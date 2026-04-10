@@ -1,0 +1,50 @@
+import Link from "next/link";
+import type { ProWithRelations } from "@/lib/types/database";
+
+export default function ProCard({ pro }: { pro: ProWithRelations }) {
+  const initial = pro.name.charAt(0).toUpperCase();
+
+  return (
+    <article className="group bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]">
+      <Link href={`/artisan/${pro.slug}`} className="flex gap-4">
+        {/* Initiale */}
+        <div className="w-12 h-12 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+          <span className="text-[var(--accent)] font-bold text-lg">
+            {initial}
+          </span>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold text-lg text-[var(--text-primary)] leading-tight mb-1">
+            {pro.name}
+          </h3>
+
+          {pro.category?.name && (
+            <span className="inline-block bg-[var(--accent-muted)] text-[var(--accent-badge-text)] text-xs font-medium px-2.5 py-0.5 rounded-full mb-2">
+              {pro.category.name}
+            </span>
+          )}
+
+          {pro.city && (
+            <p className="text-sm text-[var(--text-secondary)]">
+              {pro.city.name}
+              {pro.postal_code && ` (${pro.postal_code})`}
+            </p>
+          )}
+
+          {pro.description && (
+            <p className="text-sm text-[var(--text-tertiary)] mt-2 line-clamp-2">
+              {pro.description}
+            </p>
+          )}
+
+          {pro.phone && (
+            <p className="text-sm font-medium text-[var(--text-primary)] mt-2">
+              {pro.phone}
+            </p>
+          )}
+        </div>
+      </Link>
+    </article>
+  );
+}

@@ -1,6 +1,105 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Coral accent */
+  --color-coral: #E04A2A;
+  --color-coral-hover: #C73D1F;
+  --color-coral-dark: #FF5A36;
+  --color-coral-dark-hover: #E63E1A;
+}
+
+/* ---- Light mode (default) ---- */
+:root {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #FAFAFA;
+  --bg-tertiary: #F3F4F6;
+  --text-primary: #0A0A0A;
+  --text-secondary: #6B7280;
+  --text-tertiary: #71717A;
+  --border-color: #E5E7EB;
+  --border-hover: #D1D5DB;
+  --accent: #E04A2A;
+  --accent-hover: #C73D1F;
+  --accent-muted: rgba(224, 74, 42, 0.08);
+  --accent-badge-text: #B93A1B;
+  --card-bg: #FFFFFF;
+  --card-border: #E5E7EB;
+  --skeleton-bg: #E5E7EB;
+  --skeleton-shine: #F3F4F6;
+}
+
+/* ---- Dark mode ---- */
+.dark {
+  --bg-primary: #0A0A0A;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1A1A1A;
+  --text-primary: #FAFAFA;
+  --text-secondary: #9CA3AF;
+  --text-tertiary: #848B98;
+  --border-color: #27272A;
+  --border-hover: #3F3F46;
+  --accent: #FF5A36;
+  --accent-hover: #E63E1A;
+  --accent-muted: rgba(255, 90, 54, 0.12);
+  --accent-badge-text: #FF7A5E;
+  --card-bg: #111111;
+  --card-border: #27272A;
+  --skeleton-bg: #27272A;
+  --skeleton-shine: #3F3F46;
+}
+
+/* ---- Base styles ---- */
+body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Link underline animation ---- */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 250ms ease-out;
+}
+
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* ---- Skeleton shimmer ---- */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-bg) 25%,
+    var(--skeleton-shine) 50%,
+    var(--skeleton-bg) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ---- Selection ---- */
+::selection {
+  background-color: var(--accent-muted);
+  color: var(--text-primary);
 }
