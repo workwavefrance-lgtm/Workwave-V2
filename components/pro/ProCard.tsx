@@ -7,12 +7,20 @@ export default function ProCard({ pro }: { pro: ProWithRelations }) {
   return (
     <article className="group bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]">
       <Link href={`/artisan/${pro.slug}`} className="flex gap-4">
-        {/* Initiale */}
-        <div className="w-12 h-12 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
-          <span className="text-[var(--accent)] font-bold text-lg">
-            {initial}
-          </span>
-        </div>
+        {/* Logo ou initiale */}
+        {pro.logo_url ? (
+          <img
+            src={pro.logo_url}
+            alt={`Logo ${pro.name}`}
+            className="w-12 h-12 rounded-full object-cover border border-[var(--card-border)] shrink-0"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+            <span className="text-[var(--accent)] font-bold text-lg">
+              {initial}
+            </span>
+          </div>
+        )}
 
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-lg text-[var(--text-primary)] leading-tight mb-1">
