@@ -10,8 +10,9 @@ import { getCityBySlug } from "@/lib/queries/cities";
 import { getTopCities } from "@/lib/queries/cities";
 
 export const metadata: Metadata = {
-  title: "Recherche",
-  robots: { index: false },
+  title: "Recherche — Trouvez un professionnel près de chez vous",
+  description:
+    "Recherchez un artisan ou professionnel par métier et ville. Comparez les pros disponibles dans votre zone et contactez-les gratuitement.",
 };
 
 type Props = {
