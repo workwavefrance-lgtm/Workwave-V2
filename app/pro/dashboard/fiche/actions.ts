@@ -3,7 +3,16 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getProByUserId } from "@/lib/queries/pros";
+
+/** Client admin (service role) pour les opérations storage qui bypass les RLS */
+function createAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 // ============================================
 // Helpers
@@ -232,15 +241,15 @@ export async function uploadProLogo(
   }
 
   const fileName = generateUniqueFileName(pro.id, file.name);
-  const supabase = await createClient();
+  const admin = createAdminClient();
 
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await admin.storage
     .from("pro-logos")
     .upload(fileName, file, { contentType: file.type, upsert: false });
 
   if (uploadError) return { error: "Erreur lors de l\u2019upload" };
 
-  const { data: urlData } = supabase.storage
+  const { data: urlData } = admin.storage
     .from("pro-logos")
     .getPublicUrl(fileName);
 
@@ -248,11 +257,11 @@ export async function uploadProLogo(
   if (pro.logo_url) {
     const oldPath = pro.logo_url.split("/pro-logos/")[1];
     if (oldPath) {
-      await supabase.storage.from("pro-logos").remove([oldPath]);
+      await admin.storage.from("pro-logos").remove([oldPath]);
     }
   }
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await admin
     .from("pros")
     .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
     .eq("id", pro.id);
@@ -292,21 +301,21 @@ export async function uploadProPhoto(
   }
 
   const fileName = generateUniqueFileName(pro.id, file.name);
-  const supabase = await createClient();
+  const admin = createAdminClient();
 
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await admin.storage
     .from("pro-photos")
     .upload(fileName, file, { contentType: file.type, upsert: false });
 
   if (uploadError) return { error: "Erreur lors de l\u2019upload" };
 
-  const { data: urlData } = supabase.storage
+  const { data: urlData } = admin.storage
     .from("pro-photos")
     .getPublicUrl(fileName);
 
   const updatedPhotos = [...currentPhotos, urlData.publicUrl];
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await admin
     .from("pros")
     .update({ photos: updatedPhotos, updated_at: new Date().toISOString() })
     .eq("id", pro.id);
@@ -332,16 +341,15 @@ export async function deleteProPhoto(photoUrl: string) {
   }
 
   // Supprimer du storage
+  const admin = createAdminClient();
   const path = photoUrl.split("/pro-photos/")[1];
   if (path) {
-    const supabase = await createClient();
-    await supabase.storage.from("pro-photos").remove([path]);
+    await admin.storage.from("pro-photos").remove([path]);
   }
 
   const updatedPhotos = currentPhotos.filter((p) => p !== photoUrl);
-  const supabase = await createClient();
 
-  const { error } = await supabase
+  const { error } = await admin
     .from("pros")
     .update({ photos: updatedPhotos, updated_at: new Date().toISOString() })
     .eq("id", pro.id);
