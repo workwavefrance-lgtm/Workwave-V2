@@ -32,15 +32,17 @@ export default function VerificationForm({ attemptId, slug }: Props) {
     }
   }
 
+  // Auto-submit après re-render quand les 6 digits sont remplis
+  useEffect(() => {
+    if (digits.every((d) => d !== "") && formRef.current) {
+      formRef.current.requestSubmit();
+    }
+  }, [digits]);
+
   function updateDigit(index: number, value: string) {
     const newDigits = [...digits];
     newDigits[index] = value;
     setDigits(newDigits);
-
-    // Auto-submit quand les 6 digits sont remplis
-    if (newDigits.every((d) => d !== "") && formRef.current) {
-      formRef.current.requestSubmit();
-    }
   }
 
   function handleInput(index: number, e: React.FormEvent<HTMLInputElement>) {
@@ -84,11 +86,6 @@ export default function VerificationForm({ attemptId, slug }: Props) {
     // Focus le prochain input vide ou le dernier
     const nextEmpty = newDigits.findIndex((d) => d === "");
     focusInput(nextEmpty === -1 ? 5 : nextEmpty);
-
-    // Auto-submit si complet
-    if (newDigits.every((d) => d !== "") && formRef.current) {
-      setTimeout(() => formRef.current?.requestSubmit(), 50);
-    }
   }
 
   const codeValue = digits.join("");

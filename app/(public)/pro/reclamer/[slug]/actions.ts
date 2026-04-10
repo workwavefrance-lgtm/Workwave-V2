@@ -361,13 +361,13 @@ export async function verifyClaim(
   }
 
   // 2. Générer un magic link pour obtenir le user ID et signer l'utilisateur
-  const origin = await getOrigin();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (await getOrigin());
   const { data: linkData, error: linkError } =
     await serviceClient.auth.admin.generateLink({
       type: "magiclink",
       email: attempt.email,
       options: {
-        redirectTo: `${origin}/auth/callback?next=/pro/reclamer/succes`,
+        redirectTo: `${baseUrl}/auth/callback?next=/pro/reclamer/succes`,
       },
     });
 
