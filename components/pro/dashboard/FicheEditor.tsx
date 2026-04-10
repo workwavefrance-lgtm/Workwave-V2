@@ -194,15 +194,11 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
       )
   );
 
-  // Upload states
-  const [logoState, logoAction, logoPending] = useActionState(
-    uploadProLogo,
-    {} as UploadState
-  );
-  const [photoState, photoAction, photoPending] = useActionState(
-    uploadProPhoto,
-    {} as UploadState
-  );
+  // Upload states (appels directs, pas de forms imbriquées)
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoPending, setLogoPending] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoPending, setPhotoPending] = useState(false);
   const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>(pro.photos || []);
   const [logoUrl, setLogoUrl] = useState(pro.logo_url || "");
@@ -241,6 +237,34 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
     }));
   }
 
+  async function handleLogoUpload(file: File) {
+    setLogoPending(true);
+    setLogoError(null);
+    const fd = new FormData();
+    fd.append("logo", file);
+    const result = await uploadProLogo({} as UploadState, fd);
+    if (result.success && result.url) {
+      setLogoUrl(result.url);
+    } else {
+      setLogoError(result.error || "Erreur lors de l'upload");
+    }
+    setLogoPending(false);
+  }
+
+  async function handlePhotoUpload(file: File) {
+    setPhotoPending(true);
+    setPhotoError(null);
+    const fd = new FormData();
+    fd.append("photo", file);
+    const result = await uploadProPhoto({} as UploadState, fd);
+    if (result.success && result.url) {
+      setPhotos((prev) => [...prev, result.url!]);
+    } else {
+      setPhotoError(result.error || "Erreur lors de l'upload");
+    }
+    setPhotoPending(false);
+  }
+
   async function handleDeletePhoto(url: string) {
     setDeletingPhoto(url);
     const result = await deleteProPhoto(url);
@@ -248,16 +272,6 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
       setPhotos((prev) => prev.filter((p) => p !== url));
     }
     setDeletingPhoto(null);
-  }
-
-  // Handle logo upload result
-  if (logoState.success && logoState.url && logoState.url !== logoUrl) {
-    setLogoUrl(logoState.url);
-  }
-
-  // Handle photo upload result
-  if (photoState.success && photoState.url && !photos.includes(photoState.url)) {
-    setPhotos((prev) => [...prev, photoState.url!]);
   }
 
   // Suggestions
@@ -476,7 +490,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
             </Field>
           </Accordion>
 
-          {/* 3. Photos */}
+          {/* 3. Photos (pas de <form> imbriquée — appels directs) */}
           <Accordion title="Photos">
             {/* Logo */}
             <div className="space-y-3">
@@ -497,14 +511,17 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                     </span>
                   </div>
                 )}
-                <form action={logoAction}>
+                <div>
                   <input
                     ref={logoInputRef}
                     type="file"
-                    name="logo"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={() => logoInputRef.current?.form?.requestSubmit()}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleLogoUpload(file);
+                      e.target.value = "";
+                    }}
                   />
                   <button
                     type="button"
@@ -514,10 +531,10 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                   >
                     {logoPending ? "Upload..." : "Changer le logo"}
                   </button>
-                </form>
+                </div>
               </div>
-              {logoState.error && (
-                <p className="text-xs text-red-500">{logoState.error}</p>
+              {logoError && (
+                <p className="text-xs text-red-500">{logoError}</p>
               )}
               <p className="text-xs text-[var(--text-tertiary)]">
                 JPEG, PNG ou WebP. 2 Mo maximum.
@@ -558,16 +575,17 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               )}
 
               {photos.length < MAX_PHOTOS && (
-                <form action={photoAction}>
+                <div>
                   <input
                     ref={photoInputRef}
                     type="file"
-                    name="photo"
                     accept="image/jpeg,image/png,image/webp"
                     className="hidden"
-                    onChange={() =>
-                      photoInputRef.current?.form?.requestSubmit()
-                    }
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePhotoUpload(file);
+                      e.target.value = "";
+                    }}
                   />
                   <button
                     type="button"
@@ -597,11 +615,11 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                       JPEG, PNG ou WebP. 5 Mo maximum.
                     </p>
                   </button>
-                </form>
+                </div>
               )}
 
-              {photoState.error && (
-                <p className="text-xs text-red-500">{photoState.error}</p>
+              {photoError && (
+                <p className="text-xs text-red-500">{photoError}</p>
               )}
             </div>
           </Accordion>
