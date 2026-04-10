@@ -12,6 +12,11 @@
  * - SUPABASE_SERVICE_ROLE_KEY
  */
 
+import * as dotenv from "dotenv";
+import * as path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+
 import { createClient } from "@supabase/supabase-js";
 
 const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;

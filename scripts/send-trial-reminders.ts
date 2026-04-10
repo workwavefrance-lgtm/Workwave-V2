@@ -11,6 +11,11 @@
  * - NEXT_PUBLIC_BASE_URL
  */
 
+import * as dotenv from "dotenv";
+import * as path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+
 import { createClient } from "@supabase/supabase-js";
 import { sendTrialReminderEmail } from "../lib/email/send-trial-reminder";
 

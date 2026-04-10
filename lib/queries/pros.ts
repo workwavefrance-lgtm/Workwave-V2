@@ -53,7 +53,8 @@ export async function getProsByCategoryAndDepartment(
     .select(PRO_SELECT, { count: "exact" })
     .eq("category_id", categoryId)
     .in("city_id", cityIds)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .eq("is_active", true);
 
   return paginatedQuery(query, page, pageSize);
 }
@@ -69,7 +70,8 @@ export async function getProsByCategoryAndCity(
     .select(PRO_SELECT, { count: "exact" })
     .eq("category_id", categoryId)
     .eq("city_id", cityId)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .eq("is_active", true);
 
   return paginatedQuery(query, page, pageSize);
 }
@@ -83,6 +85,7 @@ export async function getProBySlug(
     .select(PRO_SELECT)
     .eq("slug", slug)
     .is("deleted_at", null)
+    .eq("is_active", true)
     .single();
 
   return data as ProWithRelations | null;
@@ -110,7 +113,8 @@ export async function searchPros(
     .from("pros")
     .select(PRO_SELECT, { count: "exact" })
     .ilike("name", `%${query}%`)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .eq("is_active", true);
 
   return paginatedQuery(q, page, pageSize);
 }

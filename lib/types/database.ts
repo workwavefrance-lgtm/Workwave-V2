@@ -143,6 +143,8 @@ export type Pro = {
   intervention_radius_km: number;
   enabled_category_ids: number[] | null;
   paused_until: string | null;
+  // Statut activité
+  is_active: boolean;
   // Champs calculés
   profile_completion: number;
   response_rate: number | null;

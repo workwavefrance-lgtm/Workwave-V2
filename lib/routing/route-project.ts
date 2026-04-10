@@ -131,7 +131,8 @@ export async function routeProjectToMatchingPros(
     .select(
       "id, name, email, category_id, enabled_category_ids, intervention_radius_km, min_budget, paused_until, claimed_at, trial_ends_at, response_rate, city:cities(latitude, longitude)"
     )
-    .in("subscription_status", ["trialing", "active"]);
+    .in("subscription_status", ["trialing", "active"])
+    .eq("is_active", true);
 
   if (prosError) {
     console.error("Routing: erreur requête pros", prosError);
