@@ -240,29 +240,39 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
   async function handleLogoUpload(file: File) {
     setLogoPending(true);
     setLogoError(null);
-    const fd = new FormData();
-    fd.append("logo", file);
-    const result = await uploadProLogo({} as UploadState, fd);
-    if (result.success && result.url) {
-      setLogoUrl(result.url);
-    } else {
-      setLogoError(result.error || "Erreur lors de l'upload");
+    try {
+      const fd = new FormData();
+      fd.append("logo", file);
+      const result = await uploadProLogo({} as UploadState, fd);
+      if (result.success && result.url) {
+        setLogoUrl(result.url);
+      } else {
+        setLogoError(result.error || "Erreur lors de l'upload");
+      }
+    } catch {
+      setLogoError("Erreur inattendue lors de l'upload");
+    } finally {
+      setLogoPending(false);
     }
-    setLogoPending(false);
   }
 
   async function handlePhotoUpload(file: File) {
     setPhotoPending(true);
     setPhotoError(null);
-    const fd = new FormData();
-    fd.append("photo", file);
-    const result = await uploadProPhoto({} as UploadState, fd);
-    if (result.success && result.url) {
-      setPhotos((prev) => [...prev, result.url!]);
-    } else {
-      setPhotoError(result.error || "Erreur lors de l'upload");
+    try {
+      const fd = new FormData();
+      fd.append("photo", file);
+      const result = await uploadProPhoto({} as UploadState, fd);
+      if (result.success && result.url) {
+        setPhotos((prev) => [...prev, result.url!]);
+      } else {
+        setPhotoError(result.error || "Erreur lors de l'upload");
+      }
+    } catch {
+      setPhotoError("Erreur inattendue lors de l'upload");
+    } finally {
+      setPhotoPending(false);
     }
-    setPhotoPending(false);
   }
 
   async function handleDeletePhoto(url: string) {

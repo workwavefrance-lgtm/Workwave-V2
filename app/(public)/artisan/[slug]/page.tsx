@@ -88,11 +88,19 @@ export default async function ProPage({ params }: Props) {
         <div className="lg:col-span-2 space-y-8">
           {/* En-tete */}
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
-              <span className="text-[var(--accent)] font-bold text-2xl">
-                {initial}
-              </span>
-            </div>
+            {pro.logo_url ? (
+              <img
+                src={pro.logo_url}
+                alt={`Logo ${pro.name}`}
+                className="w-16 h-16 rounded-full object-cover border border-[var(--card-border)] shrink-0"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+                <span className="text-[var(--accent)] font-bold text-2xl">
+                  {initial}
+                </span>
+              </div>
+            )}
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
                 {pro.name}
@@ -180,6 +188,25 @@ export default async function ProPage({ params }: Props) {
               </div>
             )}
           </div>
+
+          {/* Galerie photos */}
+          {Array.isArray(pro.photos) && pro.photos.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+                Réalisations
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {(pro.photos as string[]).map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Réalisation ${pro.name} ${i + 1}`}
+                    className="w-full aspect-square object-cover rounded-2xl border border-[var(--card-border)]"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Liens retour */}
           <div className="pt-8 border-t border-[var(--border-color)] flex flex-wrap gap-4">
