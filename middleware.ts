@@ -34,9 +34,10 @@ export async function middleware(request: NextRequest) {
   const isProRoute = pathname.startsWith("/pro/dashboard");
   const isAdminPage = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
   const isAdminApi = pathname.startsWith("/api/admin");
+  const isAdminLogin = pathname === "/admin/login";
 
-  // Les API routes admin ne passent pas par le middleware (évite les boucles)
-  if (isAdminApi) {
+  // Pages publiques admin et API routes : juste rafraîchir session, pas de check
+  if (isAdminApi || isAdminLogin) {
     return supabaseResponse;
   }
 

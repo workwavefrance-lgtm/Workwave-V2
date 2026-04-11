@@ -208,7 +208,7 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
             </div>
           ) : (
             <div className="space-y-3">
-              {recentLeads.map((lead) => {
+              {recentLeads.filter((lead) => lead.project).map((lead) => {
                 const badge = STATUS_BADGES[lead.status] || STATUS_BADGES.sent;
                 return (
                   <Link
@@ -219,16 +219,16 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center shrink-0">
                         <span className="text-sm font-semibold text-[var(--text-secondary)]">
-                          {lead.project.first_name.charAt(0).toUpperCase()}
+                          {lead.project!.first_name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                          {lead.project.first_name} —{" "}
-                          {lead.project.category.name}
+                          {lead.project!.first_name} —{" "}
+                          {lead.project!.category.name}
                         </p>
                         <p className="text-xs text-[var(--text-tertiary)] truncate">
-                          {lead.project.city?.name || "Ville non précisée"}
+                          {lead.project!.city?.name || "Ville non précisée"}
                         </p>
                       </div>
                     </div>
