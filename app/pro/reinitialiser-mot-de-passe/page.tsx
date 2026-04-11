@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,9 +26,15 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const isReadyRef = useRef(false);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // Garder le ref synchronisé avec le state
+  useEffect(() => {
+    isReadyRef.current = isReady;
+  }, [isReady]);
 
   const passwordValid = password.length >= 8 && /\d/.test(password);
   const passwordsMatch =
@@ -38,18 +44,86 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Supabase détecte automatiquement le token dans le hash fragment
+    console.log("[reset-password] page montée, URL:", window.location.href);
+    console.log("[reset-password] search:", window.location.search);
+    console.log("[reset-password] hash:", window.location.hash);
+
+    // Écouter l'événement PASSWORD_RECOVERY (déclenché après échange du code)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event) => {
+        console.log("[reset-password] onAuthStateChange event:", event);
         if (event === "PASSWORD_RECOVERY") {
           setIsReady(true);
         }
       }
     );
 
+    // Flow PKCE : Supabase redirige avec ?code=xxx
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    if (code) {
+      console.log("[reset-password] code PKCE détecté, échange en cours...");
+      supabase.auth.exchangeCodeForSession(code).then(({ data, error: exchangeError }) => {
+        console.log("[reset-password] exchangeCodeForSession result:", { data: !!data?.session, error: exchangeError?.message });
+        if (exchangeError) {
+          setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.");
+          setIsReady(true);
+        }
+        // Le PASSWORD_RECOVERY event sera déclenché par onAuthStateChange
+        // Fallback au cas où l'event ne se déclenche pas
+        setTimeout(() => {
+          if (!isReadyRef.current) {
+            console.log("[reset-password] fallback: forçage isReady après échange réussi");
+            setIsReady(true);
+          }
+        }, 1000);
+        // Nettoyer l'URL
+        window.history.replaceState({}, "", window.location.pathname);
+      });
+    }
+
+    // Flow implicit fallback : tokens dans le hash fragment
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      const hashParams = new URLSearchParams(hash);
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const type = hashParams.get("type");
+
+      console.log("[reset-password] hash fragment détecté, type:", type);
+
+      if (accessToken && refreshToken && type === "recovery") {
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        }).then(({ error: sessionError }) => {
+          console.log("[reset-password] setSession result:", { error: sessionError?.message });
+          if (!sessionError) {
+            setIsReady(true);
+            window.history.replaceState({}, "", window.location.pathname);
+          } else {
+            setError("Le lien de réinitialisation est invalide ou a expiré.");
+            setIsReady(true);
+          }
+        });
+      }
+    }
+
+    // Timeout : si rien ne se passe après 10s, afficher un message
+    const timeout = setTimeout(() => {
+      if (!isReadyRef.current) {
+        console.log("[reset-password] timeout 10s, lien invalide");
+        setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.");
+        setIsReady(true);
+      }
+    }, 10000);
+
     return () => {
       subscription.unsubscribe();
+      clearTimeout(timeout);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -123,7 +197,40 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Page non prête (pas de token PASSWORD_RECOVERY détecté)
+  // Lien invalide ou expiré (erreur avant d'avoir le formulaire)
+  if (isReady && error && !password) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/30 flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-600 dark:text-red-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
+            Lien expiré
+          </h2>
+          <p className="text-sm text-[var(--text-secondary)] mb-6">
+            {error}
+          </p>
+          <Link
+            href="/pro/mot-de-passe-oublie"
+            className="inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250"
+          >
+            Demander un nouveau lien
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  // Page non prête (échange du code en cours)
   if (!isReady) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
