@@ -8,6 +8,8 @@ import { qualifyProject } from "@/lib/ai/qualify-project";
 import { sendProjectNotification } from "@/lib/email/send-project-notification";
 import { sendProjectConfirmation } from "@/lib/email/send-project-confirmation";
 import { routeProjectToMatchingPros } from "@/lib/routing/route-project";
+import { track } from "@/lib/analytics/track";
+import { EVENTS } from "@/lib/analytics/events";
 
 // --- Validation schema ---
 
@@ -230,6 +232,17 @@ export async function submitProject(
     budget: data.budget,
     deletionToken,
   }).catch((err) => console.error("Erreur email confirmation (non bloquante) :", err));
+
+  // Tracking (fire-and-forget)
+  track(EVENTS.PROJECT_FORM_SUBMITTED, {
+    projectId: project.id,
+    metadata: {
+      category: category.name,
+      city: city.name,
+      urgency: data.urgency,
+      suspicious: isSuspicious,
+    },
+  });
 
   // Routing automatique vers les pros (non-bloquant)
   // On ne route PAS les projets suspects

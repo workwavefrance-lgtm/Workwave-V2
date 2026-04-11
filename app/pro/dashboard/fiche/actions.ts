@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getProByUserId } from "@/lib/queries/pros";
+import { track } from "@/lib/analytics/track";
+import { EVENTS } from "@/lib/analytics/events";
 
 /** Client admin (service role) pour les opérations storage qui bypass les RLS */
 function createAdminClient() {
@@ -218,6 +220,12 @@ export async function updateProProfile(
     .eq("id", pro.id);
 
   if (error) return { error: "Erreur lors de la sauvegarde" };
+
+  // Tracking (fire-and-forget)
+  track(EVENTS.PRO_PROFILE_UPDATED, {
+    proId: pro.id,
+    metadata: { profileCompletion: updateData.profile_completion },
+  });
 
   revalidatePath("/pro/dashboard/fiche");
   revalidatePath("/pro/dashboard");

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripeServer } from "@/lib/stripe/server";
 import { sendPaymentFailedEmail } from "@/lib/email/send-payment-failed";
+import { track } from "@/lib/analytics/track";
+import { EVENTS } from "@/lib/analytics/events";
 
 // Supabase service client (pas de cookies dans un webhook)
 async function getServiceClient() {
@@ -67,6 +69,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", parseInt(proId));
+
+  // Tracking (fire-and-forget)
+  track(EVENTS.SUBSCRIPTION_COMPLETED, {
+    proId: parseInt(proId),
+    metadata: { plan, customerId },
+  });
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {

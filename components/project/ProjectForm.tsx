@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { submitProject, type FormState } from "@/app/(public)/deposer-projet/actions";
 import CityAutocomplete from "@/components/project/CityAutocomplete";
+import { trackClient } from "@/lib/analytics/client-track";
+import { EVENTS } from "@/lib/analytics/events";
 
 type Category = {
   id: number;
@@ -53,12 +55,36 @@ export default function ProjectForm({ categories }: Props) {
     grouped[cat.vertical].push(cat);
   }
 
+  // Tracking : form started on mount + form abandoned on unload
+  const isDirty = useRef(false);
+  const submitted = useRef(false);
+
+  useEffect(() => {
+    trackClient(EVENTS.PROJECT_FORM_STARTED);
+
+    function handleBeforeUnload() {
+      if (isDirty.current && !submitted.current) {
+        trackClient(EVENTS.PROJECT_FORM_ABANDONED);
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   function handleCitySelect(id: number) {
     setCityId(id);
+    isDirty.current = true;
   }
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-8">
+    <form
+      ref={formRef}
+      action={formAction}
+      onChange={() => { isDirty.current = true; }}
+      onSubmit={() => { submitted.current = true; }}
+      className="space-y-8"
+    >
       {/* Message d'erreur global */}
       {state.message && !state.success && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">

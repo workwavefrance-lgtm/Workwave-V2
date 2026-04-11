@@ -47,6 +47,29 @@ export default function LeadDetail({ lead }: { lead: LeadWithProject }) {
   const [loading, setLoading] = useState<string | null>(null);
   const project = lead.project;
   const badge = STATUS_BADGES[lead.status] || STATUS_BADGES.sent;
+
+  // Projet supprimé
+  if (!project) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href="/pro/dashboard/leads"
+          className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-200"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Retour aux leads
+        </Link>
+        <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-8 text-center">
+          <p className="text-sm text-[var(--text-secondary)]">
+            Ce projet a été supprimé par le demandeur.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const ai = project.ai_qualification;
 
   async function handleAction(action: "contacted" | "not_relevant") {

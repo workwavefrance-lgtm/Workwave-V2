@@ -10,6 +10,8 @@ import {
   sendVerificationCode,
   sendClaimAlreadyClaimedAlert,
 } from "@/lib/email/send-verification-code";
+import { track } from "@/lib/analytics/track";
+import { EVENTS } from "@/lib/analytics/events";
 
 // ============================================
 // Types
@@ -228,6 +230,12 @@ export async function submitClaim(
     return { success: false, message: "Erreur interne, veuillez réessayer" };
   }
 
+  // Tracking claim_started (fire-and-forget)
+  track(EVENTS.CLAIM_STARTED, {
+    proId: pro.id,
+    metadata: { email: data.email },
+  });
+
   // Envoyer le code par email
   try {
     await sendVerificationCode(data.email, code, pro.name);
@@ -400,6 +408,12 @@ export async function verifyClaim(
         })
         .eq("id", attempt.id);
 
+      // Tracking claim_completed (fire-and-forget)
+      track(EVENTS.CLAIM_COMPLETED, {
+        userId: userId,
+        metadata: { slug },
+      });
+
       // Connecter l'utilisateur côté serveur
       await signInAndSetCookies(attempt.email, attempt.temp_password);
 
@@ -454,7 +468,13 @@ export async function verifyClaim(
     })
     .eq("id", attempt.id);
 
-  // 4. Connecter l'utilisateur côté serveur (écrire les cookies de session)
+  // 4. Tracking claim_completed (fire-and-forget)
+  track(EVENTS.CLAIM_COMPLETED, {
+    userId,
+    metadata: { slug },
+  });
+
+  // 5. Connecter l'utilisateur côté serveur (écrire les cookies de session)
   await signInAndSetCookies(attempt.email, attempt.temp_password);
 
   return { success: true, redirectUrl: "/pro/dashboard" };

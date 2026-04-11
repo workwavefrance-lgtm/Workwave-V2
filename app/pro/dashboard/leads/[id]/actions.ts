@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getProByUserId } from "@/lib/queries/pros";
+import { track } from "@/lib/analytics/track";
+import { EVENTS } from "@/lib/analytics/events";
 
 async function getAuthenticatedProId(): Promise<number | null> {
   const supabase = await createClient();
@@ -73,6 +75,12 @@ export async function markLeadContacted(leadId: number) {
     .eq("pro_id", proId);
 
   if (error) return { error: "Erreur lors de la mise à jour" };
+
+  // Tracking (fire-and-forget)
+  track(EVENTS.LEAD_CONTACTED, {
+    proId,
+    metadata: { leadId },
+  });
 
   revalidatePath("/pro/dashboard/leads");
   revalidatePath(`/pro/dashboard/leads/${leadId}`);

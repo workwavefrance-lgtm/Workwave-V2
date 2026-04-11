@@ -1,7 +1,11 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import AdminKPICard from "@/components/admin/data-display/AdminKPICard";
+import { useToast } from "@/components/admin/shell/AdminToast";
 import type { AdminKPIs, RecentActivity } from "@/lib/queries/admin-kpis";
+
+const REFRESH_INTERVAL = 30_000; // 30s
 
 function delta(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0;
@@ -26,28 +30,73 @@ const TYPE_ICONS: Record<string, { bg: string; color: string; label: string }> =
 };
 
 export default function OverviewClient({
-  kpis,
-  activity,
-  sparkline,
+  kpis: initialKpis,
+  activity: initialActivity,
+  sparkline: initialSparkline,
 }: {
   kpis: AdminKPIs;
   activity: RecentActivity[];
   sparkline: number[];
 }) {
+  const [kpis, setKpis] = useState(initialKpis);
+  const [activity, setActivity] = useState(initialActivity);
+  const [sparkline, setSparkline] = useState(initialSparkline);
+  const lastProjectCount = useRef(initialKpis.projectsThisMonth);
+  const { toast } = useToast();
+
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/overview");
+      if (!res.ok) return;
+      const data = await res.json();
+      setKpis(data.kpis);
+      setActivity(data.activity);
+      setSparkline(data.sparkline);
+
+      // Toast si nouveau projet détecté
+      if (data.kpis.projectsThisMonth > lastProjectCount.current) {
+        const diff = data.kpis.projectsThisMonth - lastProjectCount.current;
+        toast(
+          `${diff} nouveau${diff > 1 ? "x" : ""} projet${diff > 1 ? "s" : ""} déposé${diff > 1 ? "s" : ""}`,
+          "info"
+        );
+      }
+      lastProjectCount.current = data.kpis.projectsThisMonth;
+    } catch {
+      // Silencieux en cas d'erreur réseau
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    const interval = setInterval(refresh, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
+  }, [refresh]);
+
   return (
     <div>
-      <h1
-        className="text-xl font-semibold mb-1"
-        style={{ color: "var(--admin-text)" }}
-      >
-        Overview
-      </h1>
-      <p
-        className="text-xs mb-6"
-        style={{ color: "var(--admin-text-secondary)" }}
-      >
-        Vue d&apos;ensemble de la plateforme
-      </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1
+            className="text-xl font-semibold mb-1"
+            style={{ color: "var(--admin-text)" }}
+          >
+            Overview
+          </h1>
+          <p
+            className="text-xs"
+            style={{ color: "var(--admin-text-secondary)" }}
+          >
+            Vue d&apos;ensemble de la plateforme
+          </p>
+        </div>
+        <div
+          className="flex items-center gap-1.5 text-[10px]"
+          style={{ color: "var(--admin-text-tertiary)" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+          Mise à jour auto 30s
+        </div>
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

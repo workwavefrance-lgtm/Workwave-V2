@@ -47,6 +47,22 @@ export default function LeadCard({ lead }: { lead: LeadWithProject }) {
   const badge = STATUS_BADGES[lead.status] || STATUS_BADGES.sent;
   const project = lead.project;
 
+  // Projet supprimé — affichage dégradé
+  if (!project) {
+    return (
+      <div className="block bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5 opacity-60">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-[var(--text-tertiary)]">
+            Projet supprimé par le demandeur
+          </p>
+          <span className="text-xs text-[var(--text-tertiary)]">
+            {timeAgo(lead.sent_at)}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Link
       href={`/pro/dashboard/leads/${lead.id}`}
