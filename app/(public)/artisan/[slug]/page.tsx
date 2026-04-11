@@ -7,6 +7,7 @@ import { getProBySlug } from "@/lib/queries/pros";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
 import { BASE_URL } from "@/lib/constants";
+import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 
 export const revalidate = 86400;
 
@@ -32,6 +33,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
+
+const DAY_LABELS: Record<string, string> = {
+  lundi: "Lundi",
+  mardi: "Mardi",
+  mercredi: "Mercredi",
+  jeudi: "Jeudi",
+  vendredi: "Vendredi",
+  samedi: "Samedi",
+  dimanche: "Dimanche",
+};
+
+const PAYMENT_LABELS: Record<string, string> = {
+  CB: "Carte bancaire",
+  virement: "Virement",
+  cheque: "Chèque",
+  especes: "Espèces",
+};
 
 export default async function ProPage({ params }: Props) {
   const { slug } = await params;
@@ -76,7 +94,12 @@ export default async function ProPage({ params }: Props) {
     },
   };
 
-  const initial = pro.name.charAt(0).toUpperCase();
+  const initial = (pro.name || "?").charAt(0).toUpperCase();
+  const isClaimed = !!pro.claimed_by_user_id;
+  const photos = Array.isArray(pro.photos) ? pro.photos.filter((url): url is string => typeof url === "string" && url.startsWith("http")) : [];
+  const openingHours = pro.opening_hours as OpeningHours | null;
+  const certifications = Array.isArray(pro.certifications) ? pro.certifications : [];
+  const paymentMethods = Array.isArray(pro.payment_methods) ? pro.payment_methods : [];
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-12">
@@ -84,18 +107,21 @@ export default async function ProPage({ params }: Props) {
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Colonne gauche — Infos principales */}
+        {/* Colonne gauche */}
         <div className="lg:col-span-2 space-y-8">
           {/* En-tete */}
           <div className="flex items-start gap-4">
-            {pro.logo_url ? (
+            {pro.logo_url && pro.logo_url.startsWith("http") ? (
               <img
                 src={pro.logo_url}
                 alt={`Logo ${pro.name}`}
                 className="w-16 h-16 rounded-full object-cover border border-[var(--card-border)] shrink-0"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: "var(--accent-muted)" }}
+              >
                 <span className="text-[var(--accent)] font-bold text-2xl">
                   {initial}
                 </span>
@@ -105,9 +131,19 @@ export default async function ProPage({ params }: Props) {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-1">
                 {pro.name}
               </h1>
-              <span className="inline-block bg-[var(--accent-muted)] text-[var(--accent-badge-text)] text-sm font-medium px-3 py-1 rounded-full">
-                {pro.category.name}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className="inline-block text-[var(--accent-badge-text)] text-sm font-medium px-3 py-1 rounded-full"
+                  style={{ backgroundColor: "var(--accent-muted)" }}
+                >
+                  {pro.category.name}
+                </span>
+                {pro.free_quote && isClaimed && (
+                  <span className="inline-block bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-sm font-medium px-3 py-1 rounded-full">
+                    Devis gratuit
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -178,7 +214,7 @@ export default async function ProPage({ params }: Props) {
                   Site web
                 </h2>
                 <a
-                  href={pro.website}
+                  href={pro.website.startsWith("http") ? pro.website : `https://${pro.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[var(--accent)] text-sm hover:underline break-all"
@@ -189,14 +225,106 @@ export default async function ProPage({ params }: Props) {
             )}
           </div>
 
+          {/* Certifications (fiches réclamées) */}
+          {isClaimed && certifications.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+                Certifications et labels
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {certifications.map((cert) => (
+                  <span
+                    key={cert}
+                    className="inline-block text-[var(--accent-badge-text)] text-sm font-medium px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: "var(--accent-muted)" }}
+                  >
+                    {cert}
+                  </span>
+                ))}
+              </div>
+              {pro.rge_number && (
+                <p className="text-xs text-[var(--text-tertiary)] mt-2">
+                  N° RGE : {pro.rge_number}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Tarifs (fiches réclamées) */}
+          {isClaimed && (pro.hourly_rate || pro.travel_fee) && (
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+                Tarifs indicatifs
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {pro.hourly_rate && (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
+                    <p className="text-xs text-[var(--text-tertiary)] mb-1">Tarif horaire</p>
+                    <p className="text-lg font-semibold text-[var(--text-primary)]">{pro.hourly_rate} &euro;/h</p>
+                  </div>
+                )}
+                {pro.travel_fee && (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
+                    <p className="text-xs text-[var(--text-tertiary)] mb-1">Frais de déplacement</p>
+                    <p className="text-lg font-semibold text-[var(--text-primary)]">{pro.travel_fee} &euro;</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Modes de paiement (fiches réclamées) */}
+          {isClaimed && paymentMethods.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+                Moyens de paiement
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {paymentMethods.map((method) => (
+                  <span
+                    key={method}
+                    className="inline-block bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] text-sm font-medium px-3 py-1.5 rounded-full"
+                  >
+                    {PAYMENT_LABELS[method] || method}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Horaires d'ouverture (fiches réclamées) */}
+          {isClaimed && openingHours && (
+            <div>
+              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+                Horaires d&apos;ouverture
+              </h2>
+              <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5 space-y-2">
+                {Object.entries(DAY_LABELS).map(([key, label]) => {
+                  const day = (openingHours as Record<string, DaySchedule>)[key];
+                  if (!day) return null;
+                  return (
+                    <div key={key} className="flex justify-between text-sm">
+                      <span className={day.open ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"}>
+                        {label}
+                      </span>
+                      <span className={day.open ? "text-[var(--text-primary)] font-medium" : "text-[var(--text-tertiary)]"}>
+                        {day.open ? `${day.from} — ${day.to}` : "Fermé"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Galerie photos */}
-          {Array.isArray(pro.photos) && pro.photos.length > 0 && (
+          {photos.length > 0 && (
             <div>
               <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
                 Réalisations
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {(pro.photos as string[]).map((url, i) => (
+                {photos.map((url, i) => (
                   <img
                     key={i}
                     src={url}
@@ -205,6 +333,28 @@ export default async function ProPage({ params }: Props) {
                   />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Garanties (fiches réclamées) */}
+          {isClaimed && (pro.has_rc_pro || pro.has_decennale) && (
+            <div className="flex flex-wrap gap-3">
+              {pro.has_rc_pro && (
+                <span className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-sm font-medium px-3 py-1.5 rounded-full">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  RC Professionnelle
+                </span>
+              )}
+              {pro.has_decennale && (
+                <span className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-sm font-medium px-3 py-1.5 rounded-full">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Garantie décennale
+                </span>
+              )}
             </div>
           )}
 
@@ -252,14 +402,20 @@ export default async function ProPage({ params }: Props) {
             )}
           </div>
 
-          {/* Réclamer cette fiche */}
-          {!pro.claimed_by_user_id && pro.siret && (
-            <Link
-              href={`/pro/reclamer/${slug}`}
-              className="block border border-[var(--border-color)] text-[var(--text-primary)] text-center px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:bg-[var(--bg-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            >
-              C&apos;est mon entreprise — Réclamer cette fiche
-            </Link>
+          {/* Encart réclamation (fiche non réclamée) */}
+          {!isClaimed && pro.siret && (
+            <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
+              <p className="text-sm text-[var(--text-secondary)] mb-3">
+                Vous êtes <span className="font-semibold text-[var(--text-primary)]">{pro.name}</span> ?
+                Réclamez votre fiche gratuitement pour la compléter et recevoir des clients.
+              </p>
+              <Link
+                href={`/pro/reclamer/${slug}`}
+                className="block text-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+              >
+                Réclamer cette fiche
+              </Link>
+            </div>
           )}
 
           {/* Infos complementaires */}
@@ -292,6 +448,26 @@ export default async function ProPage({ params }: Props) {
                 {pro.category.name}
               </p>
             </div>
+            {isClaimed && pro.intervention_radius_km && (
+              <div>
+                <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-1">
+                  Zone d&apos;intervention
+                </h4>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  {pro.intervention_radius_km} km autour de {cityName || "son adresse"}
+                </p>
+              </div>
+            )}
+            {isClaimed && pro.urgency_available && (
+              <div>
+                <span className="inline-flex items-center gap-1.5 text-[var(--accent)] text-sm font-medium">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Disponible en urgence
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
