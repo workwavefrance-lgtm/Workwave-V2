@@ -9,10 +9,20 @@ export async function GET(request: NextRequest) {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin;
 
-  // Flow PKCE : échange du code contre une session (utilisé par le reset password)
+  // Flow PKCE : échange du code contre une session
   if (code) {
-    const redirectUrl = new URL(next, baseUrl);
-    const response = NextResponse.redirect(redirectUrl);
+    // Utiliser une réponse HTML (200) au lieu d'un redirect (302)
+    // car Safari bloque les cookies posés pendant un redirect cross-origin
+    const redirectUrl = new URL(next, baseUrl).toString();
+
+    const response = new NextResponse(
+      `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Connexion...</title></head>
+<body><p>Connexion en cours...</p>
+<script>window.location.href=${JSON.stringify(redirectUrl)};</script>
+</body></html>`,
+      { headers: { "Content-Type": "text/html" } }
+    );
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
