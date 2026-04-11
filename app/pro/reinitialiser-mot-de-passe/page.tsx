@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { resetPassword, type ResetPasswordState } from "./actions";
+import { useActionState } from "react";
 
 function EyeIcon({ open }: { open: boolean }) {
   if (open) {
@@ -20,15 +21,21 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
+const initialState: ResetPasswordState = { success: false };
+
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [tokenData, setTokenData] = useState<{
+    email: string;
+    ts: string;
+    token: string;
+  } | null>(null);
+  const [invalidLink, setInvalidLink] = useState(false);
+
+  const [state, formAction, isPending] = useActionState(resetPassword, initialState);
 
   const passwordValid = password.length >= 8 && /\d/.test(password);
   const passwordsMatch =
@@ -36,57 +43,26 @@ export default function ResetPasswordPage() {
   const passwordsMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
 
   useEffect(() => {
-    const supabase = createClient();
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+    const ts = params.get("ts");
+    const token = params.get("token");
 
-    console.log("[reset-password] page montée, URL:", window.location.href);
-
-    // Le code PKCE a déjà été échangé par /auth/callback côté serveur.
-    // On vérifie simplement que l'utilisateur a une session active.
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[reset-password] getSession:", {
-        hasSession: !!session,
-        email: session?.user?.email,
-      });
-      if (session) {
-        setIsReady(true);
-      } else {
-        setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.");
-        setIsReady(true);
-      }
-    });
+    if (email && ts && token) {
+      setTokenData({ email, ts, token });
+    } else {
+      setInvalidLink(true);
+    }
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (!passwordValid || !passwordsMatch) return;
-
-    setIsPending(true);
-    setError("");
-
-    try {
-      const supabase = createClient();
-      const { error: updateError } = await supabase.auth.updateUser({
-        password,
-      });
-
-      if (updateError) {
-        setError("Erreur lors de la mise à jour du mot de passe. Veuillez réessayer.");
-        return;
-      }
-
-      setSuccess(true);
-
-      // Redirection après 2 secondes
+  // Succès : redirection vers connexion
+  useEffect(() => {
+    if (state.success) {
       setTimeout(() => {
         window.location.href = "/pro/connexion";
       }, 2000);
-    } catch {
-      setError("Une erreur est survenue. Veuillez réessayer.");
-    } finally {
-      setIsPending(false);
     }
-  }
+  }, [state.success]);
 
   const inputBase =
     "w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none";
@@ -95,7 +71,7 @@ export default function ResetPasswordPage() {
   const inputError = "border-red-500 focus:ring-2 focus:ring-red-500/20";
 
   // Succès
-  if (success) {
+  if (state.success) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
         <div className="w-full max-w-sm text-center">
@@ -127,8 +103,8 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Lien invalide ou expiré (erreur avant d'avoir le formulaire)
-  if (isReady && error && !password) {
+  // Lien invalide
+  if (invalidLink) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
         <div className="w-full max-w-sm text-center">
@@ -144,10 +120,10 @@ export default function ResetPasswordPage() {
             </svg>
           </div>
           <h2 className="text-xl font-bold text-[var(--text-primary)] mb-2">
-            Lien expiré
+            Lien invalide
           </h2>
           <p className="text-sm text-[var(--text-secondary)] mb-6">
-            {error}
+            Ce lien de réinitialisation est invalide ou a expiré.
           </p>
           <Link
             href="/pro/mot-de-passe-oublie"
@@ -160,38 +136,18 @@ export default function ResetPasswordPage() {
     );
   }
 
-  // Page non prête (échange du code en cours)
-  if (!isReady) {
+  // Chargement (en attente des params)
+  if (!tokenData) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
         <div className="w-full max-w-sm text-center">
-          <div className="w-16 h-16 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="animate-spin h-6 w-6 text-[var(--text-tertiary)]"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          </div>
-          <p className="text-sm text-[var(--text-secondary)]">
-            Vérification du lien de réinitialisation...
-          </p>
-          <p className="text-xs text-[var(--text-tertiary)] mt-4">
-            Si cette page ne se charge pas,{" "}
-            <Link href="/pro/mot-de-passe-oublie" className="text-[var(--accent)] hover:underline">
-              demandez un nouveau lien
-            </Link>
-            .
-          </p>
+          <p className="text-sm text-[var(--text-secondary)]">Chargement...</p>
         </div>
       </main>
     );
   }
 
-  // Formulaire de réinitialisation
+  // Formulaire
   return (
     <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
       <div className="w-full max-w-sm">
@@ -210,11 +166,16 @@ export default function ResetPasswordPage() {
 
         {/* Card */}
         <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form action={formAction} className="space-y-6">
+            {/* Hidden fields pour le token */}
+            <input type="hidden" name="email" value={tokenData.email} />
+            <input type="hidden" name="ts" value={tokenData.ts} />
+            <input type="hidden" name="token" value={tokenData.token} />
+
             {/* Erreur */}
-            {error && (
+            {state.message && !state.success && (
               <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                <p className="text-sm text-red-600 dark:text-red-400">{state.message}</p>
               </div>
             )}
 
@@ -229,13 +190,14 @@ export default function ResetPasswordPage() {
               <div className="relative">
                 <input
                   id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="Minimum 8 caractères"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`${inputBase} pr-12 ${inputNormal}`}
+                  className={`${inputBase} pr-12 ${state.errors?.password ? inputError : inputNormal}`}
                 />
                 <button
                   type="button"
@@ -249,6 +211,9 @@ export default function ResetPasswordPage() {
               <p className="mt-1 text-xs text-[var(--text-tertiary)]">
                 Minimum 8 caractères dont au moins 1 chiffre
               </p>
+              {state.errors?.password && (
+                <p className="mt-1.5 text-sm text-red-500">{state.errors.password}</p>
+              )}
             </div>
 
             {/* Confirmation */}
@@ -262,6 +227,7 @@ export default function ResetPasswordPage() {
               <div className="relative">
                 <input
                   id="passwordConfirm"
+                  name="passwordConfirm"
                   type={showPasswordConfirm ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="Retapez votre mot de passe"
@@ -269,7 +235,7 @@ export default function ResetPasswordPage() {
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   className={`${inputBase} pr-12 ${
-                    passwordsMismatch
+                    state.errors?.passwordConfirm || passwordsMismatch
                       ? inputError
                       : passwordsMatch
                       ? "border-green-500 focus:ring-2 focus:ring-green-500/20"
@@ -300,6 +266,9 @@ export default function ResetPasswordPage() {
                   </svg>
                   Les mots de passe ne correspondent pas
                 </p>
+              )}
+              {state.errors?.passwordConfirm && (
+                <p className="mt-1.5 text-sm text-red-500">{state.errors.passwordConfirm}</p>
               )}
             </div>
 

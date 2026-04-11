@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { generateResetToken } from "@/lib/utils/reset-token";
+import { sendPasswordResetEmail } from "@/lib/email/send-password-reset";
 
 export type ForgotPasswordState = {
   success: boolean;
@@ -12,24 +13,27 @@ export async function requestPasswordReset(
   _prevState: ForgotPasswordState,
   formData: FormData
 ): Promise<ForgotPasswordState> {
-  const email = (formData.get("email") as string)?.trim();
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { success: false, errors: { email: "Adresse email invalide" } };
   }
 
-  const supabase = await createClient();
-
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
-  // Rediriger via /auth/callback qui échange le code PKCE côté serveur
-  // puis redirige vers /pro/reinitialiser-mot-de-passe
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${baseUrl}/auth/callback?next=/pro/reinitialiser-mot-de-passe`,
-  });
+  const timestamp = Date.now();
+  const token = generateResetToken(email, timestamp);
 
-  // Toujours retourner succès pour ne pas révéler si le compte existe
+  const resetUrl = `${baseUrl}/pro/reinitialiser-mot-de-passe?email=${encodeURIComponent(email)}&ts=${timestamp}&token=${token}`;
+
+  // Envoyer l'email (fire and forget — on ne révèle pas si le compte existe)
+  try {
+    await sendPasswordResetEmail(email, resetUrl);
+  } catch (err) {
+    console.error("[mot-de-passe-oublie] erreur envoi email:", err);
+  }
+
   return {
     success: true,
     message:
