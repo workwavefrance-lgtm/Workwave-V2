@@ -63,13 +63,29 @@ export default function ResetPasswordPage() {
     const code = params.get("code");
 
     if (code) {
-      console.log("[reset-password] code PKCE détecté, échange en cours...");
-      supabase.auth.exchangeCodeForSession(code).then(({ data, error: exchangeError }) => {
-        console.log("[reset-password] exchangeCodeForSession result:", { data: !!data?.session, error: exchangeError?.message });
+      console.log("[reset-password] code PKCE détecté:", code.substring(0, 20) + "...");
+      supabase.auth.exchangeCodeForSession(code).then(async ({ data, error: exchangeError }) => {
+        console.log("[reset-password] exchangeCodeForSession result:", {
+          hasSession: !!data?.session,
+          hasUser: !!data?.user,
+          userId: data?.user?.id,
+          errorMessage: exchangeError?.message,
+          errorStatus: exchangeError?.status,
+          errorName: exchangeError?.name,
+          fullError: exchangeError ? JSON.stringify(exchangeError) : null,
+        });
         if (exchangeError) {
-          setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.");
+          setError(`Erreur: ${exchangeError.message}`);
           setIsReady(true);
+          return;
         }
+        // Vérifier la session après échange
+        const { data: sessionData } = await supabase.auth.getSession();
+        console.log("[reset-password] getSession après échange:", {
+          hasSession: !!sessionData?.session,
+          userId: sessionData?.session?.user?.id,
+          email: sessionData?.session?.user?.email,
+        });
         // Le PASSWORD_RECOVERY event sera déclenché par onAuthStateChange
         // Fallback au cas où l'event ne se déclenche pas
         setTimeout(() => {
