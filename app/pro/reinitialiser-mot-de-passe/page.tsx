@@ -45,10 +45,9 @@ export default function ResetPasswordPage() {
     const supabase = createClient();
 
     console.log("[reset-password] page montée, URL:", window.location.href);
-    console.log("[reset-password] search:", window.location.search);
     console.log("[reset-password] hash:", window.location.hash);
 
-    // Écouter l'événement PASSWORD_RECOVERY (déclenché après échange du code)
+    // Écouter l'événement PASSWORD_RECOVERY
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event) => {
         console.log("[reset-password] onAuthStateChange event:", event);
@@ -58,48 +57,8 @@ export default function ResetPasswordPage() {
       }
     );
 
-    // Flow PKCE : Supabase redirige avec ?code=xxx
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-
-    if (code) {
-      console.log("[reset-password] code PKCE détecté:", code.substring(0, 20) + "...");
-      supabase.auth.exchangeCodeForSession(code).then(async ({ data, error: exchangeError }) => {
-        console.log("[reset-password] exchangeCodeForSession result:", {
-          hasSession: !!data?.session,
-          hasUser: !!data?.user,
-          userId: data?.user?.id,
-          errorMessage: exchangeError?.message,
-          errorStatus: exchangeError?.status,
-          errorName: exchangeError?.name,
-          fullError: exchangeError ? JSON.stringify(exchangeError) : null,
-        });
-        if (exchangeError) {
-          setError(`Erreur: ${exchangeError.message}`);
-          setIsReady(true);
-          return;
-        }
-        // Vérifier la session après échange
-        const { data: sessionData } = await supabase.auth.getSession();
-        console.log("[reset-password] getSession après échange:", {
-          hasSession: !!sessionData?.session,
-          userId: sessionData?.session?.user?.id,
-          email: sessionData?.session?.user?.email,
-        });
-        // Le PASSWORD_RECOVERY event sera déclenché par onAuthStateChange
-        // Fallback au cas où l'event ne se déclenche pas
-        setTimeout(() => {
-          if (!isReadyRef.current) {
-            console.log("[reset-password] fallback: forçage isReady après échange réussi");
-            setIsReady(true);
-          }
-        }, 1000);
-        // Nettoyer l'URL
-        window.history.replaceState({}, "", window.location.pathname);
-      });
-    }
-
-    // Flow implicit fallback : tokens dans le hash fragment
+    // Flow implicit : Supabase redirige avec les tokens dans le hash fragment
+    // #access_token=xxx&refresh_token=xxx&type=recovery
     const hash = window.location.hash.substring(1);
     if (hash) {
       const hashParams = new URLSearchParams(hash);
@@ -107,7 +66,7 @@ export default function ResetPasswordPage() {
       const refreshToken = hashParams.get("refresh_token");
       const type = hashParams.get("type");
 
-      console.log("[reset-password] hash fragment détecté, type:", type);
+      console.log("[reset-password] hash fragment détecté, type:", type, "hasAccessToken:", !!accessToken);
 
       if (accessToken && refreshToken && type === "recovery") {
         supabase.auth.setSession({
@@ -126,14 +85,14 @@ export default function ResetPasswordPage() {
       }
     }
 
-    // Timeout : si rien ne se passe après 10s, afficher un message
+    // Timeout : si rien ne se passe après 8s, afficher un message
     const timeout = setTimeout(() => {
       if (!isReadyRef.current) {
-        console.log("[reset-password] timeout 10s, lien invalide");
+        console.log("[reset-password] timeout 8s, lien invalide");
         setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.");
         setIsReady(true);
       }
-    }, 10000);
+    }, 8000);
 
     return () => {
       subscription.unsubscribe();
