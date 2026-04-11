@@ -1,12 +1,14 @@
-export default function AdminOverviewPage() {
+import { getAdminKPIs, getRecentActivity, getSparklineData } from "@/lib/queries/admin-kpis";
+import OverviewClient from "./OverviewClient";
+
+export default async function AdminOverviewPage() {
+  const [kpis, activity, sparkline] = await Promise.all([
+    getAdminKPIs(),
+    getRecentActivity(),
+    getSparklineData(),
+  ]);
+
   return (
-    <div>
-      <h1 className="text-xl font-semibold text-[var(--admin-text)] mb-1">
-        Overview
-      </h1>
-      <p className="text-sm text-[var(--admin-text-secondary)]">
-        Dashboard admin Workwave — Phase 2 ajoutera les KPIs et l&apos;activité récente.
-      </p>
-    </div>
+    <OverviewClient kpis={kpis} activity={activity} sparkline={sparkline} />
   );
 }
