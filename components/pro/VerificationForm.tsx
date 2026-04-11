@@ -19,7 +19,7 @@ export default function VerificationForm({ attemptId, slug }: Props) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Redirect on success (magic link)
+  // Redirect on success
   useEffect(() => {
     if (state.success && state.redirectUrl) {
       window.location.href = state.redirectUrl;

@@ -1,7 +1,8 @@
 "use server";
 
-import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export type LoginFormState = {
   success: boolean;
@@ -9,39 +10,85 @@ export type LoginFormState = {
   errors?: Record<string, string>;
 };
 
-export async function sendMagicLink(
+// Rate limiting en mémoire : max 5 tentatives par email par 15 min
+const loginAttempts = new Map<string, number[]>();
+const LOGIN_WINDOW = 15 * 60 * 1000; // 15 min
+const LOGIN_MAX = 5;
+
+function isRateLimited(email: string): boolean {
+  const now = Date.now();
+  const attempts = loginAttempts.get(email) || [];
+  const recent = attempts.filter((t) => now - t < LOGIN_WINDOW);
+  loginAttempts.set(email, recent);
+  return recent.length >= LOGIN_MAX;
+}
+
+function recordAttempt(email: string) {
+  const attempts = loginAttempts.get(email) || [];
+  attempts.push(Date.now());
+  loginAttempts.set(email, attempts);
+}
+
+export async function signIn(
   _prevState: LoginFormState,
   formData: FormData
 ): Promise<LoginFormState> {
   const email = (formData.get("email") as string)?.trim();
+  const password = formData.get("password") as string;
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { success: false, errors: { email: "Adresse email invalide" } };
   }
 
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
+  if (!password) {
+    return { success: false, errors: { password: "Mot de passe requis" } };
+  }
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
+  // Rate limiting
+  if (isRateLimited(email)) {
+    return {
+      success: false,
+      message:
+        "Trop de tentatives de connexion. Veuillez réessayer dans 15 minutes.",
+    };
+  }
+
+  recordAttempt(email);
+
+  const cookieStore = await cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Ignoré si appelé depuis un Server Component en lecture seule
+          }
+        },
+      },
+    }
+  );
+
+  const { error } = await supabase.auth.signInWithPassword({
     email,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback?next=/pro/dashboard`,
-    },
+    password,
   });
 
   if (error) {
     return {
       success: false,
-      message: "Impossible d'envoyer le lien de connexion. Réessayez.",
+      message: "Email ou mot de passe incorrect.",
     };
   }
 
-  return {
-    success: true,
-    message:
-      "Un lien de connexion a été envoyé à votre adresse email. Vérifiez votre boîte de réception.",
-  };
+  redirect("/pro/dashboard");
 }

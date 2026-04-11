@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createHash, randomInt } from "crypto";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import {
   sendVerificationCode,
   sendClaimAlreadyClaimedAlert,
@@ -55,38 +57,39 @@ async function getIp(): Promise<string> {
   );
 }
 
-async function getOrigin(): Promise<string> {
-  const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
-  return `${protocol}://${host}`;
-}
-
 // ============================================
 // Validation
 // ============================================
 
-const claimSchema = z.object({
-  email: z.string().email("Adresse email invalide"),
-  siret: z
-    .string()
-    .regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres"),
-  managerName: z
-    .string()
-    .min(2, "Le nom doit contenir au moins 2 caractères"),
-  phone: z
-    .string()
-    .regex(
-      /^(?:(?:\+33|0033|0)\s*[1-9])(?:[\s.-]*\d{2}){4}$/,
-      "Numéro de téléphone invalide"
-    ),
-});
+const claimSchema = z
+  .object({
+    email: z.string().email("Adresse email invalide"),
+    siret: z
+      .string()
+      .regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres"),
+    managerName: z
+      .string()
+      .min(2, "Le nom doit contenir au moins 2 caractères"),
+    phone: z
+      .string()
+      .regex(
+        /^(?:(?:\+33|0033|0)\s*[1-9])(?:[\s.-]*\d{2}){4}$/,
+        "Numéro de téléphone invalide"
+      ),
+    password: z
+      .string()
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(/\d/, "Le mot de passe doit contenir au moins 1 chiffre"),
+    passwordConfirm: z.string(),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["passwordConfirm"],
+  });
 
 // ============================================
 // submitClaim — Vérification SIRET + envoi code
 // ============================================
-
-const initialClaimState: ClaimFormState = { success: false };
 
 export async function submitClaim(
   _prevState: ClaimFormState,
@@ -103,6 +106,8 @@ export async function submitClaim(
     siret: (formData.get("siret") as string)?.replace(/\s/g, ""),
     managerName: (formData.get("managerName") as string)?.trim(),
     phone: (formData.get("phone") as string)?.trim(),
+    password: formData.get("password") as string,
+    passwordConfirm: formData.get("passwordConfirm") as string,
   };
 
   const result = claimSchema.safeParse(raw);
@@ -141,7 +146,6 @@ export async function submitClaim(
 
   // Fiche déjà réclamée
   if (pro.claimed_by_user_id) {
-    // Alerte admin (non bloquante)
     sendClaimAlreadyClaimedAlert(
       pro.name,
       slug,
@@ -159,7 +163,6 @@ export async function submitClaim(
 
   // Vérification SIRET
   if (data.siret !== pro.siret) {
-    // Log la tentative échouée
     await serviceClient.from("claim_attempts").insert({
       siret: data.siret,
       email: data.email,
@@ -204,7 +207,7 @@ export async function submitClaim(
   const codeHash = hashCode(code);
   const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-  // Créer la tentative en base
+  // Créer la tentative en base (avec temp_password)
   const { data: attempt, error: attemptError } = await serviceClient
     .from("claim_attempts")
     .insert({
@@ -216,6 +219,7 @@ export async function submitClaim(
       code_expires_at: expiresAt,
       attempts_count: 0,
       status: "pending",
+      temp_password: data.password,
     })
     .select("id")
     .single();
@@ -224,14 +228,13 @@ export async function submitClaim(
     return { success: false, message: "Erreur interne, veuillez réessayer" };
   }
 
-  // Envoyer le code par email (bloquant — si échec, erreur)
+  // Envoyer le code par email
   try {
     await sendVerificationCode(data.email, code, pro.name);
   } catch {
-    // Marquer la tentative comme expirée si l'email échoue
     await serviceClient
       .from("claim_attempts")
-      .update({ status: "expired", error_reason: "email_send_failed" })
+      .update({ status: "expired", error_reason: "email_send_failed", temp_password: null })
       .eq("id", attempt.id);
 
     return {
@@ -241,12 +244,11 @@ export async function submitClaim(
     };
   }
 
-  // Rediriger vers la page de vérification
   redirect(`/pro/reclamer/${slug}/verification?attempt=${attempt.id}`);
 }
 
 // ============================================
-// verifyClaim — Vérification code + création compte
+// verifyClaim — Vérification code + création compte avec mot de passe
 // ============================================
 
 export async function verifyClaim(
@@ -296,7 +298,7 @@ export async function verifyClaim(
   if (new Date(attempt.code_expires_at) < new Date()) {
     await serviceClient
       .from("claim_attempts")
-      .update({ status: "expired" })
+      .update({ status: "expired", temp_password: null })
       .eq("id", attempt.id);
 
     return {
@@ -309,7 +311,7 @@ export async function verifyClaim(
   if (attempt.attempts_count >= 3) {
     await serviceClient
       .from("claim_attempts")
-      .update({ status: "blocked" })
+      .update({ status: "blocked", temp_password: null })
       .eq("id", attempt.id);
 
     return {
@@ -322,13 +324,13 @@ export async function verifyClaim(
   // Comparer le hash
   const submittedHash = hashCode(code);
   if (submittedHash !== attempt.verification_code_hash) {
-    // Incrémenter le compteur
     const newCount = attempt.attempts_count + 1;
     const updates: Record<string, unknown> = {
       attempts_count: newCount,
     };
     if (newCount >= 3) {
       updates.status = "blocked";
+      updates.temp_password = null;
     }
     await serviceClient
       .from("claim_attempts")
@@ -347,37 +349,79 @@ export async function verifyClaim(
     };
   }
 
-  // Code correct — créer le compte et lier la fiche
+  // Code correct — créer le compte avec mot de passe et connecter
 
-  // 1. Créer le user Supabase Auth (ou récupérer s'il existe)
-  const { error: createError } = await serviceClient.auth.admin.createUser({
-    email: attempt.email,
-    email_confirm: true,
-  });
-
-  // Ignorer l'erreur "user already exists"
-  if (createError && !createError.message.includes("already")) {
-    return { success: false, message: "Erreur lors de la création du compte" };
+  if (!attempt.temp_password) {
+    return { success: false, message: "Erreur interne. Veuillez recommencer le processus." };
   }
 
-  // 2. Générer un magic link pour obtenir le user ID et signer l'utilisateur
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (await getOrigin());
-  const { data: linkData, error: linkError } =
-    await serviceClient.auth.admin.generateLink({
-      type: "magiclink",
+  // 1. Créer le user Supabase Auth avec email + mot de passe
+  const { data: signUpData, error: signUpError } =
+    await serviceClient.auth.admin.createUser({
       email: attempt.email,
-      options: {
-        redirectTo: `${baseUrl}/auth/callback?next=/pro/reclamer/succes`,
-      },
+      password: attempt.temp_password,
+      email_confirm: true,
     });
 
-  if (linkError || !linkData?.user) {
+  // Si l'utilisateur existe déjà, mettre à jour son mot de passe
+  if (signUpError && signUpError.message.includes("already")) {
+    const { data: listData } = await serviceClient.auth.admin.listUsers();
+    const existingUser = listData?.users?.find(
+      (u) => u.email === attempt.email
+    );
+    if (existingUser) {
+      await serviceClient.auth.admin.updateUserById(existingUser.id, {
+        password: attempt.temp_password,
+      });
+      // Continue avec l'ID existant
+      const userId = existingUser.id;
+
+      // Lier la fiche
+      await serviceClient
+        .from("pros")
+        .update({
+          claimed_by_user_id: userId,
+          claimed_at: new Date().toISOString(),
+          subscription_status: "trialing",
+          trial_ends_at: new Date(
+            Date.now() + 14 * 24 * 60 * 60 * 1000
+          ).toISOString(),
+        })
+        .eq("slug", slug);
+
+      // Nullifier temp_password immédiatement
+      await serviceClient
+        .from("claim_attempts")
+        .update({
+          status: "verified",
+          success: true,
+          verification_code_hash: null,
+          temp_password: null,
+        })
+        .eq("id", attempt.id);
+
+      // Connecter l'utilisateur côté serveur
+      await signInAndSetCookies(attempt.email, attempt.temp_password);
+
+      return { success: true, redirectUrl: "/pro/dashboard" };
+    }
+
     return { success: false, message: "Erreur lors de la création du compte" };
   }
 
-  const userId = linkData.user.id;
+  if (signUpError || !signUpData?.user) {
+    // Nullifier temp_password en cas d'erreur
+    await serviceClient
+      .from("claim_attempts")
+      .update({ temp_password: null })
+      .eq("id", attempt.id);
 
-  // 3. Lier la fiche au user + activer l'essai gratuit 14 jours
+    return { success: false, message: "Erreur lors de la création du compte" };
+  }
+
+  const userId = signUpData.user.id;
+
+  // 2. Lier la fiche au user + activer l'essai gratuit 14 jours
   const { error: updateError } = await serviceClient
     .from("pros")
     .update({
@@ -391,22 +435,58 @@ export async function verifyClaim(
     .eq("slug", slug);
 
   if (updateError) {
+    await serviceClient
+      .from("claim_attempts")
+      .update({ temp_password: null })
+      .eq("id", attempt.id);
+
     return { success: false, message: "Erreur lors de la réclamation de la fiche" };
   }
 
-  // 4. Marquer la tentative comme vérifiée, supprimer le hash
+  // 3. Nullifier temp_password immédiatement
   await serviceClient
     .from("claim_attempts")
     .update({
       status: "verified",
       success: true,
       verification_code_hash: null,
+      temp_password: null,
     })
     .eq("id", attempt.id);
 
-  // 5. Retourner l'URL du magic link pour connexion automatique
-  return {
-    success: true,
-    redirectUrl: linkData.properties.action_link,
-  };
+  // 4. Connecter l'utilisateur côté serveur (écrire les cookies de session)
+  await signInAndSetCookies(attempt.email, attempt.temp_password);
+
+  return { success: true, redirectUrl: "/pro/dashboard" };
+}
+
+// ============================================
+// Helper : connecter l'utilisateur et écrire les cookies de session
+// ============================================
+
+async function signInAndSetCookies(email: string, password: string) {
+  const cookieStore = await cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Ignoré si appelé depuis un Server Component en lecture seule
+          }
+        },
+      },
+    }
+  );
+
+  await supabase.auth.signInWithPassword({ email, password });
 }
