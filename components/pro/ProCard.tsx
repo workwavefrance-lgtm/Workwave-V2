@@ -15,7 +15,7 @@ export default function ProCard({ pro }: { pro: ProWithRelations }) {
             className="w-12 h-12 rounded-full object-cover border border-[var(--card-border)] shrink-0"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
             <span className="text-[var(--accent)] font-bold text-lg">
               {initial}
             </span>
@@ -28,7 +28,7 @@ export default function ProCard({ pro }: { pro: ProWithRelations }) {
           </h3>
 
           {pro.category?.name && (
-            <span className="inline-block bg-[var(--accent-muted)] text-[var(--accent-badge-text)] text-xs font-medium px-2.5 py-0.5 rounded-full mb-2">
+            <span className="inline-block text-[var(--accent-badge-text)] text-xs font-medium px-2.5 py-0.5 rounded-full mb-2" style={{ backgroundColor: "var(--accent-muted)" }}>
               {pro.category.name}
             </span>
           )}

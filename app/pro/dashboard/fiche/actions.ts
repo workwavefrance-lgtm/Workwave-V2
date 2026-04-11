@@ -163,7 +163,20 @@ export async function updateProProfile(
       const field = issue.path[0]?.toString();
       if (field) fieldErrors[field] = issue.message;
     }
-    return { fieldErrors };
+    // Construire un message d'erreur global listant les champs manquants
+    const fieldLabels: Record<string, string> = {
+      name: "Nom commercial",
+      phone: "Téléphone",
+      email: "Email de contact",
+      description: "Description",
+    };
+    const missingFields = Object.keys(fieldErrors)
+      .map((f) => fieldLabels[f] || f)
+      .join(", ");
+    return {
+      fieldErrors,
+      error: `Impossible de sauvegarder. Veuillez corriger : ${missingFields}`,
+    };
   }
 
   const data = parsed.data;

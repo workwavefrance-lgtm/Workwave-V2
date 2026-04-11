@@ -55,7 +55,7 @@ export default function DashboardHeader() {
             onClick={() => setShowMenu(!showMenu)}
             className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors duration-250"
           >
-            <div className="w-8 h-8 rounded-full bg-[var(--accent-muted)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--accent-muted)" }}>
               <span className="text-[var(--accent)] font-bold text-xs">{initial}</span>
             </div>
             <span className="hidden sm:block text-sm font-medium text-[var(--text-primary)] max-w-[120px] truncate">

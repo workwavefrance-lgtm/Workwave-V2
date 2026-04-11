@@ -105,7 +105,7 @@ export default function Sidebar() {
       {/* Section utilisateur */}
       <div className="p-4 border-t border-[var(--border-color)]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-[var(--accent-muted)] flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
             <span className="text-[var(--accent)] font-bold text-sm">{initial}</span>
           </div>
           <div className="min-w-0">

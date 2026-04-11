@@ -121,12 +121,28 @@ export default async function Footer() {
                 </a>
               </li>
               <li>
-                <a
-                  href="mailto:contact@workwave.fr"
+                <Link
+                  href="/mentions-legales"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
                   Mentions légales
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cgu"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  CGU
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cgv"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  CGV
+                </Link>
               </li>
             </ul>
           </div>

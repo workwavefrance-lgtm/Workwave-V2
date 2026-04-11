@@ -47,7 +47,7 @@ export default async function Home() {
             <span className="text-[var(--accent)]">.</span>
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed">
-            Des milliers de professionnels references en Vienne, a portee
+            Des milliers de professionnels référencés en Vienne, à portée
             d&apos;un clic.
           </p>
           <SearchForm categories={allCategories} cities={cityOptions} />

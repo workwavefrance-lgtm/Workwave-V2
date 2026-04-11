@@ -158,6 +158,9 @@ function Field({
 const inputClass =
   "w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-colors duration-200";
 
+const inputErrorClass =
+  "w-full bg-[var(--bg-primary)] border border-red-500 rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-red-500 transition-colors duration-200";
+
 // ============================================
 // Composant principal
 // ============================================
@@ -204,6 +207,16 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
   const [logoUrl, setLogoUrl] = useState(pro.logo_url || "");
   const photoInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const formTopRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to error banner when validation fails
+  const prevError = useRef(profileState.error);
+  if (profileState.error && profileState.error !== prevError.current) {
+    prevError.current = profileState.error;
+    setTimeout(() => formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  } else if (!profileState.error) {
+    prevError.current = undefined;
+  }
 
   // Available secondary categories (exclude primary)
   const availableSecondary = categories.filter(
@@ -350,6 +363,18 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
         </div>
       )}
 
+      {/* Erreur globale de validation */}
+      <div ref={formTopRef}>
+        {profileState.error && (
+          <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-2xl p-4 flex items-start gap-3">
+            <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            <p className="text-sm text-red-700 dark:text-red-400">{profileState.error}</p>
+          </div>
+        )}
+      </div>
+
       {/* Formulaire principal */}
       <form action={profileAction}>
         {/* Hidden fields for arrays and complex data */}
@@ -386,7 +411,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               <input
                 name="name"
                 defaultValue={pro.name}
-                className={inputClass}
+                className={profileState.fieldErrors?.name ? inputErrorClass : inputClass}
                 required
               />
             </Field>
@@ -443,7 +468,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                 type="tel"
                 defaultValue={pro.phone || ""}
                 placeholder="06 12 34 56 78"
-                className={inputClass}
+                className={profileState.fieldErrors?.phone ? inputErrorClass : inputClass}
                 required
               />
             </Field>
@@ -457,7 +482,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                 type="email"
                 defaultValue={pro.email || ""}
                 placeholder="contact@monentreprise.fr"
-                className={inputClass}
+                className={profileState.fieldErrors?.email ? inputErrorClass : inputClass}
                 required
               />
             </Field>
