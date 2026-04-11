@@ -33,7 +33,7 @@ export async function sendProjectRetractionEmail({
   });
 
   await resend.emails.send({
-    from: "Workwave <onboarding@resend.dev>",
+    from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: `[Workwave] Projet retiré — ${categoryName} à ${cityName}`,
     html: `

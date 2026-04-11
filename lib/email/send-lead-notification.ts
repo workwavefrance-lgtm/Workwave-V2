@@ -48,7 +48,7 @@ export async function sendLeadNotificationEmail({
   };
 
   await resend.emails.send({
-    from: "Workwave <onboarding@resend.dev>",
+    from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: `[Workwave] Nouveau projet — ${categoryName} à ${cityName}`,
     html: `

@@ -52,7 +52,7 @@ export async function sendVerificationCode(
 </html>`;
 
   await getResendClient().emails.send({
-    from: "Workwave <onboarding@resend.dev>",
+    from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: "Votre code de vérification — Workwave",
     html,
@@ -97,7 +97,7 @@ export async function sendClaimAlreadyClaimedAlert(
 
   try {
     await getResendClient().emails.send({
-      from: "Workwave <onboarding@resend.dev>",
+      from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
       subject: `[Workwave Alert] Tentative de réclamation sur fiche déjà réclamée — ${proName}`,
       html,

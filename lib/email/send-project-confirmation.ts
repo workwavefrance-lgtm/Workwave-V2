@@ -116,7 +116,7 @@ export async function sendProjectConfirmation(
 
   try {
     await getResendClient().emails.send({
-      from: "Workwave <onboarding@resend.dev>",
+      from: "Workwave <contact@workwave.fr>",
       to: data.email,
       subject: "Votre demande a bien été reçue — Workwave",
       html,

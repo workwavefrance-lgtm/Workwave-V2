@@ -107,7 +107,7 @@ export async function sendProjectNotification(
 
   try {
     await getResendClient().emails.send({
-      from: "Workwave <onboarding@resend.dev>",
+      from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
       subject: `${data.isSuspicious ? "[SUSPECT] " : ""}[Workwave] Nouveau projet — ${data.categoryName} à ${data.cityName}`,
       html,

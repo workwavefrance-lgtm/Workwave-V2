@@ -16,7 +16,7 @@ export async function sendPaymentFailedEmail(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
   await resend.emails.send({
-    from: "Workwave <onboarding@resend.dev>",
+    from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: "Problème de paiement — Workwave Pro",
     html: `

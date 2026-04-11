@@ -16,7 +16,7 @@ export async function sendTrialReminderEmail(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
   await resend.emails.send({
-    from: "Workwave <onboarding@resend.dev>",
+    from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: "Votre essai gratuit se termine demain — Workwave Pro",
     html: `
