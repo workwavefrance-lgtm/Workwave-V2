@@ -3,13 +3,24 @@ import SearchForm from "@/components/search/SearchForm";
 import CountUp from "@/components/ui/CountUp";
 import { getCategoriesByVertical } from "@/lib/queries/categories";
 import { getTopCities } from "@/lib/queries/cities";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
-  const [btp, domicile, personne, topCities] = await Promise.all([
+  const supabase = await createClient();
+
+  const [btp, domicile, personne, topCities, prosCount, citiesCount] = await Promise.all([
     getCategoriesByVertical("btp"),
     getCategoriesByVertical("domicile"),
     getCategoriesByVertical("personne"),
     getTopCities(30),
+    supabase
+      .from("pros")
+      .select("*", { count: "exact", head: true })
+      .eq("is_active", true)
+      .is("deleted_at", null),
+    supabase
+      .from("cities")
+      .select("*", { count: "exact", head: true }),
   ]);
 
   const allCategories = [...btp, ...domicile, ...personne].sort((a, b) =>
@@ -42,10 +53,14 @@ export default async function Home() {
           <SearchForm categories={allCategories} cities={cityOptions} />
           <p className="mt-6 text-sm text-[var(--text-tertiary)]">
             <CountUp
-              end={20330}
+              end={prosCount.count ?? 0}
               className="font-semibold text-[var(--text-primary)]"
             />{" "}
-            professionnels disponibles en Vienne
+            professionnels disponibles dans{" "}
+            <span className="font-semibold text-[var(--text-primary)]">
+              {(citiesCount.count ?? 0).toLocaleString("fr-FR")}
+            </span>{" "}
+            villes de la Vienne
           </p>
         </div>
       </section>
