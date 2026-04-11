@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,15 +26,9 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const isReadyRef = useRef(false);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-
-  // Garder le ref synchronisé avec le state
-  useEffect(() => {
-    isReadyRef.current = isReady;
-  }, [isReady]);
 
   const passwordValid = password.length >= 8 && /\d/.test(password);
   const passwordsMatch =
@@ -45,60 +39,21 @@ export default function ResetPasswordPage() {
     const supabase = createClient();
 
     console.log("[reset-password] page montée, URL:", window.location.href);
-    console.log("[reset-password] hash:", window.location.hash);
 
-    // Écouter l'événement PASSWORD_RECOVERY
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
-        console.log("[reset-password] onAuthStateChange event:", event);
-        if (event === "PASSWORD_RECOVERY") {
-          setIsReady(true);
-        }
-      }
-    );
-
-    // Flow implicit : Supabase redirige avec les tokens dans le hash fragment
-    // #access_token=xxx&refresh_token=xxx&type=recovery
-    const hash = window.location.hash.substring(1);
-    if (hash) {
-      const hashParams = new URLSearchParams(hash);
-      const accessToken = hashParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token");
-      const type = hashParams.get("type");
-
-      console.log("[reset-password] hash fragment détecté, type:", type, "hasAccessToken:", !!accessToken);
-
-      if (accessToken && refreshToken && type === "recovery") {
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        }).then(({ error: sessionError }) => {
-          console.log("[reset-password] setSession result:", { error: sessionError?.message });
-          if (!sessionError) {
-            setIsReady(true);
-            window.history.replaceState({}, "", window.location.pathname);
-          } else {
-            setError("Le lien de réinitialisation est invalide ou a expiré.");
-            setIsReady(true);
-          }
-        });
-      }
-    }
-
-    // Timeout : si rien ne se passe après 8s, afficher un message
-    const timeout = setTimeout(() => {
-      if (!isReadyRef.current) {
-        console.log("[reset-password] timeout 8s, lien invalide");
+    // Le code PKCE a déjà été échangé par /auth/callback côté serveur.
+    // On vérifie simplement que l'utilisateur a une session active.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("[reset-password] getSession:", {
+        hasSession: !!session,
+        email: session?.user?.email,
+      });
+      if (session) {
+        setIsReady(true);
+      } else {
         setError("Le lien de réinitialisation est invalide ou a expiré. Veuillez en demander un nouveau.");
         setIsReady(true);
       }
-    }, 8000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    });
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
