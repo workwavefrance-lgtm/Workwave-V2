@@ -31,18 +31,33 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isAdminRoute = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
   const isProRoute = pathname.startsWith("/pro/dashboard");
+  const isAdminPage = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
+  const isAdminApi = pathname.startsWith("/api/admin");
 
-  // Si pas de session, rediriger vers la bonne page de connexion
-  if (!user) {
-    const url = request.nextUrl.clone();
-    url.pathname = isAdminRoute ? "/admin/login" : "/pro/connexion";
-    return NextResponse.redirect(url);
+  // Les API routes admin ne passent pas par le middleware (évite les boucles)
+  if (isAdminApi) {
+    return supabaseResponse;
   }
 
-  // Vérification admin : check table admins via service client
-  if (isAdminRoute) {
+  // Routes pro dashboard : vérifier la session
+  if (isProRoute) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/pro/connexion";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  // Pages admin (pas les API) : vérifier session + admin
+  if (isAdminPage) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      return NextResponse.redirect(url);
+    }
+
     const adminVerified = request.cookies.get("admin_verified")?.value;
     const now = Date.now();
 
@@ -82,14 +97,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Routes pro dashboard : la session suffit
-  if (isProRoute) {
-    return supabaseResponse;
-  }
-
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/pro/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/pro/dashboard/:path*", "/admin/:path*", "/api/admin/:path*"],
 };
