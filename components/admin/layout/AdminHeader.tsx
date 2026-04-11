@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useAdmin } from "@/components/admin/shell/AdminProvider";
 import { useState, useRef, useEffect } from "react";
+import AdminMobileNav from "./AdminMobileNav";
 
 const BREADCRUMB_LABELS: Record<string, string> = {
   admin: "Admin",
@@ -52,9 +53,11 @@ export default function AdminHeader() {
   }
 
   return (
-    <header className="h-14 flex items-center justify-between px-6 border-b border-[var(--admin-border)] bg-[var(--admin-card)]">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-xs">
+    <header className="h-14 flex items-center justify-between px-4 lg:px-6 border-b border-[var(--admin-border)] bg-[var(--admin-card)]">
+      {/* Mobile hamburger + Breadcrumbs */}
+      <div className="flex items-center gap-3">
+        <AdminMobileNav />
+        <nav className="flex items-center gap-1.5 text-xs">
         {breadcrumbs.map((crumb) => (
           <span key={crumb.href} className="flex items-center gap-1.5">
             {crumb.href !== "/admin" && (
@@ -73,7 +76,8 @@ export default function AdminHeader() {
             </span>
           </span>
         ))}
-      </nav>
+        </nav>
+      </div>
 
       {/* Right: Cmd+K hint + user menu */}
       <div className="flex items-center gap-4">

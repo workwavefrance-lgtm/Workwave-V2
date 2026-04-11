@@ -5,6 +5,7 @@ import { useState } from "react";
 import AdminBadge from "@/components/admin/data-display/AdminBadge";
 import AdminButton from "@/components/admin/forms/AdminButton";
 import AdminConfirmDialog from "@/components/admin/forms/AdminConfirmDialog";
+import { useAdmin } from "@/components/admin/shell/AdminProvider";
 
 type ProData = {
   id: number;
@@ -68,8 +69,10 @@ export default function ProDetailClient({
   leads: LeadData[];
 }) {
   const router = useRouter();
+  const { admin } = useAdmin();
   const [showSuspend, setShowSuspend] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [impersonating, setImpersonating] = useState(false);
 
   const statusBadge = STATUS_BADGE[pro.subscription_status] || STATUS_BADGE.none;
 
@@ -246,6 +249,34 @@ export default function ProDetailClient({
               Actions
             </h2>
             <div className="space-y-2">
+              {admin.role === "superadmin" && pro.claimed_at && (
+                <AdminButton
+                  variant="primary"
+                  size="sm"
+                  className="w-full"
+                  disabled={impersonating}
+                  onClick={async () => {
+                    setImpersonating(true);
+                    try {
+                      const res = await fetch(
+                        `/api/admin/pros/${pro.id}/impersonate`,
+                        { method: "POST" }
+                      );
+                      if (res.ok) {
+                        const data = await res.json();
+                        window.open(data.url, "_blank");
+                      }
+                    } catch {
+                      // ignore
+                    }
+                    setImpersonating(false);
+                  }}
+                >
+                  {impersonating
+                    ? "Connexion..."
+                    : "Se connecter en tant que"}
+                </AdminButton>
+              )}
               <AdminButton
                 variant={pro.is_active ? "danger" : "primary"}
                 size="sm"
