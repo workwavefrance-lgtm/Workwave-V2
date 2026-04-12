@@ -6,6 +6,8 @@ import JsonLd from "@/components/seo/JsonLd";
 import SeoContent from "@/components/seo/SeoContent";
 import { getCategoryBySlug } from "@/lib/queries/categories";
 import { getGuideBySlug } from "@/lib/queries/seo-guides";
+import { getAllDepartments } from "@/lib/queries/departments";
+import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { BASE_URL } from "@/lib/constants";
 
@@ -47,9 +49,15 @@ export default async function GuidePage({ params }: Props) {
   const guide = await getGuideBySlug(metier);
   if (!guide) notFound();
 
+  // Departement dynamique (premier disponible)
+  const departments = await getAllDepartments();
+  const dept = departments[0];
+  const deptSlug = dept ? generateDepartmentSlug(dept) : "vienne-86";
+  const deptName = dept?.name || "Vienne";
+
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
-    { label: category.name, href: `/${category.slug}/vienne-86` },
+    { label: category.name, href: `/${category.slug}/${deptSlug}` },
     { label: "Guide" },
   ];
 
@@ -124,10 +132,10 @@ export default async function GuidePage({ params }: Props) {
           Trouvez un {category.name.toLowerCase()} pres de chez vous
         </h3>
         <Link
-          href={`/${category.slug}/vienne-86`}
+          href={`/${category.slug}/${deptSlug}`}
           className="inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-8 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
         >
-          Voir les {category.name.toLowerCase()}s en Vienne
+          Voir les {category.name.toLowerCase()}s en {deptName}
         </Link>
       </div>
     </main>
