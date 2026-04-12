@@ -47,6 +47,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     resolved.type === "department" ? "department" : "city"
   );
 
+  // Compter les pros pour cette combinaison
+  const result =
+    resolved.type === "department"
+      ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page: 1, pageSize: 1 })
+      : await getProsByCategoryAndCity(category.id, resolved.city.id, { page: 1, pageSize: 1 });
+
+  const prosCount = result.count;
+
   return {
     title: seo?.title || `${category.name} à ${locationName}`,
     description:
@@ -55,6 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical: `${BASE_URL}/${metier}/${locationSlug}`,
     },
+    // noindex si aucun pro dans cette combinaison
+    ...(prosCount === 0 ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

@@ -25,12 +25,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     truncateDescription(pro.description) ||
     `${pro.name}, ${pro.category.name} à ${cityName}. Contactez ce professionnel gratuitement.`;
 
+  // noindex si fiche vide (pas reclamee, pas de description, pas de telephone)
+  const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
+
   return {
     title: `${pro.name} — ${pro.category.name} à ${cityName}`,
     description: desc,
     alternates: {
       canonical: `${BASE_URL}/artisan/${slug}`,
     },
+    ...(hasContent ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
