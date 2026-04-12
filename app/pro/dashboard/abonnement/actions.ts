@@ -47,7 +47,7 @@ export async function createCheckoutSession(plan: "monthly" | "annual") {
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${origin}/pro/dashboard/abonnement?success=true`,
     cancel_url: `${origin}/pro/dashboard/abonnement?canceled=true`,
-    allow_promotion_codes: false,
+    allow_promotion_codes: true,
     payment_method_types: ["card"],
     metadata: {
       pro_id: String(pro.id),
