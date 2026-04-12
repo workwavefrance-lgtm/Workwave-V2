@@ -11,7 +11,7 @@ export default async function AdminLeadsPage({
     status: sp.status || "all",
     sort: sp.sort || "sent_at",
     order: (sp.order || "desc") as "asc" | "desc",
-    page: parseInt(sp.page || "1"),
+    page: Math.max(1, parseInt(sp.page || "1", 10) || 1),
     pageSize: 25,
   };
 

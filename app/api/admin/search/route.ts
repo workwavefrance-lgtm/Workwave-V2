@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin/auth";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminServiceClient } from "@/lib/admin/service-client";
 
 export async function GET(request: NextRequest) {
   const admin = await verifyAdmin();
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ pros: [], projects: [] });
   }
 
-  const supabase = await createClient();
+  const supabase = getAdminServiceClient();
 
   const [prosResult, projectsResult] = await Promise.all([
     supabase
@@ -24,20 +24,21 @@ export async function GET(request: NextRequest) {
       .limit(5),
     supabase
       .from("projects")
-      .select("id, particulier_name")
-      .or(`particulier_name.ilike.%${q}%,description.ilike.%${q}%`)
+      .select("id, first_name")
+      .or(`first_name.ilike.%${q}%,description.ilike.%${q}%,email.ilike.%${q}%`)
+      .neq("status", "deleted")
       .limit(5),
   ]);
 
-  const pros = (prosResult.data ?? []).map((p) => ({
+  const pros = ((prosResult.data ?? []) as { id: number; name: string; slug: string }[]).map((p) => ({
     id: p.id,
     name: p.name,
     slug: p.slug,
   }));
 
-  const projects = (projectsResult.data ?? []).map((p) => ({
+  const projects = ((projectsResult.data ?? []) as { id: number; first_name: string }[]).map((p) => ({
     id: p.id,
-    first_name: p.particulier_name ?? `Projet #${p.id}`,
+    first_name: p.first_name ?? `Projet #${p.id}`,
   }));
 
   return NextResponse.json({ pros, projects });

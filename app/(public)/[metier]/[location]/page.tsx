@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ListingPage({ params, searchParams }: Props) {
   const { metier, location: locationSlug } = await params;
   const { page: pageParam } = await searchParams;
-  const page = Math.max(1, parseInt(pageParam || "1", 10));
+  const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
 
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();

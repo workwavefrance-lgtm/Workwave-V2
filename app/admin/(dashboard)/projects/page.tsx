@@ -12,7 +12,7 @@ export default async function AdminProjectsPage({
     search: sp.search || "",
     sort: sp.sort || "created_at",
     order: (sp.order || "desc") as "asc" | "desc",
-    page: parseInt(sp.page || "1"),
+    page: Math.max(1, parseInt(sp.page || "1", 10) || 1),
     pageSize: 25,
   };
 

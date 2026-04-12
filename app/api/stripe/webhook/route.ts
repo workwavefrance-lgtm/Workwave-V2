@@ -52,8 +52,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Récupérer les détails de la subscription
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  if (!subscription.items.data.length) {
+    console.warn("Webhook checkout: subscription sans items", subscriptionId);
+    return;
+  }
   const firstItem = subscription.items.data[0];
-  const priceId = firstItem?.price.id || "";
+  const priceId = firstItem.price.id;
   const plan = getPlanFromPriceId(priceId);
 
   await supabase
@@ -88,10 +92,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const priceId = firstItem?.price.id || "";
   const plan = getPlanFromPriceId(priceId);
 
-  // Mapper le statut Stripe vers notre statut
+  // Mapper le statut Stripe vers notre statut DB
+  // Valeurs autorisées en DB : none, trialing, active, past_due, canceled, free, suspended
   let status: string;
   if (subscription.cancel_at_period_end) {
-    // L'abonnement est programmé pour être annulé
     status = "active"; // reste actif jusqu'à la fin de la période
   } else {
     switch (subscription.status) {
@@ -108,8 +112,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       case "unpaid":
         status = "canceled";
         break;
+      case "incomplete":
+      case "incomplete_expired":
+      case "paused":
+        // Statuts Stripe non mappés → canceled pour éviter de violer la contrainte DB
+        status = "canceled";
+        break;
       default:
-        status = subscription.status;
+        console.warn(`Statut Stripe inconnu: ${subscription.status}, fallback canceled`);
+        status = "canceled";
     }
   }
 
@@ -194,13 +205,17 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   };
 
   if (subscriptionId) {
-    const stripe = getStripeServer();
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const firstItem = subscription.items.data[0];
-    if (firstItem) {
-      updateData.current_period_end = new Date(
-        firstItem.current_period_end * 1000
-      ).toISOString();
+    try {
+      const stripe = getStripeServer();
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const firstItem = subscription.items.data[0];
+      if (firstItem) {
+        updateData.current_period_end = new Date(
+          firstItem.current_period_end * 1000
+        ).toISOString();
+      }
+    } catch (err) {
+      console.warn("Impossible de récupérer la subscription:", subscriptionId, err);
     }
   }
 

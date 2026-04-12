@@ -5,8 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST() {
   const cookieStore = await cookies();
 
-  // Lire les données d'impersonation avant suppression
+  // Vérifier que le cookie d'impersonation existe (seul un admin l'a)
   const raw = cookieStore.get("admin_impersonation")?.value;
+  if (!raw) {
+    return NextResponse.json({ error: "Pas de session d'impersonation active" }, { status: 403 });
+  }
 
   // Supprimer le cookie d'impersonation
   cookieStore.delete("admin_impersonation");
