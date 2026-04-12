@@ -232,6 +232,8 @@ Sprint 5 — Comptes pros et abonnements : cadré en détail (voir section 11 qu
 Sprint 6 — Switch DNS : à démarrer.
 Sprint 7 — Moat IA (superpouvoirs) : à démarrer après sprint 6.
 
+Mini-sprint à faire : re-scraping Sirene pour les catégories non-BTP (services à domicile et aide à la personne). Le scraping initial (Sprint 1) ne couvrait que les codes NAF du BTP. Il faut relancer le script scraping/sirene_vienne.py avec les codes NAF correspondant aux catégories "domicile" et "personne" (ménage, garde d'enfants, soutien scolaire, aide aux seniors, jardinage, etc.) pour remplir ces verticaux qui sont actuellement vides ou quasi-vides.
+
 À chaque fin de sprint, mettre à jour cette section avec la date et un résumé de ce qui a été fait.
 
 ## 10. Sprint 0 — Setup détaillé
