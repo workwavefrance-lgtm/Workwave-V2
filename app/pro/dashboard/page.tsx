@@ -20,7 +20,7 @@ export default async function DashboardHomePage() {
   if (!user) redirect("/pro/connexion");
 
   const pro = await getProByUserId(user.id);
-  if (!pro) redirect("/pro/reclamer");
+  if (!pro) redirect("/pro");
 
   // Tracking dashboard visit (fire-and-forget)
   track(EVENTS.DASHBOARD_VISIT, {

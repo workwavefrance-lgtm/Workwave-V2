@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     function onScroll() {
@@ -21,13 +21,27 @@ export default function Header() {
 
   useEffect(() => {
     const supabase = createClient();
+
+    async function checkProStatus(userId: string | undefined) {
+      if (!userId) {
+        setIsPro(false);
+        return;
+      }
+      const { data } = await supabase
+        .from("pros")
+        .select("id")
+        .eq("claimed_by_user_id", userId)
+        .maybeSingle();
+      setIsPro(!!data);
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
+      checkProStatus(session?.user?.id);
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
+      checkProStatus(session?.user?.id);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -81,10 +95,10 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
           <Link
-            href={isLoggedIn ? "/pro/dashboard" : "/pro/connexion"}
+            href={isPro ? "/pro/dashboard" : "/pro/connexion"}
             className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
-            {isLoggedIn ? "Mon dashboard" : "Espace Pro"}
+            {isPro ? "Mon dashboard" : "Espace Pro"}
           </Link>
           <Link
             href="/recherche"
@@ -160,11 +174,11 @@ export default function Header() {
             Pro
           </Link>
           <Link
-            href={isLoggedIn ? "/pro/dashboard" : "/pro/connexion"}
+            href={isPro ? "/pro/dashboard" : "/pro/connexion"}
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
           >
-            {isLoggedIn ? "Mon dashboard" : "Espace Pro"}
+            {isPro ? "Mon dashboard" : "Espace Pro"}
           </Link>
           <Link
             href="/recherche"
