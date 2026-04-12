@@ -46,12 +46,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Requete : compter les pros par categorie x ville (top 50 villes)
   const topCityIds = topCities.map((c) => c.id);
 
-  const { data: categoryCityCounts } = await supabase
-    .from("pros")
-    .select("category_id, city_id")
-    .eq("is_active", true)
-    .is("deleted_at", null)
-    .in("city_id", topCityIds);
+  // Paginer pour depasser la limite Supabase de 1000 lignes
+  let allCategoryCityCounts: { category_id: number; city_id: number }[] = [];
+  const PAGE_SIZE = 1000;
+  let offset = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data } = await supabase
+      .from("pros")
+      .select("category_id, city_id")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .in("city_id", topCityIds)
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    const rows = (data || []) as { category_id: number; city_id: number }[];
+    allCategoryCityCounts = allCategoryCityCounts.concat(rows);
+    hasMore = rows.length === PAGE_SIZE;
+    offset += PAGE_SIZE;
+  }
+
+  const categoryCityCounts = allCategoryCityCounts;
 
   // Compter les pros par couple (category_id, city_id)
   const countMap = new Map<string, number>();
@@ -82,14 +98,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ============================================
   // D. Fiches pros (seulement celles avec du contenu)
   // ============================================
-  const { data: prosRaw } = await supabase
-    .from("pros")
-    .select("slug, updated_at, claimed_by_user_id")
-    .eq("is_active", true)
-    .is("deleted_at", null)
-    .or("claimed_by_user_id.not.is.null,description.not.is.null,phone.not.is.null");
+  let allPros: { slug: string; updated_at: string; claimed_by_user_id: string | null }[] = [];
+  offset = 0;
+  hasMore = true;
 
-  const pros = (prosRaw || []) as { slug: string; updated_at: string; claimed_by_user_id: string | null }[];
+  while (hasMore) {
+    const { data } = await supabase
+      .from("pros")
+      .select("slug, updated_at, claimed_by_user_id")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .or("claimed_by_user_id.not.is.null,description.not.is.null,phone.not.is.null")
+      .range(offset, offset + PAGE_SIZE - 1);
+
+    const rows = (data || []) as { slug: string; updated_at: string; claimed_by_user_id: string | null }[];
+    allPros = allPros.concat(rows);
+    hasMore = rows.length === PAGE_SIZE;
+    offset += PAGE_SIZE;
+  }
+
+  const pros = allPros;
 
   const proUrls: MetadataRoute.Sitemap = pros.map((pro) => ({
     url: `${BASE_URL}/artisan/${pro.slug}`,
