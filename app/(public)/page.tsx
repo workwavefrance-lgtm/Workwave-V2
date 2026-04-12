@@ -1,7 +1,10 @@
 import Link from "next/link";
 import SearchForm from "@/components/search/SearchForm";
+import JsonLd from "@/components/seo/JsonLd";
 import { getCategoriesByVertical } from "@/lib/queries/categories";
 import { getTopCities } from "@/lib/queries/cities";
+import { getWebSiteSchema, getOrganizationSchema } from "@/lib/utils/schema";
+import { BASE_URL } from "@/lib/constants";
 
 export default async function Home() {
   const [btp, domicile, personne, topCities] = await Promise.all([
@@ -25,6 +28,9 @@ export default async function Home() {
 
   return (
     <main>
+      <JsonLd data={getWebSiteSchema(BASE_URL)} />
+      <JsonLd data={getOrganizationSchema(BASE_URL)} />
+
       {/* Hero */}
       <section className="py-24 sm:py-32 lg:py-40 px-4">
         <div className="max-w-4xl mx-auto text-center">

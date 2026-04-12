@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/seo/JsonLd";
+import { getOrganizationSchema } from "@/lib/utils/schema";
+import { BASE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Mentions legales",
@@ -9,6 +12,7 @@ export const metadata: Metadata = {
 export default function MentionsLegalesPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-16">
+      <JsonLd data={getOrganizationSchema(BASE_URL)} />
       <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-8">
         Mentions légales
       </h1>

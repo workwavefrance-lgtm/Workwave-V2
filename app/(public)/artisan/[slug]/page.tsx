@@ -7,6 +7,7 @@ import { getProBySlug } from "@/lib/queries/pros";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
 import { BASE_URL } from "@/lib/constants";
+import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 
 export const revalidate = 86400;
@@ -90,13 +91,18 @@ export default async function ProPage({ params }: Props) {
     { label: pro.name },
   ];
 
-  const jsonLd = {
+  const isClaimed = !!pro.claimed_by_user_id;
+  const openingHours = pro.opening_hours as OpeningHours | null;
+
+  const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: pro.name,
+    url: `${BASE_URL}/artisan/${slug}`,
     ...(pro.description ? { description: pro.description } : {}),
     ...(pro.phone ? { telephone: pro.phone } : {}),
-    ...(pro.website ? { url: pro.website } : {}),
+    ...(pro.email ? { email: pro.email } : {}),
+    ...(pro.logo_url ? { image: pro.logo_url } : {}),
     address: {
       "@type": "PostalAddress",
       ...(pro.address ? { streetAddress: pro.address } : {}),
@@ -107,18 +113,51 @@ export default async function ProPage({ params }: Props) {
         : {}),
       addressCountry: "FR",
     },
+    ...(pro.city?.latitude && pro.city?.longitude
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: pro.city.latitude,
+            longitude: pro.city.longitude,
+          },
+        }
+      : {}),
+    ...(pro.hourly_rate ? { priceRange: `${pro.hourly_rate} EUR/h` } : {}),
   };
 
+  // OpeningHours (fiches reclamees uniquement)
+  if (isClaimed && openingHours) {
+    const specs = toOpeningHoursSpecification(openingHours as OpeningHours);
+    if (specs.length > 0) {
+      jsonLd.openingHoursSpecification = specs;
+    }
+  }
+
+  // Zone d'intervention
+  if (isClaimed && pro.intervention_radius_km && pro.city?.latitude && pro.city?.longitude) {
+    jsonLd.areaServed = {
+      "@type": "GeoCircle",
+      geoMidpoint: {
+        "@type": "GeoCoordinates",
+        latitude: pro.city.latitude,
+        longitude: pro.city.longitude,
+      },
+      geoRadius: `${pro.intervention_radius_km * 1000}`,
+    };
+  }
+
+  // BreadcrumbList schema
+  const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
+
   const initial = (pro.name || "?").charAt(0).toUpperCase();
-  const isClaimed = !!pro.claimed_by_user_id;
   const photos = Array.isArray(pro.photos) ? pro.photos.filter((url): url is string => typeof url === "string" && url.startsWith("http")) : [];
-  const openingHours = pro.opening_hours as OpeningHours | null;
   const certifications = Array.isArray(pro.certifications) ? pro.certifications : [];
   const paymentMethods = Array.isArray(pro.payment_methods) ? pro.payment_methods : [];
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-12">
       <JsonLd data={jsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">

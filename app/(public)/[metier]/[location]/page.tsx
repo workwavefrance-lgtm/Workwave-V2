@@ -16,6 +16,7 @@ import { getNearbyCities, getCitiesByDepartment } from "@/lib/queries/cities";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import { BASE_URL } from "@/lib/constants";
+import { toBreadcrumbSchema } from "@/lib/utils/schema";
 
 export const revalidate = 3600;
 
@@ -155,11 +156,14 @@ export default async function ListingPage({ params, searchParams }: Props) {
     { label: locationName },
   ];
 
+  const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
+
   const baseUrl = `/${metier}/${locationSlug}`;
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">
       <JsonLd data={jsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="mb-10">
