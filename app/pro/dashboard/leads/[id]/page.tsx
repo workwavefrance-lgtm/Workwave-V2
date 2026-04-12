@@ -3,8 +3,8 @@ import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getProByUserId } from "@/lib/queries/pros";
 import { getLeadById } from "@/lib/queries/leads";
+import { getAdminServiceClient } from "@/lib/admin/service-client";
 import LeadDetail from "@/components/pro/dashboard/LeadDetail";
-import { markLeadOpened } from "./actions";
 
 export const metadata: Metadata = {
   title: "Détail du lead — Workwave Pro",
@@ -23,7 +23,7 @@ export default async function LeadDetailPage({
   if (!user) redirect("/pro/connexion");
 
   const pro = await getProByUserId(user.id);
-  if (!pro) redirect("/pro/reclamer");
+  if (!pro) redirect("/pro");
 
   const { id } = await params;
   const leadId = parseInt(id, 10);
@@ -32,9 +32,16 @@ export default async function LeadDetailPage({
   const lead = await getLeadById(leadId, pro.id);
   if (!lead) notFound();
 
-  // Marquer comme vu si c'est le premier accès
+  // Marquer comme vu si c'est le premier accès (inline, pas de server action)
   if (lead.status === "sent") {
-    await markLeadOpened(lead.id);
+    const db = getAdminServiceClient();
+    await db
+      .from("project_leads")
+      .update({ status: "opened", opened_at: new Date().toISOString() } as never)
+      .eq("id", lead.id)
+      .eq("pro_id", pro.id)
+      .eq("status", "sent");
+    lead.status = "opened";
   }
 
   return <LeadDetail lead={lead} />;
