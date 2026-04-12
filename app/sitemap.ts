@@ -98,5 +98,51 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: pro.claimed_by_user_id ? 0.8 : 0.5,
   }));
 
-  return [...staticUrls, ...categoryDeptUrls, ...categoryCityUrls, ...proUrls];
+  // ============================================
+  // E. Pages guides piliers (/[metier]/guide)
+  // ============================================
+  const { data: guidesRaw } = await supabase
+    .from("seo_guides")
+    .select("slug, updated_at");
+
+  const guides = (guidesRaw || []) as { slug: string; updated_at: string }[];
+
+  const guideUrls: MetadataRoute.Sitemap = guides.map((guide) => ({
+    url: `${BASE_URL}/${guide.slug}/guide`,
+    lastModified: new Date(guide.updated_at),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  // ============================================
+  // F. Articles de blog (/blog/[slug])
+  // ============================================
+  const blogStaticUrls: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/blog`, changeFrequency: "daily" as const, priority: 0.7 },
+  ];
+
+  const { data: postsRaw } = await supabase
+    .from("blog_posts")
+    .select("slug, published_at, updated_at")
+    .eq("status", "published")
+    .not("published_at", "is", null);
+
+  const posts = (postsRaw || []) as { slug: string; published_at: string; updated_at: string }[];
+
+  const blogUrls: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: `${BASE_URL}/blog/${post.slug}`,
+    lastModified: new Date(post.updated_at || post.published_at),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticUrls,
+    ...categoryDeptUrls,
+    ...categoryCityUrls,
+    ...guideUrls,
+    ...blogStaticUrls,
+    ...blogUrls,
+    ...proUrls,
+  ];
 }
