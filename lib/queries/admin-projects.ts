@@ -46,7 +46,7 @@ export const getAdminProjects = cache(
         "id, first_name, email, phone, description, urgency, budget, status, suspicion_score, ai_qualification, created_at, category:categories(id, name), city:cities(id, name, department:departments(code))",
         { count: "exact" }
       )
-      .is("deleted_at" as never, null);
+      .neq("status", "deleted");
 
     if (status && status !== "all") {
       query = query.eq("status", status);

@@ -35,11 +35,11 @@ export const getAdminKPIs = cache(async (): Promise<AdminKPIs> => {
       .lt("created_at", startOfMonth),
     db.from("projects").select("*", { count: "exact", head: true })
       .gte("created_at", startOfMonth)
-      .is("deleted_at" as never, null),
+      .neq("status", "deleted"),
     db.from("projects").select("*", { count: "exact", head: true })
       .gte("created_at", startOfLastMonth)
       .lt("created_at", startOfMonth)
-      .is("deleted_at" as never, null),
+      .neq("status", "deleted"),
     db.from("project_leads").select("*", { count: "exact", head: true })
       .gte("sent_at", startOfMonth),
     db.from("project_leads").select("*", { count: "exact", head: true })
@@ -89,7 +89,7 @@ export const getRecentActivity = cache(async (): Promise<RecentActivity[]> => {
   const { data: projects } = await db
     .from("projects")
     .select("id, first_name, description, status, created_at")
-    .is("deleted_at" as never, null)
+    .neq("status", "deleted")
     .order("created_at", { ascending: false })
     .limit(5) as { data: { id: number; first_name: string; description: string; status: string; created_at: string }[] | null };
 

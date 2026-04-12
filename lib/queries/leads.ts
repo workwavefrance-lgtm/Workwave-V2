@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getAdminServiceClient } from "@/lib/admin/service-client";
 import type {
   ProjectLead,
   ProjectLeadStatus,
@@ -108,7 +109,8 @@ export async function getRecentLeadsForPro(
   proId: number,
   limit = 5
 ): Promise<LeadWithProject[]> {
-  const supabase = await createClient();
+  // Service client pour bypass RLS sur la table projects (pas de SELECT policy)
+  const supabase = getAdminServiceClient();
   const { data } = await supabase
     .from("project_leads")
     .select(LEAD_WITH_PROJECT_SELECT)
@@ -127,7 +129,8 @@ export async function getLeadsForPro(
     pageSize = 10,
   }: { status?: ProjectLeadStatus; page?: number; pageSize?: number } = {}
 ) {
-  const supabase = await createClient();
+  // Service client pour bypass RLS sur la table projects (pas de SELECT policy)
+  const supabase = getAdminServiceClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -159,7 +162,8 @@ export async function getLeadById(
   leadId: number,
   proId: number
 ): Promise<LeadWithProject | null> {
-  const supabase = await createClient();
+  // Service client pour bypass RLS sur la table projects (pas de SELECT policy)
+  const supabase = getAdminServiceClient();
   const { data } = await supabase
     .from("project_leads")
     .select(LEAD_WITH_PROJECT_SELECT)
@@ -167,7 +171,7 @@ export async function getLeadById(
     .eq("pro_id", proId)
     .single();
 
-  return (data as LeadWithProject) || null;
+  return (data as unknown as LeadWithProject) || null;
 }
 
 /**
@@ -182,7 +186,8 @@ export async function getLeadPreviewCount(
 ): Promise<number> {
   if (categoryIds.length === 0 || !departmentId) return 0;
 
-  const supabase = await createClient();
+  // Service client pour bypass RLS sur la table projects
+  const supabase = getAdminServiceClient();
   const now = new Date();
   const lastMonthStart = new Date(
     now.getFullYear(),
