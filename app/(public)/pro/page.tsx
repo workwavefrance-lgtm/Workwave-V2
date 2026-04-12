@@ -2,9 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Workwave pour les professionnels — Recevez des leads qualifiés",
+  title: "Workwave pour les professionnels - Recevez des leads qualifies",
   description:
-    "Recevez des demandes qualifiées de particuliers dans votre zone. Fiche gratuite, essai 14 jours sans carte bancaire, zéro commission. À partir de 32,50 €/mois.",
+    "Recevez des demandes qualifiees de particuliers dans votre zone. Fiche gratuite, essai 14 jours sans carte bancaire, zero commission. A partir de 32,50 euros/mois.",
+  alternates: { canonical: "https://workwave.fr/pro" },
+  openGraph: {
+    type: "website",
+    title: "Workwave pour les professionnels - Recevez des leads qualifies",
+    description:
+      "Fiche gratuite, essai 14 jours sans CB, zero commission. A partir de 32,50 euros/mois.",
+    url: "https://workwave.fr/pro",
+  },
 };
 
 // ============================================

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Mentions légales — Workwave",
-  description: "Mentions légales du site Workwave.fr.",
+  title: "Mentions legales",
+  description: "Mentions legales du site Workwave.fr. Editeur, hebergeur, RGPD.",
+  alternates: { canonical: "https://workwave.fr/mentions-legales" },
 };
 
 export default function MentionsLegalesPage() {

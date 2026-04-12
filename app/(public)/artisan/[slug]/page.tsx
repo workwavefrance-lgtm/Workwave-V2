@@ -29,10 +29,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
 
   return {
-    title: `${pro.name} — ${pro.category.name} à ${cityName}`,
+    title: `${pro.name} - ${pro.category.name} a ${cityName}`,
     description: desc,
     alternates: {
       canonical: `${BASE_URL}/artisan/${slug}`,
+    },
+    openGraph: {
+      type: "profile",
+      title: `${pro.name} - ${pro.category.name} a ${cityName}`,
+      description: desc,
+      url: `${BASE_URL}/artisan/${slug}`,
+    },
+    twitter: {
+      card: "summary",
+      title: `${pro.name} - ${pro.category.name} a ${cityName}`,
+      description: desc,
     },
     ...(hasContent ? {} : { robots: { index: false, follow: true } }),
   };

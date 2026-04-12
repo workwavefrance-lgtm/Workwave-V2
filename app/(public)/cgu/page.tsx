@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Conditions Générales d'Utilisation — Workwave",
-  description: "Conditions Générales d'Utilisation de la plateforme Workwave.",
+  title: "Conditions Generales d'Utilisation",
+  description: "Conditions Generales d'Utilisation de la plateforme Workwave.",
+  alternates: { canonical: "https://workwave.fr/cgu" },
 };
 
 export default function CGUPage() {

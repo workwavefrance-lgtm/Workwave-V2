@@ -3,9 +3,10 @@ import ProjectForm from "@/components/project/ProjectForm";
 import { getAllCategories } from "@/lib/queries/categories";
 
 export const metadata: Metadata = {
-  title: "Déposer un projet",
+  title: "Deposer un projet - Devis gratuits en Vienne",
   description:
-    "Décrivez votre projet de travaux gratuitement et recevez des devis de professionnels qualifiés dans la Vienne.",
+    "Decrivez votre projet de travaux gratuitement et recevez des devis de professionnels qualifies dans la Vienne.",
+  alternates: { canonical: "https://workwave.fr/deposer-projet" },
 };
 
 export default async function DeposerProjetPage() {

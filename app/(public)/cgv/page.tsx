@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Conditions Générales de Vente — Workwave",
-  description: "Conditions Générales de Vente de la plateforme Workwave.",
+  title: "Conditions Generales de Vente",
+  description: "Conditions Generales de Vente de la plateforme Workwave.",
+  alternates: { canonical: "https://workwave.fr/cgv" },
 };
 
 export default function CGVPage() {

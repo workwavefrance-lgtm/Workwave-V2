@@ -55,13 +55,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const prosCount = result.count;
 
+  const title =
+    seo?.title ||
+    (prosCount > 0
+      ? `${category.name} a ${locationName} - ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
+      : `${category.name} a ${locationName}`);
+
+  const description =
+    seo?.meta_description ||
+    `Trouvez un ${category.name.toLowerCase()} a ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} reference${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
+
   return {
-    title: seo?.title || `${category.name} à ${locationName}`,
-    description:
-      seo?.meta_description ||
-      `Trouvez un ${category.name.toLowerCase()} à ${locationName}. Comparez les professionnels et contactez-les gratuitement.`,
+    title,
+    description,
     alternates: {
       canonical: `${BASE_URL}/${metier}/${locationSlug}`,
+    },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `${BASE_URL}/${metier}/${locationSlug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
     // noindex si aucun pro dans cette combinaison
     ...(prosCount === 0 ? { robots: { index: false, follow: true } } : {}),
