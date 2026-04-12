@@ -104,6 +104,26 @@ export async function getProByUserId(
   return data as ProWithRelations | null;
 }
 
+export async function getSimilarPros(
+  categoryId: number,
+  cityId: number,
+  excludeSlug: string,
+  limit: number = 5
+): Promise<ProWithRelations[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pros")
+    .select(PRO_SELECT)
+    .eq("category_id", categoryId)
+    .eq("city_id", cityId)
+    .neq("slug", excludeSlug)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .limit(limit);
+
+  return (data as ProWithRelations[]) || [];
+}
+
 export async function searchPros(
   query: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}

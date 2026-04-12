@@ -6,7 +6,7 @@ import ProCard from "@/components/pro/ProCard";
 import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
 import JsonLd from "@/components/seo/JsonLd";
-import { getCategoryBySlug, getAllCategories } from "@/lib/queries/categories";
+import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
 import {
   getProsByCategoryAndDepartment,
@@ -130,8 +130,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
   );
 
   let nearbyCities: Awaited<ReturnType<typeof getNearbyCities>> = [];
+  let popularCategories: Awaited<ReturnType<typeof getPopularCategoriesInCity>> = [];
   if (resolved.type === "city") {
-    nearbyCities = await getNearbyCities(resolved.city.id, 8);
+    [nearbyCities, popularCategories] = await Promise.all([
+      getNearbyCities(resolved.city.id, 8),
+      getPopularCategoriesInCity(resolved.city.id, category.id, 6),
+    ]);
   } else {
     const deptCities = await getCitiesByDepartment(resolved.department.id);
     nearbyCities = deptCities.slice(0, 10);
@@ -203,7 +207,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
         relatedCategories={relatedCategories}
         nearbyCities={nearbyCities}
         currentCategorySlug={category.slug}
+        currentCategoryName={category.name}
         locationSlug={locationSlug}
+        locationName={locationName}
+        popularCategories={popularCategories}
       />
     </main>
   );

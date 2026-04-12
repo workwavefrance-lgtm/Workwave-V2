@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProBySlug } from "@/lib/queries/pros";
+import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
+import { getNearbyCities } from "@/lib/queries/cities";
+import ProCard from "@/components/pro/ProCard";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
 import { BASE_URL } from "@/lib/constants";
@@ -71,6 +73,12 @@ export default async function ProPage({ params }: Props) {
   const { slug } = await params;
   const pro = await getProBySlug(slug);
   if (!pro) notFound();
+
+  // Charger les pros similaires et villes voisines en parallele
+  const [similarPros, nearbyCities] = await Promise.all([
+    pro.city ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
+    pro.city ? getNearbyCities(pro.city.id, 5) : Promise.resolve([]),
+  ]);
 
   const cityName = pro.city?.name || "";
   const deptSlug = pro.city?.department
@@ -525,6 +533,40 @@ export default async function ProPage({ params }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Pros similaires */}
+      {similarPros.length > 0 && (
+        <div className="mt-16 pt-8 border-t border-[var(--border-color)]">
+          <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-6">
+            Autres {pro.category.name.toLowerCase()}s a {cityName}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {similarPros.map((p) => (
+              <ProCard key={p.id} pro={p} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Communes voisines */}
+      {nearbyCities.length > 0 && (
+        <div className="mt-12 pt-8 border-t border-[var(--border-color)]">
+          <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
+            {pro.category.name} dans les communes voisines
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {nearbyCities.map((city) => (
+              <Link
+                key={city.id}
+                href={`/${pro.category.slug}/${city.slug}`}
+                className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-full text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-250"
+              >
+                {pro.category.name} a {city.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* RGPD */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-xs text-[var(--text-tertiary)]">
