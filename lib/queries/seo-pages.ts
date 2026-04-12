@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
+export type FaqItem = { question: string; answer: string };
+
 export type SeoPage = {
   id: number;
   slug: string;
@@ -10,6 +12,7 @@ export type SeoPage = {
   title: string;
   meta_description: string;
   content: string;
+  faq_json: FaqItem[] | null;
   generated_at: string;
 };
 

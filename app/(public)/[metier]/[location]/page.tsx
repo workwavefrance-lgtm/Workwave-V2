@@ -15,6 +15,7 @@ import {
 import { getNearbyCities, getCitiesByDepartment } from "@/lib/queries/cities";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
+import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 
@@ -202,6 +203,27 @@ export default async function ListingPage({ params, searchParams }: Props) {
       />
 
       {seo && <SeoContent content={seo.content} />}
+
+      {/* FAQ accordeon + schema FAQPage */}
+      {seo?.faq_json && seo.faq_json.length > 0 && (
+        <>
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: seo.faq_json.map((faq) => ({
+                "@type": "Question",
+                name: faq.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: faq.answer,
+                },
+              })),
+            }}
+          />
+          <FaqAccordion faqs={seo.faq_json} />
+        </>
+      )}
 
       <InternalLinks
         relatedCategories={relatedCategories}
