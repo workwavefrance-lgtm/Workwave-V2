@@ -162,14 +162,21 @@ def main():
         metavar="SLUG",
         help="Tester sur une seule catégorie (ex: --test plombier)",
     )
+    parser.add_argument(
+        "--vertical",
+        choices=["btp", "domicile", "personne"],
+        help="Filtrer par vertical (ex: --vertical domicile)",
+    )
     args = parser.parse_args()
 
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
     # Charger les catégories
-    query = supabase.table("categories").select("id, slug, name, naf_codes")
+    query = supabase.table("categories").select("id, slug, name, naf_codes, vertical")
     if args.test:
         query = query.eq("slug", args.test)
+    if args.vertical:
+        query = query.eq("vertical", args.vertical)
     result = query.execute()
     categories = result.data
 
