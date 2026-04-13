@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ProWithRelations } from "@/lib/types/database";
 
 export default function ProCard({ pro }: { pro: ProWithRelations }) {
@@ -9,9 +10,11 @@ export default function ProCard({ pro }: { pro: ProWithRelations }) {
       <Link href={`/artisan/${pro.slug}`} className="flex gap-4">
         {/* Logo ou initiale */}
         {pro.logo_url ? (
-          <img
+          <Image
             src={pro.logo_url}
             alt={`Logo ${pro.name}`}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-full object-cover border border-[var(--card-border)] shrink-0"
           />
         ) : (

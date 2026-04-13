@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
@@ -174,9 +175,11 @@ export default async function ProPage({ params }: Props) {
           {/* En-tete */}
           <div className="flex items-start gap-4">
             {pro.logo_url && pro.logo_url.startsWith("http") ? (
-              <img
+              <Image
                 src={pro.logo_url}
                 alt={`Logo ${pro.name}`}
+                width={64}
+                height={64}
                 className="w-16 h-16 rounded-full object-cover border border-[var(--card-border)] shrink-0"
               />
             ) : (
@@ -387,12 +390,15 @@ export default async function ProPage({ params }: Props) {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {photos.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt={`Réalisation ${pro.name} ${i + 1}`}
-                    className="w-full aspect-square object-cover rounded-2xl border border-[var(--card-border)]"
-                  />
+                  <div key={i} className="relative aspect-square">
+                    <Image
+                      src={url}
+                      alt={`Réalisation ${pro.name} ${i + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                      className="object-cover rounded-2xl border border-[var(--card-border)]"
+                    />
+                  </div>
                 ))}
               </div>
             </div>

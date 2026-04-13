@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useActionState, useRef } from "react";
+import Image from "next/image";
 import { useDashboard } from "@/components/pro/dashboard/DashboardProvider";
 import {
   updateProProfile,
@@ -534,9 +535,11 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               </p>
               <div className="flex items-center gap-4">
                 {logoUrl ? (
-                  <img
+                  <Image
                     src={logoUrl}
-                    alt="Logo"
+                    alt={`Logo ${pro.name}`}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-xl object-cover border border-[var(--border-color)]"
                   />
                 ) : (
@@ -591,10 +594,12 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                   {photos.map((url) => (
                     <div key={url} className="relative group aspect-square">
-                      <img
+                      <Image
                         src={url}
-                        alt="Réalisation"
-                        className="w-full h-full object-cover rounded-xl border border-[var(--border-color)]"
+                        alt={`Réalisation ${pro.name}`}
+                        fill
+                        sizes="(max-width: 640px) 33vw, 20vw"
+                        className="object-cover rounded-xl border border-[var(--border-color)]"
                       />
                       <button
                         type="button"

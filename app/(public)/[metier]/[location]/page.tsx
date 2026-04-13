@@ -38,6 +38,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `${resolved.department.name} (${resolved.department.code})`
       : resolved.city.name;
 
+  // "en" pour departement, "a" pour ville
+  const preposition = resolved.type === "department" ? "en" : "à";
+
   // Utiliser le contenu SEO genere si disponible
   const locationId =
     resolved.type === "department"
@@ -60,12 +63,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title =
     seo?.title ||
     (prosCount > 0
-      ? `${category.name} à ${locationName} - ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
-      : `${category.name} à ${locationName}`);
+      ? `${category.name} ${preposition} ${locationName} - ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
+      : `${category.name} ${preposition} ${locationName}`);
 
   const description =
     seo?.meta_description ||
-    `Trouvez un ${category.name.toLowerCase()} a ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} référencé${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
+    `Trouvez un ${category.name.toLowerCase()} ${preposition} ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} référencé${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
 
   return {
     title,
@@ -104,6 +107,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
     resolved.type === "department"
       ? `${resolved.department.name} (${resolved.department.code})`
       : resolved.city.name;
+
+  // "en" pour departement, "a" pour ville
+  const preposition = resolved.type === "department" ? "en" : "à";
 
   const result =
     resolved.type === "department"
@@ -145,7 +151,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${category.name} à ${locationName}`,
+    name: `${category.name} ${preposition} ${locationName}`,
     numberOfItems: result.count,
     itemListElement: result.data.map((pro, i) => ({
       "@type": "ListItem",
@@ -173,7 +179,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
       <div className="mb-10">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
-          {category.name} à {locationName}
+          {category.name} {preposition} {locationName}
         </h1>
         <p className="text-[var(--text-secondary)]">
           {result.count} professionnel{result.count > 1 ? "s" : ""} référencé
@@ -190,7 +196,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       ) : (
         <EmptyState
           title="Aucun professionnel trouvé"
-          message={`Nous n'avons pas encore de ${category.name.toLowerCase()} référencé à ${locationName}.`}
+          message={`Nous n'avons pas encore de ${category.name.toLowerCase()} référencé ${preposition} ${locationName}.`}
           actionLabel="Rechercher ailleurs"
           actionHref="/recherche"
         />
