@@ -32,20 +32,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
 
   return {
-    title: `${pro.name} - ${pro.category.name} a ${cityName}`,
+    title: `${pro.name} - ${pro.category.name} à ${cityName}`,
     description: desc,
     alternates: {
       canonical: `${BASE_URL}/artisan/${slug}`,
     },
     openGraph: {
       type: "profile",
-      title: `${pro.name} - ${pro.category.name} a ${cityName}`,
+      title: `${pro.name} - ${pro.category.name} à ${cityName}`,
       description: desc,
       url: `${BASE_URL}/artisan/${slug}`,
     },
     twitter: {
       card: "summary",
-      title: `${pro.name} - ${pro.category.name} a ${cityName}`,
+      title: `${pro.name} - ${pro.category.name} à ${cityName}`,
       description: desc,
     },
     ...(hasContent ? {} : { robots: { index: false, follow: true } }),
@@ -538,7 +538,7 @@ export default async function ProPage({ params }: Props) {
       {similarPros.length > 0 && (
         <div className="mt-16 pt-8 border-t border-[var(--border-color)]">
           <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-6">
-            Autres {pro.category.name.toLowerCase()}s a {cityName}
+            Autres {pro.category.name.toLowerCase()}s à {cityName}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {similarPros.map((p) => (
@@ -561,7 +561,7 @@ export default async function ProPage({ params }: Props) {
                 href={`/${pro.category.slug}/${city.slug}`}
                 className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-full text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-250"
               >
-                {pro.category.name} a {city.name}
+                {pro.category.name} à {city.name}
               </Link>
             ))}
           </div>

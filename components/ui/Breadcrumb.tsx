@@ -1,6 +1,4 @@
 import Link from "next/link";
-import JsonLd from "@/components/seo/JsonLd";
-import { BASE_URL } from "@/lib/constants";
 
 type BreadcrumbItem = {
   label: string;
@@ -8,20 +6,8 @@ type BreadcrumbItem = {
 };
 
 export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.label,
-      ...(item.href ? { item: `${BASE_URL}${item.href}` } : {}),
-    })),
-  };
-
   return (
     <>
-      <JsonLd data={jsonLd} />
       <nav aria-label="Fil d'Ariane" className="text-sm text-[var(--text-tertiary)] mb-8">
         <ol className="flex flex-wrap items-center gap-1.5">
           {items.map((item, index) => (

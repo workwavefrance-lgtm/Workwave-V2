@@ -98,20 +98,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ============================================
   // D. Fiches pros (seulement celles avec du contenu)
   // ============================================
-  let allPros: { slug: string; updated_at: string; claimed_by_user_id: string | null }[] = [];
+  // Inclure TOUTES les fiches pros actives dans le sitemap
+  // Les fiches enrichies (reclamees, description, phone) ont une priorite plus haute
+  let allPros: { slug: string; updated_at: string; claimed_by_user_id: string | null; description: string | null; phone: string | null }[] = [];
   offset = 0;
   hasMore = true;
 
   while (hasMore) {
     const { data } = await supabase
       .from("pros")
-      .select("slug, updated_at, claimed_by_user_id")
+      .select("slug, updated_at, claimed_by_user_id, description, phone")
       .eq("is_active", true)
       .is("deleted_at", null)
-      .or("claimed_by_user_id.not.is.null,description.not.is.null,phone.not.is.null")
       .range(offset, offset + PAGE_SIZE - 1);
 
-    const rows = (data || []) as { slug: string; updated_at: string; claimed_by_user_id: string | null }[];
+    const rows = (data || []) as { slug: string; updated_at: string; claimed_by_user_id: string | null; description: string | null; phone: string | null }[];
     allPros = allPros.concat(rows);
     hasMore = rows.length === PAGE_SIZE;
     offset += PAGE_SIZE;
@@ -119,12 +120,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const pros = allPros;
 
-  const proUrls: MetadataRoute.Sitemap = pros.map((pro) => ({
-    url: `${BASE_URL}/artisan/${pro.slug}`,
-    lastModified: new Date(pro.updated_at),
-    changeFrequency: "monthly" as const,
-    priority: pro.claimed_by_user_id ? 0.8 : 0.5,
-  }));
+  const proUrls: MetadataRoute.Sitemap = pros.map((pro) => {
+    const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
+    return {
+      url: `${BASE_URL}/artisan/${pro.slug}`,
+      lastModified: new Date(pro.updated_at),
+      changeFrequency: "monthly" as const,
+      priority: pro.claimed_by_user_id ? 0.8 : hasContent ? 0.5 : 0.3,
+    };
+  });
 
   // ============================================
   // E. Pages guides piliers (/[metier]/guide)

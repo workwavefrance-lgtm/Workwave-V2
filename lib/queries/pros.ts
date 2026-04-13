@@ -99,6 +99,8 @@ export async function getProByUserId(
     .from("pros")
     .select(PRO_SELECT)
     .eq("claimed_by_user_id", userId)
+    .is("deleted_at", null)
+    .eq("is_active", true)
     .single();
 
   return data as ProWithRelations | null;

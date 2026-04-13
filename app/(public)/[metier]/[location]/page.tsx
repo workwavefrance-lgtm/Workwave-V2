@@ -60,12 +60,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title =
     seo?.title ||
     (prosCount > 0
-      ? `${category.name} a ${locationName} - ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
-      : `${category.name} a ${locationName}`);
+      ? `${category.name} à ${locationName} - ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
+      : `${category.name} à ${locationName}`);
 
   const description =
     seo?.meta_description ||
-    `Trouvez un ${category.name.toLowerCase()} a ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} reference${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
+    `Trouvez un ${category.name.toLowerCase()} a ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} référencé${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
 
   return {
     title,

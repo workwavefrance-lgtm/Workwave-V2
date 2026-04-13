@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "Workwave",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 20 000 professionnels dans la Vienne. BTP, services a domicile, aide a la personne. Comparez et contactez gratuitement.",
+      "Plus de 20 000 professionnels dans la Vienne. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
   },
   twitter: {
     card: "summary_large_image",

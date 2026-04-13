@@ -31,17 +31,26 @@ export default function Header() {
         .from("pros")
         .select("id")
         .eq("claimed_by_user_id", userId)
+        .is("deleted_at", null)
+        .eq("is_active", true)
         .maybeSingle();
       setIsPro(!!data);
     }
 
+    // Verifier la session sans requete DB pour les anonymes
     supabase.auth.getSession().then(({ data: { session } }) => {
-      checkProStatus(session?.user?.id);
+      if (session?.user?.id) {
+        checkProStatus(session.user.id);
+      }
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      checkProStatus(session?.user?.id);
+      if (session?.user?.id) {
+        checkProStatus(session.user.id);
+      } else {
+        setIsPro(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);

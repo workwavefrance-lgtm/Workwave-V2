@@ -1,3 +1,5 @@
+export const revalidate = 3600; // 1h
+
 import Link from "next/link";
 import SearchForm from "@/components/search/SearchForm";
 import JsonLd from "@/components/seo/JsonLd";

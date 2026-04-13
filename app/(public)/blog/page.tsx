@@ -7,8 +7,21 @@ import EmptyState from "@/components/ui/EmptyState";
 export const metadata: Metadata = {
   title: "Blog - Conseils et guides pour vos projets",
   description:
-    "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne. Articles rediges par des experts.",
+    "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne. Articles rédigés par des experts.",
   alternates: { canonical: "https://workwave.fr/blog" },
+  openGraph: {
+    type: "website",
+    title: "Blog Workwave - Conseils et guides pour vos projets",
+    description:
+      "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne.",
+    url: "https://workwave.fr/blog",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog Workwave - Conseils et guides pour vos projets",
+    description:
+      "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne.",
+  },
 };
 
 export const revalidate = 3600;
