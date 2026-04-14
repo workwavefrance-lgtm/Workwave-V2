@@ -145,6 +145,12 @@ export type Pro = {
   paused_until: string | null;
   // Statut activité
   is_active: boolean;
+  // Cold email
+  do_not_contact: boolean;
+  email_bounced: boolean;
+  first_email_sent_at: string | null;
+  prenom_dirigeant: string | null;
+  nom_dirigeant: string | null;
   // Champs calculés
   profile_completion: number;
   response_rate: number | null;
@@ -260,5 +266,81 @@ export type CancellationFeedback = {
   pro_id: number;
   reason: CancellationReason;
   feedback: string | null;
+  created_at: string;
+};
+
+// ============================================
+// Cold email system
+// ============================================
+
+export type CampaignStatus = "draft" | "active" | "paused" | "completed";
+export type SubjectVariant = "a" | "b" | "c" | "d" | "e";
+
+export type EmailCampaign = {
+  id: number;
+  name: string;
+  description: string | null;
+  status: CampaignStatus;
+  total_steps: number;
+  daily_limit: number;
+  subject_variant: SubjectVariant;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EmailSequenceStatus =
+  | "pending"
+  | "active"
+  | "paused"
+  | "completed"
+  | "unsubscribed"
+  | "bounced"
+  | "error";
+
+export type EmailSequence = {
+  id: number;
+  campaign_id: number;
+  pro_id: number;
+  current_step: number;
+  status: EmailSequenceStatus;
+  next_send_at: string | null;
+  last_sent_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EmailLogStatus =
+  | "sent"
+  | "delivered"
+  | "opened"
+  | "clicked"
+  | "bounced"
+  | "complained"
+  | "failed";
+
+export type EmailLog = {
+  id: number;
+  sequence_id: number;
+  pro_id: number;
+  campaign_id: number;
+  step: number;
+  brevo_message_id: string | null;
+  subject: string | null;
+  recipient_email: string | null;
+  status: EmailLogStatus;
+  error_message: string | null;
+  sent_at: string;
+  delivered_at: string | null;
+  opened_at: string | null;
+  clicked_at: string | null;
+  bounced_at: string | null;
+  retry_count: number;
+  created_at: string;
+};
+
+export type EmailBlacklist = {
+  id: number;
+  email: string;
+  reason: string | null;
   created_at: string;
 };
