@@ -113,6 +113,14 @@ export default async function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/blog"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li>
                 <a
                   href="mailto:contact@workwave.fr"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"

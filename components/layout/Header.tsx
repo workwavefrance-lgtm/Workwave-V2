@@ -93,6 +93,12 @@ export default function Header() {
             Déposer un projet
           </Link>
           <Link
+            href="/blog"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
+          >
+            Blog
+          </Link>
+          <Link
             href="/pro"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
@@ -174,6 +180,13 @@ export default function Header() {
             className="block py-3 text-[var(--text-primary)] font-medium"
           >
             Déposer un projet
+          </Link>
+          <Link
+            href="/blog"
+            onClick={() => setMenuOpen(false)}
+            className="block py-3 text-[var(--text-primary)] font-medium"
+          >
+            Blog
           </Link>
           <Link
             href="/pro"
