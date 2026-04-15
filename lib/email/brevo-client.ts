@@ -39,6 +39,8 @@ export async function sendBrevoEmail(
     htmlContent: params.htmlContent,
     headers: {
       "X-Mailin-Tag": "cold-email",
+      "X-Mailin-Track-Click": "0",
+      "X-Mailin-Track-Open": "0",
     },
   };
 

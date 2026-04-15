@@ -94,9 +94,9 @@ export async function GET(req: Request) {
     });
   }
 
-  // 7. SEQUENCES ELIGIBLES (batch max 20)
+  // 7. SEQUENCES ELIGIBLES (batch = limite quotidienne restante)
   // On fait une query simple puis on join manuellement
-  const batchSize = Math.min(20, remaining);
+  const batchSize = remaining;
 
   const { data: sequences } = await supabase
     .from("email_sequences")
@@ -273,9 +273,10 @@ export async function GET(req: Request) {
       );
     }
 
-    // Sleep anti-bulk : 2 a 8 secondes entre chaque email
+    // Sleep anti-bulk : 1 a 3 secondes entre chaque email
+    // (Brevo gere le pacing de delivrabilite cote serveur)
     if (sent + failed + skipped < sequences.length) {
-      await sleep(randomBetween(2000, 8000));
+      await sleep(randomBetween(1000, 3000));
     }
   }
 
