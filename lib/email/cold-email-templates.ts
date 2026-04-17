@@ -18,7 +18,7 @@ type EmailTemplate = {
   html: string;
 };
 
-const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr").trim().replace(/\/+$/, "");
+const BASE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr").replace(/\s+/g, "").replace(/\/+$/, "");
 const FOUNDER_PHONE =
   process.env.WORKWAVE_FOUNDER_PHONE || "+33XXXXXXXXX";
 
