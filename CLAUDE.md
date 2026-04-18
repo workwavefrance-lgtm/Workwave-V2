@@ -4,6 +4,61 @@ Ce fichier est lu automatiquement par Claude Code à chaque session. Il contient
 
 ---
 
+## 0. Règles de travail Claude — PRIORITÉ ABSOLUE
+
+Les 4 règles ci-dessous viennent de Boris Cherny, créateur de Claude Code. Elles s'appliquent SYSTÉMATIQUEMENT à toutes les sessions Workwave, sans exception, et passent avant toute autre instruction de ce fichier.
+
+### Règle 1 — Mode plan d'abord
+Écrire le plan AVANT toute ligne de code.
+
+- Avant chaque tâche non-triviale : rédiger le plan complet (fichiers concernés, étapes ordonnées, vérification finale, risques).
+- Si la session dérape en cours de route : STOP, refais le plan.
+- Pas de code sans plan validé d'abord.
+- Sur Workwave : utiliser ExitPlanMode pour soumettre les plans à l'utilisateur sur les changements d'architecture, ajouts de tables Supabase, modifications de routing, ou tout nouveau sprint.
+
+### Règle 2 — Sous-agents pour le complexe
+Déléguer aux sous-agents pour garder le contexte principal propre.
+
+- Tâche complexe = toujours un sous-agent dédié (outil Agent avec subagent_type Explore, Plan, ou general-purpose).
+- Garder le contexte principal léger et focus sur la décision.
+- 1 tâche complexe = 1 sous-agent dédié.
+- Sur Workwave, bons cas d'usage : audit SEO concurrentiel, exploration des queries Supabase existantes avant de modifier, recherche de tous les usages d'un composant avant un refactor, vérification de migration SQL.
+
+### Règle 3 — Boucle d'auto-amélioration
+Chaque erreur devient une règle persistante dans ce fichier.
+
+- Erreur détectée → la transformer immédiatement en règle écrite.
+- Sauvegarder la règle dans la section "Leçons apprises" ci-dessous.
+- Session suivante : -80% d'erreurs sur le même sujet.
+- Avant tout nouveau sprint : relire la section "Leçons apprises".
+
+### Règle 4 — Prouve que ça marche
+Pas de "done" sans preuve concrète.
+
+- Ne JAMAIS marquer une tâche terminée sans preuve.
+- Exécuter les tests + vérifier les logs à chaque fois.
+- Pas de supposition : démontrer que ça fonctionne.
+- Sur Workwave, preuves obligatoires selon le type de tâche :
+  - **Code TS/React** : `npm run build` qui passe + `npx tsc --noEmit` (après `rm -rf .next` si erreurs dans `.next/types/`)
+  - **SEO/UI** : vérification visuelle de la page rendue (capture ou description précise)
+  - **Emails** : envoi en mode dry-run vers `workwave.france@gmail.com`
+  - **Migrations Supabase** : test de la requête générée + vérification du schéma
+  - **Commits** : `git status` après commit pour confirmer + `git log --oneline -3`
+  - **Push** : confirmation du push réussi vers `origin/main`
+
+---
+
+## 0 bis. Leçons apprises (enrichir à chaque erreur détectée — Règle 3)
+
+Section vivante. Avant chaque nouveau sprint, relire pour ne PAS reproduire les mêmes erreurs.
+
+- **18/04/2026 — Bug espace dans BASE_URL** : un espace invisible (notamment nbsp `\u00A0`) dans `NEXT_PUBLIC_BASE_URL` casse les liens emails (`https://workwave.fr /artisan/...`). Toujours nettoyer avec `.replace(/\s+/g, "")` côté serveur, pas juste `.trim()`. Ne jamais supposer qu'une variable d'env est propre.
+- **18/04/2026 — Vérification TypeScript** : `npx tsc --noEmit` peut remonter de fausses erreurs venant de `.next/types/` (cache Next 16). Réflexe : `rm -rf .next && npx tsc --noEmit` avant de conclure qu'il y a un problème de typage.
+- **18/04/2026 — Audit sans données** : ne jamais affirmer une tendance d'un concurrent SEO sur la base d'une seule page. Échantillonner au moins 3-5 pages OU être explicite sur la limite ("vu sur 1 page seulement, à reconfirmer").
+- *(à enrichir au fil des sessions)*
+
+---
+
 ## 1. Vision du projet
 
 Workwave est une plateforme qui met en relation les particuliers avec des professionnels locaux dans trois verticaux complémentaires : BTP et artisanat, services à domicile, et aide à la personne. Zone de lancement : département de la Vienne (86), puis extension progressive au Poitou-Charentes (Deux-Sèvres 79, Charente 16, Charente-Maritime 17), puis le reste de la Nouvelle-Aquitaine.
