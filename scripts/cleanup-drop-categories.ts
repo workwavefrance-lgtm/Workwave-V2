@@ -1,5 +1,8 @@
 /**
- * Cleanup des 3 catégories à drop : jardinage, lavage-voiture-a-domicile, promenade-animaux.
+ * Cleanup générique de catégories à drop (avec hard-delete des dépendances).
+ *
+ * Par défaut : jardinage, lavage-voiture-a-domicile, promenade-animaux (mini-sprint 2026-04-18).
+ * Liste personnalisable via --slugs slug1,slug2,...
  *
  * Ordre de suppression (respect des FK) :
  *  1. email_sequences (pro_id)
@@ -8,14 +11,15 @@
  *  4. seo_guides (category_id)  <-- FK oubliée au 1er run, ajoutée a posteriori
  *  5. categories (id)
  *
- * Safety check préalable confirmé :
+ * Safety check préalable obligatoire (cf. safety-check-drop-categories.ts) :
  *  - 0 pros claimed / Stripe / subscription
  *  - 0 project_leads, 0 email_logs, 0 cancellation_feedback
  *  - 0 projects.category_id, 0 categories.parent_id
  *
  * Usage :
- *   npx tsx scripts/cleanup-drop-categories.ts --dry-run    # preview seulement
- *   npx tsx scripts/cleanup-drop-categories.ts --execute    # exécution réelle
+ *   npx tsx scripts/cleanup-drop-categories.ts --dry-run
+ *   npx tsx scripts/cleanup-drop-categories.ts --execute
+ *   npx tsx scripts/cleanup-drop-categories.ts --execute --slugs cheministe
  */
 import { config } from "dotenv";
 import * as path from "path";
@@ -28,7 +32,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const TO_DROP = ["jardinage", "promenade-animaux", "lavage-voiture-a-domicile"];
+const DEFAULT_TO_DROP = ["jardinage", "promenade-animaux", "lavage-voiture-a-domicile"];
 
 async function main() {
   const args = process.argv.slice(2);
@@ -36,11 +40,19 @@ async function main() {
   const isExecute = args.includes("--execute");
 
   if (!isDryRun && !isExecute) {
-    console.error("Usage : --dry-run | --execute");
+    console.error("Usage : --dry-run | --execute [--slugs slug1,slug2,...]");
     process.exit(1);
   }
 
-  console.log(`\nMode : ${isDryRun ? "DRY-RUN (aucune écriture)" : "EXECUTE (suppression réelle)"}\n`);
+  // Permettre une liste de slugs custom via --slugs slug1,slug2
+  const slugsFlagIdx = args.indexOf("--slugs");
+  const TO_DROP =
+    slugsFlagIdx >= 0 && args[slugsFlagIdx + 1]
+      ? args[slugsFlagIdx + 1].split(",").map((s) => s.trim()).filter(Boolean)
+      : DEFAULT_TO_DROP;
+
+  console.log(`\nMode : ${isDryRun ? "DRY-RUN (aucune écriture)" : "EXECUTE (suppression réelle)"}`);
+  console.log(`Slugs ciblés : ${TO_DROP.join(", ")}\n`);
 
   // 1. Charger ids des catégories à drop
   const { data: cats } = await supabase
@@ -125,7 +137,7 @@ async function main() {
   // ============================================
 
   // Étape 1 : DELETE email_sequences (paginé)
-  console.log("Étape 1/4 : DELETE email_sequences...");
+  console.log("Étape 1/5 : DELETE email_sequences...");
   let deletedSeqs = 0;
   for (let i = 0; i < allProIds.length; i += 500) {
     const chunk = allProIds.slice(i, i + 500);
@@ -142,7 +154,7 @@ async function main() {
   console.log(`  ✅ ${deletedSeqs} email_sequences supprimées\n`);
 
   // Étape 2 : DELETE seo_pages
-  console.log("Étape 2/4 : DELETE seo_pages...");
+  console.log("Étape 2/5 : DELETE seo_pages...");
   const { error: seoErr, count: seoDel } = await supabase
     .from("seo_pages")
     .delete({ count: "exact" })

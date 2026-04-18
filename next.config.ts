@@ -38,6 +38,9 @@ const nextConfig: NextConfig = {
       // lavage-voiture-a-domicile droppé (faux positifs massifs sur NAF 4520A)
       { source: "/lavage-voiture-a-domicile", destination: "/", permanent: true },
       { source: "/lavage-voiture-a-domicile/:path*", destination: "/", permanent: true },
+      // cheministe droppé (NAF 4322B = 95% faux positifs sur "BOIS" = nom de famille)
+      { source: "/cheministe", destination: "/chauffagiste", permanent: true },
+      { source: "/cheministe/:path*", destination: "/chauffagiste/:path*", permanent: true },
     ];
   },
 };
