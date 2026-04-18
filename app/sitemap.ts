@@ -5,6 +5,7 @@ import { getTopCities } from "@/lib/queries/cities";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
+import { SPECIALTIES } from "@/lib/specialties";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = getAdminServiceClient();
@@ -147,7 +148,66 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // ============================================
-  // F. Articles de blog (/blog/[slug])
+  // F. Pages sous-spécialités (/[metier]/[specialite]/[ville])
+  // ============================================
+  // 8 metiers × 5 specialites × top 10 villes Vienne = ~400 URLs candidats.
+  // On ne sitemap que les couples (metier × ville) qui ont au moins 1 pro
+  // (sinon page noindex donc inutile dans le sitemap).
+  const specialtyTopCities = topCities.slice(0, 10);
+  const specialtyCityIds = specialtyTopCities.map((c) => c.id);
+
+  const specialtyMetierSlugs = Object.keys(SPECIALTIES);
+  const specialtyCategoryIds = categories
+    .filter((c) => specialtyMetierSlugs.includes(c.slug))
+    .map((c) => c.id);
+
+  // Compter pros (metier × ville) pour les métiers qui ont des spécialités
+  let specialtyCounts: { category_id: number; city_id: number }[] = [];
+  if (specialtyCategoryIds.length > 0 && specialtyCityIds.length > 0) {
+    offset = 0;
+    hasMore = true;
+    while (hasMore) {
+      const { data } = await supabase
+        .from("pros")
+        .select("category_id, city_id")
+        .eq("is_active", true)
+        .is("deleted_at", null)
+        .in("category_id", specialtyCategoryIds)
+        .in("city_id", specialtyCityIds)
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      const rows = (data || []) as { category_id: number; city_id: number }[];
+      specialtyCounts = specialtyCounts.concat(rows);
+      hasMore = rows.length === PAGE_SIZE;
+      offset += PAGE_SIZE;
+    }
+  }
+
+  const specialtyCountMap = new Map<string, number>();
+  for (const row of specialtyCounts) {
+    const key = `${row.category_id}-${row.city_id}`;
+    specialtyCountMap.set(key, (specialtyCountMap.get(key) || 0) + 1);
+  }
+
+  const specialtyUrls: MetadataRoute.Sitemap = [];
+  for (const cat of categories) {
+    const specs = SPECIALTIES[cat.slug];
+    if (!specs) continue;
+    for (const spec of specs) {
+      for (const city of specialtyTopCities) {
+        const count = specialtyCountMap.get(`${cat.id}-${city.id}`) || 0;
+        if (count < 1) continue; // skip si page sera noindex
+        specialtyUrls.push({
+          url: `${BASE_URL}/${cat.slug}/${spec.slug}/${city.slug}`,
+          changeFrequency: "weekly" as const,
+          priority: count >= 5 ? 0.7 : 0.6,
+        });
+      }
+    }
+  }
+
+  // ============================================
+  // G. Articles de blog (/blog/[slug])
   // ============================================
   const blogStaticUrls: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/blog`, changeFrequency: "daily" as const, priority: 0.7 },
@@ -172,6 +232,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticUrls,
     ...categoryDeptUrls,
     ...categoryCityUrls,
+    ...specialtyUrls,
     ...guideUrls,
     ...blogStaticUrls,
     ...blogUrls,
