@@ -5,6 +5,8 @@ import Pagination from "@/components/ui/Pagination";
 import ProCard from "@/components/pro/ProCard";
 import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
+import ProjectCtaBanner from "@/components/listing/ProjectCtaBanner";
+import ListingIntro from "@/components/listing/ListingIntro";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
@@ -18,6 +20,7 @@ import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
+import { extractIntro, stripIntro } from "@/lib/utils/seo";
 
 export const revalidate = 3600;
 
@@ -177,7 +180,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
-      <div className="mb-10">
+      <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
           {category.name} {preposition} {locationName}
         </h1>
@@ -186,6 +189,21 @@ export default async function ListingPage({ params, searchParams }: Props) {
           {result.count > 1 ? "s" : ""}
         </p>
       </div>
+
+      {/* CTA dépôt de projet — au-dessus de la grille pour la conversion */}
+      <ProjectCtaBanner
+        categorySlug={category.slug}
+        categoryName={category.name}
+        locationSlug={locationSlug}
+        locationName={locationName}
+        preposition={preposition}
+      />
+
+      {/* Intro SEO courte — au-dessus de la grille pour le crawl Google */}
+      <ListingIntro
+        intro={extractIntro(seo?.content)}
+        fallback={`Vous cherchez un ${category.name.toLowerCase()} ${preposition} ${locationName} ? Workwave référence ${result.count} professionnel${result.count > 1 ? "s" : ""} qualifié${result.count > 1 ? "s" : ""} dans cette zone. Comparez les profils, consultez les coordonnées et contactez directement l'artisan de votre choix. Service 100% gratuit, sans intermédiaire commercial.`}
+      />
 
       {result.data.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -208,7 +226,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
         baseUrl={baseUrl}
       />
 
-      {seo && <SeoContent content={seo.content} />}
+      {/* Contenu SEO long (sections H2 + détails) — l'intro a déjà été affichée plus haut */}
+      {seo && stripIntro(seo.content) && (
+        <SeoContent content={stripIntro(seo.content)} />
+      )}
 
       {/* FAQ accordeon + schema FAQPage */}
       {seo?.faq_json && seo.faq_json.length > 0 && (

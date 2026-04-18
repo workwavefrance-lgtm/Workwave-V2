@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import ProjectForm from "@/components/project/ProjectForm";
-import { getAllCategories } from "@/lib/queries/categories";
+import {
+  getAllCategories,
+  getCategoryBySlug,
+} from "@/lib/queries/categories";
+import { getCityBySlug } from "@/lib/queries/cities";
 
 export const metadata: Metadata = {
   title: "Deposer un projet - Devis gratuits en Vienne",
@@ -9,8 +13,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://workwave.fr/deposer-projet" },
 };
 
-export default async function DeposerProjetPage() {
-  const categories = await getAllCategories();
+type Props = {
+  searchParams: Promise<{ categorie?: string; ville?: string }>;
+};
+
+export default async function DeposerProjetPage({ searchParams }: Props) {
+  const { categorie, ville } = await searchParams;
+
+  // Pré-remplissage depuis les liens des pages listings (/[metier]/[location])
+  const [categories, prefilledCategory, prefilledCity] = await Promise.all([
+    getAllCategories(),
+    categorie ? getCategoryBySlug(categorie) : Promise.resolve(null),
+    // ville peut être un slug de ville (ex: "poitiers") ou de département (ex: "vienne-86").
+    // getCityBySlug renvoie null pour un slug de département → comportement OK (pas de prefill).
+    ville ? getCityBySlug(ville) : Promise.resolve(null),
+  ]);
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-16 sm:py-24">
@@ -30,6 +47,12 @@ export default async function DeposerProjetPage() {
           name: c.name,
           vertical: c.vertical,
         }))}
+        defaultCategoryId={prefilledCategory?.id}
+        defaultCity={
+          prefilledCity
+            ? { id: prefilledCity.id, name: prefilledCity.name }
+            : null
+        }
       />
     </main>
   );

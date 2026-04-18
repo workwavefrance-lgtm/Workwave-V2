@@ -11,17 +11,31 @@ type CityResult = {
 type Props = {
   onSelect: (cityId: number, cityName: string) => void;
   error?: string;
+  /** Pré-remplissage : ville déjà sélectionnée (ex: depuis query params) */
+  defaultCity?: { id: number; name: string } | null;
 };
 
-export default function CityAutocomplete({ onSelect, error }: Props) {
-  const [query, setQuery] = useState("");
+export default function CityAutocomplete({
+  onSelect,
+  error,
+  defaultCity,
+}: Props) {
+  const [query, setQuery] = useState(defaultCity?.name ?? "");
   const [results, setResults] = useState<CityResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedName, setSelectedName] = useState("");
+  const [selectedName, setSelectedName] = useState(defaultCity?.name ?? "");
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Notifier le parent du prefill au mount
+  useEffect(() => {
+    if (defaultCity) {
+      onSelect(defaultCity.id, defaultCity.name);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchCities = useCallback(async (q: string) => {
     if (q.length < 2) {

@@ -14,6 +14,9 @@ type Category = {
 
 type Props = {
   categories: Category[];
+  /** Pré-remplissage depuis query params (ex: depuis page listing) */
+  defaultCategoryId?: number;
+  defaultCity?: { id: number; name: string } | null;
 };
 
 const VERTICAL_LABELS: Record<string, string> = {
@@ -40,12 +43,16 @@ const BUDGET_OPTIONS = [
 
 const initialState: FormState = { success: false };
 
-export default function ProjectForm({ categories }: Props) {
+export default function ProjectForm({
+  categories,
+  defaultCategoryId,
+  defaultCity,
+}: Props) {
   const [state, formAction, isPending] = useActionState(
     submitProject,
     initialState
   );
-  const [cityId, setCityId] = useState<number | null>(null);
+  const [cityId, setCityId] = useState<number | null>(defaultCity?.id ?? null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // Grouper les catégories par vertical
@@ -105,7 +112,7 @@ export default function ProjectForm({ categories }: Props) {
         <select
           id="categoryId"
           name="categoryId"
-          defaultValue=""
+          defaultValue={defaultCategoryId ? String(defaultCategoryId) : ""}
           className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] transition-all duration-250 outline-none appearance-none cursor-pointer ${
             state.errors?.categoryId
               ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -139,6 +146,7 @@ export default function ProjectForm({ categories }: Props) {
         <CityAutocomplete
           onSelect={handleCitySelect}
           error={state.errors?.cityId}
+          defaultCity={defaultCity}
         />
         <input type="hidden" name="cityId" value={cityId ?? ""} />
       </div>
