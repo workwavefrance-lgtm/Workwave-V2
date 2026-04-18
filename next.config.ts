@@ -28,6 +28,16 @@ const nextConfig: NextConfig = {
       { source: "/project/:path*", destination: "/deposer-projet", permanent: true },
       { source: "/contact", destination: "/", permanent: true },
       { source: "/testtt", destination: "/", permanent: true },
+      // Catégories supprimées (mini-sprint cleanup 2026-04-18)
+      // jardinage absorbé par paysagiste (NAF 8130Z partagé)
+      { source: "/jardinage", destination: "/paysagiste", permanent: true },
+      { source: "/jardinage/:path*", destination: "/paysagiste/:path*", permanent: true },
+      // promenade-animaux consolidé sur garde-animaux (NAF 9609Z partagé)
+      { source: "/promenade-animaux", destination: "/garde-animaux", permanent: true },
+      { source: "/promenade-animaux/:path*", destination: "/garde-animaux/:path*", permanent: true },
+      // lavage-voiture-a-domicile droppé (faux positifs massifs sur NAF 4520A)
+      { source: "/lavage-voiture-a-domicile", destination: "/", permanent: true },
+      { source: "/lavage-voiture-a-domicile/:path*", destination: "/", permanent: true },
     ];
   },
 };
