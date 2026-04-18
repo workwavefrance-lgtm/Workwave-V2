@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Pagination from "@/components/ui/Pagination";
 import ProCard from "@/components/pro/ProCard";
@@ -122,6 +122,17 @@ export default async function ListingPage({ params, searchParams }: Props) {
           { page }
         )
       : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
+
+  // 308 vers la page département si aucun pro dans cette ville pour ce métier.
+  // Évite ~6000 URLs noindex pollutives en GSC, transmet le link juice à la
+  // page département (forte SEO), et la page redevient indexable automatiquement
+  // dès qu'un pro est ajouté pour cette commune.
+  // ATTENTION : pas de loading.tsx dans cette route ! Le streaming Suspense
+  // commit le status 200 avant que la page puisse throw permanentRedirect/notFound.
+  // Cf. lecon apprise CLAUDE.md du 2026-04-18.
+  if (resolved.type === "city" && result.count === 0) {
+    permanentRedirect(`/${metier}/vienne-86`);
+  }
 
   const allCategories = await getAllCategories();
   const relatedCategories = allCategories

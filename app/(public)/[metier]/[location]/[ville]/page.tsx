@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Pagination from "@/components/ui/Pagination";
@@ -104,6 +104,12 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
   if (!city) notFound();
 
   const result = await getProsByCategoryAndCity(category.id, city.id, { page });
+
+  // 308 vers la page département si aucun pro pour ce couple (cat × ville).
+  // Évite ~3500 URLs noindex pollutives en GSC pour les sous-spécialités vides.
+  if (result.count === 0) {
+    permanentRedirect(`/${metier}/vienne-86`);
+  }
 
   const lower = category.name.toLowerCase();
   const cityLabel = city.name;
