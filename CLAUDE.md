@@ -293,6 +293,22 @@ Sprint 7 — Moat IA (superpouvoirs) : à démarrer après sprint 6.
 
 Mini-sprint à faire : re-scraping Sirene pour les catégories non-BTP (services à domicile et aide à la personne). Le scraping initial (Sprint 1) ne couvrait que les codes NAF du BTP. Il faut relancer le script scraping/sirene_vienne.py avec les codes NAF correspondant aux catégories "domicile" et "personne" (ménage, garde d'enfants, soutien scolaire, aide aux seniors, jardinage, etc.) pour remplir ces verticaux qui sont actuellement vides ou quasi-vides.
 
+### Phase A SEO (cours) — état au 18/04/2026
+
+Branche de travail SEO additionnelle pour densifier la couverture organique avant le sprint 5.
+
+- ✓ A0 (commit 419c564) : 7 nouvelles catégories (pisciniste, vitrier, ramoneur, vidéosurveillance, nettoyage-pro, cuisiniste, cheministe).
+- ✓ A1 (commit 9b447c6) : page racine `/[metier]` proximity (géoloc + fallback ville, 35 pages).
+- ✓ A2 (commit a7da115) : 40 sous-spécialités × top 10 villes Vienne = 395 pages indexables (`/[metier]/[location]/[ville]`, schema Service+ItemList+FAQPage+BreadcrumbList).
+- ✓ A3 (commit 206e844) : 15 articles blog "prix" long-tail (~123k vol/mois cible, ex. "prix construction piscine 2026").
+- ⏸ **PAUSE 18/04/2026** : interruption pour investiguer 8140 URLs noindex remontées par Google Search Console (URL marquée "noindex" dans le rapport d'indexation). Suspicion : pages `/[metier]/[ville]` pour petites communes sans pros (logique noindex auto si `prosCount === 0` dans `app/(public)/[metier]/[location]/page.tsx` et la nouvelle route spécialités). À confirmer en GSC.
+
+Au reprise après l'investigation noindex :
+- A4 (à définir) : nouvelle vague long-tail (plus de guides prix ? autres types d'articles ? expansion sous-spécialités à d'autres métiers ?).
+- Décider du sort des 8140 URLs noindex (laisser tel quel = signal qualité OK, ou les transformer en 404 pour deindex plus rapide, ou les sortir complètement du sitemap).
+- Mini-sprint scraping Sirene non-BTP (cf. ci-dessus).
+- Apify enrichment des emails pros (sur pause depuis "on fait option c phase seo on vera ensuite pour apify").
+
 À chaque fin de sprint, mettre à jour cette section avec la date et un résumé de ce qui a été fait.
 
 ## 10. Sprint 0 — Setup détaillé
