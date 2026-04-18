@@ -59,6 +59,8 @@ Section vivante. Avant chaque nouveau sprint, relire pour ne PAS reproduire les 
 - **18/04/2026 — NAF Sirene trop génériques pour scraper précisément** : un seul code NAF couvre souvent plusieurs métiers (4329B = pisciniste + ascensoriste + autres ; 4334Z = peintre + vitrier ; 4321A = électricien + vidéosurveillance ; 8121Z = ménage + nettoyage pro). Conséquence : faux positifs massifs ("REGIONAL ASCENSEURS" classé pisciniste). Pour un scraping précis, soit (a) filtrer en post-traitement par regex sur le nom (PISCIN, VITRER, RAMON…), soit (b) enrichir via Apify Google Maps (le métier réel sort des avis), soit (c) accepter pour le SEO mais marquer la donnée comme "à valider". JAMAIS supposer qu'un NAF correspond 1:1 à un métier.
 - **18/04/2026 — dotenv + tsx → toujours `override: true`** : `tsx` pré-injecte certaines variables `.env.local` en chaîne vide AU DÉMARRAGE du script (avant que `dotenv.config()` tourne). Sans `override: true`, dotenv refuse d'écraser ces vars vides (comportement par défaut). Symptôme : log "injected env (12) from .env.local" alors qu'il y en a 13 dans le fichier ; appel API qui échoue avec "Could not resolve authentication method" pour ANTHROPIC_API_KEY. Pattern obligatoire dans tous les scripts : `dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true })`. Le script `scripts/generate-seo-content.ts` utilise déjà ce pattern — l'utiliser comme référence quand on crée un nouveau script.
 - **18/04/2026 — Next.js routes : un seul nom de param dynamique par position d'URL** : Next.js refuse `app/[metier]/[location]/page.tsx` ET `app/[metier]/[specialite]/[ville]/page.tsx` côte à côte. Erreur fatale au boot du dev server : `You cannot use different slug names for the same dynamic path ('location' !== 'specialite')`. La règle : à chaque NIVEAU d'URL, le segment dynamique doit avoir EXACTEMENT le même nom dans toutes les routes. Solution : nommer pareil partout (ex. garder `[location]` au niveau 2) et aliaser à l'intérieur de la page (`const specialite = location;` avec un commentaire). Toujours vérifier l'arborescence existante AVANT de créer un nouveau dossier dynamique. Le `npm run build` ne détecte PAS cette erreur — seul le dev server crash. Réflexe : démarrer le dev server après création d'une route dynamique.
+- **18/04/2026 — FK Postgres oubliées dans cleanup hard-delete** : avant tout DELETE en cascade manuel d'une table parent (ex. `categories`), lister TOUTES les tables enfant via `information_schema` ou `\d categories` dans psql. Le script `cleanup-drop-categories.ts` v1 a oublié `seo_guides.category_id` : pros + seo_pages déjà supprimés, puis l'étape DELETE categories a planté avec `violates foreign key constraint "seo_guides_category_id_fkey"`. Heureusement c'était récupérable (juste refaire l'étape manquante), mais on aurait pu se retrouver dans un état moitié-moitié. Réflexe avant chaque cleanup : `SELECT conrelid::regclass FROM pg_constraint WHERE confrelid='categories'::regclass AND contype='f';` pour lister toutes les tables qui pointent vers la table à drop. Le script est désormais corrigé (5 étapes au lieu de 4) et accepte `--slugs` pour être réutilisable.
+- **18/04/2026 — Reclassement par regex >> re-scraping pour catégories absorbées par NAF ambigu** : quand une catégorie cible (serrurier, vitrier, climaticien) est vide à cause d'un NAF partagé avec une catégorie absorbante (menuisier, peintre, chauffagiste), un UPDATE `category_id` par regex sur `pros.name` (`SERRUR`, `VITR|MIROIT`, `CLIM|FROID`) est BEAUCOUP plus rapide et précis qu'un re-scraping Sirene + filtre. Bonus : les fiches sont déjà nettoyées et potentiellement enrichies par Apify, et 0 API call. Précondition obligatoire : aucun pro `claimed_by_user_id != null` dans le lot (le script `reclass-pros-by-regex.ts` refuse de tourner sinon, parce que reclasser la fiche d'un pro abonné peut casser sa visibilité). Mini-sprint 18/04 : 33 reclassements (10+5+18) en 1 minute, vs ~1h de re-scraping + dedup côté Python pour le même résultat.
 - *(à enrichir au fil des sessions)*
 
 ---
@@ -291,7 +293,23 @@ Sprint 5 — Comptes pros et abonnements : cadré en détail (voir section 11 qu
 Sprint 6 — Switch DNS : à démarrer.
 Sprint 7 — Moat IA (superpouvoirs) : à démarrer après sprint 6.
 
-Mini-sprint à faire : re-scraping Sirene pour les catégories non-BTP (services à domicile et aide à la personne). Le scraping initial (Sprint 1) ne couvrait que les codes NAF du BTP. Il faut relancer le script scraping/sirene_vienne.py avec les codes NAF correspondant aux catégories "domicile" et "personne" (ménage, garde d'enfants, soutien scolaire, aide aux seniors, jardinage, etc.) pour remplir ces verticaux qui sont actuellement vides ou quasi-vides.
+Mini-sprint cleanup catégories non viables — terminé 18/04/2026 (commits c328c60 + da2c445).
+
+État avant cleanup : audit `scripts/audit-non-btp-categories.ts` a révélé que le scraping non-BTP avait déjà été fait (contrairement à ce qui était noté ici), mais avait classé 1967 fiches dans 3 catégories inexploitables (NAF Sirene 4520A / 9609Z / 8130Z trop génériques produisant des faux positifs massifs). Plus 4 catégories BTP vides absorbées par leur jumelle (NAF partagés).
+
+Actions :
+1. **Drop hard de 4 catégories** (1967 pros + 42 seo_pages + 49 email_sequences + 3 seo_guides) :
+   - `jardinage` (NAF 8130Z absorbé par paysagiste) → redirect 301 vers `/paysagiste`
+   - `promenade-animaux` (NAF 9609Z) → redirect 301 vers `/garde-animaux`
+   - `lavage-voiture-a-domicile` (NAF 4520A, faux positifs garages) → redirect 301 vers `/`
+   - `cheministe` (NAF 4322B, regex sur nom = 95% de noms de famille en BOIS) → redirect 301 vers `/chauffagiste`
+2. **Reclassement de 33 pros par regex** (UPDATE `category_id`, 0 pro claimed, 0 API call) :
+   - `serrurier` : 0 → 10 (depuis menuisier, regex SERRUR)
+   - `vitrier` : 19 → 24 (+5 depuis peintre/menuisier, regex VITR|MIROIT)
+   - `climaticien` : 0 → 18 (depuis chauffagiste, regex CLIM|FROID)
+3. **Ramoneur** : laissé tel quel (72 pros, déjà bien rempli).
+
+État final : 38 catégories actives (23 BTP + 8 domicile + 7 personne). Scripts conservés : `audit-non-btp-categories.ts`, `safety-check-drop-categories.ts`, `cleanup-drop-categories.ts` (générique via `--slugs`), `audit-regex-reclassification.ts`, `reclass-pros-by-regex.ts`.
 
 ### Phase A SEO (cours) — état au 18/04/2026
 
@@ -305,8 +323,7 @@ Branche de travail SEO additionnelle pour densifier la couverture organique avan
 
 Au reprise après l'investigation noindex :
 - A4 (à définir) : nouvelle vague long-tail (plus de guides prix ? autres types d'articles ? expansion sous-spécialités à d'autres métiers ?).
-- Décider du sort des 8140 URLs noindex (laisser tel quel = signal qualité OK, ou les transformer en 404 pour deindex plus rapide, ou les sortir complètement du sitemap).
-- Mini-sprint scraping Sirene non-BTP (cf. ci-dessus).
+- Décider du sort des 8140 URLs noindex (laisser tel quel = signal qualité OK, ou les transformer en 404 pour deindex plus rapide, ou les sortir complètement du sitemap). NB : 4 catégories sources de noindex (jardinage / promenade-animaux / lavage-voiture / cheministe) sont désormais droppées + redirigées 301 — Google va naturellement remplacer ces noindex par des 301 au prochain crawl.
 - Apify enrichment des emails pros (sur pause depuis "on fait option c phase seo on vera ensuite pour apify").
 
 À chaque fin de sprint, mettre à jour cette section avec la date et un résumé de ce qui a été fait.
