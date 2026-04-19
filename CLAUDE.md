@@ -313,20 +313,30 @@ Actions :
 
 État final : 38 catégories actives (23 BTP + 8 domicile + 7 personne). Scripts conservés : `audit-non-btp-categories.ts`, `safety-check-drop-categories.ts`, `cleanup-drop-categories.ts` (générique via `--slugs`), `audit-regex-reclassification.ts`, `reclass-pros-by-regex.ts`.
 
-### Phase A SEO (cours) — état au 18/04/2026
+### Phase A SEO — terminée 18/04/2026
 
-Branche de travail SEO additionnelle pour densifier la couverture organique avant le sprint 5.
+Branche de travail SEO additionnelle pour densifier la couverture organique avant le sprint 5. **Phase complète, prête pour le sprint 5.**
 
-- ✓ A0 (commit 419c564) : 7 nouvelles catégories (pisciniste, vitrier, ramoneur, vidéosurveillance, nettoyage-pro, cuisiniste, cheministe).
+- ✓ A0 (commit 419c564) : 7 nouvelles catégories (pisciniste, vitrier, ramoneur, vidéosurveillance, nettoyage-pro, cuisiniste, cheministe — cheministe a ensuite été dropée au mini-sprint cleanup).
 - ✓ A1 (commit 9b447c6) : page racine `/[metier]` proximity (géoloc + fallback ville, 35 pages).
 - ✓ A2 (commit a7da115) : 40 sous-spécialités × top 10 villes Vienne = 395 pages indexables (`/[metier]/[location]/[ville]`, schema Service+ItemList+FAQPage+BreadcrumbList).
 - ✓ A3 (commit 206e844) : 15 articles blog "prix" long-tail (~123k vol/mois cible, ex. "prix construction piscine 2026").
-- ⏸ **PAUSE 18/04/2026** : interruption pour investiguer 8140 URLs noindex remontées par Google Search Console (URL marquée "noindex" dans le rapport d'indexation). Suspicion : pages `/[metier]/[ville]` pour petites communes sans pros (logique noindex auto si `prosCount === 0` dans `app/(public)/[metier]/[location]/page.tsx` et la nouvelle route spécialités). À confirmer en GSC.
+- ✓ **A4 (commit à venir)** : 14 articles blog "comment choisir / guide pratique" long-tail (~109k vol/mois cible). 9 guides "comment choisir un X" (macon, couvreur, serrurier, climaticien, élagueur, architecte, ménage, garde-enfants, aide-seniors) + 5 transversaux haute valeur (lire un devis, éviter arnaques, MaPrimeRénov 2026 ~35k vol, aides rénovation énergétique ~15k vol, réception travaux). 1 skipped (chauffagiste : conflit de slug avec un guide existant). Script `scripts/generate-howto-guides.ts`.
+- ✓ **D (commit 2489833)** : redirect 308 vers page département pour villes sans pros (`/[metier]/[ville]` et `/[metier]/[specialite]/[ville]`). Évite ~6000 URLs noindex pollutives en GSC, transmet le link juice au département. Bug critique découvert au passage : `loading.tsx` empêchait `permanentRedirect()` (Suspense streaming commit 200 avant que la Page puisse throw) → `loading.tsx` supprimé. Voir Leçons apprises.
+- ✓ **D bis (commit e089274)** : strict slug match dans `getDepartmentBySlug`. Bug latent : n'importe quel slug `xxx-NN` matchait le département de code NN (duplicate content massif). Fix : regénérer le slug canonique et comparer strictement. Voir Leçons apprises.
+- ✓ Sitemap resoumise à GSC le 18/04/2026 : 18020 URLs acceptées (vs ~20000 avant cleanup ; baisse normale due au drop des 4 cat aux NAF Sirene ambigus).
 
-Au reprise après l'investigation noindex :
-- A4 (à définir) : nouvelle vague long-tail (plus de guides prix ? autres types d'articles ? expansion sous-spécialités à d'autres métiers ?).
-- Décider du sort des 8140 URLs noindex (laisser tel quel = signal qualité OK, ou les transformer en 404 pour deindex plus rapide, ou les sortir complètement du sitemap). NB : 4 catégories sources de noindex (jardinage / promenade-animaux / lavage-voiture / cheministe) sont désormais droppées + redirigées 301 — Google va naturellement remplacer ces noindex par des 301 au prochain crawl.
+**Volume SEO total capté en Phase A** :
+- A1 : 35 pages racine métier
+- A2 : 395 pages sous-spécialités
+- A3 : 15 articles "prix" (~123k vol/mois)
+- A4 : 14 articles "guide" (~109k vol/mois)
+- Total estimé : **~232k vol/mois cible long-tail** (hors trafic listing classique métier × ville).
+
+**Reportés post-sprint 5** :
 - Apify enrichment des emails pros (sur pause depuis "on fait option c phase seo on vera ensuite pour apify").
+- Suite de la stratégie noindex éventuelle (laisser tel quel ou affiner après remontée GSC sur 4-6 semaines).
+- Expansion vers d'autres départements (Deux-Sèvres 79, Charente 16, Charente-Maritime 17).
 
 À chaque fin de sprint, mettre à jour cette section avec la date et un résumé de ce qui a été fait.
 
