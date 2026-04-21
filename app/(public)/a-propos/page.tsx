@@ -57,11 +57,11 @@ export default function AProposPage() {
               même pas au téléphone.
             </p>
             <p>
-              Pendant ce temps, Habitatpresto, PagesJaunes et les autres
-              continuent d&apos;encaisser, sans s&apos;assurer que les artisans
-              en aient pour leur argent. La logique est inversée : ce sont les
-              pros qui prennent tous les risques, et les plateformes qui
-              raflent la marge.
+              Pendant ce temps, les autres plateformes continuent
+              d&apos;encaisser, sans s&apos;assurer que les artisans en aient
+              pour leur argent. La logique est inversée : ce sont les pros qui
+              prennent tous les risques, et les plateformes qui raflent la
+              marge.
             </p>
             <p className="text-[var(--text-primary)] font-medium">
               Workwave a été conçu pour offrir le même service, mais à un coût
@@ -96,7 +96,7 @@ export default function AProposPage() {
                 Un produit simple
               </p>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                Pas de paliers, pas de jargon
+                Pas de paliers
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
                 Une fiche, un dashboard, des leads. C&apos;est tout. Vous
@@ -108,7 +108,7 @@ export default function AProposPage() {
                 Un ancrage local
               </p>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                Basé à Craon, dans la Vienne
+                Basé en Vienne
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
                 Workwave est une SAS française, sans capital étranger. On
@@ -145,16 +145,15 @@ export default function AProposPage() {
               <strong className="text-[var(--text-primary)]">
                 Willy Gauvrit
               </strong>
-              , entrepreneur basé à Craon (86110), à côté de Poitiers. Pas une
-              équipe de 50 commerciaux, pas une boîte américaine, pas un fonds
-              d&apos;investissement.
+              , un entrepreneur. Pas une équipe de 50 commerciaux, pas une
+              boîte américaine, pas un fonds d&apos;investissement.
             </p>
             <p>
-              Juste une personne qui en a eu marre de voir les artisans de la
-              Vienne se faire facturer des fortunes pour des plateformes qui
-              ne livrent pas. L&apos;idée : utiliser ce que la technologie
-              permet aujourd&apos;hui (automatisation, IA, hébergement low-cost)
-              pour proposer un service au prix réel — pas au prix marketing.
+              Juste une personne qui en a eu marre de voir les artisans se
+              faire facturer des fortunes pour des plateformes qui ne livrent
+              pas. L&apos;idée : utiliser ce que la technologie permet
+              aujourd&apos;hui (automatisation, IA, hébergement low-cost) pour
+              proposer un service au prix réel — pas au prix marketing.
             </p>
             <p>
               Une question, un retour, une critique ? Écrivez à{" "}
