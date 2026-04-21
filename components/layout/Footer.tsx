@@ -121,11 +121,29 @@ export default async function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/a-propos"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  À propos
+                </Link>
+              </li>
+              <li>
                 <a
                   href="mailto:contact@workwave.fr"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
                   Contact
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/workwave.fr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Instagram
                 </a>
               </li>
               <li>

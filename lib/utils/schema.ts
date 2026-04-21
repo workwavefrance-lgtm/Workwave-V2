@@ -65,7 +65,9 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     legalName: "Workwave SAS",
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
-    sameAs: [],
+    sameAs: [
+      "https://www.instagram.com/workwave.fr/",
+    ],
     address: {
       "@type": "PostalAddress",
       streetAddress: "3 rue des Rosiers",
