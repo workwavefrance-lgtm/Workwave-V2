@@ -43,20 +43,20 @@ export default async function Home() {
             <span className="text-[var(--accent)]">.</span>
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed">
-            Des milliers de professionnels référencés en Vienne, à portée
-            d&apos;un clic.
+            Des centaines de milliers de professionnels référencés en
+            Nouvelle-Aquitaine, à portée d&apos;un clic.
           </p>
           <SearchForm categories={allCategories} cities={cityOptions} />
           <p className="mt-6 text-sm text-[var(--text-tertiary)]">
             Plus de{" "}
             <span className="font-semibold text-[var(--text-primary)]">
-              20 000
+              226 000
             </span>{" "}
             professionnels référencés dans{" "}
             <span className="font-semibold text-[var(--text-primary)]">
-              265
+              4 293
             </span>{" "}
-            villes de la Vienne
+            communes de Nouvelle-Aquitaine
           </p>
         </div>
       </section>
@@ -92,7 +92,7 @@ export default async function Home() {
       <section className="py-16 px-4 bg-[var(--bg-secondary)] border-t border-[var(--border-color)]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-8">
-            Principales villes de la Vienne
+            Principales villes de Nouvelle-Aquitaine
           </h2>
           <div className="flex flex-wrap gap-3">
             {topCities.slice(0, 20).map((city) => (

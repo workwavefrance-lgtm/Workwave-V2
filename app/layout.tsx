@@ -20,20 +20,20 @@ export const metadata: Metadata = {
     template: "%s | Workwave",
   },
   description:
-    "Annuaire des professionnels de la Vienne. Trouvez un plombier, électricien, peintre et plus de 35 métiers près de chez vous.",
+    "Annuaire des professionnels de Nouvelle-Aquitaine. Trouvez un plombier, électricien, peintre et plus de 35 métiers près de chez vous.",
   openGraph: {
     type: "website",
     locale: "fr_FR",
     siteName: "Workwave",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 20 000 professionnels dans la Vienne. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
+      "Plus de 226 000 professionnels en Nouvelle-Aquitaine. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 20 000 professionnels dans la Vienne. Comparez et contactez gratuitement.",
+      "Plus de 226 000 professionnels en Nouvelle-Aquitaine. Comparez et contactez gratuitement.",
   },
 };
 
