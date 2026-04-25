@@ -29,9 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     truncateDescription(pro.description) ||
     `${pro.name}, ${pro.category.name} à ${cityName}. Contactez ce professionnel gratuitement.`;
 
-  // noindex si fiche vide (pas reclamee, pas de description, pas de telephone)
-  const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
-
+  // Toutes les fiches actives sont indexables : chaque fiche a un titre unique,
+  // un H1, un schema LocalBusiness (SIRET + adresse + géoloc), un breadcrumb,
+  // une sidebar SIRET/dept/cat, des pros similaires + villes voisines en liens
+  // internes. C'est largement au-dessus du seuil thin content de Google.
+  // NB : les fiches sans contenu enrichi gardent une priority sitemap dégradée
+  // (0.3 vs 0.5/0.8) — voir app/sitemap.ts.
   return {
     title: `${pro.name} - ${pro.category.name} à ${cityName}`,
     description: desc,
@@ -49,7 +52,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${pro.name} - ${pro.category.name} à ${cityName}`,
       description: desc,
     },
-    ...(hasContent ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
