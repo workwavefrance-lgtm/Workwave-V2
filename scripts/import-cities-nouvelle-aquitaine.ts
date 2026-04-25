@@ -323,7 +323,6 @@ async function enrichGeoData(): Promise<void> {
     q = q.eq("departments.code", FILTER_DEPT);
   }
 
-  // @ts-expect-error - join syntax
   const { data: citiesRaw, error } = await q;
   if (error) throw new Error(`Read cities sans lat: ${error.message}`);
 
