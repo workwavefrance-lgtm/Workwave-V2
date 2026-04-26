@@ -20,8 +20,6 @@ export default async function Home() {
     a.name.localeCompare(b.name)
   );
 
-  const cityOptions = topCities.map((c) => ({ slug: c.slug, name: c.name }));
-
   const verticals = [
     { title: "BTP et artisanat", categories: btp },
     { title: "Services a domicile", categories: domicile },
@@ -46,7 +44,7 @@ export default async function Home() {
             Des centaines de milliers de professionnels référencés en
             Nouvelle-Aquitaine, à portée d&apos;un clic.
           </p>
-          <SearchForm categories={allCategories} cities={cityOptions} />
+          <SearchForm categories={allCategories} />
           <p className="mt-6 text-sm text-[var(--text-tertiary)]">
             Plus de{" "}
             <span className="font-semibold text-[var(--text-primary)]">

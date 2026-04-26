@@ -7,7 +7,6 @@ import SearchForm from "@/components/search/SearchForm";
 import { searchPros } from "@/lib/queries/pros";
 import { getCategoryBySlug, getAllCategories } from "@/lib/queries/categories";
 import { getCityBySlug } from "@/lib/queries/cities";
-import { getTopCities } from "@/lib/queries/cities";
 
 export const metadata: Metadata = {
   title: "Recherche - Trouvez un professionnel pres de chez vous",
@@ -37,10 +36,7 @@ export default async function RecherchePage({ searchParams }: Props) {
     }
   }
 
-  const [allCategories, topCities] = await Promise.all([
-    getAllCategories(),
-    getTopCities(30),
-  ]);
+  const allCategories = await getAllCategories();
 
   const query = q || "";
   const result = query
@@ -59,7 +55,6 @@ export default async function RecherchePage({ searchParams }: Props) {
             slug: c.slug,
             name: c.name,
           }))}
-          cities={topCities.map((c) => ({ slug: c.slug, name: c.name }))}
         />
       </div>
 
