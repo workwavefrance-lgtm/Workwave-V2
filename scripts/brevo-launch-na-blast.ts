@@ -64,9 +64,13 @@ const REPLY_TO = "contact@workwave.fr";
 // =====================================================================
 // 3 templates : sujet + HTML
 // =====================================================================
+// Pas de placeholders Brevo dans les sujets : risque de substitution non faite
+// (cas vu en prod 27/04 : URLs `/artisan/` au lieu de `/artisan/{{slug}}` -> 404).
+// Templates 100% generiques : on dit au pro de chercher sa fiche sur workwave.fr
+// avec son code postal + metier dans la barre de recherche.
 const SUBJECTS: Record<number, string> = {
   1: "Votre fiche Workwave est en ligne",
-  2: "{{ contact.NOM_PRO }} - juste pour confirmer que vous avez bien reçu mon email",
+  2: "Juste pour confirmer que vous avez bien reçu mon email",
   3: "Dernière relance - votre fiche Workwave",
 };
 
@@ -122,13 +126,11 @@ function buildHtml(step: number): string {
               </p>
 
               <p style="margin:0 0 16px;">
-                Votre entreprise <strong>{{ contact.NOM_PRO }}</strong> est déjà référencée gratuitement sur notre site :<br>
-                <a href="https://workwave.fr/artisan/{{ contact.SLUG }}" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr/artisan/{{ contact.SLUG }}</a>
+                Votre entreprise figure déjà gratuitement sur notre site.
               </p>
 
               <p style="margin:0 0 16px;">
-                Si vous voulez la compléter (photos, description, horaires), vous pouvez la réclamer en 3 minutes ici :<br>
-                <a href="https://workwave.fr/pro/reclamer/{{ contact.SLUG }}" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr/pro/reclamer/{{ contact.SLUG }}</a>
+                Pour la trouver, rendez-vous sur <a href="https://workwave.fr" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr</a> et tapez votre <strong>code postal</strong> et votre <strong>métier</strong> dans la barre de recherche. Vous pourrez ensuite la compléter (photos, description, horaires) et la personnaliser en quelques clics.
               </p>
 
               <p style="margin:0 0 16px;">
@@ -148,13 +150,7 @@ function buildHtml(step: number): string {
               </p>
 
               <p style="margin:0 0 16px;">
-                Pour rappel, votre fiche est ici :<br>
-                <a href="https://workwave.fr/artisan/{{ contact.SLUG }}" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr/artisan/{{ contact.SLUG }}</a>
-              </p>
-
-              <p style="margin:0 0 16px;">
-                Et la réclamer gratuitement en 3 minutes :<br>
-                <a href="https://workwave.fr/pro/reclamer/{{ contact.SLUG }}" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr/pro/reclamer/{{ contact.SLUG }}</a>
+                Pour rappel : rendez-vous sur <a href="https://workwave.fr" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr</a> et tapez votre <strong>code postal</strong> et votre <strong>métier</strong> dans la barre de recherche pour trouver et personnaliser votre fiche.
               </p>
 
               <p style="margin:0 0 16px;">
@@ -174,12 +170,11 @@ function buildHtml(step: number): string {
               </p>
 
               <p style="margin:0 0 16px;">
-                Votre fiche <strong>{{ contact.NOM_PRO }}</strong> est toujours disponible sur Workwave. Je voulais m'assurer que vous ne passiez pas à côté de l'opportunité.
+                Votre fiche Workwave est toujours disponible. Pour la trouver, rendez-vous sur <a href="https://workwave.fr" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr</a> et tapez votre <strong>code postal</strong> et votre <strong>métier</strong> dans la barre de recherche.
               </p>
 
               <p style="margin:0 0 16px;">
-                Si Workwave ne vous intéresse pas, pas de souci, je ne vous recontacterai plus. Si vous voulez juste réserver votre fiche au cas où, c'est ici en 3 minutes :<br>
-                <a href="https://workwave.fr/pro/reclamer/{{ contact.SLUG }}" style="color:#FF5A36;text-decoration:underline;">https://workwave.fr/pro/reclamer/{{ contact.SLUG }}</a>
+                Si Workwave ne vous intéresse pas, pas de souci, je ne vous recontacterai plus.
               </p>
 
               <p style="margin:0 0 4px;">Bien cordialement,</p>
