@@ -77,8 +77,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
     },
-    // noindex si zéro pro pour éviter le thin content
-    ...(prosCount === 0 ? { robots: { index: false, follow: true } } : {}),
+    // Pas de noindex : interdit par CLAUDE.md (lecon 27/04/2026).
+    // Le redirect 308 dans Page() (cf. ci-dessous) gere deja les villes sans pros
+    // en redirigeant vers la page departement. Le noindex ne sera donc jamais servi.
   };
 }
 
