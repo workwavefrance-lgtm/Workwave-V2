@@ -40,6 +40,9 @@ const stepArgIdx = args.indexOf("--step");
 const STEP = stepArgIdx >= 0 ? parseInt(args[stepArgIdx + 1], 10) : 0;
 const batchArgIdx = args.indexOf("--batch");
 const BATCH = batchArgIdx >= 0 ? parseInt(args[batchArgIdx + 1], 10) : 0;
+const scheduledAtIdx = args.indexOf("--scheduled-at");
+const SCHEDULED_AT =
+  scheduledAtIdx >= 0 ? args[scheduledAtIdx + 1] : null; // ISO 8601, ex: 2026-04-28T09:00:00+02:00
 const BATCH_SIZE = 200;
 
 if (![1, 2, 3].includes(STEP)) {
@@ -353,15 +356,19 @@ async function main() {
   // --- 5. Campagne ---
   console.log("\n[5/5] Creation campagne...");
   const campaign = await brevo<{ id: number }>("POST", "/emailCampaigns", {
-    name: CAMPAIGN_NAMES[STEP],
+    name: CAMPAIGN_NAMES[STEP] + ` - Batch ${BATCH}`,
     subject: SUBJECTS[STEP],
     sender: SENDER,
     replyTo: REPLY_TO,
     htmlContent: buildHtml(STEP),
     recipients: { listIds: [listId] },
     inlineImageActivation: false,
+    ...(SCHEDULED_AT ? { scheduledAt: SCHEDULED_AT } : {}),
   });
   console.log(`  + Campagne creee : id=${campaign.id}`);
+  if (SCHEDULED_AT) {
+    console.log(`  ⏰ Programmee pour : ${SCHEDULED_AT}`);
+  }
 
   if (SEND_NOW) {
     console.log("\n⚠️  Envoi immediat...");
