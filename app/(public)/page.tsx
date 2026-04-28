@@ -3,17 +3,21 @@ export const revalidate = 3600; // 1h
 import Link from "next/link";
 import SearchForm from "@/components/search/SearchForm";
 import JsonLd from "@/components/seo/JsonLd";
-import { getCategoriesByVertical } from "@/lib/queries/categories";
-import { getTopCities } from "@/lib/queries/cities";
+// Imports publics (sans cookies) pour permettre le caching ISR de la home.
+// Ne PAS remplacer par `lib/queries/categories` ou `lib/queries/cities` :
+// ces modules touchent aux cookies (cf. lib/supabase/server.ts) et basculent
+// la page en dynamic => cache CDN inactif (TTFB 0.4s a chaque visite).
+import { getCategoriesByVerticalPublic } from "@/lib/queries/home-public";
+import { getTopCitiesPublic } from "@/lib/queries/home-public";
 import { getWebSiteSchema, getOrganizationSchema } from "@/lib/utils/schema";
 import { BASE_URL } from "@/lib/constants";
 
 export default async function Home() {
   const [btp, domicile, personne, topCities] = await Promise.all([
-    getCategoriesByVertical("btp"),
-    getCategoriesByVertical("domicile"),
-    getCategoriesByVertical("personne"),
-    getTopCities(30),
+    getCategoriesByVerticalPublic("btp"),
+    getCategoriesByVerticalPublic("domicile"),
+    getCategoriesByVerticalPublic("personne"),
+    getTopCitiesPublic(30),
   ]);
 
   const allCategories = [...btp, ...domicile, ...personne].sort((a, b) =>

@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { getAllCategories } from "@/lib/queries/categories";
+// Import public (sans cookies) : critique pour le caching ISR du layout
+// (public). Si on remet `getAllCategories` du module categories.ts,
+// toutes les pages publiques basculent en dynamic => cache CDN inactif.
+import { getAllCategoriesPublic } from "@/lib/queries/home-public";
 
 export default async function Footer() {
-  const categories = await getAllCategories();
+  const categories = await getAllCategoriesPublic();
 
   const btp = categories.filter((c) => c.vertical === "btp").slice(0, 9);
   const domicile = categories
