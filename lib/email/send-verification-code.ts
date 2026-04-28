@@ -106,3 +106,68 @@ export async function sendClaimAlreadyClaimedAlert(
     console.error("Erreur envoi alerte admin :", error);
   }
 }
+
+// ============================================
+// Notification admin : nouvelle reclamation reussie
+// ============================================
+export async function sendClaimSuccessAlert(params: {
+  proId: number;
+  proName: string;
+  proSlug: string;
+  proSiret: string | null;
+  proCity?: string | null;
+  proCategory?: string | null;
+  claimEmail: string;
+  ip?: string;
+}): Promise<void> {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const dashboardUrl = `https://workwave.fr/admin/pros/${params.proId}`;
+  const publicUrl = `https://workwave.fr/artisan/${params.proSlug}`;
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <div style="background:#16A34A;padding:24px 32px;">
+      <h1 style="margin:0;color:#FFFFFF;font-size:18px;font-weight:600;">✅ Nouvelle fiche réclamée</h1>
+    </div>
+    <div style="padding:32px;">
+      <p style="margin:0 0 20px;font-size:15px;color:#0A0A0A;line-height:1.6;">
+        Un professionnel vient de réclamer sa fiche et a démarré son essai gratuit de 14 jours.
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;">
+        <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Fiche</td><td style="padding:6px 0;color:#0A0A0A;font-weight:500;">${params.proName}</td></tr>
+        ${params.proCategory ? `<tr><td style="padding:6px 0;color:#6B7280;">Catégorie</td><td style="padding:6px 0;color:#0A0A0A;">${params.proCategory}</td></tr>` : ""}
+        ${params.proCity ? `<tr><td style="padding:6px 0;color:#6B7280;">Ville</td><td style="padding:6px 0;color:#0A0A0A;">${params.proCity}</td></tr>` : ""}
+        <tr><td style="padding:6px 0;color:#6B7280;">SIRET</td><td style="padding:6px 0;font-family:'Courier New',monospace;color:#0A0A0A;">${params.proSiret ?? "—"}</td></tr>
+        <tr><td style="padding:6px 0;color:#6B7280;">Email du pro</td><td style="padding:6px 0;color:#0A0A0A;">${params.claimEmail}</td></tr>
+        ${params.ip ? `<tr><td style="padding:6px 0;color:#6B7280;">IP</td><td style="padding:6px 0;color:#0A0A0A;">${params.ip}</td></tr>` : ""}
+        <tr><td style="padding:6px 0;color:#6B7280;">Date</td><td style="padding:6px 0;color:#0A0A0A;">${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</td></tr>
+      </table>
+      <div style="margin-top:28px;display:flex;gap:12px;">
+        <a href="${publicUrl}" style="display:inline-block;padding:10px 18px;background:#0A0A0A;color:#FFFFFF;text-decoration:none;border-radius:10px;font-size:14px;font-weight:500;">Voir la fiche publique</a>
+        <a href="${dashboardUrl}" style="display:inline-block;padding:10px 18px;background:#FF5A36;color:#FFFFFF;text-decoration:none;border-radius:10px;font-size:14px;font-weight:500;margin-left:8px;">Ouvrir dans l'admin</a>
+      </div>
+      <p style="margin:24px 0 0;font-size:13px;color:#9CA3AF;line-height:1.6;">
+        Le pro est en essai gratuit jusqu'au ${new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString("fr-FR")}. Après ça il devra renseigner sa CB pour rester actif.
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  try {
+    await getResendClient().emails.send({
+      from: "Workwave <contact@workwave.fr>",
+      to: adminEmail,
+      subject: `[Workwave] Nouvelle fiche réclamée — ${params.proName}`,
+      html,
+    });
+  } catch (error) {
+    console.error("Erreur envoi notif claim success :", error);
+  }
+}

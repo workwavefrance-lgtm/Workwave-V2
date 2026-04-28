@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import {
   sendVerificationCode,
   sendClaimAlreadyClaimedAlert,
+  sendClaimSuccessAlert,
 } from "@/lib/email/send-verification-code";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
@@ -57,6 +58,48 @@ async function getIp(): Promise<string> {
     headersList.get("x-real-ip") ||
     "unknown"
   );
+}
+
+// Notification admin (fire-and-forget) apres une reclamation reussie.
+// Recupere les details du pro et envoie une alerte par email a ADMIN_EMAIL.
+async function notifyAdminOfClaimSuccess(params: {
+  slug: string;
+  claimEmail: string;
+  ip?: string;
+}) {
+  try {
+    const serviceClient = await getServiceClient();
+    const { data: pro } = await serviceClient
+      .from("pros")
+      .select(
+        "id, slug, name, siret, cities(name), categories(name)"
+      )
+      .eq("slug", params.slug)
+      .single();
+
+    if (!pro) return;
+
+    // cities et categories peuvent etre objets ou tableaux selon le shape
+    type Joined = { name?: string } | { name?: string }[] | null;
+    const pickName = (v: Joined): string | null => {
+      if (!v) return null;
+      if (Array.isArray(v)) return v[0]?.name ?? null;
+      return v.name ?? null;
+    };
+
+    await sendClaimSuccessAlert({
+      proId: pro.id,
+      proName: pro.name,
+      proSlug: pro.slug,
+      proSiret: pro.siret,
+      proCity: pickName(pro.cities as Joined),
+      proCategory: pickName(pro.categories as Joined),
+      claimEmail: params.claimEmail,
+      ip: params.ip,
+    });
+  } catch (err) {
+    console.error("notifyAdminOfClaimSuccess error :", err);
+  }
 }
 
 // ============================================
@@ -414,6 +457,13 @@ export async function verifyClaim(
         metadata: { slug },
       });
 
+      // Notification admin (fire-and-forget)
+      notifyAdminOfClaimSuccess({
+        slug,
+        claimEmail: attempt.email,
+        ip: attempt.ip ?? undefined,
+      });
+
       // Connecter l'utilisateur côté serveur
       await signInAndSetCookies(attempt.email, attempt.temp_password);
 
@@ -474,7 +524,14 @@ export async function verifyClaim(
     metadata: { slug },
   });
 
-  // 5. Connecter l'utilisateur côté serveur (écrire les cookies de session)
+  // 5. Notification admin (fire-and-forget)
+  notifyAdminOfClaimSuccess({
+    slug,
+    claimEmail: attempt.email,
+    ip: attempt.ip ?? undefined,
+  });
+
+  // 6. Connecter l'utilisateur côté serveur (écrire les cookies de session)
   await signInAndSetCookies(attempt.email, attempt.temp_password);
 
   return { success: true, redirectUrl: "/pro/dashboard" };
