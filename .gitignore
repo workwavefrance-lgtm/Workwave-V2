@@ -44,3 +44,4 @@ scraping/.env
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+scripts/.brevo-recovery-sent.json
