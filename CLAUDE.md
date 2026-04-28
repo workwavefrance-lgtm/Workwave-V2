@@ -75,6 +75,9 @@ Section vivante. Avant chaque nouveau sprint, relire pour ne PAS reproduire les 
     4. Laisser Google décider (il sait classer les pages faibles, c'est son métier)
   - **Vérification automatique** : un script `scripts/audit-noindex-robots.ts` scan le code et alerte si une page publique stratégique a un noindex. À lancer avant tout commit qui touche aux metadata. Idéalement en pre-commit hook.
   - **En cas de doute** : NE PAS noindex. Demander à Willy. Le coût d'un noindex en trop est beaucoup plus élevé que le coût d'une page squelette indexée (Google a son propre algo de classement).
+- **28/04/2026 — Notif admin manquante sur claim success** : `verifyClaim` (réclamation de fiche) déclenchait un essai gratuit + activait l'abonnement, mais n'appelait **aucune fonction d'envoi de mail à l'admin**. Conséquence : 4 vraies réclamations le 27-28/04 sans que l'admin ne soit informé. Détecté via `scripts/audit-claim-funnel.ts` qui a remonté `prosClaimed=5` alors que l'admin n'avait reçu aucun mail. Fix : nouvelle fonction `sendClaimSuccessAlert` dans `lib/email/send-verification-code.ts` + helper `notifyAdminOfClaimSuccess` dans `actions.ts` (avec join cities/categories pour ville+métier dans le mail) + appels fire-and-forget dans les 2 branches de `verifyClaim` (existing user + new user). **Règle pour l'avenir** : à chaque fois qu'on ajoute un Server Action critique côté business (claim, subscribe, cancel, refund, deletion), prévoir SYSTÉMATIQUEMENT une notif admin dans le même commit. Ne pas se contenter du `track(EVENTS.X)` qui ne va que dans la table analytics interne, pas dans la boîte mail.
+- **28/04/2026 — revalidatePath superflu casse les forms uncontrolled** : dans `app/pro/dashboard/fiche/actions.ts`, les actions `uploadProLogo` / `uploadProPhoto` / `deleteProPhoto` appelaient `revalidatePath("/pro/dashboard/fiche")` après l'upload. Conséquence : re-render RSC pendant que l'utilisateur était sur la page → effacement des valeurs DOM des inputs `defaultValue` (uncontrolled inputs) + réaffichage des `fieldErrors` stale d'un précédent submit. Symptôme utilisateur : "je change une photo et ça me redemande de mettre mon téléphone et mail alors qu'ils sont déjà présents". Fix : supprimer le `revalidatePath` du dashboard dans ces 3 actions (le state client gère déjà l'affichage via `setLogoUrl` et `setPhotos`). Garder uniquement `revalidatePath(/artisan/${slug})` pour la fiche publique. **Règle pour l'avenir** : ne `revalidatePath` que la page **publique** que l'action affecte (pour SEO/cache CDN). Pour le dashboard où l'utilisateur est, laisser le state client gérer le rendu — sinon on casse les uncontrolled inputs et on réintroduit des erreurs stale du `useActionState`.
+- **28/04/2026 — `count: "exact"` Supabase timeout middleware sur grosses tables** : `lib/queries/admin-pros.ts` faisait `.select(SELECT, { count: "exact" })` sur la table `pros` qui contient 226 478 rows. Conséquence : `SELECT COUNT(*)` prenait plusieurs secondes → timeout du `fetch` interne du middleware vers `/api/admin/auth/check` → redirect `/admin/login?error=unauthorized` avec message "Vous n'avez pas les droits administrateur". Symptôme utilisateur : "je clique sur Professionnels et ça me déconnecte" alors que tout le reste de l'admin fonctionnait. Fix : `count: "estimated"` qui lit pg_class stats (instantané, ±0.1% d'écart sur 226k = négligeable pour l'admin). **Règle pour l'avenir** : sur toute table > 50 000 rows, utiliser `count: "estimated"` par défaut. Réserver `"exact"` pour les listings courts (<10 000 rows) ou les exports où la précision compte. Si le count exact est nécessaire pour de grosses tables, le faire dans une requête séparée non bloquante.
 - *(à enrichir au fil des sessions)*
 
 ---
@@ -351,6 +354,46 @@ Branche de travail SEO additionnelle pour densifier la couverture organique avan
 - Expansion vers d'autres départements (Deux-Sèvres 79, Charente 16, Charente-Maritime 17).
 
 À chaque fin de sprint, mettre à jour cette section avec la date et un résumé de ce qui a été fait.
+
+## 9 bis. Sprint sécurité — à faire ce weekend (planifié le 28/04/2026)
+
+Audit sécurité complet réalisé le 28/04/2026 après l'arrivée des premiers vrais pros (4 réclamations en 24h post-batch 1 Brevo). Verdict : code applicatif solide, mais couches anti-bruteforce/2FA manquantes et backup à confirmer. À traiter ce weekend avant que le volume monte.
+
+### 🔴 CRITIQUE — actions à faire AVANT de coder le reste (30 min total)
+
+1. **Vérifier le plan Supabase** (5 min, action Willy) — Dashboard Supabase → Settings → Compute & Add-ons. Si Free, passer en Pro 25$/mois immédiatement. Sans ça, **0 backup automatique** et un DROP TABLE accidentel = perte totale des 226 478 pros + 5 fiches réclamées + claim_attempts. Sur Pro plan : 7 jours PITR + 14 jours daily backups.
+
+2. **Backup des vars d'env critiques** (10 min, action Willy) — Copier `.env.local` (notamment `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `BREVO_API_KEY`, `STRIPE_SECRET_KEY`, `ANTHROPIC_API_KEY`) dans 1Password / fichier chiffré. En cas de perte du laptop, tout reconstructible.
+
+3. **2FA sur les comptes critiques** (15 min, action Willy) — Activer la 2FA sur : Google (workwave.france@gmail.com), Vercel, GitHub (workwavefrance-lgtm), Supabase, Stripe, Brevo, Resend, Hostinger. Si Google se fait pivoter, l'attaquant peut tout reset.
+
+### 🟠 IMPORTANT — code Claude (2-3h total)
+
+4. **Rate limiting sur `/admin/login`** (30 min, code Claude) — 5 tentatives ratées par IP / 15 min. Implémentation : Upstash Redis (gratuit jusqu'à 10k req/jour) ou middleware in-memory avec Map (suffisant tant qu'on a 1 instance Vercel). Bloque les attaques brute-force sur le password admin.
+
+5. **Audit RLS Supabase** (1h, code Claude) — Vérifier que les tables sensibles (`pros`, `projects`, `project_leads`, `claim_attempts`, `admins`, `cancellation_feedback`) ont des RLS policies activées. Aujourd'hui les Server Actions utilisent `service_role` qui bypasse les RLS, donc seul le code applicatif protège (= 1 seule couche). Activer RLS = défense en profondeur si jamais une query oublie le check de session.
+
+6. **Backup hebdo manuel automatisé** (30 min, code Claude) — Cron Vercel qui dump les tables critiques nuitamment vers Vercel Blob ou S3. Garde 14 jours de rolling. Coût ~10€/mois max. Redondance vs les backups Supabase.
+
+7. **Doc procédure DR (`RUNBOOK.md`)** (30 min, code Claude) — Fichier dédié à la racine du repo : "si la prod plante, voici les 5 étapes pour la remonter en 30 min". Doit couvrir : restore Supabase backup, redeploy Vercel from Git, vérif des envs, tests post-restore.
+
+### 🟢 PLUS TARD — quand le temps
+
+8. **2FA pour le login admin Workwave** (1-2h, code Claude) — TOTP via Supabase Auth MFA. Aujourd'hui le login admin est juste email + password.
+
+9. **Audit log admin avec alertes Slack/email** sur actions sensibles (suppression pro, changement subscription, impersonation, modif role admin, etc.) — déjà partiellement loggé en DB, à compléter + alerter en temps réel.
+
+10. **WAF Vercel** — protection DDoS / bot scraping. Pro plan inclut 1 To gratuit. À activer + ajuster les rules si on remarque du scraping abusif (les bots crawlers légitimes Claude/GPT/Google sont déjà repérés et OK).
+
+### Checklist de fin de weekend
+
+- [ ] Plan Supabase : Pro confirmé
+- [ ] Vars d'env backup dans 1Password
+- [ ] 2FA activé sur 8 comptes critiques
+- [ ] Rate limiting `/admin/login` deployed
+- [ ] RLS audit + activation faite, fichier `docs/rls-policies.md` créé
+- [ ] Cron backup hebdo running, premier dump vérifié
+- [ ] `RUNBOOK.md` à la racine, lu et validé
 
 ## 10. Sprint 0 — Setup détaillé
 
