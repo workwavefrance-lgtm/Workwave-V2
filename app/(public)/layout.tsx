@@ -1,6 +1,5 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import DevBanner from "@/components/ui/DevBanner";
 import RecentClaimsToast from "@/components/social-proof/RecentClaimsToast";
 
 export default function PublicLayout({
@@ -13,7 +12,6 @@ export default function PublicLayout({
       <Header />
       <div className="flex-1">{children}</div>
       <Footer />
-      <DevBanner />
       <RecentClaimsToast />
     </>
   );
