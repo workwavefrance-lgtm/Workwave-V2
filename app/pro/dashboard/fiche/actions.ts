@@ -289,7 +289,10 @@ export async function uploadProLogo(
 
   if (updateError) return { error: "Erreur lors de la mise à jour" };
 
-  revalidatePath("/pro/dashboard/fiche");
+  // Pas de revalidatePath sur /pro/dashboard/fiche : le state client gere
+  // deja l'affichage du nouveau logo (setLogoUrl). Revalider le dashboard ici
+  // declenche un re-render RSC qui peut effacer les valeurs DOM des inputs
+  // uncontrolled (defaultValue) et reafficher des fieldErrors stale.
   revalidatePath(`/artisan/${pro.slug}`);
   return { success: true, url: urlData.publicUrl };
 }
@@ -343,7 +346,8 @@ export async function uploadProPhoto(
 
   if (updateError) return { error: "Erreur lors de la mise à jour" };
 
-  revalidatePath("/pro/dashboard/fiche");
+  // Pas de revalidatePath sur /pro/dashboard/fiche : meme raison que pour
+  // uploadProLogo (cf. commentaire). Le client gere setPhotos.
   revalidatePath(`/artisan/${pro.slug}`);
   return { success: true, url: urlData.publicUrl };
 }
@@ -377,7 +381,8 @@ export async function deleteProPhoto(photoUrl: string) {
 
   if (error) return { error: "Erreur lors de la suppression" };
 
-  revalidatePath("/pro/dashboard/fiche");
+  // Pas de revalidatePath sur /pro/dashboard/fiche : meme raison que pour
+  // uploadProLogo (cf. commentaire). Le client gere setPhotos.
   revalidatePath(`/artisan/${pro.slug}`);
   return { success: true };
 }

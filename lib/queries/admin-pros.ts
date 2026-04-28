@@ -57,9 +57,14 @@ export const getAdminPros = cache(
       pageSize = 25,
     } = filters;
 
+    // count: "estimated" au lieu de "exact" : sur 226k+ pros, COUNT(*) exact
+    // peut prendre plusieurs secondes et faire timeout le middleware fetch
+    // /api/admin/auth/check, ce qui declenche un redirect /admin/login.
+    // Estimated lit pg_class stats, instantane mais approximatif (acceptable
+    // pour une UI admin).
     let query = db
       .from("pros")
-      .select(ADMIN_PRO_SELECT, { count: "exact" });
+      .select(ADMIN_PRO_SELECT, { count: "estimated" });
 
     // Filters
     if (status && status !== "all") {
