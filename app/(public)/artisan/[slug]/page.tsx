@@ -302,7 +302,7 @@ export default async function ProPage({ params }: Props) {
                 </li>
                 <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
                   <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
-                  <span>Recevoir les <strong>demandes de devis</strong> dans votre zone (essai gratuit 14 jours)</span>
+                  <span>Recevoir les <strong>demandes de devis</strong> dans votre zone</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
                   <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
