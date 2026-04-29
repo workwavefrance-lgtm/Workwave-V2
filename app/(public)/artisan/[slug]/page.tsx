@@ -171,6 +171,73 @@ export default async function ProPage({ params }: Props) {
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
+      {/* Banniere de reclamation (TOP, immanquable).
+          Pattern issu de la recherche CTA 2026 : la bannière haute
+          full-width est le levier le plus rentable sur les annuaires
+          (Yelp, Google Business, Trustpilot). Le pro qui arrive depuis
+          un cold email ou Google la voit AVANT le contenu de sa fiche
+          et reconnaît immediatement son entreprise (effet endowment). */}
+      {!isClaimed && pro.siret && (
+        <section className="mb-8 bg-gradient-to-br from-[#FF5A36]/10 via-[#FF5A36]/5 to-transparent dark:from-[#FF5A36]/15 dark:via-[#FF5A36]/8 border-2 border-[#FF5A36]/30 dark:border-[#FF5A36]/40 rounded-2xl p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+            {/* Icone checkmark dans cercle coral */}
+            <div className="w-11 h-11 rounded-full bg-[#FF5A36] flex items-center justify-center shrink-0">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+
+            {/* Contenu */}
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold text-[#FF5A36] uppercase tracking-wider mb-1.5">
+                Cette fiche est à vous ?
+              </p>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2 leading-snug">
+                Vous êtes <span className="text-[#FF5A36]">{pro.name}</span> ? Réclamez votre fiche gratuitement.
+              </h2>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                Ajoutez votre logo, vos photos, votre description, vos horaires et recevez les demandes de clients de votre zone.
+              </p>
+
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <Link
+                  href={`/pro/reclamer/${slug}`}
+                  className="inline-flex items-center justify-center gap-2 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm whitespace-nowrap"
+                >
+                  Réclamer ma fiche — gratuit
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </Link>
+                <p className="text-xs text-[var(--text-tertiary)]">
+                  Vérification SIRET · 3 minutes · Aucune carte bancaire requise
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Colonne gauche */}
         <div className="lg:col-span-2 space-y-8">
@@ -213,6 +280,64 @@ export default async function ProPage({ params }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Section reclamation mid-page (renforcement apres scroll).
+              Pattern Yelp / Houzz : double CTA sur la fiche. Le pro qui
+              n'a pas clique sur la banniere haute trouve un 2e point
+              d'entree contextualise apres avoir vu sa fiche actuelle
+              (vide / pauvre) -> motivation accrue pour la completer. */}
+          {!isClaimed && pro.siret && (
+            <section className="bg-[#FF5A36]/5 dark:bg-[#FF5A36]/8 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-2xl p-6 sm:p-7">
+              <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-2 leading-snug">
+                Vous êtes <span className="text-[#FF5A36]">{pro.name}</span> ?
+              </h2>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
+                Cette fiche a été créée automatiquement à partir des données publiques (registre Sirene). Réclamez-la gratuitement pour :
+              </p>
+
+              <ul className="space-y-2.5 mb-6">
+                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
+                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
+                  <span>Ajouter votre <strong>logo</strong>, vos <strong>photos</strong> et votre <strong>description</strong></span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
+                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
+                  <span>Recevoir les <strong>demandes de devis</strong> dans votre zone (essai gratuit 14 jours)</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
+                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
+                  <span>Apparaître <strong>mieux</strong> dans les recherches</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
+                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
+                  <span>Contrôler les informations publiées sur votre entreprise</span>
+                </li>
+              </ul>
+
+              <Link
+                href={`/pro/reclamer/${slug}`}
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-6 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm"
+              >
+                Réclamer cette fiche — 3 minutes
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </Link>
+              <p className="text-xs text-[var(--text-tertiary)] mt-3">
+                Vérification SIRET + code par email · Aucune carte bancaire requise
+              </p>
+            </section>
+          )}
 
           {/* Description */}
           {pro.description && (
@@ -472,21 +597,11 @@ export default async function ProPage({ params }: Props) {
             )}
           </div>
 
-          {/* Encart réclamation (fiche non réclamée) */}
-          {!isClaimed && pro.siret && (
-            <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
-              <p className="text-sm text-[var(--text-secondary)] mb-3">
-                Vous êtes <span className="font-semibold text-[var(--text-primary)]">{pro.name}</span> ?
-                Réclamez votre fiche gratuitement pour la compléter et recevoir des clients.
-              </p>
-              <Link
-                href={`/pro/reclamer/${slug}`}
-                className="block text-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
-              >
-                Réclamer cette fiche
-              </Link>
-            </div>
-          )}
+          {/* Note : l'ancien encart sidebar "Reclamer cette fiche" a ete
+              supprime. Le CTA est desormais double : (1) banniere haute
+              full-width juste apres le breadcrumb (ci-dessus) et (2) section
+              card mid-page coral dans la colonne gauche avec les 4 benefices.
+              Pattern issu de la recherche CTA 2026 sur Yelp/Google/Houzz. */}
 
           {/* Infos complementaires */}
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 space-y-4">
