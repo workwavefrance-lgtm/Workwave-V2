@@ -12,13 +12,17 @@ const PROS_PER_SITEMAP = 45000;
 const SITEMAP_PROS_OFFSET = 100;
 const FIXED_SITEMAP_IDS = [0, 1, 2, 3];
 
-export const revalidate = 3600; // 1h
+export const revalidate = 86400; // 24h. L'index ne change que quand le
+// nombre total de pros depasse un multiple de 45000, donc 24h est large.
 
 export async function GET() {
   const supabase = getAdminServiceClient();
+  // count: "estimated" (lit pg_class stats) au lieu de "exact" qui scanne
+  // toute la table (226k rows, ~3-5s, cause des timeouts Googlebot).
+  // Cf. lecon apprise CLAUDE.md du 2026-04-28.
   const { count } = await supabase
     .from("pros")
-    .select("id", { count: "exact", head: true })
+    .select("id", { count: "estimated", head: true })
     .eq("is_active", true)
     .is("deleted_at", null);
 

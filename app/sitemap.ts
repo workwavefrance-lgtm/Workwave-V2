@@ -7,12 +7,21 @@ import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
 import { SPECIALTIES } from "@/lib/specialties";
 
+// Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
+// donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
+// de re-calculer la sitemap a chaque appel. C'est la cle pour eviter les
+// timeouts cote Googlebot (limite ~30s par fetch).
+export const revalidate = 86400;
+
 // Limites :
 // - Google : 50 000 URLs max par sitemap, 50 MB max
 // - On split tous les types pour rester confortablement sous la limite
 const PROS_PER_SITEMAP = 45000;
-const TOP_CITIES_FOR_LISTINGS = 500; // top villes par population pour cat x ville
+const TOP_CITIES_FOR_LISTINGS = 300; // top villes par population pour cat x ville
 const TOP_CITIES_FOR_SPECIALTIES = 100; // top villes pour les sous-specialites
+// Supabase autorise jusqu'a 5000 rows par fetch, on en profite pour
+// diviser par 5 le nombre de round-trips reseau.
+const SUPABASE_PAGE_SIZE = 5000;
 
 // IDs reserves pour generateSitemaps() :
 // 0 : static + guides + blog
@@ -33,9 +42,13 @@ const SITEMAP_PROS_OFFSET = 100;
 // ============================================================================
 export async function generateSitemaps() {
   const supabase = getAdminServiceClient();
+  // count: "estimated" : lit pg_class stats, instantane (vs "exact" qui
+  // scanne toute la table = 3-5s sur 226k rows). +/-0.1% d'ecart sur le
+  // count, mais on s'en fiche : on l'utilise juste pour calculer le nombre
+  // de batches sub-sitemaps. Cf. lesson learned CLAUDE.md 2026-04-28.
   const { count } = await supabase
     .from("pros")
-    .select("id", { count: "exact", head: true })
+    .select("id", { count: "estimated", head: true })
     .eq("is_active", true)
     .is("deleted_at", null);
 
@@ -150,8 +163,8 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
   const topCityIds = topCities.map((c) => c.id);
   if (topCityIds.length === 0) return [];
 
-  // Pagination pour depasser la limite Supabase de 1000 lignes
-  const PAGE_SIZE = 1000;
+  // Pagination 5000 par 5000 (limite max Supabase) -> /5 le nombre de
+  // round-trips reseau vs l'ancien PAGE_SIZE=1000.
   let offset = 0;
   let hasMore = true;
   const countMap = new Map<string, number>();
@@ -163,15 +176,15 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
       .eq("is_active", true)
       .is("deleted_at", null)
       .in("city_id", topCityIds)
-      .range(offset, offset + PAGE_SIZE - 1);
+      .range(offset, offset + SUPABASE_PAGE_SIZE - 1);
 
     const rows = (data || []) as { category_id: number; city_id: number }[];
     for (const row of rows) {
       const key = `${row.category_id}-${row.city_id}`;
       countMap.set(key, (countMap.get(key) || 0) + 1);
     }
-    hasMore = rows.length === PAGE_SIZE;
-    offset += PAGE_SIZE;
+    hasMore = rows.length === SUPABASE_PAGE_SIZE;
+    offset += SUPABASE_PAGE_SIZE;
   }
 
   const citySlugMap = new Map(topCities.map((c) => [c.id, c.slug]));
@@ -211,7 +224,6 @@ async function buildSpecialtyUrls(): Promise<MetadataRoute.Sitemap> {
   if (specialtyCategoryIds.length === 0 || topCities.length === 0) return [];
 
   const cityIds = topCities.map((c) => c.id);
-  const PAGE_SIZE = 1000;
   let offset = 0;
   let hasMore = true;
   const countMap = new Map<string, number>();
@@ -224,15 +236,15 @@ async function buildSpecialtyUrls(): Promise<MetadataRoute.Sitemap> {
       .is("deleted_at", null)
       .in("category_id", specialtyCategoryIds)
       .in("city_id", cityIds)
-      .range(offset, offset + PAGE_SIZE - 1);
+      .range(offset, offset + SUPABASE_PAGE_SIZE - 1);
 
     const rows = (data || []) as { category_id: number; city_id: number }[];
     for (const row of rows) {
       const key = `${row.category_id}-${row.city_id}`;
       countMap.set(key, (countMap.get(key) || 0) + 1);
     }
-    hasMore = rows.length === PAGE_SIZE;
-    offset += PAGE_SIZE;
+    hasMore = rows.length === SUPABASE_PAGE_SIZE;
+    offset += SUPABASE_PAGE_SIZE;
   }
 
   const urls: MetadataRoute.Sitemap = [];
@@ -261,8 +273,10 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
   const supabase = getAdminServiceClient();
   const offset = batchIndex * PROS_PER_SITEMAP;
 
-  // Charger ce batch en chunks de 1000 (limite Supabase) jusqu'a PROS_PER_SITEMAP
-  const PAGE_SIZE = 1000;
+  // Charger ce batch en chunks de SUPABASE_PAGE_SIZE (5000, max Supabase)
+  // jusqu'a PROS_PER_SITEMAP. Avec 45000 pros / batch et page_size=5000,
+  // on fait 9 round-trips reseau au lieu de 45 (PAGE_SIZE=1000) => 5x plus
+  // rapide.
   let allPros: {
     slug: string;
     updated_at: string;
@@ -275,7 +289,10 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
   const endOffset = offset + PROS_PER_SITEMAP;
 
   while (pageOffset < endOffset) {
-    const rangeEnd = Math.min(pageOffset + PAGE_SIZE - 1, endOffset - 1);
+    const rangeEnd = Math.min(
+      pageOffset + SUPABASE_PAGE_SIZE - 1,
+      endOffset - 1
+    );
     const { data } = await supabase
       .from("pros")
       .select("slug, updated_at, claimed_by_user_id, description, phone")
@@ -287,8 +304,8 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
     const rows = (data || []) as typeof allPros;
     if (rows.length === 0) break;
     allPros = allPros.concat(rows);
-    if (rows.length < PAGE_SIZE) break;
-    pageOffset += PAGE_SIZE;
+    if (rows.length < SUPABASE_PAGE_SIZE) break;
+    pageOffset += SUPABASE_PAGE_SIZE;
   }
 
   return allPros.map((pro) => {
