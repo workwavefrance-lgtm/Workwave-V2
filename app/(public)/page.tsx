@@ -42,9 +42,16 @@ export default async function Home() {
             Tout le savoir-faire local,
             <br />
             enfin accessible
-            <span className="text-[var(--accent)]">.</span>
+            {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
+                = le point est rendu serveur-side, LCP intact. */}
+            <span className="text-[var(--accent)] animate-accent-pulse">.</span>
           </h1>
-          <p className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed">
+          {/* Slide-in du sous-titre, leger delai pour qu'il arrive apres
+              que le H1 soit visible. Le sous-titre n'est pas le LCP. */}
+          <p
+            className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
+            style={{ animationDelay: "120ms" }}
+          >
             Des centaines de milliers de professionnels référencés en
             Nouvelle-Aquitaine, à portée d&apos;un clic.
           </p>

@@ -103,3 +103,52 @@ body {
   background-color: var(--accent-muted);
   color: var(--text-primary);
 }
+
+/* ---- Animations home hero ----
+   Effet D : pulse subtil sur le point coral final du H1.
+   Pas d'opacity:0 a l'etat initial -> le point est immediatement visible
+   au render serveur, donc le LCP candidate (le H1) n'est PAS degrade. */
+@keyframes accent-dot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    transform: scale(1.18);
+    filter: drop-shadow(0 0 8px rgba(255, 90, 54, 0.45));
+  }
+}
+
+.animate-accent-pulse {
+  display: inline-block;
+  animation: accent-dot-pulse 2.6s ease-in-out infinite;
+  /* Conserve l'origine au coin gauche pour ne pas decaler le mot precedent */
+  transform-origin: center center;
+}
+
+/* Effet F : slide-in-up du sous-titre au chargement.
+   `backwards` = applique l'etat from{} avant le delay -> evite un flash
+   de l'etat final. Pas applique au H1 lui-meme (LCP critique). */
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 600ms ease-out backwards;
+}
+
+/* Respect de l'accessibilite : si l'utilisateur a active "Reduire les
+   animations" dans son OS, on coupe nos animations decoratives. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-accent-pulse,
+  .animate-slide-in-up {
+    animation: none;
+  }
+}
