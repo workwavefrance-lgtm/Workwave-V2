@@ -183,8 +183,12 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
       const key = `${row.category_id}-${row.city_id}`;
       countMap.set(key, (countMap.get(key) || 0) + 1);
     }
-    hasMore = rows.length === SUPABASE_PAGE_SIZE;
-    offset += SUPABASE_PAGE_SIZE;
+    // Supabase peut plafonner a 1000 rows par defaut (PostgREST max-rows).
+    // On continue tant qu'on recoit des lignes, et on incremente par le
+    // nombre reel recu (pas par SUPABASE_PAGE_SIZE suppose). Cf. lecon
+    // apprise du 30/04/2026.
+    if (rows.length === 0) break;
+    offset += rows.length;
   }
 
   const citySlugMap = new Map(topCities.map((c) => [c.id, c.slug]));
@@ -243,8 +247,8 @@ async function buildSpecialtyUrls(): Promise<MetadataRoute.Sitemap> {
       const key = `${row.category_id}-${row.city_id}`;
       countMap.set(key, (countMap.get(key) || 0) + 1);
     }
-    hasMore = rows.length === SUPABASE_PAGE_SIZE;
-    offset += SUPABASE_PAGE_SIZE;
+    if (rows.length === 0) break;
+    offset += rows.length;
   }
 
   const urls: MetadataRoute.Sitemap = [];
@@ -304,8 +308,12 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
     const rows = (data || []) as typeof allPros;
     if (rows.length === 0) break;
     allPros = allPros.concat(rows);
-    if (rows.length < SUPABASE_PAGE_SIZE) break;
-    pageOffset += SUPABASE_PAGE_SIZE;
+    // Supabase peut plafonner a 1000 rows par defaut (PostgREST max-rows).
+    // On continue tant qu'on recoit des lignes, en incrementant par le
+    // nombre reel recu (pas par SUPABASE_PAGE_SIZE suppose). Cf. lecon
+    // apprise du 30/04/2026 : breaking sur rows.length < SUPABASE_PAGE_SIZE
+    // a foire 97% de la sitemap (6740 URLs au lieu de 233k).
+    pageOffset += rows.length;
   }
 
   return allPros.map((pro) => {
