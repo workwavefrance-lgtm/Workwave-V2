@@ -21,6 +21,7 @@ import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
+import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
 export const revalidate = 3600;
 
@@ -124,15 +125,17 @@ export default async function ListingPage({ params, searchParams }: Props) {
         )
       : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
 
-  // 308 vers la page département si aucun pro dans cette ville pour ce métier.
-  // Évite ~6000 URLs noindex pollutives en GSC, transmet le link juice à la
-  // page département (forte SEO), et la page redevient indexable automatiquement
-  // dès qu'un pro est ajouté pour cette commune.
+  // 308 vers la page département de la VILLE concernée si aucun pro dans cette
+  // ville pour ce métier. Évite les URLs noindex pollutives en GSC, transmet le
+  // link juice à la bonne page département (pas vienne-86 par défaut !), et la
+  // page redevient indexable automatiquement dès qu'un pro est ajouté pour cette
+  // commune.
   // ATTENTION : pas de loading.tsx dans cette route ! Le streaming Suspense
   // commit le status 200 avant que la page puisse throw permanentRedirect/notFound.
   // Cf. lecon apprise CLAUDE.md du 2026-04-18.
   if (resolved.type === "city" && result.count === 0) {
-    permanentRedirect(`/${metier}/vienne-86`);
+    const cityDeptSlug = generateDepartmentSlug(resolved.city.department);
+    permanentRedirect(`/${metier}/${cityDeptSlug}`);
   }
 
   const allCategories = await getAllCategories();
@@ -176,11 +179,24 @@ export default async function ListingPage({ params, searchParams }: Props) {
     })),
   };
 
-  const breadcrumbItems = [
-    { label: "Accueil", href: "/" },
-    { label: category.name, href: `/${category.slug}/vienne-86` },
-    { label: locationName },
-  ];
+  // Breadcrumb : le lien "Catégorie" pointe vers le département de la
+  // location courante (et non vienne-86 hardcodé). Pour une page dept, c'est
+  // self-référent → on retire ce niveau pour pas avoir un breadcrumb incohérent.
+  const breadcrumbDept =
+    resolved.type === "department" ? resolved.department : resolved.city.department;
+  const breadcrumbDeptSlug = generateDepartmentSlug(breadcrumbDept);
+  const breadcrumbItems =
+    resolved.type === "department"
+      ? [
+          { label: "Accueil", href: "/" },
+          { label: category.name, href: `/${category.slug}` },
+          { label: locationName },
+        ]
+      : [
+          { label: "Accueil", href: "/" },
+          { label: category.name, href: `/${category.slug}/${breadcrumbDeptSlug}` },
+          { label: locationName },
+        ];
 
   const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
 

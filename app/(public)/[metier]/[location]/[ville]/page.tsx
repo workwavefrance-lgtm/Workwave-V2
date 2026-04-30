@@ -19,6 +19,7 @@ import {
 } from "@/lib/specialties";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
+import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
 export const revalidate = 3600;
 
@@ -106,10 +107,12 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
 
   const result = await getProsByCategoryAndCity(category.id, city.id, { page });
 
-  // 308 vers la page département si aucun pro pour ce couple (cat × ville).
-  // Évite ~3500 URLs noindex pollutives en GSC pour les sous-spécialités vides.
+  // 308 vers la page département de la VILLE concernée si aucun pro pour ce
+  // couple (cat × ville). Évite les URLs noindex pollutives en GSC, transmet le
+  // link juice à la bonne page département (pas vienne-86 par défaut !).
   if (result.count === 0) {
-    permanentRedirect(`/${metier}/vienne-86`);
+    const cityDeptSlug = generateDepartmentSlug(city.department);
+    permanentRedirect(`/${metier}/${cityDeptSlug}`);
   }
 
   const lower = category.name.toLowerCase();
@@ -163,10 +166,12 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
     })),
   };
 
-  // Breadcrumb
+  // Breadcrumb : le lien "Catégorie" pointe vers le département de la VILLE
+  // courante (et non vienne-86 hardcodé) → meilleure pertinence locale.
+  const cityDeptSlug = generateDepartmentSlug(city.department);
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
-    { label: category.name, href: `/${category.slug}/vienne-86` },
+    { label: category.name, href: `/${category.slug}/${cityDeptSlug}` },
     { label: cityLabel, href: `/${category.slug}/${city.slug}` },
     { label: specialty.name },
   ];
