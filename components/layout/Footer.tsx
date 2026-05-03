@@ -141,6 +141,14 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  href="/departements"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Tous les départements
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/blog"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >

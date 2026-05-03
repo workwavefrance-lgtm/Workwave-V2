@@ -7,6 +7,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
 import ProjectCtaBanner from "@/components/listing/ProjectCtaBanner";
 import ListingIntro from "@/components/listing/ListingIntro";
+import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
@@ -15,6 +16,7 @@ import {
   getProsByCategoryAndCity,
 } from "@/lib/queries/pros";
 import { getNearbyCities, getCitiesByDepartment } from "@/lib/queries/cities";
+import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
@@ -156,14 +158,22 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   let nearbyCities: Awaited<ReturnType<typeof getNearbyCities>> = [];
   let popularCategories: Awaited<ReturnType<typeof getPopularCategoriesInCity>> = [];
+  // Charge en plus les 12 dept de Nouvelle-Aquitaine UNIQUEMENT pour les pages
+  // dept (pour le bloc "autres departements" en bas). Sur les pages ville on
+  // economise la query : pas de bloc inter-dept au niveau ville.
+  let allDepartments: Awaited<ReturnType<typeof getAllDepartmentsPublic>> = [];
   if (resolved.type === "city") {
     [nearbyCities, popularCategories] = await Promise.all([
       getNearbyCities(resolved.city.id, 8),
       getPopularCategoriesInCity(resolved.city.id, category.id, 6),
     ]);
   } else {
-    const deptCities = await getCitiesByDepartment(resolved.department.id);
+    const [deptCities, depts] = await Promise.all([
+      getCitiesByDepartment(resolved.department.id),
+      getAllDepartmentsPublic(),
+    ]);
     nearbyCities = deptCities.slice(0, 10);
+    allDepartments = depts;
   }
 
   const jsonLd = {
@@ -289,6 +299,18 @@ export default async function ListingPage({ params, searchParams }: Props) {
         locationName={locationName}
         popularCategories={popularCategories}
       />
+
+      {/* Bloc inter-dept : visible UNIQUEMENT sur les pages departement.
+          Pousse 11 liens internes vers /[metier]/[autre-dept] pour booster
+          la decouverte des pages dept hors-Vienne par Google (audit 2026-05-03). */}
+      {resolved.type === "department" && allDepartments.length > 0 && (
+        <OtherDepartmentsBlock
+          currentCategorySlug={category.slug}
+          currentCategoryName={category.name}
+          currentDepartmentCode={resolved.department.code}
+          allDepartments={allDepartments}
+        />
+      )}
     </main>
   );
 }

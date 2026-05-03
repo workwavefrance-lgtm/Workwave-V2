@@ -96,6 +96,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/deposer-projet`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/a-propos`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/recherche`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${BASE_URL}/departements`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/cgu`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/cgv`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/mentions-legales`, changeFrequency: "yearly", priority: 0.3 },
