@@ -1,5 +1,5 @@
 import { createPublicClient } from "@/lib/supabase/public-client";
-import type { Category, City } from "@/lib/types/database";
+import type { Category, City, Department } from "@/lib/types/database";
 
 // Queries Supabase PUBLIQUES (sans cookies) pour les Server Components
 // partages dans le layout (Footer, Header SSR si applicable) et la home.
@@ -48,4 +48,13 @@ export async function getAllCategoriesPublic(): Promise<Category[]> {
     .select("*")
     .order("name");
   return (data as Category[]) || [];
+}
+
+export async function getAllDepartmentsPublic(): Promise<Department[]> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("departments")
+    .select("*")
+    .order("code");
+  return (data as Department[]) || [];
 }

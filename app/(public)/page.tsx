@@ -8,26 +8,39 @@ import JsonLd from "@/components/seo/JsonLd";
 // ces modules touchent aux cookies (cf. lib/supabase/server.ts) et basculent
 // la page en dynamic => cache CDN inactif (TTFB 0.4s a chaque visite).
 import { getCategoriesByVerticalPublic } from "@/lib/queries/home-public";
-import { getTopCitiesPublic } from "@/lib/queries/home-public";
+import { getTopCitiesPublic, getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getWebSiteSchema, getOrganizationSchema } from "@/lib/utils/schema";
+import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 
 export default async function Home() {
-  const [btp, domicile, personne, topCities] = await Promise.all([
+  const [btp, domicile, personne, topCities, departments] = await Promise.all([
     getCategoriesByVerticalPublic("btp"),
     getCategoriesByVerticalPublic("domicile"),
     getCategoriesByVerticalPublic("personne"),
     getTopCitiesPublic(30),
+    getAllDepartmentsPublic(),
   ]);
 
   const allCategories = [...btp, ...domicile, ...personne].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
 
+  // Rotation des 12 departements pour repartir le link juice de la home
+  // sur tous les departements de Nouvelle-Aquitaine au lieu de tout pousser
+  // vers vienne-86. Offset different par vertical pour varier l'ordre.
+  // Cf. lecon CLAUDE.md (audit 2026-05-03).
+  const deptSlugs = departments.map((d) => generateDepartmentSlug(d));
+  const linkFor = (catSlug: string, idx: number, offset: number): string => {
+    if (deptSlugs.length === 0) return `/${catSlug}`;
+    const dept = deptSlugs[(idx + offset) % deptSlugs.length];
+    return `/${catSlug}/${dept}`;
+  };
+
   const verticals = [
-    { title: "BTP et artisanat", categories: btp },
-    { title: "Services a domicile", categories: domicile },
-    { title: "Aide a la personne", categories: personne },
+    { title: "BTP et artisanat", categories: btp, offset: 0 },
+    { title: "Services a domicile", categories: domicile, offset: 4 },
+    { title: "Aide a la personne", categories: personne, offset: 8 },
   ];
 
   return (
@@ -81,10 +94,10 @@ export default async function Home() {
               {vertical.title}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {vertical.categories.map((cat) => (
+              {vertical.categories.map((cat, i) => (
                 <Link
                   key={cat.id}
-                  href={`/${cat.slug}/vienne-86`}
+                  href={linkFor(cat.slug, i, vertical.offset)}
                   className="group bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 text-center transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]"
                 >
                   <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors duration-250">

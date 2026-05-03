@@ -1,11 +1,19 @@
 import Link from "next/link";
-// Import public (sans cookies) : critique pour le caching ISR du layout
-// (public). Si on remet `getAllCategories` du module categories.ts,
-// toutes les pages publiques basculent en dynamic => cache CDN inactif.
-import { getAllCategoriesPublic } from "@/lib/queries/home-public";
+// Imports publics (sans cookies) : critique pour le caching ISR du layout
+// (public). Si on remet `getAllCategories` / `getAllDepartments` qui
+// touchent aux cookies, toutes les pages publiques basculent en dynamic
+// => cache CDN inactif.
+import {
+  getAllCategoriesPublic,
+  getAllDepartmentsPublic,
+} from "@/lib/queries/home-public";
+import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
 export default async function Footer() {
-  const categories = await getAllCategoriesPublic();
+  const [categories, departments] = await Promise.all([
+    getAllCategoriesPublic(),
+    getAllDepartmentsPublic(),
+  ]);
 
   const btp = categories.filter((c) => c.vertical === "btp").slice(0, 9);
   const domicile = categories
@@ -14,6 +22,22 @@ export default async function Footer() {
   const personne = categories
     .filter((c) => c.vertical === "personne")
     .slice(0, 8);
+
+  // Rotation des 12 departements pour repartir le link juice du footer
+  // (present sur 200k+ pages) sur tous les departements de Nouvelle-Aquitaine,
+  // au lieu de tout pousser vers vienne-86 (situation pre-fix qui limitait
+  // la decouvrabilite de 92,7% des pros par Google). Offset different par
+  // colonne pour qu'aucune colonne ne demarre sur le meme dept.
+  // Cf. lecon CLAUDE.md (audit 2026-05-03).
+  const deptSlugs = departments.map((d) => generateDepartmentSlug(d));
+  const linkFor = (catSlug: string, idx: number, offset: number): string => {
+    if (deptSlugs.length === 0) return `/${catSlug}`;
+    const dept = deptSlugs[(idx + offset) % deptSlugs.length];
+    return `/${catSlug}/${dept}`;
+  };
+  const OFFSET_BTP = 0;
+  const OFFSET_DOMICILE = 4; // decale d'1/3 de la liste
+  const OFFSET_PERSONNE = 8; // decale d'2/3 de la liste
 
   return (
     <footer className="bg-[#0A0A0A] dark:bg-[#111111] text-white mt-auto">
@@ -34,10 +58,10 @@ export default async function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-4">BTP et artisanat</h4>
             <ul className="space-y-2">
-              {btp.map((cat) => (
+              {btp.map((cat, i) => (
                 <li key={cat.id}>
                   <Link
-                    href={`/${cat.slug}/vienne-86`}
+                    href={linkFor(cat.slug, i, OFFSET_BTP)}
                     className="text-zinc-400 hover:text-white transition-colors duration-250"
                   >
                     {cat.name}
@@ -51,10 +75,10 @@ export default async function Footer() {
               Services à domicile
             </h4>
             <ul className="space-y-2">
-              {domicile.map((cat) => (
+              {domicile.map((cat, i) => (
                 <li key={cat.id}>
                   <Link
-                    href={`/${cat.slug}/vienne-86`}
+                    href={linkFor(cat.slug, i, OFFSET_DOMICILE)}
                     className="text-zinc-400 hover:text-white transition-colors duration-250"
                   >
                     {cat.name}
@@ -68,10 +92,10 @@ export default async function Footer() {
               Aide à la personne
             </h4>
             <ul className="space-y-2">
-              {personne.map((cat) => (
+              {personne.map((cat, i) => (
                 <li key={cat.id}>
                   <Link
-                    href={`/${cat.slug}/vienne-86`}
+                    href={linkFor(cat.slug, i, OFFSET_PERSONNE)}
                     className="text-zinc-400 hover:text-white transition-colors duration-250"
                   >
                     {cat.name}
