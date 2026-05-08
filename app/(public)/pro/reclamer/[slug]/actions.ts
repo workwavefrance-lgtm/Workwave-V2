@@ -11,6 +11,7 @@ import {
   sendClaimAlreadyClaimedAlert,
   sendClaimSuccessAlert,
 } from "@/lib/email/send-verification-code";
+import { sendClaimWelcomeEmail } from "@/lib/email/send-claim-welcome";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
@@ -99,6 +100,33 @@ async function notifyAdminOfClaimSuccess(params: {
     });
   } catch (err) {
     console.error("notifyAdminOfClaimSuccess error :", err);
+  }
+}
+
+// Notification PRO (fire-and-forget) apres une reclamation reussie.
+// Envoie un mail de bienvenue au pro avec recap trial + avantages
+// Workwave Pro + 3 conseils pour demarrer.
+async function notifyProOfClaimSuccess(params: {
+  slug: string;
+  claimEmail: string;
+}) {
+  try {
+    const serviceClient = await getServiceClient();
+    const { data: pro } = await serviceClient
+      .from("pros")
+      .select("name, trial_ends_at")
+      .eq("slug", params.slug)
+      .single();
+
+    if (!pro || !pro.trial_ends_at) return;
+
+    await sendClaimWelcomeEmail({
+      email: params.claimEmail,
+      proName: pro.name,
+      trialEndsAt: new Date(pro.trial_ends_at),
+    });
+  } catch (err) {
+    console.error("notifyProOfClaimSuccess error :", err);
   }
 }
 
@@ -464,6 +492,12 @@ export async function verifyClaim(
         ip: attempt.ip ?? undefined,
       });
 
+      // Mail de bienvenue au pro (fire-and-forget)
+      notifyProOfClaimSuccess({
+        slug,
+        claimEmail: attempt.email,
+      });
+
       // Connecter l'utilisateur côté serveur
       await signInAndSetCookies(attempt.email, attempt.temp_password);
 
@@ -531,7 +565,13 @@ export async function verifyClaim(
     ip: attempt.ip ?? undefined,
   });
 
-  // 6. Connecter l'utilisateur côté serveur (écrire les cookies de session)
+  // 6. Mail de bienvenue au pro (fire-and-forget)
+  notifyProOfClaimSuccess({
+    slug,
+    claimEmail: attempt.email,
+  });
+
+  // 7. Connecter l'utilisateur côté serveur (écrire les cookies de session)
   await signInAndSetCookies(attempt.email, attempt.temp_password);
 
   return { success: true, redirectUrl: "/pro/dashboard" };
