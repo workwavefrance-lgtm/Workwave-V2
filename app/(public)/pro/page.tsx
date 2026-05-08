@@ -52,9 +52,9 @@ const advantages = [
       "Vous payez un abonnement fixe. Pas de pourcentage sur vos devis ni sur vos factures. Vos revenus restent vos revenus.",
   },
   {
-    title: "Fiche pro gratuite et visible sur Google",
+    title: "Fiche pro gratuite à vie, visible sur Google",
     description:
-      "Votre fiche est référencée automatiquement sur les moteurs de recherche. Plus de visibilité, plus de clients potentiels.",
+      "Votre fiche est référencée automatiquement sur les moteurs de recherche, et reste gratuite même après l'essai. Sans abonnement, vous gardez la visibilité, vous ne recevez juste plus les leads.",
   },
   {
     title: "Essai gratuit 14 jours sans carte bancaire",
@@ -319,6 +319,45 @@ export default function ProLandingPage() {
               >
                 Commencer l&apos;essai gratuit
               </Link>
+            </div>
+          </div>
+
+          {/* Encart rassurance : fiche gratuite a vie meme sans abonnement */}
+          <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8 mb-6">
+            <div className="flex items-start gap-4">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                style={{ backgroundColor: "var(--accent-muted)" }}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-[var(--text-primary)] mb-2">
+                  Pas pressé d&apos;activer votre abonnement ? Votre fiche reste
+                  gratuite à vie.
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Si vous n&apos;activez pas votre abonnement à la fin de
+                  l&apos;essai, votre fiche reste visible sur Workwave et
+                  référencée sur Google. Aucun prélèvement automatique, aucune
+                  carte bancaire requise. La seule différence : vous ne
+                  recevrez plus les demandes des particuliers de votre zone
+                  tant que vous n&apos;aurez pas réactivé l&apos;abonnement.
+                </p>
+              </div>
             </div>
           </div>
 
