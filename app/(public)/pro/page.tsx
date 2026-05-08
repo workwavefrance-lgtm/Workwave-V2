@@ -94,7 +94,7 @@ const routingSteps = [
   },
   {
     number: "2",
-    title: "Claude analyse en temps réel",
+    title: "Notre IA analyse en temps réel",
     description:
       "Notre IA lit la demande, identifie le métier exact, vérifie la cohérence et détecte le score d'urgence.",
   },
@@ -375,7 +375,7 @@ export default function ProLandingPage() {
             Comment vous recevez vos leads
           </h2>
           <p className="text-[var(--text-secondary)] text-center mb-16 max-w-2xl mx-auto">
-            3 étapes, zéro spam. Notre IA Claude qualifie chaque projet et
+            3 étapes, zéro spam. Notre IA qualifie chaque projet et
             sélectionne les 3 professionnels les mieux placés.
           </p>
 
