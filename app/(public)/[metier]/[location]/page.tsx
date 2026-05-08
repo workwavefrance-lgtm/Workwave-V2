@@ -8,6 +8,7 @@ import InternalLinks from "@/components/listing/InternalLinks";
 import ProjectCtaBanner from "@/components/listing/ProjectCtaBanner";
 import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
+import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
@@ -299,6 +300,19 @@ export default async function ListingPage({ params, searchParams }: Props) {
         locationName={locationName}
         popularCategories={popularCategories}
       />
+
+      {/* Encart doublons : invite les pros qui voient leur entreprise en
+          double a reclamer la bonne fiche et a contacter l'admin pour
+          fusionner. Affiche UNIQUEMENT quand count > 1 (sinon pas de
+          doublon possible visible sur la page courante). Strategie :
+          convertir un probleme (doublons hereites Sirene/Apify) en levier
+          d'engagement (le pro identifie lui-meme sa bonne fiche). */}
+      {result.count > 1 && (
+        <DuplicateNoticeBlock
+          categoryName={category.name}
+          locationName={locationName}
+        />
+      )}
 
       {/* Bloc inter-dept : visible UNIQUEMENT sur les pages departement.
           Pousse 11 liens internes vers /[metier]/[autre-dept] pour booster
