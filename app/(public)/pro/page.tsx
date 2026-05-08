@@ -78,6 +78,34 @@ const features = [
   "Support prioritaire par email",
 ];
 
+const stats = [
+  { value: "226 000+", label: "professionnels référencés" },
+  { value: "4 293", label: "communes couvertes" },
+  { value: "12", label: "départements de Nouvelle-Aquitaine" },
+  { value: "14 jours", label: "d'essai gratuit, sans carte bancaire" },
+];
+
+const routingSteps = [
+  {
+    number: "1",
+    title: "Le particulier dépose un projet",
+    description:
+      "Description, ville, budget, urgence. Le formulaire est qualifié en 2 minutes côté demandeur.",
+  },
+  {
+    number: "2",
+    title: "Claude analyse en temps réel",
+    description:
+      "Notre IA lit la demande, identifie le métier exact, vérifie la cohérence et détecte le score d'urgence.",
+  },
+  {
+    number: "3",
+    title: "3 pros les mieux placés sont sélectionnés",
+    description:
+      "Score composite : distance, équité de charge, ancienneté. Maximum 3 pros par projet, jamais de mise en concurrence à 30.",
+  },
+];
+
 const faqs = [
   {
     question: "Comment réclamer ma fiche ?",
@@ -313,33 +341,90 @@ export default function ProLandingPage() {
         </div>
       </section>
 
-      {/* Témoignages — placeholder */}
+      {/* Chiffres cles — credibilite par le volume */}
       <section className="py-20 sm:py-28 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-12 tracking-tight">
-            Ce que disent les pros
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] text-center mb-4 tracking-tight">
+            Workwave en chiffres
           </h2>
-          <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-12">
-            <div className="w-16 h-16 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center mx-auto mb-6">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--text-tertiary)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          <p className="text-[var(--text-secondary)] text-center mb-12 max-w-xl mx-auto">
+            Données issues du registre Sirene et de notre infrastructure SEO.
+          </p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {stats.map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8 text-center"
               >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </div>
-            <p className="text-[var(--text-secondary)] text-base mb-2">
-              Les premiers témoignages arrivent bientôt.
-            </p>
-            <p className="text-sm text-[var(--text-tertiary)]">
-              Nous venons de lancer Workwave dans la Vienne. Rejoignez les
-              premiers pros et faites partie des pionniers.
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
+                  {stat.value}
+                </p>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-snug">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Routing IA — differenciateur fort vs concurrents */}
+      <section className="py-20 sm:py-28 px-4 bg-[var(--bg-secondary)]">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] text-center mb-4 tracking-tight">
+            Comment vous recevez vos leads
+          </h2>
+          <p className="text-[var(--text-secondary)] text-center mb-16 max-w-2xl mx-auto">
+            3 étapes, zéro spam. Notre IA Claude qualifie chaque projet et
+            sélectionne les 3 professionnels les mieux placés.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 relative">
+            {routingSteps.map((step, idx) => (
+              <div key={step.number} className="relative">
+                <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-7 h-full">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-full bg-[var(--accent)] text-white text-sm font-bold flex items-center justify-center">
+                      {step.number}
+                    </div>
+                    <h3 className="text-base font-semibold text-[var(--text-primary)] leading-snug">
+                      {step.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+                {/* Connecteur fleche entre cards (visible md+) */}
+                {idx < routingSteps.length - 1 && (
+                  <div
+                    className="hidden md:flex absolute top-1/2 -right-4 lg:-right-5 -translate-y-1/2 w-8 h-8 items-center justify-center text-[var(--text-tertiary)] z-10"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                      <path d="M13 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-sm text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
+              Pas de mise en concurrence à 30 comme sur les plateformes
+              traditionnelles. Maximum 3 pros par projet, ce qui garantit des
+              leads qualifiés et une compétition raisonnable.
             </p>
           </div>
         </div>
