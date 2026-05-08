@@ -212,6 +212,7 @@ export default async function ProPage({ params }: Props) {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 <Link
                   href={`/pro/reclamer/${slug}`}
+                  rel="nofollow"
                   className="inline-flex items-center justify-center gap-2 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm whitespace-nowrap"
                 >
                   Réclamer ma fiche — gratuit
@@ -316,6 +317,7 @@ export default async function ProPage({ params }: Props) {
 
               <Link
                 href={`/pro/reclamer/${slug}`}
+                rel="nofollow"
                 className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-6 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm"
               >
                 Réclamer cette fiche — 3 minutes
@@ -698,6 +700,7 @@ export default async function ProPage({ params }: Props) {
           Sirene).{" "}
           <a
             href={`/artisan/${slug}/supprimer`}
+            rel="nofollow"
             className="underline hover:text-[var(--accent)] transition-colors duration-250"
           >
             Demander la suppression de cette fiche
