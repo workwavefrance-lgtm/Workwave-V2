@@ -144,6 +144,26 @@ export default async function ProPage({ params }: Props) {
     }
   }
 
+  // RGE officiel ADEME : hasCredential pour Schema.org Rich Results +
+  // signal LLM. Une qualif = une EducationalOccupationalCredential.
+  if (pro.rge_certified && Array.isArray(pro.rge_qualifications) && pro.rge_qualifications.length > 0) {
+    jsonLd.hasCredential = pro.rge_qualifications.map((q) => ({
+      "@type": "EducationalOccupationalCredential",
+      name: q.nom,
+      credentialCategory: "certification",
+      ...(q.organisme
+        ? {
+            recognizedBy: {
+              "@type": "Organization",
+              name: q.organisme,
+            },
+          }
+        : {}),
+      ...(q.date_fin ? { validThrough: q.date_fin } : {}),
+      ...(q.domaine ? { about: q.domaine } : {}),
+    }));
+  }
+
   // Zone d'intervention
   if (isClaimed && pro.intervention_radius_km && pro.city?.latitude && pro.city?.longitude) {
     jsonLd.areaServed = {
@@ -273,6 +293,20 @@ export default async function ProPage({ params }: Props) {
                 >
                   {pro.category.name}
                 </span>
+                {/* Badge RGE certifie — source officielle ADEME, plus credible
+                    que le champ certifications user-input. Affiche tel quel
+                    quand pro.rge_certified=true (sync via match-rge-pros.ts). */}
+                {pro.rge_certified && (
+                  <span
+                    className="inline-flex items-center gap-1.5 bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 text-sm font-medium px-3 py-1 rounded-full"
+                    title="Certification RGE officielle, source ADEME"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    RGE certifié
+                  </span>
+                )}
                 {pro.free_quote && isClaimed && (
                   <span className="inline-block bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-sm font-medium px-3 py-1 rounded-full">
                     Devis gratuit
@@ -350,6 +384,54 @@ export default async function ProPage({ params }: Props) {
               <p className="text-[var(--text-secondary)] leading-relaxed">
                 {pro.description}
               </p>
+            </div>
+          )}
+
+          {/* Section RGE officielle ADEME — affichee uniquement si rge_certified.
+              Sync auto via scripts/match-rge-pros.ts depuis le dataset officiel
+              data.ademe.fr. Plus credible que le champ certifications user-input
+              parce que la source est gouvernementale et qu'on filtre les qualifs
+              expirees au moment du sync. */}
+          {pro.rge_certified && Array.isArray(pro.rge_qualifications) && pro.rge_qualifications.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">
+                  Qualifications RGE officielles
+                </h2>
+                <span className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider px-2 py-0.5 rounded-full border border-[var(--card-border)]">
+                  Source ADEME
+                </span>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/50 rounded-2xl p-5">
+                <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed mb-4">
+                  Cette entreprise est officiellement reconnue garante de l&apos;environnement (RGE) sur le registre national de l&apos;ADEME. Les travaux RGE sont éligibles à MaPrimeRénov&apos;, aux CEE, et aux aides locales.
+                </p>
+                <div className="space-y-2.5">
+                  {pro.rge_qualifications.map((q, i) => (
+                    <div key={i} className="flex items-start gap-3 text-sm">
+                      <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-[var(--text-primary)] font-medium leading-snug">
+                          {q.nom}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                          {q.organisme && <span className="capitalize">{q.organisme}</span>}
+                          {q.organisme && q.domaine && " · "}
+                          {q.domaine}
+                          {q.date_fin && (
+                            <span className="text-[var(--text-tertiary)]">
+                              {(q.organisme || q.domaine) && " · "}
+                              valide jusqu&apos;au {new Date(q.date_fin).toLocaleDateString("fr-FR")}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

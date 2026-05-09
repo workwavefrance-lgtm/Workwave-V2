@@ -78,6 +78,17 @@ export type Certification =
 
 export type PaymentMethod = "CB" | "virement" | "cheque" | "especes";
 
+// Qualification RGE officielle source ADEME (sync via scripts/match-rge-pros.ts)
+// Une entreprise peut avoir plusieurs RgeQualification (Qualibat 5111 + 5232 + ...)
+export type RgeQualification = {
+  nom: string;
+  code: string | null;
+  organisme: string | null;
+  domaine: string | null;
+  meta_domaine: string | null;
+  date_fin: string;
+};
+
 export type Specialty = {
   category_id: number;
   specialties: string[];
@@ -128,6 +139,10 @@ export type Pro = {
   languages: string[] | null;
   certifications: Certification[];
   rge_number: string | null;
+  // RGE officiel ADEME (sync auto via scripts/match-rge-pros.ts)
+  rge_certified: boolean;
+  rge_qualifications: RgeQualification[];
+  rge_synced_at: string | null;
   has_rc_pro: boolean;
   has_decennale: boolean;
   payment_methods: PaymentMethod[];
