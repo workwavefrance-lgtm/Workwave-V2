@@ -115,9 +115,12 @@ async function fetchAllRGE(): Promise<Map<string, Qualif[]>> {
 }
 
 async function fetchAllProsWithSiret(): Promise<{ id: number; siret: string }[]> {
+  // PostgREST cap a 1000 rows par requete par defaut. Cf. lecon CLAUDE.md
+  // 30/04/2026 : ne PAS supposer que rows.length === PAGE indique "il y a
+  // plus", utiliser rows.length > 0 et incrementer offset par rows.length.
   const all: { id: number; siret: string }[] = [];
   let offset = 0;
-  const PAGE = 5000;
+  const PAGE = 1000;
   while (true) {
     const { data } = await supabase
       .from("pros")
@@ -130,8 +133,10 @@ async function fetchAllProsWithSiret(): Promise<{ id: number; siret: string }[]>
     const rows = (data || []) as { id: number; siret: string }[];
     if (rows.length === 0) break;
     all.push(...rows);
-    if (rows.length < PAGE) break;
     offset += rows.length;
+    if (offset % 50000 === 0) {
+      process.stdout.write(`  ${offset}... `);
+    }
   }
   return all;
 }
