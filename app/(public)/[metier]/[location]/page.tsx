@@ -9,6 +9,7 @@ import ProjectCtaBanner from "@/components/listing/ProjectCtaBanner";
 import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
 import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
+import CityFactsBlock from "@/components/listing/CityFactsBlock";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
@@ -300,6 +301,18 @@ export default async function ListingPage({ params, searchParams }: Props) {
         locationName={locationName}
         popularCategories={popularCategories}
       />
+
+      {/* Bloc CityFacts : passage factuel "X en chiffres" affiche UNIQUEMENT
+          sur les pages ville (pas dept) et seulement si la commune a une
+          population en base. Source INSEE deja en base (cities.population),
+          plus estimations derivees standard (logements). Contenu unique
+          factuel par ville pour le SEO local + signal LLM. */}
+      {resolved.type === "city" && resolved.city.population && (
+        <CityFactsBlock
+          city={resolved.city}
+          categoryName={category.name}
+        />
+      )}
 
       {/* Encart doublons : invite les pros qui voient leur entreprise en
           double a reclamer la bonne fiche et a contacter l'admin pour
