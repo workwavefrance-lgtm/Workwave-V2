@@ -11,6 +11,7 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
+import { formatEffectifRange, formatFoundingYear, formatAgeYears } from "@/lib/utils/sirene";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 
 export const revalidate = 86400;
@@ -141,6 +142,21 @@ export default async function ProPage({ params }: Props) {
     const specs = toOpeningHoursSpecification(openingHours as OpeningHours);
     if (specs.length > 0) {
       jsonLd.openingHoursSpecification = specs;
+    }
+  }
+
+  // Sirene v3 : foundingDate + numberOfEmployees pour Schema.org
+  // (signal d'anciennete et de taille pour Google + LLM)
+  if (pro.founding_date) {
+    jsonLd.foundingDate = pro.founding_date;
+  }
+  if (pro.effectif_range) {
+    const effLabel = formatEffectifRange(pro.effectif_range);
+    if (effLabel) {
+      jsonLd.numberOfEmployees = {
+        "@type": "QuantitativeValue",
+        description: effLabel,
+      };
     }
   }
 
@@ -384,6 +400,58 @@ export default async function ProPage({ params }: Props) {
               <p className="text-[var(--text-secondary)] leading-relaxed">
                 {pro.description}
               </p>
+            </div>
+          )}
+
+          {/* Bandeau Sirene : age + effectif. Source officielle INSEE
+              (sync via scripts/enrich-sirene-v3.ts). Signal de confiance
+              majeur pour les particuliers : c'est ce qu'ils regardent en
+              premier (anciennete + taille). Affiche uniquement si on a
+              au moins une des deux infos. */}
+          {(pro.founding_date || pro.effectif_range) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {pro.founding_date && (() => {
+                const year = formatFoundingYear(pro.founding_date);
+                const age = formatAgeYears(pro.founding_date);
+                if (!year) return null;
+                return (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
+                      <svg className="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">Entreprise créée en</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)]">
+                        {year}
+                        {age !== null && age >= 1 && (
+                          <span className="text-[var(--text-secondary)] font-normal"> · {age} {age > 1 ? "ans" : "an"} d&apos;activité</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+              {pro.effectif_range && formatEffectifRange(pro.effectif_range) && (
+                <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
+                    <svg className="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">Taille de l&apos;équipe</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      {formatEffectifRange(pro.effectif_range)}
+                      <span className="text-[var(--text-tertiary)] font-normal text-xs"> · INSEE</span>
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -3,6 +3,7 @@ import type { City, Department } from "@/lib/types/database";
 type Props = {
   city: City & { department?: Department | null };
   categoryName: string;
+  prosCount?: number;
 };
 
 /**
@@ -18,7 +19,11 @@ type Props = {
  * recompense pour le SEO local et ce que les LLM citent. Casse le risque
  * "duplicate content" entre nos 4 293 pages ville.
  */
-export default function CityFactsBlock({ city, categoryName }: Props) {
+export default function CityFactsBlock({
+  city,
+  categoryName,
+  prosCount,
+}: Props) {
   const pop = city.population;
   if (!pop) return null;
 
@@ -31,6 +36,11 @@ export default function CityFactsBlock({ city, categoryName }: Props) {
   const estimatedHomes = Math.round(pop / 2.3);
   const homesStr = estimatedHomes.toLocaleString("fr-FR");
   const popStr = pop.toLocaleString("fr-FR");
+
+  // Densite pro/habitant : 1 pro pour X habitants. Affichee uniquement si
+  // pop >= 1000 et au moins 2 pros (sinon le ratio est peu significatif).
+  const showDensity = !!prosCount && prosCount >= 2 && pop >= 1000;
+  const habitantsParPro = showDensity ? Math.round(pop / prosCount!) : null;
 
   // Categorisation marche
   let marketTier: "rural" | "small" | "medium" | "large";
@@ -113,6 +123,16 @@ export default function CityFactsBlock({ city, categoryName }: Props) {
       <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
         {marketSentence}
       </p>
+
+      {/* Densite pro/habitant : signal d'engagement utilisateur fort.
+          Calcul a la volee : population / count(pros dans cette cat).
+          Affiche uniquement si la ville a >= 1000 habitants et >= 2 pros
+          dans la categorie courante (sinon le ratio est peu significatif). */}
+      {showDensity && habitantsParPro !== null && (
+        <p className="mt-3 text-sm text-[var(--text-secondary)] leading-relaxed">
+          A {cityName}, on compte <strong className="text-[var(--text-primary)]">{prosCount} {lcCategory}{prosCount! > 1 ? "s" : ""}</strong> pour <strong className="text-[var(--text-primary)]">{popStr} habitants</strong>, soit <strong className="text-[var(--text-primary)]">1 {lcCategory} pour {habitantsParPro.toLocaleString("fr-FR")} habitants</strong>.
+        </p>
+      )}
     </section>
   );
 }

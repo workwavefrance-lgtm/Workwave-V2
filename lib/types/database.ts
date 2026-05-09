@@ -143,6 +143,11 @@ export type Pro = {
   rge_certified: boolean;
   rge_qualifications: RgeQualification[];
   rge_synced_at: string | null;
+  // Sirene v3 enrichi (sync auto via scripts/enrich-sirene-v3.ts)
+  founding_date: string | null;
+  effectif_range: string | null;
+  etat_admin: "A" | "C" | "F" | null;
+  sirene_synced_at: string | null;
   has_rc_pro: boolean;
   has_decennale: boolean;
   payment_methods: PaymentMethod[];

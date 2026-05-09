@@ -311,6 +311,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
         <CityFactsBlock
           city={resolved.city}
           categoryName={category.name}
+          prosCount={result.count}
         />
       )}
 
