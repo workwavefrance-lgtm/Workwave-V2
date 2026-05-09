@@ -55,7 +55,13 @@ export function toBreadcrumbSchema(
 }
 
 /**
- * Schema Organization pour Workwave
+ * Schema Organization pour Workwave (enrichi pour LLM/GEO)
+ *
+ * Enrichi avec areaServed (12 dept Nouvelle-Aquitaine), foundingDate,
+ * description longue, slogan, knowsAbout (categories metier), pour aider
+ * les LLM a comprendre le scope precis de l'entreprise et la citer
+ * correctement quand on leur pose des questions sur les artisans en
+ * Nouvelle-Aquitaine.
  */
 export function getOrganizationSchema(baseUrl: string): Record<string, unknown> {
   return {
@@ -65,9 +71,11 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     legalName: "Workwave SAS",
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
-    sameAs: [
-      "https://www.instagram.com/workwave.fr/",
-    ],
+    description:
+      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en Nouvelle-Aquitaine. 226 000+ artisans référencés dans les 12 départements et 4 293 communes de la région. Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + abonnement optionnel à partir de 32,50 €/mois pour recevoir les leads.",
+    slogan: "Tout le savoir-faire local, enfin accessible",
+    foundingDate: "2026-04",
+    sameAs: ["https://www.instagram.com/workwave.fr/"],
     address: {
       "@type": "PostalAddress",
       streetAddress: "3 rue des Rosiers",
@@ -75,11 +83,58 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
       postalCode: "86110",
       addressCountry: "FR",
     },
+    areaServed: {
+      "@type": "AdministrativeArea",
+      name: "Nouvelle-Aquitaine",
+      containsPlace: [
+        { "@type": "AdministrativeArea", name: "Charente", identifier: "16" },
+        { "@type": "AdministrativeArea", name: "Charente-Maritime", identifier: "17" },
+        { "@type": "AdministrativeArea", name: "Corrèze", identifier: "19" },
+        { "@type": "AdministrativeArea", name: "Creuse", identifier: "23" },
+        { "@type": "AdministrativeArea", name: "Dordogne", identifier: "24" },
+        { "@type": "AdministrativeArea", name: "Gironde", identifier: "33" },
+        { "@type": "AdministrativeArea", name: "Landes", identifier: "40" },
+        { "@type": "AdministrativeArea", name: "Lot-et-Garonne", identifier: "47" },
+        { "@type": "AdministrativeArea", name: "Pyrénées-Atlantiques", identifier: "64" },
+        { "@type": "AdministrativeArea", name: "Deux-Sèvres", identifier: "79" },
+        { "@type": "AdministrativeArea", name: "Vienne", identifier: "86" },
+        { "@type": "AdministrativeArea", name: "Haute-Vienne", identifier: "87" },
+      ],
+    },
+    knowsAbout: [
+      "BTP et artisanat",
+      "Plomberie",
+      "Électricité",
+      "Maçonnerie",
+      "Peinture",
+      "Menuiserie",
+      "Carrelage",
+      "Couverture",
+      "Charpenterie",
+      "Chauffage",
+      "Climatisation",
+      "Serrurerie",
+      "Architecture d'intérieur",
+      "Paysagisme",
+      "Services à domicile",
+      "Ménage",
+      "Jardinage",
+      "Aide à la personne",
+      "Garde d'enfants",
+      "Aide aux seniors",
+      "Soutien scolaire",
+    ],
+    numberOfEmployees: {
+      "@type": "QuantitativeValue",
+      minValue: 1,
+      maxValue: 10,
+    },
     contactPoint: {
       "@type": "ContactPoint",
       email: "contact@workwave.fr",
       contactType: "customer service",
       availableLanguage: "French",
+      areaServed: "FR",
     },
     taxID: "943055830",
   };
