@@ -71,6 +71,19 @@ export default function DeletionVerifyForm({
       >
         {isPending ? "Vérification..." : "Confirmer la suppression"}
       </button>
+
+      <div className="pt-2 border-t border-[var(--border-color)] mt-6">
+        <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
+          Vous ne recevez pas le code ou il a expiré ? Écrivez-nous à{" "}
+          <a
+            href="mailto:contact@workwave.fr?subject=Demande%20de%20suppression%20de%20fiche"
+            className="text-[var(--accent)] hover:underline"
+          >
+            contact@workwave.fr
+          </a>{" "}
+          en mentionnant le SIRET de votre fiche. Réponse sous 48h ouvrées.
+        </p>
+      </div>
     </form>
   );
 }

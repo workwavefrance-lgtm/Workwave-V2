@@ -76,9 +76,13 @@ export default function DeletionRequestForm({
           id="email"
           name="email"
           type="email"
-          placeholder="contact@entreprise.fr"
+          placeholder="votre.email@exemple.fr"
           className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
         />
+        <p className="text-xs text-[var(--text-tertiary)] mt-1.5 leading-relaxed">
+          Le code de vérification sera envoyé à cette adresse. Vous devez
+          pouvoir y accéder pour finaliser la suppression.
+        </p>
         {state.errors?.email && (
           <p className="text-xs text-red-500 mt-1">{state.errors.email}</p>
         )}
@@ -91,6 +95,20 @@ export default function DeletionRequestForm({
       >
         {isPending ? "Envoi en cours..." : "Envoyer le code de vérification"}
       </button>
+
+      <div className="pt-2 border-t border-[var(--border-color)] mt-6">
+        <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
+          Un problème pour valider la suppression ? Écrivez-nous directement
+          à{" "}
+          <a
+            href="mailto:contact@workwave.fr?subject=Demande%20de%20suppression%20de%20fiche"
+            className="text-[var(--accent)] hover:underline"
+          >
+            contact@workwave.fr
+          </a>{" "}
+          en mentionnant votre SIRET. Réponse sous 48h ouvrées.
+        </p>
+      </div>
     </form>
   );
 }

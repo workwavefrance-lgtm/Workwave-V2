@@ -291,7 +291,7 @@ async function markUnrouted(
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
-      from: "Workwave <onboarding@resend.dev>",
+      from: "Workwave <contact@workwave.fr>",
       to: process.env.ADMIN_EMAIL || "admin@workwave.fr",
       subject: `[Workwave Alert] Projet orphelin — ${project.category.name} à ${project.city.name}`,
       html: `

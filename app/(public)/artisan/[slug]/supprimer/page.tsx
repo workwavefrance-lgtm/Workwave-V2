@@ -68,9 +68,13 @@ export default async function ProDeletionPage({
           {pro.name}
         </p>
         <p className="text-sm text-[var(--text-secondary)] mb-8">
-          Pour supprimer cette fiche, veuillez confirmer le SIRET de
-          l&apos;entreprise et votre adresse email. Un code de vérification vous
-          sera envoyé.
+          Pour supprimer cette fiche, saisissez le SIRET de
+          l&apos;entreprise et une adresse email accessible. Un code de
+          vérification à 6 chiffres vous sera envoyé{" "}
+          <strong className="text-[var(--text-primary)]">
+            sur cette adresse
+          </strong>{" "}
+          dans la minute qui suit.
         </p>
         <DeletionRequestForm slug={slug} hasSiret={!!pro.siret} />
       </div>
