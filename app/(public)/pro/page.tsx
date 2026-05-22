@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import JsonLd from "@/components/seo/JsonLd";
+import { getFaqSchema } from "@/lib/utils/schema";
 
 export const metadata: Metadata = {
   title: "Workwave pour les professionnels - Recevez des leads qualifies",
@@ -470,6 +472,9 @@ export default function ProLandingPage() {
       </section>
 
       {/* FAQ */}
+      {/* JSON-LD FAQPage : le contenu reflete exactement la FAQ visible
+          ci-dessous (variable `faqs`). Conforme guidelines Google. */}
+      <JsonLd data={getFaqSchema(faqs)} />
       <section className="py-20 sm:py-28 px-4 bg-[var(--bg-secondary)]">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] text-center mb-12 tracking-tight">

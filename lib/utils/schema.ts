@@ -159,3 +159,30 @@ export function getWebSiteSchema(baseUrl: string): Record<string, unknown> {
     },
   };
 }
+
+/**
+ * Schema FAQPage — pour les sections FAQ visibles (home, /pro, etc.)
+ *
+ * IMPORTANT (exigence Google) : le contenu passe a ce helper DOIT
+ * correspondre a une FAQ reellement AFFICHEE sur la page. Ne jamais
+ * generer un FAQPage dont les questions ne sont pas visibles a l'ecran,
+ * c'est une violation des guidelines (risque d'action manuelle).
+ *
+ * Utile aussi pour le GEO : les LLM extraient les paires Q/R structurees.
+ */
+export function getFaqSchema(
+  faqs: { question: string; answer: string }[]
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}

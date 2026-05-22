@@ -9,9 +9,54 @@ import JsonLd from "@/components/seo/JsonLd";
 // la page en dynamic => cache CDN inactif (TTFB 0.4s a chaque visite).
 import { getCategoriesByVerticalPublic } from "@/lib/queries/home-public";
 import { getTopCitiesPublic, getAllDepartmentsPublic } from "@/lib/queries/home-public";
-import { getWebSiteSchema, getOrganizationSchema } from "@/lib/utils/schema";
+import {
+  getWebSiteSchema,
+  getOrganizationSchema,
+  getFaqSchema,
+} from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
+
+// FAQ affichee en bas de la home (section visible) + injectee en JSON-LD
+// FAQPage. Contenu strictement factuel : tout est verifiable dans le
+// projet (cf. lecon CLAUDE.md sur les inventions a bannir du contenu).
+const homeFaqs = [
+  {
+    question: "Qu'est-ce que Workwave ?",
+    answer:
+      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant les 12 départements de la Nouvelle-Aquitaine. La plateforme référence plus de 226 000 professionnels dans 4 293 communes et met en relation les particuliers avec des artisans locaux.",
+  },
+  {
+    question: "Workwave est-il gratuit pour les particuliers ?",
+    answer:
+      "Oui. La recherche d'un professionnel, la consultation des fiches et le dépôt d'un projet de travaux sont entièrement gratuits pour les particuliers. Aucune création de compte n'est nécessaire pour rechercher un artisan ou déposer une demande.",
+  },
+  {
+    question: "Comment trouver un artisan sur Workwave ?",
+    answer:
+      "Indiquez un métier et une ville dans la barre de recherche. Workwave affiche les professionnels référencés dans la zone choisie, avec leurs coordonnées, leur description et leurs informations légales comme le numéro SIRET et les certifications déclarées.",
+  },
+  {
+    question: "Comment déposer un projet de travaux ?",
+    answer:
+      "Remplissez le formulaire de dépôt de projet en décrivant votre besoin. La demande est analysée puis transmise automatiquement à un maximum de 3 professionnels qualifiés dans la catégorie et la zone concernées. Ces professionnels recontactent ensuite directement le particulier.",
+  },
+  {
+    question: "D'où proviennent les fiches des professionnels ?",
+    answer:
+      "Les fiches de base sont créées à partir de données publiques, principalement le registre SIRENE de l'INSEE. Chaque professionnel peut réclamer gratuitement sa fiche pour la compléter, ajouter des photos, corriger ses informations ou en demander la suppression.",
+  },
+  {
+    question: "Combien coûte Workwave pour un professionnel ?",
+    answer:
+      "Le référencement de base est gratuit à vie. Un abonnement optionnel à 39 € par mois, ou 390 € par an, permet de recevoir automatiquement les demandes de projets des particuliers. Un essai gratuit de 14 jours sans carte bancaire est proposé.",
+  },
+  {
+    question: "Quelle zone géographique couvre Workwave ?",
+    answer:
+      "Workwave couvre l'ensemble de la région Nouvelle-Aquitaine, soit 12 départements : Charente, Charente-Maritime, Corrèze, Creuse, Dordogne, Gironde, Landes, Lot-et-Garonne, Pyrénées-Atlantiques, Deux-Sèvres, Vienne et Haute-Vienne.",
+  },
+];
 
 export default async function Home() {
   const [btp, domicile, personne, topCities, departments] = await Promise.all([
@@ -125,6 +170,46 @@ export default async function Home() {
               >
                 {city.name}
               </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ — section visible + JSON-LD FAQPage (cf. getFaqSchema).
+          Enrichit aussi le volume de contenu de la home (signal SEO/GEO). */}
+      <JsonLd data={getFaqSchema(homeFaqs)} />
+      <section className="py-16 px-4 border-t border-[var(--border-color)]">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-8">
+            Questions fréquentes
+          </h2>
+          <div className="space-y-0 divide-y divide-[var(--border-color)]">
+            {homeFaqs.map((faq) => (
+              <details key={faq.question} className="group py-5">
+                <summary className="flex items-center justify-between cursor-pointer list-none">
+                  <span className="text-base font-medium text-[var(--text-primary)] pr-4">
+                    {faq.question}
+                  </span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    className="shrink-0 text-[var(--text-tertiary)] transition-transform duration-250 group-open:rotate-180"
+                  >
+                    <path
+                      d="M5 7.5L10 12.5L15 7.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </summary>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed mt-3 pr-8">
+                  {faq.answer}
+                </p>
+              </details>
             ))}
           </div>
         </div>

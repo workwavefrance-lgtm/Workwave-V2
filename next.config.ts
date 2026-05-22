@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // /sitemap.xml -> /sitemap-index.xml : Next sert le sitemap a
+      // /sitemap-index.xml (generateSitemaps dans app/sitemap.ts).
+      // Ce redirect permet aux crawlers et outils tiers qui cherchent
+      // l'URL conventionnelle /sitemap.xml de trouver le bon fichier.
+      { source: "/sitemap.xml", destination: "/sitemap-index.xml", permanent: true },
       { source: "/nos-artisans", destination: "/recherche", permanent: true },
       { source: "/nos-artisans/:path*", destination: "/recherche", permanent: true },
       { source: "/fiche-artisan", destination: "/recherche", permanent: true },
