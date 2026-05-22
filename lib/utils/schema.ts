@@ -74,8 +74,11 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     description:
       "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en Nouvelle-Aquitaine. 226 000+ artisans référencés dans les 12 départements et 4 293 communes de la région. Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + abonnement optionnel à partir de 32,50 €/mois pour recevoir les leads.",
     slogan: "Tout le savoir-faire local, enfin accessible",
-    foundingDate: "2026-04",
-    sameAs: ["https://www.instagram.com/workwave.fr/"],
+    foundingDate: "2025-03-28",
+    sameAs: [
+      "https://www.instagram.com/workwave.fr/",
+      "https://www.wikidata.org/wiki/Q139891069",
+    ],
     address: {
       "@type": "PostalAddress",
       streetAddress: "3 rue des Rosiers",
