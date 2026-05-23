@@ -7,6 +7,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
 import { getNearbyCities } from "@/lib/queries/cities";
 import ProCard from "@/components/pro/ProCard";
+import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
 import { BASE_URL } from "@/lib/constants";
@@ -842,6 +843,18 @@ export default async function ProPage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* CTA "Pas le bon artisan ?" -> /deposer-projet pre-rempli.
+          77% du trafic SEO arrive sur ces fiches (recherches navigationnelles
+          type "nom de l'entreprise") -> on offre une alternative non bloquante
+          aux visiteurs dont le pro ne convient pas / est indisponible. */}
+      <ProjectCTABlock
+        proName={pro.name}
+        categorySlug={pro.category.slug}
+        categoryName={pro.category.name}
+        citySlug={pro.city?.slug ?? null}
+        cityName={pro.city?.name ?? null}
+      />
 
       {/* RGPD */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-xs text-[var(--text-tertiary)]">
