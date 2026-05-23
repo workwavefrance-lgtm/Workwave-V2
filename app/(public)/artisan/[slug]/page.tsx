@@ -208,70 +208,44 @@ export default async function ProPage({ params }: Props) {
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Banniere de reclamation (TOP, immanquable).
-          Pattern issu de la recherche CTA 2026 : la bannière haute
-          full-width est le levier le plus rentable sur les annuaires
-          (Yelp, Google Business, Trustpilot). Le pro qui arrive depuis
-          un cold email ou Google la voit AVANT le contenu de sa fiche
-          et reconnaît immediatement son entreprise (effet endowment). */}
+      {/* Banniere de reclamation TOP — version fine (Levier D, mai 2026).
+          Reduite vs version originelle (gros bloc orange dominant) pour
+          ne pas ecraser la fiche aux yeux des particuliers (77% du trafic
+          SEO arrive sur /artisan/[slug] via recherches navigationnelles).
+          Le pro qui visite sa fiche la voit toujours immediatement, mais
+          l'espace principal de la fiche est rendu au visiteur particulier. */}
       {!isClaimed && pro.siret && (
-        <section className="mb-8 bg-gradient-to-br from-[#FF5A36]/10 via-[#FF5A36]/5 to-transparent dark:from-[#FF5A36]/15 dark:via-[#FF5A36]/8 border-2 border-[#FF5A36]/30 dark:border-[#FF5A36]/40 rounded-2xl p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
-            {/* Icone checkmark dans cercle coral */}
-            <div className="w-11 h-11 rounded-full bg-[#FF5A36] flex items-center justify-center shrink-0">
+        <section className="mb-6 bg-[#FF5A36]/5 dark:bg-[#FF5A36]/10 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-xl px-4 py-2.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+            <p className="text-sm text-[var(--text-secondary)]">
+              <span className="font-semibold text-[var(--text-primary)]">
+                Vous êtes {pro.name} ?
+              </span>{" "}
+              <span className="hidden sm:inline text-[var(--text-tertiary)]">
+                Fiche créée automatiquement depuis la base Sirene.
+              </span>
+            </p>
+            <Link
+              href={`/pro/reclamer/${slug}`}
+              rel="nofollow"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-250 hover:scale-[1.02] shrink-0 self-start sm:self-auto"
+            >
+              Réclamer ma fiche
               <svg
-                className="w-5 h-5 text-white"
+                className="w-3.5 h-3.5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2.5}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
                 />
               </svg>
-            </div>
-
-            {/* Contenu */}
-            <div className="flex-1">
-              <p className="text-[11px] font-semibold text-[#FF5A36] uppercase tracking-wider mb-1.5">
-                Cette fiche est à vous ?
-              </p>
-              <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)] mb-2 leading-snug">
-                Vous êtes <span className="text-[#FF5A36]">{pro.name}</span> ? Réclamez votre fiche gratuitement.
-              </h2>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                Ajoutez votre logo, vos photos, votre description, vos horaires et recevez les demandes de clients de votre zone.
-              </p>
-
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                <Link
-                  href={`/pro/reclamer/${slug}`}
-                  rel="nofollow"
-                  className="inline-flex items-center justify-center gap-2 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm whitespace-nowrap"
-                >
-                  Réclamer ma fiche — gratuit
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </Link>
-                <p className="text-xs text-[var(--text-tertiary)]">
-                  Vérification SIRET · 3 minutes · Aucune carte bancaire requise
-                </p>
-              </div>
-            </div>
+            </Link>
           </div>
         </section>
       )}
@@ -333,64 +307,49 @@ export default async function ProPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Section reclamation mid-page (renforcement apres scroll).
-              Pattern Yelp / Houzz : double CTA sur la fiche. Le pro qui
-              n'a pas clique sur la banniere haute trouve un 2e point
-              d'entree contextualise apres avoir vu sa fiche actuelle
-              (vide / pauvre) -> motivation accrue pour la completer. */}
-          {!isClaimed && pro.siret && (
-            <section className="bg-[#FF5A36]/5 dark:bg-[#FF5A36]/8 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-2xl p-6 sm:p-7">
-              <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-2 leading-snug">
-                Vous êtes <span className="text-[#FF5A36]">{pro.name}</span> ?
-              </h2>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
-                Cette fiche a été créée automatiquement à partir des données publiques (registre Sirene). Réclamez-la gratuitement pour :
-              </p>
+          {/* CTA particulier mid-page (Levier D, mai 2026).
+              Remplace l'ancien gros bloc orange "Reclamer cette fiche"
+              qui dominait l'experience particulier en mid-page. Ici on
+              propose au visiteur de demander un devis : il a deja vu
+              les coordonnees du pro plus haut, on lui offre l'alternative
+              "comparer plusieurs devis" au moment ou il scrolle.
+              Texte HONNETE : le lead n'est pas garanti pour CE pro
+              precis (routing automatique parmi les abonnes). */}
+          <section className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-7">
+            <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-2 leading-snug">
+              Vous cherchez un {pro.category.name.toLowerCase()}
+              {pro.city ? ` à ${pro.city.name}` : ""} ?
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
+              {pro.phone
+                ? `Contactez ${pro.name} directement au ${pro.phone}. Pour comparer plusieurs devis, décrivez votre projet — nous le transmettons à 3 artisans qualifiés dans votre zone.`
+                : `Décrivez votre projet, nous le transmettons à 3 artisans qualifiés dans votre zone. Gratuit, sans engagement.`}
+            </p>
 
-              <ul className="space-y-2.5 mb-6">
-                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
-                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
-                  <span>Ajouter votre <strong>logo</strong>, vos <strong>photos</strong> et votre <strong>description</strong></span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
-                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
-                  <span>Recevoir les <strong>demandes de devis</strong> dans votre zone</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
-                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
-                  <span>Apparaître <strong>mieux</strong> dans les recherches</span>
-                </li>
-                <li className="flex items-start gap-2.5 text-sm text-[var(--text-primary)]">
-                  <span className="text-[#FF5A36] font-bold mt-0.5 shrink-0">✓</span>
-                  <span>Contrôler les informations publiées sur votre entreprise</span>
-                </li>
-              </ul>
-
-              <Link
-                href={`/pro/reclamer/${slug}`}
-                rel="nofollow"
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-6 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm"
+            <Link
+              href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
+              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm"
+            >
+              Demander un devis (gratuit)
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+                aria-hidden="true"
               >
-                Réclamer cette fiche — 3 minutes
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </Link>
-              <p className="text-xs text-[var(--text-tertiary)] mt-3">
-                Vérification SIRET + code par email · Aucune carte bancaire requise
-              </p>
-            </section>
-          )}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </Link>
+            <p className="text-xs text-[var(--text-tertiary)] mt-3">
+              Réponse rapide · 100 % gratuit · Sans création de compte
+            </p>
+          </section>
 
           {/* Description */}
           {pro.description && (
@@ -728,7 +687,11 @@ export default async function ProPage({ params }: Props) {
 
         {/* Colonne droite — Sidebar sticky */}
         <div className="lg:sticky lg:top-[96px] lg:self-start space-y-6">
-          {/* CTA */}
+          {/* CTA sidebar : appeler le pro si phone defini, sinon orienter
+              vers le depot de projet pre-rempli (categorie + ville).
+              Texte ajuste (Levier D) : "Appeler ce pro" est plus direct
+              que "Contacter", et "Demander un devis (gratuit)" est plus
+              clair que "Deposer un projet" (jargon plateforme). */}
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 text-center">
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">
               Besoin de ce professionnel ?
@@ -738,16 +701,19 @@ export default async function ProPage({ params }: Props) {
                 href={`tel:${pro.phone}`}
                 className="block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
               >
-                Contacter ce pro
+                Appeler ce pro
               </a>
             ) : (
               <Link
-                href="/deposer-projet"
+                href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
                 className="block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
               >
-                Déposer un projet
+                Demander un devis (gratuit)
               </Link>
             )}
+            <p className="mt-3 text-xs text-[var(--text-tertiary)]">
+              Sans engagement
+            </p>
           </div>
 
           {/* Note : l'ancien encart sidebar "Reclamer cette fiche" a ete
