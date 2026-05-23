@@ -16,6 +16,9 @@ export type AdminProjectRow = {
   created_at: string;
   category: { id: number; name: string } | null;
   city: { id: number; name: string; department: { code: string } | null } | null;
+  // Audit trail notification admin (migration 2026-05-23)
+  admin_notified_at: string | null;
+  admin_notification_error: string | null;
 };
 
 export type AdminProjectsFilters = {
@@ -43,7 +46,7 @@ export const getAdminProjects = cache(
     let query = db
       .from("projects")
       .select(
-        "id, first_name, email, phone, description, urgency, budget, status, suspicion_score, ai_qualification, created_at, category:categories(id, name), city:cities(id, name, department:departments(code))",
+        "id, first_name, email, phone, description, urgency, budget, status, suspicion_score, ai_qualification, created_at, admin_notified_at, admin_notification_error, category:categories(id, name), city:cities(id, name, department:departments(code))",
         { count: "exact" }
       )
       .neq("status", "deleted");

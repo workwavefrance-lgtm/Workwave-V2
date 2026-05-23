@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -6,6 +7,54 @@ function getResendClient() {
     _resend = new Resend(process.env.RESEND_API_KEY);
   }
   return _resend;
+}
+
+// Client service_role pour tracer chaque tentative d'envoi en base
+// (projects.admin_notified_at / admin_notification_error). RLS est
+// active sur projects depuis le sprint securite 2026-05-22, service_role
+// bypasse. Tracking obligatoire pour ne plus avoir de "perte
+// silencieuse" sur les notifs (cf. projets #18 et #19 non recus).
+let _sb: SupabaseClient | null = null;
+function getServiceClient(): SupabaseClient {
+  if (!_sb) {
+    _sb = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _sb;
+}
+
+/**
+ * Audit trail : note en base le resultat de l'envoi (succes ou
+ * echec avec message). Best-effort : si le tracking lui-meme foire
+ * (network Supabase down), on log mais on n'attend rien.
+ *
+ * Effet pour l'UI admin : admin_notified_at IS NULL apres un grace
+ * period -> badge "Notif non envoyee" + bouton Renvoyer.
+ */
+async function trackAdminNotification(
+  projectId: number,
+  result: "sent" | { error: string }
+): Promise<void> {
+  try {
+    const update =
+      result === "sent"
+        ? {
+            admin_notified_at: new Date().toISOString(),
+            admin_notification_error: null,
+          }
+        : { admin_notification_error: result.error };
+    const { error } = await getServiceClient()
+      .from("projects")
+      .update(update)
+      .eq("id", projectId);
+    if (error) {
+      console.error("[trackAdminNotification] update error:", error.message);
+    }
+  } catch (e) {
+    console.error("[trackAdminNotification] exception:", e);
+  }
 }
 
 type ProjectEmailData = {
@@ -44,6 +93,9 @@ export async function sendProjectNotification(
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) {
     console.error("ADMIN_EMAIL non configuré, email non envoyé");
+    await trackAdminNotification(data.projectId, {
+      error: "ADMIN_EMAIL not configured",
+    });
     return;
   }
 
@@ -112,8 +164,14 @@ export async function sendProjectNotification(
       subject: `${data.isSuspicious ? "[SUSPECT] " : ""}[Workwave] Nouveau projet — ${data.categoryName} à ${data.cityName}`,
       html,
     });
+    // Audit trail : envoi reussi
+    await trackAdminNotification(data.projectId, "sent");
   } catch (error) {
     console.error("Erreur envoi email admin :", error);
+    // Audit trail : envoi echoue, on note la raison en base pour
+    // que l'admin la voie + puisse decider de renvoyer la notif.
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    await trackAdminNotification(data.projectId, { error: errorMsg });
     // Ne pas bloquer la soumission si l'email échoue
   }
 }

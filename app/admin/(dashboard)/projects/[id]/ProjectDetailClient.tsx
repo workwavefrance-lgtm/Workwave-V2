@@ -46,6 +46,38 @@ export default function ProjectDetailClient({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendResult, setResendResult] = useState<string | null>(null);
+
+  // Audit trail notification admin (migration 2026-05-23) : detecte
+  // les pertes silencieuses historiques + tout futur echec Resend.
+  const adminNotifiedAt = project.admin_notified_at as string | null;
+  const adminNotifError = project.admin_notification_error as string | null;
+  const isNotificationPending = !adminNotifiedAt;
+
+  async function handleResendNotification() {
+    setResending(true);
+    setResendResult(null);
+    try {
+      const res = await fetch(
+        `/api/admin/projects/${project.id}/resend-notification`,
+        { method: "POST" }
+      );
+      const json = await res.json();
+      if (json.success) {
+        setResendResult("Notification renvoyée avec succès");
+        router.refresh();
+      } else {
+        setResendResult(`Échec : ${json.error ?? "erreur inconnue"}`);
+      }
+    } catch (e) {
+      setResendResult(
+        `Exception : ${e instanceof Error ? e.message : String(e)}`
+      );
+    } finally {
+      setResending(false);
+    }
+  }
 
   const statusBadge = STATUS_BADGE[(project.status as string) || "new"] || STATUS_BADGE.new;
   const aiQual = project.ai_qualification as {
@@ -89,6 +121,77 @@ export default function ProjectDetailClient({
           {statusBadge.label}
         </AdminBadge>
       </div>
+
+      {/* Banner notification admin (Levier "fiabilite 100%" 2026-05-23).
+          Affiche systematiquement le statut de la notif admin pour ce
+          projet. Si non envoyee -> alerte + bouton Renvoyer. Si envoyee
+          -> mention discrete de la date. Eradique la "perte silencieuse"
+          historique du .catch non bloquant qui masquait les echecs
+          Resend (cf. projets #18 du 27/04 et #19 du 13/05). */}
+      {isNotificationPending ? (
+        <div
+          className="mb-4 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+          style={{
+            background: adminNotifError
+              ? "rgba(239, 68, 68, 0.08)"
+              : "rgba(245, 158, 11, 0.08)",
+            border: adminNotifError
+              ? "1px solid rgba(239, 68, 68, 0.3)"
+              : "1px solid rgba(245, 158, 11, 0.3)",
+          }}
+        >
+          <div className="flex-1 min-w-0">
+            <p
+              className="text-sm font-semibold"
+              style={{ color: adminNotifError ? "#EF4444" : "#F59E0B" }}
+            >
+              {adminNotifError
+                ? "Notification admin échouée"
+                : "Notification admin non envoyée"}
+            </p>
+            <p
+              className="text-xs mt-1"
+              style={{ color: "var(--admin-text-secondary)" }}
+            >
+              {adminNotifError
+                ? `Erreur Resend : ${adminNotifError}`
+                : "Aucune trace d'envoi pour ce projet. Soit la notif a échoué silencieusement, soit elle date d'avant le tracking. Renvoyez pour confirmer."}
+            </p>
+            {resendResult && (
+              <p
+                className="text-xs mt-2 font-medium"
+                style={{
+                  color: resendResult.startsWith("Notification")
+                    ? "#10B981"
+                    : "#EF4444",
+                }}
+              >
+                {resendResult}
+              </p>
+            )}
+          </div>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            loading={resending}
+            onClick={handleResendNotification}
+          >
+            Renvoyer la notif
+          </AdminButton>
+        </div>
+      ) : (
+        <p
+          className="text-xs mb-4 flex items-center gap-1.5"
+          style={{ color: "var(--admin-text-tertiary)" }}
+        >
+          <span style={{ color: "#10B981" }}>✓</span>
+          Notification admin envoyée le{" "}
+          {new Date(adminNotifiedAt).toLocaleString("fr-FR", {
+            dateStyle: "short",
+            timeStyle: "short",
+          })}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Project info */}
