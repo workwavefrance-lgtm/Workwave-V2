@@ -10,6 +10,7 @@ import ProCard from "@/components/pro/ProCard";
 import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
+import { getCategoryArticle } from "@/lib/utils/category-grammar";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import { formatEffectifRange, formatFoundingYear, formatAgeYears } from "@/lib/utils/sirene";
@@ -317,7 +318,8 @@ export default async function ProPage({ params }: Props) {
               precis (routing automatique parmi les abonnes). */}
           <section className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-7">
             <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-2 leading-snug">
-              Vous cherchez un {pro.category.name.toLowerCase()}
+              Vous cherchez {getCategoryArticle(pro.category.name)}{" "}
+              {pro.category.name.toLowerCase()}
               {pro.city ? ` à ${pro.city.name}` : ""} ?
             </h2>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">

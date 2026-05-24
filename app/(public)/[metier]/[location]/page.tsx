@@ -23,6 +23,7 @@ import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
+import { getCategoryArticle } from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
@@ -76,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description =
     seo?.meta_description ||
-    `Trouvez un ${category.name.toLowerCase()} ${preposition} ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} référencé${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
+    `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} référencé${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
 
   return {
     title,
@@ -242,7 +243,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       {/* Intro SEO courte — au-dessus de la grille pour le crawl Google */}
       <ListingIntro
         intro={extractIntro(seo?.content)}
-        fallback={`Vous cherchez un ${category.name.toLowerCase()} ${preposition} ${locationName} ? Workwave référence ${result.count} professionnel${result.count > 1 ? "s" : ""} qualifié${result.count > 1 ? "s" : ""} dans cette zone. Comparez les profils, consultez les coordonnées et contactez directement l'artisan de votre choix. Service 100% gratuit, sans intermédiaire commercial.`}
+        fallback={`Vous cherchez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Workwave référence ${result.count} professionnel${result.count > 1 ? "s" : ""} qualifié${result.count > 1 ? "s" : ""} dans cette zone. Comparez les profils, consultez les coordonnées et contactez directement l'artisan de votre choix. Service 100% gratuit, sans intermédiaire commercial.`}
       />
 
       {result.data.length > 0 ? (

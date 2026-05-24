@@ -4,6 +4,7 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk";
+import { getCategoryArticle } from "@/lib/utils/category-grammar";
 
 let _anthropic: Anthropic | null = null;
 
@@ -48,15 +49,15 @@ Redige un guide complet et expert sur le metier de "${input.categoryName}" pour 
 
 **Structure obligatoire (8-10 sections H2) :**
 
-## Qu'est-ce qu'un ${input.categoryName.toLowerCase()} ?
+## Qu'est-ce qu'${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()} ?
 
 Definition precise du metier, perimetre d'intervention, difference avec les metiers proches. 150-200 mots.
 
-## Les specialites d'un ${input.categoryName.toLowerCase()}
+## Les specialites d'${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()}
 
 Liste des sous-specialites et domaines d'expertise. Detaille 4-6 specialites avec une phrase d'explication chacune. 200-250 mots.
 
-## Quand faire appel a un ${input.categoryName.toLowerCase()} ?
+## Quand faire appel a ${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()} ?
 
 Situations concretes ou l'on a besoin de ce professionnel. Liste 5-7 cas d'usage courants. 200-250 mots.
 
@@ -84,7 +85,7 @@ Checklist de 6-8 questions essentielles a poser au professionnel avant de s'enga
 
 Informations legales essentielles : garantie decennale, assurance RC, droit de retractation, recours en cas de litige. 150-200 mots.
 
-## Trouver un ${input.categoryName.toLowerCase()} en ${input.departmentName}
+## Trouver ${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()} en ${input.departmentName}
 
 Paragraphe de conclusion qui mentionne Workwave et le nombre de professionnels disponibles dans la zone. Encourage a utiliser l'annuaire pour comparer et contacter. 100-150 mots.
 

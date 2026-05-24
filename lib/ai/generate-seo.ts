@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { getCategoryArticle } from "@/lib/utils/category-grammar";
 
 let _anthropic: Anthropic | null = null;
 function getClient() {
@@ -49,7 +50,7 @@ Rédige le contenu SEO pour la page "${input.categoryName} à ${input.locationNa
 
 Un paragraphe d'introduction de 3-4 phrases qui mentionne ${input.locationName}, le métier, et pourquoi faire appel à un professionnel qualifié. Décris la ville uniquement par son statut général (préfecture, sous-préfecture, commune rurale) et sa taille approximative si pertinent.
 
-## Prix moyens d'un ${input.categoryName.toLowerCase()} à ${input.locationName}
+## Prix moyens d'${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()} à ${input.locationName}
 
 Un paragraphe avec des fourchettes de prix réalistes pour les prestations courantes de ce métier dans cette zone. Présente 3-4 types de prestations avec leur fourchette (ex: "Dépannage d'urgence : 80 à 150 euros"). Précise que les prix sont indicatifs et varient selon la complexité.
 
@@ -107,7 +108,7 @@ Ligne 2 : une meta description SEO de 130 à 155 caractères MAXIMUM. La phrase 
     `${input.categoryName} à ${input.locationName} — ${input.prosCount} professionnels`;
   const metaDescription =
     metaLines[1]?.trim() ||
-    `Trouvez un ${input.categoryName.toLowerCase()} à ${input.locationName}. ${input.prosCount} professionnels référencés.`;
+    `Trouvez ${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()} à ${input.locationName}. ${input.prosCount} professionnels référencés.`;
 
   return {
     title,
