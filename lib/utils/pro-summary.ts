@@ -137,28 +137,56 @@ export function buildProSummary(pro: ProWithRelations): string {
 /**
  * Petit helper pour les badges visuels en card. Renvoie 1-3 badges
  * texte courts selon les certifications/labels du pro.
+ *
+ * Priorite d'affichage (top-down) :
+ *   1. Avis Workwave (★ X.X (N avis Workwave)) — preuve la plus forte
+ *   2. Avis Google (★ X.X (N avis)) — alternative si pas Workwave
+ *   3. RGE certifié — signal de qualite
+ *   4. Profil vérifié — claimed
+ *   5. Certif notable
+ *   6. Anciennete (10+ ans)
+ *
+ * Max 3 badges pour rester lisible.
  */
 export function buildProBadges(pro: ProWithRelations): string[] {
   const badges: string[] = [];
 
+  // Avis Workwave (verifies, le plus fort)
+  if (
+    pro.workwave_reviews_count > 0 &&
+    pro.workwave_reviews_avg !== null
+  ) {
+    badges.push(
+      `★ ${pro.workwave_reviews_avg.toFixed(1)} (${pro.workwave_reviews_count} avis Workwave)`
+    );
+  }
+
+  // Avis Google (importes)
+  if (
+    pro.google_rating &&
+    pro.google_rating >= 4.0 &&
+    (pro.google_reviews_count ?? 0) >= 3
+  ) {
+    badges.push(`★ ${pro.google_rating} (${pro.google_reviews_count} avis Google)`);
+  }
+
   if (pro.rge_certified) badges.push("RGE certifié");
-  if (pro.claimed_by_user_id) badges.push("Profil vérifié");
+  if (pro.claimed_by_user_id && badges.length < 3) badges.push("Profil vérifié");
 
   // 1 certif notable si pas deja affichee
   const certs = pro.certifications ?? [];
-  if (certs.length > 0 && !pro.rge_certified) {
+  if (certs.length > 0 && !pro.rge_certified && badges.length < 3) {
     badges.push(certs[0]);
   }
 
   // Anciennete tres remarquable (10+ ans)
   const foundedYear = pro.founded_year ?? null;
-  if (foundedYear && new Date().getFullYear() - foundedYear >= 10) {
+  if (
+    foundedYear &&
+    new Date().getFullYear() - foundedYear >= 10 &&
+    badges.length < 3
+  ) {
     badges.push(`${new Date().getFullYear() - foundedYear} ans d'expérience`);
-  }
-
-  // Note Google (rare mais valuable)
-  if (pro.google_rating && pro.google_rating >= 4.5 && (pro.google_reviews_count ?? 0) >= 3) {
-    badges.push(`★ ${pro.google_rating} (${pro.google_reviews_count} avis)`);
   }
 
   return badges.slice(0, 3);

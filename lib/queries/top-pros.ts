@@ -100,6 +100,18 @@ export function computeProScore(pro: Pro): number {
   else if (reviews >= 3) score += 10;
   else if (reviews >= 1) score += 5;
 
+  // 11. Avis natifs Workwave (preuve la plus forte : mise en relation
+  // verifiee + avis post-prestation). Bonus plus important que Google
+  // pour reconnaitre le moat qu'on construit.
+  const wwRating = pro.workwave_reviews_avg ?? 0;
+  const wwCount = pro.workwave_reviews_count ?? 0;
+  if (wwRating >= 4.5 && wwCount >= 3) score += 40;
+  else if (wwRating >= 4.0 && wwCount >= 2) score += 25;
+  else if (wwRating >= 3.5 && wwCount >= 1) score += 10;
+  // Bonus volume independant du rating (active la pro)
+  if (wwCount >= 10) score += 15;
+  else if (wwCount >= 3) score += 8;
+
   return Math.round(score);
 }
 

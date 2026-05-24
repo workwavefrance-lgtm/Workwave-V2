@@ -5,8 +5,10 @@ import Image from "next/image";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
 import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
+import { getPublishedReviewsForPro } from "@/lib/queries/reviews";
 import { getNearbyCities } from "@/lib/queries/cities";
 import ProCard from "@/components/pro/ProCard";
+import ProReviewsBlock from "@/components/pro/ProReviewsBlock";
 import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
@@ -80,10 +82,11 @@ export default async function ProPage({ params }: Props) {
   const pro = await getProBySlug(slug);
   if (!pro) notFound();
 
-  // Charger les pros similaires et villes voisines en parallele
-  const [similarPros, nearbyCities] = await Promise.all([
+  // Charger les pros similaires, villes voisines et avis en parallele
+  const [similarPros, nearbyCities, reviews] = await Promise.all([
     pro.city ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
     pro.city ? getNearbyCities(pro.city.id, 5) : Promise.resolve([]),
+    getPublishedReviewsForPro(pro.id, 20),
   ]);
 
   const cityName = pro.city?.name || "";
@@ -192,6 +195,27 @@ export default async function ProPage({ params }: Props) {
         longitude: pro.city.longitude,
       },
       geoRadius: `${pro.intervention_radius_km * 1000}`,
+    };
+  }
+
+  // AggregateRating : agrege les avis Workwave + Google si disponibles.
+  // Active les rich snippets etoiles dans la SERP Google + signal fort
+  // pour les LLMs (Perplexity, AI Overviews).
+  const wwCount = pro.workwave_reviews_count ?? 0;
+  const wwAvg = pro.workwave_reviews_avg ?? 0;
+  const gRating = pro.google_rating ?? 0;
+  const gCount = pro.google_reviews_count ?? 0;
+  if (wwCount > 0 || gCount > 0) {
+    // Moyenne ponderee par nb d'avis de chaque source
+    const totalCount = wwCount + gCount;
+    const weightedSum = wwAvg * wwCount + gRating * gCount;
+    const aggregateValue = Math.round((weightedSum / totalCount) * 10) / 10;
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: aggregateValue,
+      reviewCount: totalCount,
+      bestRating: 5,
+      worstRating: 1,
     };
   }
 
@@ -777,6 +801,15 @@ export default async function ProPage({ params }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Avis Workwave + Google */}
+      <ProReviewsBlock
+        reviews={reviews}
+        workwaveAvg={pro.workwave_reviews_avg ?? null}
+        workwaveCount={pro.workwave_reviews_count ?? 0}
+        googleRating={pro.google_rating ?? null}
+        googleReviewsCount={pro.google_reviews_count ?? null}
+      />
 
       {/* Pros similaires */}
       {similarPros.length > 0 && (
