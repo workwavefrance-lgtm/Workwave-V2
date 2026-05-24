@@ -30,7 +30,29 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const STORAGE_DISMISSED = "workwave_agent_dismissed";
 const STORAGE_MESSAGES = "workwave_agent_messages";
+const STORAGE_AUTO_OPENED = "workwave_agent_auto_opened";
 const COOKIE_CONSENT_NAME = "consent_analytics";
+
+/**
+ * Delai d'auto-open du panel selon le contexte de page. L'idee est
+ * d'etre proactif (pousser la conversion sans attendre le clic) mais
+ * pas annoying : on laisse l'user voir la page d'abord. Les pages a
+ * intent fort (listing, fiche pro) declenchent plus vite.
+ * Retourne null si on ne doit PAS auto-ouvrir sur cette page.
+ */
+function getAutoOpenDelayMs(ctx: AgentContext | null): number | null {
+  if (!ctx) return null;
+  switch (ctx.type) {
+    case "listing":
+      return 10_000; // user a tape un metier+ville -> intent fort
+    case "pro_fiche":
+      return 14_000; // user regarde une fiche -> laisser le temps de lire
+    case "home":
+      return 16_000; // user en exploration -> un peu plus de patience
+    default:
+      return null; // blog, legal, autre -> pas d'auto-open
+  }
+}
 
 /**
  * Détecte si l'utilisateur a déjà géré le bandeau cookies (accepté ou
@@ -209,6 +231,49 @@ export default function CommercialAgent() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
+
+  // Auto-open du panel apres un delai contextuel. Une seule fois par
+  // session (sessionStorage). Conditions :
+  // - bandeau cookies geré (cookieHandled === true)
+  // - user n'a pas dismiss (dismissed === false)
+  // - on est sur une page a intent (home, listing, fiche pro)
+  // - on a deja le contexte (sinon le message d'accueil serait
+  //   generique alors qu'on peut faire mieux)
+  // - pas deja auto-ouvert dans la session
+  // - user n'a pas deja ouvert/envoye un message
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (cookieHandled !== true) return;
+    if (dismissed !== false) return;
+    if (!context) return;
+    if (open) return;
+    if (messages.length > 0) return; // user a deja interagi
+    if (sessionStorage.getItem(STORAGE_AUTO_OPENED) === "1") return;
+    if (shouldHide(pathname || "/")) return;
+
+    const delay = getAutoOpenDelayMs(context);
+    if (delay === null) return;
+
+    const timer = window.setTimeout(() => {
+      // Re-check au moment du fire : l'user a peut-etre dismiss
+      // entre temps, ou ouvert manuellement
+      if (sessionStorage.getItem(STORAGE_DISMISSED) === "1") return;
+      if (sessionStorage.getItem(STORAGE_AUTO_OPENED) === "1") return;
+      setOpen(true);
+      const welcome = buildWelcomeMessage(context);
+      setMessages([{ role: "assistant", content: welcome }]);
+      try {
+        sessionStorage.setItem(STORAGE_AUTO_OPENED, "1");
+      } catch {
+        // ignore quota
+      }
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+    // On veut redéclencher si le contexte change (changement de
+    // route) tant qu'on n'a pas encore auto-ouvert dans la session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cookieHandled, dismissed, context, pathname]);
 
   // Persiste les messages dans sessionStorage pour pas perdre la conv
   // si l'utilisateur navigue puis revient
