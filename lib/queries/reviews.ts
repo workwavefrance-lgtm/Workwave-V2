@@ -17,6 +17,8 @@
 import { randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
+import { sendReviewThanks } from "@/lib/email/send-review-thanks";
+import { sendReviewModerationAlert } from "@/lib/email/send-review-moderation-alert";
 import type { ProReview } from "@/lib/types/database";
 
 /**
@@ -153,40 +155,49 @@ export async function submitReview(params: {
     return { ok: false, error: "Erreur lors de l'enregistrement." };
   }
 
-  // ─── Side-effects fire-and-forget ────────────────────────────────────
+  // ─── Side-effects : awaited pour garantir l'envoi avant fin function ─
+  // IMPORTANT : pas de "fire-and-forget" via .then() sans await dans une
+  // Server Action — Vercel ferme la function des que la response part vers
+  // le client et tue les promises detachees. Bug observe le 24/05/2026 :
+  // les mails n'arrivaient jamais. Solution : await direct (latence +2-3s
+  // mais fiable). Le user voit "Envoi en cours..." puis "Merci !" — l'attente
+  // est invisible UX-wise.
   const proName = e.pro?.name ?? "l'artisan";
   const proSlug = e.pro?.slug ?? "";
 
   // 1. Remerciement au particulier (toujours envoye)
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  import("@/lib/email/send-review-thanks").then(({ sendReviewThanks }) =>
-    sendReviewThanks({
+  try {
+    await sendReviewThanks({
       particulierEmail: e.particulier_email,
       particulierName: e.particulier_name,
       proName,
       proSlug,
       rating: params.rating,
       published: newStatus === "published",
-    }).catch((err) =>
-      console.error("[reviews] send thanks failed :", err?.message)
-    )
-  );
+    });
+  } catch (err) {
+    console.error(
+      "[reviews] send thanks failed :",
+      err instanceof Error ? err.message : err
+    );
+  }
 
   // 2. Alerte admin uniquement pour les avis a moderer (< 3 etoiles)
   if (newStatus === "pending") {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    import("@/lib/email/send-review-moderation-alert").then(
-      ({ sendReviewModerationAlert }) =>
-        sendReviewModerationAlert({
-          proName,
-          proSlug,
-          particulierName: e.particulier_name,
-          rating: params.rating,
-          comment: cleanComment,
-        }).catch((err) =>
-          console.error("[reviews] send moderation alert failed :", err?.message)
-        )
-    );
+    try {
+      await sendReviewModerationAlert({
+        proName,
+        proSlug,
+        particulierName: e.particulier_name,
+        rating: params.rating,
+        comment: cleanComment,
+      });
+    } catch (err) {
+      console.error(
+        "[reviews] send moderation alert failed :",
+        err instanceof Error ? err.message : err
+      );
+    }
   }
 
   return { ok: true };
