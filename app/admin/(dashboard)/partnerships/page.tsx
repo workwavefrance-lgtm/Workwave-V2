@@ -16,14 +16,25 @@ export const dynamic = "force-dynamic";
 export default async function AdminPartnershipsPage() {
   const sb = getAdminServiceClient();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (sb.from("partnerships") as any)
-    .select("*")
-    .order("status", { ascending: true })
-    .order("city", { ascending: true })
-    .limit(2000);
-
-  const partnerships = (data as Partnership[] | null) ?? [];
+  // Pagination cote serveur : PostgREST cap a 1000 lignes par requete,
+  // on a ~4400 partenariats. Cf. lecon CLAUDE.md 09/05/2026.
+  const PAGE = 1000;
+  const MAX_BATCHES = 6; // plafond defensif (6000 max)
+  const partnerships: Partnership[] = [];
+  let offset = 0;
+  for (let batch = 0; batch < MAX_BATCHES; batch++) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (sb.from("partnerships") as any)
+      .select("*")
+      .order("status", { ascending: true })
+      .order("city", { ascending: true })
+      .range(offset, offset + PAGE - 1);
+    const rows = (data as Partnership[] | null) ?? [];
+    if (rows.length === 0) break;
+    partnerships.push(...rows);
+    offset += rows.length;
+    if (rows.length < PAGE) break;
+  }
 
   // Stats agregees rapides en JS (la vue partnerships_stats SQL existe
   // aussi mais on calcule ici pour eviter une 2eme query)
