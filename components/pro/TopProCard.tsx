@@ -20,20 +20,25 @@ export default function TopProCard({
   rank,
   categorySlug,
   citySlug,
+  specialitySlug,
 }: {
   pro: ProWithRelations;
   rank: number;
   categorySlug: string;
   citySlug: string | null;
+  /** Slug de la sous-specialite si on est sur /[metier]/[specialite]/[ville] */
+  specialitySlug?: string | null;
 }) {
   const initial = pro.name.charAt(0).toUpperCase();
   const summary = buildProSummary(pro);
   const badges = buildProBadges(pro);
 
-  // Lien devis avec contexte pre-rempli
-  const projectHref = citySlug
-    ? `/deposer-projet?categorie=${categorySlug}&ville=${citySlug}`
-    : `/deposer-projet?categorie=${categorySlug}`;
+  // Lien devis avec contexte pre-rempli (categorie + ville + specialite si dispo)
+  const projectParams = new URLSearchParams();
+  projectParams.set("categorie", categorySlug);
+  if (citySlug) projectParams.set("ville", citySlug);
+  if (specialitySlug) projectParams.set("specialite", specialitySlug);
+  const projectHref = `/deposer-projet?${projectParams.toString()}`;
 
   return (
     <article className="group relative bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-5 sm:p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-lg hover:border-[var(--accent)]">

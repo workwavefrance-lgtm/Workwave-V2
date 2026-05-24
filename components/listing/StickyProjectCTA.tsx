@@ -16,20 +16,23 @@ export default function StickyProjectCTA({
   citySlug,
   locationName,
   preposition,
+  specialitySlug,
 }: {
   categorySlug: string;
   categoryName: string;
   citySlug: string | null;
   locationName: string;
   preposition: string;
+  /** Sous-specialite si on est sur /[metier]/[specialite]/[ville] */
+  specialitySlug?: string | null;
 }) {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState<boolean | null>(null);
 
-  // Clef sessionStorage par couple (categorie, ville) — si l'user
-  // dismiss le sticky sur /plombier/poitiers, ca ne le dismiss pas
-  // pour /electricien/poitiers.
-  const storageKey = `wwv:sticky_dismissed:${categorySlug}:${citySlug ?? "dept"}`;
+  // Clef sessionStorage par couple (categorie, specialite, ville) — si l'user
+  // dismiss le sticky sur /plombier/depannage/poitiers, ca ne le dismiss pas
+  // pour /plombier/poitiers ou /plombier/fuite/poitiers.
+  const storageKey = `wwv:sticky_dismissed:${categorySlug}:${specialitySlug ?? "all"}:${citySlug ?? "dept"}`;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -69,9 +72,11 @@ export default function StickyProjectCTA({
 
   if (dismissed === null || dismissed) return null;
 
-  const projectHref = citySlug
-    ? `/deposer-projet?categorie=${categorySlug}&ville=${citySlug}`
-    : `/deposer-projet?categorie=${categorySlug}`;
+  const projectParams = new URLSearchParams();
+  projectParams.set("categorie", categorySlug);
+  if (citySlug) projectParams.set("ville", citySlug);
+  if (specialitySlug) projectParams.set("specialite", specialitySlug);
+  const projectHref = `/deposer-projet?${projectParams.toString()}`;
 
   return (
     <div

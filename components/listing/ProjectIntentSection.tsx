@@ -19,18 +19,25 @@ export default function ProjectIntentSection({
   categoryName,
   citySlug,
   locationName,
+  currentSpecialty,
 }: {
   categorySlug: string;
   categoryName: string;
   citySlug: string | null;
   locationName: string;
+  /** Si on est sur /[metier]/[specialite]/[ville], slug de la specialty
+   *  active : la pill correspondante est mise en evidence et le CTA
+   *  principal pre-fill la specialty en query param. */
+  currentSpecialty?: string | null;
 }) {
   const specialties = SPECIALTIES[categorySlug] ?? [];
 
-  // Lien base (sans specialite) : juste categorie + ville
-  const baseHref = citySlug
-    ? `/deposer-projet?categorie=${categorySlug}&ville=${citySlug}`
-    : `/deposer-projet?categorie=${categorySlug}`;
+  // Lien CTA principal : inclut la specialty si on est sur une sous-page
+  const baseParams = new URLSearchParams();
+  baseParams.set("categorie", categorySlug);
+  if (citySlug) baseParams.set("ville", citySlug);
+  if (currentSpecialty) baseParams.set("specialite", currentSpecialty);
+  const baseHref = `/deposer-projet?${baseParams.toString()}`;
 
   return (
     <section
@@ -64,6 +71,7 @@ export default function ProjectIntentSection({
       {specialties.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-5">
           {specialties.slice(0, 8).map((spec) => {
+            const isActive = currentSpecialty === spec.slug;
             const href = citySlug
               ? `/deposer-projet?categorie=${categorySlug}&ville=${citySlug}&specialite=${spec.slug}`
               : `/deposer-projet?categorie=${categorySlug}&specialite=${spec.slug}`;
@@ -71,7 +79,11 @@ export default function ProjectIntentSection({
               <Link
                 key={spec.slug}
                 href={href}
-                className="inline-flex items-center px-3.5 py-2 text-[13px] font-medium text-[var(--text-primary)] bg-[var(--bg-secondary)] hover:bg-white dark:hover:bg-[#1A1A1A] border border-[var(--card-border)] hover:border-[var(--accent)] rounded-full transition-all duration-200 hover:-translate-y-0.5"
+                className={`inline-flex items-center px-3.5 py-2 text-[13px] font-medium rounded-full transition-all duration-200 hover:-translate-y-0.5 ${
+                  isActive
+                    ? "text-white bg-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent-hover)]"
+                    : "text-[var(--text-primary)] bg-[var(--bg-secondary)] hover:bg-white dark:hover:bg-[#1A1A1A] border border-[var(--card-border)] hover:border-[var(--accent)]"
+                }`}
               >
                 {spec.name}
               </Link>

@@ -4,24 +4,33 @@ import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Pagination from "@/components/ui/Pagination";
 import ProCard from "@/components/pro/ProCard";
+import TopProCard from "@/components/pro/TopProCard";
 import EmptyState from "@/components/ui/EmptyState";
-import ProjectCtaBanner from "@/components/listing/ProjectCtaBanner";
+import ProjectIntentSection from "@/components/listing/ProjectIntentSection";
+import StickyProjectCTA from "@/components/listing/StickyProjectCTA";
 import ListingIntro from "@/components/listing/ListingIntro";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug } from "@/lib/queries/categories";
 import { getCityBySlug } from "@/lib/queries/cities";
 import { getProsByCategoryAndCity } from "@/lib/queries/pros";
+import { getTopProsByCategoryAndCity } from "@/lib/queries/top-pros";
 import {
   getSpecialty,
   getSpecialtiesForMetier,
   isValidSpecialty,
 } from "@/lib/specialties";
 import { BASE_URL } from "@/lib/constants";
+import {
+  getCategoryBestForm,
+  pluralizeCategoryName,
+} from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
 export const revalidate = 3600;
+
+const TOP_LIMIT = 10;
 
 type Props = {
   params: Promise<{ metier: string; location: string; ville: string }>;
@@ -32,10 +41,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metier, location, ville } = await params;
   // Au niveau 2, le segment dynamique s'appelle "location" pour cohérence
   // de routing avec [metier]/[location]/page.tsx, mais ici il porte le slug
-  // d'une sous-spécialité (ex. "depannage", "renovation").
+  // d'une sous-spécialité (ex. "depannage", "renovation-salle-de-bain").
   const specialite = location;
 
-  // Garde-fou : la spécialité doit exister pour ce métier
   if (!isValidSpecialty(metier, specialite)) return {};
 
   const category = await getCategoryBySlug(metier);
@@ -43,27 +51,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const city = await getCityBySlug(ville);
   if (!category || !specialty || !city) return {};
 
-  // Compter les pros pour cette combinaison
   const result = await getProsByCategoryAndCity(category.id, city.id, {
     page: 1,
     pageSize: 1,
   });
   const prosCount = result.count;
+  const displayCount = Math.min(prosCount, TOP_LIMIT);
+  const bestForm = getCategoryBestForm(category.name);
+  const pluralCategory = pluralizeCategoryName(category.name);
+  const currentYear = new Date().getFullYear();
 
-  const lower = category.name.toLowerCase();
-  const title =
-    prosCount > 0
-      ? `${category.name} ${specialty.shortLabel} à ${city.name} — ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
-      : `${category.name} ${specialty.shortLabel} à ${city.name}`;
+  // Title style Travaux.com adapté à la sous-spécialité : "Les 10 meilleurs
+  // plombiers dépannage à Poitiers en 2026". Le shortLabel rend la phrase
+  // fluide ("dépannage", "recherche de fuite", "rénovation salle de bain").
+  let title: string;
+  if (prosCount === 0) {
+    title = `${category.name} ${specialty.shortLabel} à ${city.name}`;
+  } else if (prosCount === 1) {
+    title = `${category.name} ${specialty.shortLabel} à ${city.name} en ${currentYear} — 1 artisan référencé`;
+  } else {
+    title = `Les ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${city.name} en ${currentYear} — Workwave`;
+  }
 
   const description =
-    specialty.description.length <= 155
-      ? specialty.description
-      : `${lower} ${specialty.shortLabel} à ${city.name}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} disponible${prosCount > 1 ? "s" : ""} — devis gratuits.`;
+    prosCount > 0
+      ? `Sélection des ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${city.name} en ${currentYear}. ${specialty.description}`
+      : specialty.description;
 
   return {
     title,
-    description,
+    description: description.length > 160 ? description.slice(0, 157) + "…" : description,
     alternates: {
       canonical: `${BASE_URL}/${metier}/${specialite}/${ville}`,
     },
@@ -86,14 +103,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SpecialtyCityPage({ params, searchParams }: Props) {
   const { metier, location, ville } = await params;
-  // Au niveau 2, le segment dynamique s'appelle "location" pour cohérence
-  // de routing avec [metier]/[location]/page.tsx, mais ici il porte le slug
-  // d'une sous-spécialité (ex. "depannage", "renovation").
   const specialite = location;
   const { page: pageParam } = await searchParams;
   const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
+  const isFirstPage = page === 1;
 
-  // 404 si spécialité inconnue (config typée)
   if (!isValidSpecialty(metier, specialite)) notFound();
 
   const category = await getCategoryBySlug(metier);
@@ -105,25 +119,48 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
   const city = await getCityBySlug(ville);
   if (!city) notFound();
 
-  const result = await getProsByCategoryAndCity(category.id, city.id, { page });
+  const currentYear = new Date().getFullYear();
+  const lower = category.name.toLowerCase();
+  const cityLabel = city.name;
+  const bestForm = getCategoryBestForm(category.name);
+  const pluralCategory = pluralizeCategoryName(category.name);
 
-  // 308 vers la page département de la VILLE concernée si aucun pro pour ce
-  // couple (cat × ville). Évite les URLs noindex pollutives en GSC, transmet le
-  // link juice à la bonne page département (pas vienne-86 par défaut !).
-  if (result.count === 0) {
+  // Page 1 : fetch les TOP N tries par score + total.
+  // Pages 2+ : pagination classique sur tous les pros (ordre alpha).
+  let topPros: Awaited<ReturnType<typeof getTopProsByCategoryAndCity>>["tops"] = [];
+  let totalProsCount = 0;
+  let paginatedResult: Awaited<ReturnType<typeof getProsByCategoryAndCity>> | null = null;
+
+  if (isFirstPage) {
+    const topResult = await getTopProsByCategoryAndCity(
+      category.id,
+      city.id,
+      TOP_LIMIT
+    );
+    topPros = topResult.tops;
+    totalProsCount = topResult.total;
+  } else {
+    paginatedResult = await getProsByCategoryAndCity(category.id, city.id, {
+      page,
+    });
+    totalProsCount = paginatedResult.count;
+  }
+
+  // 308 vers la page département de la VILLE si aucun pro pour ce
+  // couple (cat × ville). Évite les URLs noindex pollutives en GSC.
+  if (totalProsCount === 0) {
     const cityDeptSlug = generateDepartmentSlug(city.department);
     permanentRedirect(`/${metier}/${cityDeptSlug}`);
   }
 
-  const lower = category.name.toLowerCase();
-  const cityLabel = city.name;
+  const displayCount = Math.min(totalProsCount, TOP_LIMIT);
 
   // Autres spécialités du même métier (pour maillage interne dense)
   const otherSpecialties = getSpecialtiesForMetier(metier).filter(
     (s) => s.slug !== specialite
   );
 
-  // Schema.org Service (spécifique à la sous-spécialité)
+  // Schema.org Service (specifique a la sous-specialite, garde de l'ancienne version)
   const serviceJsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -141,21 +178,65 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
     },
   };
 
-  // Schema.org ItemList (liste des pros, comme la page listing standard)
+  // Schema ItemList enrichi : LocalBusiness complet (adresse + telephone +
+  // aggregateRating si dispo) pour activer les rich snippets ★ dans Google
+  // + signal LLM (Perplexity, AI Overviews).
+  const itemsForSchema = isFirstPage ? topPros : (paginatedResult?.data ?? []);
+  const schemaStartPos = isFirstPage
+    ? 1
+    : (page - 1) * (paginatedResult?.pageSize ?? 20) + 1;
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${category.name} ${specialty.shortLabel} à ${cityLabel}`,
-    numberOfItems: result.count,
-    itemListElement: result.data.map((pro, i) => ({
-      "@type": "ListItem",
-      position: (page - 1) * result.pageSize + i + 1,
-      url: `${BASE_URL}/artisan/${pro.slug}`,
-      name: pro.name,
-    })),
+    name: isFirstPage
+      ? `Les ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${cityLabel}`
+      : `${category.name} ${specialty.shortLabel} à ${cityLabel}`,
+    numberOfItems: totalProsCount,
+    itemListElement: itemsForSchema.map((pro, i) => {
+      const proUrl = `${BASE_URL}/artisan/${pro.slug}`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const business: any = {
+        "@type": "LocalBusiness",
+        "@id": proUrl,
+        name: pro.name,
+        url: proUrl,
+      };
+      if (pro.address && pro.city) {
+        business.address = {
+          "@type": "PostalAddress",
+          streetAddress: pro.address,
+          addressLocality: pro.city.name,
+          ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
+          addressCountry: "FR",
+        };
+      }
+      if (pro.phone) business.telephone = pro.phone;
+      // Agregat Workwave + Google si dispo
+      const wwCount = pro.workwave_reviews_count ?? 0;
+      const wwAvg = pro.workwave_reviews_avg ?? 0;
+      const gRating = pro.google_rating ?? 0;
+      const gCount = pro.google_reviews_count ?? 0;
+      if (wwCount > 0 || gCount > 0) {
+        const totalCount = wwCount + gCount;
+        const weightedSum = wwAvg * wwCount + gRating * gCount;
+        const aggregateValue = Math.round((weightedSum / totalCount) * 10) / 10;
+        business.aggregateRating = {
+          "@type": "AggregateRating",
+          ratingValue: aggregateValue,
+          reviewCount: totalCount,
+          bestRating: 5,
+          worstRating: 1,
+        };
+      }
+      return {
+        "@type": "ListItem",
+        position: schemaStartPos + i,
+        item: business,
+      };
+    }),
   };
 
-  // Schema.org FAQPage
+  // Schema FAQPage (specifique a la specialty, garde)
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -166,8 +247,7 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
     })),
   };
 
-  // Breadcrumb : le lien "Catégorie" pointe vers le département de la VILLE
-  // courante (et non vienne-86 hardcodé) → meilleure pertinence locale.
+  // Breadcrumb
   const cityDeptSlug = generateDepartmentSlug(city.department);
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
@@ -179,6 +259,18 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
 
   const baseUrl = `/${metier}/${specialite}/${ville}`;
 
+  // H1 dynamique
+  const h1Title = isFirstPage
+    ? totalProsCount === 1
+      ? `${category.name} ${specialty.shortLabel} à ${cityLabel} en ${currentYear}`
+      : `Les ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${cityLabel} en ${currentYear}`
+    : `${category.name} ${specialty.shortLabel} à ${cityLabel} — page ${page}`;
+
+  const subTitle =
+    totalProsCount === 1
+      ? `1 artisan référencé pour ${specialty.name.toLowerCase()}`
+      : `${totalProsCount} artisans référencés · Sélection objective par profil, certifications et avis`;
+
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">
       <JsonLd data={serviceJsonLd} />
@@ -186,56 +278,104 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
       <JsonLd data={faqJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
-      <Breadcrumb items={breadcrumbItems} />
-
-      {/* Hero spécialité */}
-      <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
-          {category.name} {specialty.longLabel} à {cityLabel}
-        </h1>
-        <p className="text-[var(--text-secondary)]">
-          {result.count} professionnel{result.count > 1 ? "s" : ""} référencé
-          {result.count > 1 ? "s" : ""} pour {specialty.name.toLowerCase()}
-        </p>
-      </div>
-
-      {/* CTA dépôt de projet (au-dessus de la grille pour la conversion) */}
-      <ProjectCtaBanner
+      {/* Bar fine sticky top */}
+      <StickyProjectCTA
         categorySlug={category.slug}
         categoryName={category.name}
-        locationSlug={city.slug}
+        citySlug={city.slug}
         locationName={cityLabel}
         preposition="à"
+        specialitySlug={specialty.slug}
       />
 
-      {/* Intro SEO spécifique spécialité */}
-      <ListingIntro intro={specialty.intro} />
+      <Breadcrumb items={breadcrumbItems} />
 
-      {result.data.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {result.data.map((pro) => (
-            <ProCard key={pro.id} pro={pro} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title="Aucun professionnel trouvé"
-          message={`Nous n'avons pas encore de ${lower} ${specialty.shortLabel} référencé à ${cityLabel}. Essayez une ville voisine ou élargissez votre recherche.`}
-          actionLabel={`Voir tous les ${lower}s à ${cityLabel}`}
-          actionHref={`/${category.slug}/${city.slug}`}
+      <div className="mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
+          {h1Title}
+        </h1>
+        <p className="text-[var(--text-secondary)]">{subTitle}</p>
+      </div>
+
+      {/* Section "Quel est votre projet ?" avec specialty active highlightee */}
+      {isFirstPage && (
+        <ProjectIntentSection
+          categorySlug={category.slug}
+          categoryName={category.name}
+          citySlug={city.slug}
+          locationName={cityLabel}
+          currentSpecialty={specialty.slug}
         />
       )}
 
-      <Pagination
-        currentPage={page}
-        totalPages={result.totalPages}
-        baseUrl={baseUrl}
-      />
+      {/* Intro SEO de la specialty (contenu unique long-tail editorial) */}
+      <ListingIntro intro={specialty.intro} />
 
-      {/* FAQ spécifique spécialité */}
+      {/* Liste principale : TopProCard sur page 1, ProCard pages 2+ */}
+      {isFirstPage ? (
+        topPros.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+              {topPros.map((pro, i) => (
+                <TopProCard
+                  key={pro.id}
+                  pro={pro}
+                  rank={i + 1}
+                  categorySlug={category.slug}
+                  citySlug={city.slug}
+                  specialitySlug={specialty.slug}
+                />
+              ))}
+            </div>
+
+            {totalProsCount > TOP_LIMIT && (
+              <div className="mt-8 flex justify-center">
+                <Link
+                  href={`${baseUrl}?page=2`}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] font-medium transition-all duration-200"
+                >
+                  Voir tous les {totalProsCount} {pluralCategory} à {cityLabel}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyState
+            title="Aucun professionnel trouvé"
+            message={`Nous n'avons pas encore de ${lower} ${specialty.shortLabel} référencé à ${cityLabel}.`}
+            actionLabel={`Voir tous les ${pluralCategory} à ${cityLabel}`}
+            actionHref={`/${category.slug}/${city.slug}`}
+          />
+        )
+      ) : paginatedResult && paginatedResult.data.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedResult.data.map((pro) => (
+              <ProCard key={pro.id} pro={pro} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={paginatedResult.totalPages}
+            baseUrl={baseUrl}
+          />
+        </>
+      ) : (
+        <EmptyState
+          title="Aucun résultat sur cette page"
+          message="Retournez à la première page pour découvrir notre sélection des meilleurs artisans."
+          actionLabel="Voir le Top"
+          actionHref={baseUrl}
+        />
+      )}
+
+      {/* FAQ specifique a la specialty (contenu editorial unique) */}
       <FaqAccordion faqs={specialty.faqs} />
 
-      {/* Maillage interne : autres spécialités pour ce métier + cette ville */}
+      {/* Maillage interne : autres specialites pour ce metier + cette ville */}
       {otherSpecialties.length > 0 && (
         <section className="mt-16">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-6">
@@ -257,7 +397,7 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
               href={`/${category.slug}/${city.slug}`}
               className="text-sm text-[var(--accent)] underline hover:no-underline"
             >
-              ← Voir tous les {lower}s à {cityLabel} (toutes spécialités)
+              ← Voir tous les {pluralCategory} à {cityLabel} (toutes spécialités)
             </Link>
           </div>
         </section>
