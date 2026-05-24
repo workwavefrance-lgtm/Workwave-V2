@@ -33,6 +33,12 @@ const STORAGE_MESSAGES = "workwave_agent_messages";
 const STORAGE_AUTO_OPENED = "workwave_agent_auto_opened";
 const COOKIE_CONSENT_NAME = "consent_analytics";
 
+// Identite de l'agent. Donner un prenom + role humanise et augmente
+// la confiance. Le system prompt cote API utilise le meme prenom.
+const AGENT_NAME = "Léa";
+const AGENT_INITIAL = "L";
+const AGENT_ROLE = "Conseillère Workwave";
+
 /**
  * Delai d'auto-open du panel selon le contexte de page. L'idee est
  * d'etre proactif (pousser la conversion sans attendre le clic) mais
@@ -86,21 +92,52 @@ function shouldHide(pathname: string): boolean {
 }
 
 function buildWelcomeMessage(ctx: AgentContext | null): string {
-  if (!ctx) return "Bonjour ! Comment puis-je vous aider ?";
+  if (!ctx) return `Bonjour, je suis ${AGENT_NAME} de Workwave. Comment puis-je vous aider ?`;
   switch (ctx.type) {
     case "pro_fiche": {
       const art = getCategoryArticle(ctx.categoryName);
-      return `Bonjour ! Vous regardez la fiche de **${ctx.proName}**. Vous êtes ${ctx.proName} (pour gérer votre fiche), ou un client potentiel qui cherche ${art} ${ctx.categoryName.toLowerCase()} ?`;
+      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous regardez la fiche de **${ctx.proName}** : vous êtes ${ctx.proName} (pour gérer votre fiche), ou un client potentiel qui cherche ${art} ${ctx.categoryName.toLowerCase()} ?`;
     }
     case "listing": {
       const art = getCategoryArticle(ctx.categoryName);
-      return `Bonjour ! Vous cherchez ${art} ${ctx.categoryName.toLowerCase()} à **${ctx.locationName}** ? Au lieu d'éplucher toute la liste, décrivez votre projet en 30 secondes — on vous trouve 3 artisans qualifiés. C'est gratuit, sans engagement.`;
+      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez ${art} ${ctx.categoryName.toLowerCase()} à **${ctx.locationName}** ? Au lieu d'éplucher toute la liste, décrivez-moi votre projet en 30 secondes — je vous trouve 3 artisans qualifiés, gratuitement et sans engagement.`;
     }
     case "home":
-      return "Bonjour ! Vous cherchez un artisan pour un projet, ou vous êtes vous-même artisan et voulez gérer votre fiche ?";
+      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez un artisan pour un projet, ou vous êtes vous-même artisan et voulez gérer votre fiche ?`;
     default:
-      return "Bonjour ! Comment puis-je vous aider ?";
+      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Comment puis-je vous aider ?`;
   }
+}
+
+/**
+ * Avatar circulaire de Léa : dégradé coral + initiale en blanc.
+ * Taille parametrable via la prop size (rem).
+ */
+function AgentAvatar({ size = 32, showStatus = false }: { size?: number; showStatus?: boolean }) {
+  const px = `${size}px`;
+  const fontSize = `${Math.round(size * 0.45)}px`;
+  return (
+    <div className="relative shrink-0" style={{ width: px, height: px }}>
+      <div
+        className="w-full h-full rounded-full flex items-center justify-center text-white font-semibold select-none"
+        style={{
+          background: "linear-gradient(135deg, #FF7A5C 0%, #FF5A36 60%, #E63E1A 100%)",
+          fontSize,
+          letterSpacing: "-0.02em",
+        }}
+        aria-hidden="true"
+      >
+        {AGENT_INITIAL}
+      </div>
+      {showStatus && (
+        <span
+          className="absolute bottom-0 right-0 rounded-full bg-[#22C55E] border-2 border-white"
+          style={{ width: `${Math.max(8, size * 0.28)}px`, height: `${Math.max(8, size * 0.28)}px` }}
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
 }
 
 /**
@@ -380,30 +417,19 @@ export default function CommercialAgent() {
       <button
         type="button"
         onClick={handleOpen}
-        aria-label="Ouvrir l'assistant Workwave"
-        className="fixed right-4 sm:right-5 z-50 flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-full pl-3 pr-4 py-2.5 shadow-lg transition-all duration-250 hover:scale-105"
+        aria-label={`Discuter avec ${AGENT_NAME}`}
+        className="fixed right-4 sm:right-5 z-50 flex items-center gap-2.5 bg-white dark:bg-[#111111] border border-[#E5E7EB] dark:border-[#27272A] text-[#0A0A0A] dark:text-[#FAFAFA] hover:border-[var(--accent)] rounded-full pl-1.5 pr-4 py-1.5 shadow-lg transition-all duration-250 hover:scale-105"
         style={{
           // Respect safe-area iOS (encoche, barre URL Safari du bas)
           bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
           boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
         }}
       >
-        <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
+        <AgentAvatar size={32} showStatus />
+        <span className="flex flex-col items-start leading-tight">
+          <span className="text-sm font-semibold">Discuter avec {AGENT_NAME}</span>
+          <span className="text-[11px] text-[#22C55E] font-medium">En ligne</span>
         </span>
-        <span className="text-sm font-semibold">Besoin d&apos;aide ?</span>
       </button>
     );
   }
@@ -421,14 +447,10 @@ export default function CommercialAgent() {
     >
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-[var(--accent)] text-white shrink-0">
-        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
-        </div>
+        <AgentAvatar size={36} showStatus />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold leading-tight">Assistant Workwave</p>
-          <p className="text-[11px] text-white/80 leading-tight">Réponse en quelques secondes</p>
+          <p className="text-sm font-semibold leading-tight">{AGENT_NAME}</p>
+          <p className="text-[11px] text-white/85 leading-tight">{AGENT_ROLE} · En ligne</p>
         </div>
         <button
           type="button"
@@ -458,26 +480,41 @@ export default function CommercialAgent() {
         className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[var(--bg-secondary)]"
         style={{ minHeight: "240px", maxHeight: "420px" }}
       >
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+        {messages.map((m, i) => {
+          const isAssistant = m.role === "assistant";
+          // On affiche l'avatar uniquement sur le DERNIER message d'un
+          // groupe consecutif de l'assistant (evite la repetition).
+          const isLastOfAssistantGroup =
+            isAssistant && (i === messages.length - 1 || messages[i + 1]?.role !== "assistant");
+          return (
             <div
-              className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                m.role === "user"
-                  ? "bg-[var(--accent)] text-white rounded-br-sm"
-                  : "bg-[var(--bg-primary)] border border-[var(--card-border)] text-[var(--text-primary)] rounded-bl-sm"
-              }`}
+              key={i}
+              className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {renderMarkdownLite(m.content)}
+              {isAssistant && (
+                <div className="shrink-0 w-7">
+                  {isLastOfAssistantGroup && <AgentAvatar size={28} />}
+                </div>
+              )}
+              <div
+                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                  m.role === "user"
+                    ? "bg-[var(--accent)] text-white rounded-br-sm"
+                    : "bg-[var(--bg-primary)] border border-[var(--card-border)] text-[var(--text-primary)] rounded-bl-sm"
+                }`}
+              >
+                {renderMarkdownLite(m.content)}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {loading && (
-          <div className="flex justify-start">
+          <div className="flex items-end gap-2 justify-start">
+            <div className="shrink-0 w-7">
+              <AgentAvatar size={28} />
+            </div>
             <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl rounded-bl-sm px-3.5 py-3">
-              <div className="flex gap-1">
+              <div className="flex gap-1 items-center">
                 <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                 <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -496,7 +533,7 @@ export default function CommercialAgent() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Tapez votre message..."
+          placeholder={`Écrivez à ${AGENT_NAME}...`}
           maxLength={500}
           disabled={loading}
           className="flex-1 h-10 px-3 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-colors duration-200"
