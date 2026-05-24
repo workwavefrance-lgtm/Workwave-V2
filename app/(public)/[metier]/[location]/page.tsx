@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Pagination from "@/components/ui/Pagination";
 import ProCard from "@/components/pro/ProCard";
+import TopProCard from "@/components/pro/TopProCard";
 import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
-import ProjectCtaBanner from "@/components/listing/ProjectCtaBanner";
+import ProjectIntentSection from "@/components/listing/ProjectIntentSection";
 import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
 import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
@@ -17,16 +19,26 @@ import {
   getProsByCategoryAndDepartment,
   getProsByCategoryAndCity,
 } from "@/lib/queries/pros";
+import {
+  getTopProsByCategoryAndCity,
+  getTopProsByCategoryAndDepartment,
+} from "@/lib/queries/top-pros";
 import { getNearbyCities, getCitiesByDepartment } from "@/lib/queries/cities";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
-import { getCategoryArticle } from "@/lib/utils/category-grammar";
+import {
+  getCategoryArticle,
+  getCategoryBestForm,
+  pluralizeCategoryName,
+} from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
+
+const TOP_LIMIT = 10;
 
 export const revalidate = 3600;
 
@@ -47,10 +59,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? `${resolved.department.name} (${resolved.department.code})`
       : resolved.city.name;
 
-  // "en" pour departement, "a" pour ville
   const preposition = resolved.type === "department" ? "en" : "à";
+  const currentYear = new Date().getFullYear();
 
-  // Utiliser le contenu SEO genere si disponible
   const locationId =
     resolved.type === "department"
       ? resolved.department.id
@@ -68,16 +79,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : await getProsByCategoryAndCity(category.id, resolved.city.id, { page: 1, pageSize: 1 });
 
   const prosCount = result.count;
+  const displayCount = Math.min(prosCount, TOP_LIMIT);
+  const bestForm = getCategoryBestForm(category.name);
+  const pluralCategory = pluralizeCategoryName(category.name);
 
-  const title =
-    seo?.title ||
-    (prosCount > 0
-      ? `${category.name} ${preposition} ${locationName} - ${prosCount} professionnel${prosCount > 1 ? "s" : ""}`
-      : `${category.name} ${preposition} ${locationName}`);
+  // Title style Travaux.com : "Les 10 meilleurs plombiers a Poitiers en 2026"
+  // Si on a peu de pros, on adapte (5, 3, 1).
+  let dynamicTitle: string;
+  if (prosCount === 0) {
+    dynamicTitle = `${category.name} ${preposition} ${locationName}`;
+  } else if (prosCount === 1) {
+    dynamicTitle = `${category.name} ${preposition} ${locationName} en ${currentYear} — 1 artisan référencé`;
+  } else {
+    dynamicTitle = `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear} — Workwave`;
+  }
+
+  const title = seo?.title || dynamicTitle;
 
   const description =
     seo?.meta_description ||
-    `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. ${prosCount} professionnel${prosCount > 1 ? "s" : ""} référencé${prosCount > 1 ? "s" : ""}, devis gratuits, intervention rapide.`;
+    (prosCount > 0
+      ? `Sélection des ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear}. Comparez les profils, demandez 3 devis gratuits en 30 secondes.`
+      : `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`);
 
   return {
     title,
@@ -106,6 +129,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const { metier, location: locationSlug } = await params;
   const { page: pageParam } = await searchParams;
   const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
+  const isFirstPage = page === 1;
 
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();
@@ -118,17 +142,29 @@ export default async function ListingPage({ params, searchParams }: Props) {
       ? `${resolved.department.name} (${resolved.department.code})`
       : resolved.city.name;
 
-  // "en" pour departement, "a" pour ville
   const preposition = resolved.type === "department" ? "en" : "à";
+  const currentYear = new Date().getFullYear();
 
-  const result =
-    resolved.type === "department"
-      ? await getProsByCategoryAndDepartment(
-          category.id,
-          resolved.department.id,
-          { page }
-        )
-      : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
+  // Page 1 : fetch les TOP N tries par score + total.
+  // Pages 2+ : pagination classique sur tous les pros (ordre alpha).
+  let topPros: Awaited<ReturnType<typeof getTopProsByCategoryAndCity>>["tops"] = [];
+  let totalProsCount = 0;
+  let paginatedResult: Awaited<ReturnType<typeof getProsByCategoryAndCity>> | null = null;
+
+  if (isFirstPage) {
+    const topResult =
+      resolved.type === "department"
+        ? await getTopProsByCategoryAndDepartment(category.id, resolved.department.id, TOP_LIMIT)
+        : await getTopProsByCategoryAndCity(category.id, resolved.city.id, TOP_LIMIT);
+    topPros = topResult.tops;
+    totalProsCount = topResult.total;
+  } else {
+    paginatedResult =
+      resolved.type === "department"
+        ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page })
+        : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
+    totalProsCount = paginatedResult.count;
+  }
 
   // 308 vers la page département de la VILLE concernée si aucun pro dans cette
   // ville pour ce métier. Évite les URLs noindex pollutives en GSC, transmet le
@@ -138,10 +174,15 @@ export default async function ListingPage({ params, searchParams }: Props) {
   // ATTENTION : pas de loading.tsx dans cette route ! Le streaming Suspense
   // commit le status 200 avant que la page puisse throw permanentRedirect/notFound.
   // Cf. lecon apprise CLAUDE.md du 2026-04-18.
-  if (resolved.type === "city" && result.count === 0) {
+  if (resolved.type === "city" && totalProsCount === 0) {
     const cityDeptSlug = generateDepartmentSlug(resolved.city.department);
     permanentRedirect(`/${metier}/${cityDeptSlug}`);
   }
+
+  const displayCount = Math.min(totalProsCount, TOP_LIMIT);
+  const bestForm = getCategoryBestForm(category.name);
+  const pluralCategory = pluralizeCategoryName(category.name);
+  const citySlug = resolved.type === "city" ? resolved.city.slug : null;
 
   const allCategories = await getAllCategories();
   const relatedCategories = allCategories
@@ -179,14 +220,22 @@ export default async function ListingPage({ params, searchParams }: Props) {
     allDepartments = depts;
   }
 
+  // Schema ItemList : sur page 1 on liste les top pros (avec rank score),
+  // sur pages 2+ on liste les pros de la page en cours (positions globales).
+  const itemsForSchema = isFirstPage ? topPros : (paginatedResult?.data ?? []);
+  const schemaStartPos = isFirstPage
+    ? 1
+    : (page - 1) * (paginatedResult?.pageSize ?? 20) + 1;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${category.name} ${preposition} ${locationName}`,
-    numberOfItems: result.count,
-    itemListElement: result.data.map((pro, i) => ({
+    name: isFirstPage
+      ? `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName}`
+      : `${category.name} ${preposition} ${locationName}`,
+    numberOfItems: totalProsCount,
+    itemListElement: itemsForSchema.map((pro, i) => ({
       "@type": "ListItem",
-      position: (page - 1) * result.pageSize + i + 1,
+      position: schemaStartPos + i,
       url: `${BASE_URL}/artisan/${pro.slug}`,
       name: pro.name,
     })),
@@ -215,6 +264,23 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   const baseUrl = `/${metier}/${locationSlug}`;
 
+  // H1 dynamique selon nb de pros et page
+  const h1Title = isFirstPage
+    ? totalProsCount === 0
+      ? `${category.name} ${preposition} ${locationName}`
+      : totalProsCount === 1
+        ? `${category.name} ${preposition} ${locationName} en ${currentYear}`
+        : `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear}`
+    : `Tous les ${pluralCategory} ${preposition} ${locationName} — page ${page}`;
+
+  // Sous-titre (count d'artisans)
+  const subTitle =
+    totalProsCount === 0
+      ? "Aucun artisan référencé pour le moment"
+      : totalProsCount === 1
+        ? "1 artisan référencé"
+        : `${totalProsCount} artisans référencés · Sélection objective par profil, certifications et avis`;
+
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">
       <JsonLd data={jsonLd} />
@@ -222,50 +288,94 @@ export default async function ListingPage({ params, searchParams }: Props) {
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
-          {category.name} {preposition} {locationName}
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
+          {h1Title}
         </h1>
-        <p className="text-[var(--text-secondary)]">
-          {result.count} professionnel{result.count > 1 ? "s" : ""} référencé
-          {result.count > 1 ? "s" : ""}
-        </p>
+        <p className="text-[var(--text-secondary)]">{subTitle}</p>
       </div>
 
-      {/* CTA dépôt de projet — au-dessus de la grille pour la conversion */}
-      <ProjectCtaBanner
-        categorySlug={category.slug}
-        categoryName={category.name}
-        locationSlug={locationSlug}
-        locationName={locationName}
-        preposition={preposition}
-      />
-
-      {/* Intro SEO courte — au-dessus de la grille pour le crawl Google */}
-      <ListingIntro
-        intro={extractIntro(seo?.content)}
-        fallback={`Vous cherchez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Workwave référence ${result.count} professionnel${result.count > 1 ? "s" : ""} qualifié${result.count > 1 ? "s" : ""} dans cette zone. Comparez les profils, consultez les coordonnées et contactez directement l'artisan de votre choix. Service 100% gratuit, sans intermédiaire commercial.`}
-      />
-
-      {result.data.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {result.data.map((pro) => (
-            <ProCard key={pro.id} pro={pro} />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title="Aucun professionnel trouvé"
-          message={`Nous n'avons pas encore de ${category.name.toLowerCase()} référencé ${preposition} ${locationName}.`}
-          actionLabel="Rechercher ailleurs"
-          actionHref="/recherche"
+      {/* Section "Quel est votre projet ?" : capture du lead AVANT la liste.
+          Pattern Travaux.com. Affichee uniquement sur page 1 (sur les pages
+          paginees l'user a deja "passe la porte"). */}
+      {isFirstPage && totalProsCount > 0 && (
+        <ProjectIntentSection
+          categorySlug={category.slug}
+          categoryName={category.name}
+          citySlug={citySlug}
+          locationName={locationName}
         />
       )}
 
-      <Pagination
-        currentPage={page}
-        totalPages={result.totalPages}
-        baseUrl={baseUrl}
+      {/* Intro SEO courte */}
+      <ListingIntro
+        intro={extractIntro(seo?.content)}
+        fallback={
+          totalProsCount > 0
+            ? `Sélection des ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear}. Classement basé sur la qualité du profil (certifications, ancienneté, photos, avis vérifiés) — pas sur des boosters payants. Comparez les profils, demandez 3 devis gratuits en 30 secondes ou contactez directement l'artisan de votre choix.`
+            : `Vous cherchez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Workwave référence les professionnels qualifiés de la zone. Service 100% gratuit, sans intermédiaire commercial.`
+        }
       />
+
+      {/* Liste principale : TopProCard sur page 1, ProCard classique pages 2+ */}
+      {isFirstPage ? (
+        topPros.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+              {topPros.map((pro, i) => (
+                <TopProCard
+                  key={pro.id}
+                  pro={pro}
+                  rank={i + 1}
+                  categorySlug={category.slug}
+                  citySlug={citySlug}
+                />
+              ))}
+            </div>
+
+            {/* Lien vers la liste complète si on a plus de TOP_LIMIT pros */}
+            {totalProsCount > TOP_LIMIT && (
+              <div className="mt-8 flex justify-center">
+                <Link
+                  href={`${baseUrl}?page=2`}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] font-medium transition-all duration-200"
+                >
+                  Voir tous les {totalProsCount} {pluralCategory} {preposition} {locationName}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyState
+            title="Aucun professionnel trouvé"
+            message={`Nous n'avons pas encore de ${category.name.toLowerCase()} référencé ${preposition} ${locationName}.`}
+            actionLabel="Rechercher ailleurs"
+            actionHref="/recherche"
+          />
+        )
+      ) : paginatedResult && paginatedResult.data.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedResult.data.map((pro) => (
+              <ProCard key={pro.id} pro={pro} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={paginatedResult.totalPages}
+            baseUrl={baseUrl}
+          />
+        </>
+      ) : (
+        <EmptyState
+          title="Aucun résultat sur cette page"
+          message="Retournez à la première page pour découvrir notre sélection des meilleurs artisans."
+          actionLabel="Voir le Top"
+          actionHref={baseUrl}
+        />
+      )}
 
       {/* Contenu SEO long (sections H2 + détails) — l'intro a déjà été affichée plus haut */}
       {seo && stripIntro(seo.content) && (
@@ -312,7 +422,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
         <CityFactsBlock
           city={resolved.city}
           categoryName={category.name}
-          prosCount={result.count}
+          prosCount={totalProsCount}
         />
       )}
 
@@ -322,7 +432,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           doublon possible visible sur la page courante). Strategie :
           convertir un probleme (doublons hereites Sirene/Apify) en levier
           d'engagement (le pro identifie lui-meme sa bonne fiche). */}
-      {result.count > 1 && (
+      {totalProsCount > 1 && (
         <DuplicateNoticeBlock
           categoryName={category.name}
           locationName={locationName}

@@ -38,3 +38,36 @@ export function getCategoryArticle(categoryName: string): "un" | "une" {
   const key = categoryName.toLowerCase().trim();
   return FEMININE_CATEGORIES.has(key) ? "une" : "un";
 }
+
+/**
+ * Renvoie "meilleurs" ou "meilleures" selon le genre.
+ * Utilise pour les titres "Les X meilleurs/meilleures [metier]".
+ */
+export function getCategoryBestForm(categoryName: string): "meilleurs" | "meilleures" {
+  return getCategoryArticle(categoryName) === "une" ? "meilleures" : "meilleurs";
+}
+
+/**
+ * Pluralise un nom de categorie pour les titres au pluriel.
+ * Regle simple : on ajoute "s" au PREMIER mot (les autres restent
+ * souvent inchanges en francais : "Aide aux seniors" -> "Aides aux
+ * seniors", "Garde d'enfants" -> "Gardes d'enfants"). Marche aussi
+ * sur un seul mot ("Plombier" -> "Plombiers").
+ *
+ * Sortie en minuscule pour les phrases du genre "les 10 meilleurs
+ * plombiers a Poitiers".
+ */
+export function pluralizeCategoryName(categoryName: string): string {
+  const lower = categoryName.toLowerCase().trim();
+  if (!lower) return lower;
+
+  const parts = lower.split(/\s+/);
+  const first = parts[0];
+  // Si deja termine par "s" ou "x", on ne double pas
+  if (/[sx]$/.test(first)) {
+    parts[0] = first;
+  } else {
+    parts[0] = first + "s";
+  }
+  return parts.join(" ");
+}

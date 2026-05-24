@@ -171,6 +171,11 @@ export type Pro = {
   first_email_sent_at: string | null;
   prenom_dirigeant: string | null;
   nom_dirigeant: string | null;
+  // Enrichissement Google Places (cf. scripts/enrich-pros-google-places.ts)
+  google_place_id: string | null;
+  google_rating: number | null;
+  google_reviews_count: number | null;
+  google_enriched_at: string | null;
   // Champs calculés
   profile_completion: number;
   response_rate: number | null;
