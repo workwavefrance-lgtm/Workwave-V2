@@ -98,6 +98,10 @@ export async function getReviewByToken(
  * Soumet l'avis : passe le row de 'pending' → 'published' (auto-publie si
  * rating >= 3) ou 'pending' (modere si < 3, c'est-a-dire les avis
  * potentiellement negatifs).
+ *
+ * Side-effects (fire-and-forget, non-bloquants) :
+ *   - Mail de remerciement au particulier (variant publie/en moderation)
+ *   - Alerte admin si rating < 3 (pour moderation rapide)
  */
 export async function submitReview(params: {
   token: string;
@@ -111,7 +115,9 @@ export async function submitReview(params: {
   const sb = getAdminServiceClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existing } = await (sb.from("pro_reviews") as any)
-    .select("id, status")
+    .select(
+      "id, status, particulier_email, particulier_name, pro:pros(name, slug)"
+    )
     .eq("token", params.token)
     .single();
   if (!existing) {
@@ -129,12 +135,13 @@ export async function submitReview(params: {
   // Auto-publication si rating >= 3 (filtres positifs), sinon modere
   const newStatus = params.rating >= 3 ? "published" : "pending";
   const now = new Date().toISOString();
+  const cleanComment = params.comment?.trim() || null;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (sb.from("pro_reviews") as any)
     .update({
       rating: params.rating,
-      comment: params.comment?.trim() || null,
+      comment: cleanComment,
       status: newStatus,
       submitted_at: now,
       published_at: newStatus === "published" ? now : null,
@@ -145,6 +152,43 @@ export async function submitReview(params: {
     console.error("[reviews] submitReview erreur :", error.message);
     return { ok: false, error: "Erreur lors de l'enregistrement." };
   }
+
+  // ─── Side-effects fire-and-forget ────────────────────────────────────
+  const proName = e.pro?.name ?? "l'artisan";
+  const proSlug = e.pro?.slug ?? "";
+
+  // 1. Remerciement au particulier (toujours envoye)
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  import("@/lib/email/send-review-thanks").then(({ sendReviewThanks }) =>
+    sendReviewThanks({
+      particulierEmail: e.particulier_email,
+      particulierName: e.particulier_name,
+      proName,
+      proSlug,
+      rating: params.rating,
+      published: newStatus === "published",
+    }).catch((err) =>
+      console.error("[reviews] send thanks failed :", err?.message)
+    )
+  );
+
+  // 2. Alerte admin uniquement pour les avis a moderer (< 3 etoiles)
+  if (newStatus === "pending") {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    import("@/lib/email/send-review-moderation-alert").then(
+      ({ sendReviewModerationAlert }) =>
+        sendReviewModerationAlert({
+          proName,
+          proSlug,
+          particulierName: e.particulier_name,
+          rating: params.rating,
+          comment: cleanComment,
+        }).catch((err) =>
+          console.error("[reviews] send moderation alert failed :", err?.message)
+        )
+    );
+  }
+
   return { ok: true };
 }
 

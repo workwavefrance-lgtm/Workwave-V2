@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { generateReviewUnsubscribeToken } from "@/lib/utils/review-unsubscribe-token";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -31,6 +32,10 @@ export async function sendReviewRequest(params: {
   const proPageUrl = `${baseUrl}/artisan/${params.proSlug}`;
   const firstName = params.particulierName.split(/\s+/)[0] ?? "";
   const proCityLabel = params.proCity ? ` à ${params.proCity}` : "";
+
+  // Lien de desinscription RGPD-safe (HMAC token deterministe sur l'email)
+  const unsubToken = generateReviewUnsubscribeToken(params.particulierEmail);
+  const unsubUrl = `${baseUrl}/unsubscribe-review?token=${unsubToken}&email=${encodeURIComponent(params.particulierEmail)}`;
 
   const html = `
 <!DOCTYPE html>
@@ -96,8 +101,11 @@ export async function sendReviewRequest(params: {
       <p style="margin:0 0 4px;color:#6B7280;font-size:12px;line-height:1.5;">
         Vous n'avez pas été en contact avec cet artisan ? Pas de souci, ignorez cet email.
       </p>
-      <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.5;">
+      <p style="margin:0 0 8px;color:#9CA3AF;font-size:11px;line-height:1.5;">
         Un problème ? Écrivez-nous à <a href="mailto:contact@workwave.fr" style="color:#FF5A36;text-decoration:none;">contact@workwave.fr</a>
+      </p>
+      <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.5;">
+        <a href="${unsubUrl}" style="color:#9CA3AF;text-decoration:underline;">Ne plus recevoir de demandes d'avis</a>
       </p>
     </div>
 
@@ -128,6 +136,8 @@ Vous n'avez pas été en contact avec cet artisan ? Ignorez cet email.
 
 Un problème ? Écrivez-nous à contact@workwave.fr.
 
+Pour ne plus recevoir de demandes d'avis : ${unsubUrl}
+
 — L'équipe Workwave
   `.trim();
 
@@ -142,7 +152,11 @@ Un problème ? Écrivez-nous à contact@workwave.fr.
         // Bloque le tracking pour respecter la simplicite du flow
         // (les emails de demande d'avis n'ont pas besoin d'analytics
         // Resend, on a deja le submitted_at en base pour mesurer).
-        "List-Unsubscribe": `<mailto:contact@workwave.fr?subject=Désinscription avis>`,
+        // List-Unsubscribe RFC 8058 : lien HTTPS + fallback mailto. Gmail
+        // et Outlook affichent un bouton "Se désinscrire" direct dans
+        // l'interface (UX et delivery boost).
+        "List-Unsubscribe": `<${unsubUrl}>, <mailto:contact@workwave.fr?subject=Désinscription avis>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
       },
     });
     if (result.error) {

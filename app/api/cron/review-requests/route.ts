@@ -68,6 +68,18 @@ export async function GET(req: Request) {
     });
   }
 
+  // Charge en bulk les emails desinscrits pour eviter N+1 queries
+  const candidateEmails = (
+    projects as Array<{ email: string }>
+  ).map((p) => p.email.toLowerCase().trim());
+  const { data: unsubRows } = await supabase
+    .from("review_unsubscribes")
+    .select("email")
+    .in("email", candidateEmails);
+  const unsubscribedSet = new Set(
+    ((unsubRows as Array<{ email: string }> | null) ?? []).map((r) => r.email)
+  );
+
   const results: Array<{
     project_id: number;
     pro_name?: string;
@@ -82,6 +94,19 @@ export async function GET(req: Request) {
     category_id: number;
     city_id: number;
   }>) {
+    // Skip les emails desinscrits (RGPD + delivery)
+    if (unsubscribedSet.has(p.email.toLowerCase().trim())) {
+      await supabase
+        .from("projects")
+        .update({ review_requested_at: new Date().toISOString() })
+        .eq("id", p.id);
+      results.push({
+        project_id: p.id,
+        ok: false,
+        error: "Particulier désinscrit",
+      });
+      continue;
+    }
     // 2. Trouve le 1er pro qui a recu le lead via project_leads
     const { data: leads } = await supabase
       .from("project_leads")
