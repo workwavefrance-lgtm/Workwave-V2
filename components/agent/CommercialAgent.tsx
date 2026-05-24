@@ -28,7 +28,6 @@ import { getCategoryArticle } from "@/lib/utils/category-grammar";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
-const STORAGE_DISMISSED = "workwave_agent_dismissed";
 const STORAGE_MESSAGES = "workwave_agent_messages";
 const STORAGE_AUTO_OPENED = "workwave_agent_auto_opened";
 const COOKIE_CONSENT_NAME = "consent_analytics";
@@ -248,20 +247,12 @@ function renderMarkdownLite(text: string): ReactNode {
 export default function CommercialAgent() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [dismissed, setDismissed] = useState<boolean | null>(null); // null = pas encore lu
   const [cookieHandled, setCookieHandled] = useState<boolean | null>(null); // null = pas encore lu
   const [context, setContext] = useState<AgentContext | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  // Lecture du flag "fermé pour la session" au mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = sessionStorage.getItem(STORAGE_DISMISSED);
-    setDismissed(stored === "1");
-  }, []);
 
   // Detection du consent cookies. Tant que le bandeau cookies est
   // visible (pas de cookie consent_analytics), on ne montre PAS la
@@ -293,7 +284,6 @@ export default function CommercialAgent() {
 
   // Fetch contexte page (au mount + à chaque changement de route)
   useEffect(() => {
-    if (dismissed !== false) return;
     if (shouldHide(pathname || "/")) return;
     let cancelled = false;
     fetch("/api/agent-context", {
@@ -312,7 +302,7 @@ export default function CommercialAgent() {
     return () => {
       cancelled = true;
     };
-  }, [pathname, dismissed]);
+  }, [pathname]);
 
   // Auto-scroll en bas quand de nouveaux messages arrivent
   useEffect(() => {
@@ -324,7 +314,6 @@ export default function CommercialAgent() {
   // Auto-open du panel apres un delai contextuel. Une seule fois par
   // session (sessionStorage). Conditions :
   // - bandeau cookies geré (cookieHandled === true)
-  // - user n'a pas dismiss (dismissed === false)
   // - on est sur une page a intent (home, listing, fiche pro)
   // - on a deja le contexte (sinon le message d'accueil serait
   //   generique alors qu'on peut faire mieux)
@@ -333,7 +322,6 @@ export default function CommercialAgent() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (cookieHandled !== true) return;
-    if (dismissed !== false) return;
     if (!context) return;
     if (open) return;
     if (messages.length > 0) return; // user a deja interagi
@@ -344,9 +332,8 @@ export default function CommercialAgent() {
     if (delay === null) return;
 
     const timer = window.setTimeout(() => {
-      // Re-check au moment du fire : l'user a peut-etre dismiss
-      // entre temps, ou ouvert manuellement
-      if (sessionStorage.getItem(STORAGE_DISMISSED) === "1") return;
+      // Re-check au moment du fire : l'user a pu ouvrir manuellement
+      // entre temps
       if (sessionStorage.getItem(STORAGE_AUTO_OPENED) === "1") return;
       setOpen(true);
       const welcome = buildWelcomeMessage(context);
@@ -362,7 +349,7 @@ export default function CommercialAgent() {
     // On veut redéclencher si le contexte change (changement de
     // route) tant qu'on n'a pas encore auto-ouvert dans la session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cookieHandled, dismissed, context, pathname]);
+  }, [cookieHandled, context, pathname]);
 
   // Persiste les messages dans sessionStorage pour pas perdre la conv
   // si l'utilisateur navigue puis revient
@@ -401,17 +388,10 @@ export default function CommercialAgent() {
   }
 
   function handleClose() {
+    // Ferme uniquement la fenetre de chat, la bulle "Discuter avec Lea"
+    // reste toujours visible en bas a droite. L'user peut la rouvrir
+    // d'un clic. Pas de "dismiss pour la session" volontaire.
     setOpen(false);
-  }
-
-  function handleDismiss() {
-    setDismissed(true);
-    setOpen(false);
-    try {
-      sessionStorage.setItem(STORAGE_DISMISSED, "1");
-    } catch {
-      // ignore
-    }
   }
 
   async function handleSend(e?: React.FormEvent) {
@@ -461,8 +441,6 @@ export default function CommercialAgent() {
   }
 
   // Conditions de non-affichage
-  if (dismissed === null) return null; // pas encore initialisé
-  if (dismissed) return null;
   if (cookieHandled !== true) return null; // attend la gestion du bandeau cookies
   if (shouldHide(pathname || "/")) return null;
 
@@ -531,17 +509,7 @@ export default function CommercialAgent() {
         <button
           type="button"
           onClick={handleClose}
-          aria-label="Réduire l'assistant"
-          className="text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-[#FAFAFA] p-1.5 rounded-lg hover:bg-[#F3F4F6] dark:hover:bg-[#1F1F23] transition-all duration-150"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M5 12h14" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label="Fermer l'assistant pour cette session"
+          aria-label="Fermer la fenêtre de discussion"
           className="text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-[#FAFAFA] p-1.5 rounded-lg hover:bg-[#F3F4F6] dark:hover:bg-[#1F1F23] transition-all duration-150"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
