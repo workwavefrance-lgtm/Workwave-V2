@@ -110,20 +110,34 @@ function buildWelcomeMessage(ctx: AgentContext | null): string {
 }
 
 /**
- * Avatar circulaire de Léa : dégradé coral + initiale en blanc.
- * Taille parametrable via la prop size (rem).
+ * Avatar circulaire de Léa : dégradé coral riche + initiale en blanc
+ * en font semi-bold, avec un ring subtle blanc/glow pour le premium.
+ * Taille parametrable via la prop size.
  */
-function AgentAvatar({ size = 32, showStatus = false }: { size?: number; showStatus?: boolean }) {
+function AgentAvatar({
+  size = 32,
+  showStatus = false,
+  ring = false,
+}: {
+  size?: number;
+  showStatus?: boolean;
+  ring?: boolean;
+}) {
   const px = `${size}px`;
-  const fontSize = `${Math.round(size * 0.45)}px`;
+  const fontSize = `${Math.round(size * 0.46)}px`;
+  const statusSize = Math.max(8, Math.round(size * 0.28));
   return (
     <div className="relative shrink-0" style={{ width: px, height: px }}>
       <div
         className="w-full h-full rounded-full flex items-center justify-center text-white font-semibold select-none"
         style={{
-          background: "linear-gradient(135deg, #FF7A5C 0%, #FF5A36 60%, #E63E1A 100%)",
+          background:
+            "radial-gradient(circle at 30% 25%, #FFA78B 0%, #FF7A5C 30%, #FF5A36 60%, #D63916 100%)",
           fontSize,
-          letterSpacing: "-0.02em",
+          letterSpacing: "-0.04em",
+          boxShadow: ring
+            ? "0 0 0 3px rgba(255, 90, 54, 0.18), 0 6px 16px -4px rgba(255, 90, 54, 0.45)"
+            : "0 2px 6px -1px rgba(255, 90, 54, 0.35)",
         }}
         aria-hidden="true"
       >
@@ -131,8 +145,14 @@ function AgentAvatar({ size = 32, showStatus = false }: { size?: number; showSta
       </div>
       {showStatus && (
         <span
-          className="absolute bottom-0 right-0 rounded-full bg-[#22C55E] border-2 border-white"
-          style={{ width: `${Math.max(8, size * 0.28)}px`, height: `${Math.max(8, size * 0.28)}px` }}
+          className="absolute rounded-full bg-[#22C55E]"
+          style={{
+            width: `${statusSize}px`,
+            height: `${statusSize}px`,
+            bottom: 0,
+            right: 0,
+            boxShadow: "0 0 0 2px var(--bg-primary, #FFFFFF)",
+          }}
           aria-hidden="true"
         />
       )}
@@ -418,17 +438,23 @@ export default function CommercialAgent() {
         type="button"
         onClick={handleOpen}
         aria-label={`Discuter avec ${AGENT_NAME}`}
-        className="fixed right-4 sm:right-5 z-50 flex items-center gap-2.5 bg-white dark:bg-[#111111] border border-[#E5E7EB] dark:border-[#27272A] text-[#0A0A0A] dark:text-[#FAFAFA] hover:border-[var(--accent)] rounded-full pl-1.5 pr-4 py-1.5 shadow-lg transition-all duration-250 hover:scale-105"
+        className="group fixed right-4 sm:right-5 z-50 flex items-center gap-3 bg-white dark:bg-[#0F0F0F] border border-[#E5E7EB] dark:border-[#27272A] text-[#0A0A0A] dark:text-[#FAFAFA] hover:border-[#D1D5DB] dark:hover:border-[#3F3F46] rounded-full pl-1.5 pr-4 py-1.5 transition-all duration-300 hover:-translate-y-0.5"
         style={{
           // Respect safe-area iOS (encoche, barre URL Safari du bas)
           bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
-          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
+          boxShadow:
+            "0 12px 28px -8px rgba(15, 23, 42, 0.18), 0 4px 12px -4px rgba(15, 23, 42, 0.08)",
         }}
       >
-        <AgentAvatar size={32} showStatus />
-        <span className="flex flex-col items-start leading-tight">
-          <span className="text-sm font-semibold">Discuter avec {AGENT_NAME}</span>
-          <span className="text-[11px] text-[#22C55E] font-medium">En ligne</span>
+        <AgentAvatar size={36} showStatus ring />
+        <span className="flex flex-col items-start leading-tight pr-0.5">
+          <span className="text-[13px] font-semibold tracking-tight">
+            Discuter avec {AGENT_NAME}
+          </span>
+          <span className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-[#9CA3AF] font-medium mt-0.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+            En ligne maintenant
+          </span>
         </span>
       </button>
     );
@@ -437,26 +463,41 @@ export default function CommercialAgent() {
   // Panel chat ouvert
   return (
     <div
-      className="fixed right-4 sm:right-5 z-50 w-[calc(100vw-2rem)] sm:w-96 max-h-[calc(100vh-2.5rem)] flex flex-col bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl overflow-hidden"
+      className="fixed right-4 sm:right-5 z-50 w-[calc(100vw-2rem)] sm:w-[400px] max-h-[calc(100vh-2.5rem)] flex flex-col bg-[var(--bg-primary)] border border-[#E5E7EB] dark:border-[#27272A] rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300"
       style={{
         bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.22)",
+        boxShadow:
+          "0 32px 64px -16px rgba(15, 23, 42, 0.25), 0 12px 24px -8px rgba(15, 23, 42, 0.10)",
       }}
       role="dialog"
-      aria-label="Assistant Workwave"
+      aria-label={`Assistant ${AGENT_NAME} — Workwave`}
     >
+      {/* Liseré coral en haut pour la signature visuelle */}
+      <div
+        className="h-[3px] shrink-0"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, #FF5A36 25%, #FF7A5C 50%, #FF5A36 75%, transparent 100%)",
+        }}
+      />
+
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-[var(--accent)] text-white shrink-0">
-        <AgentAvatar size={36} showStatus />
+      <div className="flex items-center gap-3 px-5 py-4 bg-[var(--bg-primary)] border-b border-[#F1F1F3] dark:border-[#1F1F23] shrink-0">
+        <AgentAvatar size={42} showStatus />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold leading-tight">{AGENT_NAME}</p>
-          <p className="text-[11px] text-white/85 leading-tight">{AGENT_ROLE} · En ligne</p>
+          <p className="text-[15px] font-semibold leading-tight text-[#0A0A0A] dark:text-[#FAFAFA] tracking-tight">
+            {AGENT_NAME}
+          </p>
+          <p className="flex items-center gap-1.5 text-[12px] text-[#6B7280] dark:text-[#9CA3AF] leading-tight mt-0.5">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+            {AGENT_ROLE} · En ligne
+          </p>
         </div>
         <button
           type="button"
           onClick={handleClose}
           aria-label="Réduire l'assistant"
-          className="text-white/80 hover:text-white p-1 rounded transition-colors duration-150"
+          className="text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-[#FAFAFA] p-1.5 rounded-lg hover:bg-[#F3F4F6] dark:hover:bg-[#1F1F23] transition-all duration-150"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M5 12h14" />
@@ -466,7 +507,7 @@ export default function CommercialAgent() {
           type="button"
           onClick={handleDismiss}
           aria-label="Fermer l'assistant pour cette session"
-          className="text-white/80 hover:text-white p-1 rounded transition-colors duration-150"
+          className="text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-[#FAFAFA] p-1.5 rounded-lg hover:bg-[#F3F4F6] dark:hover:bg-[#1F1F23] transition-all duration-150"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M18 6L6 18M6 6l12 12" />
@@ -477,8 +518,8 @@ export default function CommercialAgent() {
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-[var(--bg-secondary)]"
-        style={{ minHeight: "240px", maxHeight: "420px" }}
+        className="flex-1 overflow-y-auto px-4 py-5 space-y-4 bg-[#FAFAFA] dark:bg-[#0A0A0A]"
+        style={{ minHeight: "300px", maxHeight: "440px" }}
       >
         {messages.map((m, i) => {
           const isAssistant = m.role === "assistant";
@@ -486,22 +527,30 @@ export default function CommercialAgent() {
           // groupe consecutif de l'assistant (evite la repetition).
           const isLastOfAssistantGroup =
             isAssistant && (i === messages.length - 1 || messages[i + 1]?.role !== "assistant");
+          const prevIsSameRole = i > 0 && messages[i - 1].role === m.role;
           return (
             <div
               key={i}
-              className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"} ${
+                prevIsSameRole ? "mt-1" : ""
+              }`}
             >
               {isAssistant && (
-                <div className="shrink-0 w-7">
+                <div className="shrink-0 w-7 self-end">
                   {isLastOfAssistantGroup && <AgentAvatar size={28} />}
                 </div>
               )}
               <div
-                className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                className={`max-w-[82%] px-4 py-2.5 text-[14px] leading-relaxed ${
                   m.role === "user"
-                    ? "bg-[var(--accent)] text-white rounded-br-sm"
-                    : "bg-[var(--bg-primary)] border border-[var(--card-border)] text-[var(--text-primary)] rounded-bl-sm"
+                    ? "bg-[var(--accent)] text-white rounded-2xl rounded-br-md"
+                    : "bg-white dark:bg-[#111111] text-[#0A0A0A] dark:text-[#FAFAFA] rounded-2xl rounded-bl-md ring-1 ring-[#E5E7EB] dark:ring-[#27272A]"
                 }`}
+                style={
+                  m.role === "user"
+                    ? { boxShadow: "0 1px 3px rgba(255, 90, 54, 0.25)" }
+                    : { boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px -2px rgba(15, 23, 42, 0.06)" }
+                }
               >
                 {renderMarkdownLite(m.content)}
               </div>
@@ -510,15 +559,21 @@ export default function CommercialAgent() {
         })}
         {loading && (
           <div className="flex items-end gap-2 justify-start">
-            <div className="shrink-0 w-7">
+            <div className="shrink-0 w-7 self-end">
               <AgentAvatar size={28} />
             </div>
-            <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl rounded-bl-sm px-3.5 py-3">
-              <div className="flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-1.5 h-1.5 bg-[var(--text-tertiary)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div className="flex flex-col gap-1">
+              <div
+                className="bg-white dark:bg-[#111111] ring-1 ring-[#E5E7EB] dark:ring-[#27272A] rounded-2xl rounded-bl-md px-4 py-3"
+                style={{ boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)" }}
+              >
+                <div className="flex gap-1 items-center">
+                  <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 bg-[#9CA3AF] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
               </div>
+              <p className="text-[11px] text-[#9CA3AF] pl-1">{AGENT_NAME} écrit…</p>
             </div>
           </div>
         )}
@@ -527,28 +582,49 @@ export default function CommercialAgent() {
       {/* Input */}
       <form
         onSubmit={handleSend}
-        className="flex items-center gap-2 px-3 py-3 border-t border-[var(--card-border)] bg-[var(--bg-primary)] shrink-0"
+        className="flex items-center gap-2 px-3 py-3 border-t border-[#F1F1F3] dark:border-[#1F1F23] bg-[var(--bg-primary)] shrink-0"
       >
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={`Écrivez à ${AGENT_NAME}...`}
-          maxLength={500}
-          disabled={loading}
-          className="flex-1 h-10 px-3 rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-colors duration-200"
-        />
+        <div className="flex-1 flex items-center bg-[#F3F4F6] dark:bg-[#1A1A1A] rounded-full px-4 h-11 focus-within:ring-2 focus-within:ring-[#FF5A36]/40 transition-all duration-200">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={`Écrivez à ${AGENT_NAME}…`}
+            maxLength={500}
+            disabled={loading}
+            className="flex-1 bg-transparent text-[14px] text-[#0A0A0A] dark:text-[#FAFAFA] placeholder:text-[#9CA3AF] focus:outline-none"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading || !input.trim()}
           aria-label="Envoyer"
-          className="w-10 h-10 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all duration-200 shrink-0"
+          className="w-11 h-11 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-30 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all duration-200 shrink-0 hover:scale-105 disabled:hover:scale-100"
+          style={{
+            boxShadow:
+              !loading && input.trim()
+                ? "0 4px 12px -2px rgba(255, 90, 54, 0.45)"
+                : "none",
+          }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
           </svg>
         </button>
       </form>
+
+      {/* Footer powered-by discret */}
+      <div className="px-4 py-2 text-center bg-[var(--bg-primary)] border-t border-[#F1F1F3] dark:border-[#1F1F23]">
+        <p className="text-[10px] text-[#9CA3AF] tracking-wide">
+          Vos réponses sont confidentielles ·{" "}
+          <a
+            href="mailto:contact@workwave.fr"
+            className="hover:text-[#FF5A36] transition-colors"
+          >
+            contact@workwave.fr
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
