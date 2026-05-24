@@ -3,12 +3,12 @@
  *
  * 1. Mairies + offices de tourisme via API publique data.gouv.fr
  *    (annuaire-administration). 100% public, RGPD-safe.
- *    On filtre par department_code in (16, 17, 19, 23, 24, 33, 40, 47,
- *    64, 79, 86, 87) = 12 dept Nouvelle-Aquitaine.
+ *    Filtre : pivot LIKE "%mairie%" + code_insee_commune dont les 2
+ *    premiers chars sont dans la liste des 12 dept Nouvelle-Aquitaine.
  *
  * 2. CCI + Chambres des Metiers en dur (12 + 12, donnees publiques).
  *
- * Idempotent : ON CONFLICT (LOWER(contact_email)) DO NOTHING.
+ * Idempotent : ON CONFLICT (contact_email) DO NOTHING.
  *
  * Exec : npx tsx scripts/seed-partnerships.ts
  *        npx tsx scripts/seed-partnerships.ts --only=mairies
@@ -25,134 +25,163 @@ const sb = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const NA_DEPT_CODES = ["16", "17", "19", "23", "24", "33", "40", "47", "64", "79", "86", "87"];
+const NA_DEPT_CODES = new Set([
+  "16",
+  "17",
+  "19",
+  "23",
+  "24",
+  "33",
+  "40",
+  "47",
+  "64",
+  "79",
+  "86",
+  "87",
+]);
 
 const API_BASE =
   "https://api-lannuaire.service-public.fr/api/explore/v2.1/catalog/datasets/api-lannuaire-administration/records";
 
-type ApiOrg = {
-  id: string;
-  nom: string;
-  pivot?: Array<{ type_service_local?: string; code?: string }>;
-  email?: Array<{ valeur: string }> | string;
-  telephone?: Array<{ valeur: string }> | string;
-  adresse?: Array<{
-    code_postal?: string;
-    nom_commune?: string;
-    accessibilite?: string;
-  }>;
-  url_service?: Array<{ valeur: string }>;
-  code_insee_commune?: string[];
-  pivot_local?: string[];
+type RawMairie = {
+  nom: string | null;
+  code_insee_commune: string | null;
+  adresse_courriel: string | null;
+  telephone: string | null; // JSON encode
+  site_internet: string | null; // JSON encode
+  adresse: string | null; // JSON encode
 };
 
-function flatEmail(raw: ApiOrg["email"]): string | null {
+function parseJsonField<T>(raw: string | null): T | null {
   if (!raw) return null;
-  if (typeof raw === "string") return raw.trim() || null;
-  if (Array.isArray(raw) && raw.length > 0) return raw[0].valeur?.trim() || null;
-  return null;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
 }
 
-function flatPhone(raw: ApiOrg["telephone"]): string | null {
-  if (!raw) return null;
-  if (typeof raw === "string") return raw.trim() || null;
-  if (Array.isArray(raw) && raw.length > 0) return raw[0].valeur?.trim() || null;
-  return null;
+function extractFirstValeur(jsonStr: string | null): string | null {
+  const arr = parseJsonField<Array<{ valeur?: string }>>(jsonStr);
+  if (!arr || arr.length === 0) return null;
+  return arr[0].valeur?.trim() || null;
 }
 
-function flatUrl(raw: ApiOrg["url_service"]): string | null {
-  if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
-  return raw[0].valeur?.trim() || null;
-}
+type AdresseEntry = {
+  code_postal?: string;
+  nom_commune?: string;
+};
 
-function flatAddress(raw: ApiOrg["adresse"]): {
+function extractCity(jsonStr: string | null): {
   postal_code: string | null;
   city: string | null;
 } {
-  if (!raw || !Array.isArray(raw) || raw.length === 0) {
-    return { postal_code: null, city: null };
-  }
-  const a = raw[0];
+  const arr = parseJsonField<AdresseEntry[]>(jsonStr);
+  if (!arr || arr.length === 0) return { postal_code: null, city: null };
   return {
-    postal_code: a.code_postal?.trim() || null,
-    city: a.nom_commune?.trim() || null,
+    postal_code: arr[0].code_postal?.trim() || null,
+    city: arr[0].nom_commune?.trim() || null,
   };
 }
 
-function deptCodeFromPostalCode(cp: string | null): string | null {
-  if (!cp || cp.length < 2) return null;
-  return cp.slice(0, 2);
-}
-
-async function fetchApiPage(
-  pivotCode: string,
+async function fetchMairiesPage(
   offset: number,
   limit = 100
-): Promise<ApiOrg[]> {
+): Promise<RawMairie[]> {
   const url = new URL(API_BASE);
-  url.searchParams.set("where", `pivot_local LIKE "%${pivotCode}%"`);
+  // Le bon filtre : pivot contient "mairie" + select des champs utiles
+  url.searchParams.set("where", `pivot LIKE "%mairie%"`);
+  url.searchParams.set(
+    "select",
+    "nom,code_insee_commune,adresse_courriel,telephone,site_internet,adresse"
+  );
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
   const res = await fetch(url.toString());
   if (!res.ok) {
-    console.error(`[seed-partnerships] API error ${res.status} :`, await res.text());
+    const body = await res.text();
+    console.error(`[seed] API error ${res.status} :`, body.slice(0, 200));
     return [];
   }
-  const json = (await res.json()) as { results?: ApiOrg[] };
+  const json = (await res.json()) as { results?: RawMairie[] };
   return json.results ?? [];
 }
 
 async function seedMairies(): Promise<{ inserted: number; skipped: number }> {
   console.log("\n=== Seed mairies via data.gouv.fr ===");
-  // Pivot "mairie" dans l'API annuaire-administration
-  const PIVOT_MAIRIE = "mairie";
-
-  const allRows: ApiOrg[] = [];
+  const allRows: RawMairie[] = [];
   let offset = 0;
   const PAGE = 100;
-  // Plafond defensif : on ne devrait pas avoir + de 5000 mairies sur les 12 dept
-  while (offset < 6000) {
-    const batch = await fetchApiPage(PIVOT_MAIRIE, offset, PAGE);
-    if (batch.length === 0) break;
-    allRows.push(...batch);
-    console.log(`  fetched ${allRows.length} (offset ${offset})`);
-    if (batch.length < PAGE) break;
-    offset += PAGE;
-    // Pause courte pour pas marteler l'API
-    await new Promise((r) => setTimeout(r, 200));
-  }
-  console.log(`Total: ${allRows.length} mairies recuperes de l'API`);
+  // L'API a ~35857 mairies en France. On les recupere toutes puis on filtre
+  // cote script par dept_code (les 2 premiers chiffres du code_insee).
+  // L'API a un cap a 10000 results via offset. Du coup on doit filtrer
+  // cote serveur sur le code_insee_commune. Strategie : faire 12 requetes
+  // une par dept code (where = pivot LIKE "%mairie%" AND code_insee_commune
+  // LIKE "86%").
 
-  // Filtre Nouvelle-Aquitaine + email valide
+  for (const deptCode of NA_DEPT_CODES) {
+    console.log(`  Dept ${deptCode}...`);
+    offset = 0;
+    while (offset < 5000) {
+      const url = new URL(API_BASE);
+      // API ODSQL : LIKE "86%" ne marche pas sur code_insee_commune,
+      // mais startswith() oui. Cf. test 24/05/2026.
+      url.searchParams.set(
+        "where",
+        `pivot LIKE "%mairie%" AND startswith(code_insee_commune, "${deptCode}")`
+      );
+      url.searchParams.set(
+        "select",
+        "nom,code_insee_commune,adresse_courriel,telephone,site_internet,adresse"
+      );
+      url.searchParams.set("limit", String(PAGE));
+      url.searchParams.set("offset", String(offset));
+      const res = await fetch(url.toString());
+      if (!res.ok) {
+        console.error(`    error ${res.status}`);
+        break;
+      }
+      const json = (await res.json()) as { results?: RawMairie[] };
+      const batch = json.results ?? [];
+      if (batch.length === 0) break;
+      allRows.push(...batch);
+      if (batch.length < PAGE) break;
+      offset += PAGE;
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    console.log(`    cumul ${allRows.length}`);
+  }
+  console.log(`Total mairies NA recupérées : ${allRows.length}`);
+
+  // Filtre supplementaire : email valide + bon dept
   const inserts: Array<Record<string, unknown>> = [];
   for (const org of allRows) {
-    const email = flatEmail(org.email);
+    const email = (org.adresse_courriel ?? "").trim();
     if (!email || !email.includes("@")) continue;
-    const { postal_code, city } = flatAddress(org.adresse);
-    const dept = deptCodeFromPostalCode(postal_code);
-    if (!dept || !NA_DEPT_CODES.includes(dept)) continue;
+    const dept = org.code_insee_commune?.slice(0, 2);
+    if (!dept || !NA_DEPT_CODES.has(dept)) continue;
+    const { postal_code, city } = extractCity(org.adresse);
+    const phone = extractFirstValeur(org.telephone);
+    const website = extractFirstValeur(org.site_internet);
 
     inserts.push({
       type: "mairie",
       name: org.nom?.trim() ?? "Mairie",
       organization: city ? `Commune de ${city}` : null,
-      contact_email: email.toLowerCase().trim(),
-      contact_phone: flatPhone(org.telephone),
-      website: flatUrl(org.url_service),
+      contact_email: email.toLowerCase(),
+      contact_phone: phone,
+      website,
       postal_code,
       city,
       department_code: dept,
       status: "to_contact",
     });
   }
+  console.log(`Filtres valides : ${inserts.length} mairies a inserer`);
 
-  console.log(`Filtres NA : ${inserts.length} mairies a inserer`);
+  if (inserts.length === 0) return { inserted: 0, skipped: 0 };
 
-  if (inserts.length === 0) {
-    return { inserted: 0, skipped: 0 };
-  }
-
-  // INSERT en batch de 500 (limite Supabase). ON CONFLICT (email) → ignore.
+  // Insert en batchs de 500. ON CONFLICT (contact_email) DO NOTHING.
   let inserted = 0;
   let skipped = 0;
   const BATCH = 500;
@@ -166,14 +195,14 @@ async function seedMairies(): Promise<{ inserted: number; skipped: number }> {
       })
       .select("id");
     if (error) {
-      console.error(`  Erreur batch ${i}/${inserts.length} :`, error.message);
+      console.error(`  Batch ${i}/${inserts.length} erreur :`, error.message);
       continue;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ins = (data as any[])?.length ?? 0;
     inserted += ins;
     skipped += chunk.length - ins;
-    console.log(`  Batch ${i + chunk.length}/${inserts.length} : +${ins} inseres`);
+    console.log(`  Batch +${ins} (cumul ${inserted}/${inserts.length})`);
   }
   return { inserted, skipped };
 }
@@ -183,13 +212,11 @@ const CCI_CMA_DATA: Array<{
   type: "cci" | "chambre_metiers";
   name: string;
   contact_email: string;
-  contact_phone?: string;
   website?: string;
   city: string;
   postal_code?: string;
   department_code: string;
 }> = [
-  // CCI Nouvelle-Aquitaine
   { type: "cci", name: "CCI Bordeaux-Gironde", contact_email: "contact@bordeauxgironde.cci.fr", website: "https://www.bordeauxgironde.cci.fr", city: "Bordeaux", postal_code: "33075", department_code: "33" },
   { type: "cci", name: "CCI de la Vienne", contact_email: "contact@poitiers.cci.fr", website: "https://www.poitiers.cci.fr", city: "Poitiers", postal_code: "86000", department_code: "86" },
   { type: "cci", name: "CCI Charente", contact_email: "cci@charente.cci.fr", website: "https://www.charente.cci.fr", city: "Angoulême", postal_code: "16021", department_code: "16" },
@@ -202,7 +229,6 @@ const CCI_CMA_DATA: Array<{
   { type: "cci", name: "CCI Deux-Sèvres", contact_email: "info@cci79.com", website: "https://www.cci79.com", city: "Niort", postal_code: "79003", department_code: "79" },
   { type: "cci", name: "CCI Limoges Haute-Vienne", contact_email: "contact@limoges.cci.fr", website: "https://www.limoges.cci.fr", city: "Limoges", postal_code: "87000", department_code: "87" },
   { type: "cci", name: "CCI Corrèze", contact_email: "info@correze.cci.fr", website: "https://www.correze.cci.fr", city: "Tulle", postal_code: "19000", department_code: "19" },
-  // Chambres des Métiers — service interlocuteur unique régional + relais départementaux
   { type: "chambre_metiers", name: "CMA Nouvelle-Aquitaine — siège", contact_email: "contact@cma-nouvelleaquitaine.fr", website: "https://www.cma-nouvelleaquitaine.fr", city: "Limoges", department_code: "87" },
   { type: "chambre_metiers", name: "CMA Charente", contact_email: "contact@cm-angouleme.fr", website: "https://www.cma-nouvelleaquitaine.fr/charente", city: "Angoulême", department_code: "16" },
   { type: "chambre_metiers", name: "CMA Charente-Maritime", contact_email: "contact@cma17.fr", website: "https://www.cma-nouvelleaquitaine.fr/charente-maritime", city: "Lagord", department_code: "17" },
