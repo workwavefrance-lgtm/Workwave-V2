@@ -8,6 +8,7 @@ import TopProCard from "@/components/pro/TopProCard";
 import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
 import ProjectIntentSection from "@/components/listing/ProjectIntentSection";
+import StickyProjectCTA from "@/components/listing/StickyProjectCTA";
 import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
 import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
@@ -220,8 +221,11 @@ export default async function ListingPage({ params, searchParams }: Props) {
     allDepartments = depts;
   }
 
-  // Schema ItemList : sur page 1 on liste les top pros (avec rank score),
-  // sur pages 2+ on liste les pros de la page en cours (positions globales).
+  // Schema ItemList enrichi : chaque item est un LocalBusiness complet
+  // (adresse + telephone + aggregateRating si Google data dispo). Bien
+  // meilleur pour les LLMs (Perplexity, AI Overviews) qui digerent des
+  // entites nommees structurees, et active les rich snippets etoiles
+  // dans la SERP Google quand on a une note.
   const itemsForSchema = isFirstPage ? topPros : (paginatedResult?.data ?? []);
   const schemaStartPos = isFirstPage
     ? 1
@@ -233,12 +237,40 @@ export default async function ListingPage({ params, searchParams }: Props) {
       ? `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName}`
       : `${category.name} ${preposition} ${locationName}`,
     numberOfItems: totalProsCount,
-    itemListElement: itemsForSchema.map((pro, i) => ({
-      "@type": "ListItem",
-      position: schemaStartPos + i,
-      url: `${BASE_URL}/artisan/${pro.slug}`,
-      name: pro.name,
-    })),
+    itemListElement: itemsForSchema.map((pro, i) => {
+      const proUrl = `${BASE_URL}/artisan/${pro.slug}`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const business: any = {
+        "@type": "LocalBusiness",
+        "@id": proUrl,
+        name: pro.name,
+        url: proUrl,
+      };
+      if (pro.address && pro.city) {
+        business.address = {
+          "@type": "PostalAddress",
+          streetAddress: pro.address,
+          addressLocality: pro.city.name,
+          ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
+          addressCountry: "FR",
+        };
+      }
+      if (pro.phone) business.telephone = pro.phone;
+      if (pro.google_rating && pro.google_reviews_count && pro.google_reviews_count > 0) {
+        business.aggregateRating = {
+          "@type": "AggregateRating",
+          ratingValue: pro.google_rating,
+          reviewCount: pro.google_reviews_count,
+          bestRating: 5,
+          worstRating: 1,
+        };
+      }
+      return {
+        "@type": "ListItem",
+        position: schemaStartPos + i,
+        item: business,
+      };
+    }),
   };
 
   // Breadcrumb : le lien "Catégorie" pointe vers le département de la
@@ -285,6 +317,19 @@ export default async function ListingPage({ params, searchParams }: Props) {
     <main className="max-w-6xl mx-auto px-4 py-12">
       <JsonLd data={jsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
+
+      {/* Bar fine sticky top qui apparait au scroll. Capture du lead
+          pendant que l'user parcourt la liste / FAQ / liens internes. */}
+      {totalProsCount > 0 && (
+        <StickyProjectCTA
+          categorySlug={category.slug}
+          categoryName={category.name}
+          citySlug={citySlug}
+          locationName={locationName}
+          preposition={preposition}
+        />
+      )}
+
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="mb-8">
