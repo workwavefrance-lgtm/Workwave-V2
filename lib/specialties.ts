@@ -173,6 +173,60 @@ export const SPECIALTIES: SpecialtyMap = {
         },
       ],
     },
+    {
+      slug: "renovation-salle-de-bain",
+      name: "Rénovation salle de bain",
+      shortLabel: "rénovation salle de bain",
+      longLabel: "spécialisé en rénovation complète de salle de bain",
+      description:
+        "Plombier rénovation salle de bain : douche italienne, baignoire, WC, robinetterie, carrelage. Devis gratuit.",
+      intro:
+        "Refaire entièrement une salle de bain implique de coordonner plomberie, électricité, carrelage et étanchéité. Un plombier spécialisé en rénovation pilote l'ensemble : dépose des anciens équipements, modification du réseau d'eau, pose d'une douche à l'italienne, remplacement du chauffe-eau et raccordement des sanitaires neufs. Comptez 3 à 5 jours pour une rénovation standard, jusqu'à 3 semaines pour une transformation complète avec maçonnerie.",
+      faqs: [
+        {
+          question: "Combien coûte une rénovation de salle de bain ?",
+          answer:
+            "Rénovation simple (changement sanitaires + robinetterie + carrelage) : 4 000 € à 8 000 €. Rénovation complète avec douche à l'italienne et meuble vasque : 8 000 € à 15 000 €. Rénovation haut de gamme avec maçonnerie : 15 000 € à 30 000 €. Les aides MaPrimeRénov' Sérénité peuvent couvrir une partie si la salle de bain est adaptée aux PMR.",
+        },
+        {
+          question: "Faut-il un plombier ou un artisan tout corps d'état ?",
+          answer:
+            "Pour une salle de bain de 5-7 m² avec équipements standards, un plombier-chauffagiste expérimenté suffit (il sous-traite carrelage ou électricité au besoin). Pour des travaux structurels (déplacement de cloison, agrandissement), passez par un artisan tout corps d'état ou un architecte d'intérieur.",
+        },
+        {
+          question: "Quels équipements privilégier pour une rénovation durable ?",
+          answer:
+            "Douche à l'italienne (accessibilité + esthétique), mitigeur thermostatique (sécurité enfants + économies), WC suspendu (gain de place + nettoyage facile), meuble vasque sur pieds (réparation plomberie facilitée). Évitez les baignoires balnéo bas de gamme : durée de vie courte et SAV coûteux.",
+        },
+      ],
+    },
+    {
+      slug: "pose-robinetterie",
+      name: "Pose de robinetterie",
+      shortLabel: "pose de robinetterie",
+      longLabel: "spécialisé en pose et remplacement de robinetterie",
+      description:
+        "Plombier pose robinetterie : mitigeur évier, douche, lavabo, baignoire. Remplacement et installation par un pro.",
+      intro:
+        "Remplacer un mitigeur qui fuit, installer une nouvelle robinetterie de cuisine ou de salle de bain, poser un mitigeur thermostatique de douche : la pose de robinetterie peut sembler simple mais demande un raccordement étanche et conforme aux normes. Un plombier intervient en 30 min à 2h selon la complexité, avec garantie sur la pose en cas de fuite ultérieure.",
+      faqs: [
+        {
+          question: "Combien coûte la pose d'un mitigeur ?",
+          answer:
+            "Mitigeur évier ou lavabo standard : 80 € à 150 € pose seule. Mitigeur de douche encastré : 150 € à 300 €. Mitigeur thermostatique de baignoire : 200 € à 400 €. Ajoutez le prix de la robinetterie (50 € à 600 €+ selon la gamme).",
+        },
+        {
+          question: "Peut-on poser un mitigeur soi-même ?",
+          answer:
+            "Pour un remplacement simple sur évier ou lavabo, oui, à condition de couper l'eau, de bien utiliser du téflon ou de la pâte d'étanchéité, et de vérifier l'absence de fuites après remise en eau. Pour un mitigeur encastré dans le mur (douche, baignoire), passez par un plombier : une fuite cachée dans la cloison coûte cher en travaux de reprise.",
+        },
+        {
+          question: "Quelle marque de robinetterie choisir ?",
+          answer:
+            "Pour la durabilité : Grohe, Hansgrohe, Jacob Delafon, Roca (gamme moyenne 100-300 €). Pour le haut de gamme : Dornbracht, Vola, GROHE Spa (500 €+). Évitez les premiers prix sans marque : cartouches qui lâchent en 2-3 ans et pièces de rechange introuvables. Demandez à votre plombier la disponibilité des cartouches de rechange.",
+        },
+      ],
+    },
   ],
 
   // ===========================================================================

@@ -63,7 +63,7 @@ export default function ProjectIntentSection({
       {/* Boutons rapides par specialite (si la categorie en a) */}
       {specialties.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-5">
-          {specialties.slice(0, 6).map((spec) => {
+          {specialties.slice(0, 8).map((spec) => {
             const href = citySlug
               ? `/deposer-projet?categorie=${categorySlug}&ville=${citySlug}&specialite=${spec.slug}`
               : `/deposer-projet?categorie=${categorySlug}&specialite=${spec.slug}`;
