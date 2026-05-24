@@ -110,6 +110,38 @@ function buildWelcomeMessage(ctx: AgentContext | null): string {
 }
 
 /**
+ * Suggestions de reponses rapides selon le contexte de page. Apparaissent
+ * sous le premier message d'accueil et disparaissent des que l'user tape
+ * ou clique un quick reply. Pattern Intercom : reduit la friction de
+ * demarrage de conversation.
+ */
+function getQuickReplies(ctx: AgentContext | null): string[] {
+  if (!ctx) return [];
+  switch (ctx.type) {
+    case "home":
+      return [
+        "Je cherche un artisan",
+        "Je suis artisan",
+        "C'est gratuit ?",
+      ];
+    case "listing":
+      return [
+        "Décrire mon projet",
+        "C'est vraiment gratuit ?",
+        "Je suis artisan",
+      ];
+    case "pro_fiche":
+      return [
+        "Je suis le gérant",
+        "Demander un devis",
+        "Comment ça marche ?",
+      ];
+    default:
+      return [];
+  }
+}
+
+/**
  * Avatar circulaire de Léa : dégradé coral riche + initiale en blanc
  * en font semi-bold, avec un ring subtle blanc/glow pour le premium.
  * Taille parametrable via la prop size.
@@ -185,7 +217,7 @@ function renderMarkdownLite(text: string): ReactNode {
       <Link
         key={`l${key++}`}
         href={safeUrl}
-        className="underline font-semibold text-[var(--accent)] hover:text-[var(--accent-hover)]"
+        className="font-medium text-[#FF5A36] hover:text-[#E63E1A] underline decoration-[#FF5A36]/40 hover:decoration-[#FF5A36] underline-offset-2 decoration-1 transition-colors duration-150"
       >
         {label}
       </Link>
@@ -384,7 +416,10 @@ export default function CommercialAgent() {
 
   async function handleSend(e?: React.FormEvent) {
     if (e) e.preventDefault();
-    const text = input.trim();
+    return sendMessage(input.trim());
+  }
+
+  async function sendMessage(text: string) {
     if (!text || loading) return;
     const userMsg: ChatMessage = { role: "user", content: text };
     const nextMessages = [...messages, userMsg];
@@ -577,6 +612,34 @@ export default function CommercialAgent() {
             </div>
           </div>
         )}
+
+        {/* Quick replies sous le premier message d'accueil. Disparaissent
+            des que l'user a interagi (envoye un message ou clique). */}
+        {!loading &&
+          messages.length === 1 &&
+          messages[0].role === "assistant" &&
+          (() => {
+            const quickReplies = getQuickReplies(context);
+            if (quickReplies.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-2 pl-9 pt-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {quickReplies.map((reply) => (
+                  <button
+                    key={reply}
+                    type="button"
+                    onClick={() => sendMessage(reply)}
+                    className="px-3.5 py-2 text-[13px] font-medium text-[#FF5A36] bg-white dark:bg-[#111111] border border-[#FF5A36]/30 hover:border-[#FF5A36] hover:bg-[#FF5A36]/5 rounded-full transition-all duration-200 hover:-translate-y-0.5"
+                    style={{
+                      boxShadow:
+                        "0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 6px -2px rgba(255, 90, 54, 0.12)",
+                    }}
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
       </div>
 
       {/* Input */}
@@ -595,22 +658,40 @@ export default function CommercialAgent() {
             className="flex-1 bg-transparent text-[14px] text-[#0A0A0A] dark:text-[#FAFAFA] placeholder:text-[#9CA3AF] focus:outline-none"
           />
         </div>
-        <button
-          type="submit"
-          disabled={loading || !input.trim()}
-          aria-label="Envoyer"
-          className="w-11 h-11 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-30 disabled:cursor-not-allowed text-white flex items-center justify-center transition-all duration-200 shrink-0 hover:scale-105 disabled:hover:scale-100"
-          style={{
-            boxShadow:
-              !loading && input.trim()
-                ? "0 4px 12px -2px rgba(255, 90, 54, 0.45)"
-                : "none",
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-          </svg>
-        </button>
+        {(() => {
+          const canSubmit = !loading && input.trim().length > 0;
+          return (
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              aria-label="Envoyer"
+              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${
+                canSubmit
+                  ? "bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white hover:scale-105"
+                  : "bg-[#F3F4F6] dark:bg-[#1F1F23] text-[#9CA3AF] cursor-not-allowed"
+              }`}
+              style={{
+                boxShadow: canSubmit
+                  ? "0 4px 12px -2px rgba(255, 90, 54, 0.45)"
+                  : "none",
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+              </svg>
+            </button>
+          );
+        })()}
       </form>
 
       {/* Footer powered-by discret */}
