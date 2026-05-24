@@ -176,9 +176,36 @@ export type Pro = {
   google_rating: number | null;
   google_reviews_count: number | null;
   google_enriched_at: string | null;
+  // Avis natifs Workwave (sollicites par cron J+7 post-projet)
+  workwave_reviews_avg: number | null;
+  workwave_reviews_count: number;
   // Champs calculés
   profile_completion: number;
   response_rate: number | null;
+};
+
+// ============================================
+// Avis natifs Workwave (pro_reviews)
+// ============================================
+
+export type ProReviewStatus = "pending" | "published" | "rejected" | "expired";
+
+export type ProReview = {
+  id: number;
+  pro_id: number;
+  project_id: number | null;
+  particulier_email: string;
+  particulier_name: string;
+  rating: number; // 1-5
+  comment: string | null;
+  token: string;
+  status: ProReviewStatus;
+  verified: boolean;
+  requested_at: string;
+  submitted_at: string | null;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type ProWithRelations = Pro & {

@@ -352,9 +352,22 @@ Sprint 2 — Pages annuaire publiques : terminé.
 Sprint 2.5 — Polish UX premium : terminé (mode clair/sombre, design premium).
 Sprint 3 — Génération SEO programmatique : terminé (588 pages générées, coût 12 dollars).
 Sprint 4 — Dépôt de projet et qualification IA : terminé (formulaire, qualification Claude, email admin via Resend).
-Sprint 5 — Comptes pros et abonnements : cadré en détail (voir section 11 quater), à démarrer.
+Sprint 5 — Comptes pros, réclamation, abonnements Stripe, dashboard pro : **terminé** (route `/api/stripe/webhook`, dashboard `/pro/dashboard/*`, SDK `stripe@22 + @stripe/stripe-js@9` installés, table pros enrichie avec colonnes Stripe). Confirmé 24/05/2026.
 Sprint 6 — Switch DNS : à démarrer.
 Sprint 7 — Moat IA (superpouvoirs) : à démarrer après sprint 6.
+
+### Mini-sprints récents (24/05/2026)
+
+- **Agent commercial IA "Léa"** — terminé : bulle conversationnelle bottom-right, auto-open contextuel, Claude Sonnet 4-6, identité humanisée (avatar + nom + statut), quick replies, design premium. Cf. commits eb213d8 → cb0fc8b.
+- **Refonte Top X listings** — terminé : `/[metier]/[location]` passe en "Les 10 meilleurs [metier] à [ville] en {annee}" avec section "Quel est votre projet ?" en TOP + TopProCards + scoring objectif + StickyProjectCTA + schema LocalBusiness × N. Cf. commits 648e20d → e912f9b.
+
+### À faire absolument dans 1 semaine (rappel utilisateur 24/05/2026)
+
+**Génération SEO content batch pour les ~10 000 combinaisons (catégorie × ville) restantes via Claude API.** Le sprint 3 a généré 588 pages, à étendre. Coût ~$50-100. Bénéfice : chaque page listing aura un texte unique de 200-500 mots + FAQ schema. Délai : 2-3h génération + 1h dev script de batch. À déclencher après mesure des métriques GSC de la refonte Top X (~31/05/2026).
+
+### Mini-sprint en cours
+
+**Système d'avis natifs Workwave** (démarré 24/05/2026) — table pro_reviews + page de notation token-based + cron email +7j + affichage sur fiche pro + badges TopProCards + modération admin. L'objectif : commencer à accumuler le moat "avis" qui fait la force de Travaux.com (207k avis natifs vs 0 chez nous aujourd'hui).
 
 Mini-sprint cleanup catégories non viables — terminé 18/04/2026 (commits c328c60 + da2c445).
 
