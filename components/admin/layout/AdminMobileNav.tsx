@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: "Projets", href: "/admin/projects" },
   { label: "Leads", href: "/admin/leads" },
   { label: "Avis", href: "/admin/reviews" },
+  { label: "Partenariats", href: "/admin/partnerships" },
   { label: "Finances", href: "/admin/finances" },
   { label: "Analytics", href: "/admin/analytics" },
   { label: "Alertes", href: "/admin/alerts" },

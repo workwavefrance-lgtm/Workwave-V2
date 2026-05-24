@@ -208,6 +208,58 @@ export type ProReview = {
   updated_at: string;
 };
 
+// ============================================
+// Partenariats locaux (mairies, notaires, etc.)
+// ============================================
+
+export type PartnershipType =
+  | "mairie"
+  | "office_tourisme"
+  | "notaire"
+  | "agence_immo"
+  | "syndic"
+  | "cci"
+  | "chambre_metiers"
+  | "association_quartier"
+  | "autre";
+
+export type PartnershipStatus =
+  | "to_contact"
+  | "contacted"
+  | "follow_up_due"
+  | "responded"
+  | "partnership"
+  | "declined"
+  | "invalid";
+
+export type Partnership = {
+  id: number;
+  type: PartnershipType;
+  name: string;
+  organization: string | null;
+  contact_first_name: string | null;
+  contact_last_name: string | null;
+  contact_role: string | null;
+  contact_email: string;
+  contact_phone: string | null;
+  website: string | null;
+  postal_code: string | null;
+  city: string | null;
+  department_code: string | null;
+  status: PartnershipStatus;
+  first_contacted_at: string | null;
+  last_contacted_at: string | null;
+  responded_at: string | null;
+  partnership_active_since: string | null;
+  emails_sent_count: number;
+  notes: string | null;
+  response_summary: string | null;
+  backlink_url: string | null;
+  backlink_observed_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ProWithRelations = Pro & {
   category: Category;
   city: CityWithDepartment | null;

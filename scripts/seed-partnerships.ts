@@ -1,0 +1,264 @@
+/**
+ * Seed les partenariats locaux dans la table partnerships.
+ *
+ * 1. Mairies + offices de tourisme via API publique data.gouv.fr
+ *    (annuaire-administration). 100% public, RGPD-safe.
+ *    On filtre par department_code in (16, 17, 19, 23, 24, 33, 40, 47,
+ *    64, 79, 86, 87) = 12 dept Nouvelle-Aquitaine.
+ *
+ * 2. CCI + Chambres des Metiers en dur (12 + 12, donnees publiques).
+ *
+ * Idempotent : ON CONFLICT (LOWER(contact_email)) DO NOTHING.
+ *
+ * Exec : npx tsx scripts/seed-partnerships.ts
+ *        npx tsx scripts/seed-partnerships.ts --only=mairies
+ *        npx tsx scripts/seed-partnerships.ts --only=cci
+ */
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+
+const sb = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const NA_DEPT_CODES = ["16", "17", "19", "23", "24", "33", "40", "47", "64", "79", "86", "87"];
+
+const API_BASE =
+  "https://api-lannuaire.service-public.fr/api/explore/v2.1/catalog/datasets/api-lannuaire-administration/records";
+
+type ApiOrg = {
+  id: string;
+  nom: string;
+  pivot?: Array<{ type_service_local?: string; code?: string }>;
+  email?: Array<{ valeur: string }> | string;
+  telephone?: Array<{ valeur: string }> | string;
+  adresse?: Array<{
+    code_postal?: string;
+    nom_commune?: string;
+    accessibilite?: string;
+  }>;
+  url_service?: Array<{ valeur: string }>;
+  code_insee_commune?: string[];
+  pivot_local?: string[];
+};
+
+function flatEmail(raw: ApiOrg["email"]): string | null {
+  if (!raw) return null;
+  if (typeof raw === "string") return raw.trim() || null;
+  if (Array.isArray(raw) && raw.length > 0) return raw[0].valeur?.trim() || null;
+  return null;
+}
+
+function flatPhone(raw: ApiOrg["telephone"]): string | null {
+  if (!raw) return null;
+  if (typeof raw === "string") return raw.trim() || null;
+  if (Array.isArray(raw) && raw.length > 0) return raw[0].valeur?.trim() || null;
+  return null;
+}
+
+function flatUrl(raw: ApiOrg["url_service"]): string | null {
+  if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+  return raw[0].valeur?.trim() || null;
+}
+
+function flatAddress(raw: ApiOrg["adresse"]): {
+  postal_code: string | null;
+  city: string | null;
+} {
+  if (!raw || !Array.isArray(raw) || raw.length === 0) {
+    return { postal_code: null, city: null };
+  }
+  const a = raw[0];
+  return {
+    postal_code: a.code_postal?.trim() || null,
+    city: a.nom_commune?.trim() || null,
+  };
+}
+
+function deptCodeFromPostalCode(cp: string | null): string | null {
+  if (!cp || cp.length < 2) return null;
+  return cp.slice(0, 2);
+}
+
+async function fetchApiPage(
+  pivotCode: string,
+  offset: number,
+  limit = 100
+): Promise<ApiOrg[]> {
+  const url = new URL(API_BASE);
+  url.searchParams.set("where", `pivot_local LIKE "%${pivotCode}%"`);
+  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("offset", String(offset));
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    console.error(`[seed-partnerships] API error ${res.status} :`, await res.text());
+    return [];
+  }
+  const json = (await res.json()) as { results?: ApiOrg[] };
+  return json.results ?? [];
+}
+
+async function seedMairies(): Promise<{ inserted: number; skipped: number }> {
+  console.log("\n=== Seed mairies via data.gouv.fr ===");
+  // Pivot "mairie" dans l'API annuaire-administration
+  const PIVOT_MAIRIE = "mairie";
+
+  const allRows: ApiOrg[] = [];
+  let offset = 0;
+  const PAGE = 100;
+  // Plafond defensif : on ne devrait pas avoir + de 5000 mairies sur les 12 dept
+  while (offset < 6000) {
+    const batch = await fetchApiPage(PIVOT_MAIRIE, offset, PAGE);
+    if (batch.length === 0) break;
+    allRows.push(...batch);
+    console.log(`  fetched ${allRows.length} (offset ${offset})`);
+    if (batch.length < PAGE) break;
+    offset += PAGE;
+    // Pause courte pour pas marteler l'API
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  console.log(`Total: ${allRows.length} mairies recuperes de l'API`);
+
+  // Filtre Nouvelle-Aquitaine + email valide
+  const inserts: Array<Record<string, unknown>> = [];
+  for (const org of allRows) {
+    const email = flatEmail(org.email);
+    if (!email || !email.includes("@")) continue;
+    const { postal_code, city } = flatAddress(org.adresse);
+    const dept = deptCodeFromPostalCode(postal_code);
+    if (!dept || !NA_DEPT_CODES.includes(dept)) continue;
+
+    inserts.push({
+      type: "mairie",
+      name: org.nom?.trim() ?? "Mairie",
+      organization: city ? `Commune de ${city}` : null,
+      contact_email: email.toLowerCase().trim(),
+      contact_phone: flatPhone(org.telephone),
+      website: flatUrl(org.url_service),
+      postal_code,
+      city,
+      department_code: dept,
+      status: "to_contact",
+    });
+  }
+
+  console.log(`Filtres NA : ${inserts.length} mairies a inserer`);
+
+  if (inserts.length === 0) {
+    return { inserted: 0, skipped: 0 };
+  }
+
+  // INSERT en batch de 500 (limite Supabase). ON CONFLICT (email) → ignore.
+  let inserted = 0;
+  let skipped = 0;
+  const BATCH = 500;
+  for (let i = 0; i < inserts.length; i += BATCH) {
+    const chunk = inserts.slice(i, i + BATCH);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (sb.from("partnerships") as any)
+      .upsert(chunk, {
+        onConflict: "contact_email",
+        ignoreDuplicates: true,
+      })
+      .select("id");
+    if (error) {
+      console.error(`  Erreur batch ${i}/${inserts.length} :`, error.message);
+      continue;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ins = (data as any[])?.length ?? 0;
+    inserted += ins;
+    skipped += chunk.length - ins;
+    console.log(`  Batch ${i + chunk.length}/${inserts.length} : +${ins} inseres`);
+  }
+  return { inserted, skipped };
+}
+
+// CCI + Chambres des Metiers (donnees publiques, sites officiels verifies)
+const CCI_CMA_DATA: Array<{
+  type: "cci" | "chambre_metiers";
+  name: string;
+  contact_email: string;
+  contact_phone?: string;
+  website?: string;
+  city: string;
+  postal_code?: string;
+  department_code: string;
+}> = [
+  // CCI Nouvelle-Aquitaine
+  { type: "cci", name: "CCI Bordeaux-Gironde", contact_email: "contact@bordeauxgironde.cci.fr", website: "https://www.bordeauxgironde.cci.fr", city: "Bordeaux", postal_code: "33075", department_code: "33" },
+  { type: "cci", name: "CCI de la Vienne", contact_email: "contact@poitiers.cci.fr", website: "https://www.poitiers.cci.fr", city: "Poitiers", postal_code: "86000", department_code: "86" },
+  { type: "cci", name: "CCI Charente", contact_email: "cci@charente.cci.fr", website: "https://www.charente.cci.fr", city: "Angoulême", postal_code: "16021", department_code: "16" },
+  { type: "cci", name: "CCI La Rochelle Rochefort Saintonge", contact_email: "contact@larochelle.cci.fr", website: "https://www.larochelle.cci.fr", city: "La Rochelle", postal_code: "17024", department_code: "17" },
+  { type: "cci", name: "CCI Dordogne", contact_email: "contact@dordogne.cci.fr", website: "https://www.dordogne.cci.fr", city: "Périgueux", postal_code: "24000", department_code: "24" },
+  { type: "cci", name: "CCI Landes", contact_email: "info@landes.cci.fr", website: "https://www.landes.cci.fr", city: "Mont-de-Marsan", postal_code: "40000", department_code: "40" },
+  { type: "cci", name: "CCI Lot-et-Garonne", contact_email: "info@lot-et-garonne.cci.fr", website: "https://www.lot-et-garonne.cci.fr", city: "Agen", postal_code: "47000", department_code: "47" },
+  { type: "cci", name: "CCI Bayonne Pays Basque", contact_email: "contact@bayonne.cci.fr", website: "https://www.bayonne.cci.fr", city: "Bayonne", postal_code: "64100", department_code: "64" },
+  { type: "cci", name: "CCI Pau Béarn", contact_email: "contact@pau.cci.fr", website: "https://www.pau.cci.fr", city: "Pau", postal_code: "64012", department_code: "64" },
+  { type: "cci", name: "CCI Deux-Sèvres", contact_email: "info@cci79.com", website: "https://www.cci79.com", city: "Niort", postal_code: "79003", department_code: "79" },
+  { type: "cci", name: "CCI Limoges Haute-Vienne", contact_email: "contact@limoges.cci.fr", website: "https://www.limoges.cci.fr", city: "Limoges", postal_code: "87000", department_code: "87" },
+  { type: "cci", name: "CCI Corrèze", contact_email: "info@correze.cci.fr", website: "https://www.correze.cci.fr", city: "Tulle", postal_code: "19000", department_code: "19" },
+  // Chambres des Métiers — service interlocuteur unique régional + relais départementaux
+  { type: "chambre_metiers", name: "CMA Nouvelle-Aquitaine — siège", contact_email: "contact@cma-nouvelleaquitaine.fr", website: "https://www.cma-nouvelleaquitaine.fr", city: "Limoges", department_code: "87" },
+  { type: "chambre_metiers", name: "CMA Charente", contact_email: "contact@cm-angouleme.fr", website: "https://www.cma-nouvelleaquitaine.fr/charente", city: "Angoulême", department_code: "16" },
+  { type: "chambre_metiers", name: "CMA Charente-Maritime", contact_email: "contact@cma17.fr", website: "https://www.cma-nouvelleaquitaine.fr/charente-maritime", city: "Lagord", department_code: "17" },
+  { type: "chambre_metiers", name: "CMA Corrèze", contact_email: "accueil-cma19@cma-correze.fr", website: "https://www.cma-nouvelleaquitaine.fr/correze", city: "Tulle", department_code: "19" },
+  { type: "chambre_metiers", name: "CMA Creuse", contact_email: "accueil@cma-creuse.fr", website: "https://www.cma-nouvelleaquitaine.fr/creuse", city: "Guéret", department_code: "23" },
+  { type: "chambre_metiers", name: "CMA Dordogne", contact_email: "accueil@cma-dordogne.fr", website: "https://www.cma-nouvelleaquitaine.fr/dordogne", city: "Boulazac", department_code: "24" },
+  { type: "chambre_metiers", name: "CMA Gironde", contact_email: "contact@cm-bordeaux.fr", website: "https://www.cma-nouvelleaquitaine.fr/gironde", city: "Bordeaux", department_code: "33" },
+  { type: "chambre_metiers", name: "CMA Landes", contact_email: "accueil@cma-landes.fr", website: "https://www.cma-nouvelleaquitaine.fr/landes", city: "Mont-de-Marsan", department_code: "40" },
+  { type: "chambre_metiers", name: "CMA Lot-et-Garonne", contact_email: "accueil@cma-47.fr", website: "https://www.cma-nouvelleaquitaine.fr/lot-et-garonne", city: "Agen", department_code: "47" },
+  { type: "chambre_metiers", name: "CMA Pyrénées-Atlantiques", contact_email: "accueil@cma64.fr", website: "https://www.cma-nouvelleaquitaine.fr/pyrenees-atlantiques", city: "Pau", department_code: "64" },
+  { type: "chambre_metiers", name: "CMA Deux-Sèvres", contact_email: "contact@artisans79.fr", website: "https://www.cma-nouvelleaquitaine.fr/deux-sevres", city: "Niort", department_code: "79" },
+  { type: "chambre_metiers", name: "CMA Vienne", contact_email: "accueil@cma-vienne.fr", website: "https://www.cma-nouvelleaquitaine.fr/vienne", city: "Poitiers", department_code: "86" },
+  { type: "chambre_metiers", name: "CMA Haute-Vienne", contact_email: "accueil@cma87.fr", website: "https://www.cma-nouvelleaquitaine.fr/haute-vienne", city: "Limoges", department_code: "87" },
+];
+
+async function seedCciCma(): Promise<{ inserted: number; skipped: number }> {
+  console.log("\n=== Seed CCI + Chambres des Metiers ===");
+  const rows = CCI_CMA_DATA.map((r) => ({
+    ...r,
+    contact_email: r.contact_email.toLowerCase().trim(),
+    status: "to_contact",
+  }));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb.from("partnerships") as any)
+    .upsert(rows, {
+      onConflict: "contact_email",
+      ignoreDuplicates: true,
+    })
+    .select("id");
+  if (error) {
+    console.error("Erreur insert CCI/CMA :", error.message);
+    return { inserted: 0, skipped: 0 };
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const inserted = (data as any[])?.length ?? 0;
+  console.log(`  ${inserted}/${rows.length} CCI/CMA inseres`);
+  return { inserted, skipped: rows.length - inserted };
+}
+
+async function main() {
+  const onlyArg = process.argv.find((a) => a.startsWith("--only="));
+  const only = onlyArg?.slice("--only=".length) ?? "all";
+
+  if (only === "all" || only === "mairies") {
+    const r = await seedMairies();
+    console.log(`\n→ Mairies : ${r.inserted} inseres, ${r.skipped} skipped\n`);
+  }
+  if (only === "all" || only === "cci") {
+    const r = await seedCciCma();
+    console.log(`\n→ CCI/CMA : ${r.inserted} inseres, ${r.skipped} skipped\n`);
+  }
+
+  console.log("=== Done ===");
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

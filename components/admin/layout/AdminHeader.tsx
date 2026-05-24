@@ -11,6 +11,7 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   projects: "Projets",
   leads: "Leads",
   reviews: "Avis",
+  partnerships: "Partenariats",
   finances: "Finances",
   analytics: "Analytics",
   alerts: "Alertes",
