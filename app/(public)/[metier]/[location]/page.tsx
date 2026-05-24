@@ -351,15 +351,13 @@ export default async function ListingPage({ params, searchParams }: Props) {
         />
       )}
 
-      {/* Intro SEO courte */}
-      <ListingIntro
-        intro={extractIntro(seo?.content)}
-        fallback={
-          totalProsCount > 0
-            ? `Sélection des ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear}. Classement basé sur la qualité du profil (certifications, ancienneté, photos, avis vérifiés) — pas sur des boosters payants. Comparez les profils, demandez 3 devis gratuits en 30 secondes ou contactez directement l'artisan de votre choix.`
-            : `Vous cherchez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Workwave référence les professionnels qualifiés de la zone. Service 100% gratuit, sans intermédiaire commercial.`
-        }
-      />
+      {/* Intro SEO depuis seo_pages.content (sprint 3). On ne genere PLUS
+          de fallback generique : le H1 + sous-titre + section "Quel est
+          votre projet ?" couvrent deja la rassurance + l'intent. Eviter
+          le doublon visuel et la repetition de mots-cles sans valeur SEO
+          ajoutee. Sur les 588 pages avec contenu SEO custom, l'intro
+          extraite reste affichee. */}
+      <ListingIntro intro={extractIntro(seo?.content)} />
 
       {/* Liste principale : TopProCard sur page 1, ProCard classique pages 2+ */}
       {isFirstPage ? (
