@@ -30,6 +30,20 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const STORAGE_DISMISSED = "workwave_agent_dismissed";
 const STORAGE_MESSAGES = "workwave_agent_messages";
+const COOKIE_CONSENT_NAME = "consent_analytics";
+
+/**
+ * Détecte si l'utilisateur a déjà géré le bandeau cookies (accepté ou
+ * refusé). Tant que ce n'est pas le cas, on N'AFFICHE PAS la bulle de
+ * l'agent : sur mobile, le bandeau cookies est full-width au bas de
+ * l'écran et masquerait la bulle. Mieux : un popup à la fois.
+ */
+function hasCookieConsentHandled(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie
+    .split("; ")
+    .some((c) => c.startsWith(`${COOKIE_CONSENT_NAME}=`));
+}
 
 // Pages où on N'AFFICHE PAS l'agent (admin, dashboard pro, flow claim, etc.)
 const HIDDEN_PATTERNS: RegExp[] = [
@@ -124,6 +138,7 @@ export default function CommercialAgent() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState<boolean | null>(null); // null = pas encore lu
+  const [cookieHandled, setCookieHandled] = useState<boolean | null>(null); // null = pas encore lu
   const [context, setContext] = useState<AgentContext | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -135,6 +150,34 @@ export default function CommercialAgent() {
     if (typeof window === "undefined") return;
     const stored = sessionStorage.getItem(STORAGE_DISMISSED);
     setDismissed(stored === "1");
+  }, []);
+
+  // Detection du consent cookies. Tant que le bandeau cookies est
+  // visible (pas de cookie consent_analytics), on ne montre PAS la
+  // bulle pour eviter le chevauchement sur mobile (bandeau cookies
+  // est full-width au bas de l'ecran sur mobile).
+  // Polling court (1s) pendant 10 min puis arret pour ne pas pomper
+  // de ressources eternellement.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Premiere check immediate
+    if (hasCookieConsentHandled()) {
+      setCookieHandled(true);
+      return;
+    }
+    setCookieHandled(false);
+    // Poll jusqu'a ce que l'user gere le bandeau
+    const startedAt = Date.now();
+    const maxDuration = 10 * 60 * 1000; // 10 min max
+    const interval = window.setInterval(() => {
+      if (hasCookieConsentHandled()) {
+        setCookieHandled(true);
+        window.clearInterval(interval);
+      } else if (Date.now() - startedAt > maxDuration) {
+        window.clearInterval(interval);
+      }
+    }, 1000);
+    return () => window.clearInterval(interval);
   }, []);
 
   // Fetch contexte page (au mount + à chaque changement de route)
@@ -263,6 +306,7 @@ export default function CommercialAgent() {
   // Conditions de non-affichage
   if (dismissed === null) return null; // pas encore initialisé
   if (dismissed) return null;
+  if (cookieHandled !== true) return null; // attend la gestion du bandeau cookies
   if (shouldHide(pathname || "/")) return null;
 
   // Bouton flottant minimisé
@@ -272,8 +316,12 @@ export default function CommercialAgent() {
         type="button"
         onClick={handleOpen}
         aria-label="Ouvrir l'assistant Workwave"
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-full pl-3 pr-4 py-2.5 shadow-lg transition-all duration-250 hover:scale-105"
-        style={{ boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)" }}
+        className="fixed right-4 sm:right-5 z-50 flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white rounded-full pl-3 pr-4 py-2.5 shadow-lg transition-all duration-250 hover:scale-105"
+        style={{
+          // Respect safe-area iOS (encoche, barre URL Safari du bas)
+          bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
+        }}
       >
         <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center shrink-0">
           <svg
@@ -298,8 +346,11 @@ export default function CommercialAgent() {
   // Panel chat ouvert
   return (
     <div
-      className="fixed bottom-5 right-5 z-50 w-[calc(100vw-2.5rem)] sm:w-96 max-h-[calc(100vh-2.5rem)] flex flex-col bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl overflow-hidden"
-      style={{ boxShadow: "0 8px 32px rgba(0, 0, 0, 0.22)" }}
+      className="fixed right-4 sm:right-5 z-50 w-[calc(100vw-2rem)] sm:w-96 max-h-[calc(100vh-2.5rem)] flex flex-col bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl overflow-hidden"
+      style={{
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.22)",
+      }}
       role="dialog"
       aria-label="Assistant Workwave"
     >
