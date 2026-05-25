@@ -1,32 +1,25 @@
 "use server";
 
-import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { sendSigninCode } from "@/lib/ai/auth/signin-code";
 
 /**
- * Server Action /ai/connexion :
+ * Server Action /ai/connexion (Phase 8) :
  *   1. Valide email
- *   2. Check si l'email existe dans ai_signups (status pending/validated)
- *      ou dans pros (compte deja active Phase 8+)
- *   3. Si trouve : envoie email "Compte pas encore actif" avec timeline
- *   4. Si pas trouve : envoie email "Compte introuvable, voulez-vous
- *      vous inscrire ?"
- *   5. Redirect vers /ai/connexion/succes?email=...
+ *   2. sendSigninCode() :
+ *      - Verifie que email = pro tech actif claimed (sinon no_account)
+ *      - Genere code 6 chiffres + temp_password aleatoire
+ *      - Update auth user password = temp_password (transparent)
+ *      - Insert ai_signin_attempts (hash code, temp_password, expiry 15min)
+ *      - Envoie email avec le code
+ *   3. Redirect vers /ai/connexion/verifier?email=... pour saisie code
  *
- * Phase 8 viendra ajouter : magic link Supabase Auth pour login reel.
+ * Si l'email n'existe pas (no_account) : message generique cote UI pour
+ * eviter user enumeration. On affiche la meme page succes que si OK.
+ *
+ * Rate limit : max 3 attempts / 15 min / email (cf signin-code.ts).
  */
-
-function getResendClient() {
-  return new Resend(process.env.RESEND_API_KEY);
-}
-
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function submitConnexion(formData: FormData): Promise<void> {
   const email = String(formData.get("email") || "").trim().toLowerCase();
@@ -35,65 +28,33 @@ export async function submitConnexion(formData: FormData): Promise<void> {
     redirect("/ai/connexion?error=invalid_email");
   }
 
-  const sb = getServiceClient();
+  // Recuperer IP + User-Agent pour rate limit + audit
+  const hdrs = await headers();
+  const ip =
+    hdrs.get("x-forwarded-for")?.split(",")[0].trim() ||
+    hdrs.get("x-real-ip") ||
+    null;
+  const userAgent = hdrs.get("user-agent") || null;
 
-  // Check signup
-  const { data: signup } = await sb
-    .from("ai_signups")
-    .select("id, first_name, status")
-    .eq("email", email)
-    .maybeSingle();
+  const result = await sendSigninCode(email, ip || undefined, userAgent || undefined);
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
-
-  let subject: string;
-  let html: string;
-
-  if (signup) {
-    if (signup.status === "validated") {
-      subject = "Connexion Workwave AI — votre acces";
-      html = `<!DOCTYPE html>
-<html><body style="font-family:sans-serif;background:#F7F7F7;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <h1 style="font-size:22px;font-weight:800;margin:0 0 16px 0;">Bonjour ${signup.first_name},</h1>
-    <p style="font-size:14px;line-height:1.6;color:#525252;">Votre compte Workwave AI est valide. La connexion sera disponible des l'ouverture du dashboard freelance (Phase 8 — bientot).</p>
-    <p style="font-size:13px;color:#999;margin-top:24px;">Une question ? Repondez a ce mail.</p>
-  </div>
-</body></html>`;
-    } else {
-      subject = "Workwave AI — votre inscription est enregistree";
-      html = `<!DOCTYPE html>
-<html><body style="font-family:sans-serif;background:#F7F7F7;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <h1 style="font-size:22px;font-weight:800;margin:0 0 16px 0;">Bonjour ${signup.first_name},</h1>
-    <p style="font-size:14px;line-height:1.6;color:#525252;">Votre inscription Workwave AI est bien enregistree. Vous etes parmi les premiers freelances de la plateforme — le dashboard freelance ouvre tres bientot et vous recevrez les instructions de connexion par mail des l'ouverture.</p>
-    <p style="font-size:13px;color:#999;margin-top:24px;">Une question ? Repondez a ce mail.</p>
-  </div>
-</body></html>`;
-    }
-  } else {
-    subject = "Workwave AI — compte introuvable";
-    html = `<!DOCTYPE html>
-<html><body style="font-family:sans-serif;background:#F7F7F7;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <h1 style="font-size:22px;font-weight:800;margin:0 0 16px 0;">Compte introuvable</h1>
-    <p style="font-size:14px;line-height:1.6;color:#525252;">Aucun compte Workwave AI n'est associe a cette adresse email (${email}).</p>
-    <p style="font-size:14px;line-height:1.6;color:#525252;margin-top:16px;">Voulez-vous <a href="${baseUrl}/ai/inscription" style="color:#FF6803;font-weight:600;">creer un compte freelance</a> ?</p>
-  </div>
-</body></html>`;
+  if (result.ok) {
+    // Code envoye -> page saisie code
+    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}`);
   }
 
-  // Send email (best effort, ne bloque pas le redirect)
-  try {
-    await getResendClient().emails.send({
-      from: "Workwave AI <contact@workwave.fr>",
-      to: [email],
-      subject,
-      html,
-    });
-  } catch (e) {
-    console.error("[submitConnexion] email error:", e);
+  // Sinon : on redirige avec message generique. Pas de detail pour eviter
+  // user enumeration. Le user voit "Si un compte existe, code envoye".
+  if (result.reason === "rate_limited") {
+    redirect("/ai/connexion?error=rate_limited");
+  }
+  if (result.reason === "no_account") {
+    // SAME redirect que success : pas de user enumeration leak
+    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&maybe=1`);
   }
 
-  redirect(`/ai/connexion/succes?email=${encodeURIComponent(email)}`);
+  // Erreurs techniques (email_send_failed, user_update_failed) : on indique
+  // un probleme technique sans details specifiques.
+  console.error("[submitConnexion] technical error:", result.reason);
+  redirect("/ai/connexion?error=technical");
 }

@@ -7,16 +7,20 @@ import {
   sendAiSignupWelcome,
   type SignupData,
 } from "@/lib/email/send-ai-signup-emails";
+import { activateAiSignup } from "@/lib/ai/auth/activate-signup";
 
 /**
- * Vrai Server Action pour /ai/inscription :
+ * Server Action pour /ai/inscription (Phase 8) :
  *   1. Valide FormData
  *   2. Insert dans ai_signups (status=pending)
- *   3. Send admin notification + welcome email (await — pas detache)
- *   4. Redirect vers /ai/inscription/succes
+ *   3. Phase 8 : activateAiSignup() = cree auth user Supabase + row pros tech
+ *      Si OK : ai_signups status='validated' avec pro_id lie
+ *      Si fail : ai_signups reste 'pending' (admin valide manuellement)
+ *   4. Send admin notification + welcome email
+ *   5. Redirect vers /ai/inscription/succes
  *
- * Phase 8 viendra remplacer ai_signups par une vraie creation auth user
- * Supabase + row pros + Stripe customer (pour les Premium).
+ * Auto-activation = simplicite. L'admin peut suspendre les fakes via le
+ * dashboard admin (a venir). RLS strict + pas d'acces tant que pas claim.
  */
 
 const CATEGORY_SLUG_MAP: Record<string, string> = {
@@ -104,6 +108,36 @@ export async function submitInscription(formData: FormData): Promise<void> {
   if (error || !signup) {
     console.error("[submitInscription] insert error:", error);
     redirect("/ai/inscription?error=insert_failed");
+  }
+
+  // Phase 8 : auto-activation du signup (cree auth user + row pros tech)
+  // Best-effort : si fail, ai_signups reste 'pending' et admin valide manuel.
+  try {
+    const activateResult = await activateAiSignup({
+      signupId: signup.id,
+      firstName,
+      lastName,
+      email,
+      categorySlug,
+      bio,
+      skills,
+      github,
+      linkedin,
+      tjm,
+      experienceYears,
+      availability,
+      location,
+    });
+    if (!activateResult.ok) {
+      console.error("[submitInscription] activate failed:", activateResult.reason);
+      // On continue le flow normalement (signup en pending pour validation admin)
+    } else {
+      console.log(
+        `[submitInscription] activated: signupId=${signup.id} -> proId=${activateResult.proId}`
+      );
+    }
+  } catch (activateErr) {
+    console.error("[submitInscription] activate exception:", activateErr);
   }
 
   // Prepare email data
