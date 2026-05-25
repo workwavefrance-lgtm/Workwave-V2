@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
  */
 
 const NAV_ITEMS = [
-  { href: "/ai#methode", label: "Comment ca marche" },
+  { href: "/ai/deposer", label: "Deposer un projet" },
   { href: "/ai/pour-les-freelances", label: "Pour freelances" },
   { href: "/ai/tarifs", label: "Tarifs" },
 ];
