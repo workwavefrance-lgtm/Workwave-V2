@@ -31,6 +31,15 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     siteName: "Workwave AI",
   },
+  // Override twitter meta du root layout BTP (QA agent finding P1) :
+  // sans ca, partages sociaux des pages /ai affichent le pitch BTP
+  // "226 000 professionnels en Nouvelle-Aquitaine".
+  twitter: {
+    card: "summary_large_image",
+    title: "Workwave AI — Trouvez le freelance tech ideal",
+    description:
+      "Matching IA entre porteurs de projet et freelances tech (IA, dev, cloud, no-code, data, design). France & Europe. Inscription gratuite, sans credit.",
+  },
 };
 
 export default function AiLayout({

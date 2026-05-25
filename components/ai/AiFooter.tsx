@@ -54,7 +54,7 @@ export default function AiFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/ai/comment-ca-marche" className="hover:text-[var(--ai-text)] transition-colors">
+                <Link href="/ai#methode" className="hover:text-[var(--ai-text)] transition-colors">
                   Comment ça marche
                 </Link>
               </li>

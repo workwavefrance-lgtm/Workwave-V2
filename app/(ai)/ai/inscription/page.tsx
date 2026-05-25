@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import { submitInscriptionStub } from "./actions";
 
 export const metadata: Metadata = {
   title: "Inscription freelance — Workwave AI",
@@ -77,8 +78,7 @@ export default function InscriptionPage() {
           FORM
           ═══════════════════════════════════════════════════════════════ */}
       <form
-        action="/ai/inscription"
-        method="POST"
+        action={submitInscriptionStub}
         className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20"
       >
         <div className="max-w-3xl space-y-12 sm:space-y-16">
