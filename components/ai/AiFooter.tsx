@@ -18,13 +18,16 @@ export default function AiFooter() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-12">
           {/* Colonne 1 : Workwave AI */}
           <div className="col-span-2 sm:col-span-1">
-            <Link href="/ai" className="flex items-center gap-2 mb-4">
-              <span
-                className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-[var(--ai-text)] text-white font-bold text-[14px] tracking-tight"
+            <Link href="/ai" className="flex items-center gap-2.5 mb-4 group">
+              <div
+                className="grid grid-cols-2 grid-rows-2 gap-[2px] w-7 h-7 transition-transform duration-200 group-hover:rotate-90"
                 aria-hidden="true"
               >
-                W
-              </span>
+                <div className="bg-[var(--ai-accent)] rounded-[2px]" />
+                <div className="bg-[var(--ai-text)] rounded-[2px]" />
+                <div className="bg-[var(--ai-text)] rounded-[2px]" />
+                <div className="bg-[var(--ai-accent)] rounded-[2px]" />
+              </div>
               <span className="text-[15px] font-semibold text-[var(--ai-text)] tracking-tight">
                 Workwave <span className="text-[var(--ai-text-tertiary)] font-medium">AI</span>
               </span>
