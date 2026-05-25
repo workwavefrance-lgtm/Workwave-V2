@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./ai-globals.css";
 import AiHeader from "@/components/ai/AiHeader";
 import AiFooter from "@/components/ai/AiFooter";
+import AiStickyCta from "@/components/ai/AiStickyCta";
 
 /**
  * Layout dédié aux routes /ai/* (Workwave AI).
@@ -52,6 +53,7 @@ export default function AiLayout({
       <AiHeader />
       <main className="flex-1">{children}</main>
       <AiFooter />
+      <AiStickyCta />
     </div>
   );
 }
