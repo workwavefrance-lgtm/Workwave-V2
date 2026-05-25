@@ -63,14 +63,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const currentYear = new Date().getFullYear();
 
   // Title clickbait style Travaux.com adapté à la sous-spécialité :
-  // "Top 10 plombiers spécialisés en dépannage à Poitiers (2026) | Devis Rapides | Workwave"
+  // "Top 10 plombiers spécialisés en dépannage à Poitiers (2026) | Devis gratuit"
   let title: string;
   if (prosCount === 0) {
     title = `${category.name} ${specialty.shortLabel} à ${city.name}`;
   } else if (prosCount === 1) {
-    title = `${category.name} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis gratuit | Workwave`;
+    title = `${category.name} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis gratuit`;
   } else {
-    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis Rapides | Workwave`;
+    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis gratuit`;
   }
 
   const description =

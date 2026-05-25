@@ -90,15 +90,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pluralCategory = pluralizeCategoryName(category.name);
 
   // Title style Travaux.com : clickbait optimise pour le CTR SERP.
-  // "Top 10 plombiers les mieux notés à Poitiers (2026) | Devis Rapides | Workwave"
+  // "Top 10 plombiers les mieux notés à Poitiers (2026) | Devis gratuit"
   // Si peu de pros, on adapte le nombre.
   let dynamicTitle: string;
   if (prosCount === 0) {
     dynamicTitle = `${category.name} ${preposition} ${locationName}`;
   } else if (prosCount === 1) {
-    dynamicTitle = `${category.name} ${preposition} ${locationName} (${currentYear}) | Devis gratuit | Workwave`;
+    dynamicTitle = `${category.name} ${preposition} ${locationName} (${currentYear}) | Devis gratuit`;
   } else {
-    dynamicTitle = `Top ${displayCount} ${pluralCategory} les ${bestForm === "meilleurs" ? "mieux notés" : "mieux notées"} ${preposition} ${locationName} (${currentYear}) | Devis Rapides | Workwave`;
+    dynamicTitle = `Top ${displayCount} ${pluralCategory} les ${bestForm === "meilleurs" ? "mieux notés" : "mieux notées"} ${preposition} ${locationName} (${currentYear}) | Devis gratuit`;
   }
 
   const title = seo?.title || dynamicTitle;
