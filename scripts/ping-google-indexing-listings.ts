@@ -68,20 +68,23 @@ async function fetchTopCategoryCityCombos(): Promise<ProsByCity[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const categories = (cats as any[]) ?? [];
 
-  // Recupere les villes prioritaires de Vienne d'abord, puis NA top
+  // Villes Vienne triees par POPULATION DESC (Poitiers, Chatellerault,
+  // etc. en premier — celles qui ont le plus de volume Google search)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: viennecities } = await (supabase as any)
     .from("cities")
-    .select("id, slug, name, department_id, departments!inner(code)")
+    .select("id, slug, name, department_id, population, departments!inner(code)")
     .eq("departments.code", "86")
-    .limit(50);
+    .not("population", "is", null)
+    .order("population", { ascending: false })
+    .limit(30);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vienneCitiesArr = (viennecities as any[]) ?? [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: othercities } = await (supabase as any)
     .from("cities")
-    .select("id, slug, name, department_id, departments!inner(code, name)")
+    .select("id, slug, name, department_id, population, departments!inner(code, name)")
     .in("departments.code", ["33", "87", "79", "16", "17", "24", "40", "47", "64", "19", "23"])
     .in("slug", PRIORITY_CITIES_OTHER_NA);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,12 +140,17 @@ async function fetchTopCategoryCityCombos(): Promise<ProsByCity[]> {
     }
   }
 
-  // Trie : priorite Vienne en tete, puis par count desc
+  // Tri : priorise les VILLES (par population dans Vienne, puis grosses
+  // villes NA) AVANT le tri par count. Sans ca, les petites communes
+  // avec 33 catégories actives saturent le quota au detriment de
+  // Poitiers/Chatellerault/Bordeaux qui ont le plus de volume Google.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cityRankMap = new Map<string, number>();
+  cities.forEach((c, idx) => cityRankMap.set(c.slug, idx));
   combos.sort((a, b) => {
-    const aVienne = vienneCitiesArr.some((c) => c.slug === a.city_slug);
-    const bVienne = vienneCitiesArr.some((c) => c.slug === b.city_slug);
-    if (aVienne && !bVienne) return -1;
-    if (!aVienne && bVienne) return 1;
+    const aRank = cityRankMap.get(a.city_slug) ?? 999;
+    const bRank = cityRankMap.get(b.city_slug) ?? 999;
+    if (aRank !== bRank) return aRank - bRank;
     return b.count - a.count;
   });
 
