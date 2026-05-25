@@ -24,6 +24,11 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+// IDs des catégories tech (Workwave AI) : pour ces pros, l'URL canonique
+// est /ai/freelance/[slug] (design Workwave AI). Évite le duplicate content
+// signal entre /artisan/[slug] et /ai/freelance/[slug] pour les pros tech.
+const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const pro = await getProBySlug(slug);
@@ -33,6 +38,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const desc =
     truncateDescription(pro.description) ||
     `${pro.name}, ${pro.category.name} à ${cityName}. Contactez ce professionnel gratuitement.`;
+
+  // Canonical : si pro tech, pointer vers /ai/freelance/[slug] (Workwave AI).
+  // Sinon, /artisan/[slug] (Workwave BTP standard).
+  const isTechPro = AI_CATEGORY_IDS.includes(pro.category.id);
+  const canonicalUrl = isTechPro
+    ? `${BASE_URL}/ai/freelance/${slug}`
+    : `${BASE_URL}/artisan/${slug}`;
 
   // Toutes les fiches actives sont indexables : chaque fiche a un titre unique,
   // un H1, un schema LocalBusiness (SIRET + adresse + géoloc), un breadcrumb,
@@ -44,13 +56,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${pro.name} - ${pro.category.name} à ${cityName}`,
     description: desc,
     alternates: {
-      canonical: `${BASE_URL}/artisan/${slug}`,
+      canonical: canonicalUrl,
     },
     openGraph: {
       type: "profile",
       title: `${pro.name} - ${pro.category.name} à ${cityName}`,
       description: desc,
-      url: `${BASE_URL}/artisan/${slug}`,
+      url: canonicalUrl,
     },
     twitter: {
       card: "summary",

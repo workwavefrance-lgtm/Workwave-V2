@@ -6,7 +6,8 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
 import { SPECIALTIES } from "@/lib/specialties";
-import { TECH_CITIES } from "@/lib/data/tech-cities";
+// TECH_CITIES n'est plus utilise : buildAiUrls charge maintenant TOUTES
+// les villes BDD avec >= 1 pro tech (vs 60 villes hardcodees).
 import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 
@@ -159,15 +160,76 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
-  // /ai/{category}/{ville} — 6 cat x 60 villes = ~360 URLs
-  const aiCategoryCity: MetadataRoute.Sitemap = AI_CATEGORIES.flatMap((catSlug) =>
-    TECH_CITIES.map((city) => ({
-      url: `${BASE_URL}/ai/${catSlug}/${city.slug}`,
+  // /ai/{category}/{ville} — extended : TOUTES les villes BDD avec >= 1 pro
+  // tech (vs 60 villes hardcodees auparavant). Charge depuis pros + cities.
+  const supabase = getAdminServiceClient();
+
+  // 1) Charger la map (category_id, city_id) -> count pour les pros tech
+  let offset = 0;
+  const countMap = new Map<string, number>(); // key = "cat_id-city_id"
+  while (true) {
+    const { data } = await supabase
+      .from("pros")
+      .select("category_id, city_id")
+      .in("category_id", AI_CATEGORY_IDS)
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .not("city_id", "is", null)
+      .range(offset, offset + SUPABASE_PAGE_SIZE - 1);
+    const rows = (data || []) as { category_id: number; city_id: number }[];
+    if (rows.length === 0) break;
+    for (const row of rows) {
+      const key = `${row.category_id}-${row.city_id}`;
+      countMap.set(key, (countMap.get(key) || 0) + 1);
+    }
+    offset += rows.length;
+  }
+
+  // 2) Charger les slugs des villes referencees dans countMap
+  const cityIds = Array.from(
+    new Set(
+      Array.from(countMap.keys()).map((k) => Number(k.split("-")[1]))
+    )
+  );
+  const citySlugMap = new Map<number, string>();
+  if (cityIds.length > 0) {
+    // Charger par batchs de 1000 pour eviter le cap PostgREST
+    for (let i = 0; i < cityIds.length; i += 1000) {
+      const batch = cityIds.slice(i, i + 1000);
+      const { data } = await supabase
+        .from("cities")
+        .select("id, slug")
+        .in("id", batch);
+      const rows = (data || []) as { id: number; slug: string }[];
+      for (const row of rows) citySlugMap.set(row.id, row.slug);
+    }
+  }
+
+  // 3) Charger le slug des categories tech (cat_id -> slug)
+  const { data: catRowsRaw } = await supabase
+    .from("categories")
+    .select("id, slug")
+    .in("id", AI_CATEGORY_IDS);
+  const catRows = (catRowsRaw || []) as { id: number; slug: string }[];
+  const catSlugMap = new Map<number, string>(
+    catRows.map((c) => [c.id, c.slug])
+  );
+
+  // 4) Generer les URLs : 1 par (cat, ville) avec >= 1 pro tech
+  const aiCategoryCity: MetadataRoute.Sitemap = [];
+  for (const [key, count] of countMap) {
+    const [catId, cityId] = key.split("-").map(Number);
+    const catSlug = catSlugMap.get(catId);
+    const citySlug = citySlugMap.get(cityId);
+    if (!catSlug || !citySlug) continue;
+    aiCategoryCity.push({
+      url: `${BASE_URL}/ai/${catSlug}/${citySlug}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
-      priority: 0.7,
-    }))
-  );
+      // Priorite ponderee par le nombre de pros tech dans la ville
+      priority: count >= 10 ? 0.75 : count >= 3 ? 0.7 : 0.6,
+    });
+  }
 
   // /ai/{category}/dept/{dept-code} — 6 cat x 96 dept = 576 URLs
   const aiCategoryDept: MetadataRoute.Sitemap = AI_CATEGORIES.flatMap((catSlug) =>
@@ -386,6 +448,12 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
   // jusqu'a PROS_PER_SITEMAP. Avec 45000 pros / batch et page_size=5000,
   // on fait 9 round-trips reseau au lieu de 45 (PAGE_SIZE=1000) => 5x plus
   // rapide.
+  //
+  // IMPORTANT : on EXCLUT les pros tech (category_id 43-48) ici. Ils sont
+  // listes dans les sub-sitemaps AI_PROS_OFFSET+ (200+) au format
+  // /ai/freelance/[slug] qui est leur URL canonique. Eviter le duplicate
+  // dans le sitemap (cf. canonical declaree dans
+  // app/(public)/artisan/[slug]/page.tsx).
   let allPros: {
     slug: string;
     updated_at: string;
@@ -407,6 +475,7 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
       .select("slug, updated_at, claimed_by_user_id, description, phone")
       .eq("is_active", true)
       .is("deleted_at", null)
+      .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
       .order("id", { ascending: true })
       .range(pageOffset, rangeEnd);
 

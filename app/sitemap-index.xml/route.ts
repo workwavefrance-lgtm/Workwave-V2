@@ -24,11 +24,15 @@ export async function GET() {
   // count: "estimated" (lit pg_class stats) au lieu de "exact" qui scanne
   // toute la table (226k rows, ~3-5s, cause des timeouts Googlebot).
   // Cf. lecon apprise CLAUDE.md du 2026-04-28.
+  // Count pros NON-tech (BTP) pour sub-sitemaps 100+. Les pros tech sont
+  // dans sub-sitemaps 200+ uniquement (URL canonique /ai/freelance/[slug]),
+  // pas dans le sub-sitemap pros standard.
   const { count } = await supabase
     .from("pros")
     .select("id", { count: "estimated", head: true })
     .eq("is_active", true)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`);
 
   // Count pros tech (categories 43-48) pour les sub-sitemaps AI 200+
   const { count: techCount } = await supabase
