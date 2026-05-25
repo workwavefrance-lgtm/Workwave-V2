@@ -14,6 +14,7 @@ import {
 } from "@/lib/data/tech-tjm-reference";
 
 export const revalidate = 21600;
+export const dynamicParams = true; // pages non pre-buildees rendues a la demande
 const TECH_VERTICAL = "tech";
 const CURRENT_YEAR = new Date().getFullYear();
 const MONTH_NAMES = [
@@ -25,22 +26,8 @@ type Props = {
   params: Promise<{ skill: string; dept: string }>;
 };
 
-// ─── generateStaticParams : 145 cats × 95 depts = ~13775 pages ─────────────
-export async function generateStaticParams() {
-  const sb = createPublicClient();
-  const { data: cats } = await sb
-    .from("categories")
-    .select("slug")
-    .eq("vertical", TECH_VERTICAL);
-  if (!cats) return [];
-  const params: Array<{ skill: string; dept: string }> = [];
-  for (const cat of cats) {
-    for (const dept of TECH_DEPARTMENTS) {
-      params.push({ skill: cat.slug, dept: dept.code });
-    }
-  }
-  return params;
-}
+// ─── Pas de generateStaticParams : tout dynamic on-demand via ISR.
+// Anti-OOM build Vercel (commit precedent crashait avec 13920 pages SSG).
 
 // ─── Metadata ──────────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

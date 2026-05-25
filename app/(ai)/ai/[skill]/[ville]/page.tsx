@@ -9,6 +9,7 @@ import { getTjmReference, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
 import { getCompaniesByCity } from "@/lib/data/tech-companies-by-city";
 
 export const revalidate = 21600; // 6h ISR
+export const dynamicParams = true; // pages non pre-buildees rendues a la demande
 
 const TECH_VERTICAL = "tech";
 const CURRENT_YEAR = new Date().getFullYear();
@@ -17,23 +18,10 @@ type CityPageProps = {
   params: Promise<{ skill: string; ville: string }>;
 };
 
-// ─── generateStaticParams : pre-build 6 categories x 30 villes = 180 pages ─
-export async function generateStaticParams() {
-  const sb = createPublicClient();
-  const { data: categories } = await sb
-    .from("categories")
-    .select("slug")
-    .eq("vertical", TECH_VERTICAL);
-  if (!categories) return [];
-
-  const params: Array<{ skill: string; ville: string }> = [];
-  for (const cat of categories) {
-    for (const city of TECH_CITIES) {
-      params.push({ skill: cat.slug, ville: city.slug });
-    }
-  }
-  return params;
-}
+// ─── Pas de generateStaticParams : tout est rendu a la demande via ISR.
+// Le build Vercel crashe (OOM SIGABRT) si on pre-genere trop. Avec
+// dynamicParams=true + revalidate=21600, chaque page est rendue au
+// premier hit (Googlebot ou user), puis cachee 6h. SEO ok, build OK.
 
 // ─── SEO metadata ──────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
