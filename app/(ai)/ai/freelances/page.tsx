@@ -3,17 +3,47 @@ import Link from "next/link";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
 export const revalidate = 21600; // 6h ISR
 
+const SITE_URL = "https://workwave.fr";
+
 export const metadata: Metadata = {
-  title: "Tous les freelances tech — Workwave AI",
+  title:
+    "Tous les freelances tech — IA, dev, cloud, data, design | Workwave AI",
   description:
-    "Decouvrez tous les freelances tech sur Workwave AI : developpement web, IA, cloud, DevOps, no-code, data analytics, design produit. Matching IA en moins de 24h.",
-  alternates: { canonical: "/ai/freelances" },
+    "Annuaire complet des freelances tech francais et europeens : developpement web (React, Next.js), IA (LLM, RAG), cloud (AWS, GCP), DevOps, no-code (Bubble, Make), data analytics, design produit. Selection IA en moins de 24h, sans commission.",
+  alternates: { canonical: `${SITE_URL}/ai/freelances` },
 };
 
 const TECH_VERTICAL = "tech";
+
+// ─────────────────────────────────────────────────────────────────────
+// FAQ freelances hub — 5 questions strategiques
+// ─────────────────────────────────────────────────────────────────────
+const FAQ_FREELANCES_HUB: FaqItem[] = [
+  {
+    q: "Comment choisir la bonne categorie pour mon projet ?",
+    a: "Selectionnez la categorie dont le freelance ideal aura la specialite principale. Pour un projet hybride (ex : app web React + integration IA), choisissez la categorie dominante du projet (ici Developpement Web). Notre IA matchera quand meme avec des freelances IA si la description du projet mentionne LLM, embedding, RAG, etc. Si vous hesitez, deposez directement votre projet via /ai/deposer et l'IA classifie automatiquement.",
+  },
+  {
+    q: "Un meme freelance peut-il avoir plusieurs categories ?",
+    a: "Oui. La plupart des freelances tech ont 2-3 categories actives (ex : Dev Web + IA, Cloud + DevOps, Data + ML). A l'inscription, le freelance choisit une categorie principale et peut activer jusqu'a 3 categories secondaires. Le matching IA pondere selon l'expertise principale, mais reste eligible pour les categories secondaires si le projet le justifie.",
+  },
+  {
+    q: "Quels sont les TJM moyens des freelances tech sur Workwave AI ?",
+    a: "Selon notre barometre 2026 (verifie vs Blog du Moderateur, Free-Work, Comet) : developpement web junior 350-500€/j senior 600-850€/j, IA junior 500-700€/j senior 800-1200€/j, Cloud junior 450-600€/j senior 700-1000€/j, Data junior 400-550€/j senior 650-900€/j, Design junior 350-450€/j senior 550-750€/j. No-code generalement 300-500€/j. Voir /ai/barometre-tjm pour le detail par technologie.",
+  },
+  {
+    q: "Quelle est la difference entre Workwave AI et un site comme Malt ?",
+    a: "Sur Workwave AI, vous deposez votre projet et notre IA selectionne automatiquement les 3 meilleurs freelances en moins de 24h. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). Le freelance paie un abonnement fixe 29,90€/mois (sans credit) au lieu d'une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
+  },
+  {
+    q: "Les freelances sont-ils verifies (KYC, certification) ?",
+    a: "Tous les freelances de notre annuaire sont enregistres a l'INSEE avec un SIRET valide (verifie via API Sirene). Pour ceux qui ont reclame leur fiche (env. 5% de la base), nous verifions l'email professionnel + le SIRET avant validation. Pour les fiches non-reclamees (donnees publiques Sirene), l'info est factuelle mais le freelance ne s'est pas exprime — la mention 'fiche non-reclamee' est explicite. Pour la KYC poussee (carte d'identite, contrat), c'est au client de demander au freelance avant la mission.",
+  },
+];
 
 export default async function FreelancesHubPage() {
   const sb = createPublicClient();
@@ -43,8 +73,49 @@ export default async function FreelancesHubPage() {
 
   const totalCount = counts.reduce((s, c) => s + c.count, 0);
 
+  // JSON-LD ItemList des 6 categories avec counts pros dynamiques
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Categories de freelances tech sur Workwave AI",
+    numberOfItems: counts.length,
+    itemListElement: counts.map((cat, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      url: `${SITE_URL}/ai/${cat.slug}`,
+      item: {
+        "@type": "Service",
+        name: cat.name,
+        description: cat.description || `Freelances tech specialises en ${cat.name}`,
+        url: `${SITE_URL}/ai/${cat.slug}`,
+        provider: {
+          "@type": "Organization",
+          name: "Workwave AI",
+        },
+      },
+    })),
+  };
+
+  // JSON-LD BreadcrumbList
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Workwave AI", item: `${SITE_URL}/ai` },
+      { "@type": "ListItem", position: 2, name: "Freelances tech", item: `${SITE_URL}/ai/freelances` },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1/2 — HERO
           ═══════════════════════════════════════════════════════════════ */}
@@ -52,7 +123,7 @@ export default async function FreelancesHubPage() {
         <Watermark text="FREELANCES" position="bottom" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
-          <SectionLabel index={1} total={2} label="Toutes categories" />
+          <SectionLabel index={1} total={3} label="Toutes categories" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
             <div className="lg:col-span-8">
@@ -110,7 +181,7 @@ export default async function FreelancesHubPage() {
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
-          <SectionLabel index={2} total={2} label="Categories" />
+          <SectionLabel index={2} total={3} label="Categories" />
 
           <h2
             className="font-black text-[var(--ai-text)] uppercase mb-10"
@@ -209,6 +280,19 @@ export default async function FreelancesHubPage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 3/3 — FAQ Freelances Hub (FAQPage schema)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AiFaqSection
+        id="faq"
+        title="Bien choisir son freelance tech"
+        subtitle="Les reponses aux questions qu'on nous pose le plus souvent avant de deposer un projet sur Workwave AI."
+        questions={FAQ_FREELANCES_HUB}
+        sectionIndex={3}
+        sectionTotal={3}
+        sectionLabel="FAQ"
+      />
     </>
   );
 }

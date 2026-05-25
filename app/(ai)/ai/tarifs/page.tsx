@@ -2,12 +2,51 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
+
+const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
-  title: "Tarifs — Gratuit cote client, 29,90€/mois cote freelance",
+  title:
+    "Tarifs Workwave AI — Gratuit cote client, 29,90€/mois cote freelance",
   description:
-    "Workwave AI est gratuit pour les porteurs de projet. Les freelances tech paient 29,90€ TTC/mois pour repondre aux briefs, sans credits, sans commission. Resiliable a tout moment.",
+    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances tech paient 29,90€ TTC/mois pour repondre aux projets, sans credits limites, resiliable en 1 clic. Comparatif vs Malt et Codeur.com.",
+  alternates: { canonical: `${SITE_URL}/ai/tarifs` },
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// FAQ pricing — 6 questions strategiques (objections, billing, B2B)
+// ─────────────────────────────────────────────────────────────────────
+const FAQ_PRICING: FaqItem[] = [
+  {
+    q: "Quel est le vrai prix pour un porteur de projet ?",
+    a: "0€. Pour toujours. Workwave AI ne facture jamais le cote client : depot de projet, selection IA, reception des 3 profils freelance, echanges, conclusion de la mission, tout est gratuit. Nous ne prenons aucune commission sur la mission, contrairement a Malt qui prend 10% jusqu'a 5 000€ par mission. Le modele est finance par l'abonnement Premium freelance (29,90€/mois TTC) qui est optionnel pour eux.",
+  },
+  {
+    q: "Pourquoi 29,90€/mois pour les freelances ?",
+    a: "Ce tarif est calibre pour rester accessible (vs 12€/mois Malt Premium + 10% de commission = mecaniquement plus cher des 4 missions/an) tout en finançant la plateforme. Concretement : pas de credits limites comme chez Codeur (1 credit = 1 reponse), pas de commission sur la mission. Vous reglez l'abonnement et vous repondez a autant de projets que vous voulez. Le ROI est positif des le 1er contrat.",
+  },
+  {
+    q: "Comment annuler mon abonnement freelance ?",
+    a: "En 1 clic depuis votre dashboard. La resiliation prend effet a la fin de la periode en cours (ex : si vous resiliez le 15 d'un mois deja paye, l'acces continue jusqu'au 15 du mois suivant). Aucun engagement, aucune penalite, aucun frais de sortie. Votre profil reste visible sur la plateforme apres resiliation (mode lecture seule, vous ne pouvez plus repondre aux nouveaux projets).",
+  },
+  {
+    q: "Y a-t-il un essai gratuit pour les freelances ?",
+    a: "Oui. 14 jours d'essai gratuit a l'inscription, sans carte bancaire requise. Vous pouvez tester le matching IA, recevoir des projets, repondre normalement. A J14 sans CB ajoutee, votre acces passe en mode visibilite seule (profil reste en ligne, mais vous ne pouvez plus repondre). Vous activez l'abonnement quand vous voulez. Tres rare que des freelances regrettent leur essai : 80%+ activent leur abonnement.",
+  },
+  {
+    q: "Que se passe-t-il si Workwave ne me trouve aucun projet ?",
+    a: "Vous ne payez rien si vous n'avez pas active votre abonnement. L'inscription, la creation du profil et la reception des projets en read-only sont gratuites. Vous decidez d'activer le Premium uniquement quand vous voulez repondre. Si vous activez puis ne recevez pas de projets pertinents, vous resiliez en 1 clic. Pas de penalite, pas de frais caches.",
+  },
+  {
+    q: "TVA et facturation pour entreprises (B2B) ?",
+    a: "Oui. Le tarif affiche 29,90€ TTC = 24,92€ HT + 4,98€ TVA (20%). Les factures sont generees automatiquement chaque mois et disponibles dans votre dashboard (PDF + acces Stripe Customer Portal). Vous pouvez ajouter votre numero TVA intracommunautaire pour la deduction. Workwave est une SAS francaise immatriculee, SIRET disponible sur demande dans les mentions legales.",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────
+// Helper schema currency : EUR + price decimal pour Google
+// ─────────────────────────────────────────────────────────────────────
 
 const CLIENT_FEATURES = [
   "Depot de projet illimite, gratuit",
@@ -66,8 +105,83 @@ const COMPARISON = [
 ];
 
 export default function TarifsPage() {
+  // JSON-LD Service avec 2 offers (Free porteur projet + Premium freelance)
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Workwave AI — Mise en relation freelances tech",
+    serviceType: "Plateforme freelance tech",
+    provider: {
+      "@type": "Organization",
+      name: "Workwave AI",
+      url: `${SITE_URL}/ai`,
+    },
+    areaServed: { "@type": "Place", name: "France et Europe" },
+    description:
+      "Plateforme de mise en relation IA entre porteurs de projet et freelances tech. Gratuit cote client, 29,90€/mois cote freelance.",
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Workwave AI Client (porteur de projet)",
+        description:
+          "Depot de projet illimite, selection IA en 24h, 3 freelances qualifies par projet, aucune commission, annulation libre.",
+        price: "0.00",
+        priceCurrency: "EUR",
+        availability: "https://schema.org/InStock",
+        url: `${SITE_URL}/ai/deposer`,
+        category: "Free",
+      },
+      {
+        "@type": "Offer",
+        name: "Workwave AI Premium (freelance tech)",
+        description:
+          "Reponse illimitee aux projets matches par IA, profil mis en avant, badge Pro Workwave, statistiques d'impressions, sans engagement.",
+        price: "29.90",
+        priceCurrency: "EUR",
+        availability: "https://schema.org/InStock",
+        url: `${SITE_URL}/ai/inscription`,
+        eligibleDuration: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: "29.90",
+          priceCurrency: "EUR",
+          unitCode: "MON",
+          referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
+        },
+      },
+    ],
+  };
+
+  // JSON-LD BreadcrumbList
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Workwave AI",
+        item: `${SITE_URL}/ai`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Tarifs",
+        item: `${SITE_URL}/ai/tarifs`,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1 — HERO
           ═══════════════════════════════════════════════════════════════ */}
@@ -76,7 +190,7 @@ export default function TarifsPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
           <div className="max-w-4xl">
-            <SectionLabel index={1} total={4} label="Tarifs" />
+            <SectionLabel index={1} total={5} label="Tarifs" />
             <h1
               className="font-black text-[var(--ai-text)] uppercase mb-8"
               style={{
@@ -114,7 +228,7 @@ export default function TarifsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Card client : light */}
             <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-8 sm:p-10">
-              <SectionLabel index="02A" total={4} label="Cote client" />
+              <SectionLabel index={2} total={5} label="Cote client" />
               <h2
                 className="font-black text-[var(--ai-text)] uppercase mb-6"
                 style={{
@@ -200,7 +314,7 @@ export default function TarifsPage() {
                     className="text-[11px] font-medium tracking-[0.2em] text-white/40"
                     style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                   >
-                    [ 02B / 04 ]
+                    [ 02 / 05 ]
                   </span>
                   <span className="h-px flex-1 max-w-[40px] bg-white/20" />
                   <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
@@ -287,7 +401,7 @@ export default function TarifsPage() {
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
           <div className="max-w-2xl mb-12 sm:mb-16">
-            <SectionLabel index={3} total={4} label="Comparatif" />
+            <SectionLabel index={3} total={5} label="Comparatif" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase"
               style={{
@@ -417,13 +531,26 @@ export default function TarifsPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4 — CTA FINAL
+          SECTION 4 — FAQ PRICING (FAQPage schema via AiFaqSection)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AiFaqSection
+        id="faq"
+        title="Questions sur les tarifs"
+        subtitle="Tout ce qu'il faut savoir sur notre modele de pricing : gratuit cote client, 29,90€ TTC pour les freelances. Sans engagement, sans piege."
+        questions={FAQ_PRICING}
+        sectionIndex={4}
+        sectionTotal={5}
+        sectionLabel="FAQ Pricing"
+      />
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 5 — CTA FINAL
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
         <Watermark text="START.NOW" position="bottom" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28 text-center">
-          <SectionLabel index={4} total={4} label="Commencer" />
+          <SectionLabel index={5} total={5} label="Commencer" />
           <h2
             className="font-black text-[var(--ai-text)] uppercase mb-6 mx-auto max-w-3xl"
             style={{

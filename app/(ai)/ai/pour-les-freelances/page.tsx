@@ -3,10 +3,14 @@ import Link from "next/link";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
+const SITE_URL = "https://workwave.fr";
+
 export const metadata: Metadata = {
-  title: "Pour les freelances tech — Workwave AI",
+  title:
+    "Pour les freelances tech — Recevez des projets qualifies | Workwave AI",
   description:
-    "Workwave AI envoie aux freelances tech les projets qualifies par IA qui matchent leur profil. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. France et Europe.",
+    "Workwave AI envoie aux freelances tech les projets qualifies par IA qui matchent leur profil. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. Alternative a Malt, Codeur, Freelancer.com. France et Europe.",
+  alternates: { canonical: `${SITE_URL}/ai/pour-les-freelances` },
 };
 
 const PROCESS = [
@@ -74,8 +78,70 @@ const FAQ = [
 ];
 
 export default function PourLesFreelancesPage() {
+  // JSON-LD FAQPage schema sur les 5 questions existantes
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map((qa) => ({
+      "@type": "Question",
+      name: qa.q,
+      acceptedAnswer: { "@type": "Answer", text: qa.a },
+    })),
+  };
+
+  // JSON-LD Service (offer pour freelance)
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Workwave AI Premium — Abonnement freelance tech",
+    serviceType: "Plateforme de matching projets freelance",
+    provider: {
+      "@type": "Organization",
+      name: "Workwave AI",
+      url: `${SITE_URL}/ai`,
+    },
+    description:
+      "Recevez les projets tech qualifies par IA qui matchent votre profil. Reponse illimitee, sans credit, sans commission. 29,90€/mois TTC, resiliable en 1 clic.",
+    areaServed: { "@type": "Place", name: "France et Europe" },
+    offers: {
+      "@type": "Offer",
+      price: "29.90",
+      priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
+      url: `${SITE_URL}/ai/inscription`,
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: "29.90",
+        priceCurrency: "EUR",
+        unitCode: "MON",
+      },
+    },
+  };
+
+  // JSON-LD BreadcrumbList
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Workwave AI", item: `${SITE_URL}/ai` },
+      { "@type": "ListItem", position: 2, name: "Pour les freelances", item: `${SITE_URL}/ai/pour-les-freelances` },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1 — HERO
           ═══════════════════════════════════════════════════════════════ */}
