@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
 export const metadata: Metadata = {
-  title: "Inscription recue — Workwave AI",
+  title: "Inscription enregistree — Workwave AI",
   description:
-    "Votre inscription freelance Workwave AI est bien recue. Notre equipe vous contacte sous 48h pour activer votre compte.",
+    "Votre inscription freelance Workwave AI est bien enregistree. Vous recevrez un email des l'ouverture du dashboard freelance.",
   robots: { index: false, follow: false },
 };
 
@@ -38,12 +38,12 @@ export default async function InscriptionSuccesPage({
               className="text-[11px] font-medium tracking-[0.2em] text-[var(--ai-text-tertiary)]"
               style={{ fontFamily: "var(--font-geist-mono), monospace" }}
             >
-              [ INSCRIPTION RECUE ]
+              [ INSCRIPTION ENREGISTREE ]
             </span>
             <span className="h-px w-10 bg-[var(--ai-border)]" />
             <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
-              Reponse &lt; 48h
+              Early access
             </span>
           </div>
 
@@ -57,13 +57,13 @@ export default async function InscriptionSuccesPage({
           >
             Bienvenue.
             <br />
-            <span className="text-[var(--ai-text-tertiary)]">Recu sous 48h.</span>
+            <span className="text-[var(--ai-text-tertiary)]">Vous etes dans.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10 max-w-xl mx-auto">
-            Votre inscription freelance Workwave AI est bien recue. Notre equipe
-            verifie votre profil sous 48h ouvrees et vous envoie les instructions
-            de connexion par mail.
+            Votre inscription freelance Workwave AI est bien enregistree. Vous
+            etes parmi les premiers freelances de la plateforme — on vous
+            previent par mail des l&apos;ouverture du dashboard freelance.
           </p>
 
           {id && (
@@ -92,11 +92,11 @@ export default async function InscriptionSuccesPage({
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">02</span>
-                <span>Notre equipe valide votre profil sous 48h ouvrees.</span>
+                <span>Vous etes inscrit en avant-premiere — le dashboard freelance arrive tres bientot.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">03</span>
-                <span>Email avec instructions de connexion + activation de votre compte.</span>
+                <span>Email d&apos;activation des l&apos;ouverture, avec acces a votre espace freelance.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">04</span>

@@ -61,12 +61,12 @@ export async function submitConnexion(formData: FormData): Promise<void> {
   </div>
 </body></html>`;
     } else {
-      subject = "Workwave AI — votre inscription est en cours";
+      subject = "Workwave AI — votre inscription est enregistree";
       html = `<!DOCTYPE html>
 <html><body style="font-family:sans-serif;background:#F7F7F7;padding:24px;color:#0A0A0A;">
   <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
     <h1 style="font-size:22px;font-weight:800;margin:0 0 16px 0;">Bonjour ${signup.first_name},</h1>
-    <p style="font-size:14px;line-height:1.6;color:#525252;">Votre inscription Workwave AI est en cours de validation par notre equipe (sous 48h ouvrees). Vous recevrez les instructions de connexion par mail des activation.</p>
+    <p style="font-size:14px;line-height:1.6;color:#525252;">Votre inscription Workwave AI est bien enregistree. Vous etes parmi les premiers freelances de la plateforme — le dashboard freelance ouvre tres bientot et vous recevrez les instructions de connexion par mail des l'ouverture.</p>
     <p style="font-size:13px;color:#999;margin-top:24px;">Une question ? Repondez a ce mail.</p>
   </div>
 </body></html>`;

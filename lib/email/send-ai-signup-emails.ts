@@ -1,7 +1,7 @@
 /**
  * Emails pour signup freelance Workwave AI :
  *   - sendAiSignupAdminNotification : admin recoit le profil avec toutes les data
- *   - sendAiSignupWelcome : user recoit confirmation "Merci, on revient sous 48h"
+ *   - sendAiSignupWelcome : user recoit confirmation "Inscription enregistree, on previent des l'ouverture"
  *
  * Tracking en BDD via ai_signups.admin_notified_at + welcome_sent_at.
  */
@@ -132,7 +132,7 @@ export async function sendAiSignupWelcome(data: SignupData): Promise<void> {
     <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE AI ]</p>
 
     <h1 style="font-size:26px;color:#0A0A0A;margin:0 0 12px 0;font-weight:800;letter-spacing:-0.02em;">Merci ${data.firstName} !</h1>
-    <p style="font-size:15px;color:#525252;line-height:1.6;margin:0 0 24px 0;">Votre inscription en tant que freelance <strong>${data.categoryName}</strong> sur Workwave AI est bien recue. Nous revenons vers vous sous 48h pour activer votre compte.</p>
+    <p style="font-size:15px;color:#525252;line-height:1.6;margin:0 0 24px 0;">Votre inscription en tant que freelance <strong>${data.categoryName}</strong> sur Workwave AI est bien enregistree. Vous etes parmi les premiers freelances de la plateforme — on vous previent des l'ouverture du dashboard.</p>
 
     <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Recap de votre profil :</h3>
     <table style="font-size:13px;width:100%;border-collapse:collapse;background:#FAFAFA;padding:16px;border-radius:8px;">
@@ -144,8 +144,8 @@ export async function sendAiSignupWelcome(data: SignupData): Promise<void> {
 
     <h3 style="font-size:14px;color:#525252;margin:32px 0 12px 0;">Prochaines etapes :</h3>
     <ol style="font-size:14px;color:#525252;line-height:1.7;padding-left:20px;margin:0 0 24px 0;">
-      <li>Validation manuelle de votre profil sous 48h ouvrees</li>
-      <li>Activation de votre acces et instructions de connexion par email</li>
+      <li>Email d'activation des l'ouverture du dashboard freelance (tres bientot)</li>
+      <li>Acces a votre espace : profil public, briefs IA-matches, messagerie</li>
       ${data.plan === "premium" ? `<li>Paiement Premium 29,90€/mois TTC active a l'activation (resiliable en 1 clic)</li>` : `<li>Profil visible sur la plateforme, vous pourrez passer Premium a tout moment</li>`}
       <li>Reception de vos premiers briefs IA-matches sur votre boite mail</li>
     </ol>
