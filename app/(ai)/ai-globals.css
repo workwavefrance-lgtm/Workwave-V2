@@ -1,0 +1,74 @@
+/* ============================================================================
+   Workwave AI — Design tokens scopés (style peec.ai / Linear / Vercel)
+   ============================================================================
+   Ces variables sont VOLONTAIREMENT séparées des --accent / --bg coral du
+   Workwave BTP. Aucun fichier hors /ai ne doit utiliser ces tokens.
+
+   Palette : noir / blanc / gris (zéro coral, zéro indigo flashy).
+   Inspiration : peec.ai, linear.app, vercel.com, stripe.com.
+   ============================================================================ */
+
+.ai-theme {
+  /* ─── Backgrounds ─────────────────────────────────────────────────── */
+  --ai-bg: #F7F7F7;              /* fond page (gris ultra-clair) */
+  --ai-bg-card: #FFFFFF;         /* fond card / surface */
+  --ai-bg-elevated: #FFFFFF;     /* fond surélevé (modales, popovers) */
+  --ai-bg-subtle: #FAFAFA;       /* fond très subtle pour blocs internes */
+
+  /* ─── Textes ──────────────────────────────────────────────────────── */
+  --ai-text: #0A0A0A;            /* texte principal (presque noir) */
+  --ai-text-secondary: #525252;  /* texte secondaire (gris foncé) */
+  --ai-text-tertiary: #999999;   /* texte tertiaire (gris) */
+  --ai-text-muted: #B8B8B8;      /* texte très clair (légendes, hints) */
+
+  /* ─── Bordures ────────────────────────────────────────────────────── */
+  --ai-border: #E5E5E5;          /* bordure standard (très fine) */
+  --ai-border-strong: #D4D4D4;   /* bordure marquée */
+  --ai-border-subtle: #F1F1F1;   /* bordure ultra-subtle */
+
+  /* ─── Boutons primaires (NOIR pur, style peec.ai) ────────────────── */
+  --ai-primary: #0A0A0A;
+  --ai-primary-hover: #1F1F1F;
+  --ai-primary-text: #FFFFFF;
+
+  /* ─── Boutons secondaires (blanc + bordure) ──────────────────────── */
+  --ai-secondary: #FFFFFF;
+  --ai-secondary-hover: #FAFAFA;
+  --ai-secondary-text: #0A0A0A;
+  --ai-secondary-border: #E5E5E5;
+
+  /* ─── Accents discrets ───────────────────────────────────────────── */
+  --ai-accent-success: #16A34A;
+  --ai-accent-success-bg: #DCFCE7;
+  --ai-accent-warn: #DC2626;
+  --ai-accent-warn-bg: #FEE2E2;
+  --ai-accent-info: #0EA5E9;
+  --ai-accent-info-bg: #E0F2FE;
+
+  /* ─── Typography ─────────────────────────────────────────────────── */
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ─── Shadows premium (très subtiles) ────────────────────────────── */
+  --ai-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ai-shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --ai-shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.08), 0 4px 8px -2px rgba(0, 0, 0, 0.04);
+
+  /* ─── Animations ─────────────────────────────────────────────────── */
+  --ai-transition-fast: 150ms ease-out;
+  --ai-transition: 250ms ease-out;
+  --ai-transition-slow: 400ms ease-out;
+}
+
+/* Reset selectif uniquement dans le scope .ai-theme */
+.ai-theme h1,
+.ai-theme h2,
+.ai-theme h3,
+.ai-theme h4 {
+  letter-spacing: -0.02em;
+}
+
+.ai-theme h1 {
+  letter-spacing: -0.04em;
+}
