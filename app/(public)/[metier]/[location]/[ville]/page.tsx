@@ -25,6 +25,7 @@ import {
   getCategoryBestForm,
   pluralizeCategoryName,
 } from "@/lib/utils/category-grammar";
+import { computePageAggregateRating } from "@/lib/seo/seo-sections";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
@@ -61,16 +62,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pluralCategory = pluralizeCategoryName(category.name);
   const currentYear = new Date().getFullYear();
 
-  // Title style Travaux.com adapté à la sous-spécialité : "Les 10 meilleurs
-  // plombiers dépannage à Poitiers en 2026". Le shortLabel rend la phrase
-  // fluide ("dépannage", "recherche de fuite", "rénovation salle de bain").
+  // Title clickbait style Travaux.com adapté à la sous-spécialité :
+  // "Top 10 plombiers spécialisés en dépannage à Poitiers (2026) | Devis Rapides | Workwave"
   let title: string;
   if (prosCount === 0) {
     title = `${category.name} ${specialty.shortLabel} à ${city.name}`;
   } else if (prosCount === 1) {
-    title = `${category.name} ${specialty.shortLabel} à ${city.name} en ${currentYear} — 1 artisan référencé`;
+    title = `${category.name} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis gratuit | Workwave`;
   } else {
-    title = `Les ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${city.name} en ${currentYear} — Workwave`;
+    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis Rapides | Workwave`;
   }
 
   const description =
@@ -160,8 +160,13 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
     (s) => s.slug !== specialite
   );
 
-  // Schema.org Service (specifique a la sous-specialite, garde de l'ancienne version)
-  const serviceJsonLd = {
+  // Schema.org Service avec AggregateRating global pour rich snippet ★ SERP
+  // (moyenne ponderee Workwave + Google sur les pros affiches).
+  const specialtyPageAggregateRating = computePageAggregateRating(
+    isFirstPage ? topPros : (paginatedResult?.data ?? [])
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const serviceJsonLd: any = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: `${category.name} ${specialty.shortLabel} à ${cityLabel}`,
@@ -177,6 +182,15 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
       name: cityLabel,
     },
   };
+  if (specialtyPageAggregateRating) {
+    serviceJsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: specialtyPageAggregateRating.ratingValue,
+      reviewCount: specialtyPageAggregateRating.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
 
   // Schema ItemList enrichi : LocalBusiness complet (adresse + telephone +
   // aggregateRating si dispo) pour activer les rich snippets ★ dans Google
@@ -259,11 +273,9 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
 
   const baseUrl = `/${metier}/${specialite}/${ville}`;
 
-  // H1 dynamique
+  // H1 SOBRE style Travaux.com (le clickbait reste dans le title pour le CTR SERP).
   const h1Title = isFirstPage
-    ? totalProsCount === 1
-      ? `${category.name} ${specialty.shortLabel} à ${cityLabel} en ${currentYear}`
-      : `Les ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${cityLabel} en ${currentYear}`
+    ? `${category.name} ${specialty.shortLabel} à ${cityLabel}`
     : `${category.name} ${specialty.shortLabel} à ${cityLabel} — page ${page}`;
 
   const subTitle =

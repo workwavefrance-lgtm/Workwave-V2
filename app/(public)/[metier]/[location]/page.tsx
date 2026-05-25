@@ -9,6 +9,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
 import ProjectIntentSection from "@/components/listing/ProjectIntentSection";
 import StickyProjectCTA from "@/components/listing/StickyProjectCTA";
+import ProgrammaticSeoSections from "@/components/listing/ProgrammaticSeoSections";
 import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
 import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
@@ -38,6 +39,10 @@ import {
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import {
+  generateSeoContent,
+  computePageAggregateRating,
+} from "@/lib/seo/seo-sections";
 
 const TOP_LIMIT = 10;
 
@@ -84,15 +89,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const bestForm = getCategoryBestForm(category.name);
   const pluralCategory = pluralizeCategoryName(category.name);
 
-  // Title style Travaux.com : "Les 10 meilleurs plombiers a Poitiers en 2026"
-  // Si on a peu de pros, on adapte (5, 3, 1).
+  // Title style Travaux.com : clickbait optimise pour le CTR SERP.
+  // "Top 10 plombiers les mieux notés à Poitiers (2026) | Devis Rapides | Workwave"
+  // Si peu de pros, on adapte le nombre.
   let dynamicTitle: string;
   if (prosCount === 0) {
     dynamicTitle = `${category.name} ${preposition} ${locationName}`;
   } else if (prosCount === 1) {
-    dynamicTitle = `${category.name} ${preposition} ${locationName} en ${currentYear} — 1 artisan référencé`;
+    dynamicTitle = `${category.name} ${preposition} ${locationName} (${currentYear}) | Devis gratuit | Workwave`;
   } else {
-    dynamicTitle = `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear} — Workwave`;
+    dynamicTitle = `Top ${displayCount} ${pluralCategory} les ${bestForm === "meilleurs" ? "mieux notés" : "mieux notées"} ${preposition} ${locationName} (${currentYear}) | Devis Rapides | Workwave`;
   }
 
   const title = seo?.title || dynamicTitle;
@@ -100,7 +106,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     seo?.meta_description ||
     (prosCount > 0
-      ? `Sélection des ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear}. Comparez les profils, demandez 3 devis gratuits en 30 secondes.`
+      ? `Besoin d'${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Comparez les ${displayCount} ${bestForm} ${pluralCategory} de la zone, consultez les avis vérifiés et recevez 3 devis gratuits en 30 secondes.`
       : `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`);
 
   return {
@@ -296,26 +302,67 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   const baseUrl = `/${metier}/${locationSlug}`;
 
-  // H1 dynamique selon nb de pros et page
+  // H1 SOBRE style Travaux.com : "Trouver un plombier à Poitiers".
+  // Le title clickbait reste pour le CTR SERP, le H1 reste institutionnel
+  // pour la cohérence du contenu de la page.
   const h1Title = isFirstPage
     ? totalProsCount === 0
       ? `${category.name} ${preposition} ${locationName}`
-      : totalProsCount === 1
-        ? `${category.name} ${preposition} ${locationName} en ${currentYear}`
-        : `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName} en ${currentYear}`
+      : `Trouver ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}`
     : `Tous les ${pluralCategory} ${preposition} ${locationName} — page ${page}`;
 
-  // Sous-titre (count d'artisans)
+  // Sous-titre (count d'artisans + signal sélection objective)
   const subTitle =
     totalProsCount === 0
       ? "Aucun artisan référencé pour le moment"
       : totalProsCount === 1
-        ? "1 artisan référencé"
-        : `${totalProsCount} artisans référencés · Sélection objective par profil, certifications et avis`;
+        ? `1 ${category.name.toLowerCase()} référencé en ${currentYear}`
+        : `Top ${displayCount} ${pluralCategory} parmi ${totalProsCount} référencés ${preposition} ${locationName} en ${currentYear} · Sélection objective par profil, certifications et avis`;
+
+  // Sections SEO programmatiques (6 H2 + FAQ avec data unique par dept)
+  const seoSectionsContent = isFirstPage && totalProsCount > 0
+    ? generateSeoContent({
+        category: { slug: category.slug, name: category.name },
+        city: resolved.type === "city" ? resolved.city : null,
+        department: resolved.type === "department" ? resolved.department : resolved.city.department,
+        prosCount: totalProsCount,
+      })
+    : null;
+
+  // AggregateRating global de la page (rich snippet ★ SERP si data dispo)
+  const pageAggregateRating = computePageAggregateRating(
+    isFirstPage ? topPros : (paginatedResult?.data ?? [])
+  );
+  const serviceJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: `${category.name} ${preposition} ${locationName}`,
+    serviceType: category.name,
+    description: `Service de mise en relation avec ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}.`,
+    provider: {
+      "@type": "Organization",
+      name: "Workwave",
+      url: BASE_URL,
+    },
+    areaServed: {
+      "@type": resolved.type === "department" ? "AdministrativeArea" : "City",
+      name: locationName,
+    },
+  };
+  if (pageAggregateRating) {
+    serviceJsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: pageAggregateRating.ratingValue,
+      reviewCount: pageAggregateRating.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">
       <JsonLd data={jsonLd} />
+      <JsonLd data={serviceJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
       {/* Bar fine sticky top qui apparait au scroll. Capture du lead
@@ -423,6 +470,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
       {/* Contenu SEO long (sections H2 + détails) — l'intro a déjà été affichée plus haut */}
       {seo && stripIntro(seo.content) && (
         <SeoContent content={stripIntro(seo.content)} />
+      )}
+
+      {/* Sections SEO programmatiques style Travaux.com (6 H2 + FAQ + schema FAQPage).
+          Genere uniquement sur page 1 pour pas dupliquer sur les pages paginees. */}
+      {seoSectionsContent && (
+        <ProgrammaticSeoSections content={seoSectionsContent} />
       )}
 
       {/* FAQ accordeon + schema FAQPage */}
