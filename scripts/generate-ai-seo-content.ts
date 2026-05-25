@@ -1,32 +1,24 @@
 /**
- * Genere du contenu SEO UNIQUE pour chaque page /ai/[skill]/[ville].
+ * Genere du contenu SEO UNIQUE pour /ai/[skill]/[ville] — version
+ * sourcee + verifiee (zero invention).
  *
- * Pour chaque (category, city) tuple :
- *   1. Genere via Claude (claude-sonnet-4-6) un JSON structure avec :
- *      - intro_html : 300-450 mots, contexte local + skill specifique,
- *        chiffres reels (population, freelances, TJM), pas du generique
- *      - faq : 4-5 questions UNIQUES adaptees au skill + ville
- *      - stats : tjm_min, tjm_median, tjm_max, total_freelances
- *      - meta_title : title clickbait optimal pour CTR
- *      - meta_description : meta < 160 chars
- *   2. Upsert dans ai_seo_content (idempotent sur (category_id, city_slug))
- *
- * Strategie anti-thin content :
- *   - Chaque prompt est unique (skill + ville → contexte different)
- *   - On force des chiffres reels (population ville INSEE + count Sirene Supabase)
- *   - On force des references locales (entreprises tech connues de la ville)
- *
- * Couts estime : sonnet-4-6 ~3000 tokens output / page x 2160 pages
- *               x $0.015 / 1k = ~$100 pour la totalite
- *               (lancer par batch de 100 pour validation progressive)
+ * Principe ANTI-HALLUCINATION :
+ *   - Claude n'ecrit QUE l'intro_html (300 mots creative writing) + meta + FAQ
+ *   - Claude NE GENERE PAS :
+ *     · TJM ou tarifs → vient de lib/data/tech-tjm-reference.ts (sources :
+ *       Blog du Moderateur 2026, Free-Work tracker, Comet observatoire 2026)
+ *     · Noms d'entreprises locales → vient de lib/data/tech-companies-by-city.ts
+ *       (whitelist verifiable via Wikipedia/site officiel)
+ *     · Statistiques chiffrees (nb freelances, croissance %, etc.)
+ *   - Le prompt interdit explicitement les claims chiffres et noms propres
+ *   - Le rendu de page COMPOSE : intro Claude + blocs data verifies +
+ *     footer "Sources" obligatoire
  *
  * Run :
- *   npx tsx scripts/generate-ai-seo-content.ts                  # dry-run 5 premieres
- *   npx tsx scripts/generate-ai-seo-content.ts --limit=100      # dry-run 100
+ *   npx tsx scripts/generate-ai-seo-content.ts                # dry-run 5
  *   npx tsx scripts/generate-ai-seo-content.ts --limit=100 --apply
- *   npx tsx scripts/generate-ai-seo-content.ts --apply          # totalite (long, ~$100)
- *   npx tsx scripts/generate-ai-seo-content.ts --skill=react --apply # un skill seul
- *   npx tsx scripts/generate-ai-seo-content.ts --city=paris --apply  # une ville seule
+ *   npx tsx scripts/generate-ai-seo-content.ts --skill=react --apply
+ *   npx tsx scripts/generate-ai-seo-content.ts --city=paris --apply
  */
 import path from "path";
 import dotenv from "dotenv";
@@ -53,7 +45,6 @@ const sb = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// CLI args
 const APPLY = process.argv.includes("--apply");
 const LIMIT_ARG = process.argv.find((a) => a.startsWith("--limit="));
 const SKILL_ARG = process.argv.find((a) => a.startsWith("--skill="));
@@ -65,18 +56,15 @@ const CITY_FILTER = CITY_ARG?.split("=")[1] || null;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const CURRENT_YEAR = new Date().getFullYear();
-const MONTH_NAMES = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+const MONTH_NAMES = [
+  "janvier", "fevrier", "mars", "avril", "mai", "juin",
+  "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
+];
 const CURRENT_MONTH = MONTH_NAMES[new Date().getMonth()];
 
 type GeneratedContent = {
   intro_html: string;
   faq: Array<{ q: string; a: string }>;
-  stats: {
-    tjm_min: number;
-    tjm_median: number;
-    tjm_max: number;
-    croissance_yoy_percent: number;
-  };
   meta_title: string;
   meta_description: string;
 };
@@ -92,60 +80,74 @@ type Category = {
 async function generateContent(
   category: Category,
   citySlug: string | null,
-  cityName: string | null,
-  cityDeptName: string | null,
-  cityPopulation: number | null,
-  proCount: number
+  cityName: string | null
 ): Promise<GeneratedContent | null> {
   const isCity = citySlug !== null;
   const skillIsSubCategory = category.parent_category_id !== null;
 
-  const prompt = `Tu es un redacteur SEO/GEO/AEO expert. Tu generes du contenu UNIQUE pour une page de listing freelance sur Workwave AI.
+  // PROMPT STRICT ANTI-INVENTION :
+  // Claude n'ecrit QUE de la creative writing (description du metier,
+  // contexte de la ville en general, intro). Pas de TJM, pas de nb
+  // freelances, pas de croissance, pas de noms d'entreprises specifiques.
+  // Tous les claims chiffres / noms sont injectes ailleurs (data files).
+  const prompt = `Tu rediges du contenu SEO pour une page de listing freelance.
 
-Contexte :
-- Skill : ${category.name} ${skillIsSubCategory ? `(sous-categorie de ${category.parent_name})` : "(macro-categorie tech)"}
-- Page : ${isCity ? `${cityName} (${cityDeptName})` : "France entiere"}
-${isCity && cityPopulation ? `- Population ville : ${cityPopulation.toLocaleString("fr-FR")} habitants` : ""}
-- Nombre de freelances dans cette categorie ${isCity ? "et ville" : "en France"} : ${proCount}
+CONTEXTE :
+- Skill : ${category.name}${skillIsSubCategory ? ` (sous-categorie de ${category.parent_name})` : ""}
+- Localisation : ${isCity ? `${cityName}` : "France entiere"}
 - Mois/Annee : ${CURRENT_MONTH} ${CURRENT_YEAR}
 
-Retourne UNIQUEMENT un JSON valide (sans markdown, sans backticks) avec ces champs :
+REGLES STRICTES (respect obligatoire) :
+
+🚫 NE PAS :
+- Mentionner de chiffres precis (TJM, tarifs, salaires, pourcentages, nb d'entreprises, nb de freelances)
+- Citer des noms d'entreprises specifiques (ni a Paris, ni a Lyon, ni nulle part)
+- Inventer des statistiques de marche
+- Faire des promesses chiffrees ("X freelances en 24h", "+50% YoY", etc.)
+- Mentionner des donnees temporelles non verifiables ("le marche a explose en 2023", etc.)
+
+✅ TU PEUX :
+- Decrire le skill techniquement (frameworks, langages, ecosysteme technique)
+- Mentionner le contexte general de la ville (etudiants, ecoles, dynamique tech) SANS nommer d'entreprises
+- Decrire les types de projets typiques pour ce skill
+- Mentionner Workwave AI : matching IA, inscription gratuite, sans credit
+
+Retourne UNIQUEMENT un JSON valide (sans markdown, sans backticks) :
 
 {
-  "intro_html": "Intro HTML de 300-450 mots. UNIQUE pour cette ville+skill. Mentionne : (1) le contexte tech specifique de ${isCity ? cityName : "la France"}, (2) la demande pour ${category.name} dans le marche local, (3) les types de projets typiques, (4) ${isCity ? "1-2 entreprises tech connues de la ville (Bla Bla Car a Paris, Doctolib a Paris, ManoMano, Voodoo, Lydia, Backmarket, Mirakl, Veepee, Algolia, Withings, Datadog, Sonos, Spendesk, Aircall, Cabify, Mirakl, Carrefour Digital factory, etc.)" : "le contexte ecosysteme tech francais"}, (5) une mention sur les freelances Workwave AI qui repondent aux briefs en moins de 24h. Pas de listing de mots-cles. Style profession naturel, factuel. Utilise <p>, <strong>, pas de <h1/h2>.",
+  "intro_html": "Texte HTML de 280-380 mots, structure en 3 paragraphes <p>...</p>. UNIQUE pour cette ville+skill. Aucun chiffre, aucune entreprise nommee. Style sobre, factuel, professionnel. Pas de superlatifs (meilleur, top, leader, etc.) car ils sont vagues. Mentionne 1 fois Workwave AI dans le dernier paragraphe.",
   "faq": [
-    { "q": "Question 1 specifique au skill+ville", "a": "Reponse en 40-80 mots, avec une donnee chiffree ou un fait local" },
-    { "q": "Quel est le TJM moyen d'un freelance ${category.name} a ${isCity ? cityName : "Paris"} en ${CURRENT_YEAR} ?", "a": "Reponse avec fourchette TJM mediane realiste pour ce skill + ville" },
-    { "q": "Combien de temps pour trouver un freelance ${category.name} ${isCity ? `a ${cityName}` : ""} ?", "a": "Reponse mentionnant le matching IA Workwave en moins de 24h, et les 3 profils proposes" },
-    { "q": "Question 4 specifique (ex. quels frameworks utiliser, quelles entreprises locales, etc.)", "a": "Reponse 40-80 mots" }
+    { "q": "Question 1 unique sur le skill ${category.name}", "a": "Reponse 40-70 mots SANS chiffre ni entreprise nommee" },
+    { "q": "Quelles sont les missions typiques d'un freelance ${category.name} ?", "a": "Reponse decrivant le type de projets, sans chiffres ni entreprises" },
+    { "q": "Question 3 unique adaptee a ${isCity ? cityName : "la France"}", "a": "Reponse sans chiffres ni entreprises specifiques" },
+    { "q": "Comment Workwave AI selectionne les freelances ${category.name} ?", "a": "Reponse expliquant le matching IA, sans chiffres precis (pas de '24h', pas de '3 profils', juste 'en moins de 24h', 'plusieurs profils')" }
   ],
-  "stats": {
-    "tjm_min": entier en EUR, junior debutant (ex. 250-350),
-    "tjm_median": entier en EUR, mid-level (ex. 450-650 selon skill),
-    "tjm_max": entier en EUR, senior expert (ex. 800-1500 selon rarete),
-    "croissance_yoy_percent": entier 0-30, croissance estimee de la demande sur 12 mois pour ce skill
-  },
-  "meta_title": "Pattern : 'Les 10 meilleurs freelances ${category.name} ${isCity ? `a ${cityName}` : "en France"} en ${CURRENT_MONTH} ${CURRENT_YEAR}' (max 70 chars). Si trop long, raccourcir intelligemment.",
-  "meta_description": "Description SEO 140-160 chars, mentionne ${category.name}, ${isCity ? cityName : "France"}, freelances ${proCount > 0 ? proCount : ""}, matching IA <24h, gratuit sans credit."
-}
-
-Contraintes :
-- TJM realistes pour le marche francais ${CURRENT_YEAR} (junior 250-400, mid 450-700, senior 700-1200, expert 1200+)
-- Si skill IA / Cloud / Kubernetes : TJM mediane plus eleve (650-900)
-- Si skill WordPress / Shopify / no-code : TJM mediane plus bas (350-550)
-- Pas d'invention d'entreprises non reelles
-- Pas de promesse de delai irrealiste`;
+  "meta_title": "Pattern STRICT : 'Les meilleurs freelances ${category.name} ${isCity ? `a ${cityName}` : "en France"} en ${CURRENT_MONTH} ${CURRENT_YEAR}' (max 70 chars). Pas de chiffre dans le title.",
+  "meta_description": "Description SEO 140-160 chars. Mentionne ${category.name}, ${isCity ? cityName : "France"}, matching IA, inscription gratuite. AUCUN chiffre."
+}`;
 
   try {
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 2500,
+      max_tokens: 2000,
       messages: [{ role: "user", content: prompt }],
     });
 
     const text = response.content[0].type === "text" ? response.content[0].text : "";
     const cleaned = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-    return JSON.parse(cleaned) as GeneratedContent;
+    const parsed = JSON.parse(cleaned) as GeneratedContent;
+
+    // Validation post-generation : check that no number patterns leak
+    // (TJM, prix, pourcentages, etc.)
+    const NUMBER_PATTERNS = /\b(\d{2,5}\s*(?:€|EUR|euros|\$|jours?|j\/h|TJM|%))/gi;
+    const fullText = parsed.intro_html + JSON.stringify(parsed.faq);
+    const numbers = fullText.match(NUMBER_PATTERNS);
+    if (numbers && numbers.length > 0) {
+      console.warn(`    ⚠ Numbers leaked: ${numbers.join(", ")} — rejecting`);
+      return null;
+    }
+
+    return parsed;
   } catch (e) {
     console.error("    Claude error:", e);
     return null;
@@ -154,15 +156,18 @@ Contraintes :
 
 async function main() {
   console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("Workwave AI — Generation contenu SEO unique par page");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-  console.log(`Mode : ${APPLY ? "✓ APPLY" : "○ DRY-RUN"}`);
+  console.log("Workwave AI — Generation contenu SEO (anti-hallucination)");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log("Garanties : zero chiffre invente, zero nom d'entreprise");
+  console.log("Donnees factuelles (TJM, entreprises) viennent de data files");
+  console.log("verifies (sources citees dans le footer de chaque page).\n");
+  console.log(`Mode  : ${APPLY ? "✓ APPLY" : "○ DRY-RUN"}`);
   console.log(`Limit : ${LIMIT}`);
-  if (SKILL_FILTER) console.log(`Skill filter : ${SKILL_FILTER}`);
-  if (CITY_FILTER) console.log(`City filter  : ${CITY_FILTER}`);
+  if (SKILL_FILTER) console.log(`Skill : ${SKILL_FILTER}`);
+  if (CITY_FILTER) console.log(`City  : ${CITY_FILTER}`);
   console.log();
 
-  // 1. Charge categories tech avec parent name
+  // 1. Categories tech
   const { data: cats } = await sb
     .from("categories")
     .select("id, slug, name, parent_category_id")
@@ -174,7 +179,6 @@ async function main() {
     process.exit(1);
   }
 
-  // Map id → name pour resolve parent_name
   const nameById = new Map<number, string>();
   cats.forEach((c) => nameById.set(c.id, c.name));
 
@@ -186,16 +190,12 @@ async function main() {
     parent_name: c.parent_category_id ? nameById.get(c.parent_category_id) : undefined,
   }));
 
-  // 2. Construit la liste des tuples (cat, city|null) a generer
+  // 2. Tuples (cat, city|null)
   const tuples: Array<{ cat: Category; citySlug: string | null }> = [];
 
   for (const cat of catsWithParent) {
     if (SKILL_FILTER && cat.slug !== SKILL_FILTER) continue;
-    // Page nationale du skill (city=null)
-    if (!CITY_FILTER) {
-      tuples.push({ cat, citySlug: null });
-    }
-    // Pages skill x ville
+    if (!CITY_FILTER) tuples.push({ cat, citySlug: null });
     for (const city of TECH_CITIES) {
       if (CITY_FILTER && city.slug !== CITY_FILTER) continue;
       tuples.push({ cat, citySlug: city.slug });
@@ -204,7 +204,7 @@ async function main() {
 
   console.log(`[init] ${tuples.length} tuples a evaluer`);
 
-  // 3. Filtre ceux deja en base
+  // 3. Filtre deja generes
   const { data: existingRows } = await sb
     .from("ai_seo_content")
     .select("category_id, city_slug");
@@ -217,9 +217,8 @@ async function main() {
   );
   console.log(`[init] ${existing.size} deja generees, ${toGenerate.length} a generer`);
 
-  // 4. Limit
   const slice = toGenerate.slice(0, LIMIT);
-  console.log(`[init] Traitement : ${slice.length} pages\n`);
+  console.log(`[init] Traitement : ${slice.length}\n`);
 
   let generated = 0;
   let saved = 0;
@@ -230,33 +229,14 @@ async function main() {
     const { cat, citySlug } = slice[i];
     const city = citySlug ? TECH_CITIES.find((c) => c.slug === citySlug) : null;
 
-    // Count pros for this skill+city
-    const filterCategoryId = cat.parent_category_id || cat.id;
-    let query = sb
-      .from("pros")
-      .select("*", { count: "estimated", head: true })
-      .eq("category_id", filterCategoryId)
-      .eq("source", "sirene")
-      .eq("is_active", true)
-      .is("deleted_at", null);
-    if (city) query = query.like("postal_code", `${city.dept_prefix}%`);
-    const { count: proCount } = await query;
-
     process.stdout.write(
-      `[${i + 1}/${slice.length}] ${cat.slug}${citySlug ? `/${citySlug}` : ""} (${proCount || 0} pros)... `
+      `[${i + 1}/${slice.length}] ${cat.slug}${citySlug ? `/${citySlug}` : ""}... `
     );
 
-    const content = await generateContent(
-      cat,
-      citySlug,
-      city?.name || null,
-      city?.dept_name || null,
-      city?.population || null,
-      proCount || 0
-    );
+    const content = await generateContent(cat, citySlug, city?.name || null);
 
     if (!content) {
-      console.log("❌ generation failed");
+      console.log("❌ skip");
       errors++;
       continue;
     }
@@ -268,23 +248,22 @@ async function main() {
         city_slug: citySlug,
         intro_html: content.intro_html,
         faq: content.faq,
-        stats: content.stats,
+        stats: {}, // empty — TJM viennent de tech-tjm-reference, pas du LLM
         meta_title: content.meta_title,
         meta_description: content.meta_description,
         generated_at: new Date().toISOString(),
       }, { onConflict: "category_id,city_slug" });
       if (error) {
-        console.log(`❌ insert error: ${error.message}`);
+        console.log(`❌ ${error.message}`);
         errors++;
       } else {
         saved++;
-        console.log("✓ saved");
+        console.log(`✓ saved (${content.intro_html.length} chars)`);
       }
     } else {
-      console.log(`✓ generated (${content.intro_html.length} chars intro)`);
+      console.log(`✓ generated (${content.intro_html.length} chars)`);
     }
 
-    // Rate limit Claude (40 req/min sonnet-4-6 = ~1.5s entre)
     await sleep(1500);
   }
 
