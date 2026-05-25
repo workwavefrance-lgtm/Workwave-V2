@@ -125,8 +125,10 @@ export async function routeTechProject(
     }
   }
 
-  // Aussi : on cherche TOUS les abonnes Premium AI actifs dans cette categorie,
-  // peu importe le dept. Ils ont priorite max.
+  // Aussi : on cherche TOUS les abonnes Premium AI actifs dans cette
+  // categorie, peu importe le dept. Ils ont priorite max.
+  // Fix #16 : explicitement filtrer active/trialing seulement (past_due
+  // et canceled n'ont plus le boost Premium dans le routing).
   const { data: premiumPros } = await sb
     .from("pros")
     .select(PRO_SELECT)

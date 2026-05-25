@@ -46,19 +46,20 @@ const PER_PAGE = 25;
 const MAX_PAGES_PER_SLICE = 400;
 
 // NAF non-tech -> macro slug
+// IMPORTANT : format avec point (73.11Z) requis par l'API recherche-entreprises
 const NAF_TO_MACRO: Array<{ code: string; label: string; macro: string }> = [
-  { code: "7311Z", label: "Activites des agences de publicite", macro: "marketing-communication" },
-  { code: "7312Z", label: "Regie publicitaire de medias", macro: "marketing-communication" },
-  { code: "7022Z", label: "Conseil pour les affaires et autres conseils de gestion", macro: "strategie-management" },
-  { code: "7410Z", label: "Activites specialisees de design", macro: "design-creation" },
-  { code: "6920Z", label: "Activites comptables", macro: "finance-comptabilite" },
-  { code: "6619B", label: "Autres activites auxiliaires de services financiers", macro: "finance-comptabilite" },
-  { code: "6910Z", label: "Activites juridiques", macro: "juridique-conseil" },
-  { code: "7820Z", label: "Activites des agences de travail temporaire", macro: "rh-recrutement" },
-  { code: "7430Z", label: "Traduction et interpretation", macro: "redaction-copywriting" },
-  { code: "7420Z", label: "Activites photographiques", macro: "audiovisuel-medias" },
-  { code: "5911C", label: "Production de films pour le cinema", macro: "audiovisuel-medias" },
-  { code: "5912Z", label: "Post-production de films cinema/video/TV", macro: "audiovisuel-medias" },
+  { code: "73.11Z", label: "Activites des agences de publicite", macro: "marketing-communication" },
+  { code: "73.12Z", label: "Regie publicitaire de medias", macro: "marketing-communication" },
+  { code: "70.22Z", label: "Conseil pour les affaires et autres conseils de gestion", macro: "strategie-management" },
+  { code: "74.10Z", label: "Activites specialisees de design", macro: "design-creation" },
+  { code: "69.20Z", label: "Activites comptables", macro: "finance-comptabilite" },
+  { code: "66.19B", label: "Autres activites auxiliaires de services financiers", macro: "finance-comptabilite" },
+  { code: "69.10Z", label: "Activites juridiques", macro: "juridique-conseil" },
+  { code: "78.20Z", label: "Activites des agences de travail temporaire", macro: "rh-recrutement" },
+  { code: "74.30Z", label: "Traduction et interpretation", macro: "redaction-copywriting" },
+  { code: "74.20Z", label: "Activites photographiques", macro: "audiovisuel-medias" },
+  { code: "59.11C", label: "Production de films pour le cinema", macro: "audiovisuel-medias" },
+  { code: "59.12Z", label: "Post-production de films cinema/video/TV", macro: "audiovisuel-medias" },
 ];
 
 const ALL_DEPTS = [
