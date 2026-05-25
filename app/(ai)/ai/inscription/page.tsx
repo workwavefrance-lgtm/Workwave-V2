@@ -457,9 +457,9 @@ export default function InscriptionPage() {
               Modifiable a tout moment depuis votre dashboard. Aucun engagement.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Free plan */}
-              <label className="flex flex-col p-6 bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl cursor-pointer has-[:checked]:border-[var(--ai-text)] has-[:checked]:bg-[var(--ai-bg-subtle)] transition-all">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* ─── Free plan ─── */}
+              <label className="group relative flex flex-col p-7 bg-[var(--ai-bg-card)] border-2 border-[var(--ai-border-strong)] rounded-2xl cursor-pointer transition-all duration-200 has-[:checked]:border-[var(--ai-text)] has-[:checked]:ring-4 has-[:checked]:ring-[var(--ai-text)]/10 has-[:checked]:-translate-y-1 has-[:checked]:shadow-xl hover:-translate-y-0.5 hover:shadow-lg">
                 <input
                   type="radio"
                   name="plan"
@@ -467,106 +467,113 @@ export default function InscriptionPage() {
                   defaultChecked
                   className="sr-only peer"
                 />
+
+                {/* Badge "✓ Selectionne" visible quand peer:checked */}
+                <span className="absolute top-4 right-4 hidden peer-checked:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ai-text)] text-white text-[11px] font-bold uppercase tracking-wider">
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12l5 5L20 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Selectionne
+                </span>
+
                 <div className="flex items-baseline gap-2 mb-4">
-                  <span
-                    className="text-4xl font-black text-[var(--ai-text)] tracking-tight"
-                    style={{ fontFamily: "var(--font-geist-mono), monospace" }}
-                  >
+                  <span className="text-5xl font-black text-[var(--ai-text)] tracking-tight" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
                     0€
                   </span>
-                  <span className="text-sm text-[var(--ai-text-tertiary)]">
-                    / illimite
-                  </span>
+                  <span className="text-sm text-[var(--ai-text-tertiary)]">/ illimite</span>
                 </div>
-                <p
-                  className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-4"
-                  style={{ letterSpacing: "0.18em" }}
-                >
-                  Visibilite
+                <p className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-5" style={{ letterSpacing: "0.18em" }}>
+                  Plan Visibilite
                 </p>
-                <ul className="space-y-2 text-[13px] text-[var(--ai-text-secondary)] mb-2">
+                <ul className="space-y-2.5 text-[13px] text-[var(--ai-text-secondary)] mb-7 flex-1">
                   <li className="flex items-start gap-2">
-                    <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                    <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                     Profil visible sur la plateforme
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                    <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                     Reception des briefs en read-only
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-[var(--ai-text-muted)] mt-0.5">×</span>
-                    <span className="text-[var(--ai-text-muted)]">
-                      Reponse aux briefs (necessite Premium)
-                    </span>
+                    <span className="text-[var(--ai-text-muted)]">Reponse aux briefs (necessite Premium)</span>
                   </li>
                 </ul>
+
+                {/* Gros bouton "Choisir ce plan" */}
+                <span className="inline-flex items-center justify-center w-full h-12 text-[14px] font-bold rounded-lg bg-[var(--ai-bg-subtle)] text-[var(--ai-text)] border border-[var(--ai-border-strong)] peer-checked:bg-[var(--ai-text)] peer-checked:text-white peer-checked:border-[var(--ai-text)] transition-all">
+                  <span className="peer-checked:hidden">Choisir ce plan</span>
+                  <span className="hidden peer-checked:inline">Plan selectionne</span>
+                </span>
               </label>
 
-              {/* Premium plan */}
-              <label className="flex flex-col p-6 bg-[var(--ai-text)] text-white rounded-2xl cursor-pointer border-2 border-[var(--ai-text)] has-[:checked]:border-[var(--ai-accent)] transition-all relative overflow-hidden">
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 opacity-[0.04]"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
-                    backgroundSize: "32px 32px",
-                  }}
+              {/* ─── Premium plan ─── */}
+              <label className="group relative flex flex-col p-7 bg-[var(--ai-text)] text-white rounded-2xl cursor-pointer border-2 border-[var(--ai-text)] transition-all duration-200 overflow-hidden has-[:checked]:border-[var(--ai-accent)] has-[:checked]:ring-4 has-[:checked]:ring-[var(--ai-accent)]/20 has-[:checked]:-translate-y-1 has-[:checked]:shadow-2xl hover:-translate-y-0.5 hover:shadow-xl">
+                {/* Grid pattern bg */}
+                <div aria-hidden="true" className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+
+                <input
+                  type="radio"
+                  name="plan"
+                  value="premium"
+                  className="sr-only peer"
                 />
-                <div className="relative z-10">
-                  <input
-                    type="radio"
-                    name="plan"
-                    value="premium"
-                    className="sr-only peer"
-                  />
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
-                    <span
-                      className="text-[10px] uppercase font-semibold text-[var(--ai-accent)]"
-                      style={{ letterSpacing: "0.2em" }}
-                    >
-                      Recommande
-                    </span>
-                  </div>
+
+                {/* Badge "Recommande" toujours visible top-right */}
+                <span className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ai-accent)] text-white text-[11px] font-bold uppercase tracking-wider z-10">
+                  ★ Recommande
+                </span>
+
+                {/* Badge "✓ Selectionne" centered si checked */}
+                <span className="absolute top-4 left-4 hidden peer-checked:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-[var(--ai-text)] text-[11px] font-bold uppercase tracking-wider z-10">
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12l5 5L20 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Selectionne
+                </span>
+
+                <div className="relative z-10 mt-8 flex-1 flex flex-col">
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span
-                      className="text-4xl font-black tracking-tight"
-                      style={{
-                        fontFamily: "var(--font-geist-mono), monospace",
-                      }}
-                    >
+                    <span className="text-5xl font-black tracking-tight" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
                       29,90€
                     </span>
                     <span className="text-sm text-white/50">/ mois TTC</span>
                   </div>
-                  <p
-                    className="text-[11px] uppercase font-semibold text-white/40 mb-4"
-                    style={{ letterSpacing: "0.18em" }}
-                  >
-                    Reponse illimitee
+                  <p className="text-[11px] uppercase font-semibold text-white/40 mb-5" style={{ letterSpacing: "0.18em" }}>
+                    Plan Reponse illimitee
                   </p>
-                  <ul className="space-y-2 text-[13px] text-white/70">
+                  <ul className="space-y-2.5 text-[13px] text-white/80 mb-7 flex-1">
                     <li className="flex items-start gap-2">
-                      <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                      <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                       Reponse a tous les briefs (sans credit)
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                      <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                       Profil mis en avant dans les listings
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                      <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                       Badge Pro Workwave sur la fiche
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                      <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                       Resiliable en 1 clic, sans engagement
                     </li>
                   </ul>
+
+                  {/* Gros bouton "Choisir ce plan" — orange premium */}
+                  <span className="inline-flex items-center justify-center w-full h-12 text-[14px] font-bold rounded-lg bg-white/10 text-white border border-white/20 peer-checked:bg-[var(--ai-accent)] peer-checked:border-[var(--ai-accent)] transition-all">
+                    <span className="peer-checked:hidden">Choisir ce plan</span>
+                    <span className="hidden peer-checked:inline">Plan selectionne ★</span>
+                  </span>
                 </div>
               </label>
             </div>
+
+            {/* Helper text */}
+            <p className="text-[12px] text-[var(--ai-text-tertiary)] text-center mt-4">
+              Cliquez sur la carte pour selectionner. Plan modifiable a tout moment depuis votre dashboard.
+            </p>
           </div>
 
           {/* ───────── Footer form : CGU + submit ───────── */}
