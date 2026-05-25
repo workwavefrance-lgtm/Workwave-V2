@@ -182,6 +182,14 @@ export type Pro = {
   // Champs calculés
   profile_completion: number;
   response_rate: number | null;
+  // Tech / Workwave AI freelance (cf. CLAUDE.md Phase 8)
+  skills: string | null;
+  github_username: string | null;
+  years_experience: number | null;
+  available_for_remote: boolean | null;
+  hourly_rate_min: number | null;
+  hourly_rate_max: number | null;
+  subscription_product: "btp" | "ai" | null;
 };
 
 // ============================================
