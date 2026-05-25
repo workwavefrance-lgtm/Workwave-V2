@@ -107,15 +107,37 @@ export default function PourLesFreelancesPage() {
               pour repondre, sans credit. Resiliation libre. Aucune commission.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                href="/ai/inscription"
-                className="inline-flex items-center justify-center h-12 px-7 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors w-full sm:w-auto"
-                style={{ boxShadow: "var(--ai-shadow-sm)" }}
-              >
-                S&apos;inscrire gratuitement
+            {/* CTA bar composite — meme pattern que /ai (landing) */}
+            <Link
+              href="/ai/inscription"
+              className="group flex flex-col sm:flex-row items-stretch bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-xl overflow-hidden hover:border-[var(--ai-text)] hover:-translate-y-0.5 transition-all duration-200 max-w-2xl"
+              style={{ boxShadow: "var(--ai-shadow-md)" }}
+              aria-label="S'inscrire gratuitement comme freelance — formulaire en 4 etapes"
+            >
+              {/* Hint text (left) */}
+              <div className="flex-1 flex items-center gap-3 px-5 py-5 sm:py-4 min-w-0">
+                <div
+                  className="grid grid-cols-2 grid-rows-2 gap-[2px] w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
+                  aria-hidden="true"
+                >
+                  <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                  <div className="bg-[var(--ai-text)] rounded-[1px]" />
+                  <div className="bg-[var(--ai-text)] rounded-[1px]" />
+                  <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                </div>
+                <span className="text-[14px] sm:text-[15px] text-[var(--ai-text-secondary)] truncate">
+                  Creez votre profil tech en 5 minutes
+                  <span className="hidden sm:inline">...</span>
+                </span>
+              </div>
+
+              {/* Orange CTA (right) */}
+              <div className="flex items-center justify-center gap-2 bg-[var(--ai-accent)] group-hover:bg-[var(--ai-accent-hover)] text-white px-6 sm:px-7 py-4 sm:py-0 transition-colors duration-200">
+                <span className="text-[14px] font-semibold whitespace-nowrap tracking-tight">
+                  S&apos;inscrire gratuitement
+                </span>
                 <svg
-                  className="ml-2 w-4 h-4"
+                  className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"
@@ -123,19 +145,35 @@ export default function PourLesFreelancesPage() {
                   <path
                     d="M5 12h14M13 6l6 6-6 6"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
-              </Link>
-              <Link
-                href="/ai/tarifs"
-                className="inline-flex items-center justify-center h-12 px-7 text-[14px] font-semibold rounded-lg bg-[var(--ai-secondary)] hover:bg-[var(--ai-secondary-hover)] text-[var(--ai-secondary-text)] border border-[var(--ai-secondary-border)] transition-colors w-full sm:w-auto"
+              </div>
+            </Link>
+
+            {/* Secondary link */}
+            <Link
+              href="/ai/tarifs"
+              className="inline-flex items-center gap-1.5 mt-5 text-[14px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors duration-150"
+            >
+              Ou voir les tarifs detailles
+              <svg
+                className="w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
               >
-                Voir les tarifs
-              </Link>
-            </div>
+                <path
+                  d="M7 17L17 7M17 7H9M17 7V15"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
           </div>
         </div>
       </section>
