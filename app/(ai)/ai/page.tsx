@@ -240,34 +240,38 @@ export default function AiHomePage() {
                   style Codeur "Recevoir des devis" mais en brand Pixel Rise) */}
               <Link
                 href="/ai/deposer"
-                className="group flex flex-col sm:flex-row items-stretch bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-xl overflow-hidden hover:border-[var(--ai-text)] hover:-translate-y-0.5 transition-all duration-200 max-w-2xl"
-                style={{ boxShadow: "var(--ai-shadow-md)" }}
+                className="group flex flex-col sm:flex-row items-stretch bg-[var(--ai-bg-card)] border-2 border-[var(--ai-border-strong)] rounded-2xl overflow-hidden hover:border-[var(--ai-text)] hover:-translate-y-1 hover:shadow-2xl transition-all duration-200 max-w-3xl"
+                style={{ boxShadow: "var(--ai-shadow-lg)" }}
                 aria-label="Deposer un projet — formulaire en 4 etapes"
               >
-                {/* Hint text (left) */}
-                <div className="flex-1 flex items-center gap-3 px-5 py-5 sm:py-4 min-w-0">
+                {/* Hint text (left) — XL */}
+                <div className="flex-1 flex items-center gap-4 px-6 py-6 sm:py-7 min-w-0">
                   <div
-                    className="grid grid-cols-2 grid-rows-2 gap-[2px] w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
+                    className="grid grid-cols-2 grid-rows-2 gap-[3px] w-7 h-7 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
                     aria-hidden="true"
                   >
-                    <div className="bg-[var(--ai-accent)] rounded-[1px]" />
-                    <div className="bg-[var(--ai-text)] rounded-[1px]" />
-                    <div className="bg-[var(--ai-text)] rounded-[1px]" />
-                    <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                    <div className="bg-[var(--ai-accent)] rounded-[2px]" />
+                    <div className="bg-[var(--ai-text)] rounded-[2px]" />
+                    <div className="bg-[var(--ai-text)] rounded-[2px]" />
+                    <div className="bg-[var(--ai-accent)] rounded-[2px]" />
                   </div>
-                  <span className="text-[14px] sm:text-[15px] text-[var(--ai-text-secondary)] truncate">
-                    Decrivez votre projet en 60 secondes
-                    <span className="hidden sm:inline">...</span>
-                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[16px] sm:text-[18px] font-bold text-[var(--ai-text)] truncate tracking-tight">
+                      Decrivez votre projet
+                    </p>
+                    <p className="text-[12px] sm:text-[13px] text-[var(--ai-text-secondary)] mt-0.5">
+                      Matching IA en moins de 24h — gratuit, sans credit
+                    </p>
+                  </div>
                 </div>
 
-                {/* Orange CTA (right) — same element, just styled */}
-                <div className="flex items-center justify-center gap-2 bg-[var(--ai-accent)] group-hover:bg-[var(--ai-accent-hover)] text-white px-6 sm:px-7 py-4 sm:py-0 transition-colors duration-200">
-                  <span className="text-[14px] font-semibold whitespace-nowrap tracking-tight">
+                {/* Orange CTA (right) — XL */}
+                <div className="flex items-center justify-center gap-2.5 bg-[var(--ai-accent)] group-hover:bg-[var(--ai-accent-hover)] text-white px-7 sm:px-9 py-5 sm:py-0 transition-colors duration-200">
+                  <span className="text-[15px] sm:text-[16px] font-bold whitespace-nowrap tracking-tight">
                     Deposer un projet
                   </span>
                   <svg
-                    className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
@@ -454,6 +458,41 @@ export default function AiHomePage() {
               </div>
             ))}
           </div>
+
+          {/* CTA inline post-3-cards (user feedback : "ici faut cta aussi") */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 sm:mt-16">
+            <Link
+              href="/ai/deposer"
+              className="group inline-flex items-center justify-center h-14 px-8 text-[15px] sm:text-[16px] font-bold rounded-xl bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-all duration-200 hover:-translate-y-0.5 w-full sm:w-auto"
+              style={{ boxShadow: "var(--ai-shadow-md)" }}
+            >
+              Commencer maintenant
+              <svg
+                className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12h14M13 6l6 6-6 6"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Link>
+            <Link
+              href="/ai/freelances"
+              className="inline-flex items-center justify-center h-14 px-7 text-[15px] font-semibold rounded-xl bg-[var(--ai-secondary)] hover:bg-[var(--ai-secondary-hover)] text-[var(--ai-secondary-text)] border border-[var(--ai-secondary-border)] transition-colors w-full sm:w-auto"
+            >
+              Parcourir les freelances
+            </Link>
+          </div>
+
+          <p className="text-center text-[12px] text-[var(--ai-text-tertiary)] mt-4">
+            Gratuit · sans engagement · sans carte bancaire
+          </p>
         </div>
       </section>
 
