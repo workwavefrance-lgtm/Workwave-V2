@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import { submitTechProject } from "./actions";
 
 export const metadata: Metadata = {
   title: "Deposer un projet tech — Workwave AI",
@@ -85,8 +86,7 @@ export default function DeposerPage() {
           FORM
           ═══════════════════════════════════════════════════════════════ */}
       <form
-        action="/ai/deposer"
-        method="POST"
+        action={submitTechProject}
         className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20"
       >
         <div className="max-w-3xl space-y-12 sm:space-y-16">
