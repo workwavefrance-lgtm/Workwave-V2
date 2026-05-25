@@ -438,56 +438,81 @@ async function buildSpecialtyUrls(): Promise<MetadataRoute.Sitemap> {
 }
 
 // ============================================================================
-// 100+N. Pros (split par batches de PROS_PER_SITEMAP)
+// 100+N. Pros NON-tech (BTP) au format /artisan/[slug]
+//
+// Pagination CURSOR-BASED (WHERE id > last_id) au lieu d'OFFSET pour eviter
+// les timeouts Vercel sur les batches eleves :
+//  - OFFSET 225000 sur une table filtree force Postgres a scan 225k rows
+//    avant de skipper. Avec count: estimated qui peut surestimer (stats
+//    pg_class biaisees par scraping massif), Next.js essaie de pre-render
+//    des sub-sitemaps qui n'ont rien et timeout a 60s.
+//  - Cursor "WHERE id > X" utilise l'index sur id directement = instantane.
+//
+// IMPORTANT : on EXCLUT les pros tech (category_id 43-48). Ils sont listes
+// dans les sub-sitemaps AI_PROS_OFFSET+ (200+) au format /ai/freelance/[slug].
 // ============================================================================
+type ProSitemapRow = {
+  slug: string;
+  updated_at: string;
+  claimed_by_user_id: string | null;
+  description: string | null;
+  phone: string | null;
+  id: number;
+};
+
+async function findBatchStartId(
+  supabase: ReturnType<typeof getAdminServiceClient>,
+  skipCount: number,
+  techFilterMode: "exclude" | "include"
+): Promise<number> {
+  if (skipCount === 0) return 0;
+  // Le calcul du startId du batch utilise OFFSET sur UN seul row (rapide :
+  // Postgres scan jusqu'au row N et stop, vs charger 1000+ rows).
+  let query = supabase
+    .from("pros")
+    .select("id")
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .order("id", { ascending: true });
+  query =
+    techFilterMode === "exclude"
+      ? query.not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
+      : query.in("category_id", AI_CATEGORY_IDS);
+  const { data } = await query.range(skipCount - 1, skipCount - 1);
+  const rows = (data || []) as { id: number }[];
+  // Pas de row a cet offset = batch hors-borne, on retourne -1 pour signaler
+  return rows.length > 0 ? rows[0].id : -1;
+}
+
 async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap> {
   const supabase = getAdminServiceClient();
-  const offset = batchIndex * PROS_PER_SITEMAP;
+  const skipCount = batchIndex * PROS_PER_SITEMAP;
 
-  // Charger ce batch en chunks de SUPABASE_PAGE_SIZE (5000, max Supabase)
-  // jusqu'a PROS_PER_SITEMAP. Avec 45000 pros / batch et page_size=5000,
-  // on fait 9 round-trips reseau au lieu de 45 (PAGE_SIZE=1000) => 5x plus
-  // rapide.
-  //
-  // IMPORTANT : on EXCLUT les pros tech (category_id 43-48) ici. Ils sont
-  // listes dans les sub-sitemaps AI_PROS_OFFSET+ (200+) au format
-  // /ai/freelance/[slug] qui est leur URL canonique. Eviter le duplicate
-  // dans le sitemap (cf. canonical declaree dans
-  // app/(public)/artisan/[slug]/page.tsx).
-  let allPros: {
-    slug: string;
-    updated_at: string;
-    claimed_by_user_id: string | null;
-    description: string | null;
-    phone: string | null;
-  }[] = [];
+  // 1) Trouver l'id de depart pour ce batch (rapide : 1 row only)
+  const startBoundary = await findBatchStartId(supabase, skipCount, "exclude");
+  if (startBoundary === -1) return []; // Batch hors-borne (count estimated > reel)
 
-  let pageOffset = offset;
-  const endOffset = offset + PROS_PER_SITEMAP;
-
-  while (pageOffset < endOffset) {
-    const rangeEnd = Math.min(
-      pageOffset + SUPABASE_PAGE_SIZE - 1,
-      endOffset - 1
+  // 2) Charger les PROS_PER_SITEMAP rows en cursor (rapide : WHERE id >= X)
+  const allPros: ProSitemapRow[] = [];
+  let lastId = startBoundary - 1; // -1 pour inclure startBoundary lui-meme
+  while (allPros.length < PROS_PER_SITEMAP) {
+    const limit = Math.min(
+      SUPABASE_PAGE_SIZE,
+      PROS_PER_SITEMAP - allPros.length
     );
     const { data } = await supabase
       .from("pros")
-      .select("slug, updated_at, claimed_by_user_id, description, phone")
+      .select("slug, updated_at, claimed_by_user_id, description, phone, id")
       .eq("is_active", true)
       .is("deleted_at", null)
       .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
+      .gt("id", lastId)
       .order("id", { ascending: true })
-      .range(pageOffset, rangeEnd);
-
-    const rows = (data || []) as typeof allPros;
+      .limit(limit);
+    const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
-    allPros = allPros.concat(rows);
-    // Supabase peut plafonner a 1000 rows par defaut (PostgREST max-rows).
-    // On continue tant qu'on recoit des lignes, en incrementant par le
-    // nombre reel recu (pas par SUPABASE_PAGE_SIZE suppose). Cf. lecon
-    // apprise du 30/04/2026 : breaking sur rows.length < SUPABASE_PAGE_SIZE
-    // a foire 97% de la sitemap (6740 URLs au lieu de 233k).
-    pageOffset += rows.length;
+    allPros.push(...rows);
+    lastId = rows[rows.length - 1].id;
   }
 
   return allPros.map((pro) => {
@@ -503,43 +528,39 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
 
 // ============================================================================
 // 200+N. Pros TECH au format /ai/freelance/[slug] (Workwave AI)
-// Liste les fiches freelance individuelles avec design Workwave AI.
-// Pagination identique a buildProsUrls : 45000 par batch, 5000 par chunk.
+//
+// Pagination CURSOR-BASED idem buildProsUrls (cf. commentaire ci-dessus).
+// Filtre : category_id IN (43-48) tech categories.
 // ============================================================================
 async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap> {
   const supabase = getAdminServiceClient();
-  const offset = batchIndex * PROS_PER_SITEMAP;
+  const skipCount = batchIndex * PROS_PER_SITEMAP;
 
-  let allPros: {
-    slug: string;
-    updated_at: string;
-    claimed_by_user_id: string | null;
-    description: string | null;
-    phone: string | null;
-  }[] = [];
+  // 1) Trouver l'id de depart pour ce batch (rapide : 1 row only)
+  const startBoundary = await findBatchStartId(supabase, skipCount, "include");
+  if (startBoundary === -1) return []; // Batch hors-borne
 
-  let pageOffset = offset;
-  const endOffset = offset + PROS_PER_SITEMAP;
-
-  while (pageOffset < endOffset) {
-    const rangeEnd = Math.min(
-      pageOffset + SUPABASE_PAGE_SIZE - 1,
-      endOffset - 1
+  // 2) Charger les PROS_PER_SITEMAP rows en cursor
+  const allPros: ProSitemapRow[] = [];
+  let lastId = startBoundary - 1;
+  while (allPros.length < PROS_PER_SITEMAP) {
+    const limit = Math.min(
+      SUPABASE_PAGE_SIZE,
+      PROS_PER_SITEMAP - allPros.length
     );
     const { data } = await supabase
       .from("pros")
-      .select("slug, updated_at, claimed_by_user_id, description, phone")
+      .select("slug, updated_at, claimed_by_user_id, description, phone, id")
       .in("category_id", AI_CATEGORY_IDS)
       .eq("is_active", true)
       .is("deleted_at", null)
+      .gt("id", lastId)
       .order("id", { ascending: true })
-      .range(pageOffset, rangeEnd);
-
-    const rows = (data || []) as typeof allPros;
+      .limit(limit);
+    const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
-    allPros = allPros.concat(rows);
-    // Pagination robuste (lecon 30/04/2026 PostgREST cap 1000)
-    pageOffset += rows.length;
+    allPros.push(...rows);
+    lastId = rows[rows.length - 1].id;
   }
 
   return allPros.map((pro) => {
