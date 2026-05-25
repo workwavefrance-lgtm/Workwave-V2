@@ -7,29 +7,21 @@
  *   - Reference Workwave AI (vs Workwave BTP)
  *   - Pas de city_slug obligatoire (sujets souvent nationaux)
  *   - Tags inclus = ['workwave-ai', skill] pour identification
+ *
+ * NOTE : Ce module est server-only (utilise via scripts/ uniquement).
+ * On evite les imports Node ('fs', 'path') au top-level pour ne pas
+ * polluer le bundle Next.js. La cle ANTHROPIC_API_KEY est attendue via
+ * process.env (settee par dotenv dans le script appelant).
  */
 import Anthropic from "@anthropic-ai/sdk";
-import * as fs from "fs";
-import * as path from "path";
 
 let _anthropic: Anthropic | null = null;
 
 function getClient() {
   if (!_anthropic) {
-    // Workaround pour le bug ANTHROPIC_API_KEY stripped en shell agent
-    // (lecon CLAUDE.md du 24/05/2026)
-    let apiKey = process.env.ANTHROPIC_API_KEY || "";
-    if (!apiKey && process.env.NODE_ENV !== "production") {
-      try {
-        const envPath = path.resolve(process.cwd(), ".env.local");
-        const content = fs.readFileSync(envPath, "utf-8");
-        const match = content.match(/^ANTHROPIC_API_KEY=(.+)$/m);
-        if (match) apiKey = match[1].trim().replace(/^["']|["']$/g, "");
-      } catch {
-        // ignore
-      }
-    }
-    _anthropic = new Anthropic({ apiKey: apiKey || undefined });
+    _anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY || undefined,
+    });
   }
   return _anthropic;
 }
