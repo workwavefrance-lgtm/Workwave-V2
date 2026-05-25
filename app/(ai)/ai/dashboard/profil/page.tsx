@@ -11,7 +11,20 @@ export const metadata: Metadata = {
 
 const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
-export default async function AiDashboardProfilePage() {
+const ERROR_MESSAGES: Record<string, string> = {
+  name_required: "Le nom complet est obligatoire.",
+};
+
+export default async function AiDashboardProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; error?: string }>;
+}) {
+  const sp = await searchParams;
+  const saved = sp.saved === "1";
+  const errorKey = sp.error;
+  const errorMsg = errorKey ? ERROR_MESSAGES[errorKey] || "Erreur. Reessayez." : "";
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -23,6 +36,23 @@ export default async function AiDashboardProfilePage() {
 
   return (
     <div className="max-w-3xl">
+      {saved && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-800"
+          role="status"
+        >
+          <p className="text-sm font-medium">✓ Modifications enregistrees.</p>
+        </div>
+      )}
+      {errorMsg && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-red-500/20 bg-red-500/10 text-red-800"
+          role="alert"
+        >
+          <p className="text-sm font-medium">{errorMsg}</p>
+        </div>
+      )}
+
       <div className="mb-10">
         <p
           className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"

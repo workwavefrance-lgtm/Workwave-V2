@@ -13,7 +13,44 @@ export const metadata: Metadata = {
 
 const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
-export default async function AiDashboardAbonnementPage() {
+const ABONNEMENT_MESSAGES: Record<string, { type: "success" | "error" | "info"; text: string }> = {
+  activated: {
+    type: "success",
+    text: "🎉 Premium active. Bienvenue ! Vous recevrez les projets matches par email + dans cette page.",
+  },
+  canceled: {
+    type: "info",
+    text: "Activation annulee. Aucun paiement n'a ete debite.",
+  },
+  no_stripe_customer: {
+    type: "error",
+    text: "Compte client introuvable. Activez Premium ci-dessous.",
+  },
+  no_subscription_yet: {
+    type: "info",
+    text: "Vous n'avez pas encore d'abonnement actif. Activez Premium ci-dessous.",
+  },
+  stripe_not_configured: {
+    type: "error",
+    text: "Service paiement temporairement indisponible. Reessayez dans quelques minutes.",
+  },
+  checkout_url_missing: {
+    type: "error",
+    text: "Erreur Stripe Checkout. Reessayez.",
+  },
+};
+
+export default async function AiDashboardAbonnementPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ activated?: string; canceled?: string; error?: string }>;
+}) {
+  const sp = await searchParams;
+  let msg: { type: "success" | "error" | "info"; text: string } | null = null;
+  if (sp.activated === "1") msg = ABONNEMENT_MESSAGES.activated;
+  else if (sp.canceled === "1") msg = ABONNEMENT_MESSAGES.canceled;
+  else if (sp.error && ABONNEMENT_MESSAGES[sp.error]) msg = ABONNEMENT_MESSAGES[sp.error];
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -49,6 +86,21 @@ export default async function AiDashboardAbonnementPage() {
           Plan Premium 29,90€/mois TTC pour repondre aux projets sans limite, profil mis en avant.
         </p>
       </div>
+
+      {msg && (
+        <div
+          className={`mb-6 p-4 rounded-lg border ${
+            msg.type === "success"
+              ? "border-green-500/20 bg-green-500/10 text-green-800"
+              : msg.type === "error"
+              ? "border-red-500/20 bg-red-500/10 text-red-800"
+              : "border-[var(--ai-border-strong)] bg-[var(--ai-bg-subtle)] text-[var(--ai-text)]"
+          }`}
+          role={msg.type === "error" ? "alert" : "status"}
+        >
+          <p className="text-sm font-medium">{msg.text}</p>
+        </div>
+      )}
 
       {isPastDue && (
         <div

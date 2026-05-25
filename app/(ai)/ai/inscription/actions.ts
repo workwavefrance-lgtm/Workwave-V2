@@ -106,6 +106,12 @@ export async function submitInscription(formData: FormData): Promise<void> {
     .single();
 
   if (error || !signup) {
+    // Fix #6 : Postgres 23505 = unique constraint violation (email deja
+    // inscrit). On redirige vers /ai/connexion avec prefill plutot que
+    // d'afficher une erreur generique.
+    if (error?.code === "23505") {
+      redirect(`/ai/connexion?prefill=${encodeURIComponent(email)}`);
+    }
     console.error("[submitInscription] insert error:", error);
     redirect("/ai/inscription?error=insert_failed");
   }

@@ -134,7 +134,10 @@ export async function openCustomerPortal(): Promise<void> {
     .maybeSingle();
 
   if (!pro?.stripe_customer_id) {
-    redirect("/ai/dashboard/abonnement?error=no_stripe_customer");
+    // Fix #17 : fallback vers Checkout au lieu de bloquer l'user.
+    // Si BDD desynchro avec Stripe (pas de customer enregistre), on
+    // propose d'activer Premium plutot que d'afficher une erreur.
+    redirect("/ai/dashboard/abonnement?error=no_subscription_yet");
   }
 
   const stripe = getStripeServer();
