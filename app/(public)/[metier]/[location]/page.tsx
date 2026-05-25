@@ -325,7 +325,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
   // Sections SEO programmatiques (6 H2 + FAQ avec data unique par dept)
   const seoSectionsContent = isFirstPage && totalProsCount > 0
     ? generateSeoContent({
-        category: { slug: category.slug, name: category.name },
+        category: { slug: category.slug, name: category.name, vertical: category.vertical },
         city: resolved.type === "city" ? resolved.city : null,
         department: resolved.type === "department" ? resolved.department : resolved.city.department,
         prosCount: totalProsCount,
