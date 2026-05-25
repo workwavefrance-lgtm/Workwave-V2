@@ -61,7 +61,7 @@ const STEPS = [
   {
     n: "02",
     title: "L'IA selectionne les 3 meilleurs profils",
-    desc: "Matching semantique sur 2 800+ freelances tech. Score sur l'expertise, l'historique de projets, la dispo et le tarif.",
+    desc: "Matching semantique sur notre base de freelances tech. Score sur l'expertise, l'historique de projets, la dispo et le tarif.",
   },
   {
     n: "03",
@@ -660,9 +660,9 @@ export default function AiHomePage() {
                 <span className="text-[var(--ai-accent)]">freelance ?</span>
               </h2>
               <p className="text-sm text-white/70 leading-relaxed mb-8 relative z-10">
-                Inscription gratuite. Recevez 3 briefs qualifies par semaine.
-                Repondez sans credit a 29,90€/mois TTC. Resiliable a tout
-                moment, aucun engagement.
+                Inscription gratuite. Recevez les briefs qualifies par IA
+                qui matchent votre profil. Repondez sans credit a 29,90€/mois
+                TTC. Resiliable a tout moment, aucun engagement.
               </p>
 
               <Link

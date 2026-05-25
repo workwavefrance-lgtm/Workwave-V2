@@ -6,7 +6,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
 export const metadata: Metadata = {
   title: "Pour les freelances tech — Workwave AI",
   description:
-    "Workwave AI envoie 3 briefs qualifies par semaine aux freelances tech. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. France et Europe.",
+    "Workwave AI envoie aux freelances tech les briefs qualifies par IA qui matchent leur profil. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. France et Europe.",
 };
 
 const PROCESS = [
@@ -18,7 +18,7 @@ const PROCESS = [
   {
     n: "02",
     title: "Reception de briefs qualifies",
-    desc: "Notre IA vous envoie 3 briefs/semaine matches sur votre expertise, vos tarifs et votre dispo.",
+    desc: "Notre IA vous envoie les briefs qui matchent votre expertise, votre TJM et votre disponibilite. Vous repondez si ca vous interesse, libre.",
   },
   {
     n: "03",
@@ -31,7 +31,7 @@ const VS = [
   {
     title: "vs Codeur.com",
     point: "Pas de credits a acheter",
-    desc: "Sur Codeur, chaque reponse coute ~10€. Sur Workwave AI : 29,90€/mois pour repondre a tous les briefs. Si vous repondez 4 fois ou plus / mois, vous etes deja gagnant.",
+    desc: "Sur Codeur, chaque reponse necessite un credit a acheter. Sur Workwave AI : 29,90€/mois fixe, reponse illimitee. Plus simple a budgeter, surtout si vous repondez regulierement.",
   },
   {
     title: "vs Malt",
@@ -61,7 +61,7 @@ const FAQ = [
   },
   {
     q: "Combien de briefs vais-je recevoir ?",
-    a: "Variable selon votre categorie et vos criteres. En moyenne 2 a 4 par semaine pour une categorie demandee (Dev Web, IA). Plus rare pour les niches (No-Code avance, Data engineering specifique).",
+    a: "Ca depend de la demande sur votre categorie et vos criteres. Workwave AI est en lancement, donc le volume monte progressivement. Une categorie demandee (Dev Web, IA) genere plus de briefs qu'une niche pointue. Le tableau de bord vous montrera votre flux reel des votre inscription.",
   },
   {
     q: "Puis-je resilier a tout moment ?",
@@ -95,16 +95,16 @@ export default function PourLesFreelancesPage() {
             >
               Recevez
               <br />
-              3 briefs tech
+              les briefs tech
               <br />
               <span className="text-[var(--ai-text-tertiary)]">
-                par semaine.
+                qui vous matchent.
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed mb-10">
-              Inscription gratuite. Profil mis en avant. Briefs qualifies par
-              IA. 29,90€/mois pour repondre, sans credit. Resiliation libre.
-              Pas de commission, ni hier, ni demain.
+              Inscription gratuite. Profil mis en avant. Briefs filtres par
+              IA selon votre expertise, votre TJM, votre dispo. 29,90€/mois
+              pour repondre, sans credit. Resiliation libre. Aucune commission.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">

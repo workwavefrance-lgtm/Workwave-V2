@@ -6,7 +6,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
 export const metadata: Metadata = {
   title: "Inscription freelance — Workwave AI",
   description:
-    "Creez votre profil freelance tech sur Workwave AI en 4 etapes. Inscription gratuite. Recevez 3 briefs qualifies par semaine. Abonnement 29,90€/mois pour repondre.",
+    "Creez votre profil freelance tech sur Workwave AI en 4 etapes. Inscription gratuite. Recevez les briefs qualifies par IA. Abonnement 29,90€/mois pour repondre.",
   robots: { index: false, follow: false },
 };
 
@@ -317,28 +317,29 @@ export default function InscriptionPage() {
               Vos conditions.
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Notre IA utilise ces criteres pour vous matcher avec les briefs
-              compatibles. Modifiables a tout moment.
+              Indicatifs pour le matching IA. Vous restez libre de repondre a
+              tous les briefs qui vous interessent, meme en dessous de votre
+              TJM. Modifiable a tout moment.
             </p>
 
             <div className="space-y-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label
-                    htmlFor="tjmMin"
+                    htmlFor="tjmIndicatif"
                     className="block text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-2"
                     style={{
                       letterSpacing: "0.18em",
                       fontFamily: "var(--font-geist-mono), monospace",
                     }}
                   >
-                    TJM minimum
+                    TJM indicatif
                   </label>
                   <div className="relative">
                     <input
-                      id="tjmMin"
+                      id="tjmIndicatif"
                       type="number"
-                      name="tjmMin"
+                      name="tjmIndicatif"
                       min="100"
                       max="3000"
                       step="50"
@@ -350,6 +351,10 @@ export default function InscriptionPage() {
                       €/jour
                     </span>
                   </div>
+                  <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-2 leading-relaxed">
+                    Indicatif uniquement. Vous gardez la main pour repondre a
+                    n&apos;importe quel brief, meme en dessous de ce tarif.
+                  </p>
                 </div>
                 <div>
                   <label

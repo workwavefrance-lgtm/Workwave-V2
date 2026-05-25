@@ -18,7 +18,7 @@ const CLIENT_FEATURES = [
 ];
 
 const FREELANCE_FEATURES = [
-  "Reception de 3 briefs qualifies / semaine",
+  "Reception de briefs qualifies par IA",
   "Reponse sans limite (pas de credits)",
   "Profil mis en avant sur les listings",
   "Badge Pro Workwave sur la fiche",
@@ -42,7 +42,7 @@ const COMPARISON = [
   {
     feature: "Systeme de credits",
     workwave: { value: "Aucun", positive: true },
-    codeur: { value: "10€ environ par devis", positive: false },
+    codeur: { value: "Oui", positive: false },
     malt: { value: "Aucun", positive: true },
   },
   {
