@@ -275,8 +275,8 @@ export async function routeProjectToMatchingPros(
 // Cas 0 pro éligible
 // ============================================
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function markUnrouted(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   projectId: number,
   project: RoutableProject

@@ -114,13 +114,31 @@ export async function activateAiSignup(
   }
 
   // 1) Verifier que le signup n'est pas deja valide (idempotence)
+  // Defense en profondeur : on charge aussi l'email du signup pour
+  // verifier qu'il matche input.email. Cela protege contre un appelant
+  // (futur) qui forgerait { signupId: 12, email: "victim@x.com" } pour
+  // detourner l'activation d'un signup vers un email arbitraire.
   const { data: signup } = await sb
     .from("ai_signups")
-    .select("status, pro_id")
+    .select("status, pro_id, email")
     .eq("id", input.signupId)
     .maybeSingle();
 
-  if (signup?.status === "validated" && signup.pro_id) {
+  if (!signup) {
+    return { ok: false, reason: `signup_not_found: ${input.signupId}` };
+  }
+
+  // Garde-fou : signupId DOIT correspondre a un signup avec le meme email
+  const signupEmailNorm = (signup.email || "").trim().toLowerCase();
+  const inputEmailNorm = input.email.trim().toLowerCase();
+  if (signupEmailNorm !== inputEmailNorm) {
+    return {
+      ok: false,
+      reason: "email_mismatch_with_signup_record",
+    };
+  }
+
+  if (signup.status === "validated" && signup.pro_id) {
     return {
       ok: true,
       proId: signup.pro_id,
@@ -213,12 +231,40 @@ export async function activateAiSignup(
       .single();
 
     if (proError || !newPro) {
-      return {
-        ok: false,
-        reason: `pros_insert_failed: ${proError?.message || "unknown"}`,
-      };
+      // Fix race condition : si une autre requete d'activation parallele
+      // a deja insere la row pros (entre notre SELECT ligne 173 et notre
+      // INSERT ici), on aura une violation de l'INDEX UNIQUE partiel
+      // idx_pros_claim_unique_active (code Postgres 23505).
+      // On re-SELECT pour recuperer la row existante et continuer
+      // l'idempotence proprement.
+      if (proError?.code === "23505") {
+        const { data: racedPro } = await sb
+          .from("pros")
+          .select("id")
+          .eq("claimed_by_user_id", userId)
+          .in("category_id", [43, 44, 45, 46, 47, 48])
+          .eq("is_active", true)
+          .is("deleted_at", null)
+          .maybeSingle();
+        if (racedPro) {
+          proId = racedPro.id;
+          // continue normalement (link ai_signups -> proId ci-dessous)
+        } else {
+          // INDEX viol mais re-SELECT vide : etat anormal, on remonte l'erreur
+          return {
+            ok: false,
+            reason: "pros_insert_unique_conflict_but_no_existing_row",
+          };
+        }
+      } else {
+        return {
+          ok: false,
+          reason: `pros_insert_failed: ${proError?.message || "unknown"}`,
+        };
+      }
+    } else {
+      proId = newPro.id;
     }
-    proId = newPro.id;
   }
 
   // 5) Lier ai_signups -> pros, status='validated'

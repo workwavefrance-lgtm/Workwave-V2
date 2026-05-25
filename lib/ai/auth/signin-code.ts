@@ -21,6 +21,25 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SIGNIN_TTL_MIN = 15;
 const MAX_ATTEMPTS_PER_EMAIL_15MIN = 3;
+const MAX_ATTEMPTS_PER_IP_15MIN = 20; // Anti-enumeration : limite par IP
+// Delai uniforme pour aligner les timings success/no_account (anti-timing-attack)
+const TIMING_BASELINE_MS = 800;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Dort jusqu'a ce que (now - startMs) >= baselineMs. Si on est deja
+ * en retard, retour immediat. Utilise pour aligner les timings de
+ * retour entre branches success/no_account (anti-timing-attack).
+ */
+async function sleepUntil(startMs: number, baselineMs: number): Promise<void> {
+  const elapsed = Date.now() - startMs;
+  if (elapsed < baselineMs) {
+    await sleep(baselineMs - elapsed);
+  }
+}
 
 function getServiceClient(): SupabaseClient {
   return createClient(
@@ -54,23 +73,43 @@ export async function sendSigninCode(
   ip?: string,
   userAgent?: string
 ): Promise<SendSigninCodeResult> {
+  // Anti-timing-attack : on tracke le temps de debut pour aligner les timings
+  // de retour entre branches success / no_account / rate_limited.
+  const startMs = Date.now();
   const sb = getServiceClient();
   const cleanEmail = email.trim().toLowerCase();
 
   if (!isValidEmail(cleanEmail)) {
+    await sleepUntil(startMs, TIMING_BASELINE_MS);
     return { ok: false, reason: "no_account" }; // generique pour eviter enum
   }
 
-  // 1) Rate limiting : max 3 attempts / 15 min / email
+  // 1a) Rate limiting par email : max 3 attempts / 15 min / email
   const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-  const { count: recentCount } = await sb
+  const { count: recentByEmail } = await sb
     .from("ai_signin_attempts")
     .select("id", { count: "exact", head: true })
     .eq("email", cleanEmail)
     .gte("created_at", fifteenMinAgo);
 
-  if (recentCount && recentCount >= MAX_ATTEMPTS_PER_EMAIL_15MIN) {
+  if (recentByEmail && recentByEmail >= MAX_ATTEMPTS_PER_EMAIL_15MIN) {
+    await sleepUntil(startMs, TIMING_BASELINE_MS);
     return { ok: false, reason: "rate_limited" };
+  }
+
+  // 1b) Rate limiting par IP : max 20 attempts / 15 min / IP
+  // Protege contre les attaques d'enumeration mass (1 essai par email)
+  if (ip) {
+    const { count: recentByIp } = await sb
+      .from("ai_signin_attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("ip", ip)
+      .gte("created_at", fifteenMinAgo);
+
+    if (recentByIp && recentByIp >= MAX_ATTEMPTS_PER_IP_15MIN) {
+      await sleepUntil(startMs, TIMING_BASELINE_MS);
+      return { ok: false, reason: "rate_limited" };
+    }
   }
 
   // 2) Verifier que l'email correspond a un pro tech actif claimed
@@ -95,12 +134,14 @@ export async function sendSigninCode(
 
   if (proError) {
     console.error("[sendSigninCode] pros lookup failed:", proError.message);
+    await sleepUntil(startMs, TIMING_BASELINE_MS);
     return { ok: false, reason: "user_check_failed" };
   }
 
   if (!pro) {
     // Anti-enumeration : on cree QUAND MEME une entree de tracking
-    // (pour ne pas leak via timing differences) mais on retourne no_account.
+    // (pour ne pas leak via timing differences) ET on aligne le timing
+    // sur le delai d'envoi d'un mail OTP Supabase (~800ms).
     await sb.from("ai_signin_attempts").insert({
       email: cleanEmail,
       ip: ip || null,
@@ -109,6 +150,7 @@ export async function sendSigninCode(
       error_reason: "no_account",
       expires_at: new Date().toISOString(),
     });
+    await sleepUntil(startMs, TIMING_BASELINE_MS);
     return { ok: false, reason: "no_account" };
   }
 
@@ -135,6 +177,7 @@ export async function sendSigninCode(
       error_reason: `otp_send_failed: ${otpError.message.slice(0, 200)}`,
       expires_at: new Date().toISOString(),
     });
+    await sleepUntil(startMs, TIMING_BASELINE_MS);
     return { ok: false, reason: "otp_send_failed" };
   }
 
