@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { isAiPremium } from "@/lib/ai/helpers";
 
 export const metadata: Metadata = {
   title: "Projets recus — Dashboard Workwave AI",
@@ -27,7 +28,7 @@ export default async function AiDashboardProjetsPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const pro = await getProByUserId(user.id);
+  const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
   // Charger les vrais project_leads via service client (RLS bypass, mais
@@ -92,9 +93,7 @@ export default async function AiDashboardProjetsPage() {
     })
     .filter((p): p is NonNullable<typeof p> => p !== null);
 
-  const isPremium =
-    pro.subscription_status === "active" ||
-    pro.subscription_status === "trialing";
+  const isPremium = isAiPremium(pro);
 
   return (
     <div className="max-w-5xl">

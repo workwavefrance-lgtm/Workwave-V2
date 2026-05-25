@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
 import { updateAiProfile } from "./actions";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default async function AiDashboardProfilePage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const pro = await getProByUserId(user.id);
+  const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
   return (

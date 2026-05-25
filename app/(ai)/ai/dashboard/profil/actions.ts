@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { sanitizeProfileUrl, AI_CATEGORY_IDS as AI_CATS } from "@/lib/ai/helpers";
 
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+const AI_CATEGORY_IDS = AI_CATS;
 
 function getServiceClient() {
   return createServiceClient(
@@ -48,18 +49,26 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
     .trim()
     .slice(0, 100)
     .replace(/[^a-zA-Z0-9-_]/g, "");
-  const linkedin = String(formData.get("linkedin") || "").trim().slice(0, 300);
+  const linkedinRaw = String(formData.get("linkedin") || "").trim().slice(0, 300);
+  // Fix #10 : valider URL pour empecher XSS via javascript:/data: protocols
+  const linkedin = linkedinRaw ? sanitizeProfileUrl(linkedinRaw) : null;
   const yearsRaw = String(formData.get("years_experience") || "").trim();
   const rateRaw = String(formData.get("hourly_rate") || "").trim();
 
   const years = yearsRaw ? Math.min(50, Math.max(0, parseInt(yearsRaw, 10) || 0)) : null;
   const rate = rateRaw ? Math.min(5000, Math.max(50, parseInt(rateRaw, 10) || 0)) : null;
 
-  // 4) Update via service (bypass RLS, mais on a deja check ownership ci-dessus)
+  // 4) Fix #18 : refuser si name vide (empechait l'effacement accidentel
+  // mais sans feedback user). On rejette explicitement.
+  if (!name) {
+    redirect("/ai/dashboard/profil?error=name_required");
+  }
+
+  // 5) Update via service (bypass RLS, mais on a deja check ownership)
   await service
     .from("pros")
     .update({
-      name: name || undefined,
+      name,
       description: description || null,
       skills: skills || null,
       github_username: github || null,

@@ -60,6 +60,9 @@ function generateStrongPassword(): string {
 }
 
 function slugifyName(firstName: string, lastName: string, signupId: number): string {
+  // Fix #23 : regex Unicode escape explicite ̀-ͯ pour strip
+  // les combining diacriticals (NFD accents). L'ancienne version utilisait
+  // les chars raw directement, problematique sur certains parsers SWC.
   const base = `${firstName} ${lastName}`
     .toLowerCase()
     .normalize("NFD")
@@ -68,6 +71,36 @@ function slugifyName(firstName: string, lastName: string, signupId: number): str
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
   return `${base}-${signupId}`;
+}
+
+// Helper : recuperer un auth user par email sans charger TOUS les users.
+// Fix #3 : auth.admin.listUsers() etait O(N), pas scalable au-dela de
+// quelques milliers d'utilisateurs.
+async function findAuthUserByEmail(
+  sb: SupabaseClient,
+  email: string
+): Promise<{ id: string } | null> {
+  // Supabase a une methode dediee depuis v2.39+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminAny = sb.auth.admin as any;
+  if (typeof adminAny.getUserByEmail === "function") {
+    const { data } = await adminAny.getUserByEmail(email);
+    if (data?.user) return { id: data.user.id };
+    return null;
+  }
+  // Fallback : query directe sur auth.users via service_role (Postgres
+  // schema 'auth' accessible avec service key)
+  const { data: rows } = await sb
+    .schema("auth")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from("users" as any)
+    .select("id")
+    .eq("email", email.toLowerCase())
+    .limit(1);
+  if (rows && rows.length > 0) {
+    return { id: (rows[0] as { id: string }).id };
+  }
+  return null;
 }
 
 export async function activateAiSignup(
@@ -109,18 +142,25 @@ export async function activateAiSignup(
     });
 
   if (createUserError) {
-    if (createUserError.message.includes("already") || createUserError.message.includes("registered")) {
-      // User existe deja en auth Supabase. Recuperer son id.
-      const { data: listData } = await sb.auth.admin.listUsers();
-      const existingUser = listData?.users?.find(
-        (u) => u.email === input.email
-      );
+    if (
+      createUserError.message.includes("already") ||
+      createUserError.message.includes("registered")
+    ) {
+      // User existe deja en auth Supabase. Recuperer son id via
+      // getUserByEmail (fix #3 : pas de listUsers() qui charge tout).
+      const existingUser = await findAuthUserByEmail(sb, input.email);
       if (!existingUser) {
-        return { ok: false, reason: "auth_user_lookup_failed_after_already_exists" };
+        return {
+          ok: false,
+          reason: "auth_user_lookup_failed_after_already_exists",
+        };
       }
       userId = existingUser.id;
     } else {
-      return { ok: false, reason: `auth_create_failed: ${createUserError.message}` };
+      return {
+        ok: false,
+        reason: `auth_create_failed: ${createUserError.message}`,
+      };
     }
   } else if (createUserData?.user) {
     userId = createUserData.user.id;

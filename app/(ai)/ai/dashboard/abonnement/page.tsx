@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
 import { startCheckout, openCustomerPortal } from "./actions";
+import { isAiPremium } from "@/lib/ai/helpers";
 
 export const metadata: Metadata = {
   title: "Abonnement — Dashboard Workwave AI",
@@ -19,12 +20,10 @@ export default async function AiDashboardAbonnementPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const pro = await getProByUserId(user.id);
+  const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
-  const isPremium =
-    pro.subscription_status === "active" ||
-    pro.subscription_status === "trialing";
+  const isPremium = isAiPremium(pro);
   const isPastDue = pro.subscription_status === "past_due";
 
   return (

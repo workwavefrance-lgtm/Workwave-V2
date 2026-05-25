@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
 
 export const metadata: Metadata = {
   title: "Parametres — Dashboard Workwave AI",
@@ -18,7 +18,7 @@ export default async function AiDashboardParametresPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const pro = await getProByUserId(user.id);
+  const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
   return (
@@ -106,8 +106,7 @@ export default async function AiDashboardParametresPage() {
       {/* Liens utiles */}
       <div className="space-y-3 mb-10">
         <Link
-          href="/ai/freelance/[slug]"
-          as={pro.slug ? `/ai/freelance/${pro.slug}` : "/ai/freelances"}
+          href={pro.slug ? `/ai/freelance/${pro.slug}` : "/ai/freelances"}
           className="block p-4 bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-xl hover:border-[var(--ai-text)] transition-colors"
         >
           <p className="text-[14px] font-semibold text-[var(--ai-text)]">

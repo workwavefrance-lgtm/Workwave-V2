@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
+import { isAiPremium } from "@/lib/ai/helpers";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const metadata: Metadata = {
   title: "Dashboard — Workwave AI",
@@ -19,19 +21,34 @@ export default async function AiDashboardPage() {
 
   if (!user) return null; // layout redirige deja
 
-  const pro = await getProByUserId(user.id);
+  const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
-  // Stats : compter les leads recus + repondus (placeholder)
-  // TODO sub-sprint F : vraie query project_leads
-  const stats = {
-    leadsReceived30d: 0,
-    leadsAnswered30d: 0,
-    responseRate: 0,
-  };
+  // Stats reelles : compte leads 30 derniers jours
+  const service = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { count: leadsReceived30d } = await service
+    .from("project_leads")
+    .select("id", { count: "exact", head: true })
+    .eq("pro_id", pro.id)
+    .gte("sent_at", thirtyDaysAgo);
+  const { count: leadsAnswered30d } = await service
+    .from("project_leads")
+    .select("id", { count: "exact", head: true })
+    .eq("pro_id", pro.id)
+    .gte("sent_at", thirtyDaysAgo)
+    .not("contacted_at", "is", null);
+
+  const received = leadsReceived30d || 0;
+  const answered = leadsAnswered30d || 0;
+  const responseRate = received > 0 ? Math.round((answered / received) * 100) : 0;
+  const stats = { leadsReceived30d: received, leadsAnswered30d: answered, responseRate };
 
   const firstName = pro.name?.split(" ")[0] || "Freelance";
-  const isPremium = pro.subscription_status === "active";
+  const isPremium = isAiPremium(pro); // helper centralise (fix #15)
 
   return (
     <div className="max-w-5xl">

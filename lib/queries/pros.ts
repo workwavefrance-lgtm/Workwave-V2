@@ -101,7 +101,57 @@ export async function getProByUserId(
     .eq("claimed_by_user_id", userId)
     .is("deleted_at", null)
     .eq("is_active", true)
-    .single();
+    .maybeSingle();
+
+  return data as ProWithRelations | null;
+}
+
+/**
+ * Recupere la fiche TECH (Workwave AI) d'un user authentifie.
+ * Filtre strict sur category_id in [43-48].
+ *
+ * Fix #14 : si un user a a la fois une fiche BTP et tech (rare mais
+ * possible), getProByUserId() generique retournait la 1ere trouvee
+ * (ordre indefini), provocant un redirect en boucle dans le dashboard
+ * AI. Cette fonction force le filtre tech.
+ */
+const AI_CATEGORY_IDS_QUERY = [43, 44, 45, 46, 47, 48];
+export async function getAiProByUserId(
+  userId: string
+): Promise<ProWithRelations | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pros")
+    .select(PRO_SELECT)
+    .eq("claimed_by_user_id", userId)
+    .in("category_id", AI_CATEGORY_IDS_QUERY)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .order("id", { ascending: false }) // si plusieurs, prendre la plus recente
+    .limit(1)
+    .maybeSingle();
+
+  return data as ProWithRelations | null;
+}
+
+/**
+ * Recupere la fiche BTP (Workwave BTP) d'un user authentifie.
+ * Filtre strict sur category_id NOT IN [43-48].
+ */
+export async function getBtpProByUserId(
+  userId: string
+): Promise<ProWithRelations | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pros")
+    .select(PRO_SELECT)
+    .eq("claimed_by_user_id", userId)
+    .not("category_id", "in", `(${AI_CATEGORY_IDS_QUERY.join(",")})`)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   return data as ProWithRelations | null;
 }

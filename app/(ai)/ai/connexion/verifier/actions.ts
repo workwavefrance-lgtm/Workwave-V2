@@ -4,23 +4,26 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import {
-  verifySigninCode,
   markSigninAttemptComplete,
+  markSigninAttemptFailed,
 } from "@/lib/ai/auth/signin-code";
 
 /**
  * Server Action verifyCode pour /ai/connexion/verifier :
  *   1. Recupere email + code depuis FormData
- *   2. verifySigninCode() retourne le temp_password si OK
- *   3. signInWithPassword(email, temp_password) -> set cookies session
- *   4. markSigninAttemptComplete() : nullify temp_password
- *   5. Redirect /ai/dashboard
+ *   2. Appelle auth.verifyOtp() (Supabase officiel) qui valide
+ *      cryptographiquement le code, set la session via cookies HttpOnly.
+ *   3. markSigninAttemptComplete() : tracking interne 'verified'.
+ *   4. Redirect /ai/dashboard.
+ *
+ * Lecon #1+#2 du 26/05/2026 : on N'ECRASE PAS le password, on
+ * NE STOCKE PAS de temp_password en clair. Supabase OTP gere tout :
+ * cryptographie, expiry, replay, session.
  */
 
-async function signInAndSetCookies(email: string, password: string) {
+async function getServerSupabaseClient() {
   const cookieStore = await cookies();
-
-  const supabase = createServerClient(
+  return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -40,42 +43,55 @@ async function signInAndSetCookies(email: string, password: string) {
       },
     }
   );
+}
 
-  return supabase.auth.signInWithPassword({ email, password });
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 export async function verifyCode(formData: FormData): Promise<void> {
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const code = String(formData.get("code") || "").trim();
 
-  if (!email || !code) {
+  // Validation stricte
+  if (!isValidEmail(email)) {
     redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=missing`);
   }
+  // Code Supabase OTP : exactement 6 chiffres
+  if (!/^\d{6}$/.test(code)) {
+    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=invalid_code`);
+  }
 
-  const result = await verifySigninCode(email, code);
+  const supabase = await getServerSupabaseClient();
 
-  if (!result.ok) {
-    const reason = result.reason;
+  // verifyOtp Supabase : valide cryptographiquement + set session cookies
+  // type 'email' = code OTP envoye via auth.signInWithOtp
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token: code,
+    type: "email",
+  });
+
+  if (error || !data.session) {
+    const errMsg = error?.message || "no_session";
+    console.error("[verifyCode] OTP verify failed:", errMsg);
+
+    // Track failure (sans leak du code en clair)
+    await markSigninAttemptFailed(email, errMsg.slice(0, 100));
+
+    // Mapping erreurs Supabase -> codes UI
+    let uiError = "invalid_code";
+    if (errMsg.includes("expired")) uiError = "expired";
+    else if (errMsg.includes("attempt") || errMsg.includes("rate")) uiError = "blocked";
+    else if (errMsg.includes("Token")) uiError = "invalid_code";
+
     redirect(
-      `/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=${reason}`
+      `/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=${uiError}`
     );
   }
 
-  // Code OK -> signInWithPassword (mot de passe temporaire genere par sendSigninCode)
-  const { error: signInError } = await signInAndSetCookies(
-    result.email,
-    result.tempPassword
-  );
-
-  if (signInError) {
-    console.error("[verifyCode] signIn error:", signInError.message);
-    redirect(
-      `/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=signin_failed`
-    );
-  }
-
-  // Cleanup : nullify temp_password
-  await markSigninAttemptComplete(result.email);
+  // Session active. Tracking.
+  await markSigninAttemptComplete(email);
 
   redirect("/ai/dashboard");
 }

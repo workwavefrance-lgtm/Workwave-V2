@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
+import { isAiPremium, AI_CATEGORY_IDS as AI_CATS } from "@/lib/ai/helpers";
 
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+const AI_CATEGORY_IDS = AI_CATS;
 
 const NAV_ITEMS = [
   { href: "/ai/dashboard", label: "Accueil", icon: "01" },
@@ -30,7 +31,7 @@ export default async function AiDashboardLayout({
   }
 
   // 2) Recuperer le pro associe
-  const pro = await getProByUserId(user.id);
+  const pro = await getAiProByUserId(user.id);
 
   if (!pro) {
     // User connecte sans fiche pros : redirige vers inscription
@@ -96,7 +97,11 @@ export default async function AiDashboardLayout({
           <div className="flex items-center gap-2 text-[11px] uppercase font-semibold tracking-wider">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
             <span className="text-[var(--ai-accent)]">
-              {pro.subscription_status === "active" ? "Premium actif" : "Plan gratuit"}
+              {isAiPremium(pro)
+                ? pro.subscription_status === "trialing"
+                  ? "Essai gratuit"
+                  : "Premium actif"
+                : "Plan gratuit"}
             </span>
           </div>
         </div>
