@@ -51,17 +51,39 @@ export async function startCheckout(formData: FormData): Promise<void> {
     .maybeSingle();
   if (!pro) redirect("/ai/connexion?error=no_pro");
 
-  // 3) Stripe Customer : reutiliser ou creer
+  // 3) Stripe Customer : reutiliser ou creer (idempotence fix #8)
+  // Avant : 2 clics rapides creaient 2 Customers, le 2e ecrasait le 1er
+  // en BDD, l'ancien devenait orphelin.
+  // Apres : on cherche par metadata.pro_id avant create. Si trouve,
+  // reutilise. Si pas trouve, create + update BDD.
   const stripe = getStripeServer();
   let customerId = pro.stripe_customer_id as string | null;
 
   if (!customerId) {
-    const customer = await stripe.customers.create({
-      email: pro.email || user.email,
-      name: pro.name || undefined,
-      metadata: { pro_id: String(pro.id), vertical: "ai" },
-    });
-    customerId = customer.id;
+    // Try search by metadata first (idempotent)
+    try {
+      const search = await stripe.customers.search({
+        query: `metadata['pro_id']:'${pro.id}' AND metadata['vertical']:'ai'`,
+        limit: 1,
+      });
+      if (search.data.length > 0) {
+        customerId = search.data[0].id;
+      }
+    } catch (searchErr) {
+      // Stripe search peut fail si pas indexe (race condition tres rare).
+      // On continue sur create normal.
+      console.warn("[startCheckout] customers.search failed:", searchErr);
+    }
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: pro.email || user.email,
+        name: pro.name || undefined,
+        metadata: { pro_id: String(pro.id), vertical: "ai" },
+      });
+      customerId = customer.id;
+    }
+
     await service
       .from("pros")
       .update({ stripe_customer_id: customerId })

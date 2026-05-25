@@ -6,11 +6,28 @@ import { submitConnexion } from "./actions";
 export const metadata: Metadata = {
   title: "Connexion — Workwave AI",
   description:
-    "Connectez-vous a votre compte freelance Workwave AI. Lien magique par email, sans mot de passe a retenir.",
+    "Connectez-vous a votre compte freelance Workwave AI. Code a 6 chiffres envoye par email, sans mot de passe a retenir.",
   robots: { index: false, follow: false },
 };
 
-export default function ConnexionPage() {
+export default async function ConnexionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ prefill?: string; error?: string }>;
+}) {
+  const sp = await searchParams;
+  // Fix #19 : pre-remplir email si user revient via "Renvoyer un code"
+  const prefilledEmail = sp.prefill ? decodeURIComponent(sp.prefill) : "";
+  const error = sp.error;
+  const errorMsg =
+    error === "rate_limited"
+      ? "Trop de tentatives recentes. Reessayez dans 15 minutes."
+      : error === "technical"
+      ? "Erreur technique temporaire. Reessayez dans quelques minutes."
+      : error === "invalid_email"
+      ? "Email invalide. Verifiez le format."
+      : "";
+
   return (
     <section className="relative overflow-hidden min-h-[calc(100vh-64px)] flex items-center">
       <Watermark text="LOGIN" position="bottom" />
@@ -67,7 +84,7 @@ export default function ConnexionPage() {
             Connexion.
           </h1>
           <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed mb-10">
-            Entrez votre email pour recevoir un lien de connexion magique. Pas
+            Entrez votre email pour recevoir un code de connexion a 6 chiffres. Pas
             de mot de passe a retenir.
           </p>
 
@@ -89,17 +106,24 @@ export default function ConnexionPage() {
                 type="email"
                 name="email"
                 required
+                defaultValue={prefilledEmail}
                 placeholder="vous@entreprise.fr"
                 className="w-full h-12 px-4 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                 autoComplete="email"
+                autoFocus={!prefilledEmail}
               />
+              {errorMsg && (
+                <p className="text-[12px] text-red-700 mt-2" role="alert">
+                  {errorMsg}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
               className="w-full h-12 px-6 text-[14px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors flex items-center justify-center"
             >
-              Recevoir le lien magique
+              Recevoir mon code
               <svg
                 className="ml-2 w-4 h-4"
                 viewBox="0 0 24 24"

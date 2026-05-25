@@ -45,9 +45,16 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
   let pausedUntil: string | null = null;
   if (pausedRaw) {
     const d = new Date(pausedRaw);
-    if (!isNaN(d.getTime()) && d > new Date()) {
-      pausedUntil = d.toISOString();
+    if (isNaN(d.getTime())) {
+      // Date format invalide (HTML5 date input devrait pas le permettre, mais
+      // securisons)
+      redirect("/ai/dashboard/preferences?error=invalid_date");
     }
+    if (d <= new Date()) {
+      // Fix #11 : on retourne une erreur UI claire au lieu d'ignorer silent
+      redirect("/ai/dashboard/preferences?error=paused_until_past");
+    }
+    pausedUntil = d.toISOString();
   }
 
   await service

@@ -75,8 +75,17 @@ export default async function AiDashboardProjetsPage() {
       const proj = Array.isArray(lead.projects) ? lead.projects[0] : lead.projects;
       if (!proj) return null;
       const fullDesc = proj.description || "";
-      const title = fullDesc.split("\n")[0] || "Projet sans titre";
-      const body = fullDesc.split("\n").slice(2).join("\n").trim() || fullDesc;
+      // Fix #22 : robust parsing. Le format /ai/deposer concatenate :
+      //   "${title}\n\n${description}${stack ? "\n\nStack: ${stack}" : ""}..."
+      // On split sur \n\n (double linebreak) pour separer title du body.
+      // Si l'user a saisi un title sans body, on garde le title comme body
+      // mais on ne le DUPLIQUE pas.
+      const parts = fullDesc.split(/\n\n+/);
+      const title = (parts[0] || "").trim() || "Projet sans titre";
+      const body =
+        parts.length > 1
+          ? parts.slice(1).join("\n\n").trim()
+          : ""; // Pas de duplication si pas de body
       return {
         id: proj.id,
         leadId: lead.id,
