@@ -366,6 +366,25 @@ Sprint 7 — Moat IA (superpouvoirs) : à démarrer.
 
 **Génération SEO content batch pour les ~10 000 combinaisons (catégorie × ville) restantes via Claude API.** Le sprint 3 a généré 588 pages, à étendre. Coût ~$50-100. Bénéfice : chaque page listing aura un texte unique de 200-500 mots + FAQ schema. Délai : 2-3h génération + 1h dev script de batch. À déclencher après mesure des métriques GSC de la refonte Top X (~31/05/2026).
 
+### 🟠 À FAIRE DEMAIN — Ping Google Indexing API sur les grosses villes (rappel utilisateur 25/05/2026)
+
+**Contexte** : aujourd'hui 25/05/2026, on a pingé 195 URLs prioritaires via `scripts/ping-google-indexing-listings.ts` MAIS le tri était mauvais (par count desc) → toutes les 195 URLs sont parties sur des PETITES communes Vienne (Buxerolles, Antran, Aslonnes, Beruges, etc.). **AUCUNE Poitiers / Châtellerault / Bordeaux / Limoges / Niort / Angoulême** n'a été pingée.
+
+Le script a été **corrigé** dans le commit `e7ca640` : trie maintenant par population DESC, donc Poitiers/Bordeaux sortent en premier.
+
+**Quota Google Indexing reset à 0h chaque jour. À faire demain matin (26/05/2026 ou jour suivant) :**
+
+```bash
+cd ~/Desktop/Workwave-V2
+# 1. Verifier que la liste est bonne (Poitiers/Chatellerault/Bordeaux en tete)
+npx tsx scripts/ping-google-indexing-listings.ts --dry-run
+
+# 2. Si OK, lancer le ping reel (195 URLs)
+npx tsx scripts/ping-google-indexing-listings.ts
+```
+
+→ **Au prochain message du user, lui rappeler cette tâche en haut de la réponse.** Une fois fait, supprimer cette section de CLAUDE.md.
+
 ### Mini-sprint en cours
 
 **Système d'avis natifs Workwave** (démarré 24/05/2026) — table pro_reviews + page de notation token-based + cron email +7j + affichage sur fiche pro + badges TopProCards + modération admin. L'objectif : commencer à accumuler le moat "avis" qui fait la force de Travaux.com (207k avis natifs vs 0 chez nous aujourd'hui).
