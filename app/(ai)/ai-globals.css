@@ -37,6 +37,19 @@
   --ai-secondary-text: #0A0A0A;
   --ai-secondary-border: #E5E5E5;
 
+  /* ─── Accent signature retro-tech (style Pixel Rise) ──────────────
+     Orange brûlé volontairement différent de la coral BTP (#FF5A36) :
+     plus saturé, plus jaune, contexte d'usage display bold + watermark.
+     ────────────────────────────────────────────────────────────────── */
+  --ai-accent: #FF6803;
+  --ai-accent-hover: #AE3A02;
+  --ai-accent-text: #FFFFFF;
+  --ai-accent-subtle: #FFF1E6;
+  --ai-accent-border: #FFD9BA;
+
+  /* ─── Watermark (giant typography derrière hero) ──────────────────── */
+  --ai-text-watermark: rgba(10, 10, 10, 0.045);
+
   /* ─── Accents discrets ───────────────────────────────────────────── */
   --ai-accent-success: #16A34A;
   --ai-accent-success-bg: #DCFCE7;
