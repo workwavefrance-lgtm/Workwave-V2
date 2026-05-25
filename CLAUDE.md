@@ -354,8 +354,8 @@ Sprint 2.5 — Polish UX premium : terminé (mode clair/sombre, design premium).
 Sprint 3 — Génération SEO programmatique : terminé (588 pages générées, coût 12 dollars).
 Sprint 4 — Dépôt de projet et qualification IA : terminé (formulaire, qualification Claude, email admin via Resend).
 Sprint 5 — Comptes pros, réclamation, abonnements Stripe, dashboard pro : **terminé** (route `/api/stripe/webhook`, dashboard `/pro/dashboard/*`, SDK `stripe@22 + @stripe/stripe-js@9` installés, table pros enrichie avec colonnes Stripe). Confirmé 24/05/2026.
-Sprint 6 — Switch DNS : à démarrer.
-Sprint 7 — Moat IA (superpouvoirs) : à démarrer après sprint 6.
+Sprint 6 — Switch DNS Hostinger → Vercel : **terminé** (workwave.fr pointe vers Vercel, certificats SSL OK, MX `@` conservé chez Hostinger pour `contact@workwave.fr`). Confirmé 25/05/2026.
+Sprint 7 — Moat IA (superpouvoirs) : à démarrer.
 
 ### Mini-sprints récents (24/05/2026)
 
@@ -952,9 +952,9 @@ vercel : déploiement manuel depuis le CLI.
 ## 14. Liens et ressources
 
 Repo GitHub : à créer.
-Hébergement actuel (à remplacer au sprint 6) : Hostinger.
-Nom de domaine : workwave.fr, géré via Hostinger.
-URL de prod : workwave.fr (après switch DNS au sprint 6).
+Hébergement : Vercel (sprint 6 terminé).
+Nom de domaine : workwave.fr, enregistré chez Hostinger mais routé vers Vercel via DNS (A/AAAA records sur Vercel IP). MX `@` conservé chez Hostinger pour `contact@workwave.fr`.
+URL de prod : https://workwave.fr (live, SSL OK).
 URL de test : à définir lors du sprint 0.
 Dashboard Supabase : à renseigner après création du projet.
 Dashboard Vercel : à renseigner après création du projet.
