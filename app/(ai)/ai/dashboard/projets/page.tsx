@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { isAiPremium } from "@/lib/ai/helpers";
+import { markLeadAsContacted } from "./actions";
 
 export const metadata: Metadata = {
   title: "Projets recus — Dashboard Workwave AI",
@@ -21,7 +22,23 @@ const BUDGET_LABELS: Record<string, string> = {
   tbd: "A definir",
 };
 
-export default async function AiDashboardProjetsPage() {
+export default async function AiDashboardProjetsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ marked?: string; error?: string }>;
+}) {
+  const sp = await searchParams;
+  const justMarked = sp.marked === "contacted";
+  const errKey = sp.error;
+  const errorMsg =
+    errKey === "invalid_lead"
+      ? "Lien invalide. Reessayez."
+      : errKey === "unauthorized"
+      ? "Vous n'avez pas acces a ce projet."
+      : errKey === "not_found"
+      ? "Projet introuvable."
+      : "";
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -106,6 +123,23 @@ export default async function AiDashboardProjetsPage() {
 
   return (
     <div className="max-w-5xl">
+      {justMarked && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-800"
+          role="status"
+        >
+          <p className="text-sm font-medium">✓ Projet marque comme contacte.</p>
+        </div>
+      )}
+      {errorMsg && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-red-500/20 bg-red-500/10 text-red-800"
+          role="alert"
+        >
+          <p className="text-sm font-medium">{errorMsg}</p>
+        </div>
+      )}
+
       <div className="mb-10">
         <p
           className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
@@ -173,35 +207,48 @@ export default async function AiDashboardProjetsPage() {
                 </span>
               </div>
               {isPremium && p.clientEmail ? (
-                <div className="pt-4 border-t border-[var(--ai-border-subtle)] grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px]">
-                  <div>
-                    <p className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] tracking-wider mb-1">
-                      Client
-                    </p>
-                    <p className="text-[var(--ai-text)] font-medium">
-                      {p.clientName || "Client Workwave"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] tracking-wider mb-1">
-                      Contact
-                    </p>
-                    <a
-                      href={`mailto:${p.clientEmail}`}
-                      className="text-[var(--ai-accent)] underline decoration-[var(--ai-border)] hover:text-[var(--ai-accent-hover)]"
-                    >
-                      {p.clientEmail}
-                    </a>
-                    {p.clientPhone && (
+                <>
+                  <div className="pt-4 border-t border-[var(--ai-border-subtle)] grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px] mb-4">
+                    <div>
+                      <p className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] tracking-wider mb-1">
+                        Client
+                      </p>
+                      <p className="text-[var(--ai-text)] font-medium">
+                        {p.clientName || "Client Workwave"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] tracking-wider mb-1">
+                        Contact
+                      </p>
                       <a
-                        href={`tel:${p.clientPhone}`}
-                        className="block text-[var(--ai-text-secondary)]"
+                        href={`mailto:${p.clientEmail}`}
+                        className="text-[var(--ai-accent)] underline decoration-[var(--ai-border)] hover:text-[var(--ai-accent-hover)]"
                       >
-                        {p.clientPhone}
+                        {p.clientEmail}
                       </a>
-                    )}
+                      {p.clientPhone && (
+                        <a
+                          href={`tel:${p.clientPhone}`}
+                          className="block text-[var(--ai-text-secondary)]"
+                        >
+                          {p.clientPhone}
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
+                  {p.leadStatus !== "contacted" && (
+                    <form action={markLeadAsContacted}>
+                      <input type="hidden" name="leadId" value={p.leadId} />
+                      <button
+                        type="submit"
+                        className="text-[12px] font-semibold text-[var(--ai-text-secondary)] hover:text-[var(--ai-accent)] underline decoration-[var(--ai-border)] underline-offset-2 transition-colors"
+                      >
+                        ✓ J&apos;ai contacte ce client
+                      </button>
+                    </form>
+                  )}
+                </>
               ) : (
                 <div className="pt-4 border-t border-[var(--ai-border-subtle)]">
                   <p className="text-[12px] text-[var(--ai-text-tertiary)] mb-2">
