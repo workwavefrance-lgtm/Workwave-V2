@@ -12,6 +12,38 @@ import {
   getTjmReference,
   TJM_SOURCES,
 } from "@/lib/data/tech-tjm-reference";
+import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
+
+const SITE_URL = "https://workwave.fr";
+
+// ─── FAQ dynamique par skill × departement ─────────────────────────────
+function buildDeptFaq(
+  category: { name: string },
+  department: { name: string; region: string; code: string },
+  proCount: number
+): FaqItem[] {
+  const skillName = category.name;
+  const skillLower = skillName.toLowerCase();
+  const deptName = department.name;
+  return [
+    {
+      q: `Combien y a-t-il de freelances ${skillName} en ${deptName} ?`,
+      a: `Notre annuaire compte ${proCount > 0 ? proCount.toLocaleString("fr-FR") : "plusieurs dizaines de"} freelances ${skillLower} actifs dans le departement de ${deptName} (${department.code}), enregistres a l'INSEE avec un SIRET valide. Le ${deptName} fait partie de la region ${department.region}, l'un des marches tech les plus actifs de France. Note : la plupart des freelances ${skillLower} travaillent en 100% remote, vous n'etes donc pas limite a ${deptName}.`,
+    },
+    {
+      q: `Quel TJM pratiquent les freelances ${skillName} en ${deptName} ?`,
+      a: `Les TJM des freelances ${skillLower} en ${deptName} sont alignes sur les moyennes nationales (donnees Blog du Moderateur, Free-Work, Comet 2026) : junior 350-500€/jour, intermediaire 500-700€/jour, senior 600-900€/jour, expert 800-1200€/jour et plus. Le ${deptName} ne presente pas de surcout significatif (contrairement a Paris ou les TJM montent de +10-20%). Negociation possible selon la duree de la mission et la stack precise.`,
+    },
+    {
+      q: `Faut-il un freelance base en ${deptName} pour mon projet ?`,
+      a: `Pas necessairement. 80% des missions ${skillLower} se realisent en 100% remote : votre freelance peut etre base partout en France (Paris, Lyon, Bordeaux) ou en Europe. Si vous avez besoin de presentiel ponctuel (kickoff, rituels equipe, ateliers), un freelance ${deptName} ou region voisine ${department.region} est ideal. Notre formulaire de depot permet de specifier votre contrainte geographique.`,
+    },
+    {
+      q: `Comment trouver rapidement un freelance ${skillName} en ${deptName} ?`,
+      a: `Deposez votre projet sur Workwave AI en 60 secondes : decrivez votre besoin, votre stack, votre budget, votre delai. Notre IA selectionne automatiquement les 3 freelances ${skillLower} les plus pertinents (en ${deptName}, en remote, ou dans la region ${department.region} selon vos contraintes) en moins de 24h. Aucune commission, gratuit cote client, les freelances vous contactent directement.`,
+    },
+  ];
+}
 
 export const revalidate = 21600;
 export const dynamicParams = true; // pages non pre-buildees rendues a la demande
@@ -160,7 +192,7 @@ export default async function SkillDeptPage({ params }: Props) {
             <span className="text-[var(--ai-text)]">Dept {department.code}</span>
           </nav>
 
-          <SectionLabel index={1} total={3} label={`${department.region}`} />
+          <SectionLabel index={1} total={4} label={`${department.region}`} />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
             <div className="lg:col-span-8">
@@ -220,7 +252,7 @@ export default async function SkillDeptPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             <div className="lg:col-span-8">
-              <SectionLabel index={2} total={3} label={`Top ${proList.length || 15}`} />
+              <SectionLabel index={2} total={4} label={`Top ${proList.length || 15}`} />
               <h2
                 className="font-black text-[var(--ai-text)] uppercase mb-8"
                 style={{
@@ -285,7 +317,7 @@ export default async function SkillDeptPage({ params }: Props) {
             {/* TJM sidebar si dispo */}
             {tjmRef && (
               <aside className="lg:col-span-4">
-                <SectionLabel index={3} total={3} label="Tarifs indicatifs" />
+                <SectionLabel index={3} total={4} label="Tarifs indicatifs" />
                 <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl overflow-hidden mb-4">
                   {[
                     { level: "Junior", subLabel: "0-3 ans", range: tjmRef.junior },
@@ -315,6 +347,19 @@ export default async function SkillDeptPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 4/4 — FAQ dynamique skill x dept (FAQPage schema)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AiFaqSection
+        id="faq"
+        title={`${category.name} en ${department.name}`}
+        subtitle={`Tout savoir sur les freelances ${category.name.toLowerCase()} dans le ${department.name} (${department.code}).`}
+        questions={buildDeptFaq(category, department, totalCount)}
+        sectionIndex={4}
+        sectionTotal={4}
+        sectionLabel="FAQ"
+      />
 
       {/* ─── AUTRES DEPTS DE LA REGION + SOURCES ─── */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">

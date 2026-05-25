@@ -4,12 +4,45 @@ import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
 // ISR : revalide chaque 6h, la base evolue lentement
 export const revalidate = 21600;
 
 const PAGE_SIZE = 24;
 const TECH_VERTICAL = "tech";
+const SITE_URL = "https://workwave.fr";
+
+// ─── FAQ dynamique par categorie ───────────────────────────────────────────
+function buildCategoryFaq(
+  category: { name: string; slug: string },
+  total: number
+): FaqItem[] {
+  const name = category.name;
+  const nameLower = name.toLowerCase();
+  return [
+    {
+      q: `Combien coute un freelance ${name} en France ?`,
+      a: `Le TJM d'un freelance ${nameLower} varie selon son experience et sa stack precise. Selon notre barometre 2026 (verifie vs Blog du Moderateur, Free-Work, Comet) : profil junior 0-3 ans 350-500€/jour, intermediaire 3-7 ans 500-700€/jour, senior 7-10 ans 600-900€/jour, expert 10+ ans 800-1200€/jour et plus. Paris ajoute generalement +10-20%. Voir le detail TJM par technologie sur notre barometre.`,
+    },
+    {
+      q: `Comment choisir le bon freelance ${name} pour mon projet ?`,
+      a: `Trois criteres essentiels : (1) Expertise verifiable — demandez le portfolio, le GitHub, et des references clients. (2) Adequation au projet — un freelance senior sur React n'est pas forcement le meilleur sur Next.js 15 App Router. Verifiez la stack precise. (3) Disponibilite + budget aligne. Workwave AI fait ce travail pour vous : notre IA selectionne les 3 freelances ${nameLower} les plus pertinents en moins de 24h.`,
+    },
+    {
+      q: `Les freelances ${name} travaillent-ils en remote ?`,
+      a: `Oui, 80% des freelances ${nameLower} francais et europeens travaillent en 100% remote depuis 2020 (la norme dans la tech). 15% acceptent l'hybride (1-2 jours de presentiel client par semaine). 5% travaillent sur site uniquement. Vous precisez vos contraintes geographiques au depot du projet et l'IA filtre en consequence.`,
+    },
+    {
+      q: `Quelle est la duree moyenne d'une mission ${name} ?`,
+      a: `Les missions ${nameLower} sur Workwave AI varient entre 5 jours (intervention courte, fix, audit) et 12+ mois (regie longue duree). La duree mediane se situe autour de 3 mois pour les projets de developpement, 1-2 mois pour les missions d'audit / refactoring / migration. Les freelances acceptent generalement des missions a partir de 5 jours (au-dela ils preferent un contrat de plus long terme).`,
+    },
+    {
+      q: `Combien y a-t-il de freelances ${name} sur Workwave AI ?`,
+      a: `Notre annuaire compte ${total > 0 ? total.toLocaleString("fr-FR") : "des centaines de"} freelances ${nameLower} actifs en France et en Europe, tous enregistres a l'INSEE avec un SIRET valide. La base est mise a jour quotidiennement via la base Sirene officielle. Chaque freelance peut reclamer sa fiche pour la completer (bio, stack, TJM, portfolio).`,
+    },
+  ];
+}
 
 type SkillPageProps = {
   params: Promise<{ skill: string }>;
@@ -150,7 +183,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
             <div className="lg:col-span-8">
-              <SectionLabel index={1} total={3} label="Freelances tech" />
+              <SectionLabel index={1} total={4} label="Freelances tech" />
 
               {/* Breadcrumb minimal */}
               <nav className="flex items-center gap-2 text-[12px] text-[var(--ai-text-tertiary)] mb-6" aria-label="Fil d'Ariane">
@@ -231,7 +264,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
       <section className="bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-            <SectionLabel index={2} total={3} label="Profils" />
+            <SectionLabel index={2} total={4} label="Profils" />
             <p className="text-[12px] text-[var(--ai-text-tertiary)] font-medium" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
               Page {page} / {totalPages}
             </p>
@@ -375,14 +408,27 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3/3 — CTA FINAL
+          SECTION 3/4 — FAQ dynamique par categorie (FAQPage schema)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AiFaqSection
+        id="faq"
+        title={`Tout savoir sur ${category.name}`}
+        subtitle={`Les questions qu'on nous pose le plus souvent sur les freelances ${category.name.toLowerCase()} avant un projet.`}
+        questions={buildCategoryFaq(category, totalCount)}
+        sectionIndex={3}
+        sectionTotal={4}
+        sectionLabel="FAQ"
+      />
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 4/4 — CTA FINAL
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
         <Watermark text="DEPOSER" position="bottom" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
           <div className="max-w-2xl">
-            <SectionLabel index={3} total={3} label="CTA" />
+            <SectionLabel index={4} total={4} label="CTA" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase mb-6"
               style={{

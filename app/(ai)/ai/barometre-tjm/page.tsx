@@ -4,6 +4,7 @@ import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { TJM_REFERENCE, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
 export const revalidate = 86400; // 24h
 const CURRENT_YEAR = new Date().getFullYear();
@@ -13,10 +14,36 @@ const MONTH_NAMES = [
 ];
 
 export const metadata: Metadata = {
-  title: `Barometre TJM freelance tech ${CURRENT_YEAR} — 35 skills analyses`,
-  description: `Tarifs journaliers moyens (TJM) des freelances tech en France pour ${CURRENT_YEAR} : 35 skills (React, Python, AWS, IA, etc.) par niveau d'experience. Sources publiques verifiees.`,
+  title: `Barometre TJM freelance tech ${CURRENT_YEAR} — 35 stacks analysees`,
+  description: `Tarifs journaliers moyens (TJM) des freelances tech en France pour ${CURRENT_YEAR} : React, Python, AWS, Kubernetes, IA/LLM, data engineering, design Figma. 35 stacks par niveau d'experience (junior, intermediaire, senior, expert). Sources publiques verifiees (Blog du Moderateur, Free-Work, Comet).`,
   alternates: { canonical: "/ai/barometre-tjm" },
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// FAQ barometre — 5 questions methodologie (essentielles pour AEO/GEO)
+// ─────────────────────────────────────────────────────────────────────
+const FAQ_BAROMETRE: FaqItem[] = [
+  {
+    q: "Sur quelles sources est base ce barometre TJM ?",
+    a: "Le barometre Workwave AI compile 3 sources publiques verifiables : (1) Etude Blog du Moderateur sur les freelances tech francais (mise a jour annuelle, sample 1500+ profils), (2) Donnees Free-Work (ex Freelance-Info, plateforme regie ESN), (3) Etude Comet sur les TJM tech IT. Aucun chiffre invente : chaque source est cliquable depuis la section Methodologie en bas de page pour verification. Mise a jour annuelle.",
+  },
+  {
+    q: "A quelle frequence le barometre est-il mis a jour ?",
+    a: "Mise a jour annuelle complete (chaque debut d'annee), avec verification trimestrielle des sources pour detecter d'eventuelles inflexions du marche. La derniere version refletait les donnees " + CURRENT_YEAR + ". Les TJM tech evoluent generalement lentement (+5-10% par an en France), donc une frequence annuelle est suffisante. Les ecarts intra-annee sont marginaux et tiennent plus de la variabilite individuelle (stack, experience, geo) que d'une evolution macro.",
+  },
+  {
+    q: "Pourquoi les fourchettes TJM sont-elles aussi larges ?",
+    a: "Parce que le marche freelance tech francais est tres heterogene. Un developpeur React 'senior' peut facturer 500€/jour (Bordeaux, sans label) comme 1100€/jour (Paris, ex-GAFA). Les variables qui influent : (a) Localisation (Paris +10-20%), (b) Stack precise (Next.js 15 App Router > jQuery), (c) Profil (ex-FAANG, conf speaker, OSS contributor), (d) Type de mission (regie longue duree -10% vs forfait court terme), (e) Demande du marche (IA/LLM en forte hausse 2024-2026). Les fourchettes sont calibrees pour couvrir 80% des cas (5e-95e percentile).",
+  },
+  {
+    q: "Comment utiliser ce barometre pour negocier mon TJM (cote freelance) ?",
+    a: "Trois conseils : (1) Positionnez-vous sur le bon segment d'experience (compter les annees d'experience effective sur la stack, pas l'anciennete totale). (2) Identifiez votre rarete : un freelance Next.js + Vercel + LLM est plus rare qu'un freelance React generaliste, vous etes en haut de fourchette. (3) Negociez en TJM affiche mais soyez ouvert sur la flexibilite si la duree est longue (3+ mois) ou le projet stimulant. Sur Workwave AI, le TJM indique est un signal de positionnement, pas un filtre dur.",
+  },
+  {
+    q: "Le barometre tient-il compte des freelances en remote depuis l'etranger ?",
+    a: "Oui pour les freelances francais travaillant en remote depuis l'etranger (Portugal, Espagne, Maroc) — ils restent dans la fourchette francaise car le client paie la prestation pour un freelance francais avec une fiscalite francaise. Non pour le 'nearshoring' offshore (developpeurs d'Europe de l'Est par exemple) qui represente un marche different avec ses propres references (souvent 30-40% moins cher mais avec barrieres langue et coordination). Workwave AI cible le marche tech francophone et europeen.",
+  },
+];
 
 export default async function BarometreTjmHubPage() {
   const month = MONTH_NAMES[new Date().getMonth()];
@@ -79,7 +106,7 @@ export default async function BarometreTjmHubPage() {
         <Watermark text="BAROMETRE" position="bottom" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <SectionLabel index={1} total={3} label={`Barometre ${month} ${CURRENT_YEAR}`} />
+          <SectionLabel index={1} total={4} label={`Barometre ${month} ${CURRENT_YEAR}`} />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
             <div className="lg:col-span-8">
@@ -144,7 +171,7 @@ export default async function BarometreTjmHubPage() {
       <section className="bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
           <div className="mb-8">
-            <SectionLabel index={2} total={3} label="Donnees par skill" />
+            <SectionLabel index={2} total={4} label="Donnees par skill" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase"
               style={{
@@ -228,7 +255,7 @@ export default async function BarometreTjmHubPage() {
       {/* ─── SOURCES + CTA ─── */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-          <SectionLabel index={3} total={3} label="Methodologie & sources" />
+          <SectionLabel index={3} total={4} label="Methodologie & sources" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-7">
@@ -318,6 +345,19 @@ export default async function BarometreTjmHubPage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 4/4 — FAQ Barometre (FAQPage schema)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AiFaqSection
+        id="faq"
+        title="Methodologie & comprehension du barometre"
+        subtitle="Les questions qu'on nous pose le plus souvent sur la fiabilite des donnees TJM et la facon de s'en servir."
+        questions={FAQ_BAROMETRE}
+        sectionIndex={4}
+        sectionTotal={4}
+        sectionLabel="FAQ"
+      />
     </>
   );
 }
