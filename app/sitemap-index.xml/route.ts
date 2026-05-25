@@ -10,6 +10,8 @@ import { BASE_URL } from "@/lib/constants";
 // Doit matcher PROS_PER_SITEMAP et SITEMAP_PROS_OFFSET dans app/sitemap.ts
 const PROS_PER_SITEMAP = 45000;
 const SITEMAP_PROS_OFFSET = 100;
+const SITEMAP_AI_PROS_OFFSET = 200;
+const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 // IDs fixes (cf. app/sitemap.ts) :
 //   0 static · 1 cat x dept · 2 cat x ville · 3 specialites · 4 Workwave AI
 const FIXED_SITEMAP_IDS = [0, 1, 2, 3, 4];
@@ -28,12 +30,25 @@ export async function GET() {
     .eq("is_active", true)
     .is("deleted_at", null);
 
+  // Count pros tech (categories 43-48) pour les sub-sitemaps AI 200+
+  const { count: techCount } = await supabase
+    .from("pros")
+    .select("id", { count: "estimated", head: true })
+    .in("category_id", AI_CATEGORY_IDS)
+    .eq("is_active", true)
+    .is("deleted_at", null);
+
   const proSitemapsCount = Math.ceil((count || 0) / PROS_PER_SITEMAP);
+  const aiProSitemapsCount = Math.ceil((techCount || 0) / PROS_PER_SITEMAP);
   const allIds = [
     ...FIXED_SITEMAP_IDS,
     ...Array.from(
       { length: proSitemapsCount },
       (_, i) => SITEMAP_PROS_OFFSET + i
+    ),
+    ...Array.from(
+      { length: aiProSitemapsCount },
+      (_, i) => SITEMAP_AI_PROS_OFFSET + i
     ),
   ];
 

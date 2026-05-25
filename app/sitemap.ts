@@ -27,18 +27,20 @@ const TOP_CITIES_FOR_SPECIALTIES = 100; // top villes pour les sous-specialites
 const SUPABASE_PAGE_SIZE = 5000;
 
 // IDs reserves pour generateSitemaps() :
-// 0 : static + guides + blog
-// 1 : cat x dept
-// 2 : cat x ville
-// 3 : specialites
-// 4 : Workwave AI (/ai/* — landing + categories + skills + villes + dept)
-// 100+N : pros batch N
+// 0    : static + guides + blog
+// 1    : cat x dept
+// 2    : cat x ville
+// 3    : specialites
+// 4    : Workwave AI (/ai/* — landing + categories + skills + villes + dept)
+// 100+N : pros batch N (toutes verticales, format /artisan/[slug])
+// 200+N : pros tech batch N (format /ai/freelance/[slug])
 const SITEMAP_STATIC = 0;
 const SITEMAP_CAT_DEPT = 1;
 const SITEMAP_CAT_CITY = 2;
 const SITEMAP_SPECIALTY = 3;
 const SITEMAP_AI = 4;
 const SITEMAP_PROS_OFFSET = 100;
+const SITEMAP_AI_PROS_OFFSET = 200;
 
 // Categories tech utilisees pour /ai/* (Workwave AI)
 const AI_CATEGORIES = [
@@ -49,6 +51,10 @@ const AI_CATEGORIES = [
   "data-analytics",
   "design-produit",
 ];
+
+// IDs des categories tech en BDD (43-48). Utilises pour filtrer les pros
+// tech dans les sub-sitemaps AI_PROS_OFFSET+.
+const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 // ============================================================================
 // generateSitemaps() : declare les sub-sitemaps
@@ -69,6 +75,17 @@ export async function generateSitemaps() {
 
   const proSitemapsCount = Math.ceil((count || 0) / PROS_PER_SITEMAP);
 
+  // Count pros tech (Workwave AI) pour les sub-sitemaps AI_PROS_OFFSET+.
+  // count estimated ne supporte pas les filtres .in(), on fait un select
+  // simple sur le category_id avec count exact (limited rows).
+  const { count: techCount } = await supabase
+    .from("pros")
+    .select("id", { count: "estimated", head: true })
+    .in("category_id", AI_CATEGORY_IDS)
+    .eq("is_active", true)
+    .is("deleted_at", null);
+  const aiProSitemapsCount = Math.ceil((techCount || 0) / PROS_PER_SITEMAP);
+
   const sitemaps = [
     { id: SITEMAP_STATIC },
     { id: SITEMAP_CAT_DEPT },
@@ -78,6 +95,9 @@ export async function generateSitemaps() {
   ];
   for (let i = 0; i < proSitemapsCount; i++) {
     sitemaps.push({ id: SITEMAP_PROS_OFFSET + i });
+  }
+  for (let i = 0; i < aiProSitemapsCount; i++) {
+    sitemaps.push({ id: SITEMAP_AI_PROS_OFFSET + i });
   }
   return sitemaps;
 }
@@ -96,6 +116,10 @@ export default async function sitemap(props: {
   if (numId === SITEMAP_CAT_CITY) return buildCategoryCityUrls();
   if (numId === SITEMAP_SPECIALTY) return buildSpecialtyUrls();
   if (numId === SITEMAP_AI) return buildAiUrls();
+  // 200+N : pros tech au format /ai/freelance/[slug]
+  if (numId >= SITEMAP_AI_PROS_OFFSET)
+    return buildAiProsUrls(numId - SITEMAP_AI_PROS_OFFSET);
+  // 100+N : tous les pros au format /artisan/[slug]
   if (numId >= SITEMAP_PROS_OFFSET)
     return buildProsUrls(numId - SITEMAP_PROS_OFFSET);
   return [];
@@ -404,6 +428,60 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
       lastModified: new Date(pro.updated_at),
       changeFrequency: "monthly" as const,
       priority: pro.claimed_by_user_id ? 0.8 : hasContent ? 0.5 : 0.3,
+    };
+  });
+}
+
+// ============================================================================
+// 200+N. Pros TECH au format /ai/freelance/[slug] (Workwave AI)
+// Liste les fiches freelance individuelles avec design Workwave AI.
+// Pagination identique a buildProsUrls : 45000 par batch, 5000 par chunk.
+// ============================================================================
+async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap> {
+  const supabase = getAdminServiceClient();
+  const offset = batchIndex * PROS_PER_SITEMAP;
+
+  let allPros: {
+    slug: string;
+    updated_at: string;
+    claimed_by_user_id: string | null;
+    description: string | null;
+    phone: string | null;
+  }[] = [];
+
+  let pageOffset = offset;
+  const endOffset = offset + PROS_PER_SITEMAP;
+
+  while (pageOffset < endOffset) {
+    const rangeEnd = Math.min(
+      pageOffset + SUPABASE_PAGE_SIZE - 1,
+      endOffset - 1
+    );
+    const { data } = await supabase
+      .from("pros")
+      .select("slug, updated_at, claimed_by_user_id, description, phone")
+      .in("category_id", AI_CATEGORY_IDS)
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .order("id", { ascending: true })
+      .range(pageOffset, rangeEnd);
+
+    const rows = (data || []) as typeof allPros;
+    if (rows.length === 0) break;
+    allPros = allPros.concat(rows);
+    // Pagination robuste (lecon 30/04/2026 PostgREST cap 1000)
+    pageOffset += rows.length;
+  }
+
+  return allPros.map((pro) => {
+    const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
+    return {
+      url: `${BASE_URL}/ai/freelance/${pro.slug}`,
+      lastModified: new Date(pro.updated_at),
+      changeFrequency: "monthly" as const,
+      // Priorite legerement plus haute pour les fiches Workwave AI : design
+      // dedie + audience tech-focused = meilleur taux de conversion attendu.
+      priority: pro.claimed_by_user_id ? 0.85 : hasContent ? 0.6 : 0.4,
     };
   });
 }
