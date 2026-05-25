@@ -101,13 +101,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     dynamicTitle = `Top ${displayCount} ${pluralCategory} les ${bestForm === "meilleurs" ? "mieux notés" : "mieux notées"} ${preposition} ${locationName} (${currentYear}) | Devis gratuit`;
   }
 
-  const title = seo?.title || dynamicTitle;
+  // PRIORITE au nouveau title clickbait (sprint 25/05/2026).
+  // L'ancien seo.title du sprint 3 est en format "X à Y — N pros"
+  // qui n'est PAS optimise CTR. On force le nouveau format meme sur les
+  // 588 pages avec seo_pages rempli.
+  const title = dynamicTitle;
 
   const description =
-    seo?.meta_description ||
-    (prosCount > 0
+    prosCount > 0
       ? `Besoin d'${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Comparez les ${displayCount} ${bestForm} ${pluralCategory} de la zone, consultez les avis vérifiés et recevez 3 devis gratuits en 30 secondes.`
-      : `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`);
+      : `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`;
 
   return {
     title,
@@ -467,15 +470,18 @@ export default async function ListingPage({ params, searchParams }: Props) {
         />
       )}
 
-      {/* Contenu SEO long (sections H2 + détails) — l'intro a déjà été affichée plus haut */}
-      {seo && stripIntro(seo.content) && (
+      {/* Anti-doublon : sur les 588 pages avec seo.content custom (sprint 3),
+          on a deja "Comment choisir", "Prix", "Questions frequentes" generes
+          par Claude API. Nos nouvelles sections programmatiques d'hier feraient
+          doublon avec les memes thematiques.
+          → Si seo.content existe : on garde seulement le contenu custom Claude
+          → Sinon : on injecte les sections programmatiques (6 H2 + FAQ) */}
+      {seo && stripIntro(seo.content) ? (
         <SeoContent content={stripIntro(seo.content)} />
-      )}
-
-      {/* Sections SEO programmatiques style Travaux.com (6 H2 + FAQ + schema FAQPage).
-          Genere uniquement sur page 1 pour pas dupliquer sur les pages paginees. */}
-      {seoSectionsContent && (
-        <ProgrammaticSeoSections content={seoSectionsContent} />
+      ) : (
+        seoSectionsContent && (
+          <ProgrammaticSeoSections content={seoSectionsContent} />
+        )
       )}
 
       {/* FAQ accordeon + schema FAQPage */}
