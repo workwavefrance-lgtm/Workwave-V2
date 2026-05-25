@@ -83,7 +83,7 @@ export default async function InscriptionSuccesPage({
                 letterSpacing: "0.2em",
               }}
             >
-              // Etapes suivantes
+              {"// Etapes suivantes"}
             </p>
             <ul className="space-y-3 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
               <li className="flex items-start gap-3">

@@ -639,7 +639,7 @@ export default function AiHomePage() {
                     letterSpacing: "0.2em",
                   }}
                 >
-                  // Pourquoi nous
+                  {"// Pourquoi nous"}
                 </p>
                 <ul className="text-[13px] text-[var(--ai-text-secondary)] space-y-2 leading-relaxed">
                   <li className="flex items-start gap-2">
@@ -899,7 +899,7 @@ export default function AiHomePage() {
             </h2>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] mt-6 leading-relaxed max-w-lg">
               Codeur.com facture chaque devis. Malt prend une commission de
-              10%. Workwave AI ne fait ni l'un ni l'autre.
+              10%. Workwave AI ne fait ni l&apos;un ni l&apos;autre.
             </p>
           </div>
 
@@ -1253,7 +1253,7 @@ export default function AiHomePage() {
             className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-8"
             style={{ letterSpacing: "0.2em", fontFamily: "var(--font-geist-mono), monospace" }}
           >
-            // Explorer Workwave AI
+            {"// Explorer Workwave AI"}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">

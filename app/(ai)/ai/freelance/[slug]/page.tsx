@@ -250,7 +250,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                     letterSpacing: "0.2em",
                   }}
                 >
-                  // Profil minimal
+                  {"// Profil minimal"}
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
                   Cette fiche est une base SIRENE non revendiquee.{" "}
@@ -316,7 +316,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                     letterSpacing: "0.2em",
                   }}
                 >
-                  // Identite SIRENE
+                  {"// Identite SIRENE"}
                 </p>
                 <dl className="space-y-3 text-[13px]">
                   <div>
@@ -421,7 +421,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                     letterSpacing: "0.2em",
                   }}
                 >
-                  // Profil non-enrichi
+                  {"// Profil non-enrichi"}
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
                   Competences techniques detaillees, stack maitrise, portfolio

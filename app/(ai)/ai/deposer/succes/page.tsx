@@ -86,7 +86,7 @@ export default async function DepostSuccesPage({
                 letterSpacing: "0.2em",
               }}
             >
-              // La suite
+              {"// La suite"}
             </p>
             <ul className="space-y-3 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
               <li className="flex items-start gap-3">

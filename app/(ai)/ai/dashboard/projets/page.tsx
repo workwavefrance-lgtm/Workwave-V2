@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { isAiPremium } from "@/lib/ai/helpers";
+import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { markLeadAsContacted } from "./actions";
 
 export const metadata: Metadata = {
@@ -11,8 +11,6 @@ export const metadata: Metadata = {
   description: "Liste des projets recus via Workwave AI.",
   robots: { index: false, follow: false },
 };
-
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 const BUDGET_LABELS: Record<string, string> = {
   lt5k: "< 5 000 €",

@@ -4,8 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 function getServiceClient() {
   return createServiceClient(

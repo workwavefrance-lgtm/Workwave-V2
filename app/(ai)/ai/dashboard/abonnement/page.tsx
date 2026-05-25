@@ -3,15 +3,13 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
 import { startCheckout, openCustomerPortal } from "./actions";
-import { isAiPremium } from "@/lib/ai/helpers";
+import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 export const metadata: Metadata = {
   title: "Abonnement — Dashboard Workwave AI",
   description: "Gerez votre abonnement Premium Workwave AI.",
   robots: { index: false, follow: false },
 };
-
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 const ABONNEMENT_MESSAGES: Record<string, { type: "success" | "error" | "info"; text: string }> = {
   activated: {

@@ -4,9 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { sanitizeProfileUrl, AI_CATEGORY_IDS as AI_CATS } from "@/lib/ai/helpers";
-
-const AI_CATEGORY_IDS = AI_CATS;
+import { sanitizeProfileUrl, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 function getServiceClient() {
   return createServiceClient(

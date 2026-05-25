@@ -343,7 +343,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                   className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
                   style={{ fontFamily: "var(--font-geist-mono), monospace", letterSpacing: "0.2em" }}
                 >
-                  // {city.name} en chiffres
+                  {`// ${city.name} en chiffres`}
                 </p>
                 <ul className="text-[13px] text-[var(--ai-text-secondary)] space-y-2 leading-relaxed">
                   <li className="flex items-start gap-2">
@@ -808,7 +808,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                   letterSpacing: "0.2em",
                 }}
               >
-                // Sources &amp; methodologie
+                {"// Sources & methodologie"}
               </p>
               <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-4">
                 Toutes les donnees chiffrees (TJM, population, nombres) sont issues
@@ -866,7 +866,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                     letterSpacing: "0.2em",
                   }}
                 >
-                  // Sources TJM
+                  {"// Sources TJM"}
                 </p>
                 <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-4">
                   Fourchettes de tarifs journaliers compilees a partir de trois

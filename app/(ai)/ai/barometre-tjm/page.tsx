@@ -247,7 +247,7 @@ export default async function BarometreTjmHubPage() {
           </div>
 
           <p className="text-[11px] text-[var(--ai-text-tertiary)] mt-4 leading-relaxed" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
-            Les colonnes "Mid (3-7 ans)" sont en surbrillance car c&apos;est le segment dominant du marche FR.
+            Les colonnes &laquo;&nbsp;Mid (3-7 ans)&nbsp;&raquo; sont en surbrillance car c&apos;est le segment dominant du marche FR.
           </p>
         </div>
       </section>

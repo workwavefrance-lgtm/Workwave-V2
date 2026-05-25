@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 export const metadata: Metadata = {
   title: "Parametres — Dashboard Workwave AI",
   description: "Parametres de votre compte Workwave AI.",
   robots: { index: false, follow: false },
 };
-
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 export default async function AiDashboardParametresPage() {
   const supabase = await createClient();
@@ -120,12 +119,13 @@ export default async function AiDashboardParametresPage() {
 
       {/* Deconnexion */}
       <div className="pt-6 border-t border-[var(--ai-border-subtle)]">
-        <a
+        <Link
           href="/api/auth/signout?redirect=/ai"
+          prefetch={false}
           className="inline-flex items-center justify-center h-11 px-5 text-[13px] font-semibold rounded-lg bg-[var(--ai-secondary)] hover:bg-[var(--ai-secondary-hover)] text-[var(--ai-secondary-text)] border border-[var(--ai-secondary-border)] transition-colors"
         >
           Se deconnecter
-        </a>
+        </Link>
       </div>
 
       {/* Suppression compte */}

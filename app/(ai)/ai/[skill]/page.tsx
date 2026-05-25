@@ -11,7 +11,6 @@ export const revalidate = 21600;
 
 const PAGE_SIZE = 24;
 const TECH_VERTICAL = "tech";
-const SITE_URL = "https://workwave.fr";
 
 // ─── FAQ dynamique par categorie ───────────────────────────────────────────
 function buildCategoryFaq(

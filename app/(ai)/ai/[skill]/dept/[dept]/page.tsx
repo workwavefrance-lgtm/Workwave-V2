@@ -14,8 +14,6 @@ import {
 } from "@/lib/data/tech-tjm-reference";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
-const SITE_URL = "https://workwave.fr";
-
 // ─── FAQ dynamique par skill × departement ─────────────────────────────
 function buildDeptFaq(
   category: { name: string },
@@ -146,7 +144,6 @@ export default async function SkillDeptPage({ params }: Props) {
     if (parent) tjmRef = getTjmReference(parent.slug);
   }
 
-  const month = MONTH_NAMES[new Date().getMonth()];
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
   // Schema.org
@@ -384,7 +381,7 @@ export default async function SkillDeptPage({ params }: Props) {
 
           <div className="border-t border-[var(--ai-border-subtle)] pt-6">
             <p className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3" style={{ fontFamily: "var(--font-geist-mono), monospace", letterSpacing: "0.2em" }}>
-              // Sources
+              {"// Sources"}
             </p>
             <ul className="text-[12px] text-[var(--ai-text-secondary)] space-y-1.5 leading-relaxed">
               <li className="flex items-start gap-2">

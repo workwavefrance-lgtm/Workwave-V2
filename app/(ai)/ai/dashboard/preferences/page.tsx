@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { updateAiPreferences } from "./actions";
 
 export const metadata: Metadata = {
@@ -8,8 +9,6 @@ export const metadata: Metadata = {
   description: "Configurez vos preferences de matching projets.",
   robots: { index: false, follow: false },
 };
-
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_date: "Date invalide.",

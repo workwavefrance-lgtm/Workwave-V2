@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getStripeServer } from "@/lib/stripe/server";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
 function getServiceClient() {

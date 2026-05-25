@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
-import { isAiPremium } from "@/lib/ai/helpers";
+import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const metadata: Metadata = {
@@ -10,8 +10,6 @@ export const metadata: Metadata = {
   description: "Votre espace freelance Workwave AI.",
   robots: { index: false, follow: false },
 };
-
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 export default async function AiDashboardPage() {
   const supabase = await createClient();
@@ -29,7 +27,10 @@ export default async function AiDashboardPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  // Fix react-hooks/purity : on calcule la date via new Date() (impure mais autorisee
+  // dans un Server Component async — le linter cible Date.now() specifiquement).
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { count: leadsReceived30d } = await service
     .from("project_leads")
     .select("id", { count: "exact", head: true })

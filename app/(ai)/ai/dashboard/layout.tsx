@@ -2,9 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
-import { isAiPremium, AI_CATEGORY_IDS as AI_CATS } from "@/lib/ai/helpers";
-
-const AI_CATEGORY_IDS = AI_CATS;
+import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 const NAV_ITEMS = [
   { href: "/ai/dashboard", label: "Accueil", icon: "01" },
