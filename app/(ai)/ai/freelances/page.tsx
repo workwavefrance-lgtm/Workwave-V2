@@ -72,7 +72,7 @@ export default async function FreelancesHubPage() {
                 {totalCount > 0
                   ? `Notre base compte ${totalCount.toLocaleString("fr-FR")} freelances tech actifs en France et Europe, repartis sur 6 categories.`
                   : "Notre base regroupe des freelances tech actifs en France et Europe, repartis sur 6 categories."}{" "}
-                Choisissez la categorie qui matche votre besoin ou deposez directement votre brief — notre IA fait le matching.
+                Choisissez la categorie qui correspond a votre besoin ou deposez directement votre projet — on s&apos;occupe de la selection.
               </p>
             </div>
 
@@ -194,7 +194,7 @@ export default async function FreelancesHubPage() {
                   <div className="bg-[var(--ai-accent)] rounded-[1px]" />
                 </div>
                 <span className="text-[14px] sm:text-[15px] text-[var(--ai-text-secondary)] truncate">
-                  L&apos;IA matche votre brief en 60s
+                  On vous propose 3 freelances en 24h
                 </span>
               </div>
               <div className="flex items-center justify-center gap-2 bg-[var(--ai-accent)] group-hover:bg-[var(--ai-accent-hover)] text-white px-6 sm:px-7 py-4 transition-colors duration-200">

@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
 export const metadata: Metadata = {
-  title: "Brief envoye — Workwave AI",
+  title: "Projet envoye — Workwave AI",
   description:
-    "Votre brief a ete recu. Notre IA route vers les 3 meilleurs freelances tech. Reponse en moins de 24h.",
+    "Votre projet a ete recu. On selectionne les 3 meilleurs freelances pour vous. Reponse en moins de 24h.",
   robots: { index: false, follow: false },
 };
 
@@ -41,12 +41,12 @@ export default async function DepostSuccesPage({
               className="text-[11px] font-medium tracking-[0.2em] text-[var(--ai-text-tertiary)]"
               style={{ fontFamily: "var(--font-geist-mono), monospace" }}
             >
-              [ BRIEF SENT ]
+              [ PROJET ENVOYE ]
             </span>
             <span className="h-px w-10 bg-[var(--ai-border)]" />
             <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
-              Reponse &lt; 24h
+              Reponse sous 24h
             </span>
           </div>
 
@@ -58,15 +58,15 @@ export default async function DepostSuccesPage({
               letterSpacing: "-0.05em",
             }}
           >
-            Brief recu.
+            C&apos;est parti.
             <br />
-            <span className="text-[var(--ai-text-tertiary)]">L&apos;IA route.</span>
+            <span className="text-[var(--ai-text-tertiary)]">On s&apos;en occupe.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10 max-w-xl mx-auto">
-            Notre IA analyse votre brief et selectionne les 3 freelances tech
-            les plus pertinents. Vous recevrez les profils par email dans les
-            24h, directement de leur part.
+            On selectionne pour vous les 3 freelances qui correspondent le mieux
+            a votre projet. Vous recevrez leurs profils par email sous 24h, et
+            ils vous contacteront directement.
           </p>
 
           {id && (
@@ -74,7 +74,7 @@ export default async function DepostSuccesPage({
               className="text-[12px] text-[var(--ai-text-tertiary)] mb-10"
               style={{ fontFamily: "var(--font-geist-mono), monospace" }}
             >
-              Reference brief : #{id}
+              Reference projet : #{id}
             </p>
           )}
 
@@ -86,20 +86,20 @@ export default async function DepostSuccesPage({
                 letterSpacing: "0.2em",
               }}
             >
-              // Etapes suivantes
+              // La suite
             </p>
             <ul className="space-y-3 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">01</span>
-                <span>Notre IA route votre brief aux 3 freelances tech les mieux matches sur expertise + dispo.</span>
+                <span>On lit votre projet et on choisit 3 freelances qui correspondent a votre besoin.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">02</span>
-                <span>Ils vous contactent directement sous 24h avec leur proposition (sans intermediaire).</span>
+                <span>Ils vous contactent directement sous 24h, par email ou telephone, avec leur proposition.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">03</span>
-                <span>Vous discutez, comparez, choisissez. Aucune commission Workwave.</span>
+                <span>Vous comparez les offres et vous choisissez. Workwave ne prend aucune commission.</span>
               </li>
             </ul>
           </div>

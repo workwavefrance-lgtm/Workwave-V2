@@ -398,10 +398,10 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
               </span>
             </h2>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10">
-              Decrivez votre projet — notre IA matche votre brief avec les 3
-              meilleurs freelances {category.name.toLowerCase()} sur la base
-              de leur expertise, leur experience et leur dispo. Gratuit, sans
-              engagement.
+              Decrivez votre projet — on selectionne les 3 freelances
+              {" "}{category.name.toLowerCase()} qui vous correspondent le mieux
+              en fonction de leur expertise, leur experience et leur disponibilite.
+              Gratuit, sans engagement.
             </p>
 
             <Link

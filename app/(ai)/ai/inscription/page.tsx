@@ -353,7 +353,7 @@ export default function InscriptionPage() {
                   </div>
                   <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-2 leading-relaxed">
                     Indicatif uniquement. Vous gardez la main pour repondre a
-                    n&apos;importe quel brief, meme en dessous de ce tarif.
+                    n&apos;importe quel projet, meme en dessous de ce tarif.
                   </p>
                 </div>
                 <div>

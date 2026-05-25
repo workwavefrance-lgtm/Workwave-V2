@@ -86,7 +86,7 @@ export default async function BarometreSkillPage({ params }: Props) {
         name: `Combien gagne un freelance ${skillName} senior ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Un freelance ${skillName} senior (7-10 ans d'experience) facture en moyenne entre ${ref.senior.min}€ et ${ref.senior.max}€ par jour en France ${CURRENT_YEAR}. Au-dela de 10 ans (profil expert), les TJM peuvent atteindre ${ref.expert.max}€ et plus selon la rarete de la stack et le contexte du brief.`,
+          text: `Un freelance ${skillName} senior (7-10 ans d'experience) facture en moyenne entre ${ref.senior.min}€ et ${ref.senior.max}€ par jour en France ${CURRENT_YEAR}. Au-dela de 10 ans (profil expert), les TJM peuvent atteindre ${ref.expert.max}€ et plus selon la rarete de la stack et le contexte du projet.`,
         },
       },
       {
@@ -94,7 +94,7 @@ export default async function BarometreSkillPage({ params }: Props) {
         name: `Comment se positionner sur son TJM en tant que freelance ${skillName} ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Le TJM depend de votre experience, votre stack technique, votre localisation (Paris generalement +10-20%), la complexite du brief (refonte simple vs architecture distribuee) et la duree de la mission (>3 mois = TJM negocie). Workwave AI permet aux clients de specifier leur budget pour matcher les freelances avec le bon profil + tarif.`,
+          text: `Le TJM depend de votre experience, votre stack technique, votre localisation (Paris generalement +10-20%), la complexite du projet (refonte simple vs architecture distribuee) et la duree de la mission (>3 mois = TJM negocie). Workwave AI permet aux clients de specifier leur budget pour selectionner les freelances avec le bon profil + tarif.`,
         },
       },
     ],

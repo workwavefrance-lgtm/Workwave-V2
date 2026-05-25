@@ -56,7 +56,7 @@ const STEPS = [
   {
     n: "01",
     title: "Decrivez votre projet",
-    desc: "Notre chat IA qualifie votre brief en 60 secondes : objectif, stack, budget, delai. Pas de formulaire interminable.",
+    desc: "On vous pose 4 questions simples : objectif, technos, budget, delai. 60 secondes, pas de formulaire interminable.",
   },
   {
     n: "02",
@@ -343,8 +343,8 @@ export default function AiHomePage() {
                   Matching IA
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
-                  Notre IA route votre brief aux 3 meilleurs profils en moins
-                  de 24h. Gratuit, sans credit, sans engagement.
+                  On selectionne les 3 freelances qui correspondent a votre
+                  projet et on vous repond sous 24h. Gratuit, sans engagement.
                 </p>
               </div>
 
@@ -685,9 +685,9 @@ export default function AiHomePage() {
                 <br />a confier ?
               </h2>
               <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed mb-8">
-                Decrivez votre brief en 60 secondes. Notre IA selectionne les 3
-                meilleurs profils en moins de 24h. Gratuit, sans engagement,
-                sans credit.
+                Decrivez votre projet en 60 secondes. On vous propose les 3
+                freelances qui vous correspondent sous 24h. Gratuit, sans
+                engagement.
               </p>
               <Link
                 href="/ai/deposer"

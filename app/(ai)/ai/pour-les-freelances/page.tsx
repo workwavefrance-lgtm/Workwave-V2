@@ -6,7 +6,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
 export const metadata: Metadata = {
   title: "Pour les freelances tech — Workwave AI",
   description:
-    "Workwave AI envoie aux freelances tech les briefs qualifies par IA qui matchent leur profil. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. France et Europe.",
+    "Workwave AI envoie aux freelances tech les projets qualifies par IA qui matchent leur profil. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. France et Europe.",
 };
 
 const PROCESS = [
@@ -17,8 +17,8 @@ const PROCESS = [
   },
   {
     n: "02",
-    title: "Reception de briefs qualifies",
-    desc: "Notre IA vous envoie les briefs qui matchent votre expertise, votre TJM et votre disponibilite. Vous repondez si ca vous interesse, libre.",
+    title: "Reception de projets qualifies",
+    desc: "Notre IA vous envoie les projets qui matchent votre expertise, votre TJM et votre disponibilite. Vous repondez si ca vous interesse, libre.",
   },
   {
     n: "03",
@@ -40,8 +40,8 @@ const VS = [
   },
   {
     title: "vs LinkedIn outbound",
-    point: "Briefs deja qualifies",
-    desc: "Plus besoin de chasser des leads froids. Les briefs arrivent qualifies, avec budget et delai connus. Vous repondez ou pas, en 1 clic.",
+    point: "Projets deja qualifies",
+    desc: "Plus besoin de chasser des leads froids. Les projets arrivent qualifies, avec budget et delai connus. Vous repondez ou pas, en 1 clic.",
   },
   {
     title: "vs Freelancer.com",
@@ -53,15 +53,15 @@ const VS = [
 const FAQ = [
   {
     q: "C'est vraiment gratuit pour s'inscrire ?",
-    a: "Oui. L'inscription, la creation du profil, la reception des briefs : tout est gratuit. L'abonnement 29,90€/mois est uniquement requis si vous voulez repondre aux briefs (envoyer un message au client).",
+    a: "Oui. L'inscription, la creation du profil, la reception des projets : tout est gratuit. L'abonnement 29,90€/mois est uniquement requis si vous voulez repondre aux projets (envoyer un message au client).",
   },
   {
-    q: "Comment l'IA selectionne-t-elle les briefs ?",
-    a: "Matching semantique sur l'expertise (tags + bio), score pondere par votre TJM indicatif, votre dispo et votre categorie. Le TJM n'est PAS un filtre dur : si un brief vous interesse en dessous, vous pouvez quand meme repondre. Les 3 meilleurs profils sont notifies par email a chaque brief.",
+    q: "Comment l'IA selectionne-t-elle les projets ?",
+    a: "Matching semantique sur l'expertise (tags + bio), score pondere par votre TJM indicatif, votre dispo et votre categorie. Le TJM n'est PAS un filtre dur : si un projet vous interesse en dessous, vous pouvez quand meme repondre. Les 3 meilleurs profils sont notifies par email a chaque projet.",
   },
   {
-    q: "Combien de briefs vais-je recevoir ?",
-    a: "Ca depend de la demande sur votre categorie et vos criteres. Workwave AI est en lancement, donc le volume monte progressivement. Une categorie demandee (Dev Web, IA) genere plus de briefs qu'une niche pointue. Le tableau de bord vous montrera votre flux reel des votre inscription.",
+    q: "Combien de projets vais-je recevoir ?",
+    a: "Ca depend de la demande sur votre categorie et vos criteres. Workwave AI est en lancement, donc le volume monte progressivement. Une categorie demandee (Dev Web, IA) genere plus de projets qu'une niche pointue. Le tableau de bord vous montrera votre flux reel des votre inscription.",
   },
   {
     q: "Puis-je resilier a tout moment ?",
@@ -95,14 +95,14 @@ export default function PourLesFreelancesPage() {
             >
               Recevez
               <br />
-              les briefs tech
+              les projets tech
               <br />
               <span className="text-[var(--ai-text-tertiary)]">
                 qui vous matchent.
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed mb-10">
-              Inscription gratuite. Profil mis en avant. Briefs filtres par
+              Inscription gratuite. Profil mis en avant. Projets filtres par
               IA selon votre expertise, votre TJM, votre dispo. 29,90€/mois
               pour repondre, sans credit. Resiliation libre. Aucune commission.
             </p>

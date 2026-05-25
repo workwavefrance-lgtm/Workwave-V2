@@ -11,14 +11,14 @@ export const metadata: Metadata = {
 
 const CLIENT_FEATURES = [
   "Depot de projet illimite, gratuit",
-  "Matching IA en moins de 24h",
-  "3 freelances qualifies par brief",
+  "Selection IA en moins de 24h",
+  "3 freelances qualifies par projet",
   "Aucune commission sur vos missions",
   "Annulation a tout moment, sans frais",
 ];
 
 const FREELANCE_FEATURES = [
-  "Reception de briefs qualifies par IA",
+  "Reception de projets qualifies par IA",
   "Reponse sans limite (pas de credits)",
   "Profil mis en avant sur les listings",
   "Badge Pro Workwave sur la fiche",

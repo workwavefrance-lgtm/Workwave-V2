@@ -41,7 +41,7 @@ export default function DeposerPage() {
           HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-[var(--ai-border-subtle)]">
-        <Watermark text="BRIEF" position="bottom" />
+        <Watermark text="PROJET" position="bottom" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
           <div className="max-w-3xl">
@@ -50,7 +50,7 @@ export default function DeposerPage() {
                 className="text-[11px] font-medium tracking-[0.2em] text-[var(--ai-text-tertiary)]"
                 style={{ fontFamily: "var(--font-geist-mono), monospace" }}
               >
-                [ NEW BRIEF ]
+                [ NOUVEAU PROJET ]
               </span>
               <span className="h-px flex-1 max-w-[40px] bg-[var(--ai-border)]" />
               <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
@@ -74,9 +74,9 @@ export default function DeposerPage() {
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed">
-              4 etapes, 60 secondes. Notre IA selectionne les 3 freelances tech
-              les plus pertinents en moins de 24h. Gratuit, sans engagement,
-              aucune commission.
+              4 etapes, 60 secondes. On selectionne les 3 freelances qui
+              correspondent le mieux a votre besoin et on vous repond sous 24h.
+              Gratuit, sans engagement, aucune commission.
             </p>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function DeposerPage() {
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
               Selectionnez la categorie qui correspond le mieux. Vous pourrez
-              preciser dans le brief.
+              detailler a l&apos;etape suivante.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -143,9 +143,9 @@ export default function DeposerPage() {
             </div>
           </div>
 
-          {/* ───────── Step 02 — Brief ───────── */}
+          {/* ───────── Step 02 — Votre projet ───────── */}
           <div>
-            <SectionLabel index={2} total={4} label="Brief" />
+            <SectionLabel index={2} total={4} label="Votre projet" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase mb-3"
               style={{
@@ -157,8 +157,8 @@ export default function DeposerPage() {
               Decrivez le contexte.
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Plus le brief est precis, meilleur sera le matching. Notre IA
-              re-questionne si necessaire pour qualifier.
+              Plus votre description est precise, mieux on selectionne les
+              freelances qui vous correspondent.
             </p>
 
             <div className="space-y-5">
@@ -199,11 +199,11 @@ export default function DeposerPage() {
                   name="description"
                   required
                   rows={8}
-                  placeholder="Decrivez le contexte de votre projet, les objectifs, les contraintes techniques, le perimetre attendu. Soyez precis : c'est ce qui permettra a notre IA de matcher les bons profils."
+                  placeholder="Decrivez le contexte de votre projet, les objectifs, les contraintes techniques, le perimetre attendu. Soyez precis : c'est ce qui nous permet de choisir les bons profils."
                   className="w-full px-4 py-3 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all resize-y"
                 />
                 <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-2">
-                  Minimum 100 caracteres recommande pour un matching de qualite.
+                  Minimum 100 caracteres recommande pour une selection precise.
                 </p>
               </div>
 

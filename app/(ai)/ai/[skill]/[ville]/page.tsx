@@ -224,7 +224,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
         name: `Combien de temps pour recevoir des propositions ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Notre IA route votre brief en moins de 24h aux 3 freelances ${category.name.toLowerCase()} les plus matches. Vous recevrez leurs propositions directement par email.`,
+          text: `On selectionne en moins de 24h les 3 freelances ${category.name.toLowerCase()} qui correspondent le mieux a votre projet. Vous recevrez leurs propositions directement par email.`,
         },
       },
     ],
@@ -334,7 +334,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                   Matching IA
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed mt-2">
-                  Notre IA route votre brief aux 3 meilleurs freelances de {city.name}.
+                  On selectionne pour vous les 3 freelances qui correspondent le mieux a votre projet sur {city.name}.
                 </p>
               </div>
 
@@ -395,9 +395,9 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                 Aucun freelance {category.name.toLowerCase()} reference a {city.name} pour l&apos;instant.
               </p>
               <p className="text-sm text-[var(--ai-text-secondary)] mb-6 max-w-lg mx-auto">
-                Notre IA peut quand meme matcher votre brief avec des freelances
-                en remote ou dans les villes voisines. Decrivez votre projet,
-                on s&apos;occupe du reste.
+                On peut quand meme vous proposer des freelances en remote ou
+                dans les villes voisines. Decrivez votre projet, on s&apos;occupe
+                du reste.
               </p>
               <Link
                 href="/ai/deposer"
@@ -520,7 +520,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                   </h3>
                   <p className="text-[13px] text-[var(--ai-text-secondary)] mb-6 leading-relaxed">
                     Fourchettes <strong>indicatives</strong> pour le marche francais {CURRENT_YEAR},
-                    selon l&apos;experience. Le tarif final depend du brief et du profil.
+                    selon l&apos;experience. Le tarif final depend du projet et du profil.
                   </p>
 
                   <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl overflow-hidden">
@@ -778,8 +778,8 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                 <br />a {city.name}.
               </h3>
               <p className="text-sm text-white/70 leading-relaxed mb-8 max-w-lg">
-                Inscription gratuite, sans engagement. Notre IA route votre brief
-                aux 3 meilleurs profils en moins de 24h.
+                Inscription gratuite, sans engagement. On vous propose les 3
+                freelances qui correspondent a votre projet en moins de 24h.
               </p>
               <Link
                 href="/ai/deposer"
