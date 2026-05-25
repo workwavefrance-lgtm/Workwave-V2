@@ -146,7 +146,7 @@ Reponds UNIQUEMENT avec le JSON entre les balises \`\`\`json et \`\`\`, rien d'a
   const slug = parsed.title
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") // strip accents
+    .replace(/[\u0300-\u036f]/g, "") // strip combining diacriticals (NFD accents)
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
