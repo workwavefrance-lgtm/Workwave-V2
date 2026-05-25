@@ -12,6 +12,44 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // ─── Workwave AI (workwaveai.co + .ai + .io) → workwave.fr/ai ────────
+      // Phase 10 : si l'utilisateur achete un domaine vanity pour le vertical
+      // tech (ex. workwaveai.co), tout traffic est redirige 301 vers le
+      // sous-chemin /ai du domaine principal. Ca preserve le link juice et
+      // garde 1 seul domaine indexable pour le SEO.
+      //
+      // Requiert : domaine ajoute en "redirect domain" dans Vercel project
+      // settings + DNS configure vers Vercel.
+      //
+      // Pattern `has: [{ type: 'host', value: 'workwaveai.co' }]` matche
+      // le header Host de la requete. Le destination utilise :path* pour
+      // preserver l'eventuel sub-path.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "workwaveai.co" }],
+        destination: "https://workwave.fr/ai/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.workwaveai.co" }],
+        destination: "https://workwave.fr/ai/:path*",
+        permanent: true,
+      },
+      // Variantes TLD au cas ou (.ai et .io achetes plus tard)
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "workwaveai.io" }],
+        destination: "https://workwave.fr/ai/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "workwave.ai" }],
+        destination: "https://workwave.fr/ai/:path*",
+        permanent: true,
+      },
+
       // /sitemap.xml -> /sitemap-index.xml : Next sert le sitemap a
       // /sitemap-index.xml (generateSitemaps dans app/sitemap.ts).
       // Ce redirect permet aux crawlers et outils tiers qui cherchent
