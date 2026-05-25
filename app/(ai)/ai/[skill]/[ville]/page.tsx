@@ -91,14 +91,17 @@ export default async function SkillCityPage({ params }: CityPageProps) {
 
   const sb = createPublicClient();
 
-  // 1. Charge la categorie
+  // 1. Charge la categorie (macro ou skill avec parent)
   const { data: category } = await sb
     .from("categories")
-    .select("id, slug, name, description")
+    .select("id, slug, name, description, parent_category_id")
     .eq("slug", skill)
     .eq("vertical", TECH_VERTICAL)
     .maybeSingle();
   if (!category) notFound();
+
+  // Si skill (parent_category_id set), filtre pros par le parent (= macro)
+  const filterCategoryId = category.parent_category_id || category.id;
 
   // 2. Top 10 pros par ville (postal LIKE prefix dept)
   const { data: pros } = await sb
@@ -106,7 +109,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
     .select(
       "id, name, slug, postal_code, address, years_experience, github_username"
     )
-    .eq("category_id", category.id)
+    .eq("category_id", filterCategoryId)
     .eq("source", "sirene")
     .eq("is_active", true)
     .is("deleted_at", null)

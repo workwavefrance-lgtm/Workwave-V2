@@ -80,15 +80,20 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
 
   const sb = createPublicClient();
 
-  // 1. Charge la categorie
+  // 1. Charge la categorie (peut etre une macro ou un skill avec parent)
   const { data: category } = await sb
     .from("categories")
-    .select("id, slug, name, description, seo_keywords")
+    .select("id, slug, name, description, seo_keywords, parent_category_id")
     .eq("slug", skill)
     .eq("vertical", TECH_VERTICAL)
     .maybeSingle();
 
   if (!category) notFound();
+
+  // Si la categorie a un parent_category_id, c'est un skill (ex. react).
+  // On filtre les pros par le category_id du parent (= macro categorie).
+  // Sinon (macro), on filtre directement par son category_id.
+  const filterCategoryId = category.parent_category_id || category.id;
 
   // 2. Count + liste des pros (estimated count pour speed)
   const { data: pros, count } = await sb
@@ -96,7 +101,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
     .select("id, name, slug, postal_code, address, years_experience, github_username, cities(name, slug, department_id)", {
       count: "estimated",
     })
-    .eq("category_id", category.id)
+    .eq("category_id", filterCategoryId)
     .eq("source", "sirene")
     .eq("is_active", true)
     .is("deleted_at", null)
