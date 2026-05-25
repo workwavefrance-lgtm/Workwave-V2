@@ -14,11 +14,28 @@ async function getServiceClient() {
   );
 }
 
-// Déterminer le plan à partir du price ID
-function getPlanFromPriceId(priceId: string): "monthly" | "annual" | null {
-  if (priceId === process.env.STRIPE_PRICE_MONTHLY_ID) return "monthly";
-  if (priceId === process.env.STRIPE_PRICE_ANNUAL_ID) return "annual";
-  return null;
+// Déterminer le plan + le produit (BTP ou AI) à partir du price ID
+// Workwave BTP Pro     : STRIPE_PRICE_{MONTHLY,ANNUAL}_ID (39€/mois, 390€/an)
+// Workwave AI Premium  : STRIPE_AI_PRICE_{MONTHLY,ANNUAL}_ID (29,90€/mois, 299€/an)
+type PlanInfo = {
+  plan: "monthly" | "annual" | null;
+  product: "btp" | "ai" | null;
+};
+
+function getPlanFromPriceId(priceId: string): PlanInfo {
+  if (priceId === process.env.STRIPE_PRICE_MONTHLY_ID) {
+    return { plan: "monthly", product: "btp" };
+  }
+  if (priceId === process.env.STRIPE_PRICE_ANNUAL_ID) {
+    return { plan: "annual", product: "btp" };
+  }
+  if (priceId === process.env.STRIPE_AI_PRICE_MONTHLY_ID) {
+    return { plan: "monthly", product: "ai" };
+  }
+  if (priceId === process.env.STRIPE_AI_PRICE_ANNUAL_ID) {
+    return { plan: "annual", product: "ai" };
+  }
+  return { plan: null, product: null };
 }
 
 // ============================================
@@ -58,7 +75,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
   const firstItem = subscription.items.data[0];
   const priceId = firstItem.price.id;
-  const plan = getPlanFromPriceId(priceId);
+  const { plan, product } = getPlanFromPriceId(priceId);
 
   await supabase
     .from("pros")
@@ -67,6 +84,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripe_subscription_id: subscriptionId,
       subscription_status: "active",
       subscription_plan: plan,
+      subscription_product: product, // 'btp' | 'ai' | null (Phase 8)
       current_period_end: firstItem
         ? new Date(firstItem.current_period_end * 1000).toISOString()
         : null,
@@ -77,7 +95,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // Tracking (fire-and-forget)
   track(EVENTS.SUBSCRIPTION_COMPLETED, {
     proId: parseInt(proId),
-    metadata: { plan, customerId },
+    metadata: { plan, product, customerId },
   });
 }
 
@@ -90,7 +108,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   const firstItem = subscription.items.data[0];
   const priceId = firstItem?.price.id || "";
-  const plan = getPlanFromPriceId(priceId);
+  const { plan, product } = getPlanFromPriceId(priceId);
 
   // Mapper le statut Stripe vers notre statut DB
   // Valeurs autorisées en DB : none, trialing, active, past_due, canceled, free, suspended
@@ -124,16 +142,21 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     }
   }
 
+  // On ne reset PAS subscription_product si product === null (price ID inconnu).
+  // On l'override seulement si on a pu le determiner (cas normal).
+  const updateData: Record<string, unknown> = {
+    subscription_status: status,
+    subscription_plan: plan,
+    current_period_end: firstItem
+      ? new Date(firstItem.current_period_end * 1000).toISOString()
+      : null,
+    updated_at: new Date().toISOString(),
+  };
+  if (product !== null) updateData.subscription_product = product;
+
   await supabase
     .from("pros")
-    .update({
-      subscription_status: status,
-      subscription_plan: plan,
-      current_period_end: firstItem
-        ? new Date(firstItem.current_period_end * 1000).toISOString()
-        : null,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq("stripe_customer_id", customerId);
 }
 
