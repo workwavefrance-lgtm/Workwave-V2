@@ -138,9 +138,9 @@ export default function AiHomePage() {
           SECTION 1/5 — HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
-        {/* Socials flottantes verticales droite (desktop only) */}
+        {/* Socials flottantes verticales droite (xl+ only pour eviter overlap col droite a lg) */}
         <aside
-          className="hidden lg:flex flex-col gap-3 absolute right-6 top-1/2 -translate-y-1/2 z-20"
+          className="hidden xl:flex flex-col gap-3 absolute right-6 top-1/2 -translate-y-1/2 z-20"
           aria-label="Reseaux sociaux"
         >
           {[
@@ -305,7 +305,8 @@ export default function AiHomePage() {
                 </p>
               </div>
 
-              <div className="border-t border-[var(--ai-border-subtle)] pt-8">
+              {/* Bullet list cache sur mobile/tablet (redondant avec Section 4) */}
+              <div className="hidden lg:block border-t border-[var(--ai-border-subtle)] pt-8">
                 <p
                   className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-4"
                   style={{
@@ -371,8 +372,8 @@ export default function AiHomePage() {
           SECTION 2/5 — COMMENT CA MARCHE
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
-          <div className="max-w-2xl mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
+          <div className="max-w-2xl mb-12 sm:mb-16">
             <SectionLabel index={2} total={5} label="Methode" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase"
@@ -418,8 +419,8 @@ export default function AiHomePage() {
           SECTION 3/5 — CATEGORIES TECH
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12 sm:mb-16">
             <div className="max-w-2xl">
               <SectionLabel index={3} total={5} label="Categories" />
               <h2
@@ -516,8 +517,8 @@ export default function AiHomePage() {
           SECTION 4/5 — POURQUOI WORKWAVE AI
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
-          <div className="max-w-2xl mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
+          <div className="max-w-2xl mb-12 sm:mb-16">
             <SectionLabel index={4} total={5} label="Pourquoi nous" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase"
