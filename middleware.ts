@@ -32,6 +32,7 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isProRoute = pathname.startsWith("/pro/dashboard");
+  const isAiRoute = pathname.startsWith("/ai/dashboard");
   const isAdminPage = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
   const isAdminApi = pathname.startsWith("/api/admin");
   const isAdminLogin = pathname === "/admin/login";
@@ -41,11 +42,23 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Routes pro dashboard : vérifier la session
+  // Routes pro dashboard (BTP) : vérifier la session
   if (isProRoute) {
     if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/pro/connexion";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  // Routes AI dashboard (tech) : vérifier la session (defense en profondeur,
+  // le layout.tsx fait deja un check + verif category_id 43-48, mais le
+  // middleware bloque plus tot et evite de charger un layout/page inutilement)
+  if (isAiRoute) {
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/ai/connexion";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
@@ -102,5 +115,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/pro/dashboard/:path*", "/admin/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/pro/dashboard/:path*",
+    "/ai/dashboard/:path*",
+    "/admin/:path*",
+    "/api/admin/:path*",
+  ],
 };
