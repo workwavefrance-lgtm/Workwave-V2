@@ -6,6 +6,9 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
 import { SPECIALTIES } from "@/lib/specialties";
+import { TECH_CITIES } from "@/lib/data/tech-cities";
+import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
+import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 
 // Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
 // donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
@@ -28,12 +31,24 @@ const SUPABASE_PAGE_SIZE = 5000;
 // 1 : cat x dept
 // 2 : cat x ville
 // 3 : specialites
+// 4 : Workwave AI (/ai/* — landing + categories + skills + villes + dept)
 // 100+N : pros batch N
 const SITEMAP_STATIC = 0;
 const SITEMAP_CAT_DEPT = 1;
 const SITEMAP_CAT_CITY = 2;
 const SITEMAP_SPECIALTY = 3;
+const SITEMAP_AI = 4;
 const SITEMAP_PROS_OFFSET = 100;
+
+// Categories tech utilisees pour /ai/* (Workwave AI)
+const AI_CATEGORIES = [
+  "intelligence-artificielle",
+  "developpement-web",
+  "cloud-devops",
+  "no-code-automation",
+  "data-analytics",
+  "design-produit",
+];
 
 // ============================================================================
 // generateSitemaps() : declare les sub-sitemaps
@@ -59,6 +74,7 @@ export async function generateSitemaps() {
     { id: SITEMAP_CAT_DEPT },
     { id: SITEMAP_CAT_CITY },
     { id: SITEMAP_SPECIALTY },
+    { id: SITEMAP_AI },
   ];
   for (let i = 0; i < proSitemapsCount; i++) {
     sitemaps.push({ id: SITEMAP_PROS_OFFSET + i });
@@ -79,9 +95,73 @@ export default async function sitemap(props: {
   if (numId === SITEMAP_CAT_DEPT) return buildCategoryDeptUrls();
   if (numId === SITEMAP_CAT_CITY) return buildCategoryCityUrls();
   if (numId === SITEMAP_SPECIALTY) return buildSpecialtyUrls();
+  if (numId === SITEMAP_AI) return buildAiUrls();
   if (numId >= SITEMAP_PROS_OFFSET)
     return buildProsUrls(numId - SITEMAP_PROS_OFFSET);
   return [];
+}
+
+// ============================================================================
+// 4. Workwave AI : /ai/* (landing + categories + skills + villes + dept)
+// ============================================================================
+async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+
+  // 4 pages racines /ai/* indexables (les pages noindex comme /deposer,
+  // /inscription, /connexion, /succes ne sont PAS dans le sitemap).
+  const aiStatic: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/ai`, lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: `${BASE_URL}/ai/freelances`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE_URL}/ai/tarifs`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/ai/pour-les-freelances`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${BASE_URL}/ai/barometre-tjm`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+  ];
+
+  // /ai/{category} — 6 categories racines
+  const aiCategories: MetadataRoute.Sitemap = AI_CATEGORIES.map((slug) => ({
+    url: `${BASE_URL}/ai/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  }));
+
+  // /ai/barometre-tjm/{skill} — 35 stacks
+  const aiBarometerSkills: MetadataRoute.Sitemap = Object.keys(TJM_REFERENCE).map(
+    (skill) => ({
+      url: `${BASE_URL}/ai/barometre-tjm/${skill}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    })
+  );
+
+  // /ai/{category}/{ville} — 6 cat x 60 villes = ~360 URLs
+  const aiCategoryCity: MetadataRoute.Sitemap = AI_CATEGORIES.flatMap((catSlug) =>
+    TECH_CITIES.map((city) => ({
+      url: `${BASE_URL}/ai/${catSlug}/${city.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }))
+  );
+
+  // /ai/{category}/dept/{dept-code} — 6 cat x 96 dept = 576 URLs
+  const aiCategoryDept: MetadataRoute.Sitemap = AI_CATEGORIES.flatMap((catSlug) =>
+    TECH_DEPARTMENTS.map((dept) => ({
+      url: `${BASE_URL}/ai/${catSlug}/dept/${dept.code}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.65,
+    }))
+  );
+
+  return [
+    ...aiStatic,
+    ...aiCategories,
+    ...aiBarometerSkills,
+    ...aiCategoryCity,
+    ...aiCategoryDept,
+  ];
 }
 
 // ============================================================================

@@ -10,7 +10,9 @@ import { BASE_URL } from "@/lib/constants";
 // Doit matcher PROS_PER_SITEMAP et SITEMAP_PROS_OFFSET dans app/sitemap.ts
 const PROS_PER_SITEMAP = 45000;
 const SITEMAP_PROS_OFFSET = 100;
-const FIXED_SITEMAP_IDS = [0, 1, 2, 3];
+// IDs fixes (cf. app/sitemap.ts) :
+//   0 static · 1 cat x dept · 2 cat x ville · 3 specialites · 4 Workwave AI
+const FIXED_SITEMAP_IDS = [0, 1, 2, 3, 4];
 
 export const revalidate = 86400; // 24h. L'index ne change que quand le
 // nombre total de pros depasse un multiple de 45000, donc 24h est large.
