@@ -5,6 +5,8 @@ import { createPublicClient } from "@/lib/supabase/public-client";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { TECH_CITIES, findTechCityBySlug } from "@/lib/data/tech-cities";
+import { getTjmReference, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
+import { getCompaniesByCity } from "@/lib/data/tech-companies-by-city";
 
 export const revalidate = 21600; // 6h ISR
 
@@ -120,6 +122,53 @@ export default async function SkillCityPage({ params }: CityPageProps) {
 
   const proList = pros || [];
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
+
+  // 2.bis. Charge le contenu SEO unique genere par Claude (anti-hallucination)
+  // Fallback gracieux si table vide ou pas encore generee pour cette page.
+  let aiContent: {
+    intro_html: string;
+    faq: Array<{ q: string; a: string }>;
+    meta_title?: string;
+    meta_description?: string;
+  } | null = null;
+  try {
+    const { data } = await sb
+      .from("ai_seo_content")
+      .select("intro_html, faq, meta_title, meta_description")
+      .eq("category_id", category.id)
+      .eq("city_slug", city.slug)
+      .maybeSingle();
+    if (data) {
+      aiContent = {
+        intro_html: data.intro_html,
+        faq: data.faq,
+        meta_title: data.meta_title || undefined,
+        meta_description: data.meta_description || undefined,
+      };
+    }
+  } catch {
+    // Table peut ne pas exister en dev, ou pas de droits — silent fallback
+  }
+
+  // 2.ter. TJM reference (verifie, source citee)
+  // Si le slug est un skill avec parent, on prend d'abord le skill puis fallback
+  // sur le parent macro pour le TJM (ex. "react" -> "developpement-web")
+  const tjmRef =
+    getTjmReference(category.slug) ||
+    (category.parent_category_id
+      ? (async () => {
+          const { data: parent } = await sb
+            .from("categories")
+            .select("slug")
+            .eq("id", category.parent_category_id)
+            .maybeSingle();
+          return parent ? getTjmReference(parent.slug) : null;
+        })()
+      : null);
+  const tjmResolved = tjmRef instanceof Promise ? await tjmRef : tjmRef;
+
+  // 2.quater. Entreprises tech locales verifiees (whitelist)
+  const localCompanies = getCompaniesByCity(city.slug);
 
   // 3. Schema.org Service + ItemList + FAQPage
   const serviceSchema = {
@@ -438,13 +487,192 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3/4 — FAQ
+          SECTION 3/6 — CONTEXTE + TARIFS (conditionnel, sourcees)
+          ═══════════════════════════════════════════════════════════════ */}
+      {(aiContent?.intro_html || tjmResolved) && (
+        <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+              {/* Intro Claude (creative, no numbers) */}
+              {aiContent?.intro_html && (
+                <div className="lg:col-span-7">
+                  <SectionLabel index={3} total={6} label="Contexte" />
+                  <h2
+                    className="font-black text-[var(--ai-text)] uppercase mb-6"
+                    style={{
+                      fontSize: "clamp(28px, 4vw, 44px)",
+                      lineHeight: 1,
+                      letterSpacing: "-0.04em",
+                    }}
+                  >
+                    Le marche {category.name.toLowerCase()}
+                    <br />
+                    <span className="text-[var(--ai-text-tertiary)]">a {city.name}.</span>
+                  </h2>
+                  <div
+                    className="prose prose-sm sm:prose-base max-w-none text-[var(--ai-text-secondary)] leading-relaxed [&>p]:mb-4 [&>p>strong]:text-[var(--ai-text)] [&>p>strong]:font-semibold"
+                    dangerouslySetInnerHTML={{ __html: aiContent.intro_html }}
+                  />
+                </div>
+              )}
+
+              {/* Bloc TJM verifie + source citee */}
+              {tjmResolved && (
+                <div className={aiContent?.intro_html ? "lg:col-span-5" : "lg:col-span-12"}>
+                  <SectionLabel index={4} total={6} label="Tarifs indicatifs" />
+                  <h3
+                    className="font-black text-[var(--ai-text)] uppercase mb-2"
+                    style={{
+                      fontSize: "clamp(20px, 2.8vw, 32px)",
+                      lineHeight: 1,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    TJM freelance
+                  </h3>
+                  <p className="text-[13px] text-[var(--ai-text-secondary)] mb-6 leading-relaxed">
+                    Fourchettes <strong>indicatives</strong> pour le marche francais {CURRENT_YEAR},
+                    selon l&apos;experience. Le tarif final depend du brief et du profil.
+                  </p>
+
+                  <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl overflow-hidden">
+                    {[
+                      { level: "Junior", subLabel: "0-3 ans", range: tjmResolved.junior },
+                      { level: "Mid-level", subLabel: "3-7 ans", range: tjmResolved.mid },
+                      { level: "Senior", subLabel: "7-10 ans", range: tjmResolved.senior },
+                      { level: "Expert", subLabel: "10+ ans", range: tjmResolved.expert },
+                    ].map((row, i, arr) => (
+                      <div
+                        key={row.level}
+                        className={`flex items-baseline justify-between px-5 py-4 ${
+                          i < arr.length - 1
+                            ? "border-b border-[var(--ai-border-subtle)]"
+                            : ""
+                        }`}
+                      >
+                        <div>
+                          <p className="text-[14px] font-semibold text-[var(--ai-text)]">
+                            {row.level}
+                          </p>
+                          <p className="text-[11px] text-[var(--ai-text-tertiary)]">
+                            {row.subLabel}
+                          </p>
+                        </div>
+                        <p
+                          className="text-[15px] sm:text-[16px] font-semibold text-[var(--ai-text)]"
+                          style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+                        >
+                          {row.range.min}-{row.range.max}{" "}
+                          <span className="text-[12px] text-[var(--ai-text-tertiary)]">
+                            €/jour
+                          </span>
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Mini-credit sources sous le tableau */}
+                  <p
+                    className="text-[11px] text-[var(--ai-text-tertiary)] mt-3 leading-relaxed"
+                    style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+                  >
+                    Source : Blog du Moderateur, Free-Work, Comet — voir refs en bas de page
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 4/6 — ECOSYSTEME TECH LOCAL (whitelist, verifie)
+          ═══════════════════════════════════════════════════════════════ */}
+      {localCompanies.length > 0 && (
+        <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <div className="max-w-2xl mb-10">
+              <SectionLabel index={5} total={6} label="Ecosysteme local" />
+              <h2
+                className="font-black text-[var(--ai-text)] uppercase mb-4"
+                style={{
+                  fontSize: "clamp(28px, 4vw, 44px)",
+                  lineHeight: 1,
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                Entreprises tech
+                <br />
+                <span className="text-[var(--ai-text-tertiary)]">a {city.name}.</span>
+              </h2>
+              <p className="text-sm sm:text-base text-[var(--ai-text-secondary)] leading-relaxed">
+                Quelques entreprises tech avec presence verifiable a {city.name} (sources publiques :
+                sites officiels + LinkedIn). Liste non exhaustive.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {localCompanies.slice(0, 12).map((co) => (
+                <a
+                  key={co.name}
+                  href={co.verified_url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="group bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl p-5 hover:border-[var(--ai-text)] transition-all duration-200"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div
+                      className="grid grid-cols-2 grid-rows-2 gap-[2px] w-5 h-5 transition-transform duration-200 group-hover:rotate-90"
+                      aria-hidden="true"
+                    >
+                      <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                      <div className="bg-[var(--ai-text)] rounded-[1px]" />
+                      <div className="bg-[var(--ai-text)] rounded-[1px]" />
+                      <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                    </div>
+                    <svg
+                      className="w-3.5 h-3.5 text-[var(--ai-text-tertiary)] group-hover:text-[var(--ai-accent)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M7 17L17 7M17 7H9M17 7V15"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-[15px] font-bold text-[var(--ai-text)] mb-1 leading-tight tracking-tight">
+                    {co.name}
+                  </h3>
+                  <p className="text-[12px] text-[var(--ai-text-secondary)] leading-relaxed">
+                    {co.description}
+                  </p>
+                </a>
+              ))}
+            </div>
+
+            <p
+              className="text-[11px] text-[var(--ai-text-tertiary)] mt-6 leading-relaxed"
+              style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+            >
+              Source : sites officiels des entreprises + verifications publiques.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 5/6 — FAQ (utilise aiContent.faq si dispo, fallback default)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-4">
-              <SectionLabel index={3} total={4} label="FAQ" />
+              <SectionLabel index={5} total={6} label="FAQ" />
               <h2
                 className="font-black text-[var(--ai-text)] uppercase mb-4"
                 style={{
@@ -461,7 +689,13 @@ export default async function SkillCityPage({ params }: CityPageProps) {
 
             <div className="lg:col-span-8">
               <ul className="space-y-3">
-                {(faqSchema.mainEntity as Array<{ name: string; acceptedAnswer: { text: string } }>).map((q, i) => (
+                {(aiContent?.faq && aiContent.faq.length > 0
+                  ? aiContent.faq.map((item) => ({
+                      name: item.q,
+                      acceptedAnswer: { text: item.a },
+                    }))
+                  : (faqSchema.mainEntity as Array<{ name: string; acceptedAnswer: { text: string } }>)
+                ).map((q, i) => (
                   <li key={q.name} className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl">
                     <details className="group">
                       <summary className="flex items-start gap-4 p-6 cursor-pointer list-none">
@@ -491,11 +725,11 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4/4 — VILLES SIMILAIRES + CTA
+          SECTION 6/6 — VILLES SIMILAIRES + CTA + SOURCES FOOTER
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <SectionLabel index={4} total={4} label="Autres villes" />
+          <SectionLabel index={6} total={6} label="Autres villes" />
           <h2
             className="font-black text-[var(--ai-text)] uppercase mb-8"
             style={{
@@ -569,6 +803,107 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                 </svg>
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            FOOTER SOURCES — methodologie + URLs cliquables
+            Garantie : toutes les donnees chiffrees sont sourcees publiquement.
+            ═══════════════════════════════════════════════════════════════ */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
+          <div className="border-t border-[var(--ai-border-subtle)] pt-12 grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div>
+              <p
+                className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-4"
+                style={{
+                  fontFamily: "var(--font-geist-mono), monospace",
+                  letterSpacing: "0.2em",
+                }}
+              >
+                // Sources &amp; methodologie
+              </p>
+              <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-4">
+                Toutes les donnees chiffrees (TJM, population, nombres) sont issues
+                de sources publiques verifiables. Workwave AI n&apos;invente aucun
+                chiffre. Les profils freelances affiches proviennent de la base
+                Sirene (INSEE).
+              </p>
+              <ul className="text-[12px] text-[var(--ai-text-secondary)] space-y-2 leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                  <span>
+                    Population {city.name} :{" "}
+                    <a
+                      href={`https://www.insee.fr/fr/statistiques/serie/000436389`}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-accent)]"
+                    >
+                      INSEE {CURRENT_YEAR}
+                    </a>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                  <span>
+                    Fiches freelances :{" "}
+                    <a
+                      href="https://www.data.gouv.fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/"
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-accent)]"
+                    >
+                      Base Sirene INSEE (data.gouv.fr)
+                    </a>
+                  </span>
+                </li>
+                {localCompanies.length > 0 && (
+                  <li className="flex items-start gap-2">
+                    <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                    <span>
+                      Entreprises tech locales : sites officiels (URLs cliquables
+                      sur chaque card)
+                    </span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {tjmResolved && (
+              <div>
+                <p
+                  className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-4"
+                  style={{
+                    fontFamily: "var(--font-geist-mono), monospace",
+                    letterSpacing: "0.2em",
+                  }}
+                >
+                  // Sources TJM
+                </p>
+                <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-4">
+                  Fourchettes de tarifs journaliers compilees a partir de trois
+                  observatoires publics du freelancing tech en France.
+                </p>
+                <ul className="text-[12px] text-[var(--ai-text-secondary)] space-y-2 leading-relaxed">
+                  {TJM_SOURCES.map((src) => (
+                    <li key={src.url} className="flex items-start gap-2">
+                      <span className="text-[var(--ai-accent)] mt-0.5">→</span>
+                      <span>
+                        <a
+                          href={src.url}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="font-semibold text-[var(--ai-text)] underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-accent)]"
+                        >
+                          {src.name}
+                        </a>{" "}
+                        — {src.title}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </section>
