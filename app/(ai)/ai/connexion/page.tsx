@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
-import { submitConnexionStub } from "./actions";
+import { submitConnexion } from "./actions";
 
 export const metadata: Metadata = {
   title: "Connexion — Workwave AI",
@@ -72,7 +72,7 @@ export default function ConnexionPage() {
           </p>
 
           {/* Form */}
-          <form className="space-y-5" action={submitConnexionStub}>
+          <form className="space-y-5" action={submitConnexion}>
             <div>
               <label
                 htmlFor="email"
