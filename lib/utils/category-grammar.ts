@@ -71,3 +71,75 @@ export function pluralizeCategoryName(categoryName: string): string {
   }
   return parts.join(" ");
 }
+
+/**
+ * Mappe le NOM DU METIER -> NOM DU SERVICE pour les phrases du type
+ * "projet de PEINTURE" (au lieu de "projet de peintre") ou "travaux
+ * de PLOMBERIE" (au lieu de "travaux de plombier").
+ *
+ * En francais le metier (plombier) est souvent different du nom du
+ * service (plomberie). Pour les services a domicile et l'aide a la
+ * personne, c'est generalement le meme mot (jardinage, menage,
+ * soutien scolaire).
+ */
+const SERVICE_LABEL_BY_CATEGORY_SLUG: Record<string, string> = {
+  // BTP — mappings necessaires
+  plombier: "plomberie",
+  electricien: "électricité",
+  macon: "maçonnerie",
+  peintre: "peinture",
+  carreleur: "carrelage",
+  menuisier: "menuiserie",
+  couvreur: "couverture",
+  chauffagiste: "chauffage",
+  charpentier: "charpente",
+  facadier: "façade",
+  serrurier: "serrurerie",
+  climaticien: "climatisation",
+  terrassier: "terrassement",
+  paysagiste: "paysagisme",
+  elagueur: "élagage",
+  architecte: "architecture",
+  "decorateur-interieur": "décoration intérieure",
+  plaquiste: "plâtrerie",
+  pisciniste: "piscine",
+  vitrier: "vitrerie",
+  ramoneur: "ramonage",
+  cuisiniste: "cuisine sur mesure",
+  videosurveillance: "vidéosurveillance",
+  "nettoyage-pro": "nettoyage professionnel",
+  // Domicile — generalement le nom est deja le nom du service
+  jardinage: "jardinage",
+  menage: "ménage",
+  repassage: "repassage",
+  "petit-bricolage": "bricolage",
+  "nettoyage-vitres": "nettoyage de vitres",
+  debarras: "débarras",
+  demenagement: "déménagement",
+  "livraison-de-courses": "livraison de courses",
+  "lavage-voiture-a-domicile": "lavage de voiture",
+  // Personne — pareil
+  "garde-d-enfants": "garde d'enfants",
+  "garde-enfants": "garde d'enfants",
+  "soutien-scolaire": "soutien scolaire",
+  "aide-aux-seniors": "aide aux seniors",
+  "aide-administrative": "aide administrative",
+  "cours-particuliers": "cours particuliers",
+  "accompagnement-handicap": "accompagnement",
+  "promenade-animaux": "promenade d'animaux",
+  "garde-animaux": "garde d'animaux",
+};
+
+/**
+ * Renvoie le NOM DU SERVICE associe a une categorie, pour les phrases
+ * du type "projet de {service}" / "travaux de {service}".
+ *
+ * Fallback : si la categorie n'est pas mappee, retourne le nom de la
+ * categorie en lowercase (cas des services a domicile et aide a la
+ * personne ou metier = service).
+ */
+export function getCategoryServiceLabel(categorySlug: string, categoryName: string): string {
+  const mapped = SERVICE_LABEL_BY_CATEGORY_SLUG[categorySlug];
+  if (mapped) return mapped;
+  return categoryName.toLowerCase().trim();
+}

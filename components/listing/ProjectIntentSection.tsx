@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SPECIALTIES } from "@/lib/specialties";
+import { getCategoryServiceLabel } from "@/lib/utils/category-grammar";
 
 /**
  * Section "Quel est votre projet de [metier] a [ville] ?"
@@ -61,7 +62,7 @@ export default function ProjectIntentSection({
         id="project-intent-title"
         className="text-lg sm:text-xl font-semibold tracking-tight text-[var(--text-primary)] mb-1"
       >
-        Quel est votre projet de {categoryName.toLowerCase()} à {locationName} ?
+        Quel est votre projet de {getCategoryServiceLabel(categorySlug, categoryName)} à {locationName} ?
       </h2>
       <p className="text-sm text-[var(--text-secondary)] mb-5">
         Décrivez votre besoin en 30 secondes — nous transmettons votre demande à 3 artisans qualifiés. Gratuit, sans engagement.
