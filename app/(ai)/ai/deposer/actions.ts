@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { qualifyTechProject } from "@/lib/ai/qualify-tech-project";
 import { routeTechProject } from "@/lib/routing/route-tech-project";
 import { sendAiProjectNotification } from "@/lib/email/send-ai-project-notification";
+import { sendProjectToAiFreelance } from "@/lib/email/send-ai-project-to-freelance";
 
 /**
  * Server Action de soumission de projet tech.
@@ -202,6 +203,34 @@ export async function submitTechProject(formData: FormData): Promise<void> {
     } else {
       // unrouted = pas trouve de freelance
       await sb.from("projects").update({ status: "unrouted" }).eq("id", project.id);
+    }
+  }
+
+  // ─── 6 bis. Phase 8 : email aux freelances Premium AI routes ─────────
+  // Seuls les abonnes recoivent un email (les autres voient le projet dans
+  // leur dashboard /ai/dashboard/projets). Le mail est envoye en await
+  // pour ne pas perdre l'envoi (lecon 24/05).
+  if (!isSuspicious && routed.length > 0) {
+    for (const freelance of routed) {
+      if (!freelance.isPremium || !freelance.email) continue;
+      const firstName = freelance.name.split(" ")[0] || "Freelance";
+      const r = await sendProjectToAiFreelance({
+        freelanceEmail: freelance.email,
+        freelanceFirstName: firstName,
+        projectId: project.id,
+        projectTitle: title,
+        projectDescription: description,
+        projectBudget: BUDGET_LABELS[budget] || budget || null,
+        projectTimeline: TIMELINE_LABELS[timeline] || timeline || null,
+        projectCategoryName: finalCategoryName,
+        clientCity: null,
+      });
+      if (!r.ok) {
+        console.warn(
+          `[submitTechProject] email to freelance ${freelance.id} failed:`,
+          r.error
+        );
+      }
     }
   }
 
