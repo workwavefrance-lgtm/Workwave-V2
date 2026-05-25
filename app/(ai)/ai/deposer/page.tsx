@@ -178,6 +178,7 @@ export default function DeposerPage() {
                   type="text"
                   name="title"
                   required
+                  maxLength={200}
                   placeholder="Ex : Refonte de notre app mobile React Native"
                   className="w-full h-12 px-4 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                 />
@@ -199,6 +200,7 @@ export default function DeposerPage() {
                   name="description"
                   required
                   rows={8}
+                  maxLength={5000}
                   placeholder="Decrivez le contexte de votre projet, les objectifs, les contraintes techniques, le perimetre attendu. Soyez precis : c'est ce qui nous permet de choisir les bons profils."
                   className="w-full px-4 py-3 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all resize-y"
                 />
@@ -372,6 +374,8 @@ export default function DeposerPage() {
                     type="text"
                     name="contactName"
                     required
+                    maxLength={100}
+                    autoComplete="name"
                     className="w-full h-12 px-4 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                   />
                 </div>
@@ -390,6 +394,8 @@ export default function DeposerPage() {
                     id="company"
                     type="text"
                     name="company"
+                    maxLength={150}
+                    autoComplete="organization"
                     className="w-full h-12 px-4 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                   />
                 </div>
@@ -412,6 +418,7 @@ export default function DeposerPage() {
                     type="email"
                     name="contactEmail"
                     required
+                    maxLength={200}
                     placeholder="vous@entreprise.fr"
                     className="w-full h-12 px-4 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                     autoComplete="email"
@@ -432,12 +439,27 @@ export default function DeposerPage() {
                     id="contactPhone"
                     type="tel"
                     name="contactPhone"
+                    maxLength={30}
+                    autoComplete="tel"
                     placeholder="+33 6 12 34 56 78"
                     className="w-full h-12 px-4 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                   />
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* ───────── Honeypot anti-bot (champ cache pour humains, visible aux bots) ───────── */}
+          {/* Les bots remplissent les champs name=website automatiquement, les humains ne le voient pas */}
+          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
+            <label htmlFor="hp_website">Site web (ne pas remplir)</label>
+            <input
+              id="hp_website"
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+            />
           </div>
 
           {/* ───────── Submit ───────── */}

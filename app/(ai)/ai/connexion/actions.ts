@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { sendSigninCode } from "@/lib/ai/auth/signin-code";
+import { isValidEmail } from "@/lib/ai/helpers";
 
 /**
  * Server Action /ai/connexion (Phase 8) :
@@ -22,9 +23,11 @@ import { sendSigninCode } from "@/lib/ai/auth/signin-code";
  */
 
 export async function submitConnexion(formData: FormData): Promise<void> {
-  const email = String(formData.get("email") || "").trim().toLowerCase();
+  // Truncate defensif (anti FormData forge) + lowercase
+  const email = String(formData.get("email") || "").trim().toLowerCase().slice(0, 200);
 
-  if (!email || !email.includes("@")) {
+  // Regex stricte au lieu de juste check "@" (defense en profondeur)
+  if (!isValidEmail(email)) {
     redirect("/ai/connexion?error=invalid_email");
   }
 

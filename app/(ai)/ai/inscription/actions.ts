@@ -8,6 +8,19 @@ import {
   type SignupData,
 } from "@/lib/email/send-ai-signup-emails";
 import { activateAiSignup } from "@/lib/ai/auth/activate-signup";
+import { isValidEmail } from "@/lib/ai/helpers";
+
+// Max length defensifs (cote serveur)
+const MAX_NAME = 100;
+const MAX_EMAIL = 200;
+const MAX_URL = 500;
+const MAX_SKILLS = 500;
+const MAX_BIO = 1000;
+const MAX_LOCATION = 100;
+
+function truncate(s: string, max: number): string {
+  return s.length > max ? s.slice(0, max) : s;
+}
 
 /**
  * Server Action pour /ai/inscription (Phase 8) :
@@ -49,28 +62,41 @@ function getServiceClient() {
 }
 
 export async function submitInscription(formData: FormData): Promise<void> {
-  // Validation
-  const firstName = String(formData.get("firstName") || "").trim();
-  const lastName = String(formData.get("lastName") || "").trim();
-  const email = String(formData.get("email") || "").trim().toLowerCase();
-  const github = String(formData.get("github") || "").trim() || null;
-  const linkedin = String(formData.get("linkedin") || "").trim() || null;
+  // Honeypot anti-bot (champ visible aux bots, cache aux humains)
+  const honeypot = String(formData.get("website") || "").trim();
+  if (honeypot.length > 0) {
+    // Simuler succes pour ne pas alerter le bot
+    redirect("/ai/inscription/succes?id=0&plan=free");
+  }
+
+  // Validation + truncation defensive
+  const firstName = truncate(String(formData.get("firstName") || "").trim(), MAX_NAME);
+  const lastName = truncate(String(formData.get("lastName") || "").trim(), MAX_NAME);
+  const email = truncate(String(formData.get("email") || "").trim().toLowerCase(), MAX_EMAIL);
+  const githubRaw = truncate(String(formData.get("github") || "").trim(), MAX_URL);
+  const github = githubRaw || null;
+  const linkedinRaw = truncate(String(formData.get("linkedin") || "").trim(), MAX_URL);
+  const linkedin = linkedinRaw || null;
   const categoryForm = String(formData.get("category") || "").trim();
-  const skills = String(formData.get("skills") || "").trim() || null;
-  const bio = String(formData.get("bio") || "").trim() || null;
+  const skillsRaw = truncate(String(formData.get("skills") || "").trim(), MAX_SKILLS);
+  const skills = skillsRaw || null;
+  const bioRaw = truncate(String(formData.get("bio") || "").trim(), MAX_BIO);
+  const bio = bioRaw || null;
   const tjmRaw = String(formData.get("tjmIndicatif") || "").trim();
   const tjm = tjmRaw ? parseInt(tjmRaw, 10) : null;
   const experienceRaw = String(formData.get("experience") || "").trim();
   const experienceYears = experienceRaw ? parseInt(experienceRaw, 10) : null;
   const availability = String(formData.get("availability") || "").trim() || null;
-  const location = String(formData.get("location") || "").trim() || null;
+  const locationRaw = truncate(String(formData.get("location") || "").trim(), MAX_LOCATION);
+  const location = locationRaw || null;
   const plan = (String(formData.get("plan") || "free").trim() as "free" | "premium");
   const cgu = formData.get("cgu") === "on";
 
   if (!firstName || !lastName || !email || !categoryForm || !cgu) {
     redirect("/ai/inscription?error=missing_fields");
   }
-  if (!email.includes("@")) {
+  // Validation format email (regex stricte, plus solide que juste "@")
+  if (!isValidEmail(email)) {
     redirect("/ai/inscription?error=invalid_email");
   }
 

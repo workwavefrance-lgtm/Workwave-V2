@@ -6,6 +6,20 @@ import { qualifyTechProject } from "@/lib/ai/qualify-tech-project";
 import { routeTechProject } from "@/lib/routing/route-tech-project";
 import { sendAiProjectNotification } from "@/lib/email/send-ai-project-notification";
 import { sendProjectToAiFreelance } from "@/lib/email/send-ai-project-to-freelance";
+import { isValidEmail } from "@/lib/ai/helpers";
+
+// Max length defensifs (cote serveur, en miroir des maxLength HTML)
+const MAX_TITLE = 200;
+const MAX_DESCRIPTION = 5000;
+const MAX_STACK = 500;
+const MAX_NAME = 100;
+const MAX_COMPANY = 150;
+const MAX_EMAIL = 200;
+const MAX_PHONE = 30;
+
+function truncate(s: string, max: number): string {
+  return s.length > max ? s.slice(0, max) : s;
+}
 
 /**
  * Server Action de soumission de projet tech.
@@ -58,18 +72,32 @@ function getServiceClient() {
 }
 
 export async function submitTechProject(formData: FormData): Promise<void> {
-  // ─── 1. Extract + validate ─────────────────────────────────────────────
+  // ─── 0. Honeypot anti-bot ──────────────────────────────────────────────
+  // Champ hidden visible uniquement aux bots. S'il est rempli, on simule
+  // un succes pour ne pas alerter le bot, mais on ignore la soumission.
+  const honeypot = String(formData.get("website") || "").trim();
+  if (honeypot.length > 0) {
+    // Simuler succes pour ne pas signaler au bot qu'il a ete detecte
+    redirect("/ai/deposer/succes?id=0");
+  }
+
+  // ─── 1. Extract + truncate defensif ────────────────────────────────────
+  // On truncate cote serveur en miroir des maxLength HTML pour parer aux
+  // bots qui forgent des FormData hors form HTML.
   const categoryFormValue = String(formData.get("category") || "").trim();
-  const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const stack = String(formData.get("stack") || "").trim() || null;
+  const title = truncate(String(formData.get("title") || "").trim(), MAX_TITLE);
+  const description = truncate(String(formData.get("description") || "").trim(), MAX_DESCRIPTION);
+  const stackRaw = truncate(String(formData.get("stack") || "").trim(), MAX_STACK);
+  const stack = stackRaw || null;
   const budget = String(formData.get("budget") || "").trim();
   const timeline = String(formData.get("timeline") || "").trim();
   const remoteOk = formData.get("remoteOk") === "on";
-  const contactName = String(formData.get("contactName") || "").trim();
-  const company = String(formData.get("company") || "").trim() || null;
-  const contactEmail = String(formData.get("contactEmail") || "").trim();
-  const contactPhone = String(formData.get("contactPhone") || "").trim() || null;
+  const contactName = truncate(String(formData.get("contactName") || "").trim(), MAX_NAME);
+  const companyRaw = truncate(String(formData.get("company") || "").trim(), MAX_COMPANY);
+  const company = companyRaw || null;
+  const contactEmail = truncate(String(formData.get("contactEmail") || "").trim().toLowerCase(), MAX_EMAIL);
+  const contactPhoneRaw = truncate(String(formData.get("contactPhone") || "").trim(), MAX_PHONE);
+  const contactPhone = contactPhoneRaw || null;
 
   if (
     !categoryFormValue ||
@@ -81,6 +109,11 @@ export async function submitTechProject(formData: FormData): Promise<void> {
     !contactEmail
   ) {
     redirect("/ai/deposer?error=missing_fields");
+  }
+
+  // Validation format email (defensif si bot bypass le type="email" HTML)
+  if (!isValidEmail(contactEmail)) {
+    redirect("/ai/deposer?error=invalid_email");
   }
 
   const categorySlug = CATEGORY_SLUG_MAP[categoryFormValue];

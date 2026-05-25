@@ -576,6 +576,18 @@ export default function InscriptionPage() {
             </p>
           </div>
 
+          {/* ───────── Honeypot anti-bot (champ visible aux bots, cache aux humains) ───────── */}
+          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
+            <label htmlFor="hp_website_signup">Site web (ne pas remplir)</label>
+            <input
+              id="hp_website_signup"
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
+
           {/* ───────── Footer form : CGU + submit ───────── */}
           <div className="border-t border-[var(--ai-border-subtle)] pt-10">
             <label className="flex items-start gap-3 mb-6 cursor-pointer">

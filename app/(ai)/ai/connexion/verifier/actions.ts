@@ -7,6 +7,7 @@ import {
   markSigninAttemptComplete,
   markSigninAttemptFailed,
 } from "@/lib/ai/auth/signin-code";
+import { isValidEmail } from "@/lib/ai/helpers";
 
 /**
  * Server Action verifyCode pour /ai/connexion/verifier :
@@ -45,13 +46,10 @@ async function getServerSupabaseClient() {
   );
 }
 
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 export async function verifyCode(formData: FormData): Promise<void> {
-  const email = String(formData.get("email") || "").trim().toLowerCase();
-  const code = String(formData.get("code") || "").trim();
+  // Truncate defensif anti FormData forge
+  const email = String(formData.get("email") || "").trim().toLowerCase().slice(0, 200);
+  const code = String(formData.get("code") || "").trim().slice(0, 10);
 
   // Validation stricte
   if (!isValidEmail(email)) {
