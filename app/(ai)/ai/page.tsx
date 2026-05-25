@@ -1,24 +1,97 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
 /**
  * Landing /ai (Workwave AI) — style Pixel Rise (validee Willy 25/05).
  *
- * Structure 5 sections :
- *   [1/5] Hero (watermark, socials, scroll)
- *   [2/5] Comment ca marche (3 etapes numerotees)
- *   [3/5] Categories tech (6 cards)
- *   [4/5] Pourquoi Workwave AI (4 differentiators)
- *   [5/5] Freelance + CTA final
+ * Structure 7 sections :
+ *   [1/7] Hero (watermark, socials, scroll)
+ *   [2/7] Comment ca marche (3 etapes numerotees)
+ *   [3/7] Categories tech (6 cards)
+ *   [4/7] Pourquoi Workwave AI (4 differentiators)
+ *   [5/7] TJM par technologie (teaser barometre)
+ *   [6/7] FAQ (8 questions strategiques SEO/AEO)
+ *   [7/7] Freelance + CTA final
+ *
+ * Schemas JSON-LD injectes : Organization + WebSite (SearchAction) +
+ * ItemList des 6 categories. La FAQ rend son propre FAQPage schema via
+ * AiFaqSection.
  *
  * Aucun composant BTP. Tokens .ai-theme scopes.
  */
 
+const SITE_URL = "https://workwave.fr";
+
 export const metadata: Metadata = {
-  title: "Workwave AI — Trouvez le freelance tech ideal en moins de 24h",
+  title:
+    "Workwave AI — Freelances tech (IA, dev, cloud, data) en France | Selection en 24h",
   description:
-    "Plateforme de mise en relation IA entre porteurs de projet et freelances tech (IA, dev, cloud, no-code, data, design). Matching automatique en moins de 24h. Inscription gratuite, sans credit, sans engagement. France et Europe.",
+    "Trouvez les freelances tech qui correspondent a votre projet en moins de 24h : IA / LLM, dev web (React, Next.js), cloud (AWS, GCP), no-code, data, design. Inscription gratuite, sans credit, sans commission. France et Europe.",
+  alternates: { canonical: `${SITE_URL}/ai` },
+  openGraph: {
+    title: "Workwave AI — Selection IA des meilleurs freelances tech",
+    description:
+      "IA, dev, cloud, data, design : on selectionne les 3 freelances qui correspondent a votre projet sous 24h. Gratuit, sans engagement.",
+    url: `${SITE_URL}/ai`,
+    siteName: "Workwave AI",
+    locale: "fr_FR",
+    type: "website",
+  },
 };
+
+// ─────────────────────────────────────────────────────────────────────
+// FAQ — 8 questions strategiques (SEO + AEO + GEO)
+// ─────────────────────────────────────────────────────────────────────
+const FAQ: FaqItem[] = [
+  {
+    q: "Comment fonctionne Workwave AI pour trouver un freelance ?",
+    a: "Vous decrivez votre projet en 60 secondes (categorie, contexte, budget, delai). Notre IA analyse votre demande et selectionne les 3 freelances de notre base qui correspondent le mieux en fonction de leur expertise, de leur historique de missions, de leur disponibilite et de leur tarif. Vous recevez les profils par email sous 24h, et les freelances vous contactent directement. Pas d'intermediaire, pas de commission.",
+  },
+  {
+    q: "C'est gratuit pour les clients ?",
+    a: "Oui. Deposer un projet, recevoir les 3 freelances selectionnes, echanger avec eux : tout est gratuit cote client. Workwave ne prend aucune commission sur la mission. Les freelances financent la plateforme via un abonnement optionnel de 29,90€/mois TTC qui leur permet de repondre aux projets.",
+  },
+  {
+    q: "Quels metiers tech sont couverts ?",
+    a: "6 categories principales avec des dizaines de specialites : Intelligence Artificielle (LLM, RAG, agents, fine-tuning, computer vision), Developpement Web (React, Next.js, Vue, mobile React Native, full-stack), Cloud & DevOps (AWS, GCP, Azure, Kubernetes, Terraform), No-Code & Automation (Bubble, Make, Zapier, Airtable, Webflow), Data & Analytics (BI, ETL, ML engineering, data science), Design Produit (UX/UI, prototypage, design system, Figma). Plus de 30 stacks couvertes au total.",
+  },
+  {
+    q: "En combien de temps est-on contacte par les freelances ?",
+    a: "Sous 24h dans 90% des cas, souvent en quelques heures. Notre IA travaille en continu et envoie les notifications immediatement apres analyse. Si votre projet est tres niche ou ne match aucun freelance dispo, vous recevez un message sous 24h pour preciser ou attendre l'arrivee de nouveaux profils.",
+  },
+  {
+    q: "Quel est le TJM moyen d'un freelance tech en France en 2026 ?",
+    a: "Selon notre barometre TJM (donnees Blog du Moderateur, Free-Work, Comet) : developpeur web React junior 350-500€/j, senior 600-850€/j ; ingenieur IA/ML junior 500-700€/j, senior 800-1200€/j ; DevOps junior 450-600€/j, senior 700-1000€/j. Paris ajoute generalement +10-20%. Le tarif final depend de la stack, de la duree de la mission et de la complexite du projet.",
+  },
+  {
+    q: "Le freelance travaille en remote ou en presentiel ?",
+    a: "Au choix. 80% de notre base travaille en 100% remote (la norme dans la tech francaise depuis 2020), 15% en hybride (remote + bureau client 1-2 jours/semaine), 5% sur site uniquement. Vous precisez vos contraintes (geo, presentiel obligatoire ou pas) dans le formulaire de depot et notre IA filtre en consequence.",
+  },
+  {
+    q: "Qui sont les freelances referenced sur Workwave AI ?",
+    a: "Freelances et micro-entreprises tech basees en France et en Europe (UE + UK), enregistres a l'INSEE (SIRET valide). Nous referencons aujourd'hui plus de 100 000 profils issus de la base Sirene avec codes NAF tech (62.01Z, 62.02A, 73.11Z, 70.22Z, etc.). Chaque freelance peut reclamer sa fiche pour la completer (bio, stack, TJM indicatif, portfolio, lien GitHub).",
+  },
+  {
+    q: "Comment Workwave AI se differencie de Malt, Comet, Free-Work ?",
+    a: "3 differences majeures : (1) Selection automatique par IA en moins de 24h, vs recherche manuelle dans des listes de centaines de profils. (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele freemium pour les freelances (29,90€/mois sans credits limites, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────
+// TJM teaser — top 8 skills avec fourchette TJM senior (source: barometre)
+// Donnees verifiees vs lib/data/tech-tjm-reference.ts
+// ─────────────────────────────────────────────────────────────────────
+const TJM_TEASER = [
+  { skill: "react", name: "React", min: 550, max: 850 },
+  { skill: "nextjs", name: "Next.js", min: 600, max: 900 },
+  { skill: "python", name: "Python", min: 500, max: 800 },
+  { skill: "ia-llm", name: "IA / LLM", min: 700, max: 1200 },
+  { skill: "aws", name: "AWS", min: 650, max: 1000 },
+  { skill: "kubernetes", name: "Kubernetes", min: 700, max: 1100 },
+  { skill: "data-engineering", name: "Data Engineering", min: 600, max: 950 },
+  { skill: "figma", name: "Design Figma", min: 450, max: 750 },
+];
 
 // ─────────────────────────────────────────────────────────────────────
 // Section helper : indicateur de pagination + label + titre H2
@@ -132,8 +205,78 @@ const WHY = [
 // Page
 // ─────────────────────────────────────────────────────────────────────
 export default function AiHomePage() {
+  // ── JSON-LD : Organization (entite Workwave AI) ────────────────────
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Workwave AI",
+    alternateName: "Workwave",
+    url: `${SITE_URL}/ai`,
+    logo: `${SITE_URL}/logo-workwave-ai.svg`,
+    description:
+      "Plateforme francaise de mise en relation IA entre porteurs de projet et freelances tech (IA, dev, cloud, data, no-code, design). Selection automatique sous 24h. Sans commission.",
+    foundingDate: "2026",
+    areaServed: { "@type": "Place", name: "France et Europe" },
+    sameAs: [
+      "https://www.linkedin.com/company/workwave-fr",
+      "https://twitter.com/workwave_fr",
+      "https://www.instagram.com/workwave.fr",
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: "contact@workwave.fr",
+      availableLanguage: ["French", "English"],
+    },
+  };
+
+  // ── JSON-LD : WebSite avec SearchAction (sitelinks searchbox) ──────
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Workwave AI",
+    url: `${SITE_URL}/ai`,
+    inLanguage: "fr-FR",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/ai/freelances?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  // ── JSON-LD : ItemList des 6 categories (couverture metiers) ───────
+  const categoriesItemList = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Categories freelances tech disponibles sur Workwave AI",
+    numberOfItems: CATEGORIES.length,
+    itemListElement: CATEGORIES.map((cat, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      url: `${SITE_URL}/ai/${cat.slug}`,
+      name: cat.name,
+      description: cat.skills,
+    })),
+  };
+
   return (
     <>
+      {/* JSON-LD schemas */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(categoriesItemList) }}
+      />
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 1/5 — HERO
           ═══════════════════════════════════════════════════════════════ */}
@@ -206,7 +349,7 @@ export default function AiHomePage() {
                   className="text-[11px] font-medium tracking-[0.2em] text-[var(--ai-text-tertiary)]"
                   style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                 >
-                  [ 01 / 05 ]
+                  [ 01 / 07 ]
                 </span>
                 <span className="h-px flex-1 max-w-[60px] bg-[var(--ai-border)]" />
                 <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
@@ -420,7 +563,7 @@ export default function AiHomePage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
           <div className="max-w-2xl mb-12 sm:mb-16">
-            <SectionLabel index={2} total={5} label="Methode" />
+            <SectionLabel index={2} total={7} label="Methode" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase"
               style={{
@@ -503,7 +646,7 @@ export default function AiHomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12 sm:mb-16">
             <div className="max-w-2xl">
-              <SectionLabel index={3} total={5} label="Categories" />
+              <SectionLabel index={3} total={7} label="Categories" />
               <h2
                 className="font-black text-[var(--ai-text)] uppercase"
                 style={{
@@ -600,7 +743,7 @@ export default function AiHomePage() {
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
           <div className="max-w-2xl mb-12 sm:mb-16">
-            <SectionLabel index={4} total={5} label="Pourquoi nous" />
+            <SectionLabel index={4} total={7} label="Pourquoi nous" />
             <h2
               className="font-black text-[var(--ai-text)] uppercase"
               style={{
@@ -648,7 +791,102 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5/5 — FREELANCES + CTA FINAL
+          SECTION 5/7 — TJM PAR TECHNOLOGIE (teaser barometre)
+          ═══════════════════════════════════════════════════════════════ */}
+      <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg-subtle)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
+          <SectionLabel index={5} total={7} label="TJM par stack" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 mb-12">
+            <div className="lg:col-span-5">
+              <h2
+                className="font-black text-[var(--ai-text)] uppercase mb-4"
+                style={{
+                  fontSize: "clamp(32px, 5vw, 56px)",
+                  lineHeight: 0.95,
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                Combien
+                <br />
+                <span className="text-[var(--ai-text-tertiary)]">
+                  ca coute ?
+                </span>
+              </h2>
+              <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed mb-6">
+                Les TJM des freelances tech senior (7+ ans) en France en 2026.
+                Donnees agregees de sources publiques (Blog du Moderateur,
+                Free-Work, Comet, Malt).
+              </p>
+              <Link
+                href="/ai/barometre-tjm"
+                className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-[var(--ai-text)] hover:text-[var(--ai-accent)] transition-colors"
+              >
+                Voir le barometre complet
+                <svg
+                  className="w-3.5 h-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 12h14M13 6l6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {TJM_TEASER.map((item) => (
+                  <Link
+                    key={item.skill}
+                    href={`/ai/barometre-tjm/${item.skill}`}
+                    className="group flex flex-col gap-1 p-4 bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-xl hover:border-[var(--ai-text)] hover:-translate-y-0.5 transition-all"
+                  >
+                    <span className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] tracking-wider">
+                      {item.name}
+                    </span>
+                    <span
+                      className="text-[15px] sm:text-[16px] font-bold text-[var(--ai-text)] tracking-tight"
+                      style={{ fontFamily: "var(--font-geist-mono), monospace" }}
+                    >
+                      {item.min}-{item.max}€
+                    </span>
+                    <span className="text-[10px] text-[var(--ai-text-tertiary)]">
+                      /jour · senior
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-4 leading-relaxed">
+                Source : barometre TJM Workwave AI 2026. Fourchettes indicatives
+                pour profils senior (7-10 ans d&apos;experience).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 6/7 — FAQ (FAQPage schema via AiFaqSection)
+          ═══════════════════════════════════════════════════════════════ */}
+      <AiFaqSection
+        id="faq"
+        title="Questions frequentes"
+        subtitle="Tout ce qu'il faut savoir sur Workwave AI avant de deposer un projet ou de creer votre profil freelance."
+        questions={FAQ}
+        sectionIndex={6}
+        sectionTotal={7}
+        sectionLabel="FAQ"
+      />
+
+      {/* ═══════════════════════════════════════════════════════════════
+          SECTION 7/7 — FREELANCES + CTA FINAL
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
         {/* Watermark bottom */}
@@ -672,7 +910,7 @@ export default function AiHomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             {/* Cote client */}
             <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl p-8 sm:p-10">
-              <SectionLabel index={5} total={5} label="Cote client" />
+              <SectionLabel index={7} total={7} label="Cote client" />
               <h2
                 className="font-black text-[var(--ai-text)] uppercase mb-4"
                 style={{
