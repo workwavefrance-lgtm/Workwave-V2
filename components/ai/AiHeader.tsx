@@ -21,8 +21,8 @@ import { useEffect, useState } from "react";
  */
 
 const NAV_ITEMS = [
-  { href: "/ai", label: "Trouver" },
-  { href: "/ai/pour-les-freelances", label: "Freelances" },
+  { href: "/ai#methode", label: "Comment ca marche" },
+  { href: "/ai/pour-les-freelances", label: "Pour freelances" },
   { href: "/ai/tarifs", label: "Tarifs" },
 ];
 
@@ -144,12 +144,35 @@ export default function AiHeader() {
               FR
             </button>
 
-            {/* CTA desktop */}
+            {/* Connexion en lien texte (md+) */}
             <Link
               href="/ai/connexion"
-              className="hidden md:inline-flex items-center h-10 px-5 text-[13px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors duration-150"
+              className="hidden md:inline-flex items-center h-10 px-3 text-[13px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors duration-150"
             >
               Connexion
+            </Link>
+
+            {/* CTA primary orange : Deposer un projet (md+) */}
+            <Link
+              href="/ai/deposer"
+              className="hidden md:inline-flex items-center h-10 px-5 text-[13px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors duration-150"
+              style={{ boxShadow: "var(--ai-shadow-sm)" }}
+            >
+              Deposer un projet
+              <svg
+                className="ml-1.5 w-3.5 h-3.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 12h14M13 6l6 6-6 6"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </Link>
 
             {/* Hamburger mobile (< md) — 44x44 tap target */}

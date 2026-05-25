@@ -45,8 +45,8 @@ const VS = [
   },
   {
     title: "vs Freelancer.com",
-    point: "France & Europe, profils premium",
-    desc: "Pas de concurrence avec des TJM a 50€/jour. Workwave AI cible le tech francophone et europeen, avec des TJM dans la realite du marche (400-1200€/jour).",
+    point: "Focus France & Europe",
+    desc: "Freelancer.com et Upwork c'est un marche mondial avec beaucoup d'offshore. Workwave AI cible le tech francophone et europeen, junior, senior, ou expert, du moment que le travail est de qualite. Vous fixez votre TJM, le client decide.",
   },
 ];
 
@@ -57,7 +57,7 @@ const FAQ = [
   },
   {
     q: "Comment l'IA selectionne-t-elle les briefs ?",
-    a: "Matching semantique sur l'expertise (tags + bio), filtres durs sur le TJM, la dispo et la categorie. Score composite pondere par l'historique de reponses. Les 3 meilleurs profils sont notifies par email a chaque brief.",
+    a: "Matching semantique sur l'expertise (tags + bio), score pondere par votre TJM indicatif, votre dispo et votre categorie. Le TJM n'est PAS un filtre dur : si un brief vous interesse en dessous, vous pouvez quand meme repondre. Les 3 meilleurs profils sont notifies par email a chaque brief.",
   },
   {
     q: "Combien de briefs vais-je recevoir ?",

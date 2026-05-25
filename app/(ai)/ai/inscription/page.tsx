@@ -340,11 +340,11 @@ export default function InscriptionPage() {
                       id="tjmIndicatif"
                       type="number"
                       name="tjmIndicatif"
-                      min="100"
+                      min="50"
                       max="3000"
                       step="50"
-                      placeholder="400"
-                      className="w-full h-12 pl-4 pr-12 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
+                      placeholder="Votre TJM"
+                      className="w-full h-12 pl-4 pr-16 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                       style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[13px] text-[var(--ai-text-tertiary)]">
