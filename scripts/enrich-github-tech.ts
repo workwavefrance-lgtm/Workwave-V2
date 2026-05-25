@@ -52,6 +52,37 @@ const supabase = createClient(
 const APPLY = process.argv.includes("--apply");
 const LIMIT_ARG = process.argv.find((a) => a.startsWith("--limit="));
 const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split("=")[1], 10) : 20;
+const BIG_CITIES = process.argv.includes("--big-cities");
+const POSTAL_ARG = process.argv.find((a) => a.startsWith("--postals="));
+
+// Postal prefixes ordonnes par densite tech (Paris en tete, capital)
+// 75 = Paris, 92/93/94/77/78/91/95 = banlieue IDF (massif tech)
+// 69 = Lyon/Rhone, 13 = Marseille, 31 = Toulouse, 33 = Bordeaux
+// 44 = Nantes, 59 = Lille, 35 = Rennes, 67 = Strasbourg, 06 = Nice
+// 34 = Montpellier, 38 = Grenoble
+const BIG_CITY_PREFIXES = [
+  "75", // Paris (capital)
+  "92", "93", "94", // Petite couronne
+  "77", "78", "91", "95", // Grande couronne
+  "69", // Lyon / Rhone
+  "13", // Marseille / Bouches-du-Rhone
+  "31", // Toulouse / Haute-Garonne
+  "33", // Bordeaux / Gironde
+  "44", // Nantes / Loire-Atlantique
+  "59", // Lille / Nord
+  "35", // Rennes / Ille-et-Vilaine
+  "67", // Strasbourg / Bas-Rhin
+  "06", // Nice / Alpes-Maritimes
+  "34", // Montpellier / Herault
+  "38", // Grenoble / Isere
+  "21", // Dijon
+];
+
+const POSTAL_PREFIXES: string[] | null = POSTAL_ARG
+  ? POSTAL_ARG.split("=")[1].split(",").map((p) => p.trim())
+  : BIG_CITIES
+    ? BIG_CITY_PREFIXES
+    : null;
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -159,13 +190,25 @@ function parseName(name: string): { firstName: string; lastName: string } | null
   };
 }
 
+// Liste de keywords location FR pour la verification post-search
+const FR_LOCATION_KEYWORDS = [
+  "france", "paris", "lyon", "marseille", "toulouse", "bordeaux",
+  "nantes", "rennes", "strasbourg", "lille", "nice", "montpellier",
+  "grenoble", "tours", "dijon", "angers", "reims", "le mans", "saint-etienne",
+  "brest", "limoges", "clermont", "amiens", "nimes", "metz", "besancon",
+  "ile-de-france", "idf", "occitanie", "bretagne", "normandie",
+  "provence", "aquitaine", "auvergne", "alsace", "fr", "français", "francais",
+];
+
 async function searchGitHub(
   firstName: string,
   lastName: string
 ): Promise<GitHubUser[]> {
-  // Query : fullname + location FR
-  const q = `${firstName} ${lastName} location:France`;
-  const url = `${SEARCH_API}?q=${encodeURIComponent(q)}&per_page=5`;
+  // Search par nom uniquement, location verifiee apres dans getUserDetails
+  // (filtre location:France GitHub matche que les profils contenant
+  // exactement "France" — trop restrictif, 99% des profils FR ne l'ont pas)
+  const q = `${firstName} ${lastName}`;
+  const url = `${SEARCH_API}?q=${encodeURIComponent(q)}&per_page=10`;
   try {
     const r = await fetch(url, {
       headers: {
@@ -220,26 +263,45 @@ async function main() {
   console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("Workwave AI — Enrich GitHub username pour pros tech");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
-  console.log(`Mode  : ${APPLY ? "✓ APPLY" : "○ DRY-RUN"}`);
-  console.log(`Limit : ${LIMIT}\n`);
+  console.log(`Mode    : ${APPLY ? "✓ APPLY" : "○ DRY-RUN"}`);
+  console.log(`Limit   : ${LIMIT}`);
+  console.log(
+    `Postals : ${POSTAL_PREFIXES ? POSTAL_PREFIXES.join(",") + " (grosses villes)" : "tous (France entiere)"}\n`
+  );
 
-  // Charge tech pros sans github_username
-  const { data: pros, error } = await supabase
-    .from("pros")
-    .select("id, name, postal_code, city_id")
-    .in("category_id", TECH_CATEGORY_IDS)
-    .eq("source", "sirene")
-    .is("github_username", null)
-    .eq("is_active", true)
-    .is("deleted_at", null)
-    .limit(LIMIT);
+  // Charge tech pros sans github_username, prioritise par postal prefix
+  const allPros: ProRow[] = [];
+  const prefixesToScan = POSTAL_PREFIXES || [""]; // "" = no filter
 
-  if (error) {
-    console.error("❌ Query error:", error);
-    process.exit(1);
+  for (const prefix of prefixesToScan) {
+    if (allPros.length >= LIMIT) break;
+    const remaining = LIMIT - allPros.length;
+
+    let q = supabase
+      .from("pros")
+      .select("id, name, postal_code, city_id")
+      .in("category_id", TECH_CATEGORY_IDS)
+      .eq("source", "sirene")
+      .is("github_username", null)
+      .eq("is_active", true)
+      .is("deleted_at", null);
+
+    if (prefix) q = q.like("postal_code", `${prefix}%`);
+
+    const { data, error } = await q.limit(remaining);
+    if (error) {
+      console.error("❌ Query error:", error);
+      process.exit(1);
+    }
+    const got = data || [];
+    allPros.push(...got);
+    if (prefix && got.length > 0) {
+      console.log(`[init] postal ${prefix}* : ${got.length} pros tech sans GitHub`);
+    }
   }
 
-  console.log(`[init] ${pros?.length || 0} pros tech sans GitHub a tester\n`);
+  console.log(`\n[init] Total ${allPros.length} pros a tester\n`);
+  const pros = allPros;
 
   let matched = 0;
   let skipped = 0;
@@ -264,32 +326,23 @@ async function main() {
 
     // Si plusieurs, on cherche celui qui matche le nom au mieux
     let bestMatch: GitHubUser | null = null;
-    if (candidates.length === 1) {
-      // Single result, verify via details
-      const details = await getUserDetails(candidates[0].login);
+    // Check chaque candidat (max 5 pour limiter le rate)
+    // Requirement strict pour eviter faux positifs :
+    //   - details.name DOIT matcher firstName + lastName
+    //   - details.location DOIT contenir un keyword FR
+    for (const cand of candidates.slice(0, 5)) {
+      const details = await getUserDetails(cand.login);
       await sleep(RATE_LIMIT_MS);
-      if (details && looksLikeName(details.name, parsed.firstName, parsed.lastName)) {
-        bestMatch = candidates[0];
+      if (!details) continue;
+      const nameMatch = looksLikeName(details.name, parsed.firstName, parsed.lastName);
+      const loc = (details.location || "").toLowerCase();
+      const isFR = FR_LOCATION_KEYWORDS.some((kw) => loc.includes(kw));
+      if (nameMatch && isFR) {
+        bestMatch = cand;
+        break;
       }
-    } else {
-      // Multiple : check each, prefer those with name match + FR location
-      for (const cand of candidates.slice(0, 3)) {
-        const details = await getUserDetails(cand.login);
-        await sleep(RATE_LIMIT_MS);
-        if (!details) continue;
-        if (
-          looksLikeName(details.name, parsed.firstName, parsed.lastName) &&
-          (details.location?.toLowerCase().includes("france") ||
-            details.location?.toLowerCase().includes("paris") ||
-            details.location?.toLowerCase().includes("lyon") ||
-            details.location?.toLowerCase().includes("bordeaux"))
-        ) {
-          bestMatch = cand;
-          break;
-        }
-      }
-      if (!bestMatch) ambiguous++;
     }
+    if (!bestMatch && candidates.length > 1) ambiguous++;
 
     if (bestMatch) {
       matched++;
