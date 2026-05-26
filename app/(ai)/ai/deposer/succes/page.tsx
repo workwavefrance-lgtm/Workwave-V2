@@ -64,9 +64,9 @@ export default async function DepostSuccesPage({
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10 max-w-xl mx-auto">
-            On selectionne pour vous les 3 freelances qui correspondent le mieux
-            a votre projet. Vous recevrez leurs profils par email sous 24h, et
-            ils vous contacteront directement.
+            Votre projet est en cours de diffusion a toute la communaute des
+            freelances tech FR. Ceux qui correspondent a votre besoin vont vous
+            contacter directement sous 24h.
           </p>
 
           {id && (
@@ -91,15 +91,15 @@ export default async function DepostSuccesPage({
             <ul className="space-y-3 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">01</span>
-                <span>On lit votre projet et on choisit 3 freelances qui correspondent a votre besoin.</span>
+                <span>Notre IA qualifie votre brief (categorie, mots-cles, budget).</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">02</span>
-                <span>Ils vous contactent directement sous 24h, par email ou telephone, avec leur proposition.</span>
+                <span>Email envoye en temps reel a toute la communaute des freelances tech inscrits.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">03</span>
-                <span>Vous comparez les offres et vous choisissez. Workwave ne prend aucune commission.</span>
+                <span>Les freelances pertinents vous contactent directement sous 24h. Vous choisissez. Aucune commission.</span>
               </li>
             </ul>
           </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import SubmitButton from "@/components/ai/SubmitButton";
 import { submitConnexion } from "./actions";
 
 export const metadata: Metadata = {
@@ -119,26 +120,28 @@ export default async function ConnexionPage({
               )}
             </div>
 
-            <button
-              type="submit"
+            <SubmitButton
+              pendingText="Envoi du code..."
               className="w-full h-12 px-6 text-[14px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors flex items-center justify-center"
             >
-              Recevoir mon code
-              <svg
-                className="ml-2 w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M5 12h14M13 6l6 6-6 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+              <span className="inline-flex items-center">
+                Recevoir mon code
+                <svg
+                  className="ml-2 w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 12h14M13 6l6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </SubmitButton>
           </form>
 
           {/* Switch to signup */}

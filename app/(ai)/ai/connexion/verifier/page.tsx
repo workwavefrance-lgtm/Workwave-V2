@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import SubmitButton from "@/components/ai/SubmitButton";
 import { verifyCode } from "./actions";
 
 export const metadata: Metadata = {
@@ -141,26 +142,28 @@ export default async function ConnexionVerifierPage({
               />
             </div>
 
-            <button
-              type="submit"
+            <SubmitButton
+              pendingText="Verification..."
               className="w-full h-12 px-6 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors flex items-center justify-center"
             >
-              Se connecter
-              <svg
-                className="ml-2 w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M5 12h14M13 6l6 6-6 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+              <span className="inline-flex items-center">
+                Se connecter
+                <svg
+                  className="ml-2 w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 12h14M13 6l6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </SubmitButton>
           </form>
 
           {/* Renvoyer un nouveau code */}

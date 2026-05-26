@@ -128,6 +128,14 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
   // Sinon (macro), on filtre directement par son category_id.
   const filterCategoryId = category.parent_category_id || category.id;
 
+  // Garde-fou : on ne liste QUE les pros tech reels (categories 43-48).
+  // Si une categorie a vertical='tech' par erreur de seed mais que son ID
+  // n'est PAS dans les 6 categories tech parentes, on retourne notFound().
+  // Sinon on ramene des pros non-tech qui 404 ensuite sur leur fiche.
+  if (![43, 44, 45, 46, 47, 48].includes(filterCategoryId)) {
+    notFound();
+  }
+
   // 2. Count + liste des pros (estimated count pour speed)
   const { data: pros, count } = await sb
     .from("pros")
@@ -306,7 +314,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
                       >
                         {getInitials(displayName)}
                       </div>
-                      {pro.years_experience != null && pro.years_experience > 0 && (
+                      {pro.years_experience != null && pro.years_experience > 0 && pro.years_experience <= 50 && (
                         <span
                           className="text-[11px] font-medium text-[var(--ai-text-tertiary)] tracking-wider"
                           style={{ fontFamily: "var(--font-geist-mono), monospace" }}

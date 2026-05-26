@@ -431,7 +431,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                     >
                       {getInitials(pro.name)}
                     </div>
-                    {pro.years_experience != null && pro.years_experience > 0 && (
+                    {pro.years_experience != null && pro.years_experience > 0 && pro.years_experience <= 50 && (
                       <span
                         className="text-[11px] font-medium text-[var(--ai-text-tertiary)] tracking-wider mt-3"
                         style={{ fontFamily: "var(--font-geist-mono), monospace" }}

@@ -48,11 +48,14 @@ const FAQ_FREELANCES_HUB: FaqItem[] = [
 export default async function FreelancesHubPage() {
   const sb = createPublicClient();
 
-  // 1. Charge les 6 categories tech
+  // 1. Charge UNIQUEMENT les 6 categories tech PARENTES (ids 43-48).
+  // Le filtre vertical='tech' seul ramene aussi les sous-categories
+  // (audiovisuel, finance, etc.) qui ont ete mal taggees ailleurs.
   const { data: categories } = await sb
     .from("categories")
     .select("id, slug, name, description")
     .eq("vertical", TECH_VERTICAL)
+    .in("id", [43, 44, 45, 46, 47, 48])
     .order("slug");
 
   if (!categories) return null;

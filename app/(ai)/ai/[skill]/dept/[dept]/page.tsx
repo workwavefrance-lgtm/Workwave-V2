@@ -297,7 +297,7 @@ export default async function SkillDeptPage({ params }: Props) {
                           <span className="text-[11px] font-medium text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
                             #{String(i + 1).padStart(2, "0")}
                           </span>
-                          {pro.years_experience != null && pro.years_experience > 0 && (
+                          {pro.years_experience != null && pro.years_experience > 0 && pro.years_experience <= 50 && (
                             <span className="text-[11px] text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
                               {pro.years_experience} ans
                             </span>

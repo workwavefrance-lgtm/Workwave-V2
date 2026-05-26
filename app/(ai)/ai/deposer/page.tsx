@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import SubmitButton from "@/components/ai/SubmitButton";
 import { submitTechProject } from "./actions";
 
 export const metadata: Metadata = {
@@ -512,27 +513,29 @@ export default async function DeposerPage({
               </span>
             </label>
 
-            <button
-              type="submit"
+            <SubmitButton
+              pendingText="Publication..."
               className="w-full sm:w-auto inline-flex items-center justify-center h-14 px-10 text-[15px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
               style={{ boxShadow: "var(--ai-shadow-sm)" }}
             >
-              Publier mon projet
-              <svg
-                className="ml-2 w-5 h-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M5 12h14M13 6l6 6-6 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+              <span className="inline-flex items-center">
+                Publier mon projet
+                <svg
+                  className="ml-2 w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 12h14M13 6l6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </SubmitButton>
 
             <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-4 leading-relaxed max-w-md">
               Aucun frais. Aucune commission. Vous negociez directement avec le

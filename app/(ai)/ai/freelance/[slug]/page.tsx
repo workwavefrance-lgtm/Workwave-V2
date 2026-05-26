@@ -83,7 +83,7 @@ export async function generateMetadata({ params }: FreelancePageProps): Promise<
   return {
     title: `${name} — Freelance ${category?.name || "Tech"} a ${cityName} — Workwave AI`,
     description: `${name}, freelance ${(category?.name || "tech").toLowerCase()} a ${cityName}.${
-      pro.years_experience ? ` ${pro.years_experience} ans d'experience.` : ""
+      pro.years_experience && pro.years_experience > 0 && pro.years_experience <= 50 ? ` ${pro.years_experience} ans d'experience.` : ""
     } Contactez via Workwave AI : matching IA, sans credit, sans commission.`,
     alternates: { canonical: `/ai/freelance/${pro.slug}` },
     openGraph: {
@@ -258,7 +258,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                     )}
                   </span>
                 )}
-                {pro.years_experience != null && pro.years_experience > 0 && (
+                {pro.years_experience != null && pro.years_experience > 0 && pro.years_experience <= 50 && (
                   <span className="inline-flex items-center gap-2">
                     <svg
                       className="w-3.5 h-3.5 text-[var(--ai-text-tertiary)]"
