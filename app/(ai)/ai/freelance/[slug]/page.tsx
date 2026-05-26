@@ -4,6 +4,14 @@ import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
+import {
+  getInitials,
+  getAvatarStyle,
+  getThemeColor,
+  getThemeColorHover,
+  getBadges,
+  monthsSince,
+} from "@/lib/ai/personalisation";
 
 export const revalidate = 21600; // ISR 6h
 
@@ -45,7 +53,7 @@ async function fetchPro(slug: string) {
   const { data, error } = await sb
     .from("pros")
     .select(
-      "id, name, slug, siret, postal_code, address, years_experience, github_username, founding_date, etat_admin, category_id, source, categories(slug, name, description, vertical), cities(name, slug, postal_code)"
+      "id, name, slug, siret, postal_code, address, years_experience, github_username, linkedin, description, skills, hourly_rate, available_for_remote, claimed_by_user_id, claimed_at, subscription_product, subscription_status, founding_date, etat_admin, category_id, source, avatar_color, theme_color, created_at, categories(slug, name, description, vertical), cities(name, slug, postal_code)"
     )
     .eq("slug", slug)
     .in("category_id", TECH_CATEGORY_IDS)
@@ -94,9 +102,20 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
 
   const displayName = titleCase(pro.name);
   const firstName = getFirstName(displayName);
+  const initials = getInitials(displayName);
   const category = Array.isArray(pro.categories) ? pro.categories[0] : pro.categories;
   const city = Array.isArray(pro.cities) ? pro.cities[0] : pro.cities;
   const cityName = city?.name ? titleCase(city.name) : null;
+
+  // Phase 12 — personnalisation : avatar + theme color + badges
+  const avatarStyle = getAvatarStyle(pro.avatar_color);
+  const themeMain = getThemeColor(pro.theme_color);
+  const themeHover = getThemeColorHover(pro.theme_color);
+  const monthsClaimed = monthsSince(pro.claimed_at) ?? undefined;
+  const badges = getBadges(pro, {
+    monthsSinceSubscription: monthsClaimed,
+    monthsSinceClaim: monthsClaimed,
+  });
 
   // Schema.org Person
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
@@ -160,6 +179,18 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
             <div className="lg:col-span-8">
               <SectionLabel index={1} total={3} label="Freelance tech" />
 
+              {/* Avatar perso (Phase 12 cool/fun) */}
+              <div
+                className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl font-black text-[28px] sm:text-[34px] mb-6 shadow-lg"
+                style={{
+                  ...avatarStyle,
+                  boxShadow: `0 16px 40px -12px ${themeMain}66`,
+                }}
+                aria-hidden="true"
+              >
+                {initials}
+              </div>
+
               <h1
                 className="font-black text-[var(--ai-text)] uppercase mb-6"
                 style={{
@@ -171,6 +202,27 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
               >
                 {displayName}
               </h1>
+
+              {/* Badges achievements (Phase 12) */}
+              {badges.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {badges.map((b) => (
+                    <span
+                      key={b.kind}
+                      title={b.description}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-full"
+                      style={{
+                        background: `${themeMain}15`,
+                        color: themeHover,
+                        border: `1px solid ${themeMain}33`,
+                      }}
+                    >
+                      <span aria-hidden="true">{b.emoji}</span>
+                      <span>{b.label}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {/* Meta inline */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-[var(--ai-text-secondary)] mb-8">

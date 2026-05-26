@@ -190,6 +190,27 @@ export type Pro = {
   hourly_rate_min: number | null;
   hourly_rate_max: number | null;
   subscription_product: "btp" | "ai" | null;
+  // Personnalisation Phase 12 (cool/fun) — palette 8 couleurs
+  avatar_color:
+    | "orange"
+    | "blue"
+    | "purple"
+    | "green"
+    | "pink"
+    | "red"
+    | "yellow"
+    | "cyan"
+    | null;
+  theme_color:
+    | "orange"
+    | "blue"
+    | "purple"
+    | "green"
+    | "pink"
+    | "red"
+    | "yellow"
+    | "cyan"
+    | null;
 };
 
 // ============================================

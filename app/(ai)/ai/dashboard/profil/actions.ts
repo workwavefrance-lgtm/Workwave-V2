@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { sanitizeProfileUrl, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { PERSONA_COLORS, type PersonaColor } from "@/lib/ai/personalisation";
 
 function getServiceClient() {
   return createServiceClient(
@@ -74,6 +75,22 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
     redirect("/ai/dashboard/profil?error=name_required");
   }
 
+  // Phase 12 — personnalisation (avatar_color + theme_color)
+  // Whitelist stricte : on n'accepte QUE les 8 couleurs autorisees.
+  // Si l'input est absent ou invalide, on retombe sur null (= orange par defaut).
+  const avatarColorRaw = String(formData.get("avatar_color") || "").trim();
+  const themeColorRaw = String(formData.get("theme_color") || "").trim();
+  const avatarColor: PersonaColor | null = PERSONA_COLORS.includes(
+    avatarColorRaw as PersonaColor
+  )
+    ? (avatarColorRaw as PersonaColor)
+    : null;
+  const themeColor: PersonaColor | null = PERSONA_COLORS.includes(
+    themeColorRaw as PersonaColor
+  )
+    ? (themeColorRaw as PersonaColor)
+    : null;
+
   // 5) Update via service (bypass RLS, mais on a deja check ownership)
   await service
     .from("pros")
@@ -85,6 +102,8 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
       linkedin: linkedin || null,
       years_experience: years,
       hourly_rate: rate,
+      avatar_color: avatarColor,
+      theme_color: themeColor,
       updated_at: new Date().toISOString(),
     })
     .eq("id", pro.id);

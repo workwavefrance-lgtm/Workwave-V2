@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
 import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
 const NAV_ITEMS = [
   { href: "/ai/dashboard", label: "Accueil", icon: "01" },
@@ -44,7 +45,8 @@ export default async function AiDashboardLayout({
 
   // 4) Render dashboard shell
   const proName = pro.name || "Freelance";
-  const firstInitial = (proName[0] || "F").toUpperCase();
+  const initials = getInitials(proName);
+  const avatarStyle = getAvatarStyle(pro.avatar_color);
 
   return (
     <div className="min-h-screen flex bg-[var(--ai-bg)]">
@@ -80,8 +82,12 @@ export default async function AiDashboardLayout({
         {/* Profile card */}
         <div className="p-6 border-b border-[var(--ai-border-subtle)]">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--ai-accent)] flex items-center justify-center text-white font-bold text-[15px]">
-              {firstInitial}
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[15px]"
+              style={avatarStyle}
+              aria-hidden="true"
+            >
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-semibold text-[var(--ai-text)] truncate">
@@ -168,8 +174,12 @@ export default async function AiDashboardLayout({
                 Workwave AI
               </span>
             </Link>
-            <div className="w-9 h-9 rounded-full bg-[var(--ai-accent)] flex items-center justify-center text-white font-bold text-[14px]">
-              {firstInitial}
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[14px]"
+              style={avatarStyle}
+              aria-hidden="true"
+            >
+              {initials}
             </div>
           </div>
         </header>

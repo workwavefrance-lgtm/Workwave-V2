@@ -2,6 +2,15 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import {
+  PERSONA_COLORS,
+  COLOR_HEX,
+  COLOR_HEX_DARKER,
+  COLOR_LABEL,
+  getInitials,
+  normalizeColor,
+  type PersonaColor,
+} from "@/lib/ai/personalisation";
 import { updateAiProfile } from "./actions";
 
 export const metadata: Metadata = {
@@ -129,6 +138,13 @@ export default async function AiDashboardProfilePage({
           />
         </div>
 
+        {/* ───────── Personnalisation Phase 12 (cool/fun) ───────── */}
+        <PersonalisationSection
+          name={pro.name || "Freelance"}
+          avatarColor={normalizeColor(pro.avatar_color)}
+          themeColor={normalizeColor(pro.theme_color)}
+        />
+
         <button
           type="submit"
           className="inline-flex items-center justify-center h-12 px-7 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
@@ -137,6 +153,133 @@ export default async function AiDashboardProfilePage({
         </button>
       </form>
     </div>
+  );
+}
+
+/**
+ * Section personnalisation Phase 12 : avatar_color + theme_color.
+ * 2 grilles de 8 couleurs, click pour selectionner via radio (preview live).
+ */
+function PersonalisationSection({
+  name,
+  avatarColor,
+  themeColor,
+}: {
+  name: string;
+  avatarColor: PersonaColor;
+  themeColor: PersonaColor;
+}) {
+  const initials = getInitials(name);
+  return (
+    <div className="pt-6 border-t border-[var(--ai-border-subtle)]">
+      <p
+        className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-1"
+        style={{
+          letterSpacing: "0.18em",
+          fontFamily: "var(--font-geist-mono), monospace",
+        }}
+      >
+        Personnalisation
+      </p>
+      <p className="text-[12px] text-[var(--ai-text-tertiary)] mb-6">
+        Choisissez vos couleurs : avatar (cercle d&apos;initiales) et accent (fiche publique).
+      </p>
+
+      {/* Avatar color selector */}
+      <fieldset className="mb-6">
+        <div className="flex items-center gap-4 mb-3">
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-[18px] shrink-0 transition-all"
+            style={{
+              background: `linear-gradient(135deg, ${COLOR_HEX[avatarColor]} 0%, ${COLOR_HEX_DARKER[avatarColor]} 100%)`,
+              color: "white",
+            }}
+            aria-hidden="true"
+          >
+            {initials}
+          </div>
+          <legend className="block text-[13px] font-semibold text-[var(--ai-text)]">
+            Couleur de l&apos;avatar
+          </legend>
+        </div>
+        <div className="grid grid-cols-8 gap-2 max-w-md">
+          {PERSONA_COLORS.map((c) => (
+            <ColorOption
+              key={c}
+              name="avatar_color"
+              value={c}
+              defaultChecked={avatarColor === c}
+              label={COLOR_LABEL[c]}
+            />
+          ))}
+        </div>
+      </fieldset>
+
+      {/* Theme color selector */}
+      <fieldset>
+        <div className="flex items-center gap-4 mb-3">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-all"
+            style={{
+              background: COLOR_HEX[themeColor],
+              boxShadow: `0 8px 24px -8px ${COLOR_HEX[themeColor]}80`,
+            }}
+            aria-hidden="true"
+          >
+            <span className="text-white font-bold text-[18px]">✦</span>
+          </div>
+          <legend className="block text-[13px] font-semibold text-[var(--ai-text)]">
+            Couleur d&apos;accent (fiche publique)
+          </legend>
+        </div>
+        <div className="grid grid-cols-8 gap-2 max-w-md">
+          {PERSONA_COLORS.map((c) => (
+            <ColorOption
+              key={c}
+              name="theme_color"
+              value={c}
+              defaultChecked={themeColor === c}
+              label={COLOR_LABEL[c]}
+            />
+          ))}
+        </div>
+      </fieldset>
+    </div>
+  );
+}
+
+/**
+ * Pastille de couleur cliquable (radio). Affiche un check si selected.
+ */
+function ColorOption({
+  name,
+  value,
+  defaultChecked,
+  label,
+}: {
+  name: string;
+  value: PersonaColor;
+  defaultChecked: boolean;
+  label: string;
+}) {
+  return (
+    <label
+      className="relative block cursor-pointer aspect-square"
+      title={label}
+    >
+      <input
+        type="radio"
+        name={name}
+        value={value}
+        defaultChecked={defaultChecked}
+        className="peer sr-only"
+      />
+      <span
+        className="block w-full h-full rounded-full border-2 border-transparent peer-checked:border-[var(--ai-text)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--ai-accent-subtle)] transition-all hover:scale-110"
+        style={{ background: COLOR_HEX[value] }}
+      />
+      <span className="sr-only">{label}</span>
+    </label>
   );
 }
 
