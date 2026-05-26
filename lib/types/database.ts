@@ -114,7 +114,7 @@ export type Pro = {
   description: string | null;
   logo_url: string | null;
   photos: string[];
-  source: "sirene" | "pagesjaunes" | "manual";
+  source: "sirene" | "pagesjaunes" | "manual" | "ai_signup";
   naf_code: string | null;
   created_at: string;
   updated_at: string;
