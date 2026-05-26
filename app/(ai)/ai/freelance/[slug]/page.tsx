@@ -57,7 +57,7 @@ async function fetchPro(slug: string) {
   const { data, error } = await sb
     .from("pros")
     .select(
-      "id, name, slug, siret, postal_code, address, years_experience, github_username, linkedin, description, skills, hourly_rate, available_for_remote, claimed_by_user_id, claimed_at, subscription_product, subscription_status, founding_date, etat_admin, category_id, source, avatar_color, theme_color, logo_url, created_at, categories(slug, name, description, vertical), cities(name, slug, postal_code)"
+      "id, name, slug, siret, postal_code, address, years_experience, github_username, linkedin, description, skills, hourly_rate, available_for_remote, claimed_by_user_id, claimed_at, subscription_product, subscription_status, founding_date, etat_admin, category_id, source, avatar_color, theme_color, logo_url, photos, created_at, categories(slug, name, description, vertical), cities(name, slug, postal_code)"
     )
     .eq("slug", slug)
     .in("category_id", TECH_CATEGORY_IDS)
@@ -590,6 +590,55 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          PORTFOLIO — Galerie de photos publiques (Phase 12 polish)
+          Affichee uniquement si le freelance a uploade des photos.
+          ═══════════════════════════════════════════════════════════════ */}
+      {pro.photos && Array.isArray(pro.photos) && pro.photos.length > 0 && (
+        <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+            <div className="mb-8">
+              <SectionLabel index={2} total={3} label="Portfolio" />
+              <h2
+                className="font-black text-[var(--ai-text)] uppercase mb-3"
+                style={{
+                  fontSize: "clamp(28px, 4vw, 44px)",
+                  lineHeight: 1,
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                Realisations
+                <br />
+                de <span className="text-[var(--ai-text-tertiary)]">{firstName}.</span>
+              </h2>
+              <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed max-w-2xl">
+                Selection de travaux, mockups et projets passes.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pro.photos.map((photoUrl: string, idx: number) => (
+                <a
+                  key={photoUrl + idx}
+                  href={photoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] hover:border-[var(--ai-text)] transition-colors block"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photoUrl}
+                    alt={`Realisation ${idx + 1} de ${displayName}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
           SECTION 3/3 — CTA TRAVAILLER AVEC X

@@ -256,3 +256,140 @@ export async function deleteAiAvatar(): Promise<void> {
 
   redirect("/ai/dashboard/profil?saved=1#avatar");
 }
+
+// ============================================
+// Portfolio photos (galerie sur fiche publique)
+// ============================================
+
+const MAX_PORTFOLIO_PHOTOS = 10;
+const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 Mo (photos plus grandes que l'avatar)
+const ALLOWED_PHOTO_MIMES = ["image/jpeg", "image/png", "image/webp"];
+
+function generatePhotoFileName(proId: number, originalName: string): string {
+  const ext = originalName.split(".").pop()?.toLowerCase() || "jpg";
+  const ts = Date.now();
+  const rand = Math.random().toString(36).slice(2, 8);
+  return `${proId}/portfolio-${ts}-${rand}.${ext}`;
+}
+
+/**
+ * Ajoute une photo au portfolio (galerie publique sur la fiche).
+ * Limite : MAX_PORTFOLIO_PHOTOS photos max par freelance.
+ * Stockage : bucket Supabase 'pro-photos' (partage avec BTP).
+ */
+export async function addAiPortfolioPhoto(formData: FormData): Promise<void> {
+  // 1) Auth
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/ai/connexion");
+
+  // 2) Recup pro avec son tableau photos actuel
+  const service = getServiceClient();
+  const { data: pro } = await service
+    .from("pros")
+    .select("id, slug, photos")
+    .eq("claimed_by_user_id", user.id)
+    .in("category_id", AI_CATEGORY_IDS)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!pro) redirect("/ai/connexion?error=no_pro");
+
+  // 3) Verifier la limite
+  const currentPhotos: string[] = Array.isArray(pro.photos) ? pro.photos : [];
+  if (currentPhotos.length >= MAX_PORTFOLIO_PHOTOS) {
+    redirect("/ai/dashboard/profil?error=portfolio_max#portfolio");
+  }
+
+  // 4) Recup fichier
+  const file = formData.get("photo") as File | null;
+  if (!file || file.size === 0) {
+    redirect("/ai/dashboard/profil?error=photo_no_file#portfolio");
+  }
+  if (!ALLOWED_PHOTO_MIMES.includes(file.type)) {
+    redirect("/ai/dashboard/profil?error=photo_invalid_type#portfolio");
+  }
+  if (file.size > MAX_PHOTO_SIZE) {
+    redirect("/ai/dashboard/profil?error=photo_too_large#portfolio");
+  }
+
+  // 5) Upload
+  const fileName = generatePhotoFileName(pro.id, file.name);
+  const { error: uploadError } = await service.storage
+    .from("pro-photos")
+    .upload(fileName, file, { contentType: file.type, upsert: false });
+  if (uploadError) {
+    console.error("[addAiPortfolioPhoto] upload failed:", uploadError.message);
+    redirect("/ai/dashboard/profil?error=photo_upload_failed#portfolio");
+  }
+
+  const { data: urlData } = service.storage.from("pro-photos").getPublicUrl(fileName);
+
+  // 6) Append URL au tableau photos
+  const newPhotos = [...currentPhotos, urlData.publicUrl];
+  await service
+    .from("pros")
+    .update({ photos: newPhotos, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+
+  // 7) Revalidate page publique
+  if (pro.slug) {
+    revalidatePath(`/ai/freelance/${pro.slug}`);
+  }
+
+  redirect("/ai/dashboard/profil?saved=1#portfolio");
+}
+
+/**
+ * Supprime une photo du portfolio par son URL.
+ */
+export async function deleteAiPortfolioPhoto(formData: FormData): Promise<void> {
+  const photoUrl = String(formData.get("photoUrl") || "").trim();
+  if (!photoUrl) {
+    redirect("/ai/dashboard/profil?error=photo_missing#portfolio");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/ai/connexion");
+
+  const service = getServiceClient();
+  const { data: pro } = await service
+    .from("pros")
+    .select("id, slug, photos")
+    .eq("claimed_by_user_id", user.id)
+    .in("category_id", AI_CATEGORY_IDS)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!pro) redirect("/ai/connexion?error=no_pro");
+
+  const currentPhotos: string[] = Array.isArray(pro.photos) ? pro.photos : [];
+  // Verif que la photo appartient bien au pro (anti-CSRF/spoof)
+  if (!currentPhotos.includes(photoUrl)) {
+    redirect("/ai/dashboard/profil?error=photo_not_yours#portfolio");
+  }
+
+  // Supprimer du storage Supabase (best-effort, on continue meme si echec)
+  const storagePath = photoUrl.split("/pro-photos/")[1];
+  if (storagePath) {
+    await service.storage.from("pro-photos").remove([storagePath]);
+  }
+
+  // Update photos array (filter)
+  const newPhotos = currentPhotos.filter((u) => u !== photoUrl);
+  await service
+    .from("pros")
+    .update({ photos: newPhotos, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+
+  if (pro.slug) {
+    revalidatePath(`/ai/freelance/${pro.slug}`);
+  }
+
+  redirect("/ai/dashboard/profil?saved=1#portfolio");
+}

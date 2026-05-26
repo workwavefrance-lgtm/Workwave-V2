@@ -11,7 +11,13 @@ import {
   normalizeColor,
   type PersonaColor,
 } from "@/lib/ai/personalisation";
-import { updateAiProfile, uploadAiAvatar, deleteAiAvatar } from "./actions";
+import {
+  updateAiProfile,
+  uploadAiAvatar,
+  deleteAiAvatar,
+  addAiPortfolioPhoto,
+  deleteAiPortfolioPhoto,
+} from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
 
 export const metadata: Metadata = {
@@ -26,7 +32,16 @@ const ERROR_MESSAGES: Record<string, string> = {
   avatar_invalid_type: "Format accepte : JPEG, PNG ou WebP.",
   avatar_too_large: "Photo trop lourde (max 2 Mo).",
   avatar_upload_failed: "Erreur d'upload. Reessayez.",
+  portfolio_max: "Limite de 10 photos atteinte. Supprimez-en une avant d'en ajouter.",
+  photo_no_file: "Aucun fichier selectionne.",
+  photo_invalid_type: "Format accepte : JPEG, PNG ou WebP.",
+  photo_too_large: "Photo trop lourde (max 5 Mo).",
+  photo_upload_failed: "Erreur d'upload. Reessayez.",
+  photo_missing: "Photo introuvable.",
+  photo_not_yours: "Photo introuvable.",
 };
+
+const MAX_PORTFOLIO_PHOTOS = 10;
 
 export default async function AiDashboardProfilePage({
   searchParams,
@@ -161,6 +176,82 @@ export default async function AiDashboardProfilePage({
             )}
           </div>
         </div>
+      </div>
+
+      {/* Portfolio (galerie photos publiques sur la fiche) */}
+      <div className="mb-10 pt-8 border-t border-[var(--ai-border-subtle)]" id="portfolio">
+        <p
+          className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-1"
+          style={{
+            letterSpacing: "0.18em",
+            fontFamily: "var(--font-geist-mono), monospace",
+          }}
+        >
+          Portfolio — Galerie publique
+        </p>
+        <p className="text-[12px] text-[var(--ai-text-tertiary)] mb-4">
+          Jusqu&apos;a {MAX_PORTFOLIO_PHOTOS} photos / captures de vos
+          projets, designs, mockups (max 5 Mo par photo, JPEG / PNG / WebP).
+          Visible sur votre fiche publique.
+        </p>
+
+        {/* Grille des photos existantes */}
+        {pro.photos && Array.isArray(pro.photos) && pro.photos.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+            {pro.photos.map((photoUrl: string, idx: number) => (
+              <div
+                key={photoUrl + idx}
+                className="relative group aspect-square rounded-xl overflow-hidden bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={photoUrl}
+                  alt={`Portfolio ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {/* Overlay supprimer au hover */}
+                <form
+                  action={deleteAiPortfolioPhoto}
+                  className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/50 transition-colors"
+                >
+                  <input type="hidden" name="photoUrl" value={photoUrl} />
+                  <SubmitButton
+                    pendingText=""
+                    className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center h-9 px-3 text-[12px] font-semibold rounded-lg bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
+                  >
+                    Supprimer
+                  </SubmitButton>
+                </form>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload form (si pas au max) */}
+        {(!pro.photos || !Array.isArray(pro.photos) || pro.photos.length < MAX_PORTFOLIO_PHOTOS) && (
+          <form
+            action={addAiPortfolioPhoto}
+            encType="multipart/form-data"
+            className="flex flex-wrap gap-2 items-center"
+          >
+            <input
+              type="file"
+              name="photo"
+              accept="image/jpeg,image/png,image/webp"
+              required
+              className="text-[12px] text-[var(--ai-text-secondary)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-semibold file:bg-[var(--ai-text)] file:text-white hover:file:bg-[#1F1F1F] file:cursor-pointer cursor-pointer"
+            />
+            <SubmitButton
+              pendingText="Upload..."
+              className="inline-flex items-center justify-center h-10 px-4 text-[13px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Ajouter une photo
+            </SubmitButton>
+            <span className="text-[11px] text-[var(--ai-text-tertiary)]">
+              {pro.photos && Array.isArray(pro.photos) ? pro.photos.length : 0} / {MAX_PORTFOLIO_PHOTOS}
+            </span>
+          </form>
+        )}
       </div>
 
       <form action={updateAiProfile} className="space-y-6">

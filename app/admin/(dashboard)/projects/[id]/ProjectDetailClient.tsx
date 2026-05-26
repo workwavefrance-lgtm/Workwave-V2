@@ -226,13 +226,48 @@ export default function ProjectDetailClient({
             </div>
           </Card>
 
-          {/* Routing */}
-          <Card title={`Routing (${leads.length} pros)`}>
-            {leads.length === 0 ? (
-              <p className="text-xs py-4 text-center" style={{ color: "var(--admin-text-tertiary)" }}>
-                Aucun pro n&apos;a reçu ce projet
-              </p>
-            ) : (
+          {/* Broadcast / Routing — Phase 11 model :
+              - AI projects (vertical='tech') sont broadcastes a TOUS les freelances inscrits.
+                broadcast_count = nombre de freelances ayant recu le mail.
+                Les leads (project_leads) sont crees A LA VOLEE quand un Premium clique
+                "J'ai contacte ce client", donc len(leads) = nb de Premium qui ont marque
+                comme contacte (pas tous les destinataires).
+              - BTP projects (vertical='btp') utilisent encore le routing top 3 (Sprint 5).
+                leads = pros selectionnes par l'IA. */}
+          {(() => {
+            const broadcastCount = project.broadcast_count as number | null;
+            const broadcastedAt = project.broadcasted_at as string | null;
+            const isAi = project.vertical === "tech";
+            return (
+              <Card
+                title={
+                  isAi
+                    ? `Broadcast (${broadcastCount ?? 0} freelances) — ${leads.length} contact${leads.length > 1 ? "s" : ""}`
+                    : `Routing (${leads.length} pros)`
+                }
+              >
+                {isAi && broadcastedAt && (
+                  <p className="text-xs mb-3" style={{ color: "var(--admin-text-tertiary)" }}>
+                    Diffuse a {broadcastCount ?? 0} freelance{(broadcastCount ?? 0) > 1 ? "s" : ""} le{" "}
+                    {new Date(broadcastedAt).toLocaleString("fr-FR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    .
+                  </p>
+                )}
+                {leads.length === 0 ? (
+                  <p className="text-xs py-4 text-center" style={{ color: "var(--admin-text-tertiary)" }}>
+                    {isAi
+                      ? broadcastCount && broadcastCount > 0
+                        ? "Aucun freelance Premium n'a encore marque ce projet comme contacte."
+                        : "Pas encore broadcasté (ou pas de freelances eligibles)."
+                      : "Aucun pro n'a reçu ce projet"}
+                  </p>
+                ) : (
               <div className="space-y-2">
                 {leads.map((lead) => {
                   const s = LEAD_STATUS[lead.status] || LEAD_STATUS.sent;
@@ -264,7 +299,9 @@ export default function ProjectDetailClient({
                 })}
               </div>
             )}
-          </Card>
+              </Card>
+            );
+          })()}
         </div>
 
         {/* Sidebar */}
