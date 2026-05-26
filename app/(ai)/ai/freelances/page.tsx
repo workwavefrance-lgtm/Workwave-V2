@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title:
     "Tous les freelances tech — IA, dev, cloud, data, design | Workwave AI",
   description:
-    "Annuaire complet des freelances tech francais et europeens : developpement web (React, Next.js), IA (LLM, RAG), cloud (AWS, GCP), DevOps, no-code (Bubble, Make), data analytics, design produit. Selection IA en moins de 24h, sans commission.",
+    "Annuaire complet des freelances tech francais et europeens : developpement web (React, Next.js), IA (LLM, RAG), cloud (AWS, GCP), DevOps, no-code (Bubble, Make), data analytics, design produit. Publiez votre projet, alertez 500+ freelances tech FR en temps reel, sans commission.",
   alternates: { canonical: `${SITE_URL}/ai/freelances` },
 };
 

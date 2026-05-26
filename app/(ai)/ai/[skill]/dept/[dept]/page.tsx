@@ -39,7 +39,7 @@ function buildDeptFaq(
     },
     {
       q: `Comment trouver rapidement un freelance ${skillName} en ${deptName} ?`,
-      a: `Deposez votre projet sur Workwave AI en 60 secondes : decrivez votre besoin, votre stack, votre budget, votre delai. Notre IA selectionne automatiquement les 3 freelances ${skillLower} les plus pertinents (en ${deptName}, en remote, ou dans la region ${department.region} selon vos contraintes) en moins de 24h. Aucune commission, gratuit cote client, les freelances vous contactent directement.`,
+      a: `Deposez votre projet sur Workwave AI en 60 secondes : decrivez votre besoin, votre stack, votre budget, votre delai. Notre IA qualifie votre brief puis on alerte en temps reel toute la communaute des freelances ${skillLower} (en ${deptName}, en remote, ou dans la region ${department.region} selon vos contraintes). Les freelances pertinents vous contactent directement sous 24h. Aucune commission, gratuit cote client, les freelances vous contactent directement.`,
     },
   ];
 }

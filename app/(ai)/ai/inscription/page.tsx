@@ -8,7 +8,7 @@ import { submitInscription } from "./actions";
 export const metadata: Metadata = {
   title: "Inscription freelance — Workwave AI",
   description:
-    "Creez votre profil freelance tech sur Workwave AI en 4 etapes. Inscription gratuite. Recevez les briefs qualifies par IA. Abonnement 29,90€/mois pour repondre.",
+    "Creez votre profil freelance tech sur Workwave AI en 4 etapes. Inscription gratuite. Recevez en temps reel tous les projets tech publies. Abonnement 29,90€/mois pour repondre.",
   robots: { index: false, follow: false },
 };
 

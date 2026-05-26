@@ -27,7 +27,7 @@ function buildCategoryFaq(
     },
     {
       q: `Comment choisir le bon freelance ${name} pour mon projet ?`,
-      a: `Trois criteres essentiels : (1) Expertise verifiable — demandez le portfolio, le GitHub, et des references clients. (2) Adequation au projet — un freelance senior sur React n'est pas forcement le meilleur sur Next.js 15 App Router. Verifiez la stack precise. (3) Disponibilite + budget aligne. Workwave AI fait ce travail pour vous : notre IA selectionne les 3 freelances ${nameLower} les plus pertinents en moins de 24h.`,
+      a: `Trois criteres essentiels : (1) Expertise verifiable — demandez le portfolio, le GitHub, et des references clients. (2) Adequation au projet — un freelance senior sur React n'est pas forcement le meilleur sur Next.js 15 App Router. Verifiez la stack precise. (3) Disponibilite + budget aligne. Workwave AI vous fait gagner du temps : votre brief est diffuse en temps reel a toute la communaute des freelances ${nameLower}, ceux qui matchent votre besoin vous contactent directement.`,
     },
     {
       q: `Les freelances ${name} travaillent-ils en remote ?`,
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: SkillPageProps): Promise<Meta
     title: `Freelances ${category.name} — Workwave AI`,
     description:
       category.description ||
-      `Trouvez le freelance ${category.name} ideal sur Workwave AI. Matching par IA en moins de 24h, gratuit, sans credit.`,
+      `Trouvez votre freelance ${category.name} sur Workwave AI. Publiez votre projet, alertez la communaute en temps reel. Gratuit, sans commission.`,
     alternates: { canonical: `/ai/${category.slug}` },
     openGraph: {
       title: `Freelances ${category.name} — Workwave AI`,
@@ -450,7 +450,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
               </span>
             </h2>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10">
-              Decrivez votre projet — on selectionne les 3 freelances
+              Decrivez votre projet — on alerte la communaute des freelances
               {" "}{category.name.toLowerCase()} qui vous correspondent le mieux
               en fonction de leur expertise, leur experience et leur disponibilite.
               Gratuit, sans engagement.

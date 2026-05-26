@@ -164,7 +164,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
     "@context": "https://schema.org",
     "@type": "Service",
     name: `Mise en relation freelance ${category.name} a ${city.name}`,
-    description: `Service de matching IA entre porteurs de projet et freelances ${category.name.toLowerCase()} a ${city.name}. Inscription gratuite, sans credit.`,
+    description: `Publiez votre projet ${category.name.toLowerCase()} a ${city.name} et alertez la communaute freelance en temps reel. Inscription gratuite, sans commission.`,
     provider: {
       "@type": "Organization",
       name: "Workwave AI",
@@ -209,7 +209,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
         name: `Comment trouver un bon freelance ${category.name.toLowerCase()} a ${city.name} ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Decrivez votre projet sur Workwave AI en 60 secondes. Notre IA selectionne les 3 freelances ${category.name.toLowerCase()} les plus pertinents a ${city.name} en moins de 24h, sur la base de leur expertise, leur experience et leur disponibilite. Vous discutez directement avec eux, sans intermediaire ni commission.`,
+          text: `Decrivez votre projet sur Workwave AI en 60 secondes. Notre IA qualifie votre brief puis on alerte en temps reel toute la communaute des freelances ${category.name.toLowerCase()} (a ${city.name}, en remote, ou ailleurs en France). Les freelances pertinents vous contactent directement, sans intermediaire ni commission.`,
         },
       },
       {
@@ -225,7 +225,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
         name: `Combien de temps pour recevoir des propositions ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `On selectionne en moins de 24h les 3 freelances ${category.name.toLowerCase()} qui correspondent le mieux a votre projet. Vous recevrez leurs propositions directement par email.`,
+          text: `On alerte en temps reel toute la communaute des freelances ${category.name.toLowerCase()}. Ceux qui correspondent a votre besoin vous contactent sous 24h, directement par email ou telephone.`,
         },
       },
     ],
@@ -276,7 +276,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
 
               <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed mb-8">
                 Les {proList.length || "meilleurs"} freelances {category.name.toLowerCase()} a {city.name} ({city.dept_name}) en {CURRENT_YEAR}.
-                Matching par IA en moins de 24h. Inscription gratuite, sans credit,
+                Broadcast en temps reel a la communaute. Inscription gratuite, sans credit,
                 sans commission.
               </p>
 
@@ -335,7 +335,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                   Matching IA
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed mt-2">
-                  On selectionne pour vous les 3 freelances qui correspondent le mieux a votre projet sur {city.name}.
+                  On alerte en temps reel toute la communaute des freelances tech a {city.name}. Reponse en moins de 24h.
                 </p>
               </div>
 

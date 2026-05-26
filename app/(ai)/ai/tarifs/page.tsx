@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const FAQ_PRICING: FaqItem[] = [
   {
     q: "Quel est le vrai prix pour un porteur de projet ?",
-    a: "0€. Pour toujours. Workwave AI ne facture jamais le cote client : depot de projet, selection IA, reception des 3 profils freelance, echanges, conclusion de la mission, tout est gratuit. Nous ne prenons aucune commission sur la mission, contrairement a Malt qui prend 10% jusqu'a 5 000€ par mission. Le modele est finance par l'abonnement Premium freelance (29,90€/mois TTC) qui est optionnel pour eux.",
+    a: "0€. Pour toujours. Workwave AI ne facture jamais le cote client : depot de projet, broadcast a la communaute, contact direct par les freelances, echanges, conclusion de la mission, tout est gratuit. Nous ne prenons aucune commission sur la mission, contrairement a Malt qui prend 10% jusqu'a 5 000€ par mission. Le modele est finance par l'abonnement Premium freelance (29,90€/mois TTC) qui est optionnel pour eux.",
   },
   {
     q: "Pourquoi 29,90€/mois pour les freelances ?",

@@ -5,7 +5,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
 export const metadata: Metadata = {
   title: "Projet envoye — Workwave AI",
   description:
-    "Votre projet a ete recu. On selectionne les 3 meilleurs freelances pour vous. Reponse en moins de 24h.",
+    "Votre projet a ete recu. Diffusion en temps reel a toute la communaute des freelances tech. Reponse en moins de 24h.",
   robots: { index: false, follow: false },
 };
 

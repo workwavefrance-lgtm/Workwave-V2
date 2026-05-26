@@ -323,8 +323,8 @@ const CATEGORIES = [
 
 const WHY = [
   {
-    title: "Matching par IA",
-    desc: "Selection semantique des 3 meilleurs profils en moins de 24h. Fini les listes interminables de candidatures.",
+    title: "Broadcast a la communaute",
+    desc: "Votre projet est diffuse en temps reel a 500+ freelances tech FR. Reponse en moins de 24h, sans paperasse.",
   },
   {
     title: "Inscription gratuite",
@@ -1478,7 +1478,7 @@ export default function AiHomePage() {
                 <span className="text-[var(--ai-accent)]">freelance ?</span>
               </h2>
               <p className="text-sm text-white/70 leading-relaxed mb-8 relative z-10">
-                Inscription gratuite. Recevez les briefs qualifies par IA
+                Inscription gratuite. Recevez tous les projets tech en temps reel
                 qui matchent votre profil. Repondez sans credit a 29,90€/mois
                 TTC. Resiliable a tout moment, aucun engagement.
               </p>

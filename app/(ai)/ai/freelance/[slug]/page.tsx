@@ -84,7 +84,7 @@ export async function generateMetadata({ params }: FreelancePageProps): Promise<
     title: `${name} — Freelance ${category?.name || "Tech"} a ${cityName} — Workwave AI`,
     description: `${name}, freelance ${(category?.name || "tech").toLowerCase()} a ${cityName}.${
       pro.years_experience && pro.years_experience > 0 && pro.years_experience <= 50 ? ` ${pro.years_experience} ans d'experience.` : ""
-    } Contactez via Workwave AI : matching IA, sans credit, sans commission.`,
+    } Contactez via Workwave AI : publiez votre projet, alertez la communaute. Sans credit, sans commission.`,
     alternates: { canonical: `/ai/freelance/${pro.slug}` },
     openGraph: {
       title: `${name} — Freelance ${category?.name || "Tech"} a ${cityName}`,
@@ -510,7 +510,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-8">
               Decrivez votre projet — notre IA verifie si {firstName} est
               compatible (dispo, TJM, expertise) et le contacte si oui.
-              Sinon, vous recevez les 3 meilleurs profils alternatifs.
+              Sinon, d&apos;autres freelances de la communaute vous contacteront directement.
               Gratuit, sans engagement.
             </p>
 

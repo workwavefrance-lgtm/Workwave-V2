@@ -29,9 +29,9 @@ function truncate(s: string, max: number): string {
  *      au slug DB (intelligence-artificielle, developpement-web, etc.)
  *   3. Qualifier le brief via Claude (suspicion + summary + keywords)
  *   4. Insert dans projects (vertical='tech', status='new', ai_qualification)
- *   5. Router vers 3 freelances tech (matching category + dept)
+ *   5. Broadcast a tous les freelances tech inscrits (email Resend)
  *   6. Insert project_leads pour chaque freelance route
- *   7. Email admin avec brief + 3 freelances routes
+ *   7. Email admin avec brief + stats du broadcast
  *   8. Redirect vers /ai/deposer/succes?id=N
  *
  * Note : pas d'email aux freelances (ils n'ont pas d'email Sirene).

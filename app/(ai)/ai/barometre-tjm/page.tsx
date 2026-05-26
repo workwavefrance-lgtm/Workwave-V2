@@ -327,7 +327,7 @@ export default async function BarometreTjmHubPage() {
                     <span className="text-[var(--ai-accent)]">au bon prix.</span>
                   </h3>
                   <p className="text-sm text-white/70 leading-relaxed mb-6">
-                    Decrivez votre projet, notre IA selectionne les 3 freelances qui correspondent
+                    Decrivez votre projet, on alerte en temps reel toute la communaute des freelances tech
                     a votre budget. Gratuit, sans engagement.
                   </p>
                   <Link
