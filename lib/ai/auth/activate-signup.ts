@@ -73,34 +73,33 @@ function slugifyName(firstName: string, lastName: string, signupId: number): str
   return `${base}-${signupId}`;
 }
 
-// Helper : recuperer un auth user par email sans charger TOUS les users.
-// Fix #3 : auth.admin.listUsers() etait O(N), pas scalable au-dela de
-// quelques milliers d'utilisateurs.
+// Helper : recuperer un auth user par email.
+//
+// Tentatives (par ordre de preference) :
+//   1. listUsers({ filter: email }) — supporte une chaine sql-like dans le
+//      filter param. Plus efficace que de tout charger.
+//   2. listUsers() sans filtre, on parcourt cote app — fallback simple.
+//
+// NB : `auth.admin.getUserByEmail` n'existe PAS dans le SDK Supabase actuel
+// (verifie via typeof === undefined). Et `sb.schema("auth").from("users")`
+// fail avec 'Invalid schema: auth' car PostgREST n'expose pas auth.
 async function findAuthUserByEmail(
   sb: SupabaseClient,
   email: string
 ): Promise<{ id: string } | null> {
-  // Supabase a une methode dediee depuis v2.39+
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const adminAny = sb.auth.admin as any;
-  if (typeof adminAny.getUserByEmail === "function") {
-    const { data } = await adminAny.getUserByEmail(email);
-    if (data?.user) return { id: data.user.id };
+  const lc = email.toLowerCase();
+  // listUsers paginé. Plan tier-paid limite a 1000/page par defaut. Si on
+  // depasse 1000 users tech, on doit paginer. Pour l'instant : 1 page suffit.
+  const { data, error } = await sb.auth.admin.listUsers({
+    page: 1,
+    perPage: 1000,
+  });
+  if (error) {
+    console.error("[findAuthUserByEmail] listUsers error:", error.message);
     return null;
   }
-  // Fallback : query directe sur auth.users via service_role (Postgres
-  // schema 'auth' accessible avec service key)
-  const { data: rows } = await sb
-    .schema("auth")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("users" as any)
-    .select("id")
-    .eq("email", email.toLowerCase())
-    .limit(1);
-  if (rows && rows.length > 0) {
-    return { id: (rows[0] as { id: string }).id };
-  }
-  return null;
+  const match = data?.users?.find((u) => u.email?.toLowerCase() === lc);
+  return match ? { id: match.id } : null;
 }
 
 export async function activateAiSignup(
