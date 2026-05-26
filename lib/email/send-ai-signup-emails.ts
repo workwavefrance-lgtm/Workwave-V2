@@ -131,8 +131,8 @@ export async function sendAiSignupWelcome(data: SignupData): Promise<void> {
   <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
     <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE AI ]</p>
 
-    <h1 style="font-size:26px;color:#0A0A0A;margin:0 0 12px 0;font-weight:800;letter-spacing:-0.02em;">Merci ${data.firstName} !</h1>
-    <p style="font-size:15px;color:#525252;line-height:1.6;margin:0 0 24px 0;">Votre inscription en tant que freelance <strong>${data.categoryName}</strong> sur Workwave AI est bien enregistree. Vous etes parmi les premiers freelances de la plateforme — on vous previent des l'ouverture du dashboard.</p>
+    <h1 style="font-size:26px;color:#0A0A0A;margin:0 0 12px 0;font-weight:800;letter-spacing:-0.02em;">Bienvenue ${data.firstName} !</h1>
+    <p style="font-size:15px;color:#525252;line-height:1.6;margin:0 0 24px 0;">Votre compte freelance <strong>${data.categoryName}</strong> sur Workwave AI est actif. Des qu&rsquo;un projet tech est publie, vous recevez un email en temps reel. Modele communaute : tous les freelances voient tous les projets, vous choisissez ceux qui vous interessent.</p>
 
     <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Recap de votre profil :</h3>
     <table style="font-size:13px;width:100%;border-collapse:collapse;background:#FAFAFA;padding:16px;border-radius:8px;">
@@ -144,14 +144,20 @@ export async function sendAiSignupWelcome(data: SignupData): Promise<void> {
 
     <h3 style="font-size:14px;color:#525252;margin:32px 0 12px 0;">Prochaines etapes :</h3>
     <ol style="font-size:14px;color:#525252;line-height:1.7;padding-left:20px;margin:0 0 24px 0;">
-      <li>Email d'activation des l'ouverture du dashboard freelance (tres bientot)</li>
-      <li>Acces a votre espace : profil public, briefs IA-matches, messagerie</li>
-      ${data.plan === "premium" ? `<li>Paiement Premium 29,90€/mois TTC active a l'activation (resiliable en 1 clic)</li>` : `<li>Profil visible sur la plateforme, vous pourrez passer Premium a tout moment</li>`}
-      <li>Reception de vos premiers briefs IA-matches sur votre boite mail</li>
+      <li>Connectez-vous a votre dashboard via <a href="${baseUrl}/ai/connexion" style="color:#FF6803;">workwave.fr/ai/connexion</a> (code a 6 chiffres envoye par mail)</li>
+      <li>Completez votre profil (bio, stack, GitHub, LinkedIn) pour gagner des badges</li>
+      ${data.plan === "premium" ? `<li>Activez votre abonnement Premium 29,90€/mois TTC dans <a href="${baseUrl}/ai/dashboard/abonnement" style="color:#FF6803;">le dashboard</a> (resiliable en 1 clic)</li>` : `<li>Profil visible sur la plateforme. Passez Premium quand vous voulez pour repondre aux projets.</li>`}
+      <li>Vous recevez par mail chaque projet tech publie en temps reel ${data.plan === "premium" ? "(reponse illimitee)" : "(reponse reservee aux Premium)"}</li>
     </ol>
 
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${baseUrl}/ai/connexion" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">
+        Acceder a mon dashboard &rarr;
+      </a>
+    </div>
+
     <p style="font-size:13px;color:#525252;line-height:1.6;margin:24px 0 0 0;">
-      Une question ? Repondez directement a ce mail, on est sur l'autre bout.
+      Une question ? Repondez directement a ce mail, on est sur l&rsquo;autre bout.
     </p>
 
     <hr style="border:none;border-top:1px solid #E5E5E5;margin:32px 0 16px 0;">

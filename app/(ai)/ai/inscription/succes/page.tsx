@@ -3,9 +3,9 @@ import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
 export const metadata: Metadata = {
-  title: "Inscription enregistree — Workwave AI",
+  title: "Compte cree — Workwave AI",
   description:
-    "Votre inscription freelance Workwave AI est bien enregistree. Vous recevrez un email des l'ouverture du dashboard freelance.",
+    "Votre compte freelance Workwave AI est actif. Connectez-vous a votre dashboard pour voir tous les projets tech en temps reel.",
   robots: { index: false, follow: false },
 };
 
@@ -38,12 +38,12 @@ export default async function InscriptionSuccesPage({
               className="text-[11px] font-medium tracking-[0.2em] text-[var(--ai-text-tertiary)]"
               style={{ fontFamily: "var(--font-geist-mono), monospace" }}
             >
-              [ INSCRIPTION ENREGISTREE ]
+              [ COMPTE FREELANCE ACTIF ]
             </span>
             <span className="h-px w-10 bg-[var(--ai-border)]" />
             <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
-              Early access
+              Pret a recevoir
             </span>
           </div>
 
@@ -57,13 +57,15 @@ export default async function InscriptionSuccesPage({
           >
             Bienvenue.
             <br />
-            <span className="text-[var(--ai-text-tertiary)]">Vous etes dans.</span>
+            <span className="text-[var(--ai-text-tertiary)]">
+              Tout est pret.
+            </span>
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10 max-w-xl mx-auto">
-            Votre inscription freelance Workwave AI est bien enregistree. Vous
-            etes parmi les premiers freelances de la plateforme — on vous
-            previent par mail des l&apos;ouverture du dashboard freelance.
+            Votre compte freelance Workwave AI est actif. Des qu&apos;un projet
+            tech est publie, vous recevez un email en temps reel. Connectez-vous
+            au dashboard pour voir tous les projets et filtrer par savoir-faire.
           </p>
 
           {id && (
@@ -88,19 +90,19 @@ export default async function InscriptionSuccesPage({
             <ul className="space-y-3 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">01</span>
-                <span>Email de confirmation envoye a votre adresse (verifiez vos spams).</span>
+                <span>Email de bienvenue envoye a votre adresse (verifiez vos spams).</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">02</span>
-                <span>Vous etes inscrit en avant-premiere — le dashboard freelance arrive tres bientot.</span>
+                <span>Connectez-vous a votre dashboard via /ai/connexion (code a 6 chiffres envoye par mail).</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">03</span>
-                <span>Email d&apos;activation des l&apos;ouverture, avec acces a votre espace freelance.</span>
+                <span>Completez votre profil (bio, stack, GitHub, LinkedIn) pour gagner des badges.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">04</span>
-                <span>Reception de vos premiers briefs IA-matches par mail.</span>
+                <span>Recevez en temps reel TOUS les projets tech publies, par email + dashboard.</span>
               </li>
             </ul>
           </div>
@@ -113,10 +115,10 @@ export default async function InscriptionSuccesPage({
               Retour a l&apos;accueil
             </Link>
             <Link
-              href="/ai/freelances"
-              className="inline-flex items-center justify-center h-12 px-7 text-[14px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors duration-150"
+              href="/ai/connexion"
+              className="inline-flex items-center justify-center h-12 px-7 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors duration-150"
             >
-              Voir les freelances deja inscrits
+              Acceder a mon dashboard →
             </Link>
           </div>
         </div>
