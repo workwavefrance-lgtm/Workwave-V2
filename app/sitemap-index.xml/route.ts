@@ -11,7 +11,8 @@ import { BASE_URL } from "@/lib/constants";
 const PROS_PER_SITEMAP = 45000;
 const SITEMAP_PROS_OFFSET = 100;
 const SITEMAP_AI_PROS_OFFSET = 200;
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+import { AI_CATEGORY_IDS as AI_CATEGORY_IDS_HELPER } from "@/lib/ai/helpers";
+const AI_CATEGORY_IDS = AI_CATEGORY_IDS_HELPER as unknown as number[];
 // IDs fixes (cf. app/sitemap.ts) :
 //   0 static · 1 cat x dept · 2 cat x ville · 3 specialites · 4 Workwave AI
 const FIXED_SITEMAP_IDS = [0, 1, 2, 3, 4];

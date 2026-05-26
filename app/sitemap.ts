@@ -53,9 +53,11 @@ const AI_CATEGORIES = [
   "design-produit",
 ];
 
-// IDs des categories tech en BDD (43-48). Utilises pour filtrer les pros
-// tech dans les sub-sitemaps AI_PROS_OFFSET+.
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+// IDs des categories Workwave AI en BDD (tech 43-48 + business/creatif 79-87).
+// Utilises pour filtrer les pros AI dans les sub-sitemaps AI_PROS_OFFSET+.
+// Source unique : lib/ai/helpers.ts AI_CATEGORY_IDS.
+import { AI_CATEGORY_IDS as AI_CATEGORY_IDS_HELPER } from "@/lib/ai/helpers";
+const AI_CATEGORY_IDS = AI_CATEGORY_IDS_HELPER as unknown as number[];
 
 // ============================================================================
 // generateSitemaps() : declare les sub-sitemaps

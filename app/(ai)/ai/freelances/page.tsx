@@ -4,6 +4,7 @@ import { createPublicClient } from "@/lib/supabase/public-client";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 export const revalidate = 21600; // 6h ISR
 
@@ -55,7 +56,7 @@ export default async function FreelancesHubPage() {
     .from("categories")
     .select("id, slug, name, description")
     .eq("vertical", TECH_VERTICAL)
-    .in("id", [43, 44, 45, 46, 47, 48])
+    .in("id", AI_CATEGORY_IDS)
     .order("slug");
 
   if (!categories) return null;

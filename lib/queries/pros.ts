@@ -107,15 +107,17 @@ export async function getProByUserId(
 }
 
 /**
- * Recupere la fiche TECH (Workwave AI) d'un user authentifie.
- * Filtre strict sur category_id in [43-48].
+ * Recupere la fiche Workwave AI d'un user authentifie.
+ * Filtre strict sur category_id in AI_CATEGORY_IDS (tech 43-48 + business/creatif 79-87).
  *
- * Fix #14 : si un user a a la fois une fiche BTP et tech (rare mais
- * possible), getProByUserId() generique retournait la 1ere trouvee
- * (ordre indefini), provocant un redirect en boucle dans le dashboard
- * AI. Cette fonction force le filtre tech.
+ * Fix #14 : si un user a a la fois une fiche BTP et AI (rare mais possible),
+ * getProByUserId() generique retournait la 1ere trouvee (ordre indefini),
+ * provocant un redirect en boucle dans le dashboard AI. Cette fonction force
+ * le filtre AI.
  */
-const AI_CATEGORY_IDS_QUERY = [43, 44, 45, 46, 47, 48];
+// 14 categories Workwave AI : import depuis helpers (source unique de verite).
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+const AI_CATEGORY_IDS_QUERY = AI_CATEGORY_IDS as unknown as number[];
 export async function getAiProByUserId(
   userId: string
 ): Promise<ProWithRelations | null> {
@@ -136,7 +138,7 @@ export async function getAiProByUserId(
 
 /**
  * Recupere la fiche BTP (Workwave BTP) d'un user authentifie.
- * Filtre strict sur category_id NOT IN [43-48].
+ * Filtre strict sur category_id NOT IN AI_CATEGORY_IDS (donc tout sauf 43-48 + 79-87).
  */
 export async function getBtpProByUserId(
   userId: string

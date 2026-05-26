@@ -7,9 +7,9 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Pour les freelances tech — Recevez 100% des projets en temps reel | Workwave AI",
+    "Pour les freelances — Recevez 100% des projets en temps reel | Workwave AI",
   description:
-    "Inscrivez-vous gratuitement et recevez en temps reel TOUS les projets tech publies sur Workwave AI. Filtrez par savoir-faire, repondez aux projets qui vous interessent. 29,90€/mois pour repondre, sans credit, sans commission. Alternative a Malt, Codeur, Freelancer.com.",
+    "Inscrivez-vous gratuitement (tech, marketing, finance, juridique, RH, design, creation, audiovisuel) et recevez en temps reel TOUS les projets publies sur Workwave AI. Filtrez par savoir-faire, repondez aux projets qui vous interessent. 29,90€/mois pour repondre, sans credit, sans commission. Alternative a Malt, Codeur, Freelancer.com.",
   alternates: { canonical: `${SITE_URL}/ai/pour-les-freelances` },
 };
 
@@ -22,7 +22,7 @@ const PROCESS = [
   {
     n: "02",
     title: "Recevez 100% des projets en temps reel",
-    desc: "Chaque projet tech publie sur Workwave vous est notifie par email immediatement. Vous voyez tout dans votre dashboard, filtre par categorie + budget.",
+    desc: "Chaque projet publie sur Workwave dans votre vertical (tech, marketing, finance, juridique, RH, design, creatif) vous est notifie par email immediatement. Vous voyez tout dans votre dashboard, filtre par categorie + budget.",
   },
   {
     n: "03",
@@ -61,7 +61,7 @@ const FAQ = [
   },
   {
     q: "Vais-je voir TOUS les projets ou juste ceux qui matchent ?",
-    a: "TOUS. A chaque projet publie sur Workwave AI, tous les freelances tech inscrits recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Modele communaute Codeur.com : pas de selection imposee, vous gardez la main.",
+    a: "TOUS. A chaque projet publie sur Workwave AI dans votre vertical (tech, marketing, finance, juridique, RH, design, creatif), tous les freelances inscrits du vertical recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Modele communaute Codeur.com : pas de selection imposee, vous gardez la main.",
   },
   {
     q: "Combien de projets vais-je recevoir ?",
@@ -93,15 +93,15 @@ export default function PourLesFreelancesPage() {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Workwave AI Premium — Abonnement freelance tech",
-    serviceType: "Plateforme de matching projets freelance",
+    name: "Workwave AI Premium — Abonnement freelance",
+    serviceType: "Plateforme de matching projets freelance multi-verticale",
     provider: {
       "@type": "Organization",
       name: "Workwave AI",
       url: `${SITE_URL}/ai`,
     },
     description:
-      "Recevez les projets tech qualifies par IA qui matchent votre profil. Reponse illimitee, sans credit, sans commission. 29,90€/mois TTC, resiliable en 1 clic.",
+      "Recevez les projets qualifies par IA qui matchent votre profil, tous verticaux confondus : tech, marketing, finance, juridique, RH, design, creation. Reponse illimitee, sans credit, sans commission. 29,90€/mois TTC, resiliable en 1 clic.",
     areaServed: { "@type": "Place", name: "France et Europe" },
     offers: {
       "@type": "Offer",

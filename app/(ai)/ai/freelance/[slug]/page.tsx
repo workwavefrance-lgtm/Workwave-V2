@@ -15,7 +15,11 @@ import {
 
 export const revalidate = 21600; // ISR 6h
 
-const TECH_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+
+// Alias retro-compat : ne pas casser les references internes a TECH_CATEGORY_IDS
+// dans le code historique. Maintenant = 14 cats (tech + business/creatif).
+const TECH_CATEGORY_IDS = AI_CATEGORY_IDS;
 
 type FreelancePageProps = {
   params: Promise<{ slug: string }>;

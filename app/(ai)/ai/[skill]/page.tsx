@@ -6,6 +6,7 @@ import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 // ISR : revalide chaque 6h, la base evolue lentement
 export const revalidate = 21600;
@@ -128,11 +129,11 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
   // Sinon (macro), on filtre directement par son category_id.
   const filterCategoryId = category.parent_category_id || category.id;
 
-  // Garde-fou : on ne liste QUE les pros tech reels (categories 43-48).
-  // Si une categorie a vertical='tech' par erreur de seed mais que son ID
-  // n'est PAS dans les 6 categories tech parentes, on retourne notFound().
-  // Sinon on ramene des pros non-tech qui 404 ensuite sur leur fiche.
-  if (![43, 44, 45, 46, 47, 48].includes(filterCategoryId)) {
+  // Garde-fou : on ne liste QUE les pros des 14 categories acceptees par
+  // Workwave AI (tech + business/creatif). Si la categorie demandee est en
+  // dehors de cette liste (sous-categorie SEO sans pros, ou cat mal taggee),
+  // on retourne notFound().
+  if (!AI_CATEGORY_IDS.includes(filterCategoryId)) {
     notFound();
   }
 

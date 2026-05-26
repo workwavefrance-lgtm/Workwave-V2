@@ -4,11 +4,44 @@
  * incoherentes entre dashboard pages.
  */
 
-// Note : pas de `as const` pour permettre .includes(arbitraire number) dans
-// les check `if (!AI_CATEGORY_IDS.includes(pro.category_id))`. Sinon TS
-// raise "Argument of type 'number' is not assignable to parameter of type
-// '43 | 44 | 45 | 46 | 47 | 48'".
-export const AI_CATEGORY_IDS: readonly number[] = [43, 44, 45, 46, 47, 48];
+// 14 categories acceptees sur Workwave AI (multi-vertical freelance services).
+//
+// Tech (6 macro categories) :
+//   43 = intelligence-artificielle
+//   44 = developpement-web
+//   45 = cloud-devops
+//   46 = no-code-automation
+//   47 = data-analytics
+//   48 = design-produit
+//
+// Business & creatif (8 macro categories — etendu Phase 13) :
+//   79 = marketing-communication
+//   80 = design-creation
+//   81 = strategie-management
+//   82 = finance-comptabilite
+//   83 = rh-recrutement
+//   85 = juridique-conseil
+//   86 = redaction-copywriting
+//   87 = audiovisuel-medias
+//
+// Note : pas de `as const` pour permettre .includes(arbitraire number).
+export const AI_CATEGORY_IDS: readonly number[] = [
+  43, 44, 45, 46, 47, 48, 79, 80, 81, 82, 83, 85, 86, 87,
+];
+
+/**
+ * Sub-array : uniquement les 6 categories tech (sans business/creatif).
+ * Utile pour les filtres SEO/UI specifiques "vraiment tech" (ex. barometre
+ * TJM qui n'a de sens que sur le tech, pas sur le juridique).
+ */
+export const AI_TECH_CATEGORY_IDS: readonly number[] = [43, 44, 45, 46, 47, 48];
+
+/**
+ * Sub-array : uniquement les 8 categories business/creatif (extension Phase 13).
+ */
+export const AI_BUSINESS_CATEGORY_IDS: readonly number[] = [
+  79, 80, 81, 82, 83, 85, 86, 87,
+];
 
 /**
  * Verifie si un pro est Premium AI actif (active OU trialing).

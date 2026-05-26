@@ -40,12 +40,23 @@ function truncate(s: string, max: number): string {
  */
 
 const CATEGORY_SLUG_MAP: Record<string, string> = {
+  // Tech
   ia: "intelligence-artificielle",
   dev: "developpement-web",
   cloud: "cloud-devops",
   nocode: "no-code-automation",
   data: "data-analytics",
   design: "design-produit",
+  // Business
+  marketing: "marketing-communication",
+  strategie: "strategie-management",
+  finance: "finance-comptabilite",
+  juridique: "juridique-conseil",
+  rh: "rh-recrutement",
+  // Creatif
+  redaction: "redaction-copywriting",
+  audiovisuel: "audiovisuel-medias",
+  creation: "design-creation",
 };
 
 const CATEGORY_NAME_MAP: Record<string, string> = {
@@ -55,6 +66,14 @@ const CATEGORY_NAME_MAP: Record<string, string> = {
   "no-code-automation": "No-Code & Automation",
   "data-analytics": "Data & Analytics",
   "design-produit": "Design Produit",
+  "marketing-communication": "Marketing & Communication",
+  "strategie-management": "Strategie & Management",
+  "finance-comptabilite": "Finance & Comptabilite",
+  "juridique-conseil": "Juridique & Conseil",
+  "rh-recrutement": "RH & Recrutement",
+  "redaction-copywriting": "Redaction & Copywriting",
+  "audiovisuel-medias": "Audiovisuel & Medias",
+  "design-creation": "Design & Creation",
 };
 
 function getServiceClient() {

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title:
     "Tarifs Workwave AI — Gratuit cote client, 29,90€/mois cote freelance",
   description:
-    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances tech paient 29,90€ TTC/mois pour repondre aux projets, sans credits limites, resiliable en 1 clic. Comparatif vs Malt et Codeur.com.",
+    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances (tech, marketing, finance, juridique, RH, design, creation, audiovisuel) paient 29,90€ TTC/mois pour repondre aux projets, sans credits limites, resiliable en 1 clic. Comparatif vs Malt et Codeur.com.",
   alternates: { canonical: `${SITE_URL}/ai/tarifs` },
 };
 
@@ -49,15 +49,15 @@ const FAQ_PRICING: FaqItem[] = [
 // ─────────────────────────────────────────────────────────────────────
 
 const CLIENT_FEATURES = [
-  "Depot de projet illimite, gratuit",
-  "Broadcast a 500+ freelances tech en temps reel",
+  "Depot de projet illimite, gratuit (tech, marketing, finance, juridique, design...)",
+  "Broadcast a la communaute des freelances FR en temps reel",
   "Qualification IA du brief (categorie, mots-cles)",
   "Aucune commission sur vos missions",
   "Annulation a tout moment, sans frais",
 ];
 
 const FREELANCE_FEATURES = [
-  "Reception en temps reel de 100% des projets tech",
+  "Reception en temps reel de 100% des projets de votre vertical",
   "Reponse sans limite (pas de credits)",
   "Profil mis en avant sur les listings",
   "Badge Pro Workwave sur la fiche",
@@ -109,8 +109,8 @@ export default function TarifsPage() {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Workwave AI — Mise en relation freelances tech",
-    serviceType: "Plateforme freelance tech",
+    name: "Workwave AI — Mise en relation freelances multi-verticaux",
+    serviceType: "Plateforme freelance multi-verticale (tech + business + creatif)",
     provider: {
       "@type": "Organization",
       name: "Workwave AI",
@@ -118,13 +118,13 @@ export default function TarifsPage() {
     },
     areaServed: { "@type": "Place", name: "France et Europe" },
     description:
-      "Plateforme de mise en relation IA entre porteurs de projet et freelances tech. Gratuit cote client, 29,90€/mois cote freelance.",
+      "Plateforme de mise en relation IA entre porteurs de projet et freelances multi-verticaux (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Gratuit cote client, 29,90€/mois cote freelance.",
     offers: [
       {
         "@type": "Offer",
         name: "Workwave AI Client (porteur de projet)",
         description:
-          "Depot de projet illimite, broadcast en temps reel a 500+ freelances tech FR, qualification IA du brief, aucune commission, annulation libre.",
+          "Depot de projet illimite, broadcast en temps reel a la communaute des freelances FR (tech, marketing, finance, juridique, RH, design, creation), qualification IA du brief, aucune commission, annulation libre.",
         price: "0.00",
         priceCurrency: "EUR",
         availability: "https://schema.org/InStock",
@@ -133,9 +133,9 @@ export default function TarifsPage() {
       },
       {
         "@type": "Offer",
-        name: "Workwave AI Premium (freelance tech)",
+        name: "Workwave AI Premium (freelance)",
         description:
-          "Acces en temps reel a 100% des projets tech, reponse illimitee, profil mis en avant, badge Pro Workwave, statistiques d'impressions, sans engagement.",
+          "Acces en temps reel a 100% des projets de votre vertical (tech, marketing, finance, juridique, RH, design, creation, audiovisuel), reponse illimitee, profil mis en avant, badge Pro Workwave, statistiques d'impressions, sans engagement.",
         price: "29.90",
         priceCurrency: "EUR",
         availability: "https://schema.org/InStock",

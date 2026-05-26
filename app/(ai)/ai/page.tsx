@@ -25,14 +25,14 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Workwave AI — La plateforme freelance de reference (IA, dev, cloud, data)",
+    "Workwave AI — La plateforme freelance de reference (tech, marketing, finance, design, juridique)",
   description:
-    "Publiez votre projet tech et alertez en temps reel toute la communaute freelances FR : IA / LLM, dev web (React, Next.js), cloud (AWS, GCP), no-code, data, design. Inscription gratuite, sans commission, sans engagement.",
+    "Publiez votre projet et alertez en temps reel toute la communaute des freelances FR : tech (IA, dev, cloud, data), marketing & com, finance & compta, juridique, RH, design & creation, audiovisuel, redaction. Inscription gratuite, sans commission, sans engagement.",
   alternates: { canonical: `${SITE_URL}/ai` },
   openGraph: {
     title: "Workwave AI — La plateforme freelance de reference",
     description:
-      "Postez votre projet, alertez la communaute des freelances tech FR en temps reel. Gratuit, sans commission.",
+      "Postez votre projet (tech, marketing, finance, juridique, design, RH...), alertez la communaute des freelances FR en temps reel. Gratuit, sans commission.",
     url: `${SITE_URL}/ai`,
     siteName: "Workwave AI",
     locale: "fr_FR",
@@ -53,8 +53,8 @@ const FAQ: FaqItem[] = [
     a: "Oui, 100% gratuit. Deposer un projet, etre contacte par les freelances, signer un devis : tout est gratuit cote client. Workwave ne prend aucune commission sur la mission. Les freelances financent la plateforme via un abonnement optionnel de 29,90€/mois TTC qui leur permet de repondre aux projets publies.",
   },
   {
-    q: "Quels metiers tech sont couverts ?",
-    a: "6 categories principales avec des dizaines de specialites : Intelligence Artificielle (LLM, RAG, agents, fine-tuning, computer vision), Developpement Web (React, Next.js, Vue, mobile React Native, full-stack), Cloud & DevOps (AWS, GCP, Azure, Kubernetes, Terraform), No-Code & Automation (Bubble, Make, Zapier, Airtable, Webflow), Data & Analytics (BI, ETL, ML engineering, data science), Design Produit (UX/UI, prototypage, design system, Figma). Plus de 30 stacks couvertes au total.",
+    q: "Quels metiers sont couverts par Workwave AI ?",
+    a: "14 categories au total, tech et hors-tech. Cote tech (6 categories) : Intelligence Artificielle (LLM, RAG, agents, fine-tuning, vision), Developpement Web (React, Next.js, Vue, full-stack, mobile), Cloud & DevOps (AWS, GCP, Azure, Kubernetes, Terraform), No-Code & Automation (Bubble, Make, Zapier, Airtable, Webflow), Data & Analytics (BI, ETL, ML engineering, data science), Design Produit (UX/UI, design system, Figma). Cote business et creatif (8 categories) : Marketing & Communication (SEO, SEA, social, growth, content), Strategie & Management (consulting, transformation, ops), Finance & Comptabilite (DAF a temps partage, controle de gestion, expertise comptable), Juridique & Conseil (avocats, contrats, RGPD, propriete intellectuelle), RH & Recrutement (talent acquisition, formation, paie), Redaction & Copywriting (ghostwriting, SEO, technique, scripts), Audiovisuel & Medias (montage, motion, photo, podcasts), Design & Creation (graphisme, branding, illustration, print). Plus de 100 000 profils freelances inscrits, sourcing direct INSEE Sirene.",
   },
   {
     q: "En combien de temps est-on contacte par les freelances ?",
@@ -69,12 +69,12 @@ const FAQ: FaqItem[] = [
     a: "Au choix. 80% de notre base travaille en 100% remote (la norme dans la tech francaise depuis 2020), 15% en hybride (remote + bureau client 1-2 jours/semaine), 5% sur site uniquement. Vous precisez vos contraintes (geo, presentiel obligatoire ou pas) dans le formulaire de depot — chaque freelance verra ces criteres dans son dashboard et choisira si le projet l'interesse.",
   },
   {
-    q: "Qui sont les freelances referenced sur Workwave AI ?",
-    a: "Freelances et micro-entreprises tech basees en France et en Europe (UE + UK), enregistres a l'INSEE (SIRET valide). Nous referencons aujourd'hui plus de 100 000 profils issus de la base Sirene avec codes NAF tech (62.01Z, 62.02A, 73.11Z, 70.22Z, etc.). Chaque freelance peut reclamer sa fiche pour la completer (bio, stack, TJM indicatif, portfolio, lien GitHub).",
+    q: "Qui sont les freelances references sur Workwave AI ?",
+    a: "Freelances et micro-entreprises basees en France et en Europe (UE + UK), enregistres a l'INSEE (SIRET valide), tech et hors-tech. Nous referencons aujourd'hui plus de 100 000 profils issus de la base Sirene avec codes NAF tech (62.01Z, 62.02A, 73.11Z, 70.22Z) et business/creatif (70.21Z communication, 73.11Z conseil marketing, 69.10Z juridique, 69.20Z comptabilite, 78.10Z RH, 90.03A creation artistique, 59.11C audiovisuel, etc.). Chaque freelance peut reclamer sa fiche pour la completer (bio, stack, TJM indicatif, portfolio, lien GitHub ou Behance).",
   },
   {
     q: "Comment Workwave AI se differencie de Malt, Comet, Free-Work ?",
-    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances tech inscrits, ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele freemium pour les freelances (29,90€/mois sans credits limites, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
+    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances inscrits (tech + business + creatif), ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele freemium pour les freelances (29,90€/mois sans credits limites, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
   },
 ];
 
@@ -157,8 +157,8 @@ const VS_COMPETITORS = [
     workwaveBest: false,
   },
   {
-    feature: "Specialisation tech",
-    workwave: "Tech uniquement",
+    feature: "Verticaux couverts",
+    workwave: "Tech + business + creatif",
     malt: "Multi-vertical",
     comet: "Tech + Data",
     freeWork: "Tech uniquement",
@@ -273,7 +273,7 @@ const STEPS = [
   {
     n: "02",
     title: "On alerte la communaute en temps reel",
-    desc: "Notre IA qualifie votre brief (categorie, mots-cles) puis on envoie un mail a tous les freelances tech inscrits sur Workwave.",
+    desc: "Notre IA qualifie votre brief (categorie, mots-cles) puis on envoie un mail a tous les freelances inscrits sur Workwave correspondant a votre vertical.",
   },
   {
     n: "03",
@@ -283,48 +283,112 @@ const STEPS = [
 ];
 
 const CATEGORIES = [
+  // ─── Tech (6 categories) ───
   {
     slug: "intelligence-artificielle",
     name: "Intelligence Artificielle",
     skills: "LLM, RAG, agents, fine-tuning, vision",
     count: 18,
+    group: "tech" as const,
   },
   {
     slug: "developpement-web",
     name: "Developpement Web",
     skills: "React, Next.js, Vue, full-stack, mobile",
     count: 32,
+    group: "tech" as const,
   },
   {
     slug: "cloud-devops",
     name: "Cloud & DevOps",
     skills: "AWS, GCP, Azure, Kubernetes, CI/CD",
     count: 21,
+    group: "tech" as const,
   },
   {
     slug: "no-code-automation",
     name: "No-Code & Automation",
     skills: "Bubble, Make, Zapier, Airtable, Webflow",
     count: 14,
+    group: "tech" as const,
   },
   {
     slug: "data-analytics",
     name: "Data & Analytics",
     skills: "BI, ETL, ML engineering, data science",
     count: 19,
+    group: "tech" as const,
   },
   {
     slug: "design-produit",
     name: "Design Produit",
     skills: "UX/UI, prototypage, design system, Figma",
     count: 16,
+    group: "tech" as const,
+  },
+  // ─── Business & Creatif (8 categories) ───
+  {
+    slug: "marketing-communication",
+    name: "Marketing & Communication",
+    skills: "SEO, SEA, social, growth, brand, content",
+    count: 18,
+    group: "business" as const,
+  },
+  {
+    slug: "strategie-management",
+    name: "Strategie & Management",
+    skills: "Consulting, transformation, ops, lean",
+    count: 121,
+    group: "business" as const,
+  },
+  {
+    slug: "finance-comptabilite",
+    name: "Finance & Comptabilite",
+    skills: "DAF a temps partage, controle de gestion, expertise comptable",
+    count: 14,
+    group: "business" as const,
+  },
+  {
+    slug: "juridique-conseil",
+    name: "Juridique & Conseil",
+    skills: "Avocats, contrats, RGPD, propriete intellectuelle",
+    count: 65,
+    group: "business" as const,
+  },
+  {
+    slug: "rh-recrutement",
+    name: "RH & Recrutement",
+    skills: "Talent acquisition, formation, paie, SIRH",
+    count: 1,
+    group: "business" as const,
+  },
+  {
+    slug: "redaction-copywriting",
+    name: "Redaction & Copywriting",
+    skills: "Ghostwriting, SEO, technique, scripts, edito",
+    count: 20,
+    group: "creatif" as const,
+  },
+  {
+    slug: "audiovisuel-medias",
+    name: "Audiovisuel & Medias",
+    skills: "Montage, motion, photo, podcasts, video",
+    count: 56,
+    group: "creatif" as const,
+  },
+  {
+    slug: "design-creation",
+    name: "Design & Creation",
+    skills: "Graphisme, branding, illustration, print",
+    count: 64,
+    group: "creatif" as const,
   },
 ];
 
 const WHY = [
   {
     title: "Broadcast a la communaute",
-    desc: "Votre projet est diffuse en temps reel a 500+ freelances tech FR. Reponse en moins de 24h, sans paperasse.",
+    desc: "Votre projet est diffuse en temps reel a la communaute des freelances FR de votre vertical (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Reponse en moins de 24h, sans paperasse.",
   },
   {
     title: "Inscription gratuite",
@@ -353,7 +417,7 @@ export default function AiHomePage() {
     url: `${SITE_URL}/ai`,
     logo: `${SITE_URL}/logo-workwave-ai.svg`,
     description:
-      "Plateforme francaise de mise en relation IA entre porteurs de projet et freelances tech (IA, dev, cloud, data, no-code, design). Selection automatique sous 24h. Sans commission.",
+      "Plateforme francaise de mise en relation IA entre porteurs de projet et freelances multi-verticaux : tech (IA, dev, cloud, data, no-code, design produit), marketing & communication, finance & comptabilite, juridique & conseil, RH & recrutement, redaction & copywriting, audiovisuel & medias, design & creation. Broadcast communaute en temps reel. Sans commission.",
     foundingDate: "2026",
     areaServed: { "@type": "Place", name: "France et Europe" },
     sameAs: [
@@ -390,7 +454,7 @@ export default function AiHomePage() {
   const categoriesItemList = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Categories freelances tech disponibles sur Workwave AI",
+    name: "Categories freelances (tech + business + creatif) disponibles sur Workwave AI",
     numberOfItems: CATEGORIES.length,
     itemListElement: CATEGORIES.map((cat, idx) => ({
       "@type": "ListItem",
@@ -515,9 +579,10 @@ export default function AiHomePage() {
               </h1>
 
               <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-xl leading-relaxed mb-10">
-                Publiez votre projet (IA, dev, cloud, no-code, data, design)
-                et alertez en temps reel toute la communaute des freelances
-                tech FR. Inscription gratuite, sans commission, sans engagement.
+                Publiez votre projet (tech, marketing, finance, juridique, RH,
+                design, creation, audiovisuel) et alertez en temps reel toute la
+                communaute des freelances FR. Inscription gratuite, sans
+                commission, sans engagement.
               </p>
 
               {/* CTA bar composite (search-bar look, single click target,
@@ -627,7 +692,8 @@ export default function AiHomePage() {
                   Broadcast communaute
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
-                  On alerte en temps reel la communaute des freelances tech FR.
+                  On alerte en temps reel la communaute des freelances FR
+                  (tech, marketing, finance, juridique, RH, design, creation).
                   Reponse en moins de 24h, gratuit, sans engagement.
                 </p>
               </div>
@@ -796,12 +862,17 @@ export default function AiHomePage() {
                   letterSpacing: "-0.04em",
                 }}
               >
-                Tous les profils
+                14 verticaux,
                 <br />
-                tech qui
+                100 000+
                 <br />
-                <span className="text-[var(--ai-text-tertiary)]">comptent.</span>
+                <span className="text-[var(--ai-text-tertiary)]">freelances.</span>
               </h2>
+              <p className="text-base text-[var(--ai-text-secondary)] mt-6 max-w-md leading-relaxed">
+                Du dev senior au DAF a temps partage, en passant par les
+                avocats, les graphistes ou les rédacteurs : Workwave couvre les
+                14 verticaux freelance qui comptent en France.
+              </p>
             </div>
             <Link
               href="/ai/freelances"
@@ -1265,7 +1336,7 @@ export default function AiHomePage() {
                 className="text-[13px] font-bold text-[var(--ai-text)] uppercase mb-5 pb-3 border-b border-[var(--ai-border-subtle)]"
                 style={{ letterSpacing: "0.08em" }}
               >
-                Categories tech
+                Categories
               </h3>
               <ul className="space-y-2.5">
                 {CATEGORIES.map((cat) => (
@@ -1461,7 +1532,7 @@ export default function AiHomePage() {
                 <span className="h-px flex-1 max-w-[40px] bg-white/20" />
                 <span className="inline-flex items-center gap-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-accent)]">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
-                  Tech
+                  14 verticaux
                 </span>
               </div>
 
@@ -1478,9 +1549,10 @@ export default function AiHomePage() {
                 <span className="text-[var(--ai-accent)]">freelance ?</span>
               </h2>
               <p className="text-sm text-white/70 leading-relaxed mb-8 relative z-10">
-                Inscription gratuite. Recevez tous les projets tech en temps reel
-                qui matchent votre profil. Repondez sans credit a 29,90€/mois
-                TTC. Resiliable a tout moment, aucun engagement.
+                Inscription gratuite — tech, marketing, finance, juridique, RH,
+                design, creation. Recevez tous les projets de votre vertical en
+                temps reel. Repondez sans credit a 29,90€/mois TTC. Resiliable
+                a tout moment, aucun engagement.
               </p>
 
               <Link

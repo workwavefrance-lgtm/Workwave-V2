@@ -8,17 +8,28 @@ import { submitInscription } from "./actions";
 export const metadata: Metadata = {
   title: "Inscription freelance — Workwave AI",
   description:
-    "Creez votre profil freelance tech sur Workwave AI en 4 etapes. Inscription gratuite. Recevez en temps reel tous les projets tech publies. Abonnement 29,90€/mois pour repondre.",
+    "Creez votre profil freelance sur Workwave AI en 4 etapes (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Inscription gratuite. Recevez en temps reel tous les projets publies dans votre vertical. Abonnement 29,90€/mois pour repondre.",
   robots: { index: false, follow: false },
 };
 
 const CATEGORIES = [
+  // Tech (6)
   { value: "ia", label: "Intelligence Artificielle", hint: "LLM, RAG, agents, fine-tuning" },
   { value: "dev", label: "Developpement Web", hint: "React, Next.js, mobile, full-stack" },
   { value: "cloud", label: "Cloud & DevOps", hint: "AWS, GCP, Azure, K8s, CI/CD" },
   { value: "nocode", label: "No-Code & Automation", hint: "Bubble, Make, Zapier, Webflow" },
   { value: "data", label: "Data & Analytics", hint: "BI, ETL, ML, data science" },
   { value: "design", label: "Design Produit", hint: "UX/UI, prototypage, design system" },
+  // Business (5)
+  { value: "marketing", label: "Marketing & Communication", hint: "SEO, SEA, social, growth, content" },
+  { value: "strategie", label: "Strategie & Management", hint: "Consulting, transformation, ops" },
+  { value: "finance", label: "Finance & Comptabilite", hint: "DAF, controle gestion, expertise" },
+  { value: "juridique", label: "Juridique & Conseil", hint: "Avocats, contrats, RGPD" },
+  { value: "rh", label: "RH & Recrutement", hint: "Talent, formation, paie" },
+  // Creatif (3)
+  { value: "redaction", label: "Redaction & Copywriting", hint: "Ghostwriting, SEO, scripts" },
+  { value: "audiovisuel", label: "Audiovisuel & Medias", hint: "Montage, motion, photo, podcasts" },
+  { value: "creation", label: "Design & Creation", hint: "Graphisme, branding, illustration" },
 ];
 
 const AVAILABILITY = [

@@ -16,6 +16,9 @@
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+
+const AI_CATEGORY_IDS_QUERY = AI_CATEGORY_IDS as unknown as number[];
 
 function getServiceClient(): SupabaseClient {
   return createClient(
@@ -24,14 +27,33 @@ function getServiceClient(): SupabaseClient {
   );
 }
 
-// Mapping category_slug -> category_id (categories tech BDD : 43-48)
+// Mapping category_slug -> category_id (categories Workwave AI : tech 43-48 + business/creatif 79-87).
+// IDs verifies via scripts/_check-cat-mapping.ts (source unique de verite : table BDD categories).
+// Maintenu aligne avec lib/ai/helpers.ts AI_CATEGORY_IDS.
+//
+// ATTENTION historique (26/05/2026) : l'ancienne version de ce map avait des
+// IDs swappes (43 -> intelligence-artificielle, 44 -> developpement-web), ce
+// qui creait les pros sous la mauvaise categorie. Les signups 1-6 de la BDD
+// portent donc des category_id incoherents avec leur category_slug declare.
+// Fixe par scripts/_fix-mismapped-signups.ts apres ce commit.
 const CATEGORY_ID_MAP: Record<string, number> = {
-  "intelligence-artificielle": 43,
-  "developpement-web": 44,
+  // Tech (6)
+  "developpement-web": 43,
+  "intelligence-artificielle": 44,
   "cloud-devops": 45,
   "no-code-automation": 46,
   "data-analytics": 47,
   "design-produit": 48,
+  // Business (5)
+  "marketing-communication": 79,
+  "design-creation": 80,
+  "strategie-management": 81,
+  "finance-comptabilite": 82,
+  "rh-recrutement": 83,
+  "juridique-conseil": 85,
+  // Creatif (2)
+  "redaction-copywriting": 86,
+  "audiovisuel-medias": 87,
 };
 
 export type AiSignupActivateInput = {
@@ -191,7 +213,7 @@ export async function activateAiSignup(
     .from("pros")
     .select("id")
     .eq("claimed_by_user_id", userId)
-    .in("category_id", [43, 44, 45, 46, 47, 48])
+    .in("category_id", AI_CATEGORY_IDS_QUERY)
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
@@ -241,7 +263,7 @@ export async function activateAiSignup(
           .from("pros")
           .select("id")
           .eq("claimed_by_user_id", userId)
-          .in("category_id", [43, 44, 45, 46, 47, 48])
+          .in("category_id", AI_CATEGORY_IDS_QUERY)
           .eq("is_active", true)
           .is("deleted_at", null)
           .maybeSingle();

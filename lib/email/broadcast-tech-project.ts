@@ -32,7 +32,9 @@ function getServiceClient() {
   );
 }
 
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
+// 14 categories acceptees Workwave AI (tech + business/creatif). On broadcast
+// les projets a TOUS les freelances dans ces categories, sans distinction.
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 const CHUNK_SIZE = 50;
 const CHUNK_DELAY_MS = 1000;
 

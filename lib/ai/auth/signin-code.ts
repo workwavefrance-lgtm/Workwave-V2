@@ -18,8 +18,10 @@
  * ip, user_agent, status, created_at pour analytics et anti-abuse.
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 const SIGNIN_TTL_MIN = 15;
+const AI_CATEGORY_IDS_QUERY = AI_CATEGORY_IDS as unknown as number[];
 // Rate limits relaches le 26/05/2026 (user-friendly pour le dev / le test).
 // Securite preservee par :
 //   - delai uniforme sleepUntil 800ms sur toutes les branches (anti-timing)
@@ -117,9 +119,9 @@ export async function sendSigninCode(
     }
   }
 
-  // 2) Verifier que l'email correspond a un pro tech actif claimed
+  // 2) Verifier que l'email correspond a un pro Workwave AI actif claimed
   // Filtres durs :
-  //   - category_id in [43-48] (tech)
+  //   - category_id in AI_CATEGORY_IDS (tech 43-48 + business/creatif 79-87)
   //   - is_active = true, deleted_at IS NULL
   //   - claimed_by_user_id IS NOT NULL (compte deja active)
   //   - subscription_status NOT IN ('canceled') (on accepte trialing/active/
@@ -130,7 +132,7 @@ export async function sendSigninCode(
     .from("pros")
     .select("id, claimed_by_user_id, category_id, name, subscription_status")
     .eq("email", cleanEmail)
-    .in("category_id", [43, 44, 45, 46, 47, 48])
+    .in("category_id", AI_CATEGORY_IDS_QUERY)
     .eq("is_active", true)
     .is("deleted_at", null)
     .not("claimed_by_user_id", "is", null)

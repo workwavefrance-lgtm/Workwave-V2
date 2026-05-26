@@ -17,17 +17,16 @@ import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import { formatEffectifRange, formatFoundingYear, formatAgeYears } from "@/lib/utils/sirene";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
+// IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
+// l'URL canonique est /ai/freelance/[slug] (design Workwave AI). Évite le
+// duplicate content signal entre /artisan/[slug] et /ai/freelance/[slug].
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 export const revalidate = 86400;
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-// IDs des catégories tech (Workwave AI) : pour ces pros, l'URL canonique
-// est /ai/freelance/[slug] (design Workwave AI). Évite le duplicate content
-// signal entre /artisan/[slug] et /ai/freelance/[slug] pour les pros tech.
-const AI_CATEGORY_IDS = [43, 44, 45, 46, 47, 48];
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
