@@ -57,7 +57,7 @@ async function fetchPro(slug: string) {
   const { data, error } = await sb
     .from("pros")
     .select(
-      "id, name, slug, siret, postal_code, address, years_experience, github_username, linkedin, description, skills, hourly_rate, available_for_remote, claimed_by_user_id, claimed_at, subscription_product, subscription_status, founding_date, etat_admin, category_id, source, avatar_color, theme_color, created_at, categories(slug, name, description, vertical), cities(name, slug, postal_code)"
+      "id, name, slug, siret, postal_code, address, years_experience, github_username, linkedin, description, skills, hourly_rate, available_for_remote, claimed_by_user_id, claimed_at, subscription_product, subscription_status, founding_date, etat_admin, category_id, source, avatar_color, theme_color, logo_url, created_at, categories(slug, name, description, vertical), cities(name, slug, postal_code)"
     )
     .eq("slug", slug)
     .in("category_id", TECH_CATEGORY_IDS)
@@ -121,6 +121,11 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
     monthsSinceClaim: monthsClaimed,
   });
 
+  // Fiche revendiquee = compte freelance deja cree pour ce SIRET (via /ai/inscription
+  // ou /pro/reclamer/[slug]). Dans ce cas on n'affiche pas le CTA "Reclamer ma fiche"
+  // ni la card "Profil minimal / non revendiquee" — la fiche est detenue par le freelance.
+  const isClaimed = !!pro.claimed_by_user_id;
+
   // Schema.org Person
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
   const personSchema = {
@@ -183,17 +188,32 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
             <div className="lg:col-span-8">
               <SectionLabel index={1} total={3} label="Freelance tech" />
 
-              {/* Avatar perso (Phase 12 cool/fun) */}
-              <div
-                className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl font-black text-[28px] sm:text-[34px] mb-6 shadow-lg"
-                style={{
-                  ...avatarStyle,
-                  boxShadow: `0 16px 40px -12px ${themeMain}66`,
-                }}
-                aria-hidden="true"
-              >
-                {initials}
-              </div>
+              {/* Avatar perso (Phase 12 cool/fun) — photo uploadee OU initiales avec gradient */}
+              {pro.logo_url ? (
+                <div
+                  className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl mb-6 shadow-lg overflow-hidden bg-white"
+                  style={{ boxShadow: `0 16px 40px -12px ${themeMain}66` }}
+                  aria-hidden="true"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={pro.logo_url}
+                    alt={`Photo de profil de ${displayName}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl font-black text-[28px] sm:text-[34px] mb-6 shadow-lg"
+                  style={{
+                    ...avatarStyle,
+                    boxShadow: `0 16px 40px -12px ${themeMain}66`,
+                  }}
+                  aria-hidden="true"
+                >
+                  {initials}
+                </div>
+              )}
 
               <h1
                 className="font-black text-[var(--ai-text)] uppercase mb-6"
@@ -297,71 +317,134 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                 )}
               </div>
 
-              {/* Description placeholder (profil non revendique) */}
-              <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 sm:p-8 max-w-2xl">
-                <p
-                  className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
-                  style={{
-                    fontFamily: "var(--font-geist-mono), monospace",
-                    letterSpacing: "0.2em",
-                  }}
-                >
-                  {"// Profil minimal"}
-                </p>
-                <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
-                  Cette fiche est une base SIRENE non revendiquee.{" "}
-                  {firstName} n&apos;a pas encore complete son profil (bio,
-                  competences detaillees, portfolio). Vous pouvez{" "}
-                  <Link
-                    href="/ai/deposer"
-                    className="text-[var(--ai-text)] font-semibold underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-accent)] transition-colors"
+              {/* Description placeholder (profil non revendique) — masquee si pro.description existe OU si fiche revendiquee */}
+              {!isClaimed && !pro.description && (
+                <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 sm:p-8 max-w-2xl">
+                  <p
+                    className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
+                    style={{
+                      fontFamily: "var(--font-geist-mono), monospace",
+                      letterSpacing: "0.2em",
+                    }}
                   >
-                    deposer votre projet
-                  </Link>{" "}
-                  — notre IA verifiera si {firstName} est un bon match et le
-                  contactera directement.
-                </p>
-              </div>
+                    {"// Profil minimal"}
+                  </p>
+                  <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
+                    Cette fiche est une base SIRENE non revendiquee.{" "}
+                    {firstName} n&apos;a pas encore complete son profil (bio,
+                    competences detaillees, portfolio). Vous pouvez{" "}
+                    <Link
+                      href="/ai/deposer"
+                      className="text-[var(--ai-text)] font-semibold underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-accent)] transition-colors"
+                    >
+                      deposer votre projet
+                    </Link>{" "}
+                    — notre IA verifiera si {firstName} est un bon match et le
+                    contactera directement.
+                  </p>
+                </div>
+              )}
+
+              {/* Description riche du pro (si revendique et bio remplie) */}
+              {pro.description && pro.description.trim().length > 0 && (
+                <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 sm:p-8 max-w-2xl">
+                  <p
+                    className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
+                    style={{
+                      fontFamily: "var(--font-geist-mono), monospace",
+                      letterSpacing: "0.2em",
+                    }}
+                  >
+                    {"// A propos"}
+                  </p>
+                  <p className="text-sm text-[var(--ai-text)] leading-relaxed whitespace-pre-wrap">
+                    {pro.description}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Stat block droite */}
             <div className="lg:col-span-4 space-y-6">
-              {/* Card abonnement / claim */}
-              <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl p-6">
-                <p
-                  className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-2"
-                  style={{ letterSpacing: "0.18em" }}
-                >
-                  Vous etes {firstName} ?
-                </p>
-                <p className="text-sm text-[var(--ai-text)] font-semibold mb-4 leading-snug">
-                  Reclamez votre fiche gratuitement
-                </p>
-                <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-5">
-                  Completez votre bio, ajoutez vos competences, recevez les
-                  briefs qui vous matchent. Inscription gratuite.
-                </p>
-                <Link
-                  href={`/ai/inscription?siret=${pro.siret}`}
-                  className="inline-flex items-center justify-center w-full h-11 px-5 text-[14px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors"
-                >
-                  Reclamer ma fiche
-                  <svg
-                    className="ml-2 w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
+              {/* Card "Reclamer ma fiche" — UNIQUEMENT si la fiche n'est pas encore revendiquee */}
+              {!isClaimed && (
+                <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl p-6">
+                  <p
+                    className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-2"
+                    style={{ letterSpacing: "0.18em" }}
                   >
-                    <path
-                      d="M5 12h14M13 6l6 6-6 6"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </Link>
-              </div>
+                    Vous etes {firstName} ?
+                  </p>
+                  <p className="text-sm text-[var(--ai-text)] font-semibold mb-4 leading-snug">
+                    Reclamez votre fiche gratuitement
+                  </p>
+                  <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-5">
+                    Completez votre bio, ajoutez vos competences, recevez les
+                    briefs qui vous matchent. Inscription gratuite.
+                  </p>
+                  <Link
+                    href={`/ai/inscription?siret=${pro.siret}`}
+                    className="inline-flex items-center justify-center w-full h-11 px-5 text-[14px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors"
+                  >
+                    Reclamer ma fiche
+                    <svg
+                      className="ml-2 w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5 12h14M13 6l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </Link>
+                </div>
+              )}
+
+              {/* Card "Contacter via Workwave" — affichee quand fiche revendiquee
+                  (alternative au CTA "Reclamer ma fiche") */}
+              {isClaimed && (
+                <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl p-6">
+                  <p
+                    className="text-[11px] uppercase font-semibold text-[var(--ai-accent)] mb-2"
+                    style={{ letterSpacing: "0.18em" }}
+                  >
+                    ● Freelance verifie
+                  </p>
+                  <p className="text-sm text-[var(--ai-text)] font-semibold mb-4 leading-snug">
+                    Travailler avec {firstName} ?
+                  </p>
+                  <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-5">
+                    Decrivez votre projet en 60 secondes — {firstName} verra
+                    automatiquement votre brief dans son dashboard et vous
+                    contactera s&apos;il est interesse.
+                  </p>
+                  <Link
+                    href="/ai/deposer"
+                    className="inline-flex items-center justify-center w-full h-11 px-5 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
+                  >
+                    Deposer mon projet
+                    <svg
+                      className="ml-2 w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5 12h14M13 6l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </Link>
+                </div>
+              )}
 
               {/* Identite SIRENE */}
               <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6">
@@ -436,8 +519,23 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
               </p>
             )}
 
+            {/* Skills/stack du freelance — si remplies */}
+            {pro.skills && pro.skills.trim().length > 0 && (
+              <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 max-w-2xl mb-6">
+                <p
+                  className="text-[11px] uppercase font-semibold text-[var(--ai-accent)] mb-3"
+                  style={{ letterSpacing: "0.18em" }}
+                >
+                  ● Stack & competences
+                </p>
+                <p className="text-sm text-[var(--ai-text)] leading-relaxed whitespace-pre-wrap">
+                  {pro.skills}
+                </p>
+              </div>
+            )}
+
             {/* Hint vers GitHub si disponible */}
-            {pro.github_username ? (
+            {pro.github_username && (
               <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 max-w-2xl">
                 <p
                   className="text-[11px] uppercase font-semibold text-[var(--ai-accent)] mb-3"
@@ -468,7 +566,10 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                   </svg>
                 </a>
               </div>
-            ) : (
+            )}
+
+            {/* "Profil non-enrichi" : seulement si pas de skills, pas de github et fiche pas revendiquee */}
+            {!pro.skills && !pro.github_username && !isClaimed && (
               <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 max-w-2xl">
                 <p
                   className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"

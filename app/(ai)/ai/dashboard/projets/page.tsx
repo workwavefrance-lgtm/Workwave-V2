@@ -85,13 +85,15 @@ export default async function AiDashboardProjetsPage({
   // tous les freelances voient TOUS les projets, plus de project_leads filter).
   // Note : on inclut les projets "suspicious" (l'IA flag mais on les montre
   // quand meme avec une card "ATTENTION" — cf. decision user 26/05).
+  // NB: la table `projects` n'a PAS de colonne `deleted_at` — le soft-delete
+  // se fait via `status='deleted'` (cf. /deposer-projet/supprimer). Le seul
+  // filtre necessaire est donc .neq("status", "deleted").
   let projectsQuery = service
     .from("projects")
     .select(
       "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, categories(name, slug)"
     )
     .eq("vertical", "tech")
-    .is("deleted_at", null)
     .neq("status", "deleted")
     .order("created_at", { ascending: false })
     .limit(PROJECTS_LIMIT);

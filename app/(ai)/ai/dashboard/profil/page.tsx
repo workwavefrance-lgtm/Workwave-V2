@@ -11,7 +11,8 @@ import {
   normalizeColor,
   type PersonaColor,
 } from "@/lib/ai/personalisation";
-import { updateAiProfile } from "./actions";
+import { updateAiProfile, uploadAiAvatar, deleteAiAvatar } from "./actions";
+import SubmitButton from "@/components/ai/SubmitButton";
 
 export const metadata: Metadata = {
   title: "Mon profil — Dashboard Workwave AI",
@@ -21,6 +22,10 @@ export const metadata: Metadata = {
 
 const ERROR_MESSAGES: Record<string, string> = {
   name_required: "Le nom complet est obligatoire.",
+  avatar_no_file: "Aucun fichier selectionne.",
+  avatar_invalid_type: "Format accepte : JPEG, PNG ou WebP.",
+  avatar_too_large: "Photo trop lourde (max 2 Mo).",
+  avatar_upload_failed: "Erreur d'upload. Reessayez.",
 };
 
 export default async function AiDashboardProfilePage({
@@ -81,6 +86,81 @@ export default async function AiDashboardProfilePage({
         <p className="text-base text-[var(--ai-text-secondary)]">
           Ces informations sont utilisees par notre IA pour vous matcher avec les meilleurs projets.
         </p>
+      </div>
+
+      {/* Avatar photo upload — FORM SEPARE (multipart/form-data) */}
+      <div className="mb-8" id="avatar">
+        <p
+          className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-1"
+          style={{
+            letterSpacing: "0.18em",
+            fontFamily: "var(--font-geist-mono), monospace",
+          }}
+        >
+          Photo de profil
+        </p>
+        <p className="text-[12px] text-[var(--ai-text-tertiary)] mb-4">
+          Une photo claire et professionnelle augmente la confiance des clients
+          (max 2 Mo, JPEG / PNG / WebP).
+        </p>
+        <div className="flex items-center gap-5 flex-wrap">
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center font-bold text-[24px] shrink-0 overflow-hidden bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)]"
+            aria-hidden="true"
+          >
+            {pro.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={pro.logo_url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span
+                style={{
+                  background: `linear-gradient(135deg, ${COLOR_HEX[normalizeColor(pro.avatar_color)]} 0%, ${COLOR_HEX_DARKER[normalizeColor(pro.avatar_color)]} 100%)`,
+                  color: "white",
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {getInitials(pro.name || "Freelance")}
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 flex-1 min-w-[200px]">
+            <form action={uploadAiAvatar} encType="multipart/form-data" className="flex flex-wrap gap-2 items-center">
+              <input
+                type="file"
+                name="avatar"
+                accept="image/jpeg,image/png,image/webp"
+                required
+                className="text-[12px] text-[var(--ai-text-secondary)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-semibold file:bg-[var(--ai-text)] file:text-white hover:file:bg-[#1F1F1F] file:cursor-pointer cursor-pointer"
+              />
+              <SubmitButton
+                pendingText="Upload en cours..."
+                className="inline-flex items-center justify-center h-10 px-4 text-[13px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                Uploader
+              </SubmitButton>
+            </form>
+
+            {pro.logo_url && (
+              <form action={deleteAiAvatar}>
+                <SubmitButton
+                  pendingText="Suppression..."
+                  className="inline-flex items-center justify-center h-9 px-3 text-[12px] font-semibold rounded-lg bg-transparent border border-[var(--ai-border-subtle)] hover:border-red-400 hover:text-red-600 text-[var(--ai-text-secondary)] transition-colors disabled:opacity-60"
+                >
+                  Supprimer la photo
+                </SubmitButton>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
 
       <form action={updateAiProfile} className="space-y-6">

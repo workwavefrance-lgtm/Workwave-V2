@@ -119,3 +119,140 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
 
   redirect("/ai/dashboard/profil?saved=1");
 }
+
+// ============================================
+// Upload avatar photo (Phase 12)
+// ============================================
+
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024; // 2 Mo
+const ALLOWED_AVATAR_MIMES = ["image/jpeg", "image/png", "image/webp"];
+
+function generateAvatarFileName(proId: number, originalName: string): string {
+  const ext = originalName.split(".").pop()?.toLowerCase() || "jpg";
+  const ts = Date.now();
+  return `${proId}/avatar-${ts}.${ext}`;
+}
+
+/**
+ * Upload une photo de profil pour un freelance Workwave AI.
+ * Stockee dans le bucket Supabase Storage 'pro-logos' (partage avec BTP).
+ * Met a jour `pros.logo_url` avec l'URL publique.
+ *
+ * Securite :
+ *   - Auth check via supabase.auth.getUser()
+ *   - Match pro via claimed_by_user_id == auth.uid AND category_id in AI
+ *   - Validation type MIME (jpeg/png/webp uniquement) + taille (max 2 Mo)
+ *
+ * Effets :
+ *   - Upload fichier dans pro-logos/{proId}/avatar-{ts}.ext
+ *   - Suppression de l'ancien logo si existant (idempotent)
+ *   - Update pros.logo_url avec la nouvelle URL publique
+ *   - Revalidate /ai/freelance/{slug} (page publique seulement)
+ */
+export async function uploadAiAvatar(formData: FormData): Promise<void> {
+  // 1) Auth
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/ai/connexion");
+
+  // 2) Recup pro
+  const service = getServiceClient();
+  const { data: pro } = await service
+    .from("pros")
+    .select("id, slug, logo_url")
+    .eq("claimed_by_user_id", user.id)
+    .in("category_id", AI_CATEGORY_IDS)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!pro) redirect("/ai/connexion?error=no_pro");
+
+  // 3) Recup fichier
+  const file = formData.get("avatar") as File | null;
+  if (!file || file.size === 0) {
+    redirect("/ai/dashboard/profil?error=avatar_no_file");
+  }
+  if (!ALLOWED_AVATAR_MIMES.includes(file.type)) {
+    redirect("/ai/dashboard/profil?error=avatar_invalid_type");
+  }
+  if (file.size > MAX_AVATAR_SIZE) {
+    redirect("/ai/dashboard/profil?error=avatar_too_large");
+  }
+
+  // 4) Upload Supabase Storage
+  const fileName = generateAvatarFileName(pro.id, file.name);
+  const { error: uploadError } = await service.storage
+    .from("pro-logos")
+    .upload(fileName, file, { contentType: file.type, upsert: false });
+  if (uploadError) {
+    console.error("[uploadAiAvatar] upload failed:", uploadError.message);
+    redirect("/ai/dashboard/profil?error=avatar_upload_failed");
+  }
+
+  const { data: urlData } = service.storage.from("pro-logos").getPublicUrl(fileName);
+
+  // 5) Cleanup ancien logo si existant
+  if (pro.logo_url) {
+    const oldPath = pro.logo_url.split("/pro-logos/")[1];
+    if (oldPath) {
+      // Non-bloquant : si la suppression echoue (ex. fichier deja absent),
+      // on continue. Le nouvel upload remplace deja la reference en BDD.
+      await service.storage.from("pro-logos").remove([oldPath]);
+    }
+  }
+
+  // 6) Update pros.logo_url
+  await service
+    .from("pros")
+    .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+
+  // 7) Revalidate page publique (pas le dashboard)
+  if (pro.slug) {
+    revalidatePath(`/ai/freelance/${pro.slug}`);
+  }
+
+  redirect("/ai/dashboard/profil?saved=1#avatar");
+}
+
+/**
+ * Supprime la photo de profil (revient aux initiales avec couleur).
+ */
+export async function deleteAiAvatar(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/ai/connexion");
+
+  const service = getServiceClient();
+  const { data: pro } = await service
+    .from("pros")
+    .select("id, slug, logo_url")
+    .eq("claimed_by_user_id", user.id)
+    .in("category_id", AI_CATEGORY_IDS)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!pro) redirect("/ai/connexion?error=no_pro");
+
+  if (pro.logo_url) {
+    const oldPath = pro.logo_url.split("/pro-logos/")[1];
+    if (oldPath) {
+      await service.storage.from("pro-logos").remove([oldPath]);
+    }
+  }
+
+  await service
+    .from("pros")
+    .update({ logo_url: null, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+
+  if (pro.slug) {
+    revalidatePath(`/ai/freelance/${pro.slug}`);
+  }
+
+  redirect("/ai/dashboard/profil?saved=1#avatar");
+}

@@ -25,7 +25,7 @@ function getServiceClient() {
  *   1. Auth Supabase (user logge)
  *   2. Pro Workwave AI actif claimed par cet user (14 categories AI_CATEGORY_IDS)
  *   3. Pro Premium actif (subscription_product='ai' AND status in active/trialing)
- *   4. Projet existe ET est Workwave AI (vertical='tech' = produit AI, deleted_at IS NULL)
+ *   4. Projet existe ET est Workwave AI (vertical='tech' = produit AI) ET pas status='deleted'
  *   5. Pas de doublon (UPSERT par (project_id, pro_id))
  *
  * Idempotent : si lead deja cree pour ce couple, no-op (skip overwrite).
@@ -66,14 +66,16 @@ export async function markProjectAsContacted(formData: FormData): Promise<void> 
     redirect("/ai/dashboard/abonnement?error=premium_required");
   }
 
-  // 4) Verifier que le projet existe ET est tech
+  // 4) Verifier que le projet existe ET est Workwave AI (tech) ET pas soft-deleted
+  // NB: la table `projects` n'a PAS de colonne `deleted_at` — le soft-delete
+  // se fait via `status='deleted'`.
   const { data: project } = await service
     .from("projects")
-    .select("id, vertical, deleted_at")
+    .select("id, vertical, status")
     .eq("id", projectId)
     .maybeSingle();
 
-  if (!project || project.vertical !== "tech" || project.deleted_at) {
+  if (!project || project.vertical !== "tech" || project.status === "deleted") {
     redirect("/ai/dashboard/projets?error=project_not_found");
   }
 

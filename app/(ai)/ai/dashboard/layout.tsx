@@ -83,13 +83,27 @@ export default async function AiDashboardLayout({
         {/* Profile card */}
         <div className="p-6 border-b border-[var(--ai-border-subtle)]">
           <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[15px]"
-              style={avatarStyle}
-              aria-hidden="true"
-            >
-              {initials}
-            </div>
+            {pro.logo_url ? (
+              <div
+                className="w-10 h-10 rounded-full overflow-hidden bg-white border border-[var(--ai-border-subtle)]"
+                aria-hidden="true"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={pro.logo_url}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[15px]"
+                style={avatarStyle}
+                aria-hidden="true"
+              >
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-semibold text-[var(--ai-text)] truncate">
                 {proName}
@@ -179,13 +193,23 @@ export default async function AiDashboardLayout({
                 Workwave AI
               </span>
             </Link>
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[14px]"
-              style={avatarStyle}
-              aria-hidden="true"
-            >
-              {initials}
-            </div>
+            {pro.logo_url ? (
+              <div
+                className="w-9 h-9 rounded-full overflow-hidden bg-white border border-[var(--ai-border-subtle)]"
+                aria-hidden="true"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={pro.logo_url} alt="" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-[14px]"
+                style={avatarStyle}
+                aria-hidden="true"
+              >
+                {initials}
+              </div>
+            )}
           </div>
         </header>
 
