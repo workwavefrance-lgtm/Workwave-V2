@@ -278,6 +278,46 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
+  // ============================================
+  // Idempotence : skip si event deja traite
+  // ============================================
+  // Stripe peut retry un event jusqu'a 24h en cas de 5xx ou timeout.
+  // Sans dedup, le meme event.id est traite N fois (double notification,
+  // double trial activation, etc.). On INSERT le event.id dans
+  // stripe_webhook_events ; si conflit (PRIMARY KEY violation), c'est
+  // qu'on l'a deja vu → retour 200 OK immediat sans processing.
+  const supabase = await getServiceClient();
+  // Extraction defensive de pro_id depuis les metadata Stripe (utile pour
+  // monitoring + jointure ulterieure, mais ne bloque pas si absent)
+  let proIdFromMetadata: number | null = null;
+  const eventObject = event.data.object as unknown as {
+    metadata?: Record<string, string>;
+  };
+  if (eventObject.metadata?.pro_id) {
+    const parsed = parseInt(String(eventObject.metadata.pro_id), 10);
+    if (!isNaN(parsed)) proIdFromMetadata = parsed;
+  }
+
+  const { error: dedupError } = await supabase
+    .from("stripe_webhook_events")
+    .insert({
+      stripe_event_id: event.id,
+      event_type: event.type,
+      api_version: event.api_version || null,
+      event_created_at: new Date(event.created * 1000).toISOString(),
+      pro_id: proIdFromMetadata,
+    });
+
+  if (dedupError) {
+    // Code 23505 = duplicate key violation = event deja traite
+    if (dedupError.code === "23505") {
+      console.log(`[webhook] event ${event.id} (${event.type}) deja traite, skip`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+    // Autre erreur : log mais on continue (mieux vaut traiter 2x que rater)
+    console.error("[webhook] erreur insert stripe_webhook_events:", dedupError);
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed":
@@ -314,9 +354,22 @@ export async function POST(req: Request) {
     }
   } catch (err) {
     console.error(`Erreur traitement webhook ${event.type}:`, err);
+    // Mark l'event comme failed dans la table d'idempotence (pour monitoring)
+    await supabase
+      .from("stripe_webhook_events")
+      .update({
+        processing_error: err instanceof Error ? err.message.slice(0, 500) : "unknown",
+      })
+      .eq("stripe_event_id", event.id);
     // On retourne quand même 200 pour éviter les retries Stripe
     return NextResponse.json({ received: true, error: "processing_error" });
   }
+
+  // Mark l'event comme traite avec succes (processed_at = NOW)
+  await supabase
+    .from("stripe_webhook_events")
+    .update({ processed_at: new Date().toISOString() })
+    .eq("stripe_event_id", event.id);
 
   return NextResponse.json({ received: true });
 }
