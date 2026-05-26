@@ -7,6 +7,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
 import { TECH_CITIES, findTechCityBySlug } from "@/lib/data/tech-cities";
 import { getTjmReference, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
 import { getCompaniesByCity } from "@/lib/data/tech-companies-by-city";
+import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
 export const revalidate = 21600; // 6h ISR
 export const dynamicParams = true; // pages non pre-buildees rendues a la demande
@@ -97,7 +98,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
   const { data: pros } = await sb
     .from("pros")
     .select(
-      "id, name, slug, postal_code, address, years_experience, github_username"
+      "id, name, slug, postal_code, address, years_experience, github_username, avatar_color"
     )
     .eq("category_id", filterCategoryId)
     .in("source", ["sirene", "ai_signup"])
@@ -424,17 +425,15 @@ export default async function SkillCityPage({ params }: CityPageProps) {
 
                   <div className="flex items-start gap-3 mb-4">
                     <div
-                      className="grid grid-cols-2 grid-rows-2 gap-[2px] w-6 h-6 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
+                      className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-[14px] flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
+                      style={getAvatarStyle(pro.avatar_color)}
                       aria-hidden="true"
                     >
-                      <div className="bg-[var(--ai-accent)] rounded-[1px]" />
-                      <div className="bg-[var(--ai-text)] rounded-[1px]" />
-                      <div className="bg-[var(--ai-text)] rounded-[1px]" />
-                      <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                      {getInitials(pro.name)}
                     </div>
                     {pro.years_experience != null && pro.years_experience > 0 && (
                       <span
-                        className="text-[11px] font-medium text-[var(--ai-text-tertiary)] tracking-wider"
+                        className="text-[11px] font-medium text-[var(--ai-text-tertiary)] tracking-wider mt-3"
                         style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                       >
                         {pro.years_experience} ans

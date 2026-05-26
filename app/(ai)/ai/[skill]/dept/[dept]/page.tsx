@@ -13,6 +13,7 @@ import {
   TJM_SOURCES,
 } from "@/lib/data/tech-tjm-reference";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
+import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
 // ─── FAQ dynamique par skill × departement ─────────────────────────────
 function buildDeptFaq(
@@ -118,7 +119,7 @@ export default async function SkillDeptPage({ params }: Props) {
   // Top 15 pros du dept (LIKE postal_code prefix)
   const { data: pros, count } = await sb
     .from("pros")
-    .select("id, name, slug, postal_code, years_experience, github_username", {
+    .select("id, name, slug, postal_code, years_experience, github_username, avatar_color", {
       count: "estimated",
     })
     .eq("category_id", filterCategoryId)
@@ -284,15 +285,24 @@ export default async function SkillDeptPage({ params }: Props) {
                       href={`/ai/freelance/${pro.slug}`}
                       className="group bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-xl p-4 hover:border-[var(--ai-text)] transition-all"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <span className="text-[11px] font-medium text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
-                          #{String(i + 1).padStart(2, "0")}
-                        </span>
-                        {pro.years_experience != null && pro.years_experience > 0 && (
-                          <span className="text-[11px] text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
-                            {pro.years_experience} ans
+                      <div className="flex items-start justify-between mb-3">
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-[13px] transition-transform duration-200 group-hover:scale-110"
+                          style={getAvatarStyle(pro.avatar_color)}
+                          aria-hidden="true"
+                        >
+                          {getInitials(pro.name)}
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-[11px] font-medium text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+                            #{String(i + 1).padStart(2, "0")}
                           </span>
-                        )}
+                          {pro.years_experience != null && pro.years_experience > 0 && (
+                            <span className="text-[11px] text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+                              {pro.years_experience} ans
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <h3 className="text-[14px] font-bold text-[var(--ai-text)] mb-1 tracking-tight">
                         {titleCase(pro.name)}

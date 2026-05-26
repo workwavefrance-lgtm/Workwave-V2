@@ -5,6 +5,7 @@ import { createPublicClient } from "@/lib/supabase/public-client";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
+import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
 // ISR : revalide chaque 6h, la base evolue lentement
 export const revalidate = 21600;
@@ -130,7 +131,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
   // 2. Count + liste des pros (estimated count pour speed)
   const { data: pros, count } = await sb
     .from("pros")
-    .select("id, name, slug, postal_code, address, years_experience, github_username, cities(name, slug, department_id)", {
+    .select("id, name, slug, postal_code, address, years_experience, github_username, avatar_color, cities(name, slug, department_id)", {
       count: "estimated",
     })
     .eq("category_id", filterCategoryId)
@@ -299,13 +300,11 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
                   >
                     <div className="flex items-start justify-between mb-5">
                       <div
-                        className="grid grid-cols-2 grid-rows-2 gap-[2px] w-6 h-6 transition-transform duration-200 group-hover:rotate-90"
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-[16px] transition-transform duration-200 group-hover:scale-110"
+                        style={getAvatarStyle(pro.avatar_color)}
                         aria-hidden="true"
                       >
-                        <div className="bg-[var(--ai-accent)] rounded-[1px]" />
-                        <div className="bg-[var(--ai-text)] rounded-[1px]" />
-                        <div className="bg-[var(--ai-text)] rounded-[1px]" />
-                        <div className="bg-[var(--ai-accent)] rounded-[1px]" />
+                        {getInitials(displayName)}
                       </div>
                       {pro.years_experience != null && pro.years_experience > 0 && (
                         <span
