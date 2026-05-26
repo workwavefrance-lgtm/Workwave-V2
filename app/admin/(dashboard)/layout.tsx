@@ -33,22 +33,27 @@ export default async function AdminLayout({
       className="admin-shell h-screen flex overflow-hidden"
       style={
         {
-          "--admin-bg": "#0A0A0A",
-          "--admin-card": "#111111",
-          "--admin-border": "#1F1F1F",
-          "--admin-hover": "#1A1A1A",
-          "--admin-text": "#FAFAFA",
-          "--admin-text-secondary": "#737373",
-          "--admin-text-tertiary": "#404040",
-          "--admin-accent": "#10B981",
-          "--admin-danger": "#EF4444",
+          // Palette Pixel Rise — alignee avec /ai/dashboard (style clair,
+          // accent orange Workwave, contraste eleve)
+          "--admin-bg": "#FAFAFA",
+          "--admin-card": "#FFFFFF",
+          "--admin-border": "#E5E5E5",
+          "--admin-border-strong": "#D4D4D4",
+          "--admin-hover": "#F5F5F5",
+          "--admin-text": "#0A0A0A",
+          "--admin-text-secondary": "#525252",
+          "--admin-text-tertiary": "#999999",
+          "--admin-accent": "#FF6803",
+          "--admin-accent-hover": "#E55A00",
+          "--admin-danger": "#DC2626",
           "--admin-warning": "#F59E0B",
+          "--admin-success": "#16A34A",
         } as React.CSSProperties
       }
     >
       <style>{`
         .admin-shell, .admin-shell * {
-          color-scheme: dark;
+          color-scheme: light;
         }
         .admin-shell {
           background: var(--admin-bg);
@@ -63,7 +68,7 @@ export default async function AdminLayout({
           background: transparent;
         }
         .admin-shell ::-webkit-scrollbar-thumb {
-          background: var(--admin-border);
+          background: var(--admin-border-strong);
           border-radius: 3px;
         }
         .admin-shell ::-webkit-scrollbar-thumb:hover {
