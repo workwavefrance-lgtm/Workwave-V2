@@ -37,8 +37,9 @@ export default async function AiDashboardLayout({
     redirect("/ai/inscription?error=no_profile");
   }
 
-  // 3) Verifier que le pro est tech (category 43-48). Sinon redirige vers
-  // le dashboard BTP (l'user a une fiche BTP, pas tech)
+  // 3) Verifier que le pro est Workwave AI (14 categories AI_CATEGORY_IDS :
+  // tech 43-48 + business/creatif 79-87). Sinon redirige vers le dashboard
+  // BTP (l'user a une fiche BTP, pas AI).
   if (!AI_CATEGORY_IDS.includes(pro.category_id)) {
     redirect("/pro/dashboard");
   }

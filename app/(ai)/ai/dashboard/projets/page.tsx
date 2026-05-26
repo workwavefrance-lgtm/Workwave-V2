@@ -7,8 +7,8 @@ import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { markProjectAsContacted } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Tous les projets tech — Dashboard Workwave AI",
-  description: "Tous les projets tech publies sur Workwave AI, en temps reel.",
+  title: "Tous les projets — Dashboard Workwave AI",
+  description: "Tous les projets publies sur Workwave AI, en temps reel (tech, marketing, finance, juridique, RH, design, creation, audiovisuel).",
   robots: { index: false, follow: false },
 };
 
@@ -73,7 +73,7 @@ export default async function AiDashboardProjetsPage({
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Charger toutes les categories tech pour les filtres
+  // Charger toutes les categories Workwave AI (14 verticaux) pour les filtres
   const { data: categoriesRaw } = await service
     .from("categories")
     .select("id, slug, name")
@@ -81,7 +81,7 @@ export default async function AiDashboardProjetsPage({
     .order("name");
   const categories = categoriesRaw || [];
 
-  // Charger tous les projets tech actifs (Phase 11 broadcast model :
+  // Charger tous les projets Workwave AI actifs (Phase 11 broadcast model :
   // tous les freelances voient TOUS les projets, plus de project_leads filter).
   // Note : on inclut les projets "suspicious" (l'IA flag mais on les montre
   // quand meme avec une card "ATTENTION" — cf. decision user 26/05).
@@ -163,8 +163,8 @@ export default async function AiDashboardProjetsPage({
       receivedAt: proj.created_at,
       status: proj.status,
       isSuspicious: proj.status === "suspicious" || suspicionScore > 70,
-      categoryName: cat?.name || "Tech",
-      categorySlug: cat?.slug || "tech",
+      categoryName: cat?.name || "Workwave AI",
+      categorySlug: cat?.slug || "ai",
       clientName: proj.first_name,
       clientEmail: proj.email,
       clientPhone: proj.phone,
@@ -206,7 +206,7 @@ export default async function AiDashboardProjetsPage({
             letterSpacing: "-0.04em",
           }}
         >
-          Tous les projets tech.
+          Tous les projets.
         </h1>
         <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed">
           Tous les projets publies sur Workwave AI, en temps reel. Filtrez par

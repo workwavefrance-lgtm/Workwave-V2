@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
@@ -66,6 +65,8 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
     })
     .eq("id", pro.id);
 
-  revalidatePath("/ai/dashboard/preferences");
+  // NOTE : pas de revalidatePath sur cette meme page (cf. lecon 28/04 CLAUDE.md).
+  // Le redirect cause un re-fetch RSC propre, et les inputs uncontrolled prennent
+  // les nouvelles valeurs depuis la BDD a l'arrivee sur la page.
   redirect("/ai/dashboard/preferences?saved=1");
 }

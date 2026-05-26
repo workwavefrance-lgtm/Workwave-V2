@@ -188,7 +188,7 @@ export default async function AiDashboardAbonnementPage({
             <ul className="space-y-2 text-[13px] text-white/80 mb-7">
               <li className="flex items-start gap-2">
                 <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
-                Reponse illimitee a tous les projets tech publies
+                Reponse illimitee a tous les projets publies de votre vertical
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>

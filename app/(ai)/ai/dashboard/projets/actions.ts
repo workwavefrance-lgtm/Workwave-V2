@@ -15,7 +15,7 @@ function getServiceClient() {
 
 /**
  * Server Action Phase 11 (Broadcast model) :
- * Marquer un projet tech comme CONTACTE par le freelance Premium.
+ * Marquer un projet Workwave AI comme CONTACTE par le freelance Premium.
  *
  * Contexte : avec le modele broadcast, les `project_leads` ne sont plus
  * crees au moment du dépôt (plus de routing top 3). Ils sont crees A LA
@@ -23,9 +23,9 @@ function getServiceClient() {
  *
  * Securite (defense en profondeur, 5 checks) :
  *   1. Auth Supabase (user logge)
- *   2. Pro tech actif claimed par cet user (category 43-48)
+ *   2. Pro Workwave AI actif claimed par cet user (14 categories AI_CATEGORY_IDS)
  *   3. Pro Premium actif (subscription_product='ai' AND status in active/trialing)
- *   4. Projet existe ET est tech (vertical='tech', deleted_at IS NULL)
+ *   4. Projet existe ET est Workwave AI (vertical='tech' = produit AI, deleted_at IS NULL)
  *   5. Pas de doublon (UPSERT par (project_id, pro_id))
  *
  * Idempotent : si lead deja cree pour ce couple, no-op (skip overwrite).
