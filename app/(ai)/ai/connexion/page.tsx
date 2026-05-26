@@ -6,7 +6,7 @@ import { submitConnexion } from "./actions";
 export const metadata: Metadata = {
   title: "Connexion — Workwave AI",
   description:
-    "Connectez-vous a votre compte freelance Workwave AI. Code a 6 chiffres envoye par email, sans mot de passe a retenir.",
+    "Connectez-vous a votre compte freelance Workwave AI. Code de connexion envoye par email, sans mot de passe a retenir.",
   robots: { index: false, follow: false },
 };
 
@@ -84,8 +84,8 @@ export default async function ConnexionPage({
             Connexion.
           </h1>
           <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed mb-10">
-            Entrez votre email pour recevoir un code de connexion a 6 chiffres. Pas
-            de mot de passe a retenir.
+            Entrez votre email pour recevoir un code de connexion. Pas de mot
+            de passe a retenir.
           </p>
 
           {/* Form */}

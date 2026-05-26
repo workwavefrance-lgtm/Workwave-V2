@@ -90,9 +90,9 @@ export default async function ConnexionVerifierPage({
           </h1>
           <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed mb-2">
             {maybe ? (
-              <>Si un compte Workwave AI existe pour cet email, vous avez recu un code a 6 chiffres.</>
+              <>Si un compte Workwave AI existe pour cet email, vous avez recu un code de connexion.</>
             ) : (
-              <>Nous avons envoye un code a 6 chiffres a <strong className="text-[var(--ai-text)]">{obfuscated}</strong>.</>
+              <>Nous avons envoye un code de connexion a <strong className="text-[var(--ai-text)]">{obfuscated}</strong>.</>
             )}
           </p>
           <p className="text-sm text-[var(--ai-text-tertiary)] mb-8">
@@ -123,7 +123,7 @@ export default async function ConnexionVerifierPage({
                   fontFamily: "var(--font-geist-mono), monospace",
                 }}
               >
-                Code a 6 chiffres
+                Code recu par mail
               </label>
               <input
                 id="code"
@@ -131,10 +131,10 @@ export default async function ConnexionVerifierPage({
                 name="code"
                 required
                 inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
+                pattern="[0-9]{6,10}"
+                maxLength={10}
                 autoComplete="one-time-code"
-                placeholder="123456"
+                placeholder="12345678"
                 className="w-full h-14 px-4 text-[24px] font-bold tracking-[0.3em] text-center text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all"
                 style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                 autoFocus

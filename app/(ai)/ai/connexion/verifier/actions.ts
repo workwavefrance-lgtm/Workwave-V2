@@ -49,14 +49,16 @@ async function getServerSupabaseClient() {
 export async function verifyCode(formData: FormData): Promise<void> {
   // Truncate defensif anti FormData forge
   const email = String(formData.get("email") || "").trim().toLowerCase().slice(0, 200);
-  const code = String(formData.get("code") || "").trim().slice(0, 10);
+  // Code OTP : on accepte jusqu'a 10 chiffres (Supabase emet 6-8 selon config)
+  const code = String(formData.get("code") || "").trim().replace(/\s+/g, "").slice(0, 10);
 
   // Validation stricte
   if (!isValidEmail(email)) {
     redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=missing`);
   }
-  // Code Supabase OTP : exactement 6 chiffres
-  if (!/^\d{6}$/.test(code)) {
+  // Code Supabase OTP : 6 a 10 chiffres (Supabase peut emettre des codes de
+  // 6, 7 ou 8 chiffres selon la config dashboard. On accepte large.)
+  if (!/^\d{6,10}$/.test(code)) {
     redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=invalid_code`);
   }
 
