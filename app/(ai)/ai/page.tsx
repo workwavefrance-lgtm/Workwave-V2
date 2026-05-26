@@ -25,14 +25,14 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Workwave AI — Freelances tech (IA, dev, cloud, data) en France | Selection en 24h",
+    "Workwave AI — La plateforme freelance de reference (IA, dev, cloud, data)",
   description:
-    "Trouvez les freelances tech qui correspondent a votre projet en moins de 24h : IA / LLM, dev web (React, Next.js), cloud (AWS, GCP), no-code, data, design. Inscription gratuite, sans credit, sans commission. France et Europe.",
+    "Publiez votre projet tech et alertez en temps reel toute la communaute freelances FR : IA / LLM, dev web (React, Next.js), cloud (AWS, GCP), no-code, data, design. Inscription gratuite, sans commission, sans engagement.",
   alternates: { canonical: `${SITE_URL}/ai` },
   openGraph: {
-    title: "Workwave AI — Selection IA des meilleurs freelances tech",
+    title: "Workwave AI — La plateforme freelance de reference",
     description:
-      "IA, dev, cloud, data, design : on selectionne les 3 freelances qui correspondent a votre projet sous 24h. Gratuit, sans engagement.",
+      "Postez votre projet, alertez la communaute des freelances tech FR en temps reel. Gratuit, sans commission.",
     url: `${SITE_URL}/ai`,
     siteName: "Workwave AI",
     locale: "fr_FR",
@@ -46,11 +46,11 @@ export const metadata: Metadata = {
 const FAQ: FaqItem[] = [
   {
     q: "Comment fonctionne Workwave AI pour trouver un freelance ?",
-    a: "Vous decrivez votre projet en 60 secondes (categorie, contexte, budget, delai). Notre IA analyse votre demande et selectionne les 3 freelances de notre base qui correspondent le mieux en fonction de leur expertise, de leur historique de missions, de leur disponibilite et de leur tarif. Vous recevez les profils par email sous 24h, et les freelances vous contactent directement. Pas d'intermediaire, pas de commission.",
+    a: "Vous decrivez votre projet en 60 secondes (categorie, contexte, budget, delai). Notre IA qualifie votre demande (categorie, resume, mots-cles) puis on alerte en temps reel par email TOUTE la communaute des freelances tech inscrits sur Workwave. Les freelances qui correspondent a votre besoin vous contactent directement par mail ou telephone. Pas d'intermediaire, pas de commission, vous gardez le controle des echanges.",
   },
   {
     q: "C'est gratuit pour les clients ?",
-    a: "Oui. Deposer un projet, recevoir les 3 freelances selectionnes, echanger avec eux : tout est gratuit cote client. Workwave ne prend aucune commission sur la mission. Les freelances financent la plateforme via un abonnement optionnel de 29,90€/mois TTC qui leur permet de repondre aux projets.",
+    a: "Oui, 100% gratuit. Deposer un projet, etre contacte par les freelances, signer un devis : tout est gratuit cote client. Workwave ne prend aucune commission sur la mission. Les freelances financent la plateforme via un abonnement optionnel de 29,90€/mois TTC qui leur permet de repondre aux projets publies.",
   },
   {
     q: "Quels metiers tech sont couverts ?",
@@ -58,7 +58,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "En combien de temps est-on contacte par les freelances ?",
-    a: "Sous 24h dans 90% des cas, souvent en quelques heures. Notre IA travaille en continu et envoie les notifications immediatement apres analyse. Si votre projet est tres niche ou ne match aucun freelance dispo, vous recevez un message sous 24h pour preciser ou attendre l'arrivee de nouveaux profils.",
+    a: "Sous 24h dans 90% des cas, souvent en quelques heures. Des qu'un freelance Premium voit votre projet correspondant a son savoir-faire dans son dashboard, il peut vous contacter directement. Plus votre brief est clair (techno, budget, delai), plus les freelances pertinents repondent vite.",
   },
   {
     q: "Quel est le TJM moyen d'un freelance tech en France en 2026 ?",
@@ -66,7 +66,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "Le freelance travaille en remote ou en presentiel ?",
-    a: "Au choix. 80% de notre base travaille en 100% remote (la norme dans la tech francaise depuis 2020), 15% en hybride (remote + bureau client 1-2 jours/semaine), 5% sur site uniquement. Vous precisez vos contraintes (geo, presentiel obligatoire ou pas) dans le formulaire de depot et notre IA filtre en consequence.",
+    a: "Au choix. 80% de notre base travaille en 100% remote (la norme dans la tech francaise depuis 2020), 15% en hybride (remote + bureau client 1-2 jours/semaine), 5% sur site uniquement. Vous precisez vos contraintes (geo, presentiel obligatoire ou pas) dans le formulaire de depot — chaque freelance verra ces criteres dans son dashboard et choisira si le projet l'interesse.",
   },
   {
     q: "Qui sont les freelances referenced sur Workwave AI ?",
@@ -74,7 +74,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "Comment Workwave AI se differencie de Malt, Comet, Free-Work ?",
-    a: "3 differences majeures : (1) Selection automatique par IA en moins de 24h, vs recherche manuelle dans des listes de centaines de profils. (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele freemium pour les freelances (29,90€/mois sans credits limites, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
+    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances tech inscrits, ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele freemium pour les freelances (29,90€/mois sans credits limites, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
   },
 ];
 
@@ -272,13 +272,13 @@ const STEPS = [
   },
   {
     n: "02",
-    title: "L'IA selectionne les 3 meilleurs profils",
-    desc: "Matching semantique sur notre base de freelances tech. Score sur l'expertise, l'historique de projets, la dispo et le tarif.",
+    title: "On alerte la communaute en temps reel",
+    desc: "Notre IA qualifie votre brief (categorie, mots-cles) puis on envoie un mail a tous les freelances tech inscrits sur Workwave.",
   },
   {
     n: "03",
-    title: "Discutez directement avec eux",
-    desc: "Echange en direct sans intermediaire. Devis, contrat, paiement : 100% libre. Aucune commission Workwave.",
+    title: "Les freelances pertinents vous contactent",
+    desc: "Ceux qui correspondent a votre besoin vous repondent directement. Echange en direct sans intermediaire. Devis et paiement 100% libre, aucune commission Workwave.",
   },
 ];
 
@@ -500,22 +500,24 @@ export default function AiHomePage() {
               <h1
                 className="font-black text-[var(--ai-text)] uppercase mb-8"
                 style={{
-                  fontSize: "clamp(40px, 7.5vw, 92px)",
+                  fontSize: "clamp(36px, 7vw, 88px)",
                   lineHeight: 0.95,
                   letterSpacing: "-0.05em",
                 }}
               >
-                Trouvez le
+                La plateforme
                 <br />
-                freelance tech
+                freelance
                 <br />
-                <span className="text-[var(--ai-text-tertiary)]">ideal.</span>
+                <span className="text-[var(--ai-text-tertiary)]">
+                  de reference.
+                </span>
               </h1>
 
               <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-xl leading-relaxed mb-10">
-                Workwave AI connecte les porteurs de projet aux freelances tech
-                (IA, dev, cloud, no-code, data, design). Matching par IA en
-                moins de 24h. Inscription gratuite, sans credit.
+                Publiez votre projet (IA, dev, cloud, no-code, data, design)
+                et alertez en temps reel toute la communaute des freelances
+                tech FR. Inscription gratuite, sans commission, sans engagement.
               </p>
 
               {/* CTA bar composite (search-bar look, single click target,
@@ -622,11 +624,11 @@ export default function AiHomePage() {
                   className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
                   style={{ letterSpacing: "0.18em" }}
                 >
-                  Matching IA
+                  Broadcast communaute
                 </p>
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
-                  On selectionne les 3 freelances qui correspondent a votre
-                  projet et on vous repond sous 24h. Gratuit, sans engagement.
+                  On alerte en temps reel la communaute des freelances tech FR.
+                  Reponse en moins de 24h, gratuit, sans engagement.
                 </p>
               </div>
 

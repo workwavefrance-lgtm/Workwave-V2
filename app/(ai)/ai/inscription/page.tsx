@@ -343,9 +343,10 @@ export default async function InscriptionPage({
               Vos conditions.
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Indicatifs pour le matching IA. Vous restez libre de repondre a
-              tous les briefs qui vous interessent, meme en dessous de votre
-              TJM. Modifiable a tout moment.
+              Indicatifs pour affichage sur votre fiche publique. Vous recevez
+              en temps reel TOUS les projets tech publies — c&apos;est vous qui
+              choisissez ceux qui vous interessent dans le dashboard.
+              Modifiable a tout moment.
             </p>
 
             <div className="space-y-8">

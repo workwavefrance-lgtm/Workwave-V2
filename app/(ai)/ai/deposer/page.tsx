@@ -7,7 +7,7 @@ import { submitTechProject } from "./actions";
 export const metadata: Metadata = {
   title: "Deposer un projet tech — Workwave AI",
   description:
-    "Decrivez votre projet tech en 4 etapes. Notre IA selectionne les 3 meilleurs freelances en moins de 24h. Gratuit, sans engagement, sans credit.",
+    "Publiez votre projet tech en 4 etapes. On alerte en temps reel toute la communaute des freelances tech FR. Reponse en moins de 24h, gratuit, sans engagement.",
 };
 
 const CATEGORIES = [
@@ -101,9 +101,9 @@ export default async function DeposerPage({
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed">
-              4 etapes, 60 secondes. On selectionne les 3 freelances qui
-              correspondent le mieux a votre besoin et on vous repond sous 24h.
-              Gratuit, sans engagement, aucune commission.
+              4 etapes, 60 secondes. On alerte en temps reel toute la
+              communaute des freelances tech FR — les profils interesses
+              vous contactent directement. Gratuit, sans engagement, aucune commission.
             </p>
           </div>
         </div>
@@ -184,8 +184,8 @@ export default async function DeposerPage({
               Decrivez le contexte.
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Plus votre description est precise, mieux on selectionne les
-              freelances qui vous correspondent.
+              Plus votre brief est precis (techno, contexte, contraintes),
+              plus les freelances pertinents vous repondront vite.
             </p>
 
             <div className="space-y-5">
@@ -232,7 +232,8 @@ export default async function DeposerPage({
                   className="w-full px-4 py-3 text-[15px] text-[var(--ai-text)] bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-lg placeholder:text-[var(--ai-text-muted)] focus:outline-none focus:border-[var(--ai-text)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] transition-all resize-y"
                 />
                 <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-2">
-                  Minimum 100 caracteres recommande pour une selection precise.
+                  Minimum 100 caracteres recommande pour que les bons profils
+                  reagissent.
                 </p>
               </div>
 
@@ -379,8 +380,8 @@ export default async function DeposerPage({
               Comment vous joindre ?
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Vos coordonnees ne sont partagees qu&apos;avec les 3 freelances
-              selectionnes par notre IA. Jamais publiees.
+              Vos coordonnees ne sont visibles que par les freelances Premium
+              de notre communaute. Jamais publiees, jamais revendues.
             </p>
 
             <div className="space-y-5">
@@ -506,8 +507,8 @@ export default async function DeposerPage({
                 >
                   CGU
                 </Link>{" "}
-                et que mes coordonnees soient partagees avec les 3 freelances
-                selectionnes par l&apos;IA Workwave. Aucune autre diffusion.
+                et que mes coordonnees soient diffusees aux freelances Premium
+                de la communaute Workwave AI. Aucune autre diffusion.
               </span>
             </label>
 
@@ -516,7 +517,7 @@ export default async function DeposerPage({
               className="w-full sm:w-auto inline-flex items-center justify-center h-14 px-10 text-[15px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
               style={{ boxShadow: "var(--ai-shadow-sm)" }}
             >
-              Recevoir 3 freelances en 24h
+              Publier mon projet
               <svg
                 className="ml-2 w-5 h-5"
                 viewBox="0 0 24 24"

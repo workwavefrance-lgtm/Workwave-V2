@@ -32,7 +32,7 @@ const FAQ_PRICING: FaqItem[] = [
   },
   {
     q: "Y a-t-il un essai gratuit pour les freelances ?",
-    a: "Oui. 14 jours d'essai gratuit a l'inscription, sans carte bancaire requise. Vous pouvez tester le matching IA, recevoir des projets, repondre normalement. A J14 sans CB ajoutee, votre acces passe en mode visibilite seule (profil reste en ligne, mais vous ne pouvez plus repondre). Vous activez l'abonnement quand vous voulez. Tres rare que des freelances regrettent leur essai : 80%+ activent leur abonnement.",
+    a: "Oui. 14 jours d'essai gratuit a l'inscription, sans carte bancaire requise. Vous pouvez voir tous les projets en temps reel, recevoir les emails et repondre normalement. A J14 sans CB ajoutee, votre acces passe en mode visibilite seule (vous voyez toujours les projets dans le dashboard, mais les coordonnees client sont floutees). Vous activez l'abonnement quand vous voulez.",
   },
   {
     q: "Que se passe-t-il si Workwave ne me trouve aucun projet ?",
@@ -50,14 +50,14 @@ const FAQ_PRICING: FaqItem[] = [
 
 const CLIENT_FEATURES = [
   "Depot de projet illimite, gratuit",
-  "Selection IA en moins de 24h",
-  "3 freelances qualifies par projet",
+  "Broadcast a 500+ freelances tech en temps reel",
+  "Qualification IA du brief (categorie, mots-cles)",
   "Aucune commission sur vos missions",
   "Annulation a tout moment, sans frais",
 ];
 
 const FREELANCE_FEATURES = [
-  "Reception de projets qualifies par IA",
+  "Reception en temps reel de 100% des projets tech",
   "Reponse sans limite (pas de credits)",
   "Profil mis en avant sur les listings",
   "Badge Pro Workwave sur la fiche",
@@ -124,7 +124,7 @@ export default function TarifsPage() {
         "@type": "Offer",
         name: "Workwave AI Client (porteur de projet)",
         description:
-          "Depot de projet illimite, selection IA en 24h, 3 freelances qualifies par projet, aucune commission, annulation libre.",
+          "Depot de projet illimite, broadcast en temps reel a 500+ freelances tech FR, qualification IA du brief, aucune commission, annulation libre.",
         price: "0.00",
         priceCurrency: "EUR",
         availability: "https://schema.org/InStock",
@@ -135,7 +135,7 @@ export default function TarifsPage() {
         "@type": "Offer",
         name: "Workwave AI Premium (freelance tech)",
         description:
-          "Reponse illimitee aux projets matches par IA, profil mis en avant, badge Pro Workwave, statistiques d'impressions, sans engagement.",
+          "Acces en temps reel a 100% des projets tech, reponse illimitee, profil mis en avant, badge Pro Workwave, statistiques d'impressions, sans engagement.",
         price: "29.90",
         priceCurrency: "EUR",
         availability: "https://schema.org/InStock",

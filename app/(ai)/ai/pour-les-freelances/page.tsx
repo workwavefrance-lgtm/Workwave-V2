@@ -7,9 +7,9 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Pour les freelances tech — Recevez des projets qualifies | Workwave AI",
+    "Pour les freelances tech — Recevez 100% des projets en temps reel | Workwave AI",
   description:
-    "Workwave AI envoie aux freelances tech les projets qualifies par IA qui matchent leur profil. Inscription gratuite. 29,90€/mois pour repondre, sans credit, sans commission. Alternative a Malt, Codeur, Freelancer.com. France et Europe.",
+    "Inscrivez-vous gratuitement et recevez en temps reel TOUS les projets tech publies sur Workwave AI. Filtrez par savoir-faire, repondez aux projets qui vous interessent. 29,90€/mois pour repondre, sans credit, sans commission. Alternative a Malt, Codeur, Freelancer.com.",
   alternates: { canonical: `${SITE_URL}/ai/pour-les-freelances` },
 };
 
@@ -21,13 +21,13 @@ const PROCESS = [
   },
   {
     n: "02",
-    title: "Reception de projets qualifies",
-    desc: "Notre IA vous envoie les projets qui matchent votre expertise, votre TJM et votre disponibilite. Vous repondez si ca vous interesse, libre.",
+    title: "Recevez 100% des projets en temps reel",
+    desc: "Chaque projet tech publie sur Workwave vous est notifie par email immediatement. Vous voyez tout dans votre dashboard, filtre par categorie + budget.",
   },
   {
     n: "03",
-    title: "Reponse directe au client",
-    desc: "Vous discutez sans intermediaire. Devis, contrat, paiement : 100% libre. Aucune commission.",
+    title: "Vous choisissez, vous repondez directement",
+    desc: "Pas de selection imposee : c'est vous qui filtrez et decidez. Premium = vous voyez les coordonnees et contactez le client. Devis, contrat, paiement : 100% libre. Aucune commission.",
   },
 ];
 
@@ -57,15 +57,15 @@ const VS = [
 const FAQ = [
   {
     q: "C'est vraiment gratuit pour s'inscrire ?",
-    a: "Oui. L'inscription, la creation du profil, la reception des projets : tout est gratuit. L'abonnement 29,90€/mois est uniquement requis si vous voulez repondre aux projets (envoyer un message au client).",
+    a: "Oui. L'inscription, la creation du profil, la reception en temps reel des projets : tout est gratuit. L'abonnement 29,90€/mois est uniquement requis si vous voulez RÉPONDRE aux projets (voir les coordonnees du client et le contacter).",
   },
   {
-    q: "Comment l'IA selectionne-t-elle les projets ?",
-    a: "Matching semantique sur l'expertise (tags + bio), score pondere par votre TJM indicatif, votre dispo et votre categorie. Le TJM n'est PAS un filtre dur : si un projet vous interesse en dessous, vous pouvez quand meme repondre. Les 3 meilleurs profils sont notifies par email a chaque projet.",
+    q: "Vais-je voir TOUS les projets ou juste ceux qui matchent ?",
+    a: "TOUS. A chaque projet publie sur Workwave AI, tous les freelances tech inscrits recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Modele communaute Codeur.com : pas de selection imposee, vous gardez la main.",
   },
   {
     q: "Combien de projets vais-je recevoir ?",
-    a: "Ca depend de la demande sur votre categorie et vos criteres. Workwave AI est en lancement, donc le volume monte progressivement. Une categorie demandee (Dev Web, IA) genere plus de projets qu'une niche pointue. Le tableau de bord vous montrera votre flux reel des votre inscription.",
+    a: "Ca depend de la demande sur Workwave AI au global. La plateforme est en lancement, donc le volume monte progressivement. Vous serez alerte par email a chaque nouveau projet publie, et le tableau de bord centralise tout avec filtres.",
   },
   {
     q: "Puis-je resilier a tout moment ?",
@@ -161,16 +161,17 @@ export default function PourLesFreelancesPage() {
             >
               Recevez
               <br />
-              les projets tech
+              100% des projets
               <br />
               <span className="text-[var(--ai-text-tertiary)]">
-                qui vous matchent.
+                en temps reel.
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed mb-10">
-              Inscription gratuite. Profil mis en avant. Projets filtres par
-              IA selon votre expertise, votre TJM, votre dispo. 29,90€/mois
-              pour repondre, sans credit. Resiliation libre. Aucune commission.
+              Inscription gratuite. A chaque nouveau projet tech publie sur
+              Workwave, vous etes notifie par email. Filtrez dans le dashboard
+              par savoir-faire, repondez aux projets qui vous interessent.
+              29,90€/mois pour repondre, sans credit, sans commission.
             </p>
 
             {/* CTA bar composite — meme pattern que /ai (landing) */}

@@ -25,11 +25,11 @@ const TECH_VERTICAL = "tech";
 const FAQ_FREELANCES_HUB: FaqItem[] = [
   {
     q: "Comment choisir la bonne categorie pour mon projet ?",
-    a: "Selectionnez la categorie dont le freelance ideal aura la specialite principale. Pour un projet hybride (ex : app web React + integration IA), choisissez la categorie dominante du projet (ici Developpement Web). Notre IA matchera quand meme avec des freelances IA si la description du projet mentionne LLM, embedding, RAG, etc. Si vous hesitez, deposez directement votre projet via /ai/deposer et l'IA classifie automatiquement.",
+    a: "Selectionnez la categorie dont le freelance ideal aura la specialite principale. Pour un projet hybride (ex : app web React + integration IA), choisissez la categorie dominante (ici Developpement Web). Notre IA qualifie la demande et la diffuse a toute la communaute des freelances tech — ceux d'autres categories pertinentes verront le projet aussi grace au filtre dashboard. Si vous hesitez, deposez votre projet via /ai/deposer, l'IA classifie automatiquement.",
   },
   {
     q: "Un meme freelance peut-il avoir plusieurs categories ?",
-    a: "Oui. La plupart des freelances tech ont 2-3 categories actives (ex : Dev Web + IA, Cloud + DevOps, Data + ML). A l'inscription, le freelance choisit une categorie principale et peut activer jusqu'a 3 categories secondaires. Le matching IA pondere selon l'expertise principale, mais reste eligible pour les categories secondaires si le projet le justifie.",
+    a: "Oui. La plupart des freelances tech ont 2-3 categories actives (ex : Dev Web + IA, Cloud + DevOps, Data + ML). A l'inscription, le freelance choisit une categorie principale et peut activer jusqu'a 3 categories secondaires. Comme tous les freelances voient tous les projets en temps reel, ils choisissent eux-memes ceux qui correspondent a leur savoir-faire via les filtres dashboard.",
   },
   {
     q: "Quels sont les TJM moyens des freelances tech sur Workwave AI ?",
@@ -37,7 +37,7 @@ const FAQ_FREELANCES_HUB: FaqItem[] = [
   },
   {
     q: "Quelle est la difference entre Workwave AI et un site comme Malt ?",
-    a: "Sur Workwave AI, vous deposez votre projet et notre IA selectionne automatiquement les 3 meilleurs freelances en moins de 24h. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). Le freelance paie un abonnement fixe 29,90€/mois (sans credit) au lieu d'une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
+    a: "Sur Workwave AI, vous publiez votre projet et notre IA diffuse en temps reel a toute la communaute des freelances tech inscrits — ceux qui correspondent a votre besoin vous contactent directement. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). Le freelance paie un abonnement fixe 29,90€/mois (sans credit) pour repondre aux projets, au lieu d'une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
   },
   {
     q: "Les freelances sont-ils verifies (KYC, certification) ?",
@@ -265,7 +265,7 @@ export default async function FreelancesHubPage() {
                   <div className="bg-[var(--ai-accent)] rounded-[1px]" />
                 </div>
                 <span className="text-[14px] sm:text-[15px] text-[var(--ai-text-secondary)] truncate">
-                  On vous propose 3 freelances en 24h
+                  On alerte 500+ freelances tech en temps reel
                 </span>
               </div>
               <div className="flex items-center justify-center gap-2 bg-[var(--ai-accent)] group-hover:bg-[var(--ai-accent-hover)] text-white px-6 sm:px-7 py-4 transition-colors duration-200">
