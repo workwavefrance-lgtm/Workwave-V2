@@ -20,8 +20,13 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SIGNIN_TTL_MIN = 15;
-const MAX_ATTEMPTS_PER_EMAIL_15MIN = 3;
-const MAX_ATTEMPTS_PER_IP_15MIN = 20; // Anti-enumeration : limite par IP
+// Rate limits relaches le 26/05/2026 (user-friendly pour le dev / le test).
+// Securite preservee par :
+//   - delai uniforme sleepUntil 800ms sur toutes les branches (anti-timing)
+//   - IP rate limit (200/15min = 14/min, large mais bloque l'attaque mass)
+//   - Supabase Auth applique son propre rate limit en plus (envoi mail OTP)
+const MAX_ATTEMPTS_PER_EMAIL_15MIN = 20;
+const MAX_ATTEMPTS_PER_IP_15MIN = 200;
 // Delai uniforme pour aligner les timings success/no_account (anti-timing-attack)
 const TIMING_BASELINE_MS = 800;
 
