@@ -47,3 +47,4 @@ next-env.d.ts
 scripts/.brevo-recovery-sent.json
 scripts/.brevo-cold-batch*-sent.json
 scripts/.backup-sent-logs-*/
+.env*.local
