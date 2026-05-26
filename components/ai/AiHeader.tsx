@@ -53,6 +53,11 @@ export default function AiHeader() {
     setIsOpen(false);
   }, [pathname]);
 
+  // Hide sur le dashboard freelance — il a sa propre sidebar/header.
+  // Sinon double UI (header public + sidebar dashboard) qui rend la page
+  // confuse (le bouton "Connexion" du header public renvoie vers /ai/connexion).
+  if (pathname.startsWith("/ai/dashboard")) return null;
+
   return (
     <>
       <header

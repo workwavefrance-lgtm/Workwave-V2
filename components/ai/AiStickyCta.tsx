@@ -27,6 +27,7 @@ const HIDDEN_PATHS = [
   "/ai/deposer/succes",
   "/ai/connexion",
   "/ai/inscription",
+  "/ai/dashboard",
 ];
 
 const DISMISS_KEY = "ai-sticky-cta-dismissed";

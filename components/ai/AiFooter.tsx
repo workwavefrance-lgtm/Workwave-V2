@@ -1,12 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * Footer minimaliste Workwave AI (style peec.ai).
  *
  * Sobre, beaucoup d'espace, lien retour vers Workwave BTP pour
  * indiquer aux visiteurs qu'on a deja un autre vertical etabli.
+ *
+ * Hide sur /ai/dashboard pour ne pas confuser l'experience freelance
+ * (qui a son propre layout sidebar + header).
  */
 export default function AiFooter() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/ai/dashboard")) return null;
+
   const year = new Date().getFullYear();
 
   return (
