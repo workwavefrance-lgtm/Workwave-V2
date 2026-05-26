@@ -34,9 +34,36 @@ const TIMELINES = [
   { value: "flexible", label: "Flexible", desc: "Pas de contrainte" },
 ];
 
-export default function DeposerPage() {
+const ERROR_MESSAGES: Record<string, string> = {
+  missing_fields: "Tous les champs obligatoires doivent etre remplis.",
+  invalid_email: "L'adresse email saisie n'est pas valide. Verifiez le format.",
+  invalid_category: "Categorie invalide. Selectionnez une categorie dans la liste.",
+  category_not_found: "Categorie introuvable. Reessayez ou contactez le support.",
+  insert_failed: "Une erreur technique a empeche l'enregistrement de votre projet. Reessayez dans quelques instants.",
+};
+
+export default async function DeposerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const sp = await searchParams;
+  const errorMsg = sp.error && ERROR_MESSAGES[sp.error] ? ERROR_MESSAGES[sp.error] : "";
+
   return (
     <>
+      {/* Banner d'erreur (affichage si redirect avec ?error=...) */}
+      {errorMsg && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+          <div
+            className="p-4 rounded-lg border border-red-500/20 bg-red-500/10 text-red-800"
+            role="alert"
+          >
+            <p className="text-sm font-medium">{errorMsg}</p>
+          </div>
+        </div>
+      )}
+
       {/* ═══════════════════════════════════════════════════════════════
           HERO
           ═══════════════════════════════════════════════════════════════ */}
