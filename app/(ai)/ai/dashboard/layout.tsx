@@ -141,8 +141,12 @@ export default async function AiDashboardLayout({
           >
             → Voir le site public
           </Link>
+          {/* Bug critique fix : prefetch={false} obligatoire sinon Next.js
+              prefetch ce GET = signout silencieux quand le dashboard charge,
+              et toute action suivante kicke l'user vers /ai/connexion. */}
           <Link
-            href="/api/auth/signout"
+            href="/api/auth/signout?redirect=/ai"
+            prefetch={false}
             className="block text-[11px] text-[var(--ai-text-tertiary)] hover:text-[var(--ai-accent)] transition-colors"
           >
             → Se deconnecter
