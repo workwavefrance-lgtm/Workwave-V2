@@ -87,6 +87,15 @@ type SendAiProjectNotificationInput = {
     confidence: number;
   } | null;
   routed: RoutedFreelance[];
+  /**
+   * Phase 11 — broadcast a tous les freelances tech au lieu du routing top 3.
+   * Optionnel pour retrocompat avec d'autres appelants eventuels.
+   */
+  broadcastInfo?: {
+    sent: number;
+    totalTargets: number;
+    failed: number;
+  };
 };
 
 export async function sendAiProjectNotification(
@@ -99,6 +108,19 @@ export async function sendAiProjectNotification(
     input.qualification && input.qualification.suspicion_score > 70
       ? `<span style="background:#FEE2E2;color:#DC2626;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;">⚠ Suspicion ${input.qualification.suspicion_score}/100</span>`
       : "";
+
+  // Phase 11 : broadcast remplace routing IA. On affiche les stats du broadcast
+  // dans le mail admin (combien de freelances joins) plutot que le top 3.
+  // Le bloc routed reste supporte pour retrocompat BTP (qui utilise toujours
+  // le routing). En tech, broadcastInfo est defini et routed=[].
+  const broadcastHtml = input.broadcastInfo
+    ? `<h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Broadcast a la communaute :</h3>
+       <table style="font-size:13px;width:100%;border-collapse:collapse;">
+         <tr><td style="padding:4px 0;color:#999;width:160px;">Freelances cibles</td><td style="color:#0A0A0A;font-weight:600;">${input.broadcastInfo.totalTargets}</td></tr>
+         <tr><td style="padding:4px 0;color:#999;">Emails envoyes</td><td style="color:#0A0A0A;font-weight:600;">${input.broadcastInfo.sent}</td></tr>
+         ${input.broadcastInfo.failed > 0 ? `<tr><td style="padding:4px 0;color:#999;">Echecs envoi</td><td style="color:#DC2626;font-weight:600;">${input.broadcastInfo.failed}</td></tr>` : ""}
+       </table>`
+    : "";
 
   const routedHtml = input.routed.length
     ? `<h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Top 3 freelances routes par l'IA :</h3>
@@ -118,7 +140,7 @@ export async function sendAiProjectNotification(
            )
            .join("")}
        </ol>`
-    : `<p style="color:#DC2626;font-size:13px;"><strong>Aucun freelance route</strong> — categorie vide ou trop peu de candidats.</p>`;
+    : broadcastHtml;
 
   const aiInsightsHtml = input.qualification
     ? `<h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Analyse IA :</h3>
