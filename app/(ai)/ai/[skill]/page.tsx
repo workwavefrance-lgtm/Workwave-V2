@@ -134,7 +134,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
       count: "estimated",
     })
     .eq("category_id", filterCategoryId)
-    .eq("source", "sirene")
+    .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)
     .order("github_username", { ascending: false, nullsFirst: false })

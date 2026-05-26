@@ -64,7 +64,7 @@ export default async function FreelancesHubPage() {
         .from("pros")
         .select("*", { count: "estimated", head: true })
         .eq("category_id", cat.id)
-        .eq("source", "sirene")
+        .in("source", ["sirene", "ai_signup"])
         .eq("is_active", true)
         .is("deleted_at", null);
       return { ...cat, count: count || 0 };

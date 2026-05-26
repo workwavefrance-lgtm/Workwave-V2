@@ -54,7 +54,7 @@ export default async function BarometreTjmHubPage() {
     .from("pros")
     .select("*", { count: "estimated", head: true })
     .in("category_id", [43, 44, 45, 46, 47, 48])
-    .eq("source", "sirene")
+    .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null);
 

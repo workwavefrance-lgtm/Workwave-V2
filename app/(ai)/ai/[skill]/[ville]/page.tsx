@@ -100,7 +100,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       "id, name, slug, postal_code, address, years_experience, github_username"
     )
     .eq("category_id", filterCategoryId)
-    .eq("source", "sirene")
+    .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)
     .like("postal_code", `${city.dept_prefix}%`)

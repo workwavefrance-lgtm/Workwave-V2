@@ -46,7 +46,7 @@ export default async function BarometreSkillPage({ params }: Props) {
   let proCount = 0;
   if (filterCategoryId) {
     const { count } = await sb.from("pros").select("*", { count: "estimated", head: true })
-      .eq("category_id", filterCategoryId).eq("source", "sirene").eq("is_active", true).is("deleted_at", null);
+      .eq("category_id", filterCategoryId).in("source", ["sirene", "ai_signup"]).eq("is_active", true).is("deleted_at", null);
     proCount = count || 0;
   }
 
