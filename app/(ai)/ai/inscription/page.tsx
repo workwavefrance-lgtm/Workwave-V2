@@ -561,16 +561,23 @@ export default async function InscriptionPage({
                 </span>
 
                 <div className="relative z-10 mt-8 flex-1 flex flex-col">
-                  <div className="flex items-baseline gap-2 mb-4">
+                  <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-5xl font-black tracking-tight" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
                       29,90€
                     </span>
                     <span className="text-sm text-white/50">/ mois TTC</span>
                   </div>
+                  <p className="text-[12px] font-semibold text-[var(--ai-accent)] mb-5">
+                    14 jours d&apos;essai gratuit · CB requise · resiliable a tout moment
+                  </p>
                   <p className="text-[11px] uppercase font-semibold text-white/40 mb-5" style={{ letterSpacing: "0.18em" }}>
                     Plan Reponse illimitee
                   </p>
                   <ul className="space-y-2.5 text-[13px] text-white/80 mb-7 flex-1">
+                    <li className="flex items-start gap-2">
+                      <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
+                      14 jours gratuits, prelevement automatique a J15
+                    </li>
                     <li className="flex items-start gap-2">
                       <span className="text-[var(--ai-accent)] mt-0.5 font-bold">→</span>
                       Reponse a tous les briefs (sans credit)

@@ -9,6 +9,9 @@ import {
 } from "@/lib/email/send-ai-signup-emails";
 import { activateAiSignup } from "@/lib/ai/auth/activate-signup";
 import { isValidEmail } from "@/lib/ai/helpers";
+import { createAiCheckoutSession } from "@/lib/stripe/create-ai-checkout";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
 // Max length defensifs (cote serveur)
 const MAX_NAME = 100;
@@ -144,6 +147,7 @@ export async function submitInscription(formData: FormData): Promise<void> {
 
   // Phase 8 : auto-activation du signup (cree auth user + row pros tech)
   // Best-effort : si fail, ai_signups reste 'pending' et admin valide manuel.
+  let activatedProId: number | null = null;
   try {
     const activateResult = await activateAiSignup({
       signupId: signup.id,
@@ -164,6 +168,7 @@ export async function submitInscription(formData: FormData): Promise<void> {
       console.error("[submitInscription] activate failed:", activateResult.reason);
       // On continue le flow normalement (signup en pending pour validation admin)
     } else {
+      activatedProId = activateResult.proId;
       console.log(
         `[submitInscription] activated: signupId=${signup.id} -> proId=${activateResult.proId}`
       );
@@ -194,6 +199,30 @@ export async function submitInscription(formData: FormData): Promise<void> {
   // Send emails (await for reliability — lesson 24/05)
   await sendAiSignupAdminNotification(data);
   await sendAiSignupWelcome(data);
+
+  // Phase 11+ : si plan='premium' et activation OK, on redirige directement
+  // vers Stripe Checkout avec 14j trial. L'user saisit sa CB et accede au
+  // dashboard avec subscription_status='trialing' (set par le webhook).
+  //
+  // Si fail (Stripe down, activation echec), on retombe sur /ai/inscription/succes
+  // qui guide l'user vers /ai/dashboard/abonnement (= bouton "Activer Premium").
+  if (plan === "premium" && activatedProId) {
+    const fullName = `${firstName} ${lastName}`.trim();
+    const checkoutResult = await createAiCheckoutSession({
+      proId: activatedProId,
+      email,
+      name: fullName,
+      plan: "monthly",
+      existingCustomerId: null,
+      successUrl: `${BASE_URL}/ai/dashboard/abonnement?activated=1`,
+      cancelUrl: `${BASE_URL}/ai/inscription/succes?id=${signup.id}&plan=premium&checkout_canceled=1`,
+    });
+    if (checkoutResult.ok) {
+      redirect(checkoutResult.url);
+    }
+    // Si Stripe fail, on tombe sur le redirect /succes plus bas (fallback)
+    console.error("[submitInscription] Stripe checkout failed:", checkoutResult.error);
+  }
 
   redirect(`/ai/inscription/succes?id=${signup.id}&plan=${data.plan}`);
 }

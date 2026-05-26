@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getStripeServer } from "@/lib/stripe/server";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { createAiCheckoutSession } from "@/lib/stripe/create-ai-checkout";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
@@ -21,16 +22,7 @@ function getServiceClient() {
  * vers Stripe Checkout (hosted page).
  */
 export async function startCheckout(formData: FormData): Promise<void> {
-  const plan = String(formData.get("plan") || "monthly");
-  const priceId =
-    plan === "annual"
-      ? process.env.STRIPE_AI_PRICE_ANNUAL_ID
-      : process.env.STRIPE_AI_PRICE_MONTHLY_ID;
-
-  if (!priceId) {
-    console.error("[startCheckout] STRIPE_AI_PRICE_*_ID not set in env");
-    redirect("/ai/dashboard/abonnement?error=stripe_not_configured");
-  }
+  const plan = String(formData.get("plan") || "monthly") as "monthly" | "annual";
 
   // 1) Verifier auth
   const supabase = await createClient();
@@ -51,67 +43,28 @@ export async function startCheckout(formData: FormData): Promise<void> {
     .maybeSingle();
   if (!pro) redirect("/ai/connexion?error=no_pro");
 
-  // 3) Stripe Customer : reutiliser ou creer (idempotence fix #8)
-  // Avant : 2 clics rapides creaient 2 Customers, le 2e ecrasait le 1er
-  // en BDD, l'ancien devenait orphelin.
-  // Apres : on cherche par metadata.pro_id avant create. Si trouve,
-  // reutilise. Si pas trouve, create + update BDD.
-  const stripe = getStripeServer();
-  let customerId = pro.stripe_customer_id as string | null;
-
-  if (!customerId) {
-    // Try search by metadata first (idempotent)
-    try {
-      const search = await stripe.customers.search({
-        query: `metadata['pro_id']:'${pro.id}' AND metadata['vertical']:'ai'`,
-        limit: 1,
-      });
-      if (search.data.length > 0) {
-        customerId = search.data[0].id;
-      }
-    } catch (searchErr) {
-      // Stripe search peut fail si pas indexe (race condition tres rare).
-      // On continue sur create normal.
-      console.warn("[startCheckout] customers.search failed:", searchErr);
-    }
-
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: pro.email || user.email,
-        name: pro.name || undefined,
-        metadata: { pro_id: String(pro.id), vertical: "ai" },
-      });
-      customerId = customer.id;
-    }
-
-    await service
-      .from("pros")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", pro.id);
-  }
-
-  // 4) Creer la Checkout Session
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: priceId, quantity: 1 }],
-    subscription_data: {
-      trial_period_days: 14,
-      metadata: { pro_id: String(pro.id), vertical: "ai" },
-    },
-    metadata: { pro_id: String(pro.id), vertical: "ai" },
-    success_url: `${BASE_URL}/ai/dashboard/abonnement?activated=1`,
-    cancel_url: `${BASE_URL}/ai/dashboard/abonnement?canceled=1`,
-    locale: "fr",
-    billing_address_collection: "auto",
-    allow_promotion_codes: true,
+  // 3) Creer la Checkout Session via helper centralise
+  const result = await createAiCheckoutSession({
+    proId: pro.id,
+    email: pro.email || user.email,
+    name: pro.name || "",
+    plan: plan === "annual" ? "annual" : "monthly",
+    existingCustomerId: pro.stripe_customer_id,
+    successUrl: `${BASE_URL}/ai/dashboard/abonnement?activated=1`,
+    cancelUrl: `${BASE_URL}/ai/dashboard/abonnement?canceled=1`,
   });
 
-  if (!session.url) {
-    redirect("/ai/dashboard/abonnement?error=checkout_url_missing");
+  if (!result.ok) {
+    redirect(
+      `/ai/dashboard/abonnement?error=${
+        result.error === "stripe_not_configured"
+          ? "stripe_not_configured"
+          : "checkout_url_missing"
+      }`
+    );
   }
 
-  redirect(session.url);
+  redirect(result.url);
 }
 
 /**
