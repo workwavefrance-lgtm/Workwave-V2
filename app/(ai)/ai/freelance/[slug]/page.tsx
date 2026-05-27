@@ -519,20 +519,32 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
               </p>
             )}
 
-            {/* Skills/stack du freelance — si remplies */}
-            {pro.skills && pro.skills.trim().length > 0 && (
-              <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 max-w-2xl mb-6">
-                <p
-                  className="text-[11px] uppercase font-semibold text-[var(--ai-accent)] mb-3"
-                  style={{ letterSpacing: "0.18em" }}
-                >
-                  ● Stack & competences
-                </p>
-                <p className="text-sm text-[var(--ai-text)] leading-relaxed whitespace-pre-wrap">
-                  {pro.skills}
-                </p>
-              </div>
-            )}
+            {/* Skills/stack du freelance — si remplies.
+                Compat double-format : `skills` peut etre `string` (signup AI nouveau)
+                OU `string[]` (BTP legacy jsonb default '[]'). */}
+            {(() => {
+              const raw = pro.skills;
+              let skillsText = "";
+              if (typeof raw === "string") {
+                skillsText = raw.trim();
+              } else if (Array.isArray(raw)) {
+                skillsText = raw.filter((s) => typeof s === "string" && s.trim().length > 0).join(", ");
+              }
+              if (skillsText.length === 0) return null;
+              return (
+                <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 max-w-2xl mb-6">
+                  <p
+                    className="text-[11px] uppercase font-semibold text-[var(--ai-accent)] mb-3"
+                    style={{ letterSpacing: "0.18em" }}
+                  >
+                    ● Stack & competences
+                  </p>
+                  <p className="text-sm text-[var(--ai-text)] leading-relaxed whitespace-pre-wrap">
+                    {skillsText}
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* Hint vers GitHub si disponible */}
             {pro.github_username && (
@@ -568,8 +580,15 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
               </div>
             )}
 
-            {/* "Profil non-enrichi" : seulement si pas de skills, pas de github et fiche pas revendiquee */}
-            {!pro.skills && !pro.github_username && !isClaimed && (
+            {/* "Profil non-enrichi" : seulement si pas de skills (string vide ou array vide),
+                pas de github et fiche pas revendiquee */}
+            {(() => {
+              const raw = pro.skills;
+              const hasSkills =
+                (typeof raw === "string" && raw.trim().length > 0) ||
+                (Array.isArray(raw) && raw.some((s) => typeof s === "string" && s.trim().length > 0));
+              return !hasSkills && !pro.github_username && !isClaimed;
+            })() && (
               <div className="bg-[var(--ai-bg)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 max-w-2xl">
                 <p
                   className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-3"
