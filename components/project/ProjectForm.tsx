@@ -79,6 +79,22 @@ export default function ProjectForm({
   const [urgency, setUrgency] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
 
+  // Fix UX : ne pas afficher les erreurs Zod du serveur AVANT que l'user
+  // ait touche au champ ou tente un submit. Sinon a l'arrivee sur l'etape 4,
+  // les 4 champs (prenom/email/tel/consent) etant vides, on affiche 4 erreurs
+  // rouges immediatement = aspect "formulaire deja casse" decourageant.
+  // - touched: per-field state (passe a true au onBlur)
+  // - hasAttemptedSubmit: passe a true au clic du bouton "Envoyer"
+  // L'erreur n'apparait que si l'un des deux est true.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const showError = (field: string): string | undefined =>
+    (touched[field] || hasAttemptedSubmit)
+      ? state.errors?.[field as keyof typeof state.errors]
+      : undefined;
+  const handleBlur = (field: string) =>
+    setTouched((t) => (t[field] ? t : { ...t, [field]: true }));
+
   // Tracking : start + abandon
   const isDirty = useRef(false);
   const submitted = useRef(false);
@@ -360,15 +376,16 @@ export default function ProjectForm({
               type="text"
               autoComplete="given-name"
               placeholder="Jean"
+              onBlur={() => handleBlur("firstName")}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
-                state.errors?.firstName
+                showError("firstName")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
               }`}
             />
-            {state.errors?.firstName && (
+            {showError("firstName") && (
               <p className="mt-1.5 text-sm text-red-500">
-                {state.errors.firstName}
+                {showError("firstName")}
               </p>
             )}
           </div>
@@ -386,14 +403,15 @@ export default function ProjectForm({
               type="email"
               autoComplete="email"
               placeholder="jean@exemple.fr"
+              onBlur={() => handleBlur("email")}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
-                state.errors?.email
+                showError("email")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
               }`}
             />
-            {state.errors?.email && (
-              <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
+            {showError("email") && (
+              <p className="mt-1.5 text-sm text-red-500">{showError("email")}</p>
             )}
           </div>
 
@@ -410,14 +428,15 @@ export default function ProjectForm({
               type="tel"
               autoComplete="tel"
               placeholder="06 12 34 56 78"
+              onBlur={() => handleBlur("phone")}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
-                state.errors?.phone
+                showError("phone")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
               }`}
             />
-            {state.errors?.phone && (
-              <p className="mt-1.5 text-sm text-red-500">{state.errors.phone}</p>
+            {showError("phone") && (
+              <p className="mt-1.5 text-sm text-red-500">{showError("phone")}</p>
             )}
           </div>
 
@@ -439,9 +458,9 @@ export default function ProjectForm({
                 </a>
               </span>
             </label>
-            {state.errors?.consent && (
+            {showError("consent") && (
               <p className="mt-1.5 text-sm text-red-500">
-                {state.errors.consent}
+                {showError("consent")}
               </p>
             )}
           </div>
@@ -490,6 +509,7 @@ export default function ProjectForm({
           <button
             type="submit"
             disabled={isPending}
+            onClick={() => setHasAttemptedSubmit(true)}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-10 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {isPending ? (
