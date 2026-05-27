@@ -53,6 +53,26 @@ export async function createAiCheckoutSession(
   const stripe = getStripeServer();
   let customerId = input.existingCustomerId || null;
 
+  // Si on a un existingCustomerId, verifier qu'il n'est pas deleted/invalid
+  // dans Stripe (cas : un ancien customer Premium qui a ete deleted soft par
+  // l'admin ou pendant une migration). Si deleted, on ignore et on cree.
+  if (customerId) {
+    try {
+      const cus = await stripe.customers.retrieve(customerId);
+      if ("deleted" in cus && cus.deleted) {
+        console.warn(
+          `[createAiCheckoutSession] customer ${customerId} marked deleted in Stripe, ignoring`
+        );
+        customerId = null;
+      }
+    } catch (e) {
+      console.warn(
+        `[createAiCheckoutSession] customer ${customerId} retrieve failed (${e instanceof Error ? e.message : "unknown"}), ignoring`
+      );
+      customerId = null;
+    }
+  }
+
   // Cherche Customer existant via metadata.pro_id (idempotent)
   if (!customerId) {
     try {

@@ -49,6 +49,28 @@ export async function createBtpUnlockCheckoutSession(
   const stripe = getStripeServer();
   let customerId = input.existingCustomerId || null;
 
+  // Si on a un existingCustomerId, verifier qu'il n'est pas deleted/invalid
+  // dans Stripe (cas reel : un ancien customer Premium BTP qui a ete deleted
+  // soft par l'admin ou pendant une migration). Si deleted, on ignore et
+  // on en cree un nouveau via la branche ci-dessous.
+  if (customerId) {
+    try {
+      const cus = await stripe.customers.retrieve(customerId);
+      if ("deleted" in cus && cus.deleted) {
+        console.warn(
+          `[createBtpUnlockCheckoutSession] customer ${customerId} marked deleted in Stripe, ignoring`
+        );
+        customerId = null;
+      }
+    } catch (e) {
+      // Customer doesn't exist anymore : ignore et recree
+      console.warn(
+        `[createBtpUnlockCheckoutSession] customer ${customerId} retrieve failed (${e instanceof Error ? e.message : "unknown"}), ignoring`
+      );
+      customerId = null;
+    }
+  }
+
   // Idempotent customer search via metadata.pro_id + vertical='btp'
   if (!customerId) {
     try {
