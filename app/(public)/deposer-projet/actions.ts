@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { qualifyProject } from "@/lib/ai/qualify-project";
 import { sendProjectNotification } from "@/lib/email/send-project-notification";
@@ -82,6 +83,8 @@ export async function submitProject(
   _prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  console.log("[submitProject] called");
+
   // Honeypot check
   const honeypot = formData.get("website") as string;
   if (honeypot && honeypot.length > 0) {
@@ -128,16 +131,19 @@ export async function submitProject(
         errors[key] = issue.message;
       }
     }
+    console.log("[submitProject] zod validation failed:", errors);
     return { success: false, errors };
   }
 
   const data = result.data;
+  console.log(`[submitProject] zod OK, category=${data.categoryId} city=${data.cityId} budget=${data.budget}`);
 
   // Sprint 13 — Anti-PII bypass : detection de tel/email/URL dans la description.
-  // Le particulier ne doit pas pouvoir mettre ses coordonnees dans la description
-  // pour skip le paywall pro BTP (9,90 EUR par lead unlock).
   const piiResult = detectPii(data.description);
   if (piiResult.hasPii) {
+    console.log(
+      `[submitProject] PII detected: phones=${piiResult.foundPhones.length} emails=${piiResult.foundEmails.length} urls=${piiResult.foundUrls.length}`
+    );
     return {
       success: false,
       errors: {
@@ -258,31 +264,37 @@ export async function submitProject(
     },
   });
 
-  // Sprint 13 — Broadcast BTP a tous les pros claimed dans la categorie + departement.
-  // Plus de routing top 3 : tous les pros eligibles recoivent le mail. Pour
-  // debloquer les coordonnees du particulier, ils paient 9,90 EUR TTC par lead
-  // (cf. /pro/dashboard/leads).
+  // Sprint 13 — Broadcast BTP en BACKGROUND via after() (Next.js 16).
+  // Le redirect vers /deposer-projet/merci arrive IMMEDIATEMENT a l'user
+  // (UX rapide), et le broadcast s'execute apres que la response soit envoyee.
+  // after() est l'API officielle Next.js pour le post-response work, equivalent
+  // a waitUntil de Vercel. Pas de "promise detachee morte" : la function lifetime
+  // est etendue automatiquement.
   // NB : on broadcast meme si le projet est suspicious, mais avec le banner
   // "Projet flague par notre IA" pour que les pros decident en connaissance de
   // cause.
-  // IMPORTANT : await pour eviter promise detachee morte sur Vercel (lecon 24/05).
-  // L'envoi de 50+ emails prend du temps mais c'est le tradeoff fiabilite vs UX.
-  try {
-    await broadcastBtpProject({
-      projectId: project.id,
-      projectTitle: data.description.split("\n")[0].slice(0, 100) || "Nouveau projet",
-      projectDescription: data.description,
-      projectBudget: data.budget,
-      projectTimeline: data.urgency,
-      projectCategoryName: category.name,
-      projectCategoryId: data.categoryId,
-      projectCityName: city.name,
-      projectDepartmentId: city.department_id,
-      isSuspicious,
-    });
-  } catch (err) {
-    console.error("Erreur broadcast BTP (non bloquante) :", err);
-  }
+  console.log(`[submitProject] project ${project.id} created, scheduling broadcast in background`);
+  after(async () => {
+    try {
+      const result = await broadcastBtpProject({
+        projectId: project.id,
+        projectTitle: data.description.split("\n")[0].slice(0, 100) || "Nouveau projet",
+        projectDescription: data.description,
+        projectBudget: data.budget,
+        projectTimeline: data.urgency,
+        projectCategoryName: category.name,
+        projectCategoryId: data.categoryId,
+        projectCityName: city.name,
+        projectDepartmentId: city.department_id,
+        isSuspicious,
+      });
+      console.log(
+        `[submitProject] broadcast project ${project.id} : ${result.sent}/${result.totalTargets} sent, ${result.failed} failed`
+      );
+    } catch (err) {
+      console.error(`[submitProject] broadcast project ${project.id} failed :`, err);
+    }
+  });
 
   redirect("/deposer-projet/merci");
 }
