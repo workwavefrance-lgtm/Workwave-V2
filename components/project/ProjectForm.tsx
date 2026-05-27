@@ -78,6 +78,16 @@ export default function ProjectForm({
   const [cityId, setCityId] = useState<number | null>(defaultCity?.id ?? null);
   const [urgency, setUrgency] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
+  // Fix critique : inputs uncontrolled = React reset les valeurs au re-render.
+  // Si l'action retourne une erreur (rate limit, validation), l'user voit son
+  // formulaire vide et croit que "rien ne se passe". Solution : controlled.
+  // Step 4 fields :
+  const [firstName, setFirstName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [consent, setConsent] = useState(false);
+  // Step 3 : description (pour preserver aussi)
+  const [description, setDescription] = useState("");
 
   // Fix UX validations :
   // - touched: per-field state (passe a true au onBlur)
@@ -289,15 +299,21 @@ export default function ProjectForm({
               name="description"
               rows={4}
               placeholder="Type de travaux, surface, contraintes... Laissez vide si vous préférez, les artisans vous rappelleront pour préciser."
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                dismissError("description");
+              }}
+              onBlur={() => handleBlur("description")}
               className={`w-full px-4 py-3 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none resize-y ${
-                state.errors?.description
+                showError("description")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
               }`}
             />
-            {state.errors?.description && (
+            {showError("description") && (
               <p className="mt-1.5 text-sm text-red-500">
-                {state.errors.description}
+                {showError("description")}
               </p>
             )}
           </div>
@@ -392,8 +408,12 @@ export default function ProjectForm({
               type="text"
               autoComplete="given-name"
               placeholder="Jean"
+              value={firstName}
               onBlur={() => handleBlur("firstName")}
-              onChange={() => dismissError("firstName")}
+              onChange={(e) => {
+                setFirstName(e.target.value);
+                dismissError("firstName");
+              }}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
                 showError("firstName")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -420,8 +440,12 @@ export default function ProjectForm({
               type="email"
               autoComplete="email"
               placeholder="jean@exemple.fr"
+              value={email}
               onBlur={() => handleBlur("email")}
-              onChange={() => dismissError("email")}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                dismissError("email");
+              }}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
                 showError("email")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -446,8 +470,12 @@ export default function ProjectForm({
               type="tel"
               autoComplete="tel"
               placeholder="06 12 34 56 78"
+              value={phone}
               onBlur={() => handleBlur("phone")}
-              onChange={() => dismissError("phone")}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                dismissError("phone");
+              }}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
                 showError("phone")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -464,7 +492,11 @@ export default function ProjectForm({
               <input
                 type="checkbox"
                 name="consent"
-                onChange={() => dismissError("consent")}
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked);
+                  dismissError("consent");
+                }}
                 className="mt-0.5 h-5 w-5 rounded border-[var(--border-color)] text-[var(--accent)] focus:ring-[var(--accent)]/20 cursor-pointer"
               />
               <span className="text-sm text-[var(--text-secondary)] leading-relaxed">
