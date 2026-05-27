@@ -42,10 +42,96 @@ function getPlanFromPriceId(priceId: string): PlanInfo {
 // Handlers par événement
 // ============================================
 
+/**
+ * Sprint 13 — BTP Lead Unlock.
+ * Un pro BTP paie 9,90 EUR TTC one-time pour debloquer les coordonnees
+ * d'un particulier sur un projet specifique. INSERT dans lead_unlocks.
+ *
+ * Idempotence : UNIQUE (project_id, pro_id). Si meme couple deja unlocke
+ * (webhook joue 2x, ou pro re-paie par erreur), on ignore avec un log.
+ */
+async function handleBtpLeadUnlock(session: Stripe.Checkout.Session) {
+  const proIdStr = session.metadata?.pro_id;
+  const projectIdStr = session.metadata?.project_id;
+  if (!proIdStr || !projectIdStr) {
+    console.warn(
+      "[handleBtpLeadUnlock] session metadata manquante (pro_id ou project_id)"
+    );
+    return;
+  }
+  const proId = parseInt(proIdStr, 10);
+  const projectId = parseInt(projectIdStr, 10);
+  if (isNaN(proId) || isNaN(projectId)) {
+    console.warn(
+      `[handleBtpLeadUnlock] pro_id ou project_id non-numerique : ${proIdStr}/${projectIdStr}`
+    );
+    return;
+  }
+
+  const paymentIntentId =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id;
+  if (!paymentIntentId) {
+    console.warn(
+      `[handleBtpLeadUnlock] session sans payment_intent (session ${session.id})`
+    );
+    return;
+  }
+
+  const supabase = await getServiceClient();
+  const { error: insertError } = await supabase.from("lead_unlocks").insert({
+    project_id: projectId,
+    pro_id: proId,
+    stripe_payment_intent_id: paymentIntentId,
+    stripe_checkout_session_id: session.id,
+    amount_cents: session.amount_total || 990,
+    currency: session.currency || "eur",
+    paid_at: new Date().toISOString(),
+  });
+
+  if (insertError) {
+    // Code 23505 = duplicate key (UNIQUE project_id+pro_id) = deja unlock
+    if (insertError.code === "23505") {
+      console.log(
+        `[handleBtpLeadUnlock] deja unlock (project ${projectId}, pro ${proId}), skip idempotent`
+      );
+      return;
+    }
+    // Autre erreur : log mais on continue (mieux vaut crier dans les logs)
+    console.error(
+      `[handleBtpLeadUnlock] INSERT lead_unlocks failed (${insertError.code}):`,
+      insertError.message
+    );
+    return;
+  }
+
+  // Tracking analytics (fire-and-forget)
+  track(EVENTS.SUBSCRIPTION_COMPLETED, {
+    proId,
+    metadata: {
+      type: "btp_lead_unlock",
+      projectId,
+      amountCents: session.amount_total || 990,
+    },
+  });
+
+  console.log(
+    `[handleBtpLeadUnlock] OK — pro ${proId} a unlock le projet ${projectId} (${(session.amount_total || 990) / 100}€)`
+  );
+}
+
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const proId = session.metadata?.pro_id;
   if (!proId) {
     console.warn("Webhook checkout.session.completed sans pro_id dans metadata");
+    return;
+  }
+
+  // Sprint 13 : BTP Lead Unlock (mode=payment, pas subscription).
+  // Route vers un handler dedie qui INSERT dans lead_unlocks.
+  if (session.metadata?.product === "btp_lead_unlock") {
+    await handleBtpLeadUnlock(session);
     return;
   }
 
