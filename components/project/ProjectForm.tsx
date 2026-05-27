@@ -79,21 +79,37 @@ export default function ProjectForm({
   const [urgency, setUrgency] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
 
-  // Fix UX : ne pas afficher les erreurs Zod du serveur AVANT que l'user
-  // ait touche au champ ou tente un submit. Sinon a l'arrivee sur l'etape 4,
-  // les 4 champs (prenom/email/tel/consent) etant vides, on affiche 4 erreurs
-  // rouges immediatement = aspect "formulaire deja casse" decourageant.
+  // Fix UX validations :
   // - touched: per-field state (passe a true au onBlur)
   // - hasAttemptedSubmit: passe a true au clic du bouton "Envoyer"
-  // L'erreur n'apparait que si l'un des deux est true.
+  // - dismissedErrors: champs ou l'user a tape apres un submit failed
+  //   (l'erreur Zod stale doit disparaitre quand l'user corrige). On la
+  //   ré-affichera apres le prochain submit si elle est toujours invalide.
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const showError = (field: string): string | undefined =>
-    (touched[field] || hasAttemptedSubmit)
+  const [dismissedErrors, setDismissedErrors] = useState<Set<string>>(new Set());
+  const showError = (field: string): string | undefined => {
+    if (dismissedErrors.has(field)) return undefined;
+    return touched[field] || hasAttemptedSubmit
       ? state.errors?.[field as keyof typeof state.errors]
       : undefined;
+  };
   const handleBlur = (field: string) =>
     setTouched((t) => (t[field] ? t : { ...t, [field]: true }));
+  const dismissError = (field: string) => {
+    setDismissedErrors((s) => {
+      if (s.has(field)) return s;
+      const next = new Set(s);
+      next.add(field);
+      return next;
+    });
+  };
+  // Quand l'user clique submit, on reset dismissedErrors pour que les
+  // nouvelles erreurs du serveur (si validation echoue encore) s'affichent.
+  const handleAttemptSubmit = () => {
+    setHasAttemptedSubmit(true);
+    setDismissedErrors(new Set());
+  };
 
   // Tracking : start + abandon
   const isDirty = useRef(false);
@@ -377,6 +393,7 @@ export default function ProjectForm({
               autoComplete="given-name"
               placeholder="Jean"
               onBlur={() => handleBlur("firstName")}
+              onChange={() => dismissError("firstName")}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
                 showError("firstName")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -404,6 +421,7 @@ export default function ProjectForm({
               autoComplete="email"
               placeholder="jean@exemple.fr"
               onBlur={() => handleBlur("email")}
+              onChange={() => dismissError("email")}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
                 showError("email")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -429,6 +447,7 @@ export default function ProjectForm({
               autoComplete="tel"
               placeholder="06 12 34 56 78"
               onBlur={() => handleBlur("phone")}
+              onChange={() => dismissError("phone")}
               className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none ${
                 showError("phone")
                   ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
@@ -445,6 +464,7 @@ export default function ProjectForm({
               <input
                 type="checkbox"
                 name="consent"
+                onChange={() => dismissError("consent")}
                 className="mt-0.5 h-5 w-5 rounded border-[var(--border-color)] text-[var(--accent)] focus:ring-[var(--accent)]/20 cursor-pointer"
               />
               <span className="text-sm text-[var(--text-secondary)] leading-relaxed">
@@ -509,7 +529,7 @@ export default function ProjectForm({
           <button
             type="submit"
             disabled={isPending}
-            onClick={() => setHasAttemptedSubmit(true)}
+            onClick={handleAttemptSubmit}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-10 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {isPending ? (
