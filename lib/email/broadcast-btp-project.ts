@@ -1,0 +1,237 @@
+/**
+ * Broadcast email a TOUS les pros BTP de la categorie + zone du projet.
+ * Phase Sprint 13 (2026-05-27) : nouveau modele pay-per-lead.
+ *
+ * Difference avec broadcastTechProject :
+ *   - BTP : filtre par categorie EXACTE du projet + meme departement que la ville du projet
+ *     (le pro n'a pas besoin d'etre Premium pour recevoir, mais doit payer 9,90€
+ *      par lead unlock pour voir les coordonnees)
+ *   - Tech : broadcast a tous les freelances dans les 14 categories AI (modele
+ *     Codeur.com generaliste)
+ *
+ * Filtres durs (cote SELECT pros) :
+ *   - category_id = project.category_id (BTP categorie exacte du projet)
+ *   - cities.department_id = project.city.department_id (meme departement)
+ *   - is_active = true, deleted_at IS NULL
+ *   - claimed_by_user_id IS NOT NULL (fiche revendiquee, donc auto-subscribed)
+ *   - email IS NOT NULL
+ *   - paused_until IS NULL OR paused_until < NOW()
+ *   - do_not_contact = false
+ *   - source IN ('sirene', 'pagesjaunes', 'manual', 'ai_signup')
+ *
+ * NB : on ne filtre PAS par subscription_status. Tous les pros BTP claimed
+ * recoivent les mails. La paywall est sur l'unlock (9,90€ par lead).
+ *
+ * Volume estime : sur les ~226k pros BTP, environ 5-10% sont claimed/actifs.
+ * Pour un projet sur une categorie x departement donne, on cible quelques
+ * dizaines a centaines de pros max.
+ */
+import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
+
+let _resend: Resend | null = null;
+function getResendClient(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
+
+function getServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+const CHUNK_SIZE = 50;
+const CHUNK_DELAY_MS = 1000;
+const UNLOCK_PRICE_EUR_TTC = "9,90";
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export type BroadcastBtpInput = {
+  projectId: number;
+  projectTitle: string;
+  projectDescription: string;
+  projectBudget: string | null;
+  projectTimeline: string | null;
+  projectCategoryName: string;
+  projectCategoryId: number;
+  projectCityName: string | null;
+  projectDepartmentId: number;
+  isSuspicious: boolean;
+};
+
+export type BroadcastBtpResult = {
+  totalTargets: number;
+  sent: number;
+  failed: number;
+  errors: string[];
+};
+
+function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string): string {
+  const previewDesc =
+    input.projectDescription.length > 220
+      ? input.projectDescription.slice(0, 220).trim() + "..."
+      : input.projectDescription;
+
+  const suspiciousBanner = input.isSuspicious
+    ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
+        <p style="font-size:12px;color:#92400E;margin:0;font-weight:600;">
+          &#9888; Projet flague par notre IA — verifiez avant de debloquer.
+        </p>
+      </div>`
+    : "";
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;margin:0;padding:24px;color:#0A0A0A;">
+  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
+    <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE &middot; NOUVEAU PROJET ]</p>
+
+    <h1 style="font-size:24px;color:#0A0A0A;margin:0 0 8px 0;font-weight:800;letter-spacing:-0.02em;">Nouveau projet ${input.projectCategoryName}${input.projectCityName ? ` &agrave; ${input.projectCityName}` : ""}</h1>
+    <p style="font-size:14px;color:#525252;line-height:1.6;margin:0 0 24px 0;">
+      Un particulier de votre zone vient de publier une demande qui correspond a votre savoir-faire. Connectez-vous a votre dashboard pour la consulter.
+    </p>
+
+    ${suspiciousBanner}
+
+    <div style="background:#FAFAFA;border-left:3px solid #FF6803;padding:20px;border-radius:8px;margin:0 0 24px 0;">
+      <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${input.projectTitle}</h2>
+      <p style="font-size:13px;color:#525252;line-height:1.6;margin:0 0 16px 0;white-space:pre-wrap;">${previewDesc}</p>
+      <table style="font-size:12px;width:100%;border-collapse:collapse;">
+        ${input.projectBudget ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Budget</td><td style="color:#0A0A0A;font-weight:600;">${input.projectBudget}</td></tr>` : ""}
+        ${input.projectTimeline ? `<tr><td style="padding:4px 0;color:#999;">Delai</td><td style="color:#0A0A0A;font-weight:600;">${input.projectTimeline}</td></tr>` : ""}
+      </table>
+    </div>
+
+    <a href="${baseUrl}/pro/dashboard/projets" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 24px 0;">
+      Voir le projet &rarr;
+    </a>
+
+    <p style="font-size:12px;color:#525252;line-height:1.6;margin:24px 0 0 0;">
+      <strong>Comment ca marche ?</strong> Acces gratuit a tous les projets de votre zone. Pour debloquer les coordonnees d'un particulier (telephone + email) et le contacter directement : ${UNLOCK_PRICE_EUR_TTC}&euro; TTC par projet. Sans engagement, sans abonnement, sans commission.
+    </p>
+    <p style="font-size:12px;color:#999;line-height:1.6;margin:8px 0 0 0;">
+      Pour ne plus recevoir ces notifications, mettez votre fiche en pause depuis votre <a href="${baseUrl}/pro/dashboard/preferences" style="color:#999;">dashboard</a>.
+    </p>
+
+    <hr style="border:none;border-top:1px solid #E5E5E5;margin:32px 0 16px 0;">
+    <p style="font-size:11px;color:#999;text-align:center;">
+      Workwave &middot; <a href="${baseUrl}" style="color:#999;">workwave.fr</a> &middot; projet #${input.projectId}
+    </p>
+  </div>
+</body></html>`;
+}
+
+async function sendOne(
+  email: string,
+  subject: string,
+  html: string
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const r = await getResendClient().emails.send({
+      from: "Workwave <contact@workwave.fr>",
+      to: [email],
+      subject,
+      html,
+    });
+    if (r.error) {
+      return { ok: false, error: r.error.message || String(r.error) };
+    }
+    return { ok: true };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, error: msg };
+  }
+}
+
+export async function broadcastBtpProject(
+  input: BroadcastBtpInput
+): Promise<BroadcastBtpResult> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
+  const subject = `Nouveau projet ${input.projectCategoryName}${input.projectCityName ? ` a ${input.projectCityName}` : ""} — Workwave`;
+  const html = buildEmailHtml(input, baseUrl);
+
+  const sb = getServiceClient();
+  const nowIso = new Date().toISOString();
+
+  // 1) Recuperer les city_ids du meme departement que la ville du projet
+  const { data: cities, error: citiesError } = await sb
+    .from("cities")
+    .select("id")
+    .eq("department_id", input.projectDepartmentId);
+
+  if (citiesError || !cities || cities.length === 0) {
+    return {
+      totalTargets: 0,
+      sent: 0,
+      failed: 0,
+      errors: ["no_cities_in_department"],
+    };
+  }
+  const cityIds = cities.map((c: { id: number }) => c.id);
+
+  // 2) Selection des pros BTP eligibles
+  const { data: pros, error: queryError } = await sb
+    .from("pros")
+    .select("id, email, name, paused_until")
+    .eq("category_id", input.projectCategoryId)
+    .in("city_id", cityIds)
+    .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup"])
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .not("claimed_by_user_id", "is", null)
+    .not("email", "is", null)
+    .eq("do_not_contact", false)
+    .or(`paused_until.is.null,paused_until.lt.${nowIso}`);
+
+  if (queryError) {
+    console.error("[broadcastBtpProject] query error:", queryError);
+    return { totalTargets: 0, sent: 0, failed: 0, errors: [queryError.message] };
+  }
+
+  const targets = (pros || []).filter(
+    (f): f is { id: number; email: string; name: string; paused_until: string | null } =>
+      typeof f.email === "string" && f.email.length > 0
+  );
+
+  if (targets.length === 0) {
+    return { totalTargets: 0, sent: 0, failed: 0, errors: [] };
+  }
+
+  // 3) Envoi en chunks de 50 (respect rate limit Resend ~10 req/s)
+  let sent = 0;
+  let failed = 0;
+  const errors: string[] = [];
+
+  for (let i = 0; i < targets.length; i += CHUNK_SIZE) {
+    const chunk = targets.slice(i, i + CHUNK_SIZE);
+    const results = await Promise.all(
+      chunk.map((t) => sendOne(t.email, subject, html))
+    );
+    for (const r of results) {
+      if (r.ok) {
+        sent++;
+      } else {
+        failed++;
+        if (errors.length < 10 && r.error) errors.push(r.error.slice(0, 200));
+      }
+    }
+    if (i + CHUNK_SIZE < targets.length) {
+      await sleep(CHUNK_DELAY_MS);
+    }
+  }
+
+  // 4) Track le broadcast en BDD
+  await sb
+    .from("projects")
+    .update({
+      broadcast_count: sent,
+      broadcasted_at: new Date().toISOString(),
+    })
+    .eq("id", input.projectId);
+
+  return { totalTargets: targets.length, sent, failed, errors };
+}

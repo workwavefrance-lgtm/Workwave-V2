@@ -94,12 +94,8 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function pingUrl(
-  client: ReturnType<
-    typeof google.indexing
-  >["v3"]["urlNotifications"],
-  url: string
-): Promise<{ ok: boolean; error?: string }> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function pingUrl(client: any, url: string): Promise<{ ok: boolean; error?: string }> {
   try {
     await client.publish({
       requestBody: { url, type: "URL_UPDATED" },
