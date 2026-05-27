@@ -6,13 +6,13 @@ import { getFaqSchema } from "@/lib/utils/schema";
 export const metadata: Metadata = {
   title: "Workwave pour les professionnels - Recevez des leads qualifies",
   description:
-    "Recevez des demandes qualifiees de particuliers dans votre zone. Fiche gratuite, essai 14 jours sans carte bancaire, zero commission. A partir de 32,50 euros/mois.",
+    "Recevez des demandes qualifiees de particuliers dans votre zone. Fiche gratuite, pas d'abonnement, zero commission. Payez uniquement 9,90 EUR TTC par lead que vous voulez contacter.",
   alternates: { canonical: "https://workwave.fr/pro" },
   openGraph: {
     type: "website",
     title: "Workwave pour les professionnels - Recevez des leads qualifies",
     description:
-      "Fiche gratuite, essai 14 jours sans CB, zero commission. A partir de 32,50 euros/mois.",
+      "Fiche gratuite, pas d'abonnement, zero commission. Payez 9,90 EUR TTC par lead que vous voulez contacter.",
     url: "https://workwave.fr/pro",
   },
 };
@@ -51,40 +51,40 @@ const advantages = [
   {
     title: "Zéro commission sur vos chantiers",
     description:
-      "Vous payez un abonnement fixe. Pas de pourcentage sur vos devis ni sur vos factures. Vos revenus restent vos revenus.",
+      "Vous payez 9,90 € TTC par lead que vous voulez contacter. Pas de pourcentage sur vos devis ni sur vos factures. Vos revenus restent vos revenus.",
   },
   {
     title: "Fiche pro gratuite à vie, visible sur Google",
     description:
-      "Votre fiche est référencée automatiquement sur les moteurs de recherche, et reste gratuite même après l'essai. Sans abonnement, vous gardez la visibilité, vous ne recevez juste plus les leads.",
+      "Votre fiche est référencée automatiquement sur les moteurs de recherche, et reste gratuite. Aucun abonnement, vous payez uniquement quand vous voulez débloquer les coordonnées d'un client.",
   },
   {
-    title: "Essai gratuit 14 jours sans carte bancaire",
+    title: "Inscription gratuite, sans carte bancaire",
     description:
-      "Testez le service pendant 14 jours, recevez vos premiers leads. Aucun engagement, aucune carte demandée.",
+      "Réclamez votre fiche en 2 min via SIRET. Recevez tous les projets de votre zone par email. Aucun engagement, aucune carte demandée.",
   },
   {
-    title: "Résiliation libre, sans engagement",
+    title: "Pay-per-lead, sans engagement",
     description:
-      "Vous pouvez résilier à tout moment en un clic depuis votre dashboard. Pas de frais cachés, pas de période de blocage.",
+      "Vous payez 9,90 € TTC uniquement quand vous décidez de contacter un client. Pas de frais récurrents, pas de période de blocage.",
   },
 ];
 
 const features = [
-  "Leads illimités dans votre zone",
-  "Fiche pro premium référencée SEO",
-  "Dashboard avec statistiques d'activité",
+  "Tous les projets de votre zone reçus par email",
+  "Fiche pro référencée SEO sur Google",
+  "Dashboard avec liste des projets disponibles",
   "Qualification IA des demandes",
-  "Notifications email instantanées",
-  "Gestion des préférences de leads",
-  "Support prioritaire par email",
+  "Coordonnées débloquées à la demande (9,90 € TTC/lead)",
+  "Gestion des préférences (catégorie, zone, pause)",
+  "Aucun abonnement récurrent",
 ];
 
 const stats = [
   { value: "226 000+", label: "professionnels référencés" },
   { value: "4 293", label: "communes couvertes" },
   { value: "12", label: "départements de Nouvelle-Aquitaine" },
-  { value: "14 jours", label: "d'essai gratuit, sans carte bancaire" },
+  { value: "9,90 €", label: "TTC par lead, paiement unique" },
 ];
 
 const routingSteps = [
@@ -102,9 +102,9 @@ const routingSteps = [
   },
   {
     number: "3",
-    title: "3 pros les mieux placés sont sélectionnés",
+    title: "Tous les pros éligibles reçoivent le projet",
     description:
-      "Score composite : distance, équité de charge, ancienneté. Maximum 3 pros par projet, jamais de mise en concurrence à 30.",
+      "Tous les pros de la catégorie + département reçoivent un email avec la demande. Chacun décide librement s'il veut débloquer pour 9,90 € TTC.",
   },
 ];
 
@@ -120,14 +120,14 @@ const faqs = [
       "Un lead est une demande de projet déposée par un particulier dans votre zone et votre domaine d'activité. Vous recevez les coordonnées complètes du demandeur pour le contacter directement.",
   },
   {
-    question: "Puis-je résilier à tout moment ?",
+    question: "Y a-t-il un abonnement à payer ?",
     answer:
-      "Oui. Vous pouvez résilier votre abonnement à tout moment depuis votre dashboard. La résiliation prend effet à la fin de la période en cours. Pour l'offre annuelle, un remboursement au prorata est calculé automatiquement.",
+      "Non. Aucun abonnement, aucune carte bancaire requise pour s'inscrire. Vous réclamez votre fiche gratuitement et recevez automatiquement tous les projets de votre zone par email. Vous payez uniquement 9,90 € TTC par lead que vous souhaitez contacter (paiement unique par projet, via Stripe sécurisé).",
   },
   {
     question: "Combien de leads vais-je recevoir ?",
     answer:
-      "Le nombre de leads dépend de votre zone géographique, de votre catégorie et de la demande des particuliers. Chaque lead est envoyé à 3 professionnels maximum, ce qui garantit une concurrence raisonnable.",
+      "Tous les pros éligibles (même catégorie + même département) reçoivent les projets en temps réel. Vous décidez ensuite lesquels vous intéressent et que vous voulez débloquer pour 9,90 € TTC. Pas de limite de réception, pas de mise en concurrence forcée.",
   },
   {
     question: "Mes coordonnées sont-elles partagées ?",
@@ -135,9 +135,9 @@ const faqs = [
       "Vos coordonnées professionnelles (téléphone, email) sont visibles sur votre fiche publique une fois que vous l'avez réclamée. Les coordonnées des particuliers ne vous sont communiquées que via les leads.",
   },
   {
-    question: "Comment fonctionne l'essai gratuit ?",
+    question: "Comment fonctionne l'inscription ?",
     answer:
-      "Dès que vous réclamez votre fiche, vous bénéficiez de 14 jours d'essai gratuit sans carte bancaire. Pendant cette période, vous recevez normalement les leads. À la fin de l'essai, vous pouvez activer votre abonnement ou rester sur la version gratuite (fiche visible mais sans réception de leads).",
+      "Dès que vous réclamez votre fiche (vérification SIRET + email, 2 min), vous êtes inscrit au broadcast. Vous recevez automatiquement par email tous les projets de votre catégorie publiés dans votre département. Vous gardez le contrôle : aucune carte demandée à l'inscription, vous payez 9,90 € TTC uniquement quand vous décidez de débloquer un lead spécifique.",
   },
 ];
 
@@ -265,66 +265,50 @@ export default function ProLandingPage() {
       >
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] text-center mb-4 tracking-tight">
-            Un tarif simple et transparent
+            Pay-per-lead. Pas d&apos;abonnement.
           </h2>
           <p className="text-[var(--text-secondary)] text-center mb-12 max-w-xl mx-auto">
-            Pas de commission, pas de frais cachés. Un abonnement fixe pour
-            recevoir tous vos leads.
+            Réclamez votre fiche gratuitement, recevez tous les projets de votre
+            zone. Payez uniquement 9,90 € TTC pour débloquer les coordonnées
+            d&apos;un client. Sans engagement, sans commission.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-            {/* Mensuel */}
-            <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-8">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-                Mensuel
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] mb-6">
-                Sans engagement
-              </p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-[var(--text-primary)]">
-                  39 &euro;
-                </span>
-                <span className="text-[var(--text-secondary)]"> /mois</span>
-              </div>
-              <Link
-                href="/recherche"
-                className="block w-full text-center border border-[var(--border-color)] text-[var(--text-primary)] font-semibold py-3 px-6 rounded-full transition-all duration-250 hover:border-[var(--accent)] hover:text-[var(--accent)]"
-              >
-                Commencer l&apos;essai gratuit
-              </Link>
-            </div>
-
-            {/* Annuel */}
+          {/* Card unique pay-per-lead */}
+          <div className="max-w-md mx-auto mb-12">
             <div className="bg-[var(--bg-primary)] border-2 border-[var(--accent)] rounded-2xl p-8 relative">
-              <span className="absolute -top-3 right-6 bg-[var(--accent)] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                2 mois offerts
+              <span
+                className="absolute -top-3 right-6 bg-[var(--accent)] text-white text-xs font-semibold px-3 py-1 rounded-full"
+              >
+                Nouveau
               </span>
               <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-                Annuel
+                Lead Unlock
               </h3>
               <p className="text-sm text-[var(--text-secondary)] mb-6">
-                Économisez 78 &euro; par an
+                Paiement unique, sans abonnement
               </p>
               <div className="mb-1">
-                <span className="text-4xl font-bold text-[var(--text-primary)]">
-                  32,50 &euro;
+                <span className="text-5xl font-bold text-[var(--text-primary)]">
+                  9,90 &euro;
                 </span>
-                <span className="text-[var(--text-secondary)]"> /mois</span>
+                <span className="text-[var(--text-secondary)]"> TTC / projet</span>
               </div>
               <p className="text-xs text-[var(--text-tertiary)] mb-6">
-                Facturé 390 &euro; par an
+                Coordonnées débloquées immédiatement (nom + email + téléphone)
               </p>
               <Link
                 href="/recherche"
                 className="block w-full text-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold py-3 px-6 rounded-full transition-all duration-250 hover:scale-[1.02]"
               >
-                Commencer l&apos;essai gratuit
+                Réclamer ma fiche gratuitement
               </Link>
+              <p className="text-xs text-center text-[var(--text-tertiary)] mt-3">
+                Sans CB · Vous payez uniquement les leads qui vous intéressent
+              </p>
             </div>
           </div>
 
-          {/* Encart rassurance : fiche gratuite a vie meme sans abonnement */}
+          {/* Encart rassurance : fiche gratuite a vie + comment ça marche */}
           <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8 mb-6">
             <div className="flex items-start gap-4">
               <div
@@ -348,17 +332,31 @@ export default function ProLandingPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-[var(--text-primary)] mb-2">
-                  Pas pressé d&apos;activer votre abonnement ? Votre fiche reste
-                  gratuite à vie.
+                  Comment ça marche ?
                 </h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                  Si vous n&apos;activez pas votre abonnement à la fin de
-                  l&apos;essai, votre fiche reste visible sur Workwave et
-                  référencée sur Google. Aucun prélèvement automatique, aucune
-                  carte bancaire requise. La seule différence : vous ne
-                  recevrez plus les demandes des particuliers de votre zone
-                  tant que vous n&apos;aurez pas réactivé l&apos;abonnement.
-                </p>
+                <ol className="text-sm text-[var(--text-secondary)] leading-relaxed space-y-2 list-decimal list-inside">
+                  <li>
+                    <strong>Réclamez votre fiche gratuitement</strong> en
+                    vérifiant votre SIRET. Inscription en 2 min.
+                  </li>
+                  <li>
+                    <strong>Recevez automatiquement tous les projets</strong>{" "}
+                    de votre catégorie et département (par email + dashboard).
+                  </li>
+                  <li>
+                    <strong>Choisissez les projets qui vous intéressent</strong>{" "}
+                    en lisant la description, le budget et le délai.
+                  </li>
+                  <li>
+                    <strong>Débloquez les coordonnées pour 9,90 € TTC</strong>{" "}
+                    quand vous voulez répondre. Paiement unique par projet.
+                  </li>
+                  <li>
+                    <strong>Contactez le client en direct.</strong> Devis,
+                    contrat, paiement : 100 % entre vous et le client. Workwave
+                    ne prend aucune commission.
+                  </li>
+                </ol>
               </div>
             </div>
           </div>

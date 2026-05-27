@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { qualifyProject } from "@/lib/ai/qualify-project";
 import { sendProjectNotification } from "@/lib/email/send-project-notification";
 import { sendProjectConfirmation } from "@/lib/email/send-project-confirmation";
-import { routeProjectToMatchingPros } from "@/lib/routing/route-project";
+import { broadcastBtpProject } from "@/lib/email/broadcast-btp-project";
+import { detectPii, formatPiiErrorMessage } from "@/lib/ai/detect-pii";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
@@ -132,6 +133,19 @@ export async function submitProject(
 
   const data = result.data;
 
+  // Sprint 13 — Anti-PII bypass : detection de tel/email/URL dans la description.
+  // Le particulier ne doit pas pouvoir mettre ses coordonnees dans la description
+  // pour skip le paywall pro BTP (9,90 EUR par lead unlock).
+  const piiResult = detectPii(data.description);
+  if (piiResult.hasPii) {
+    return {
+      success: false,
+      errors: {
+        description: formatPiiErrorMessage(piiResult),
+      },
+    };
+  }
+
   // Récupérer les noms de catégorie et ville pour l'IA et l'email
   const supabase = await createClient();
 
@@ -143,7 +157,7 @@ export async function submitProject(
 
   const { data: city } = await supabase
     .from("cities")
-    .select("name")
+    .select("name, department_id")
     .eq("id", data.cityId)
     .single();
 
@@ -244,12 +258,30 @@ export async function submitProject(
     },
   });
 
-  // Routing automatique vers les pros (non-bloquant)
-  // On ne route PAS les projets suspects
-  if (!isSuspicious) {
-    routeProjectToMatchingPros(project.id).catch((err) =>
-      console.error("Erreur routing projet (non bloquante) :", err)
-    );
+  // Sprint 13 — Broadcast BTP a tous les pros claimed dans la categorie + departement.
+  // Plus de routing top 3 : tous les pros eligibles recoivent le mail. Pour
+  // debloquer les coordonnees du particulier, ils paient 9,90 EUR TTC par lead
+  // (cf. /pro/dashboard/leads).
+  // NB : on broadcast meme si le projet est suspicious, mais avec le banner
+  // "Projet flague par notre IA" pour que les pros decident en connaissance de
+  // cause.
+  // IMPORTANT : await pour eviter promise detachee morte sur Vercel (lecon 24/05).
+  // L'envoi de 50+ emails prend du temps mais c'est le tradeoff fiabilite vs UX.
+  try {
+    await broadcastBtpProject({
+      projectId: project.id,
+      projectTitle: data.description.split("\n")[0].slice(0, 100) || "Nouveau projet",
+      projectDescription: data.description,
+      projectBudget: data.budget,
+      projectTimeline: data.urgency,
+      projectCategoryName: category.name,
+      projectCategoryId: data.categoryId,
+      projectCityName: city.name,
+      projectDepartmentId: city.department_id,
+      isSuspicious,
+    });
+  } catch (err) {
+    console.error("Erreur broadcast BTP (non bloquante) :", err);
   }
 
   redirect("/deposer-projet/merci");
