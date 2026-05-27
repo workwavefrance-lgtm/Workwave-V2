@@ -55,7 +55,11 @@ const projectSchema = z.object({
 // en mémoire ne protège qu'en développement local.
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 heure
-const RATE_LIMIT_MAX = 3;
+// Sprint 13 : relax 3 -> 30 par heure. Avec le modele broadcast BTP (tous les
+// pros recoivent), un volume plus eleve de projets/h est OK. La protection
+// anti-spam reelle se fait via PII detection + IA suspicion_score + admin
+// moderation manuelle des projets flagues.
+const RATE_LIMIT_MAX = 30;
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
