@@ -76,35 +76,93 @@ export async function sendClaimWelcomeEmail(params: {
       </p>
     </div>
 
-    <!-- Section 3 conseils pour demarrer -->
+    <!-- Section "Comment ca marche ?" : 5 etapes pedagogiques pour que le pro
+         comprenne tout le flow d'un coup. Identique a la section affichee sur
+         le dashboard pour coherence. -->
     <div style="padding:8px 32px 8px;">
       <p style="margin:0 0 18px;font-size:13px;color:#6B7280;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;text-align:center;">
-        3 conseils pour démarrer
+        Comment ça marche ?
       </p>
 
-      <table style="width:100%;border-collapse:separate;border-spacing:0 12px;font-size:14px;">
+      <table style="width:100%;border-collapse:separate;border-spacing:0 10px;font-size:14px;">
         <tr>
           <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Complétez votre fiche</p>
-            <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Description, photos de réalisations, certifications (RGE, Qualibat…). Les fiches complètes reçoivent 3 fois plus de leads.
-            </p>
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-right:12px;">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#FF5A36;color:#FFFFFF;font-size:12px;font-weight:700;text-align:center;line-height:24px;">1</div>
+                </td>
+                <td>
+                  <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.55;">
+                    <strong>Réclamez votre fiche gratuitement</strong> en vérifiant votre SIRET. Inscription en 2&nbsp;min.
+                  </p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <tr>
           <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Réglez votre rayon d'intervention</p>
-            <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Indiquez la distance maximum que vous acceptez de parcourir. Seuls les projets dans votre zone vous seront proposés.
-            </p>
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-right:12px;">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#FF5A36;color:#FFFFFF;font-size:12px;font-weight:700;text-align:center;line-height:24px;">2</div>
+                </td>
+                <td>
+                  <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.55;">
+                    <strong>Recevez automatiquement tous les projets</strong> de votre catégorie et département (par email + dashboard).
+                  </p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <tr>
           <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Activez votre Stripe pour débloquer les leads</p>
-            <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Quand un projet vous intéresse, un clic suffit pour débloquer les coordonnées. Le paiement se fait à la transaction, sans engagement.
-            </p>
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-right:12px;">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#FF5A36;color:#FFFFFF;font-size:12px;font-weight:700;text-align:center;line-height:24px;">3</div>
+                </td>
+                <td>
+                  <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.55;">
+                    <strong>Choisissez les projets qui vous intéressent</strong> en lisant la description, le budget et le délai.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-right:12px;">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#FF5A36;color:#FFFFFF;font-size:12px;font-weight:700;text-align:center;line-height:24px;">4</div>
+                </td>
+                <td>
+                  <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.55;">
+                    <strong>Débloquez les coordonnées pour 9,90&nbsp;€ TTC</strong> quand vous voulez répondre. Paiement unique par projet.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
+            <table style="width:100%;border-collapse:collapse;">
+              <tr>
+                <td style="width:28px;vertical-align:top;padding-right:12px;">
+                  <div style="width:24px;height:24px;border-radius:50%;background:#FF5A36;color:#FFFFFF;font-size:12px;font-weight:700;text-align:center;line-height:24px;">5</div>
+                </td>
+                <td>
+                  <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.55;">
+                    <strong>Contactez le client en direct.</strong> Devis, contrat, paiement&nbsp;: 100&nbsp;% entre vous et le client. Workwave ne prend aucune commission.
+                  </p>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
       </table>
