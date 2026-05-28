@@ -27,6 +27,26 @@ const STATUS_BADGE: Record<
 
 const FILTERS: FilterConfig[] = [
   {
+    key: "vertical",
+    label: "Vertical",
+    options: [
+      { label: "Tous", value: "all" },
+      { label: "BTP", value: "btp" },
+      { label: "Workwave AI", value: "ai" },
+    ],
+  },
+  {
+    key: "source",
+    label: "Source",
+    options: [
+      { label: "Toutes", value: "all" },
+      { label: "Sirene (scrap)", value: "sirene" },
+      { label: "AI signup", value: "ai_signup" },
+      { label: "Manuel", value: "manual" },
+      { label: "Pages Jaunes", value: "pagesjaunes" },
+    ],
+  },
+  {
     key: "status",
     label: "Statut",
     options: [
@@ -204,6 +224,8 @@ export default function ProsTableClient({
         <AdminTableFilters
           filters={FILTERS}
           values={{
+            vertical: filters.vertical || "all",
+            source: filters.source || "all",
             status: filters.status || "all",
             claimed: filters.claimed || "all",
           }}

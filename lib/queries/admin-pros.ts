@@ -1,6 +1,11 @@
 import { cache } from "react";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import type { SubscriptionStatus } from "@/lib/types/database";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+
+// IDs de categorie Workwave AI (tech + business + creatif). Utilises pour
+// segmenter dans /admin/pros : vertical='ai' = ces categories, 'btp' = NOT IN.
+const AI_CATEGORY_IDS_QUERY = AI_CATEGORY_IDS as unknown as number[];
 
 const ADMIN_PRO_SELECT =
   "id, slug, name, siret, email, phone, category_id, city_id, subscription_status, subscription_plan, profile_completion, response_rate, claimed_at, created_at, trial_ends_at, current_period_end, is_active, deleted_at, category:categories(id, name, slug), city:cities(id, name, slug, department:departments(id, code, name))";
@@ -37,6 +42,8 @@ export type AdminProsFilters = {
   status?: string;
   claimed?: string;
   category?: string;
+  vertical?: string; // 'all' | 'btp' | 'ai'
+  source?: string; // 'all' | 'sirene' | 'ai_signup' | 'manual' | 'pagesjaunes'
   search?: string;
   sort?: string;
   order?: "asc" | "desc";
@@ -50,6 +57,8 @@ export const getAdminPros = cache(
     const {
       status = "all",
       claimed = "all",
+      vertical = "all",
+      source = "all",
       search = "",
       sort = "created_at",
       order = "desc",
@@ -75,6 +84,23 @@ export const getAdminPros = cache(
       query = query.not("claimed_by_user_id", "is", null);
     } else if (claimed === "unclaimed") {
       query = query.is("claimed_by_user_id", null);
+    }
+
+    // Sprint 13 polish : filtre vertical (BTP / AI) pour segmenter dans l'admin.
+    // BTP = category_id NOT IN AI_CATEGORY_IDS. AI = IN AI_CATEGORY_IDS.
+    if (vertical === "btp") {
+      query = query.not(
+        "category_id",
+        "in",
+        `(${AI_CATEGORY_IDS_QUERY.join(",")})`
+      );
+    } else if (vertical === "ai") {
+      query = query.in("category_id", AI_CATEGORY_IDS_QUERY);
+    }
+
+    // Filtre par source (sirene/ai_signup/manual/pagesjaunes)
+    if (source && source !== "all") {
+      query = query.eq("source", source);
     }
 
     if (search) {

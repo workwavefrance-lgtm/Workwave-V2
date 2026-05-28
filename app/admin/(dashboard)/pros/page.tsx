@@ -10,6 +10,8 @@ export default async function AdminProsPage({
   const filters = {
     status: sp.status || "all",
     claimed: sp.claimed || "all",
+    vertical: sp.vertical || "all",
+    source: sp.source || "all",
     search: sp.search || "",
     sort: sp.sort || "created_at",
     order: (sp.order || "desc") as "asc" | "desc",
