@@ -12,6 +12,9 @@ export async function GET(request: NextRequest) {
   const filters = {
     status: url.get("status") || "all",
     claimed: url.get("claimed") || "all",
+    vertical: url.get("vertical") || "all",
+    source: url.get("source") || "all",
+    state: url.get("state") || "all",
     search: url.get("search") || "",
     sort: url.get("sort") || "created_at",
     order: (url.get("order") || "desc") as "asc" | "desc",

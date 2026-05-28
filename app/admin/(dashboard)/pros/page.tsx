@@ -12,6 +12,7 @@ export default async function AdminProsPage({
     claimed: sp.claimed || "all",
     vertical: sp.vertical || "all",
     source: sp.source || "all",
+    state: sp.state || "all",
     search: sp.search || "",
     sort: sp.sort || "created_at",
     order: (sp.order || "desc") as "asc" | "desc",

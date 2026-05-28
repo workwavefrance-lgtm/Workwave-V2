@@ -5,8 +5,6 @@ import { useCallback } from "react";
 import AdminTable from "@/components/admin/data-display/AdminTable";
 import type { AdminColumn } from "@/components/admin/data-display/AdminTable";
 import AdminTableSearch from "@/components/admin/data-display/AdminTableSearch";
-import AdminTableFilters from "@/components/admin/data-display/AdminTableFilters";
-import type { FilterConfig } from "@/components/admin/data-display/AdminTableFilters";
 import AdminTablePagination from "@/components/admin/data-display/AdminTablePagination";
 import AdminBadge from "@/components/admin/data-display/AdminBadge";
 import CsvExportButton from "@/components/admin/export/CsvExportButton";
@@ -25,48 +23,22 @@ const STATUS_BADGE: Record<
   suspended: { label: "Suspendu", variant: "danger" },
 };
 
-const FILTERS: FilterConfig[] = [
-  {
-    key: "vertical",
-    label: "Vertical",
-    options: [
-      { label: "Tous", value: "all" },
-      { label: "BTP", value: "btp" },
-      { label: "Workwave AI", value: "ai" },
-    ],
-  },
-  {
-    key: "source",
-    label: "Source",
-    options: [
-      { label: "Toutes", value: "all" },
-      { label: "Sirene (scrap)", value: "sirene" },
-      { label: "AI signup", value: "ai_signup" },
-      { label: "Manuel", value: "manual" },
-      { label: "Pages Jaunes", value: "pagesjaunes" },
-    ],
-  },
-  {
-    key: "status",
-    label: "Statut",
-    options: [
-      { label: "Tous", value: "all" },
-      { label: "Actif", value: "active" },
-      { label: "Essai", value: "trialing" },
-      { label: "Impayé", value: "past_due" },
-      { label: "Résilié", value: "canceled" },
-      { label: "Gratuit", value: "none" },
-    ],
-  },
-  {
-    key: "claimed",
-    label: "Réclamé",
-    options: [
-      { label: "Tous", value: "all" },
-      { label: "Oui", value: "claimed" },
-      { label: "Non", value: "unclaimed" },
-    ],
-  },
+// Tabs Vertical : separation visuelle BTP / AI
+const VERTICAL_TABS: { value: string; label: string }[] = [
+  { value: "all", label: "Tous" },
+  { value: "btp", label: "BTP" },
+  { value: "ai", label: "Workwave AI" },
+];
+
+// Tabs Etat metier : 5 categories produit mutuellement exclusives.
+// L'ordre suit le funnel : prospect (scrape) -> reclame -> payant -> trial -> resilie.
+const STATE_TABS: { value: string; label: string; description: string }[] = [
+  { value: "all", label: "Tous", description: "Tous les pros" },
+  { value: "scraped", label: "Scrappés", description: "Sirene/Pages Jaunes, non réclamés" },
+  { value: "claimed_free", label: "Réclamés gratuits", description: "Compte créé, plan gratuit" },
+  { value: "paying", label: "Payants", description: "Abonnement actif" },
+  { value: "trialing", label: "Essai gratuit", description: "En essai, va passer payant" },
+  { value: "canceled", label: "Résiliés", description: "Abonnement annulé" },
 ];
 
 const columns: AdminColumn<AdminProRow>[] = [
@@ -191,6 +163,9 @@ export default function ProsTableClient({
     [router, searchParams]
   );
 
+  const activeVertical = filters.vertical || "all";
+  const activeState = filters.state || "all";
+
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
@@ -209,28 +184,80 @@ export default function ProsTableClient({
         className="text-xs mb-5"
         style={{ color: "var(--admin-text-secondary)" }}
       >
-        {initialCount} professionnel{initialCount > 1 ? "s" : ""}
+        {initialCount.toLocaleString("fr-FR")} professionnel
+        {initialCount > 1 ? "s" : ""}
       </p>
 
-      {/* Search + Filters */}
+      {/* Tabs Vertical : separation BTP / AI en gros et visible */}
+      <div
+        className="flex gap-1 p-1 rounded-lg mb-4 w-fit"
+        style={{
+          backgroundColor: "var(--admin-card)",
+          border: "1px solid var(--admin-border)",
+        }}
+      >
+        {VERTICAL_TABS.map((tab) => {
+          const isActive = activeVertical === tab.value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => updateParams({ vertical: tab.value })}
+              className="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+              style={{
+                backgroundColor: isActive
+                  ? "var(--admin-bg)"
+                  : "transparent",
+                color: isActive
+                  ? "var(--admin-text)"
+                  : "var(--admin-text-secondary)",
+                boxShadow: isActive
+                  ? "0 1px 2px rgba(0,0,0,0.05)"
+                  : "none",
+              }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tabs Etat metier : 5 categories produit */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {STATE_TABS.map((tab) => {
+          const isActive = activeState === tab.value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => updateParams({ state: tab.value })}
+              title={tab.description}
+              className="px-3 py-1.5 text-xs font-medium rounded-full transition-colors"
+              style={{
+                backgroundColor: isActive
+                  ? "var(--admin-accent)"
+                  : "var(--admin-card)",
+                color: isActive ? "#fff" : "var(--admin-text-secondary)",
+                border: `1px solid ${
+                  isActive ? "var(--admin-accent)" : "var(--admin-border)"
+                }`,
+              }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Search (filtres avances optionnels supprimes : remplaces par les tabs ci-dessus) */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="w-full sm:w-64">
+        <div className="w-full sm:w-80">
           <AdminTableSearch
             value={filters.search || ""}
             onChange={(v) => updateParams({ search: v })}
             placeholder="Nom, SIRET, email..."
           />
         </div>
-        <AdminTableFilters
-          filters={FILTERS}
-          values={{
-            vertical: filters.vertical || "all",
-            source: filters.source || "all",
-            status: filters.status || "all",
-            claimed: filters.claimed || "all",
-          }}
-          onChange={(key, value) => updateParams({ [key]: value })}
-        />
       </div>
 
       {/* Table */}
