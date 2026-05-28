@@ -146,8 +146,12 @@ export default function RecentClaimsToast() {
       role="status"
       aria-live="polite"
       className={[
+        // hidden sm:block : toast cache sur mobile (<640px) car il prenait
+        // toute la largeur en bottom-4 et genait la lecture du contenu.
+        // Sur tablette/desktop il reste discret en bottom-left max-w-340px.
+        "hidden sm:block",
         "fixed z-40 pointer-events-none",
-        "left-4 right-4 bottom-4 sm:left-6 sm:right-auto sm:bottom-6",
+        "sm:left-6 sm:right-auto sm:bottom-6",
         "sm:max-w-[340px]",
         "transition-all duration-300 ease-out",
         visible
