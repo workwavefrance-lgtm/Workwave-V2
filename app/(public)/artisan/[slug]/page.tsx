@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Breadcrumb from "@/components/ui/Breadcrumb";
@@ -92,6 +92,16 @@ export default async function ProPage({ params }: Props) {
   const { slug } = await params;
   const pro = await getProBySlug(slug);
   if (!pro) notFound();
+
+  // Si pro Workwave AI (tech + business + creatif), rediriger 308 vers
+  // /ai/freelance/[slug] qui a le bon layout (header AI, terminologie
+  // "freelance", CTA approprie). La canonical seule ne suffit pas : Google la
+  // suit mais le user voyait la page BTP. NB : pas de loading.tsx ici, donc
+  // permanentRedirect fonctionne (cf. lecons apprises 18/04 sur Suspense
+  // streaming qui casse les redirects).
+  if (AI_CATEGORY_IDS.includes(pro.category.id)) {
+    permanentRedirect(`/ai/freelance/${slug}`);
+  }
 
   // Charger les pros similaires, villes voisines et avis en parallele
   const [similarPros, nearbyCities, reviews] = await Promise.all([
