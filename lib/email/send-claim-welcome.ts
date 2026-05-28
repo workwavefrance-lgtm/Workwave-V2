@@ -9,13 +9,13 @@ function getResendClient() {
 }
 
 /**
- * Mail de bienvenue envoye au pro juste apres qu'il ait valide son code
- * de verification. Ce mail :
- *  - Confirme que la fiche est a lui
- *  - Recap les avantages Workwave Pro (extraits de /pro/page.tsx)
- *  - Communique la date de fin d'essai gratuit
- *  - Incite legerement a activer l'abonnement (offre annuelle 2 mois offerts)
- *  - Donne 3 conseils pour demarrer (compleer fiche, photos, rayon)
+ * Mail de bienvenue envoye au pro BTP juste apres qu'il ait valide son code
+ * de verification.
+ *
+ * Modele Sprint 13 : pay-per-lead 9,90 EUR par lead debloque, fiche gratuite
+ * a vie. PLUS d'essai 14j / PLUS de CB obligatoire. Le pro recoit les projets
+ * de sa zone par email, et il paie 9,90 EUR uniquement quand il veut voir les
+ * coordonnees du client (debloquer le lead).
  *
  * Vouvoiement strict. Design coherent avec les autres mails Workwave
  * (header colore, card blanche, table clean, CTA coral arrondis).
@@ -23,17 +23,10 @@ function getResendClient() {
 export async function sendClaimWelcomeEmail(params: {
   email: string;
   proName: string;
-  trialEndsAt: Date;
 }): Promise<void> {
   const baseUrl = (
     process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr"
   ).replace(/\s+/g, "");
-
-  const trialEndStr = params.trialEndsAt.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
   const html = `
 <!DOCTYPE html>
@@ -57,15 +50,17 @@ export async function sendClaimWelcomeEmail(params: {
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
         Vous venez de réclamer la fiche <strong style="color:#0A0A0A;">${params.proName}</strong> sur Workwave.
-        Votre essai gratuit de 14 jours démarre maintenant — vous recevez les demandes de clients de votre zone
-        sans avoir à entrer de carte bancaire.
+        Votre fiche est désormais à vous, <strong>gratuite à vie</strong>, sans engagement et sans carte bancaire.
       </p>
 
-      <!-- Card trial info -->
-      <div style="background:#FFF5F2;border:1px solid #FFD4C7;border-radius:12px;padding:18px 20px;margin:24px 0;">
-        <p style="margin:0 0 6px;font-size:12px;color:#FF5A36;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Essai gratuit actif</p>
-        <p style="margin:0;font-size:15px;color:#0A0A0A;line-height:1.5;">
-          Jusqu'au <strong>${trialEndStr}</strong>. Aucune carte bancaire requise.
+      <!-- Card modele pay-per-lead -->
+      <div style="background:#FFF5F2;border:1px solid #FFD4C7;border-radius:12px;padding:20px;margin:24px 0;">
+        <p style="margin:0 0 6px;font-size:12px;color:#FF5A36;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Fonctionnement</p>
+        <p style="margin:0 0 12px;font-size:15px;color:#0A0A0A;line-height:1.5;font-weight:600;">
+          Vous ne payez que les leads qui vous intéressent.
+        </p>
+        <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
+          Recevez gratuitement par email les projets de votre zone. Quand un projet vous plaît, débloquez les coordonnées du client pour <strong style="color:#0A0A0A;">9,90&nbsp;€</strong>. Pas d'abonnement, pas de surprise.
         </p>
       </div>
 
@@ -81,81 +76,38 @@ export async function sendClaimWelcomeEmail(params: {
       </p>
     </div>
 
-    <!-- Section avantages -->
+    <!-- Section 3 conseils pour demarrer -->
     <div style="padding:8px 32px 8px;">
       <p style="margin:0 0 18px;font-size:13px;color:#6B7280;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;text-align:center;">
-        Ce que vous obtenez avec Workwave Pro
+        3 conseils pour démarrer
       </p>
 
       <table style="width:100%;border-collapse:separate;border-spacing:0 12px;font-size:14px;">
         <tr>
           <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Leads qualifiés dans votre zone</p>
+            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Complétez votre fiche</p>
             <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Chaque demande est analysée par notre IA et routée aux 3 pros les mieux placés. Pas de spam, que des projets réels.
+              Description, photos de réalisations, certifications (RGE, Qualibat…). Les fiches complètes reçoivent 3 fois plus de leads.
             </p>
           </td>
         </tr>
         <tr>
           <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Zéro commission sur vos chantiers</p>
+            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Réglez votre rayon d'intervention</p>
             <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Un abonnement fixe, pas de pourcentage sur vos devis ni sur vos factures. Vos revenus restent vos revenus.
+              Indiquez la distance maximum que vous acceptez de parcourir. Seuls les projets dans votre zone vous seront proposés.
             </p>
           </td>
         </tr>
         <tr>
           <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Visibilité Google maximale</p>
+            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Activez votre Stripe pour débloquer les leads</p>
             <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Votre fiche est référencée automatiquement sur les moteurs de recherche. Plus vous la complétez, plus vous gagnez en position.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:16px 18px;vertical-align:top;">
-            <p style="margin:0 0 4px;font-size:14px;color:#0A0A0A;font-weight:600;line-height:1.4;">Résiliation libre, sans engagement</p>
-            <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.6;">
-              Vous pouvez résilier à tout moment en un clic depuis votre dashboard. Pas de frais cachés, pas de blocage.
+              Quand un projet vous intéresse, un clic suffit pour débloquer les coordonnées. Le paiement se fait à la transaction, sans engagement.
             </p>
           </td>
         </tr>
       </table>
-    </div>
-
-    <!-- Section conseils 3 etapes -->
-    <div style="padding:24px 32px 8px;">
-      <p style="margin:0 0 14px;font-size:13px;color:#6B7280;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;text-align:center;">
-        Pour bien démarrer
-      </p>
-      <ol style="margin:0;padding:0 0 0 20px;font-size:14px;color:#374151;line-height:1.8;">
-        <li><strong style="color:#0A0A0A;">Complétez votre fiche</strong> — logo, description, photos de réalisations. Une fiche complète reçoit 3× plus de leads qu'une fiche vide.</li>
-        <li><strong style="color:#0A0A0A;">Réglez votre rayon d'intervention</strong> dans Préférences leads (5-100 km). Plus le rayon est précis, plus les leads sont pertinents.</li>
-        <li><strong style="color:#0A0A0A;">Activez les notifications email</strong> pour ne manquer aucune demande dans vos paramètres.</li>
-      </ol>
-    </div>
-
-    <!-- Section incitation activation (douce) -->
-    <div style="padding:32px 32px 8px;">
-      <div style="background:#0A0A0A;border-radius:14px;padding:24px;text-align:center;color:#FFFFFF;">
-        <p style="margin:0 0 6px;font-size:12px;color:#FFB8A3;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">
-          Quand vous serez prêt
-        </p>
-        <p style="margin:0 0 14px;font-size:18px;color:#FFFFFF;font-weight:600;line-height:1.4;">
-          Activez votre abonnement et économisez<br/>2 mois en passant à l'annuel
-        </p>
-        <p style="margin:0 0 18px;font-size:13px;color:#A1A1AA;line-height:1.6;">
-          Mensuel : 39 €/mois · Annuel : 32,50 €/mois (390 €/an)<br/>
-          Sans engagement, résiliable à tout moment.
-        </p>
-        <a href="${baseUrl}/pro/dashboard/abonnement"
-           style="display:inline-block;background:#FFFFFF;color:#0A0A0A;text-decoration:none;padding:12px 28px;border-radius:9999px;font-size:14px;font-weight:600;">
-          Voir les options d'abonnement
-        </a>
-        <p style="margin:14px 0 0;font-size:12px;color:#6B7280;line-height:1.5;">
-          Pas pressé ? Profitez d'abord de vos 14 jours d'essai. Aucun prélèvement automatique sans votre accord.
-        </p>
-      </div>
     </div>
 
     <!-- Signature -->

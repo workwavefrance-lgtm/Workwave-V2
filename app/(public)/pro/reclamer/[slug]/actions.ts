@@ -114,16 +114,15 @@ async function notifyProOfClaimSuccess(params: {
     const serviceClient = await getServiceClient();
     const { data: pro } = await serviceClient
       .from("pros")
-      .select("name, trial_ends_at")
+      .select("name")
       .eq("slug", params.slug)
       .single();
 
-    if (!pro || !pro.trial_ends_at) return;
+    if (!pro) return;
 
     await sendClaimWelcomeEmail({
       email: params.claimEmail,
       proName: pro.name,
-      trialEndsAt: new Date(pro.trial_ends_at),
     });
   } catch (err) {
     console.error("notifyProOfClaimSuccess error :", err);
@@ -455,16 +454,16 @@ export async function verifyClaim(
       // Continue avec l'ID existant
       const userId = existingUser.id;
 
-      // Lier la fiche
+      // Lier la fiche au user. Modele BTP Sprint 13 : pay-per-lead 9,90€ par
+      // lead debloque, fiche gratuite a vie. Pas d'essai gratuit / pas de CB
+      // requise. Le subscription_status reste "none" jusqu'au premier paiement.
       await serviceClient
         .from("pros")
         .update({
           claimed_by_user_id: userId,
           claimed_at: new Date().toISOString(),
-          subscription_status: "trialing",
-          trial_ends_at: new Date(
-            Date.now() + 14 * 24 * 60 * 60 * 1000
-          ).toISOString(),
+          subscription_status: "none",
+          trial_ends_at: null,
         })
         .eq("slug", slug);
 
@@ -519,16 +518,16 @@ export async function verifyClaim(
 
   const userId = signUpData.user.id;
 
-  // 2. Lier la fiche au user + activer l'essai gratuit 14 jours
+  // 2. Lier la fiche au user. Modele BTP Sprint 13 : pay-per-lead 9,90€ par
+  // lead debloque, fiche gratuite a vie. Pas d'essai gratuit / pas de CB
+  // requise. Le subscription_status reste "none" jusqu'au premier paiement.
   const { error: updateError } = await serviceClient
     .from("pros")
     .update({
       claimed_by_user_id: userId,
       claimed_at: new Date().toISOString(),
-      subscription_status: "trialing",
-      trial_ends_at: new Date(
-        Date.now() + 14 * 24 * 60 * 60 * 1000
-      ).toISOString(),
+      subscription_status: "none",
+      trial_ends_at: null,
     })
     .eq("slug", slug);
 

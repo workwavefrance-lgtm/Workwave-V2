@@ -137,7 +137,7 @@ export async function sendClaimSuccessAlert(params: {
     </div>
     <div style="padding:32px;">
       <p style="margin:0 0 20px;font-size:15px;color:#0A0A0A;line-height:1.6;">
-        Un professionnel vient de réclamer sa fiche et a démarré son essai gratuit de 14 jours.
+        Un professionnel vient de réclamer sa fiche. Son compte BTP est actif en mode gratuit (pay-per-lead 9,90&nbsp;€).
       </p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;">
         <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Fiche</td><td style="padding:6px 0;color:#0A0A0A;font-weight:500;">${params.proName}</td></tr>
@@ -153,7 +153,7 @@ export async function sendClaimSuccessAlert(params: {
         <a href="${dashboardUrl}" style="display:inline-block;padding:10px 18px;background:#FF5A36;color:#FFFFFF;text-decoration:none;border-radius:10px;font-size:14px;font-weight:500;margin-left:8px;">Ouvrir dans l'admin</a>
       </div>
       <p style="margin:24px 0 0;font-size:13px;color:#9CA3AF;line-height:1.6;">
-        Le pro est en essai gratuit jusqu'au ${new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString("fr-FR")}. Après ça il devra renseigner sa CB pour rester actif.
+        Modele pay-per-lead Sprint 13 : la fiche reste gratuite a vie. Le pro paie 9,90&nbsp;€ par lead debloque, sans abonnement ni CB requise.
       </p>
     </div>
   </div>
