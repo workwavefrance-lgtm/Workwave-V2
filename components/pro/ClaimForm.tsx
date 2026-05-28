@@ -287,16 +287,19 @@ export default function ClaimForm({ slug, proName }: Props) {
         )}
       </div>
 
-      {/* Submit */}
+      {/* Submit : bouton coral large + texte action-oriente + rassurance dessous.
+          Pattern CRO : le bouton doit etre l'element le plus visible de la page,
+          le texte doit promettre un benefice (recevoir des demandes), et la
+          rassurance doit lever les freins (rapide, sans engagement). */}
       <button
         type="submit"
         disabled={isPending || !passwordValid || passwordsMismatch}
-        className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-6 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2"
+        className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-5 rounded-full text-base sm:text-lg font-bold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[var(--accent)]/25"
       >
         {isPending ? (
           <>
             <svg
-              className="animate-spin h-4 w-4"
+              className="animate-spin h-5 w-5"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -318,13 +321,26 @@ export default function ClaimForm({ slug, proName }: Props) {
             Vérification en cours...
           </>
         ) : (
-          "Vérifier et envoyer le code"
+          <>
+            Activer mon accès pro et recevoir des demandes
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </>
         )}
       </button>
 
-      <p className="text-xs text-[var(--text-tertiary)] text-center">
-        Un code de vérification à 6 chiffres sera envoyé à votre adresse email.
-      </p>
+      <div className="text-center space-y-1.5">
+        <p className="text-sm font-medium text-[var(--text-secondary)] flex items-center justify-center gap-1.5">
+          <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          Validation rapide en 30&nbsp;secondes. Sans aucun engagement.
+        </p>
+        <p className="text-xs text-[var(--text-tertiary)]">
+          Un code de vérification à 6 chiffres sera envoyé à votre adresse email.
+        </p>
+      </div>
     </form>
   );
 }

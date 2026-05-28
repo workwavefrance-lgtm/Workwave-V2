@@ -323,8 +323,29 @@ export default async function ClaimPage({ params }: Props) {
         </p>
       </section>
 
-      {/* Card formulaire */}
-      <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8">
+      {/* Bandeau d'accroche commercial : transforme l'aspect "formulaire admin"
+          en opportunite. Le ton est positif (felicitations) + benefit-oriented
+          (recevoir des demandes de devis). */}
+      <div className="bg-gradient-to-br from-[#FF5A36]/5 via-[#FF5A36]/10 to-transparent dark:from-[#FF5A36]/8 dark:via-[#FF5A36]/12 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-2xl p-5 sm:p-6 mb-4">
+        <p className="text-base sm:text-lg text-[var(--text-primary)] leading-relaxed">
+          <span className="font-bold">Félicitations,</span> votre entreprise est déjà en ligne sur Workwave&nbsp;!
+          Prenez le contrôle pour <span className="font-semibold">personnaliser votre présentation</span> et
+          commencer à <span className="font-semibold text-[#FF5A36]">recevoir des demandes de devis</span>.
+        </p>
+      </div>
+
+      {/* Indicateur de progression : reduit la friction perçue ("c'est presque fini"). */}
+      <div className="flex items-center gap-2 mb-3 px-1">
+        <div className="flex-1 h-1.5 bg-[#FF5A36] rounded-full" />
+        <div className="flex-1 h-1.5 bg-[var(--border-color)] rounded-full" />
+      </div>
+      <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-3 px-1">
+        Étape 1 / 2 — Vérification d&apos;identité
+      </p>
+
+      {/* Card formulaire : ombre portee + bordure plus marquee pour la faire
+          "ressortir" de la page (hierarchie visuelle = etape logique). */}
+      <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8 shadow-lg shadow-[#FF5A36]/5 dark:shadow-black/30">
         <ClaimForm slug={slug} proName={pro.name} />
       </div>
     </main>
