@@ -997,3 +997,9 @@ Dashboard Stripe : à renseigner au sprint 5.
 API Sirene : api.insee.fr/entreprises/sirene/V3
 Documentation Next.js : nextjs.org/docs
 Documentation Supabase : supabase.com/docs
+
+## 15. À faire dans 1-2 semaines
+
+- **Test A/B Claude Opus 4.8 sur Léa (chatbot commercial)** : Opus 4.8 sorti le 28/05/2026 ($5/M input + $25/M output). Aujourd'hui Léa tourne sur Sonnet 4.6. Hypothèse : Opus 4.8 ferait des réponses 20-30 % plus engageantes sur les objections complexes (coût marginal ~$0.05/conversation au lieu de $0.01, soit $5/mois pour 100 conv). À tester en juin 2026 quand on aura un volume suffisant de conversations Léa pour comparer (mesurer : taux de clic sur "Réclamer ma fiche" après chat). Pour switcher : env var `LEA_MODEL=opus-4-8` qui override le défaut dans `app/api/agent-chat/route.ts`. **Garder Sonnet 4.6 par défaut tant que l'A/B n'est pas concluant**.
+- **Migration Haiku 4.5 → Opus 4.8 sur batch descriptions IA** : NON pertinent. Les 5000 descriptions BTP générées le 28/05/2026 avec Haiku 4.5 sont qualité OK pour SEO, et Opus 4.8 coûterait x10 ($37 au lieu de $4) pour gain marginal. Garder Haiku par défaut sur les batches volume.
+- **Migration vers Opus 4.8 sur articles blog long-format (>2000 mots)** : à évaluer si on relance une campagne de génération articles. Coût marginal $0.50/article. À tester sur 5 articles pour comparer qualité narrative avant migration totale.
