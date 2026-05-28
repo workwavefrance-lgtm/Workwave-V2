@@ -42,6 +42,12 @@ export default function ClaimForm({ slug, proName }: Props) {
     initialState
   );
 
+  // Inputs controlled : preserver les valeurs au re-render apres echec validation
+  // (SIRET deja saisi, email, etc.). Sans ca, l'user re-tape tout a chaque erreur.
+  const [email, setEmail] = useState("");
+  const [siret, setSiret] = useState("");
+  const [managerName, setManagerName] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -51,10 +57,9 @@ export default function ClaimForm({ slug, proName }: Props) {
   const passwordsMatch = password.length > 0 && passwordConfirm.length > 0 && password === passwordConfirm;
   const passwordsMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
 
-  function handleSiretInput(e: React.FormEvent<HTMLInputElement>) {
-    const input = e.currentTarget;
-    const raw = input.value.replace(/\D/g, "");
-    input.value = formatSiret(raw);
+  function handleSiretInput(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value.replace(/\D/g, "");
+    setSiret(formatSiret(raw));
   }
 
   const inputBase =
@@ -67,8 +72,8 @@ export default function ClaimForm({ slug, proName }: Props) {
     <form action={formAction} className="space-y-6">
       <input type="hidden" name="slug" value={slug} />
 
-      {/* Message d'erreur global */}
-      {state.message && !state.success && (
+      {/* Message d'erreur global (cache pendant isPending pour pas de flash rouge) */}
+      {state.message && !state.success && !isPending && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-sm text-red-600 dark:text-red-400">
             {state.message}
@@ -98,12 +103,14 @@ export default function ClaimForm({ slug, proName }: Props) {
           id="email"
           name="email"
           type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           placeholder="contact@entreprise.fr"
           required
-          className={`${inputBase} ${state.errors?.email ? inputError : inputNormal}`}
+          className={`${inputBase} ${state.errors?.email && !isPending ? inputError : inputNormal}`}
         />
-        {state.errors?.email && (
+        {state.errors?.email && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
         )}
       </div>
@@ -120,18 +127,19 @@ export default function ClaimForm({ slug, proName }: Props) {
           id="siret"
           name="siret"
           type="text"
+          value={siret}
+          onChange={handleSiretInput}
           inputMode="numeric"
           autoComplete="off"
           placeholder="123 456 789 01234"
           maxLength={17}
           required
-          onInput={handleSiretInput}
-          className={`${inputBase} font-mono tracking-wide ${state.errors?.siret ? inputError : inputNormal}`}
+          className={`${inputBase} font-mono tracking-wide ${state.errors?.siret && !isPending ? inputError : inputNormal}`}
         />
         <p className="mt-1 text-xs text-[var(--text-tertiary)]">
           14 chiffres, visible sur vos documents officiels
         </p>
-        {state.errors?.siret && (
+        {state.errors?.siret && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.siret}</p>
         )}
       </div>
@@ -148,12 +156,14 @@ export default function ClaimForm({ slug, proName }: Props) {
           id="managerName"
           name="managerName"
           type="text"
+          value={managerName}
+          onChange={(e) => setManagerName(e.target.value)}
           autoComplete="name"
           placeholder="Jean Dupont"
           required
-          className={`${inputBase} ${state.errors?.managerName ? inputError : inputNormal}`}
+          className={`${inputBase} ${state.errors?.managerName && !isPending ? inputError : inputNormal}`}
         />
-        {state.errors?.managerName && (
+        {state.errors?.managerName && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">
             {state.errors.managerName}
           </p>
@@ -172,12 +182,14 @@ export default function ClaimForm({ slug, proName }: Props) {
           id="phone"
           name="phone"
           type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           autoComplete="tel"
           placeholder="06 12 34 56 78"
           required
-          className={`${inputBase} ${state.errors?.phone ? inputError : inputNormal}`}
+          className={`${inputBase} ${state.errors?.phone && !isPending ? inputError : inputNormal}`}
         />
-        {state.errors?.phone && (
+        {state.errors?.phone && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.phone}</p>
         )}
       </div>
@@ -200,7 +212,7 @@ export default function ClaimForm({ slug, proName }: Props) {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={`${inputBase} pr-12 ${state.errors?.password ? inputError : inputNormal}`}
+            className={`${inputBase} pr-12 ${state.errors?.password && !isPending ? inputError : inputNormal}`}
           />
           <button
             type="button"
@@ -214,7 +226,7 @@ export default function ClaimForm({ slug, proName }: Props) {
         <p className="mt-1 text-xs text-[var(--text-tertiary)]">
           Minimum 8 caractères dont au moins 1 chiffre
         </p>
-        {state.errors?.password && (
+        {state.errors?.password && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.password}</p>
         )}
       </div>

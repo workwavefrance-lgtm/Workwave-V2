@@ -96,8 +96,8 @@ export default function VerificationForm({ attemptId, slug }: Props) {
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="code" value={codeValue} />
 
-      {/* Message d'erreur global */}
-      {state.message && !state.success && (
+      {/* Message d'erreur global (cache pendant isPending pour pas de flash rouge) */}
+      {state.message && !state.success && !isPending && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-sm text-red-600 dark:text-red-400">
             {state.message}

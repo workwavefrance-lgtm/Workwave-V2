@@ -26,6 +26,10 @@ function EyeIcon({ open }: { open: boolean }) {
 export default function LoginForm() {
   const [state, formAction, isPending] = useActionState(signIn, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  // Inputs controlled : preserver les valeurs au re-render apres echec validation.
+  // Sans ca, l'user voit ses champs vides apres une erreur et croit que rien ne marche.
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const inputBase =
     "w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition-all duration-250 outline-none";
@@ -35,8 +39,8 @@ export default function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {/* Erreur globale */}
-      {state.message && !state.success && (
+      {/* Erreur globale (cachee pendant isPending pour pas de flash rouge) */}
+      {state.message && !state.success && !isPending && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-sm text-red-600 dark:text-red-400">
             {state.message}
@@ -56,13 +60,15 @@ export default function LoginForm() {
           id="email"
           name="email"
           type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           autoFocus
           placeholder="contact@entreprise.fr"
           required
-          className={`${inputBase} ${state.errors?.email ? inputError : inputNormal}`}
+          className={`${inputBase} ${state.errors?.email && !isPending ? inputError : inputNormal}`}
         />
-        {state.errors?.email && (
+        {state.errors?.email && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
         )}
       </div>
@@ -80,10 +86,12 @@ export default function LoginForm() {
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             placeholder="Votre mot de passe"
             required
-            className={`${inputBase} pr-12 ${state.errors?.password ? inputError : inputNormal}`}
+            className={`${inputBase} pr-12 ${state.errors?.password && !isPending ? inputError : inputNormal}`}
           />
           <button
             type="button"
@@ -94,7 +102,7 @@ export default function LoginForm() {
             <EyeIcon open={showPassword} />
           </button>
         </div>
-        {state.errors?.password && (
+        {state.errors?.password && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.password}</p>
         )}
       </div>

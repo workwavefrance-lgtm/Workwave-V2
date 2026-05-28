@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   requestPasswordReset,
   type ForgotPasswordState,
@@ -13,6 +13,8 @@ export default function ForgotPasswordForm() {
     requestPasswordReset,
     initialState
   );
+  // Input controlled : preserver la valeur au re-render apres echec validation.
+  const [email, setEmail] = useState("");
 
   // Message de succès
   if (state.success && state.message) {
@@ -49,8 +51,8 @@ export default function ForgotPasswordForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {/* Erreur globale */}
-      {state.message && !state.success && (
+      {/* Erreur globale (cachee pendant isPending pour pas de flash rouge) */}
+      {state.message && !state.success && !isPending && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-sm text-red-600 dark:text-red-400">
             {state.message}
@@ -75,13 +77,15 @@ export default function ForgotPasswordForm() {
           id="email"
           name="email"
           type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           autoFocus
           placeholder="contact@entreprise.fr"
           required
-          className={`${inputBase} ${state.errors?.email ? inputError : inputNormal}`}
+          className={`${inputBase} ${state.errors?.email && !isPending ? inputError : inputNormal}`}
         />
-        {state.errors?.email && (
+        {state.errors?.email && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
         )}
       </div>

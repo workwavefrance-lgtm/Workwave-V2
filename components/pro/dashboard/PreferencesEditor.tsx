@@ -298,15 +298,15 @@ export default function PreferencesEditor({
           </p>
         </div>
 
-        {/* Messages + Bouton */}
+        {/* Messages + Bouton (caches pendant pending pour pas de flash stale) */}
         <div className="flex items-center justify-between gap-4">
           <div>
-            {state.success && (
+            {state.success && !pending && (
               <p className="text-sm text-green-600 dark:text-green-400">
                 Préférences sauvegardées
               </p>
             )}
-            {state.error && (
+            {state.error && !pending && (
               <p className="text-sm text-red-500">{state.error}</p>
             )}
           </div>
