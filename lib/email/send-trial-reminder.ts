@@ -8,6 +8,16 @@ function getResendClient() {
   return _resend;
 }
 
+/**
+ * Sprint 13 — IMPORTANT : ce mail est USAGE WORKWAVE AI UNIQUEMENT.
+ * BTP est pivote sur pay-per-lead (9,90 EUR/lead), plus d'essai/trialing
+ * pour les BTP. Si un cron est cree pour appeler cette fonction, il DOIT
+ * filtrer sur `category_id IN AI_CATEGORY_IDS` pour ne cibler que les
+ * freelances AI Premium en essai 14j.
+ *
+ * Aujourd'hui (28/05/2026) aucun cron actif n'appelle cette fonction, mais
+ * elle reste en place pour le jour ou on activera les reminders AI.
+ */
 export async function sendTrialReminderEmail(
   email: string,
   proName: string

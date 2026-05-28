@@ -147,6 +147,9 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
     .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)
+    // Sprint 13 : les freelances reclames (compte cree) sortent en premier
+    // avant les fiches signups non encore activees. Boost commercial fort.
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("github_username", { ascending: false, nullsFirst: false })
     .order("years_experience", { ascending: false, nullsFirst: false })
     .order("id", { ascending: true })

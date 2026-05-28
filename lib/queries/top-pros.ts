@@ -143,6 +143,14 @@ export async function getTopProsByCategoryAndCity(
   const scored = pros
     .map((p) => ({ pro: p, score: computeProScore(p) }))
     .sort((a, b) => {
+      // Sprint 13 : les pros reclames (compte cree, engagement reel) sortent
+      // toujours AVANT les fiches scrapees Sirene non reclamees. Boost
+      // commercial fort : incite les pros a reclamer leur fiche pour gagner
+      // en visibilite. Le score departage les claimed entre eux.
+      const aClaimed = !!a.pro.claimed_by_user_id;
+      const bClaimed = !!b.pro.claimed_by_user_id;
+      if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
+
       if (b.score !== a.score) return b.score - a.score;
       return (a.pro.name ?? "").localeCompare(b.pro.name ?? "");
     });
@@ -187,6 +195,14 @@ export async function getTopProsByCategoryAndDepartment(
   const scored = pros
     .map((p) => ({ pro: p, score: computeProScore(p) }))
     .sort((a, b) => {
+      // Sprint 13 : les pros reclames (compte cree, engagement reel) sortent
+      // toujours AVANT les fiches scrapees Sirene non reclamees. Boost
+      // commercial fort : incite les pros a reclamer leur fiche pour gagner
+      // en visibilite. Le score departage les claimed entre eux.
+      const aClaimed = !!a.pro.claimed_by_user_id;
+      const bClaimed = !!b.pro.claimed_by_user_id;
+      if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
+
       if (b.score !== a.score) return b.score - a.score;
       return (a.pro.name ?? "").localeCompare(b.pro.name ?? "");
     });

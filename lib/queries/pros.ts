@@ -15,8 +15,12 @@ async function paginatedQuery(
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  // Sprint 13 : boost claimed pour mettre en premier les pros qui ont
+  // reclame leur fiche (engagement reel) avant les fiches scrapees Sirene.
+  // Incite les pros a reclamer leur fiche pour gagner en visibilite.
   const { data, count } = await query
     .range(from, to)
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("name");
 
   const total = count || 0;

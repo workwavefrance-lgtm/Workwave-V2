@@ -127,6 +127,8 @@ export default async function SkillDeptPage({ params }: Props) {
     .eq("is_active", true)
     .is("deleted_at", null)
     .like("postal_code", `${department.code}%`)
+    // Sprint 13 : claimed en premier (boost commercial)
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("github_username", { ascending: false, nullsFirst: false })
     .order("years_experience", { ascending: false, nullsFirst: false })
     .limit(15);

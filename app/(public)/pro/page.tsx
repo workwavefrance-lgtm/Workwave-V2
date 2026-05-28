@@ -77,7 +77,7 @@ const features = [
   "Qualification IA des demandes",
   "Coordonnées débloquées à la demande (9,90 € TTC/lead)",
   "Gestion des préférences (catégorie, zone, pause)",
-  "Aucun abonnement récurrent",
+  "Paiement uniquement quand vous débloquez un lead",
 ];
 
 const stats = [
@@ -364,7 +364,7 @@ export default function ProLandingPage() {
           {/* Fonctionnalités incluses */}
           <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-8">
             <h3 className="text-base font-semibold text-[var(--text-primary)] mb-5">
-              Inclus dans chaque abonnement
+              Inclus pour tous les pros, gratuitement
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {features.map((feature) => (
