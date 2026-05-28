@@ -34,8 +34,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!pro) return {};
 
   const cityName = pro.city?.name || "";
+  // Sprint 14 : fallback description_ai si pas de description manuelle.
+  // Cible les pages "Exploree non indexee" GSC (~3 384) en leur donnant un
+  // contenu enrichi qui passe le seuil thin content de Google.
+  const proAi = pro as typeof pro & { description_ai?: string | null };
+  const effectiveDescription = pro.description || proAi.description_ai || null;
   const desc =
-    truncateDescription(pro.description) ||
+    truncateDescription(effectiveDescription) ||
     `${pro.name}, ${pro.category.name} à ${cityName}. Contactez ce professionnel gratuitement.`;
 
   // Canonical : si pro tech, pointer vers /ai/freelance/[slug] (Workwave AI).
@@ -137,7 +142,11 @@ export default async function ProPage({ params }: Props) {
     "@type": "LocalBusiness",
     name: pro.name,
     url: `${BASE_URL}/artisan/${slug}`,
-    ...(pro.description ? { description: pro.description } : {}),
+    ...(() => {
+      const proAi = pro as typeof pro & { description_ai?: string | null };
+      const d = pro.description || proAi.description_ai;
+      return d ? { description: d } : {};
+    })(),
     ...(pro.phone ? { telephone: pro.phone } : {}),
     ...(pro.email ? { email: pro.email } : {}),
     ...(pro.logo_url ? { image: pro.logo_url } : {}),
@@ -398,17 +407,24 @@ export default async function ProPage({ params }: Props) {
             </p>
           </section>
 
-          {/* Description */}
-          {pro.description && (
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
-                Description
-              </h2>
-              <p className="text-[var(--text-secondary)] leading-relaxed">
-                {pro.description}
-              </p>
-            </div>
-          )}
+          {/* Description : priorite a la description manuelle du pro, fallback
+              vers description_ai (Sprint 14 : enrichit les pages thin content
+              pour debloquer l'indexation Google). */}
+          {(() => {
+            const proAi = pro as typeof pro & { description_ai?: string | null };
+            const text = pro.description || proAi.description_ai;
+            if (!text) return null;
+            return (
+              <div>
+                <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
+                  Description
+                </h2>
+                <p className="text-[var(--text-secondary)] leading-relaxed">
+                  {text}
+                </p>
+              </div>
+            );
+          })()}
 
           {/* Bandeau Sirene : age + effectif. Source officielle INSEE
               (sync via scripts/enrich-sirene-v3.ts). Signal de confiance
