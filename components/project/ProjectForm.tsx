@@ -181,7 +181,15 @@ export default function ProjectForm({
         isDirty.current = true;
       }}
       onSubmit={() => {
+        // Safari fix : declencher handleAttemptSubmit ici (onSubmit) plutot
+        // que dans le onClick du bouton. Sur Safari iOS, un setState dans
+        // onClick PEUT preempter la submission native si le re-render React
+        // arrive avant que Safari traite l'event submit. En faisant le state
+        // update dans onSubmit, React garantit que le submit est deja en cours
+        // avant le re-render. Marche identiquement sur Chrome.
         submitted.current = true;
+        setHasAttemptedSubmit(true);
+        setDismissedErrors(new Set());
       }}
       className="space-y-8"
     >
@@ -570,7 +578,6 @@ export default function ProjectForm({
           <button
             type="submit"
             disabled={isPending}
-            onClick={handleAttemptSubmit}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-10 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {isPending ? (
