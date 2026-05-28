@@ -164,6 +164,13 @@ export async function broadcastBtpProject(
     .eq("department_id", input.projectDepartmentId);
 
   if (citiesError || !cities || cities.length === 0) {
+    // Important : update broadcasted_at meme quand 0 cibles, sinon l'audit
+    // BDD ne distingue plus "broadcast jamais tente" d'un "broadcast OK avec
+    // 0 plombiers eligibles". Bug detecte sur projet #42 (Laurent) le 28/05.
+    await sb
+      .from("projects")
+      .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
+      .eq("id", input.projectId);
     return {
       totalTargets: 0,
       sent: 0,
@@ -189,6 +196,11 @@ export async function broadcastBtpProject(
 
   if (queryError) {
     console.error("[broadcastBtpProject] query error:", queryError);
+    // Track meme en erreur pour audit
+    await sb
+      .from("projects")
+      .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
+      .eq("id", input.projectId);
     return { totalTargets: 0, sent: 0, failed: 0, errors: [queryError.message] };
   }
 
@@ -198,6 +210,13 @@ export async function broadcastBtpProject(
   );
 
   if (targets.length === 0) {
+    // 0 plombiers eligibles dans le departement (cas concret : projet #42
+    // Laurent dans le 86, aucun plombier reclame). Track quand meme pour ne
+    // pas laisser broadcasted_at=null indefiniment et pouvoir auditer.
+    await sb
+      .from("projects")
+      .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
+      .eq("id", input.projectId);
     return { totalTargets: 0, sent: 0, failed: 0, errors: [] };
   }
 
