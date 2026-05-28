@@ -119,7 +119,7 @@ export default async function SkillDeptPage({ params }: Props) {
   // Top 15 pros du dept (LIKE postal_code prefix)
   const { data: pros, count } = await sb
     .from("pros")
-    .select("id, name, slug, postal_code, years_experience, github_username, avatar_color", {
+    .select("id, name, slug, postal_code, years_experience, github_username, avatar_color, claimed_by_user_id", {
       count: "estimated",
     })
     .eq("category_id", filterCategoryId)
@@ -309,6 +309,16 @@ export default async function SkillDeptPage({ params }: Props) {
                       <h3 className="text-[14px] font-bold text-[var(--ai-text)] mb-1 tracking-tight">
                         {titleCase(pro.name)}
                       </h3>
+                      {pro.claimed_by_user_id && (
+                        <div className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 mb-1.5">
+                          <svg className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                          <span className="text-[9px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                            Fiche réclamée
+                          </span>
+                        </div>
+                      )}
                       <p className="text-[12px] text-[var(--ai-text-secondary)]">
                         {pro.postal_code || department.name}
                       </p>

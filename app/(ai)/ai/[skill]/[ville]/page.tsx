@@ -98,7 +98,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
   const { data: pros } = await sb
     .from("pros")
     .select(
-      "id, name, slug, postal_code, address, years_experience, github_username, avatar_color"
+      "id, name, slug, postal_code, address, years_experience, github_username, avatar_color, claimed_by_user_id"
     )
     .eq("category_id", filterCategoryId)
     .in("source", ["sirene", "ai_signup"])
@@ -446,6 +446,16 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                   <h3 className="text-base font-bold text-[var(--ai-text)] mb-1 leading-tight tracking-tight pr-10">
                     {titleCase(pro.name)}
                   </h3>
+                  {pro.claimed_by_user_id && (
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 mb-2">
+                      <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                        Fiche réclamée
+                      </span>
+                    </div>
+                  )}
                   <p className="text-[13px] text-[var(--ai-text-secondary)] mb-3">
                     {city.name}
                     {pro.postal_code && (

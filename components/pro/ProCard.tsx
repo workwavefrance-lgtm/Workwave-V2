@@ -30,6 +30,19 @@ export default function ProCard({ pro }: { pro: ProWithRelations }) {
             {pro.name}
           </h3>
 
+          {/* Badge "Fiche reclamee" : signal de confiance (le pro a un compte
+              actif, repond aux leads). Mis en valeur en vert sobre. */}
+          {pro.claimed_by_user_id && (
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 mb-2 mr-2">
+              <svg className="w-3 h-3 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                Fiche réclamée
+              </span>
+            </div>
+          )}
+
           {pro.category?.name && (
             <span className="inline-block text-[var(--accent-badge-text)] text-xs font-medium px-2.5 py-0.5 rounded-full mb-2" style={{ backgroundColor: "var(--accent-muted)" }}>
               {pro.category.name}
