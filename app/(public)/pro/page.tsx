@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/seo/JsonLd";
 import { getFaqSchema } from "@/lib/utils/schema";
+import HeroSiretLookup from "@/components/landing/HeroSiretLookup";
 
 export const metadata: Metadata = {
   title: "Workwave pour les professionnels - Recevez des leads qualifies",
@@ -184,42 +185,9 @@ export default function ProLandingPage() {
             Recevez des demandes qualifiées de particuliers dans votre zone,
             sans commission sur vos chantiers.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/pro/retrouver-fiche"
-              className="inline-flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold py-4 px-8 rounded-full text-base transition-all duration-250 hover:scale-[1.02]"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-              Tapez votre SIRET et récupérez votre fiche
-            </Link>
-            <a
-              href="#pricing"
-              className="inline-flex items-center justify-center border border-[var(--border-color)] text-[var(--text-primary)] font-semibold py-4 px-8 rounded-full text-base transition-all duration-250 hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            >
-              Voir les tarifs
-            </a>
-          </div>
-          <p className="mt-6 text-sm text-[var(--text-tertiary)]">
-            Déjà inscrit ?{" "}
-            <Link
-              href="/pro/connexion"
-              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline decoration-[var(--border-color)] hover:decoration-[var(--text-primary)] underline-offset-4 transition-colors duration-250"
-            >
-              Connectez-vous
-            </Link>
-          </p>
+          {/* Hero CTA : input SIRET inline (zero friction). Le composant client
+              gere la Server Action lookupBySiret + redirect intelligent. */}
+          <HeroSiretLookup />
         </div>
       </section>
 
