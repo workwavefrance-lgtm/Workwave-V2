@@ -30,11 +30,15 @@ echo ""
 echo "=== Workwave cron $(date '+%Y-%m-%d %H:%M:%S') ==="
 
 echo ""
-echo "--- Tache 1 : Mass cold mail (95 mails/jour) ---"
+echo "--- Tache 1 : Pre-warm sitemap cache (avant que Google fetch) ---"
+npx tsx scripts/_warm-sitemap-cache.ts || echo "Sitemap warm failed (continuing)"
+
+echo ""
+echo "--- Tache 2 : Mass cold mail (95 mails/jour) ---"
 npx tsx scripts/_mass-cold-may28.ts || echo "Mass cold failed (continuing)"
 
 echo ""
-echo "--- Tache 2 : Ping Google Indexing AI (200 URLs/jour) ---"
+echo "--- Tache 3 : Ping Google Indexing AI (200 URLs/jour) ---"
 npx tsx scripts/ping-google-indexing-ai-freelances.ts || echo "Ping Google failed (continuing)"
 
 echo ""
