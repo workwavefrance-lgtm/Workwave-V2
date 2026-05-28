@@ -22,7 +22,7 @@ async function getProForClaim(slug: string) {
   const { data, error } = await supabase
     .from("pros")
     .select(
-      "id, name, slug, siret, address, postal_code, claimed_by_user_id, created_at, category:categories(name), city:cities(name)"
+      "id, name, slug, siret, address, postal_code, email, phone, claimed_by_user_id, created_at, category:categories(name), city:cities(name)"
     )
     .eq("slug", slug)
     .single();
@@ -155,6 +155,49 @@ export default async function ClaimPage({ params }: Props) {
         Retour à la fiche
       </Link>
 
+      {/* Banner ROUGE : alerte si email ou telephone manquant. Boost
+          conversion car le pro voit immediatement qu'il manque "le minimum
+          pour etre joignable" → motivation forte de finaliser le claim. */}
+      {(!pro.email || !pro.phone) && (
+        <section className="bg-red-50 dark:bg-red-950/30 border-2 border-red-300 dark:border-red-800 rounded-2xl p-5 sm:p-6 mb-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+              <svg
+                className="w-4 h-4 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-1">
+                Action requise
+              </p>
+              <h2 className="text-base sm:text-lg font-bold text-red-700 dark:text-red-300 leading-snug mb-1">
+                Il manque les informations de contact pour que les clients
+                puissent vous joindre
+              </h2>
+              <p className="text-sm text-red-600 dark:text-red-400/90 leading-relaxed">
+                {!pro.email && !pro.phone
+                  ? "Votre email et votre téléphone sont absents."
+                  : !pro.email
+                    ? "Votre email professionnel est absent."
+                    : "Votre téléphone est absent."}{" "}
+                Réclamez votre fiche maintenant (gratuit, 2 min) pour les ajouter
+                et commencer à recevoir des leads.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Bloc "Nous avons ces infos sur votre entreprise" — affichage des
           donnees Sirene deja connues. Pattern Yelp/Google : le pro voit qu'il
           recupere ce qui existe deja (effet endowment), ne cree pas une fiche
@@ -240,6 +283,39 @@ export default async function ClaimPage({ params }: Props) {
               </dd>
             </div>
           )}
+
+          {/* Email : si present = noir normal, si absent = rouge avec mention
+              "vos clients ne peuvent pas vous joindre". Boost conversion. */}
+          <div className="flex flex-col sm:flex-row sm:gap-3">
+            <dt className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide sm:w-32 shrink-0 sm:pt-0.5">
+              Email
+            </dt>
+            <dd
+              className={
+                pro.email
+                  ? "text-sm text-[var(--text-primary)]"
+                  : "text-sm font-semibold text-red-600 dark:text-red-400"
+              }
+            >
+              {pro.email || "Non renseigné — vos clients ne peuvent pas vous joindre"}
+            </dd>
+          </div>
+
+          {/* Telephone : meme logique */}
+          <div className="flex flex-col sm:flex-row sm:gap-3">
+            <dt className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide sm:w-32 shrink-0 sm:pt-0.5">
+              Téléphone
+            </dt>
+            <dd
+              className={
+                pro.phone
+                  ? "text-sm text-[var(--text-primary)]"
+                  : "text-sm font-semibold text-red-600 dark:text-red-400"
+              }
+            >
+              {pro.phone || "Non renseigné — vos clients ne peuvent pas vous joindre"}
+            </dd>
+          </div>
         </dl>
 
         <p className="text-xs text-[var(--text-tertiary)] ml-11">
