@@ -186,10 +186,23 @@ export default function ProLandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/recherche"
-              className="inline-flex items-center justify-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold py-4 px-8 rounded-full text-base transition-all duration-250 hover:scale-[1.02]"
+              href="/pro/retrouver-fiche"
+              className="inline-flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold py-4 px-8 rounded-full text-base transition-all duration-250 hover:scale-[1.02]"
             >
-              Réclamer ma fiche gratuitement
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
+              Tapez votre SIRET et récupérez votre fiche
             </Link>
             <a
               href="#pricing"
@@ -297,10 +310,10 @@ export default function ProLandingPage() {
                 Coordonnées débloquées immédiatement (nom + email + téléphone)
               </p>
               <Link
-                href="/recherche"
+                href="/pro/retrouver-fiche"
                 className="block w-full text-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold py-3 px-6 rounded-full transition-all duration-250 hover:scale-[1.02]"
               >
-                Réclamer ma fiche gratuitement
+                Tapez votre SIRET pour commencer
               </Link>
               <p className="text-xs text-center text-[var(--text-tertiary)] mt-3">
                 Sans CB · Vous payez uniquement les leads qui vous intéressent
