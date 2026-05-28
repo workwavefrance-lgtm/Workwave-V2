@@ -99,6 +99,13 @@ export default function ProjectForm({
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [dismissedErrors, setDismissedErrors] = useState<Set<string>>(new Set());
   const showError = (field: string): string | undefined => {
+    // Pendant la submission, ne PAS afficher d'erreurs : si le serveur retourne
+    // success (redirect /merci), les erreurs stales du state precedent ne
+    // doivent pas clignoter en rouge pendant la transition. Si le serveur
+    // retourne des erreurs, isPending repassera a false et elles s'afficheront
+    // proprement. Sans ce check : l'user voit des erreurs rouges sur des champs
+    // valides pendant 1-2s avant le redirect, et croit que le form est casse.
+    if (isPending) return undefined;
     if (dismissedErrors.has(field)) return undefined;
     return touched[field] || hasAttemptedSubmit
       ? state.errors?.[field as keyof typeof state.errors]
@@ -196,8 +203,10 @@ export default function ProjectForm({
         </div>
       </div>
 
-      {/* Message d'erreur global (apres submit serveur) */}
-      {state.message && !state.success && (
+      {/* Message d'erreur global (apres submit serveur). Cache pendant isPending
+          pour eviter le clignotement entre un submit precedent qui a echoue et
+          le nouveau submit en cours qui peut reussir. */}
+      {state.message && !state.success && !isPending && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-sm text-red-600 dark:text-red-400">
             {state.message}
