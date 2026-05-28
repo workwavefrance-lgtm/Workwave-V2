@@ -175,6 +175,35 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* CTA Pro : point d'entree direct pour les professionnels qui
+          decouvrent Workwave (sans cold email). Place avant la FAQ pour
+          etre visible sans interrompre le flow particulier. */}
+      <section className="py-16 px-4 border-t border-[var(--border-color)]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
+            Vous êtes professionnel ?
+          </h2>
+          <p className="text-base text-[var(--text-secondary)] mb-8 max-w-xl mx-auto">
+            Retrouvez votre fiche Workwave en saisissant votre SIRET, ou
+            créez un compte si vous n&apos;êtes pas encore référencé.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/pro/retrouver-fiche"
+              className="px-6 py-3 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+            >
+              Retrouver ma fiche avec mon SIRET
+            </Link>
+            <Link
+              href="/pro"
+              className="px-6 py-3 rounded-full border border-[var(--border-color)] text-[var(--text-primary)] text-sm font-semibold hover:bg-[var(--bg-secondary)] transition-colors"
+            >
+              Créer un compte pro
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ — section visible + JSON-LD FAQPage (cf. getFaqSchema).
           Enrichit aussi le volume de contenu de la home (signal SEO/GEO). */}
       <JsonLd data={getFaqSchema(homeFaqs)} />
