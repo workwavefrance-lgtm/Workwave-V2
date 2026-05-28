@@ -29,14 +29,16 @@ export default function ConnexionPage() {
           <LoginForm />
         </div>
 
-        {/* Lien réclamation */}
+        {/* Lien retrouver-fiche : permet a un pro de retrouver sa fiche
+            scrapee Sirene en saisissant son SIRET, sans avoir a chercher
+            son nom dans l'annuaire public. */}
         <p className="text-center text-sm text-[var(--text-tertiary)] mt-6">
           Vous n&apos;avez pas encore réclamé votre fiche ?{" "}
           <Link
-            href="/"
+            href="/pro/retrouver-fiche"
             className="text-[var(--accent)] hover:underline transition-colors duration-250"
           >
-            Recherchez votre entreprise
+            Retrouvez-la avec votre SIRET
           </Link>
         </p>
       </div>
