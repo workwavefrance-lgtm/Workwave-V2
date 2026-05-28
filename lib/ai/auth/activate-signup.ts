@@ -227,6 +227,9 @@ export async function activateAiSignup(
     const slug = slugifyName(input.firstName, input.lastName, input.signupId);
     const proName = `${input.firstName} ${input.lastName}`.trim();
 
+    // NB : pros.skills est NOT NULL en BDD (heritage du modele BTP).
+    // Si l'user n'a pas fourni de skills a l'inscription, on met une chaine vide.
+    // Idem pour description (bio peut etre null en signup, mais on garantit ici).
     const { data: newPro, error: proError } = await sb
       .from("pros")
       .insert({
@@ -235,8 +238,8 @@ export async function activateAiSignup(
         category_id: categoryId,
         is_active: true,
         source: "ai_signup",
-        description: input.bio,
-        skills: input.skills,
+        description: input.bio || "",
+        skills: input.skills || "",
         github_username: input.github,
         linkedin: input.linkedin,
         years_experience: input.experienceYears,
