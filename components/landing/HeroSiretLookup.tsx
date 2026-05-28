@@ -128,16 +128,9 @@ export default function HeroSiretLookup() {
         </p>
       </form>
 
-      {/* Liens secondaires */}
-      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 text-sm text-[var(--text-tertiary)]">
-        <span>Pas de fiche existante ?</span>
-        <Link
-          href="/ai/inscription"
-          className="text-[var(--text-secondary)] hover:text-[var(--accent)] underline decoration-[var(--border-color)] hover:decoration-[var(--accent)] underline-offset-4 transition-colors duration-250"
-        >
-          Créer un compte Workwave AI
-        </Link>
-        <span className="text-[var(--border-color)] hidden sm:inline">·</span>
+      {/* Liens secondaires : on garde uniquement "Deja inscrit" cote BTP.
+          Le lien AI est volontairement retire (page /pro = vertical BTP). */}
+      <div className="flex items-center justify-center mt-6 text-sm text-[var(--text-tertiary)]">
         <Link
           href="/pro/connexion"
           className="text-[var(--text-secondary)] hover:text-[var(--accent)] underline decoration-[var(--border-color)] hover:decoration-[var(--accent)] underline-offset-4 transition-colors duration-250"

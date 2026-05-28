@@ -182,8 +182,8 @@ export default function ProLandingPage() {
             <span className="text-[var(--accent)]">.</span>
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed mb-10">
-            Recevez des demandes qualifiées de particuliers dans votre zone,
-            sans commission sur vos chantiers.
+            <strong className="text-[var(--text-primary)] font-semibold">Fiche 100&nbsp;% gratuite</strong>, sans abonnement et sans commission.
+            Recevez les demandes de particuliers dans votre zone et payez uniquement les leads que vous voulez contacter.
           </p>
           {/* Hero CTA : input SIRET inline (zero friction). Le composant client
               gere la Server Action lookupBySiret + redirect intelligent. */}
