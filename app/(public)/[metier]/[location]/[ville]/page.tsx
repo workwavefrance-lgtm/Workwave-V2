@@ -12,6 +12,7 @@ import ListingIntro from "@/components/listing/ListingIntro";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug } from "@/lib/queries/categories";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getCityBySlug } from "@/lib/queries/cities";
 import { getProsByCategoryAndCity } from "@/lib/queries/pros";
 import { getTopProsByCategoryAndCity } from "@/lib/queries/top-pros";
@@ -111,6 +112,11 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
 
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();
+
+  // Anti-fuite vertical : categorie AI ne doit pas s'afficher sur route BTP.
+  if (AI_CATEGORY_IDS.includes(category.id)) {
+    permanentRedirect(`/ai/${category.slug}`);
+  }
 
   const specialty = getSpecialty(metier, specialite);
   if (!specialty) notFound();

@@ -16,6 +16,7 @@ import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
 import CityFactsBlock from "@/components/listing/CityFactsBlock";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { resolveLocation } from "@/lib/queries/location";
 import {
   getProsByCategoryAndDepartment,
@@ -140,6 +141,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();
+
+  // Anti-fuite vertical : categorie AI ne doit pas s'afficher sur route BTP.
+  // Redirect 308 vers /ai/[skill] (preserve SEO + bon vertical).
+  if (AI_CATEGORY_IDS.includes(category.id)) {
+    permanentRedirect(`/ai/${category.slug}`);
+  }
 
   const resolved = await resolveLocation(locationSlug);
   if (!resolved) notFound();

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
+import { getBtpProByUserId, getAiProByUserId } from "@/lib/queries/pros";
 import DashboardProvider from "@/components/pro/dashboard/DashboardProvider";
 import Sidebar from "@/components/pro/dashboard/Sidebar";
 import BottomBar from "@/components/pro/dashboard/BottomBar";
@@ -22,9 +22,18 @@ export default async function DashboardLayout({
     redirect("/pro/connexion");
   }
 
-  const pro = await getProByUserId(user.id);
+  // Anti-fuite vertical : on charge UNIQUEMENT la fiche BTP de cet user
+  // (getBtpProByUserId filtre category_id NOT IN AI_CATEGORY_IDS). Symetrique
+  // au check fait cote AI (app/(ai)/ai/dashboard/layout.tsx). Audit 29/05/2026.
+  const pro = await getBtpProByUserId(user.id);
 
   if (!pro) {
+    // Si l'user a une fiche AI (freelance), on l'envoie sur SON dashboard
+    // au lieu de l'afficher le dashboard BTP avec une fiche AI.
+    const aiPro = await getAiProByUserId(user.id);
+    if (aiPro) {
+      redirect("/ai/dashboard");
+    }
     redirect("/pro/reclamer");
   }
 

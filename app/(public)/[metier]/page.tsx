@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
@@ -10,6 +10,7 @@ import {
   getAllCategories,
 } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getCitiesByDepartment } from "@/lib/queries/cities";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
@@ -52,6 +53,14 @@ export default async function MetierProximityPage({ params }: Props) {
   const { metier } = await params;
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();
+
+  // Anti-fuite vertical : une categorie AI (vertical=tech) ne doit JAMAIS
+  // s'afficher sur une route BTP. Redirect 308 vers l'equivalent /ai/[skill]
+  // (preserve le SEO + envoie l'user sur le bon vertical). Sans ca,
+  // /developpement-web listait 153 freelances AI sur une page BTP.
+  if (AI_CATEGORY_IDS.includes(category.id)) {
+    permanentRedirect(`/ai/${category.slug}`);
+  }
 
   // Charger tous les départements actifs + leurs villes (parallèle)
   const departments = await getAllDepartments();

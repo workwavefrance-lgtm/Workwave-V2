@@ -192,7 +192,11 @@ export async function searchPros(
     .select(PRO_SELECT, { count: "exact" })
     .ilike("name", `%${query}%`)
     .is("deleted_at", null)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    // Anti-fuite vertical : la recherche BTP exclut les freelances AI
+    // (leur fiche /artisan/[slug] redirige vers /ai/freelance, incoherent
+    // dans un contexte BTP). Audit separation 29/05/2026.
+    .not("category_id", "in", `(${AI_CATEGORY_IDS_QUERY.join(",")})`);
 
   return paginatedQuery(q, page, pageSize);
 }
