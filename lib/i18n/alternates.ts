@@ -43,3 +43,19 @@ export function aiAlternates({
     },
   };
 }
+
+/**
+ * Pages EN-only (sans équivalent FR) : pages programmatiques internationales
+ * (/en/ai/[skill]/[city], hubs). hreflang en + x-default => self.
+ */
+export function aiAlternatesEnOnly(
+  enPath: string
+): NonNullable<Metadata["alternates"]> {
+  return {
+    canonical: abs(enPath),
+    languages: {
+      en: abs(enPath),
+      "x-default": abs(enPath),
+    },
+  };
+}

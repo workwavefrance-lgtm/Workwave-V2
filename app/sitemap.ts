@@ -10,6 +10,8 @@ import { SPECIALTIES } from "@/lib/specialties";
 // les villes BDD avec >= 1 pro tech (vs 60 villes hardcodees).
 import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
+import { INTL_SKILLS } from "@/lib/data/intl-skills";
+import { INTL_CITIES } from "@/lib/data/intl-cities";
 
 // Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
 // donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
@@ -263,7 +265,7 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
 // ============================================================================
 async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  return [
+  const urls: MetadataRoute.Sitemap = [
     {
       url: `${BASE_URL}/en/ai`,
       lastModified: now,
@@ -271,6 +273,25 @@ async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
   ];
+  // Hubs /en/ai/[skill] + pages programmatiques /en/ai/[skill]/[city].
+  // Genere depuis les data files statiques (DB-free => sitemap rapide).
+  for (const skill of INTL_SKILLS) {
+    urls.push({
+      url: `${BASE_URL}/en/ai/${skill.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
+    for (const city of INTL_CITIES) {
+      urls.push({
+        url: `${BASE_URL}/en/ai/${skill.slug}/${city.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
+    }
+  }
+  return urls;
 }
 
 // ============================================================================
