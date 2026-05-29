@@ -25,7 +25,6 @@ import {
   getCategoryBestForm,
   pluralizeCategoryName,
 } from "@/lib/utils/category-grammar";
-import { computePageAggregateRating } from "@/lib/seo/seo-sections";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
@@ -160,11 +159,8 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
     (s) => s.slug !== specialite
   );
 
-  // Schema.org Service avec AggregateRating global pour rich snippet ★ SERP
-  // (moyenne ponderee Workwave + Google sur les pros affiches).
-  const specialtyPageAggregateRating = computePageAggregateRating(
-    isFirstPage ? topPros : (paginatedResult?.data ?? [])
-  );
+  // Schema.org Service (sans aggregateRating : Google rejette les review
+  // snippets sur ce type, cf. fix 26/05/2026).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const serviceJsonLd: any = {
     "@context": "https://schema.org",
@@ -182,15 +178,10 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
       name: cityLabel,
     },
   };
-  if (specialtyPageAggregateRating) {
-    serviceJsonLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: specialtyPageAggregateRating.ratingValue,
-      reviewCount: specialtyPageAggregateRating.reviewCount,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
+  // NB : pas d'aggregateRating sur le Service global. Google rejette les review
+  // snippets sur le type Service ("Type d'objet non valide pour le champ parent"
+  // GSC 26/05/2026) + contre les guidelines (auto-attribution). Les vrais
+  // aggregateRating restent sur les LocalBusiness individuels de l'ItemList.
 
   // Schema ItemList enrichi : LocalBusiness complet (adresse + telephone +
   // aggregateRating si dispo) pour activer les rich snippets ★ dans Google

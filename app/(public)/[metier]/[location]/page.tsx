@@ -39,10 +39,7 @@ import {
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
-import {
-  generateSeoContent,
-  computePageAggregateRating,
-} from "@/lib/seo/seo-sections";
+import { generateSeoContent } from "@/lib/seo/seo-sections";
 
 const TOP_LIMIT = 10;
 
@@ -332,10 +329,6 @@ export default async function ListingPage({ params, searchParams }: Props) {
       })
     : null;
 
-  // AggregateRating global de la page (rich snippet ★ SERP si data dispo)
-  const pageAggregateRating = computePageAggregateRating(
-    isFirstPage ? topPros : (paginatedResult?.data ?? [])
-  );
   const serviceJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -352,15 +345,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
       name: locationName,
     },
   };
-  if (pageAggregateRating) {
-    serviceJsonLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: pageAggregateRating.ratingValue,
-      reviewCount: pageAggregateRating.reviewCount,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
+  // NB : on NE met PAS d'aggregateRating sur le Service global. Google rejette
+  // les review snippets sur le type Service ("Type d'objet non valide pour le
+  // champ parent" en GSC, detecte 26/05/2026) + c'est contre les guidelines
+  // Google (auto-attribution de notes par le site lui-meme). Les vrais
+  // aggregateRating restent sur les LocalBusiness individuels (fiches pros
+  // dans l'ItemList ci-dessous) = source legitime et acceptee par Google.
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">
