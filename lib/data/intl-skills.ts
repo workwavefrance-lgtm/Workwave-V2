@@ -18,7 +18,9 @@ export type IntlSkill = {
   label: string;
   noun: string; // pluriel, ex. "web developers"
   nounSingular: string; // ex. "web developer"
-  tjmKey: string; // clé TJM_REFERENCE
+  /** Clé TJM_REFERENCE. Optionnel : les catégories business/créatif n'ont pas
+   *  de TJM de référence => le bloc tarifs est masqué (pas de chiffre inventé). */
+  tjmKey?: string;
   frCategorySlug: string; // catégorie FR équivalente
   blurb: string;
 };
@@ -83,6 +85,79 @@ export const INTL_SKILLS: IntlSkill[] = [
     frCategorySlug: "no-code-automation",
     blurb:
       "Builders shipping apps and workflows fast with Bubble, Webflow, Make, Zapier and Airtable.",
+  },
+  // ─── Business & creative (wave 2 — pas de TJM de reference) ──────────
+  {
+    slug: "marketing",
+    label: "Marketing & Communication",
+    noun: "marketing specialists",
+    nounSingular: "marketing specialist",
+    frCategorySlug: "marketing-communication",
+    blurb:
+      "SEO, paid acquisition, social, content and growth specialists who help you reach and convert your audience.",
+  },
+  {
+    slug: "finance",
+    label: "Finance & Accounting",
+    noun: "finance & accounting experts",
+    nounSingular: "finance expert",
+    frCategorySlug: "finance-comptabilite",
+    blurb:
+      "Fractional CFOs, financial controllers and accountants who structure your finances and reporting.",
+  },
+  {
+    slug: "legal",
+    label: "Legal & Consulting",
+    noun: "legal consultants",
+    nounSingular: "legal consultant",
+    frCategorySlug: "juridique-conseil",
+    blurb:
+      "Contract, GDPR, IP and corporate-law specialists who secure your business and agreements.",
+  },
+  {
+    slug: "hr",
+    label: "HR & Recruiting",
+    noun: "HR & recruiting specialists",
+    nounSingular: "HR specialist",
+    frCategorySlug: "rh-recrutement",
+    blurb:
+      "Talent acquisition, training and people-ops specialists who help you hire and grow your team.",
+  },
+  {
+    slug: "graphic-design",
+    label: "Graphic Design & Branding",
+    noun: "graphic designers",
+    nounSingular: "graphic designer",
+    frCategorySlug: "design-creation",
+    blurb:
+      "Brand identity, graphic design, illustration and print specialists who shape how your brand looks.",
+  },
+  {
+    slug: "copywriting",
+    label: "Writing & Copywriting",
+    noun: "writers & copywriters",
+    nounSingular: "copywriter",
+    frCategorySlug: "redaction-copywriting",
+    blurb:
+      "Copywriters, ghostwriters and content writers who turn your ideas into clear, persuasive words.",
+  },
+  {
+    slug: "video-production",
+    label: "Audiovisual & Media",
+    noun: "video & media producers",
+    nounSingular: "video producer",
+    frCategorySlug: "audiovisuel-medias",
+    blurb:
+      "Video editors, motion designers, photographers and podcast producers for all your media content.",
+  },
+  {
+    slug: "strategy",
+    label: "Strategy & Management",
+    noun: "strategy consultants",
+    nounSingular: "strategy consultant",
+    frCategorySlug: "strategie-management",
+    blurb:
+      "Strategy, transformation and operations consultants who help you plan and execute with clarity.",
   },
 ];
 

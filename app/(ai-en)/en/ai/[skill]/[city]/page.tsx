@@ -64,7 +64,9 @@ function buildFaq(skill: IntlSkill, city: IntlCity, seniorRange: string): FaqIte
   return [
     {
       q: `How much does it cost to hire a freelance ${skill.nounSingular} in ${city.name}?`,
-      a: `Senior freelance ${skill.noun} typically charge around ${seniorRange}. The figure is indicative${city.currency === "EUR" ? "" : ", converted from European market data, and local rates may vary"}. Final rates depend on seniority, the stack, the scope and the length of the engagement. On Workwave you contact ${skill.noun} directly and agree the rate with them — Workwave takes 0% commission.`,
+      a: seniorRange
+        ? `Senior freelance ${skill.noun} typically charge around ${seniorRange}. The figure is indicative${city.currency === "EUR" ? "" : ", converted from European market data, and local rates may vary"}. Final rates depend on seniority, the stack, the scope and the length of the engagement. On Workwave you contact ${skill.noun} directly and agree the rate with them — Workwave takes 0% commission.`
+        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer — Workwave takes 0% commission, so pricing stays transparent and you keep full control.`,
     },
     {
       q: `Do freelance ${skill.noun} in ${city.name} work remotely?`,
@@ -91,7 +93,7 @@ export default async function SkillCityPage({
   const city = getIntlCity(citySlug);
   if (!skill || !city) notFound();
 
-  const tjm = TJM_REFERENCE[skill.tjmKey];
+  const tjm = skill.tjmKey ? TJM_REFERENCE[skill.tjmKey] : undefined;
   const seniorRange = tjm
     ? formatTjmRange(tjm.senior.min, tjm.senior.max, "en", city.currency)
     : "";

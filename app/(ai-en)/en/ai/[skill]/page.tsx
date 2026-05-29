@@ -54,7 +54,7 @@ export default async function SkillHubPage({
   const skill = getIntlSkill(skillSlug);
   if (!skill) notFound();
 
-  const tjm = TJM_REFERENCE[skill.tjmKey];
+  const tjm = skill.tjmKey ? TJM_REFERENCE[skill.tjmKey] : undefined;
   const path = `/en/ai/${skill.slug}`;
   const gulf = INTL_CITIES.filter((c) => c.region === "Gulf");
   const europe = INTL_CITIES.filter((c) => c.region === "Europe");
@@ -70,7 +70,9 @@ export default async function SkillHubPage({
   const faq: FaqItem[] = [
     {
       q: `How much does it cost to hire a freelance ${skill.nounSingular}?`,
-      a: `Day rates depend on seniority, stack and region. As an indicative global benchmark, senior ${skill.noun} charge around ${tjm ? formatTjmRange(tjm.senior.min, tjm.senior.max, "en") : "market rates"} (USD). Rates in the Gulf and top European hubs trend higher. On Workwave you agree the rate directly with the freelancer — 0% commission.`,
+      a: tjm
+        ? `Day rates depend on seniority, stack and region. As an indicative global benchmark, senior ${skill.noun} charge around ${formatTjmRange(tjm.senior.min, tjm.senior.max, "en")} (USD). Rates in the Gulf and top European hubs trend higher. On Workwave you agree the rate directly with the freelancer — 0% commission.`
+        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer — Workwave takes 0% commission, so pricing stays transparent.`,
     },
     {
       q: `Where can I hire freelance ${skill.noun} on Workwave?`,
