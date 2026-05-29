@@ -229,6 +229,118 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "One of Europe's most productive startup ecosystems, Stockholm has deep demand for engineering and product skills.",
   },
+  // ─── Gulf & Middle East — Tier 2 ─────────────────────────────────────
+  {
+    slug: "sharjah",
+    name: "Sharjah",
+    country: "United Arab Emirates",
+    countryCode: "AE",
+    region: "Gulf",
+    currency: "AED",
+    monument: "skyline",
+    blurb:
+      "Part of the UAE's dynamic economy, Sharjah hosts a growing base of SMEs and creative businesses hiring freelance talent.",
+  },
+  {
+    slug: "manama",
+    name: "Manama",
+    country: "Bahrain",
+    countryCode: "BH",
+    region: "Gulf",
+    currency: "USD",
+    monument: "skyline",
+    blurb:
+      "A regional finance and fintech hub, Manama pairs a business-friendly climate with rising demand for digital skills.",
+  },
+  {
+    slug: "kuwait-city",
+    name: "Kuwait City",
+    country: "Kuwait",
+    countryCode: "KW",
+    region: "Gulf",
+    currency: "USD",
+    monument: "skyline",
+    blurb:
+      "Kuwait's capital is steadily digitising its economy, opening opportunities for freelance tech and product specialists.",
+  },
+  {
+    slug: "muscat",
+    name: "Muscat",
+    country: "Oman",
+    countryCode: "OM",
+    region: "Gulf",
+    currency: "USD",
+    monument: "skyline",
+    blurb:
+      "Oman's capital is investing in digital transformation, with growing demand for engineering and data talent.",
+  },
+  {
+    slug: "neom",
+    name: "NEOM",
+    country: "Saudi Arabia",
+    countryCode: "SA",
+    region: "Gulf",
+    currency: "SAR",
+    monument: "skyline",
+    blurb:
+      "A flagship Saudi megaproject in technology and innovation, NEOM drives strong demand for senior specialist talent.",
+  },
+  // ─── Europe — Tier 2 ─────────────────────────────────────────────────
+  {
+    slug: "milan",
+    name: "Milan",
+    country: "Italy",
+    countryCode: "IT",
+    region: "Europe",
+    currency: "EUR",
+    monument: "skyline",
+    blurb:
+      "Italy's business and design capital, Milan combines a strong creative scene with growing tech demand.",
+  },
+  {
+    slug: "vienna",
+    name: "Vienna",
+    country: "Austria",
+    countryCode: "AT",
+    region: "Europe",
+    currency: "EUR",
+    monument: "skyline",
+    blurb:
+      "A high-quality-of-life hub in Central Europe, Vienna anchors steady demand for engineering and data specialists.",
+  },
+  {
+    slug: "copenhagen",
+    name: "Copenhagen",
+    country: "Denmark",
+    countryCode: "DK",
+    region: "Europe",
+    currency: "USD",
+    monument: "skyline",
+    blurb:
+      "A Nordic leader in design and clean tech, Copenhagen has deep demand for product and engineering talent.",
+  },
+  {
+    slug: "tallinn",
+    name: "Tallinn",
+    country: "Estonia",
+    countryCode: "EE",
+    region: "Europe",
+    currency: "EUR",
+    monument: "skyline",
+    blurb:
+      "One of Europe's most digital societies, Tallinn punches well above its weight for startups and engineering talent.",
+  },
+  {
+    slug: "warsaw",
+    name: "Warsaw",
+    country: "Poland",
+    countryCode: "PL",
+    region: "Europe",
+    currency: "USD",
+    monument: "skyline",
+    blurb:
+      "A fast-growing Central-European tech hub, Warsaw offers a deep and competitive pool of engineering talent.",
+  },
 ];
 
 const CITY_MAP = new Map(INTL_CITIES.map((c) => [c.slug, c]));
