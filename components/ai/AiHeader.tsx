@@ -3,14 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { en } from "@/lib/i18n/en";
 
 /**
  * Header Workwave AI — style Pixel Rise + mobile menu premium.
  *
+ * Bilingue (FR + EN) : la locale est deduite du pathname (les routes EN sont
+ * sous /en/ai/*). Le branche FR conserve EXACTEMENT les libelles/hrefs actuels
+ * (zero regression) ; seule la branche EN utilise le dictionnaire anglais.
+ * Le switcher de langue (auparavant un bouton mort "FR") devient un lien
+ * fonctionnel vers l'autre locale.
+ *
  * Desktop (md+) :
  *   - Logo 2x2 grid orange/noir
  *   - Nav centrale pill bar avec active state pill dynamique
- *   - CTA droite : pill noir "Connexion" + switcher FR
+ *   - CTA droite : pill noir "Connexion" + switcher de langue
  *
  * Mobile (< md) :
  *   - Logo + hamburger 44x44 (tap target accessible)
@@ -20,10 +27,18 @@ import { useEffect, useState } from "react";
  *   - Body scroll lock quand open, Escape pour fermer
  */
 
-const NAV_ITEMS = [
+// Nav FR (inchangee — pages /ai/* existantes).
+const NAV_ITEMS_FR = [
   { href: "/ai/deposer", label: "Deposer un projet" },
   { href: "/ai/pour-les-freelances", label: "Pour freelances" },
   { href: "/ai/tarifs", label: "Tarifs" },
+];
+
+// Nav EN (Phase 1 : ancres sur la home EN — pas de sous-pages EN encore).
+const NAV_ITEMS_EN = [
+  { href: "/en/ai#how-it-works", label: en.footer.howItWorks },
+  { href: "/en/ai#for-freelances", label: en.nav.forFreelances },
+  { href: "/en/ai#pricing", label: en.nav.pricing },
 ];
 
 export default function AiHeader() {
@@ -54,9 +69,30 @@ export default function AiHeader() {
   }, [pathname]);
 
   // Hide sur le dashboard freelance — il a sa propre sidebar/header.
-  // Sinon double UI (header public + sidebar dashboard) qui rend la page
-  // confuse (le bouton "Connexion" du header public renvoie vers /ai/connexion).
   if (pathname.startsWith("/ai/dashboard")) return null;
+
+  // ─── Locale (deduite du pathname) ─────────────────────────────────────
+  const isEn = pathname.startsWith("/en/ai");
+
+  const navItems = isEn ? NAV_ITEMS_EN : NAV_ITEMS_FR;
+  const homeHref = isEn ? "/en/ai" : "/ai";
+  const homeAria = isEn ? en.nav.homeAria : "Workwave AI — Accueil";
+  const primaryNavAria = isEn ? en.nav.primaryNavAria : "Navigation principale";
+  const mobileNavAria = isEn ? en.nav.mobileNavAria : "Menu mobile";
+  const openMenuLabel = isEn ? en.nav.openMenu : "Ouvrir le menu";
+  const closeMenuLabel = isEn ? en.nav.closeMenu : "Fermer le menu";
+  const ctaHref = "/ai/deposer";
+  const ctaLabel = isEn ? en.nav.postProject : "Deposer un projet";
+  const loginHref = "/ai/connexion";
+  const loginLabel = isEn ? en.nav.login : "Connexion";
+  const loginSignupLabel = isEn ? en.nav.loginSignup : "Connexion / Inscription";
+  // Switcher : on affiche/lie vers l'AUTRE langue.
+  const langHref = isEn ? "/ai" : "/en/ai";
+  const langCode = isEn ? "FR" : "EN";
+  const langAria = isEn ? en.langSwitch.label : "Changer de langue";
+  const btpQuestion = isEn
+    ? en.footer.btpQuestion
+    : "Vous cherchez un artisan BTP ?";
 
   return (
     <>
@@ -67,9 +103,9 @@ export default function AiHeader() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-4">
           {/* Logo */}
           <Link
-            href="/ai"
+            href={homeHref}
             className="flex items-center gap-2.5 flex-shrink-0 group"
-            aria-label="Workwave AI — Accueil"
+            aria-label={homeAria}
           >
             <div
               className="grid grid-cols-2 grid-rows-2 gap-[2px] w-7 h-7 transition-transform duration-200 group-hover:rotate-90"
@@ -92,9 +128,9 @@ export default function AiHeader() {
           <nav
             className="hidden md:flex items-center gap-1 bg-[var(--ai-bg-card)] rounded-full p-1 border border-[var(--ai-border-subtle)]"
             style={{ boxShadow: "var(--ai-shadow-sm)" }}
-            aria-label="Navigation principale"
+            aria-label={primaryNavAria}
           >
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -115,10 +151,11 @@ export default function AiHeader() {
 
           {/* Actions droite */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <button
-              type="button"
+            <Link
+              href={langHref}
               className="hidden lg:inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors duration-150"
-              aria-label="Changer de langue"
+              aria-label={langAria}
+              hrefLang={isEn ? "fr" : "en"}
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -146,24 +183,24 @@ export default function AiHeader() {
                   strokeLinecap="round"
                 />
               </svg>
-              FR
-            </button>
+              {langCode}
+            </Link>
 
             {/* Connexion en lien texte (md+) */}
             <Link
-              href="/ai/connexion"
+              href={loginHref}
               className="hidden md:inline-flex items-center h-10 px-3 text-[13px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors duration-150"
             >
-              Connexion
+              {loginLabel}
             </Link>
 
             {/* CTA primary orange : Deposer un projet (md+) */}
             <Link
-              href="/ai/deposer"
+              href={ctaHref}
               className="hidden md:inline-flex items-center h-10 px-5 text-[13px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors duration-150"
               style={{ boxShadow: "var(--ai-shadow-sm)" }}
             >
-              Deposer un projet
+              {ctaLabel}
               <svg
                 className="ml-1.5 w-3.5 h-3.5"
                 viewBox="0 0 24 24"
@@ -185,7 +222,7 @@ export default function AiHeader() {
               type="button"
               onClick={() => setIsOpen(!isOpen)}
               className="md:hidden w-11 h-11 flex items-center justify-center rounded-lg text-[var(--ai-text)] hover:bg-[var(--ai-bg-subtle)] transition-colors duration-150 -mr-2"
-              aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-label={isOpen ? closeMenuLabel : openMenuLabel}
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
             >
@@ -256,9 +293,9 @@ export default function AiHeader() {
           </div>
 
           {/* Nav items en display bold */}
-          <nav aria-label="Menu mobile">
+          <nav aria-label={mobileNavAria}>
             <ul>
-              {NAV_ITEMS.map((item, i) => {
+              {navItems.map((item, i) => {
                 const isActive = pathname === item.href;
                 return (
                   <li key={item.href}>
@@ -314,11 +351,11 @@ export default function AiHeader() {
           {/* CTAs */}
           <div className="mt-10 space-y-3">
             <Link
-              href="/ai/deposer"
+              href={ctaHref}
               className="flex items-center justify-center h-12 px-6 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
               style={{ boxShadow: "var(--ai-shadow-sm)" }}
             >
-              Deposer un projet
+              {ctaLabel}
               <svg
                 className="ml-2 w-4 h-4"
                 viewBox="0 0 24 24"
@@ -335,20 +372,21 @@ export default function AiHeader() {
               </svg>
             </Link>
             <Link
-              href="/ai/connexion"
+              href={loginHref}
               className="flex items-center justify-center h-12 px-6 text-[14px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors"
             >
-              Connexion / Inscription
+              {loginSignupLabel}
             </Link>
           </div>
 
           {/* Footer mobile menu */}
           <div className="mt-12 pt-8 border-t border-[var(--ai-border-subtle)]">
             <div className="flex items-center justify-between mb-6">
-              <button
-                type="button"
+              <Link
+                href={langHref}
                 className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors"
-                aria-label="Changer de langue"
+                aria-label={langAria}
+                hrefLang={isEn ? "fr" : "en"}
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -376,14 +414,14 @@ export default function AiHeader() {
                     strokeLinecap="round"
                   />
                 </svg>
-                FR · Francais
-              </button>
+                {isEn ? en.langSwitch.toFr : "EN · English"}
+              </Link>
             </div>
             <Link
               href="/"
               className="block text-[12px] text-[var(--ai-text-tertiary)] hover:text-[var(--ai-text)] transition-colors"
             >
-              Vous cherchez un artisan BTP ?{" "}
+              {btpQuestion}{" "}
               <span className="underline decoration-[var(--ai-border)] underline-offset-2 font-medium">
                 workwave.fr
               </span>

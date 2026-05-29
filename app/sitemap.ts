@@ -33,6 +33,7 @@ const SUPABASE_PAGE_SIZE = 5000;
 // 2    : cat x ville
 // 3    : specialites
 // 4    : Workwave AI (/ai/* — landing + categories + skills + villes + dept)
+// 5    : Workwave AI EN (/en/ai/* — landing + skill x city internationaux, Phase C)
 // 100+N : pros batch N (toutes verticales, format /artisan/[slug])
 // 200+N : pros tech batch N (format /ai/freelance/[slug])
 const SITEMAP_STATIC = 0;
@@ -40,6 +41,7 @@ const SITEMAP_CAT_DEPT = 1;
 const SITEMAP_CAT_CITY = 2;
 const SITEMAP_SPECIALTY = 3;
 const SITEMAP_AI = 4;
+const SITEMAP_AI_EN = 5;
 const SITEMAP_PROS_OFFSET = 100;
 const SITEMAP_AI_PROS_OFFSET = 200;
 
@@ -95,6 +97,7 @@ export async function generateSitemaps() {
     { id: SITEMAP_CAT_CITY },
     { id: SITEMAP_SPECIALTY },
     { id: SITEMAP_AI },
+    { id: SITEMAP_AI_EN },
   ];
   for (let i = 0; i < proSitemapsCount; i++) {
     sitemaps.push({ id: SITEMAP_PROS_OFFSET + i });
@@ -119,6 +122,7 @@ export default async function sitemap(props: {
   if (numId === SITEMAP_CAT_CITY) return buildCategoryCityUrls();
   if (numId === SITEMAP_SPECIALTY) return buildSpecialtyUrls();
   if (numId === SITEMAP_AI) return buildAiUrls();
+  if (numId === SITEMAP_AI_EN) return buildAiEnUrls();
   // 200+N : pros tech au format /ai/freelance/[slug]
   if (numId >= SITEMAP_AI_PROS_OFFSET)
     return buildAiProsUrls(numId - SITEMAP_AI_PROS_OFFSET);
@@ -249,6 +253,23 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     ...aiBarometerSkills,
     ...aiCategoryCity,
     ...aiCategoryDept,
+  ];
+}
+
+// ============================================================================
+// 5. Workwave AI EN : /en/ai/* (Phase B = landing ; Phase C ajoutera les
+//    pages skill x ville internationales : Dubai, London, Berlin...).
+//    BTP reste 100% FR : aucune URL BTP ici.
+// ============================================================================
+async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+  return [
+    {
+      url: `${BASE_URL}/en/ai`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
   ];
 }
 

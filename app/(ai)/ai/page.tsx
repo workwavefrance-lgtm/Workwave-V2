@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
+import { aiAlternates } from "@/lib/i18n/alternates";
 
 /**
  * Landing /ai (Workwave AI) — style Pixel Rise (validee Willy 25/05).
@@ -28,7 +29,8 @@ export const metadata: Metadata = {
     "Workwave AI — La plateforme freelance de reference (tech, marketing, finance, design, juridique)",
   description:
     "Publiez votre projet et alertez en temps reel toute la communaute des freelances FR : tech (IA, dev, cloud, data), marketing & com, finance & compta, juridique, RH, design & creation, audiovisuel, redaction. Inscription gratuite, sans commission, sans engagement.",
-  alternates: { canonical: `${SITE_URL}/ai` },
+  // hreflang reciproque FR <-> EN (+ x-default => EN international).
+  alternates: aiAlternates({ fr: "/ai", en: "/en/ai", current: "fr" }),
   openGraph: {
     title: "Workwave AI — La plateforme freelance de reference",
     description:
