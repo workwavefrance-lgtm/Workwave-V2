@@ -163,7 +163,7 @@ export default async function SkillCityPage({
             {city.blurb} Post your project for free — our AI alerts matching freelance {skill.noun} and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
+            <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
               Post a project — it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
@@ -276,7 +276,7 @@ export default async function SkillCityPage({
             Post your project for free and get matched in 24 hours. 0% commission.
           </p>
           <div className="mt-8">
-            <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
+            <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
               Post a project — it&rsquo;s free
             </Link>
           </div>

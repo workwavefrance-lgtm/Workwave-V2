@@ -223,7 +223,7 @@ export default function AiEnHomePage() {
 
           <div className="mt-9 flex flex-col sm:flex-row gap-3">
             <Link
-              href="/ai/deposer"
+              href="/en/ai/deposer"
               className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
               style={{ boxShadow: "var(--ai-shadow-sm)" }}
             >
@@ -433,7 +433,7 @@ export default function AiEnHomePage() {
             Post your project for free. Get matched with the right talent across Europe, the Gulf and beyond in 24 hours.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
+            <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
               Post a project — it&rsquo;s free
             </Link>
             <Link href="/ai/inscription" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">

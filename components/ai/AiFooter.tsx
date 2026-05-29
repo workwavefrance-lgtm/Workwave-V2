@@ -45,6 +45,7 @@ export default function AiFooter() {
         howItWorksHref: "/en/ai#how-it-works",
         whyUsHref: "/en/ai#for-freelances",
         pricingHref: "/en/ai#pricing",
+        postProjectHref: "/en/ai/deposer",
       }
     : {
         tagline:
@@ -70,6 +71,7 @@ export default function AiFooter() {
         howItWorksHref: "/ai#methode",
         whyUsHref: "/ai/pour-les-freelances",
         pricingHref: "/ai/tarifs",
+        postProjectHref: "/ai/deposer",
       };
 
   return (
@@ -107,7 +109,7 @@ export default function AiFooter() {
             </p>
             <ul className="space-y-2 text-[13px] text-[var(--ai-text-secondary)]">
               <li>
-                <Link href="/ai/deposer" className="hover:text-[var(--ai-text)] transition-colors">
+                <Link href={t.postProjectHref} className="hover:text-[var(--ai-text)] transition-colors">
                   {t.postProject}
                 </Link>
               </li>

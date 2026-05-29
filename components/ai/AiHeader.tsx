@@ -81,7 +81,7 @@ export default function AiHeader() {
   const mobileNavAria = isEn ? en.nav.mobileNavAria : "Menu mobile";
   const openMenuLabel = isEn ? en.nav.openMenu : "Ouvrir le menu";
   const closeMenuLabel = isEn ? en.nav.closeMenu : "Fermer le menu";
-  const ctaHref = "/ai/deposer";
+  const ctaHref = isEn ? "/en/ai/deposer" : "/ai/deposer";
   const ctaLabel = isEn ? en.nav.postProject : "Deposer un projet";
   const loginHref = "/ai/connexion";
   const loginLabel = isEn ? en.nav.login : "Connexion";

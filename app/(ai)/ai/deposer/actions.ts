@@ -71,13 +71,19 @@ function getServiceClient() {
 }
 
 export async function submitTechProject(formData: FormData): Promise<void> {
+  // Locale (FR par defaut) : pilote les redirections vers /ai/deposer (FR)
+  // ou /en/ai/deposer (EN). Le reste du flow (qualif, broadcast, mail admin)
+  // est identique. Champ cache name="locale" pose par le form EN.
+  const locale = String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+  const base = locale === "en" ? "/en/ai/deposer" : "/ai/deposer";
+
   // ─── 0. Honeypot anti-bot ──────────────────────────────────────────────
   // Champ hidden visible uniquement aux bots. S'il est rempli, on simule
   // un succes pour ne pas alerter le bot, mais on ignore la soumission.
   const honeypot = String(formData.get("website") || "").trim();
   if (honeypot.length > 0) {
     // Simuler succes pour ne pas signaler au bot qu'il a ete detecte
-    redirect("/ai/deposer/succes?id=0");
+    redirect(`${base}/succes?id=0`);
   }
 
   // ─── 1. Extract + truncate defensif ────────────────────────────────────
@@ -107,17 +113,17 @@ export async function submitTechProject(formData: FormData): Promise<void> {
     !contactName ||
     !contactEmail
   ) {
-    redirect("/ai/deposer?error=missing_fields");
+    redirect(`${base}?error=missing_fields`);
   }
 
   // Validation format email (defensif si bot bypass le type="email" HTML)
   if (!isValidEmail(contactEmail)) {
-    redirect("/ai/deposer?error=invalid_email");
+    redirect(`${base}?error=invalid_email`);
   }
 
   const categorySlug = CATEGORY_SLUG_MAP[categoryFormValue];
   if (!categorySlug) {
-    redirect("/ai/deposer?error=invalid_category");
+    redirect(`${base}?error=invalid_category`);
   }
 
   const sb = getServiceClient();
@@ -131,7 +137,7 @@ export async function submitTechProject(formData: FormData): Promise<void> {
     .maybeSingle();
 
   if (!category) {
-    redirect("/ai/deposer?error=category_not_found");
+    redirect(`${base}?error=category_not_found`);
   }
 
   // ─── 3. Qualifier le brief via Claude ──────────────────────────────────
@@ -206,7 +212,7 @@ export async function submitTechProject(formData: FormData): Promise<void> {
 
   if (insertErr || !project) {
     console.error("[submitTechProject] insert project error:", insertErr);
-    redirect("/ai/deposer?error=insert_failed");
+    redirect(`${base}?error=insert_failed`);
   }
 
   // ─── 6. Broadcast a TOUS les freelances tech (Phase 11) ────────────────
@@ -259,5 +265,5 @@ export async function submitTechProject(formData: FormData): Promise<void> {
   });
 
   // ─── 8. Redirect succes ────────────────────────────────────────────────
-  redirect(`/ai/deposer/succes?id=${project.id}`);
+  redirect(`${base}/succes?id=${project.id}`);
 }
