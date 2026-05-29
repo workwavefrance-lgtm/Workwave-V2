@@ -636,27 +636,30 @@ export default function AiHomePage() {
                 </div>
               </Link>
 
-              {/* Secondary link */}
-              <Link
-                href="/ai/freelances"
-                className="inline-flex items-center gap-1.5 mt-5 text-[14px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors duration-150"
-              >
-                Ou voir les freelances disponibles
-                <svg
-                  className="w-3.5 h-3.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
+              {/* Liens secondaires : 2 audiences distinctes. Le CTA freelance
+                  (recrutement) est rendu visible des le hero — avant, un
+                  freelance arrivant sur /ai ne voyait QUE le message client. */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-3 mt-5">
+                <Link
+                  href="/ai/freelances"
+                  className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[var(--ai-text-secondary)] hover:text-[var(--ai-text)] transition-colors duration-150"
                 >
-                  <path
-                    d="M7 17L17 7M17 7H9M17 7V15"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
+                  Voir les freelances disponibles
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M7 17L17 7M17 7H9M17 7V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+                <span className="hidden sm:inline text-[var(--ai-border-strong)]">·</span>
+                <Link
+                  href="/ai/pour-les-freelances"
+                  className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-[var(--ai-accent)] hover:underline transition-colors duration-150"
+                >
+                  Vous êtes freelance&nbsp;? Créez votre profil gratuit
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </div>
             </div>
 
             {/* Stat block droite */}

@@ -168,10 +168,11 @@ export default function PourLesFreelancesPage() {
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed mb-10">
-              Inscription gratuite. A chaque nouveau projet tech publie sur
-              Workwave, vous etes notifie par email. Filtrez dans le dashboard
-              par savoir-faire, repondez aux projets qui vous interessent.
-              29,90€/mois pour repondre, sans credit, sans commission.
+              <strong className="text-[var(--ai-text)]">Profil et alertes 100&nbsp;% gratuits</strong> : à chaque
+              nouveau projet de votre domaine, vous êtes notifié par email et le voyez
+              dans votre dashboard. <strong className="text-[var(--ai-text)]">L&apos;abonnement
+              29,90&nbsp;€/mois n&apos;est requis que pour répondre</strong> (voir les coordonnées
+              du client et le contacter). Sans crédit, sans commission, résiliable en 1 clic.
             </p>
 
             {/* CTA bar composite — meme pattern que /ai (landing) */}
@@ -193,8 +194,7 @@ export default function PourLesFreelancesPage() {
                   <div className="bg-[var(--ai-accent)] rounded-[1px]" />
                 </div>
                 <span className="text-[14px] sm:text-[15px] text-[var(--ai-text-secondary)] truncate">
-                  Creez votre profil tech en 5 minutes
-                  <span className="hidden sm:inline">...</span>
+                  Profil gratuit en 4 étapes — 5 minutes
                 </span>
               </div>
 
