@@ -318,26 +318,36 @@ export default async function BarometreTjmHubPage() {
                   }}
                 />
                 <div className="relative z-10">
+                  {/* CTA freelance-first : le barometre TJM est consulte a ~95%
+                      par des freelances qui cherchent combien facturer. On leur
+                      propose donc de recevoir des missions, pas de deposer un
+                      projet (qui est pour les clients). Acquisition freelance #1. */}
                   <p className="text-[10px] uppercase font-semibold text-[var(--ai-accent)] mb-3" style={{ letterSpacing: "0.2em" }}>
-                    ● Trouvez votre freelance
+                    ● Vous êtes freelance ?
                   </p>
                   <h3 className="font-black uppercase mb-4" style={{ fontSize: "clamp(24px, 3.5vw, 32px)", lineHeight: 1, letterSpacing: "-0.04em" }}>
-                    Le bon profil
+                    Recevez des missions
                     <br />
-                    <span className="text-[var(--ai-accent)]">au bon prix.</span>
+                    <span className="text-[var(--ai-accent)]">à votre TJM.</span>
                   </h3>
                   <p className="text-sm text-white/70 leading-relaxed mb-6">
-                    Decrivez votre projet, on alerte en temps reel toute la communaute des freelances tech
-                    a votre budget. Gratuit, sans engagement.
+                    Créez votre profil gratuit et recevez par email les projets qui matchent
+                    votre stack et votre tarif. Sans commission, sans engagement.
                   </p>
                   <Link
-                    href="/ai/deposer"
+                    href="/ai/pour-les-freelances"
                     className="inline-flex items-center justify-center w-full h-12 px-6 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
                   >
-                    Deposer un projet
+                    Créer mon profil gratuit
                     <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
+                  </Link>
+                  <Link
+                    href="/ai/deposer"
+                    className="block text-center mt-3 text-[12px] text-white/50 hover:text-white/80 transition-colors"
+                  >
+                    Vous cherchez un freelance ? Déposer un projet →
                   </Link>
                 </div>
               </div>

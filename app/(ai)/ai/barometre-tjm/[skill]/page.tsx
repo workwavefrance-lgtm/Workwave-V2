@@ -285,6 +285,31 @@ export default async function BarometreSkillPage({ params }: Props) {
                 ))}
               </ul>
 
+              {/* CTA freelance : conversion #1 du barometre. Le freelance qui
+                  consulte le TJM de son stack est une cible chaude pour
+                  l'inscription. */}
+              <div className="bg-[var(--ai-text)] text-white rounded-2xl p-7 mb-6">
+                <p className="text-[10px] uppercase font-semibold text-[var(--ai-accent)] mb-2" style={{ letterSpacing: "0.2em" }}>
+                  ● Vous êtes freelance ?
+                </p>
+                <h3 className="font-black uppercase mb-3" style={{ fontSize: "clamp(20px, 3vw, 26px)", lineHeight: 1.05, letterSpacing: "-0.03em" }}>
+                  Recevez des missions à ce TJM
+                </h3>
+                <p className="text-[13px] text-white/70 leading-relaxed mb-5">
+                  Créez votre profil gratuit et recevez par email les projets qui matchent
+                  votre stack. Sans commission, sans engagement.
+                </p>
+                <Link
+                  href="/ai/pour-les-freelances"
+                  className="inline-flex items-center justify-center w-full h-11 px-5 text-[14px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
+                >
+                  Créer mon profil gratuit
+                  <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </div>
+
               <Link href="/ai/barometre-tjm" className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--ai-text)] hover:text-[var(--ai-accent)]">
                 Voir tous les skills tech →
               </Link>
