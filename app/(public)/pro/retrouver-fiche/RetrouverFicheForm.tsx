@@ -105,23 +105,27 @@ export default function RetrouverFicheForm() {
         )}
       </button>
 
-      {/* Alternative : creer un compte si pas de fiche existante */}
+      {/* Alternative : creer une fiche si pas dans notre base */}
       <div className="pt-6 border-t border-[var(--border-color)]">
         <p className="text-sm text-[var(--text-secondary)] mb-3">
-          Pas de fiche existante ? Créez-en une :
+          Pas encore de fiche chez nous ? Créez-la en 1 minute :
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Link
-            href="/pro"
-            className="flex-1 text-center px-4 py-2.5 rounded-full border border-[var(--border-color)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
+            href={
+              isComplete
+                ? `/pro/creer-fiche?siret=${siret.replace(/\D/g, "")}`
+                : "/pro/creer-fiche"
+            }
+            className="flex-1 text-center px-4 py-2.5 rounded-full bg-[var(--accent)] text-white text-sm font-semibold hover:bg-[var(--accent-hover)] transition-colors"
           >
-            Compte BTP / Artisan
+            Créer ma fiche BTP
           </Link>
           <Link
             href="/ai/inscription"
             className="flex-1 text-center px-4 py-2.5 rounded-full border border-[var(--border-color)] text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
           >
-            Compte Workwave AI
+            Freelance tech (Workwave AI)
           </Link>
         </div>
       </div>

@@ -35,6 +35,9 @@ export default function HeroSiretLookup() {
 
   const digitsCount = siret.replace(/\D/g, "").length;
   const isComplete = digitsCount === 14;
+  const createHref = isComplete
+    ? `/pro/creer-fiche?siret=${siret.replace(/\D/g, "")}`
+    : "/pro/creer-fiche";
 
   return (
     <div className="max-w-xl mx-auto">
@@ -128,9 +131,14 @@ export default function HeroSiretLookup() {
         </p>
       </form>
 
-      {/* Liens secondaires : on garde uniquement "Deja inscrit" cote BTP.
-          Le lien AI est volontairement retire (page /pro = vertical BTP). */}
-      <div className="flex items-center justify-center mt-6 text-sm text-[var(--text-tertiary)]">
+      {/* Liens secondaires : créer une fiche (pro hors-base) + connexion. */}
+      <div className="flex flex-col items-center gap-2.5 mt-6 text-sm">
+        <Link
+          href={createHref}
+          className="text-[var(--accent)] font-semibold hover:underline underline-offset-4"
+        >
+          Pas encore de fiche ? Créez-la gratuitement →
+        </Link>
         <Link
           href="/pro/connexion"
           className="text-[var(--text-secondary)] hover:text-[var(--accent)] underline decoration-[var(--border-color)] hover:decoration-[var(--accent)] underline-offset-4 transition-colors duration-250"
