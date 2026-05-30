@@ -11,12 +11,10 @@ import { SPECIALTIES } from "@/lib/specialties";
 import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
-import { INTL_CITIES } from "@/lib/data/intl-cities";
 import { FR_CITIES } from "@/lib/data/intl-fr-cities";
-import { visaGuideSlugs } from "@/lib/data/freelance-visa";
-// Le contenu EN international est servi sur le gTLD workwaveai.co (cf.
-// next.config.ts + lib/i18n/alternates.ts). Le sitemap EN liste donc des URLs .co.
-const AI_EN_BASE = "https://www.workwaveai.co";
+// NB : le contenu EN international (/en/ai/*, gTLD workwaveai.co) n'est PLUS
+// dans cet index. Il a son propre sitemap dedie + stable :
+// app/sitemap-ai-en.xml/route.ts (evite de polluer l'index .fr avec des URLs .co).
 
 // Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
 // donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
@@ -40,15 +38,17 @@ const SUPABASE_PAGE_SIZE = 5000;
 // 2    : cat x ville
 // 3    : specialites
 // 4    : Workwave AI (/ai/* — landing + categories + skills + villes + dept)
-// 5    : Workwave AI EN (/en/ai/* — landing + skill x city internationaux, Phase C)
 // 100+N : pros batch N (toutes verticales, format /artisan/[slug])
 // 200+N : pros tech batch N (format /ai/freelance/[slug])
+//
+// L'EN international (/en/ai/*) est volontairement HORS de cet index (sitemap
+// dedie .co : app/sitemap-ai-en.xml/route.ts) pour ne pas mettre d'URLs .co
+// dans la propriete GSC workwave.fr (cross-domaine).
 const SITEMAP_STATIC = 0;
 const SITEMAP_CAT_DEPT = 1;
 const SITEMAP_CAT_CITY = 2;
 const SITEMAP_SPECIALTY = 3;
 const SITEMAP_AI = 4;
-const SITEMAP_AI_EN = 5;
 const SITEMAP_PROS_OFFSET = 100;
 const SITEMAP_AI_PROS_OFFSET = 200;
 
@@ -104,7 +104,6 @@ export async function generateSitemaps() {
     { id: SITEMAP_CAT_CITY },
     { id: SITEMAP_SPECIALTY },
     { id: SITEMAP_AI },
-    { id: SITEMAP_AI_EN },
   ];
   for (let i = 0; i < proSitemapsCount; i++) {
     sitemaps.push({ id: SITEMAP_PROS_OFFSET + i });
@@ -129,7 +128,6 @@ export default async function sitemap(props: {
   if (numId === SITEMAP_CAT_CITY) return buildCategoryCityUrls();
   if (numId === SITEMAP_SPECIALTY) return buildSpecialtyUrls();
   if (numId === SITEMAP_AI) return buildAiUrls();
-  if (numId === SITEMAP_AI_EN) return buildAiEnUrls();
   // 200+N : pros tech au format /ai/freelance/[slug]
   if (numId >= SITEMAP_AI_PROS_OFFSET)
     return buildAiProsUrls(numId - SITEMAP_AI_PROS_OFFSET);
@@ -273,57 +271,6 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     ...aiCategoryDept,
     ...aiMonde,
   ];
-}
-
-// ============================================================================
-// 5. Workwave AI EN : /en/ai/* (Phase B = landing ; Phase C ajoutera les
-//    pages skill x ville internationales : Dubai, London, Berlin...).
-//    BTP reste 100% FR : aucune URL BTP ici.
-// ============================================================================
-async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-  const urls: MetadataRoute.Sitemap = [
-    {
-      url: `${AI_EN_BASE}/en/ai`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-  ];
-  // Hubs /en/ai/[skill] + pages programmatiques /en/ai/[skill]/[city].
-  // Genere depuis les data files statiques (DB-free => sitemap rapide).
-  for (const skill of INTL_SKILLS) {
-    urls.push({
-      url: `${AI_EN_BASE}/en/ai/${skill.slug}`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    });
-    for (const city of INTL_CITIES) {
-      urls.push({
-        url: `${AI_EN_BASE}/en/ai/${skill.slug}/${city.slug}`,
-        lastModified: now,
-        changeFrequency: "weekly",
-        priority: 0.7,
-      });
-    }
-  }
-  // Guides visa/permis freelance (contenu sourcé, hub + par pays).
-  urls.push({
-    url: `${AI_EN_BASE}/en/ai/freelance-visa`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.7,
-  });
-  for (const slug of visaGuideSlugs()) {
-    urls.push({
-      url: `${AI_EN_BASE}/en/ai/freelance-visa/${slug}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.65,
-    });
-  }
-  return urls;
 }
 
 // ============================================================================

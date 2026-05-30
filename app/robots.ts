@@ -18,8 +18,15 @@ export default function robots(): MetadataRoute.Robots {
         "/artisan/*/supprimer",
       ],
     },
-    // sitemap-index.xml liste les 10 sub-sitemaps generes par app/sitemap.ts.
-    // Une seule URL a soumettre dans Google Search Console.
-    sitemap: `${BASE_URL}/sitemap-index.xml`,
+    // Deux sitemaps declares :
+    //  - sitemap-index.xml : contenu FR/BTP (workwave.fr) -> a soumettre dans
+    //    la propriete GSC workwave.fr.
+    //  - sitemap-ai-en.xml : contenu EN international (workwaveai.co) -> a
+    //    soumettre dans la propriete GSC workwaveai.co. Sitemap dedie et stable
+    //    (cf. app/sitemap-ai-en.xml/route.ts), hors de l'index .fr.
+    sitemap: [
+      `${BASE_URL}/sitemap-index.xml`,
+      "https://www.workwaveai.co/sitemap-ai-en.xml",
+    ],
   };
 }
