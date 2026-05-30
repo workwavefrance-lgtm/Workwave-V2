@@ -29,17 +29,26 @@ function abs(path: string): string {
   return `${BASE_URL}${path}`;
 }
 
+// Le contenu EN international est hébergé sur le gTLD workwaveai.co (cf.
+// next.config.ts : workwave.fr/en/ai/* redirige 301 vers ce domaine). Donc le
+// canonical + hreflang des pages EN pointent sur le .co, pas sur le .fr
+// (un gTLD ranke à l'international, un .fr est géo-ciblé France).
+const AI_EN_BASE = "https://www.workwaveai.co";
+function absEn(path: string): string {
+  return `${AI_EN_BASE}${path}`;
+}
+
 export function aiAlternates({
   fr,
   en,
   current,
 }: AlternatesInput): NonNullable<Metadata["alternates"]> {
   return {
-    canonical: current === "en" ? abs(en) : abs(fr),
+    canonical: current === "en" ? absEn(en) : abs(fr),
     languages: {
       "fr-FR": abs(fr),
-      en: abs(en),
-      "x-default": abs(en),
+      en: absEn(en),
+      "x-default": absEn(en),
     },
   };
 }
@@ -52,10 +61,10 @@ export function aiAlternatesEnOnly(
   enPath: string
 ): NonNullable<Metadata["alternates"]> {
   return {
-    canonical: abs(enPath),
+    canonical: absEn(enPath),
     languages: {
-      en: abs(enPath),
-      "x-default": abs(enPath),
+      en: absEn(enPath),
+      "x-default": absEn(enPath),
     },
   };
 }

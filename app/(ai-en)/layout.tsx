@@ -19,7 +19,11 @@ import AiFooter from "@/components/ai/AiFooter";
  * automatiquement en anglais.
  */
 
-const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
+// Ce route group sert le contenu EN international, canonicalisé sur le gTLD
+// workwaveai.co (cf. lib/i18n/alternates.ts + next.config.ts). Le metadataBase
+// pointe donc sur .co : toute URL relative (og:image future, etc.) résout sur
+// le bon domaine, et reste cohérente avec les canonical/hreflang des pages EN.
+const SITE_URL = "https://www.workwaveai.co";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

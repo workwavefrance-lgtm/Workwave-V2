@@ -28,7 +28,7 @@ import {
  * affichées comme INDICATIVES (garde-fou : pas de fausse précision locale).
  */
 
-const SITE_URL = "https://workwave.fr";
+const SITE_URL = "https://www.workwaveai.co";
 export const revalidate = 21600;
 
 type Params = { skill: string; city: string };

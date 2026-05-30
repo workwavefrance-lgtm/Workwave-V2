@@ -14,6 +14,9 @@ import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
 import { FR_CITIES } from "@/lib/data/intl-fr-cities";
 import { visaGuideSlugs } from "@/lib/data/freelance-visa";
+// Le contenu EN international est servi sur le gTLD workwaveai.co (cf.
+// next.config.ts + lib/i18n/alternates.ts). Le sitemap EN liste donc des URLs .co.
+const AI_EN_BASE = "https://www.workwaveai.co";
 
 // Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
 // donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
@@ -281,7 +284,7 @@ async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const urls: MetadataRoute.Sitemap = [
     {
-      url: `${BASE_URL}/en/ai`,
+      url: `${AI_EN_BASE}/en/ai`,
       lastModified: now,
       changeFrequency: "daily",
       priority: 0.9,
@@ -291,14 +294,14 @@ async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
   // Genere depuis les data files statiques (DB-free => sitemap rapide).
   for (const skill of INTL_SKILLS) {
     urls.push({
-      url: `${BASE_URL}/en/ai/${skill.slug}`,
+      url: `${AI_EN_BASE}/en/ai/${skill.slug}`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     });
     for (const city of INTL_CITIES) {
       urls.push({
-        url: `${BASE_URL}/en/ai/${skill.slug}/${city.slug}`,
+        url: `${AI_EN_BASE}/en/ai/${skill.slug}/${city.slug}`,
         lastModified: now,
         changeFrequency: "weekly",
         priority: 0.7,
@@ -307,14 +310,14 @@ async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
   }
   // Guides visa/permis freelance (contenu sourcé, hub + par pays).
   urls.push({
-    url: `${BASE_URL}/en/ai/freelance-visa`,
+    url: `${AI_EN_BASE}/en/ai/freelance-visa`,
     lastModified: now,
     changeFrequency: "monthly",
     priority: 0.7,
   });
   for (const slug of visaGuideSlugs()) {
     urls.push({
-      url: `${BASE_URL}/en/ai/freelance-visa/${slug}`,
+      url: `${AI_EN_BASE}/en/ai/freelance-visa/${slug}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.65,

@@ -15,7 +15,7 @@ import { INTL_CITIES } from "@/lib/data/intl-cities";
  * ISR 24h. generateStaticParams sur les pays qui ont un guide fiable.
  */
 
-const SITE_URL = "https://workwave.fr";
+const SITE_URL = "https://www.workwaveai.co";
 export const revalidate = 86400;
 
 type Params = { country: string };

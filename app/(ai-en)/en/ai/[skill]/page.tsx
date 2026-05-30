@@ -15,7 +15,7 @@ import { INTL_CITIES } from "@/lib/data/intl-cities";
  * ISR 6h, pas de generateStaticParams (build léger).
  */
 
-const SITE_URL = "https://workwave.fr";
+const SITE_URL = "https://www.workwaveai.co";
 export const revalidate = 21600;
 
 type Params = { skill: string };

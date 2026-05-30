@@ -24,29 +24,44 @@ const nextConfig: NextConfig = {
       // Pattern `has: [{ type: 'host', value: 'workwaveai.co' }]` matche
       // le header Host de la requete. Le destination utilise :path* pour
       // preserver l'eventuel sub-path.
+      // ─── Workwave AI international : workwaveai.co SERT le contenu EN ──────
+      // Le .co (gTLD) heberge le contenu anglais international (/en/ai/*). Un
+      // gTLD ranke a l'international, contrairement au .fr (geo-cible France).
+      // Le contenu BTP/FR servi aussi sur .co garde son canonical sur .fr
+      // (metadataBase=workwave.fr) => pas de duplicate. Seules les pages EN
+      // ont leur canonical sur .co (cf. lib/i18n/alternates.ts).
+      //
+      // 1. workwave.fr/en/ai/* -> 301 vers www.workwaveai.co/en/ai/* (consolide).
       {
-        source: "/:path*",
-        has: [{ type: "host", value: "workwaveai.co" }],
-        destination: "https://workwave.fr/ai/:path*",
+        source: "/en/ai",
+        has: [{ type: "host", value: "workwave.fr" }],
+        destination: "https://www.workwaveai.co/en/ai",
         permanent: true,
       },
       {
-        source: "/:path*",
+        source: "/en/ai/:path*",
+        has: [{ type: "host", value: "workwave.fr" }],
+        destination: "https://www.workwaveai.co/en/ai/:path*",
+        permanent: true,
+      },
+      // 2. www.workwaveai.co/ -> /en/ai : la racine du .co = home AI EN.
+      {
+        source: "/",
         has: [{ type: "host", value: "www.workwaveai.co" }],
-        destination: "https://workwave.fr/ai/:path*",
+        destination: "/en/ai",
         permanent: true,
       },
-      // Variantes TLD au cas ou (.ai et .io achetes plus tard)
+      // 3. Vanity .io / .ai (inactifs) -> home EN du .co.
       {
         source: "/:path*",
         has: [{ type: "host", value: "workwaveai.io" }],
-        destination: "https://workwave.fr/ai/:path*",
+        destination: "https://www.workwaveai.co/en/ai",
         permanent: true,
       },
       {
         source: "/:path*",
         has: [{ type: "host", value: "workwave.ai" }],
-        destination: "https://workwave.fr/ai/:path*",
+        destination: "https://www.workwaveai.co/en/ai",
         permanent: true,
       },
 

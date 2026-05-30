@@ -11,7 +11,7 @@ import { visaGuideSlugs } from "@/lib/data/freelance-visa";
  * Liste les pays qui ont un guide sourcé. ISR 24h.
  */
 
-const SITE_URL = "https://workwave.fr";
+const SITE_URL = "https://www.workwaveai.co";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {

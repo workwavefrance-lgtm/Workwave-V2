@@ -16,7 +16,7 @@ import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
  * hreflang reciproque avec /ai via aiAlternates. FAQPage schema via AiFaqSection.
  */
 
-const SITE_URL = "https://workwave.fr";
+const SITE_URL = "https://www.workwaveai.co";
 
 export const metadata: Metadata = {
   title:
