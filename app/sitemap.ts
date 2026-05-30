@@ -12,6 +12,7 @@ import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
+import { visaGuideSlugs } from "@/lib/data/freelance-visa";
 
 // Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
 // donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
@@ -290,6 +291,21 @@ async function buildAiEnUrls(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       });
     }
+  }
+  // Guides visa/permis freelance (contenu sourcé, hub + par pays).
+  urls.push({
+    url: `${BASE_URL}/en/ai/freelance-visa`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  });
+  for (const slug of visaGuideSlugs()) {
+    urls.push({
+      url: `${BASE_URL}/en/ai/freelance-visa/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.65,
+    });
   }
   return urls;
 }
