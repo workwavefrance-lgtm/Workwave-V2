@@ -6,6 +6,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getStripeServer } from "@/lib/stripe/server";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { createAiCheckoutSession } from "@/lib/stripe/create-ai-checkout";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
@@ -22,6 +23,12 @@ function getServiceClient() {
  * vers Stripe Checkout (hosted page).
  */
 export async function startCheckout(formData: FormData): Promise<void> {
+  // Locale-aware redirects (champ cache name="locale" ; defaut "fr" => FR
+  // strictement inchange). NB : le dashboard EN est free-only et n'appelle
+  // PAS cette action ; on garde le pilotage locale par robustesse.
+  const locale: Locale =
+    String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+
   const plan = String(formData.get("plan") || "monthly") as "monthly" | "annual";
 
   // 1) Verifier auth
@@ -29,7 +36,7 @@ export async function startCheckout(formData: FormData): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user || !user.email) redirect("/ai/connexion");
+  if (!user || !user.email) redirect(localizeAiPath("/ai/connexion", locale));
 
   // 2) Recuperer pro tech
   const service = getServiceClient();
@@ -41,7 +48,7 @@ export async function startCheckout(formData: FormData): Promise<void> {
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   // 3) Creer la Checkout Session via helper centralise
   const result = await createAiCheckoutSession({
@@ -50,13 +57,13 @@ export async function startCheckout(formData: FormData): Promise<void> {
     name: pro.name || "",
     plan: plan === "annual" ? "annual" : "monthly",
     existingCustomerId: pro.stripe_customer_id,
-    successUrl: `${BASE_URL}/ai/dashboard/abonnement?activated=1`,
-    cancelUrl: `${BASE_URL}/ai/dashboard/abonnement?canceled=1`,
+    successUrl: `${BASE_URL}${localizeAiPath("/ai/dashboard/abonnement", locale)}?activated=1`,
+    cancelUrl: `${BASE_URL}${localizeAiPath("/ai/dashboard/abonnement", locale)}?canceled=1`,
   });
 
   if (!result.ok) {
     redirect(
-      `/ai/dashboard/abonnement?error=${
+      `${localizeAiPath("/ai/dashboard/abonnement", locale)}?error=${
         result.error === "stripe_not_configured"
           ? "stripe_not_configured"
           : "checkout_url_missing"
@@ -71,12 +78,18 @@ export async function startCheckout(formData: FormData): Promise<void> {
  * Server Action : ouvrir le Stripe Customer Portal (gestion carte, factures,
  * resiliation). Stripe gere entierement l'UI.
  */
-export async function openCustomerPortal(): Promise<void> {
+export async function openCustomerPortal(formData?: FormData): Promise<void> {
+  // Locale-aware redirects (champ cache name="locale" ; defaut "fr" => FR
+  // strictement inchange). formData optionnel : si l'action est appelee sans
+  // arg (cas FR historique <form action={openCustomerPortal}>), locale="fr".
+  const locale: Locale =
+    String(formData?.get("locale") || "fr") === "en" ? "en" : "fr";
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   const service = getServiceClient();
   const { data: pro } = await service
@@ -90,13 +103,13 @@ export async function openCustomerPortal(): Promise<void> {
     // Fix #17 : fallback vers Checkout au lieu de bloquer l'user.
     // Si BDD desynchro avec Stripe (pas de customer enregistre), on
     // propose d'activer Premium plutot que d'afficher une erreur.
-    redirect("/ai/dashboard/abonnement?error=no_subscription_yet");
+    redirect(localizeAiPath("/ai/dashboard/abonnement", locale) + "?error=no_subscription_yet");
   }
 
   const stripe = getStripeServer();
   const portalSession = await stripe.billingPortal.sessions.create({
     customer: pro.stripe_customer_id,
-    return_url: `${BASE_URL}/ai/dashboard/abonnement`,
+    return_url: `${BASE_URL}${localizeAiPath("/ai/dashboard/abonnement", locale)}`,
   });
 
   redirect(portalSession.url);

@@ -38,6 +38,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
 function getServiceClient() {
   return createServiceClient(
@@ -53,16 +54,23 @@ function getStripeClient(): Stripe | null {
 }
 
 export async function deleteAiAccount(formData: FormData): Promise<void> {
+  // Locale-aware redirects (champ cache name="locale" pose par la page EN ;
+  // defaut "fr" => comportement FR strictement inchange).
+  const locale: Locale =
+    String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
-  // Double confirmation : le user doit avoir tape "SUPPRIMER" exactement
+  // Double confirmation : le user doit avoir tape le mot de confirmation
+  // exactement. FR = "SUPPRIMER" (inchange). EN = "DELETE" accepte EN PLUS
+  // (additif, sans retirer SUPPRIMER) pour le dashboard /en/ai/dashboard.
   const confirm = String(formData.get("confirm") || "").trim();
-  if (confirm !== "SUPPRIMER") {
-    redirect("/ai/dashboard/parametres?error=confirm_required");
+  if (confirm !== "SUPPRIMER" && confirm !== "DELETE") {
+    redirect(localizeAiPath("/ai/dashboard/parametres", locale) + "?error=confirm_required");
   }
 
   const service = getServiceClient();
@@ -74,7 +82,7 @@ export async function deleteAiAccount(formData: FormData): Promise<void> {
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/dashboard/parametres?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/dashboard/parametres", locale) + "?error=no_pro");
 
   // 1) Annuler l'abonnement Stripe si actif (pas de remboursement, juste cancel
   //    immediat = la periode en cours est perdue mais on s'arrete la). Si on
@@ -144,6 +152,7 @@ export async function deleteAiAccount(formData: FormData): Promise<void> {
     }
   }
 
-  // 5) Redirect vers /ai avec un flag pour afficher un message confirmation
-  redirect("/ai?account_deleted=1");
+  // 5) Redirect vers /ai (ou /en/ai) avec un flag pour afficher un message
+  //    confirmation. localizeAiPath("/ai", "en") => "/en/ai".
+  redirect(localizeAiPath("/ai", locale) + "?account_deleted=1");
 }

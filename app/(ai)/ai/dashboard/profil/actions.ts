@@ -6,6 +6,16 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { sanitizeProfileUrl, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { PERSONA_COLORS, type PersonaColor } from "@/lib/ai/personalisation";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
+
+/**
+ * Lit la locale depuis le FormData (champ cache name="locale" pose par les
+ * pages EN). Defaut "fr" => toutes les redirections restent strictement
+ * identiques au comportement FR de prod (additif uniquement).
+ */
+function readLocale(formData?: FormData): Locale {
+  return String(formData?.get("locale") || "fr") === "en" ? "en" : "fr";
+}
 
 function getServiceClient() {
   return createServiceClient(
@@ -20,12 +30,13 @@ function getServiceClient() {
  * concernee (claimed_by_user_id == auth.uid AND category_id in tech).
  */
 export async function updateAiProfile(formData: FormData): Promise<void> {
+  const locale = readLocale(formData);
   // 1) Verifier auth
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   // 2) Recuperer pro tech de l'user (avec slug pour revalidatePath public)
   const service = getServiceClient();
@@ -38,7 +49,7 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
     .is("deleted_at", null)
     .maybeSingle();
 
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   // 3) Valider + sanitize les inputs
   // stripControlChars : enleve les caracteres de controle Unicode qui
@@ -72,7 +83,7 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
   // 4) Fix #18 : refuser si name vide (empechait l'effacement accidentel
   // mais sans feedback user). On rejette explicitement.
   if (!name) {
-    redirect("/ai/dashboard/profil?error=name_required");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=name_required");
   }
 
   // Phase 12 — personnalisation (avatar_color + theme_color)
@@ -117,7 +128,7 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
     revalidatePath(`/ai/freelance/${pro.slug}`);
   }
 
-  redirect("/ai/dashboard/profil?saved=1");
+  redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?saved=1");
 }
 
 // ============================================
@@ -150,12 +161,13 @@ function generateAvatarFileName(proId: number, originalName: string): string {
  *   - Revalidate /ai/freelance/{slug} (page publique seulement)
  */
 export async function uploadAiAvatar(formData: FormData): Promise<void> {
+  const locale = readLocale(formData);
   // 1) Auth
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   // 2) Recup pro
   const service = getServiceClient();
@@ -167,18 +179,18 @@ export async function uploadAiAvatar(formData: FormData): Promise<void> {
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   // 3) Recup fichier
   const file = formData.get("avatar") as File | null;
   if (!file || file.size === 0) {
-    redirect("/ai/dashboard/profil?error=avatar_no_file");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=avatar_no_file");
   }
   if (!ALLOWED_AVATAR_MIMES.includes(file.type)) {
-    redirect("/ai/dashboard/profil?error=avatar_invalid_type");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=avatar_invalid_type");
   }
   if (file.size > MAX_AVATAR_SIZE) {
-    redirect("/ai/dashboard/profil?error=avatar_too_large");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=avatar_too_large");
   }
 
   // 4) Upload Supabase Storage
@@ -188,7 +200,7 @@ export async function uploadAiAvatar(formData: FormData): Promise<void> {
     .upload(fileName, file, { contentType: file.type, upsert: false });
   if (uploadError) {
     console.error("[uploadAiAvatar] upload failed:", uploadError.message);
-    redirect("/ai/dashboard/profil?error=avatar_upload_failed");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=avatar_upload_failed");
   }
 
   const { data: urlData } = service.storage.from("pro-logos").getPublicUrl(fileName);
@@ -214,18 +226,19 @@ export async function uploadAiAvatar(formData: FormData): Promise<void> {
     revalidatePath(`/ai/freelance/${pro.slug}`);
   }
 
-  redirect("/ai/dashboard/profil?saved=1#avatar");
+  redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?saved=1#avatar");
 }
 
 /**
  * Supprime la photo de profil (revient aux initiales avec couleur).
  */
-export async function deleteAiAvatar(): Promise<void> {
+export async function deleteAiAvatar(formData?: FormData): Promise<void> {
+  const locale = readLocale(formData);
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   const service = getServiceClient();
   const { data: pro } = await service
@@ -236,7 +249,7 @@ export async function deleteAiAvatar(): Promise<void> {
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   if (pro.logo_url) {
     const oldPath = pro.logo_url.split("/pro-logos/")[1];
@@ -254,7 +267,7 @@ export async function deleteAiAvatar(): Promise<void> {
     revalidatePath(`/ai/freelance/${pro.slug}`);
   }
 
-  redirect("/ai/dashboard/profil?saved=1#avatar");
+  redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?saved=1#avatar");
 }
 
 // ============================================
@@ -278,12 +291,13 @@ function generatePhotoFileName(proId: number, originalName: string): string {
  * Stockage : bucket Supabase 'pro-photos' (partage avec BTP).
  */
 export async function addAiPortfolioPhoto(formData: FormData): Promise<void> {
+  const locale = readLocale(formData);
   // 1) Auth
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   // 2) Recup pro avec son tableau photos actuel
   const service = getServiceClient();
@@ -295,24 +309,24 @@ export async function addAiPortfolioPhoto(formData: FormData): Promise<void> {
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   // 3) Verifier la limite
   const currentPhotos: string[] = Array.isArray(pro.photos) ? pro.photos : [];
   if (currentPhotos.length >= MAX_PORTFOLIO_PHOTOS) {
-    redirect("/ai/dashboard/profil?error=portfolio_max#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=portfolio_max#portfolio");
   }
 
   // 4) Recup fichier
   const file = formData.get("photo") as File | null;
   if (!file || file.size === 0) {
-    redirect("/ai/dashboard/profil?error=photo_no_file#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=photo_no_file#portfolio");
   }
   if (!ALLOWED_PHOTO_MIMES.includes(file.type)) {
-    redirect("/ai/dashboard/profil?error=photo_invalid_type#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=photo_invalid_type#portfolio");
   }
   if (file.size > MAX_PHOTO_SIZE) {
-    redirect("/ai/dashboard/profil?error=photo_too_large#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=photo_too_large#portfolio");
   }
 
   // 5) Upload
@@ -322,7 +336,7 @@ export async function addAiPortfolioPhoto(formData: FormData): Promise<void> {
     .upload(fileName, file, { contentType: file.type, upsert: false });
   if (uploadError) {
     console.error("[addAiPortfolioPhoto] upload failed:", uploadError.message);
-    redirect("/ai/dashboard/profil?error=photo_upload_failed#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=photo_upload_failed#portfolio");
   }
 
   const { data: urlData } = service.storage.from("pro-photos").getPublicUrl(fileName);
@@ -339,23 +353,24 @@ export async function addAiPortfolioPhoto(formData: FormData): Promise<void> {
     revalidatePath(`/ai/freelance/${pro.slug}`);
   }
 
-  redirect("/ai/dashboard/profil?saved=1#portfolio");
+  redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?saved=1#portfolio");
 }
 
 /**
  * Supprime une photo du portfolio par son URL.
  */
 export async function deleteAiPortfolioPhoto(formData: FormData): Promise<void> {
+  const locale = readLocale(formData);
   const photoUrl = String(formData.get("photoUrl") || "").trim();
   if (!photoUrl) {
-    redirect("/ai/dashboard/profil?error=photo_missing#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=photo_missing#portfolio");
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   const service = getServiceClient();
   const { data: pro } = await service
@@ -366,12 +381,12 @@ export async function deleteAiPortfolioPhoto(formData: FormData): Promise<void> 
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   const currentPhotos: string[] = Array.isArray(pro.photos) ? pro.photos : [];
   // Verif que la photo appartient bien au pro (anti-CSRF/spoof)
   if (!currentPhotos.includes(photoUrl)) {
-    redirect("/ai/dashboard/profil?error=photo_not_yours#portfolio");
+    redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=photo_not_yours#portfolio");
   }
 
   // Supprimer du storage Supabase (best-effort, on continue meme si echec)
@@ -391,5 +406,5 @@ export async function deleteAiPortfolioPhoto(formData: FormData): Promise<void> 
     revalidatePath(`/ai/freelance/${pro.slug}`);
   }
 
-  redirect("/ai/dashboard/profil?saved=1#portfolio");
+  redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?saved=1#portfolio");
 }

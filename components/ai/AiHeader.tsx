@@ -68,8 +68,12 @@ export default function AiHeader() {
     setIsOpen(false);
   }, [pathname]);
 
-  // Hide sur le dashboard freelance — il a sa propre sidebar/header.
-  if (pathname.startsWith("/ai/dashboard")) return null;
+  // Hide sur le dashboard freelance (FR + EN) — il a sa propre sidebar/header.
+  if (
+    pathname.startsWith("/ai/dashboard") ||
+    pathname.startsWith("/en/ai/dashboard")
+  )
+    return null;
 
   // ─── Locale (deduite du pathname) ─────────────────────────────────────
   const isEn = pathname.startsWith("/en/ai");
@@ -83,7 +87,7 @@ export default function AiHeader() {
   const closeMenuLabel = isEn ? en.nav.closeMenu : "Fermer le menu";
   const ctaHref = isEn ? "/en/ai/deposer" : "/ai/deposer";
   const ctaLabel = isEn ? en.nav.postProject : "Deposer un projet";
-  const loginHref = "/ai/connexion";
+  const loginHref = isEn ? "/en/ai/connexion" : "/ai/connexion";
   const loginLabel = isEn ? en.nav.login : "Connexion";
   const loginSignupLabel = isEn ? en.nav.loginSignup : "Connexion / Inscription";
   // Switcher : on affiche/lie vers l'AUTRE langue.

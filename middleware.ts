@@ -32,7 +32,9 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isProRoute = pathname.startsWith("/pro/dashboard");
-  const isAiRoute = pathname.startsWith("/ai/dashboard");
+  const isAiRoute =
+    pathname.startsWith("/ai/dashboard") ||
+    pathname.startsWith("/en/ai/dashboard");
   const isAdminPage = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
   const isAdminApi = pathname.startsWith("/api/admin");
   const isAdminLogin = pathname === "/admin/login";
@@ -58,7 +60,9 @@ export async function middleware(request: NextRequest) {
   if (isAiRoute) {
     if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = "/ai/connexion";
+      url.pathname = pathname.startsWith("/en/ai/dashboard")
+        ? "/en/ai/connexion"
+        : "/ai/connexion";
       return NextResponse.redirect(url);
     }
     return supabaseResponse;
@@ -118,6 +122,7 @@ export const config = {
   matcher: [
     "/pro/dashboard/:path*",
     "/ai/dashboard/:path*",
+    "/en/ai/dashboard/:path*",
     "/admin/:path*",
     "/api/admin/:path*",
   ],

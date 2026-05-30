@@ -14,7 +14,11 @@ import { en } from "@/lib/i18n/en";
  */
 export default function AiFooter() {
   const pathname = usePathname();
-  if (pathname.startsWith("/ai/dashboard")) return null;
+  if (
+    pathname.startsWith("/ai/dashboard") ||
+    pathname.startsWith("/en/ai/dashboard")
+  )
+    return null;
 
   const year = new Date().getFullYear();
   const isEn = pathname.startsWith("/en/ai");
@@ -143,12 +147,12 @@ export default function AiFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/ai/inscription" className="hover:text-[var(--ai-text)] transition-colors">
+                <Link href={isEn ? "/en/ai/inscription" : "/ai/inscription"} className="hover:text-[var(--ai-text)] transition-colors">
                   {t.signup}
                 </Link>
               </li>
               <li>
-                <Link href="/ai/connexion" className="hover:text-[var(--ai-text)] transition-colors">
+                <Link href={isEn ? "/en/ai/connexion" : "/ai/connexion"} className="hover:text-[var(--ai-text)] transition-colors">
                   {t.login}
                 </Link>
               </li>

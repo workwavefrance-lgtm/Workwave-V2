@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
 function getServiceClient() {
   return createServiceClient(
@@ -13,11 +14,16 @@ function getServiceClient() {
 }
 
 export async function updateAiPreferences(formData: FormData): Promise<void> {
+  // Locale-aware redirects (champ cache name="locale" pose par la page EN ;
+  // defaut "fr" => comportement FR strictement inchange).
+  const locale: Locale =
+    String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/ai/connexion");
+  if (!user) redirect(localizeAiPath("/ai/connexion", locale));
 
   const service = getServiceClient();
   const { data: pro } = await service
@@ -28,7 +34,7 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
     .eq("is_active", true)
     .is("deleted_at", null)
     .maybeSingle();
-  if (!pro) redirect("/ai/connexion?error=no_pro");
+  if (!pro) redirect(localizeAiPath("/ai/connexion", locale) + "?error=no_pro");
 
   // Parse + validate
   const remoteRaw = String(formData.get("available_for_remote") || "");
@@ -46,11 +52,11 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
     if (isNaN(d.getTime())) {
       // Date format invalide (HTML5 date input devrait pas le permettre, mais
       // securisons)
-      redirect("/ai/dashboard/preferences?error=invalid_date");
+      redirect(localizeAiPath("/ai/dashboard/preferences", locale) + "?error=invalid_date");
     }
     if (d <= new Date()) {
       // Fix #11 : on retourne une erreur UI claire au lieu d'ignorer silent
-      redirect("/ai/dashboard/preferences?error=paused_until_past");
+      redirect(localizeAiPath("/ai/dashboard/preferences", locale) + "?error=paused_until_past");
     }
     pausedUntil = d.toISOString();
   }
@@ -68,5 +74,5 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
   // NOTE : pas de revalidatePath sur cette meme page (cf. lecon 28/04 CLAUDE.md).
   // Le redirect cause un re-fetch RSC propre, et les inputs uncontrolled prennent
   // les nouvelles valeurs depuis la BDD a l'arrivee sur la page.
-  redirect("/ai/dashboard/preferences?saved=1");
+  redirect(localizeAiPath("/ai/dashboard/preferences", locale) + "?saved=1");
 }
