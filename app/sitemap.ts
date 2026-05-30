@@ -12,6 +12,7 @@ import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
+import { FR_CITIES } from "@/lib/data/intl-fr-cities";
 import { visaGuideSlugs } from "@/lib/data/freelance-visa";
 
 // Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
@@ -250,12 +251,24 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
+  // /ai/monde/* — francophone international (hors France)
+  const aiMonde: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/ai/monde`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+  ];
+  for (const skill of INTL_SKILLS) {
+    aiMonde.push({ url: `${BASE_URL}/ai/monde/${skill.slug}`, lastModified: now, changeFrequency: "weekly", priority: 0.65 });
+    for (const c of FR_CITIES) {
+      aiMonde.push({ url: `${BASE_URL}/ai/monde/${skill.slug}/${c.slug}`, lastModified: now, changeFrequency: "weekly", priority: 0.6 });
+    }
+  }
+
   return [
     ...aiStatic,
     ...aiCategories,
     ...aiBarometerSkills,
     ...aiCategoryCity,
     ...aiCategoryDept,
+    ...aiMonde,
   ];
 }
 

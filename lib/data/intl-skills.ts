@@ -170,3 +170,24 @@ export function getIntlSkill(slug: string): IntlSkill | null {
 export function allIntlSkillSlugs(): string[] {
   return INTL_SKILLS.map((s) => s.slug);
 }
+
+/** Libellés français pour les pages francophones (/ai/monde/[skill]/[ville]). */
+export const SKILL_FR: Record<
+  string,
+  { label: string; noun: string; nounSingular: string }
+> = {
+  "web-development": { label: "Développement Web", noun: "développeurs web", nounSingular: "développeur web" },
+  "ai-engineering": { label: "Intelligence Artificielle", noun: "ingénieurs IA", nounSingular: "ingénieur IA" },
+  "cloud-devops": { label: "Cloud & DevOps", noun: "ingénieurs cloud & DevOps", nounSingular: "ingénieur cloud" },
+  "data-analytics": { label: "Data & Analytics", noun: "experts data", nounSingular: "data analyst" },
+  "product-design": { label: "Design Produit", noun: "designers produit", nounSingular: "designer produit" },
+  "no-code-automation": { label: "No-Code & Automatisation", noun: "experts no-code", nounSingular: "expert no-code" },
+  marketing: { label: "Marketing & Communication", noun: "experts marketing", nounSingular: "expert marketing" },
+  finance: { label: "Finance & Comptabilité", noun: "experts finance", nounSingular: "expert finance" },
+  legal: { label: "Juridique & Conseil", noun: "consultants juridiques", nounSingular: "consultant juridique" },
+  hr: { label: "RH & Recrutement", noun: "experts RH", nounSingular: "expert RH" },
+  "graphic-design": { label: "Design & Création", noun: "graphistes", nounSingular: "graphiste" },
+  copywriting: { label: "Rédaction & Copywriting", noun: "rédacteurs", nounSingular: "rédacteur" },
+  "video-production": { label: "Audiovisuel & Médias", noun: "monteurs & producteurs vidéo", nounSingular: "monteur vidéo" },
+  strategy: { label: "Stratégie & Management", noun: "consultants en stratégie", nounSingular: "consultant en stratégie" },
+};
