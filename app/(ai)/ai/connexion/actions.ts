@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { sendSigninCode } from "@/lib/ai/auth/signin-code";
 import { isValidEmail } from "@/lib/ai/helpers";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
 /**
  * Server Action /ai/connexion (Phase 8) :
@@ -23,12 +24,15 @@ import { isValidEmail } from "@/lib/ai/helpers";
  */
 
 export async function submitConnexion(formData: FormData): Promise<void> {
+  const locale: Locale =
+    String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+
   // Truncate defensif (anti FormData forge) + lowercase
   const email = String(formData.get("email") || "").trim().toLowerCase().slice(0, 200);
 
   // Regex stricte au lieu de juste check "@" (defense en profondeur)
   if (!isValidEmail(email)) {
-    redirect("/ai/connexion?error=invalid_email");
+    redirect(localizeAiPath("/ai/connexion", locale) + "?error=invalid_email");
   }
 
   // Recuperer IP + User-Agent pour rate limit + audit
@@ -41,23 +45,24 @@ export async function submitConnexion(formData: FormData): Promise<void> {
 
   const result = await sendSigninCode(email, ip || undefined, userAgent || undefined);
 
+  const verifierBase = localizeAiPath("/ai/connexion/verifier", locale);
   if (result.ok) {
     // Code envoye -> page saisie code
-    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}`);
+    redirect(`${verifierBase}?email=${encodeURIComponent(email)}`);
   }
 
   // Sinon : on redirige avec message generique. Pas de detail pour eviter
   // user enumeration. Le user voit "Si un compte existe, code envoye".
   if (result.reason === "rate_limited") {
-    redirect("/ai/connexion?error=rate_limited");
+    redirect(localizeAiPath("/ai/connexion", locale) + "?error=rate_limited");
   }
   if (result.reason === "no_account") {
     // SAME redirect que success : pas de user enumeration leak
-    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&maybe=1`);
+    redirect(`${verifierBase}?email=${encodeURIComponent(email)}&maybe=1`);
   }
 
   // Erreurs techniques (email_send_failed, user_update_failed) : on indique
   // un probleme technique sans details specifiques.
   console.error("[submitConnexion] technical error:", result.reason);
-  redirect("/ai/connexion?error=technical");
+  redirect(localizeAiPath("/ai/connexion", locale) + "?error=technical");
 }

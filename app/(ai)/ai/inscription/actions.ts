@@ -10,6 +10,7 @@ import {
 import { activateAiSignup } from "@/lib/ai/auth/activate-signup";
 import { isValidEmail } from "@/lib/ai/helpers";
 import { createAiCheckoutSession } from "@/lib/stripe/create-ai-checkout";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
@@ -84,11 +85,16 @@ function getServiceClient() {
 }
 
 export async function submitInscription(formData: FormData): Promise<void> {
+  // EN ou FR : pilote toutes les redirections (champ cache name="locale" pose
+  // par la page EN ; defaut "fr"). Meme pattern que submitTechProject (deposer).
+  const locale: Locale =
+    String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+
   // Honeypot anti-bot (champ visible aux bots, cache aux humains)
   const honeypot = String(formData.get("website") || "").trim();
   if (honeypot.length > 0) {
     // Simuler succes pour ne pas alerter le bot
-    redirect("/ai/inscription/succes?id=0&plan=free");
+    redirect(localizeAiPath("/ai/inscription/succes", locale) + "?id=0&plan=free");
   }
 
   // Validation + truncation defensive
@@ -115,16 +121,16 @@ export async function submitInscription(formData: FormData): Promise<void> {
   const cgu = formData.get("cgu") === "on";
 
   if (!firstName || !lastName || !email || !categoryForm || !cgu) {
-    redirect("/ai/inscription?error=missing_fields");
+    redirect(localizeAiPath("/ai/inscription", locale) + "?error=missing_fields");
   }
   // Validation format email (regex stricte, plus solide que juste "@")
   if (!isValidEmail(email)) {
-    redirect("/ai/inscription?error=invalid_email");
+    redirect(localizeAiPath("/ai/inscription", locale) + "?error=invalid_email");
   }
 
   const categorySlug = CATEGORY_SLUG_MAP[categoryForm];
   if (!categorySlug) {
-    redirect("/ai/inscription?error=invalid_category");
+    redirect(localizeAiPath("/ai/inscription", locale) + "?error=invalid_category");
   }
 
   const categoryName = CATEGORY_NAME_MAP[categorySlug] || categorySlug;
@@ -158,10 +164,13 @@ export async function submitInscription(formData: FormData): Promise<void> {
     // inscrit). On redirige vers /ai/connexion avec prefill plutot que
     // d'afficher une erreur generique.
     if (error?.code === "23505") {
-      redirect(`/ai/connexion?prefill=${encodeURIComponent(email)}`);
+      redirect(
+        localizeAiPath("/ai/connexion", locale) +
+          `?prefill=${encodeURIComponent(email)}`
+      );
     }
     console.error("[submitInscription] insert error:", error);
-    redirect("/ai/inscription?error=insert_failed");
+    redirect(localizeAiPath("/ai/inscription", locale) + "?error=insert_failed");
   }
 
   // Phase 8 : auto-activation du signup (cree auth user + row pros tech)
@@ -217,7 +226,7 @@ export async function submitInscription(formData: FormData): Promise<void> {
 
   // Send emails (await for reliability — lesson 24/05)
   await sendAiSignupAdminNotification(data);
-  await sendAiSignupWelcome(data);
+  await sendAiSignupWelcome(data, locale);
 
   // Phase 11+ : si plan='premium' et activation OK, on redirige directement
   // vers Stripe Checkout avec 14j trial. L'user saisit sa CB et accede au
@@ -243,5 +252,8 @@ export async function submitInscription(formData: FormData): Promise<void> {
     console.error("[submitInscription] Stripe checkout failed:", checkoutResult.error);
   }
 
-  redirect(`/ai/inscription/succes?id=${signup.id}&plan=${data.plan}`);
+  redirect(
+    localizeAiPath("/ai/inscription/succes", locale) +
+      `?id=${signup.id}&plan=${data.plan}`
+  );
 }

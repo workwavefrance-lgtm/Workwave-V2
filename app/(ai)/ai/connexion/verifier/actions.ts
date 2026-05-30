@@ -8,6 +8,7 @@ import {
   markSigninAttemptFailed,
 } from "@/lib/ai/auth/signin-code";
 import { isValidEmail } from "@/lib/ai/helpers";
+import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
 /**
  * Server Action verifyCode pour /ai/connexion/verifier :
@@ -47,6 +48,10 @@ async function getServerSupabaseClient() {
 }
 
 export async function verifyCode(formData: FormData): Promise<void> {
+  const locale: Locale =
+    String(formData.get("locale") || "fr") === "en" ? "en" : "fr";
+  const verifierBase = localizeAiPath("/ai/connexion/verifier", locale);
+
   // Truncate defensif anti FormData forge
   const email = String(formData.get("email") || "").trim().toLowerCase().slice(0, 200);
   // Code OTP : on accepte jusqu'a 10 chiffres (Supabase emet 6-8 selon config)
@@ -54,12 +59,12 @@ export async function verifyCode(formData: FormData): Promise<void> {
 
   // Validation stricte
   if (!isValidEmail(email)) {
-    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=missing`);
+    redirect(`${verifierBase}?email=${encodeURIComponent(email)}&error=missing`);
   }
   // Code Supabase OTP : 6 a 10 chiffres (Supabase peut emettre des codes de
   // 6, 7 ou 8 chiffres selon la config dashboard. On accepte large.)
   if (!/^\d{6,10}$/.test(code)) {
-    redirect(`/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=invalid_code`);
+    redirect(`${verifierBase}?email=${encodeURIComponent(email)}&error=invalid_code`);
   }
 
   const supabase = await getServerSupabaseClient();
@@ -86,12 +91,12 @@ export async function verifyCode(formData: FormData): Promise<void> {
     else if (errMsg.includes("Token")) uiError = "invalid_code";
 
     redirect(
-      `/ai/connexion/verifier?email=${encodeURIComponent(email)}&error=${uiError}`
+      `${verifierBase}?email=${encodeURIComponent(email)}&error=${uiError}`
     );
   }
 
   // Session active. Tracking.
   await markSigninAttemptComplete(email);
 
-  redirect("/ai/dashboard");
+  redirect(localizeAiPath("/ai/dashboard", locale));
 }

@@ -7,6 +7,7 @@
  */
 import { Resend } from "resend";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Locale } from "@/lib/i18n/config";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -122,8 +123,63 @@ export async function sendAiSignupAdminNotification(data: SignupData): Promise<v
 }
 
 // ─── WELCOME USER ─────────────────────────────────────────────────────────
-export async function sendAiSignupWelcome(data: SignupData): Promise<void> {
+export async function sendAiSignupWelcome(
+  data: SignupData,
+  locale: Locale = "fr"
+): Promise<void> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
+
+  // Variante EN : pointe vers le tunnel anglais sur le gTLD workwaveai.co,
+  // free-only (pas de mention premium). Le freelance US recoit un mail anglais.
+  if (locale === "en") {
+    const aiBase = "https://www.workwaveai.co/en/ai";
+    const enHtml = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;margin:0;padding:24px;color:#0A0A0A;">
+  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
+    <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE AI ]</p>
+    <h1 style="font-size:26px;color:#0A0A0A;margin:0 0 12px 0;font-weight:800;letter-spacing:-0.02em;">Welcome, ${data.firstName}!</h1>
+    <p style="font-size:15px;color:#525252;line-height:1.6;margin:0 0 24px 0;">Your freelance <strong>${data.categoryName}</strong> account on Workwave AI is live. As soon as a project is posted, you get an email in real time. Community model: every freelancer sees every project, you pick the ones you want.</p>
+    <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Your profile:</h3>
+    <table style="font-size:13px;width:100%;border-collapse:collapse;background:#FAFAFA;padding:16px;border-radius:8px;">
+      <tr><td style="padding:6px 12px;color:#999;width:160px;">Email</td><td style="color:#0A0A0A;padding:6px 0;">${data.email}</td></tr>
+      <tr><td style="padding:6px 12px;color:#999;">Category</td><td style="color:#0A0A0A;padding:6px 0;">${data.categoryName}</td></tr>
+      ${data.tjm ? `<tr><td style="padding:6px 12px;color:#999;">Indicative day rate</td><td style="color:#0A0A0A;padding:6px 0;font-family:'SF Mono',Menlo,monospace;">${data.tjm}/day</td></tr>` : ""}
+      <tr><td style="padding:6px 12px;color:#999;">Plan</td><td style="color:#0A0A0A;padding:6px 0;"><strong>Free (profile visible, $0/mo)</strong></td></tr>
+    </table>
+    <h3 style="font-size:14px;color:#525252;margin:32px 0 12px 0;">Next steps:</h3>
+    <ol style="font-size:14px;color:#525252;line-height:1.7;padding-left:20px;margin:0 0 24px 0;">
+      <li>Sign in to your dashboard at <a href="${aiBase}/connexion" style="color:#FF6803;">workwaveai.co/en/ai</a> (6-digit code sent by email)</li>
+      <li>Complete your profile (bio, stack, GitHub, LinkedIn) to stand out</li>
+      <li>You will receive every matching project by email in real time</li>
+    </ol>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${aiBase}/connexion" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Go to my dashboard &rarr;</a>
+    </div>
+    <p style="font-size:13px;color:#525252;line-height:1.6;margin:24px 0 0 0;">A question? Just reply to this email, we're on the other end.</p>
+    <hr style="border:none;border-top:1px solid #E5E5E5;margin:32px 0 16px 0;">
+    <p style="font-size:11px;color:#999;text-align:center;">Workwave AI · <a href="${aiBase}" style="color:#999;">workwaveai.co</a></p>
+  </div>
+</body></html>`;
+    try {
+      const r = await getResendClient().emails.send({
+        from: "Workwave AI <contact@workwave.fr>",
+        to: [data.email],
+        subject: `Welcome to Workwave AI, ${data.firstName}!`,
+        html: enHtml,
+      });
+      if (r.error) {
+        console.error("[sendAiSignupWelcome EN] Resend error:", r.error);
+        return;
+      }
+      await getServiceClient().from("ai_signups").update({
+        welcome_sent_at: new Date().toISOString(),
+      }).eq("id", data.signupId);
+    } catch (e: unknown) {
+      console.error("[sendAiSignupWelcome EN] exception:", e);
+    }
+    return;
+  }
 
   const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"></head>
