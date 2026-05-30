@@ -1,6 +1,7 @@
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
 import { visaGuideSlugs } from "@/lib/data/freelance-visa";
+import { US_STATES } from "@/lib/data/us-states";
 
 /**
  * Sitemap DÉDIÉ et STABLE du contenu EN international (Workwave AI), servi sur
@@ -40,6 +41,14 @@ function buildEntries(): Entry[] {
         loc: `${AI_EN_BASE}/en/ai/${skill.slug}/${city.slug}`,
         changefreq: "weekly",
         priority: 0.7,
+      });
+    }
+    // Hubs d'état US : /en/ai/[skill]/state/[state]
+    for (const st of US_STATES) {
+      entries.push({
+        loc: `${AI_EN_BASE}/en/ai/${skill.slug}/state/${st.slug}`,
+        changefreq: "weekly",
+        priority: 0.65,
       });
     }
   }
