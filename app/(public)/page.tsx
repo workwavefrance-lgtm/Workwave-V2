@@ -16,6 +16,14 @@ import {
 } from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
+import type { Metadata } from "next";
+
+// Canonical explicite de la home (manquait : Next n'émet la balise canonical
+// que si alternates.canonical est défini). Title/description/OG restent hérités
+// du root layout. Résout le trou détecté en QA SEO du 30/05.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 // FAQ affichee en bas de la home (section visible) + injectee en JSON-LD
 // FAQPage. Contenu strictement factuel : tout est verifiable dans le

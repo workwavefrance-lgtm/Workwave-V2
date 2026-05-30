@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import Providers from "@/app/providers";
@@ -38,6 +38,19 @@ export const metadata: Metadata = {
     description:
       "Plus de 226 000 professionnels en Nouvelle-Aquitaine. Comparez et contactez gratuitement.",
   },
+  // Nom affiché si le site est ajouté à l'écran d'accueil iOS.
+  appleWebApp: { title: "Workwave" },
+};
+
+// themeColor = couleur de la barre d'adresse mobile : on suit le fond réel du
+// site (blanc en clair, noir en sombre) plutôt que le coral (réservé aux
+// accents, cf. philosophie de design). Le coral reste la couleur du favicon +
+// du theme_color PWA (manifest.ts).
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
+  ],
 };
 
 export default function RootLayout({
