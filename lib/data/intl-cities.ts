@@ -22,10 +22,19 @@ export type IntlCity = {
   name: string;
   country: string;
   countryCode: string; // ISO 3166-1 alpha-2
-  region: "Gulf" | "Europe";
+  region: "Gulf" | "Europe" | "USA";
   currency: Currency;
   monument: MonumentName;
   blurb: string;
+  // ─── Champs RICHES (tier US) — optionnels. Rendus en sections premium par
+  // le template /en/ai/[skill]/[city] quand présents. Faits PUBLICS vérifiables
+  // uniquement (état, fuseau, métro, écosystème qualitatif) — aucun chiffre
+  // inventé (règle CLAUDE.md). Le Golfe/Europe ne les renseigne pas (fallback).
+  state?: string; // "California"
+  stateCode?: string; // "CA" (2 lettres)
+  metro?: string; // "San Francisco Bay Area"
+  timezone?: string; // "Pacific Time (PT)"
+  techScene?: string; // paragraphe factuel sur l'écosystème tech/freelance local
 };
 
 export const INTL_CITIES: IntlCity[] = [
@@ -340,6 +349,127 @@ export const INTL_CITIES: IntlCity[] = [
     monument: "skyline",
     blurb:
       "A fast-growing Central-European tech hub, Warsaw offers a deep and competitive pool of engineering talent.",
+  },
+  // ─── United States — Tier 1 tech hubs ────────────────────────────────
+  {
+    slug: "san-francisco", name: "San Francisco", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "golden-gate",
+    state: "California", stateCode: "CA", metro: "San Francisco Bay Area",
+    timezone: "Pacific Time (PT)",
+    blurb:
+      "The heart of the world's largest technology ecosystem, San Francisco concentrates demand for senior engineers, AI and product talent.",
+    techScene:
+      "The San Francisco Bay Area is the world's leading technology hub — home to global software companies, the venture-capital industry and one of the deepest pools of senior engineering, AI and product talent anywhere.",
+  },
+  {
+    slug: "new-york", name: "New York", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "statue-liberty",
+    state: "New York", stateCode: "NY", metro: "New York metro",
+    timezone: "Eastern Time (ET)",
+    blurb:
+      "A global business capital, New York pairs finance, media and a vast tech scene with one of the largest freelance markets in the world.",
+    techScene:
+      "New York pairs Wall Street with a sprawling 'Silicon Alley' spanning fintech, media, adtech and e-commerce — and one of the largest freelance and creative talent markets anywhere.",
+  },
+  {
+    slug: "los-angeles", name: "Los Angeles", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "California", stateCode: "CA", metro: "Greater Los Angeles",
+    timezone: "Pacific Time (PT)",
+    blurb:
+      "Entertainment capital and home of 'Silicon Beach', Los Angeles drives strong demand for creative, video and product freelancers.",
+    techScene:
+      "Greater Los Angeles blends entertainment, media and the fast-growing 'Silicon Beach' startup cluster, with heavy demand for creative, video, design and product talent.",
+  },
+  {
+    slug: "seattle", name: "Seattle", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "space-needle",
+    state: "Washington", stateCode: "WA", metro: "Greater Seattle",
+    timezone: "Pacific Time (PT)",
+    blurb:
+      "A top-tier engineering hub anchored by global cloud and e-commerce companies, Seattle is dense with senior software talent.",
+    techScene:
+      "Seattle is a top-tier engineering hub anchored by global cloud and e-commerce giants, with deep demand for cloud, data and senior software freelancers.",
+  },
+  {
+    slug: "austin", name: "Austin", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "Texas", stateCode: "TX", metro: "Greater Austin",
+    timezone: "Central Time (CT)",
+    blurb:
+      "One of the fastest-growing US tech hubs, Austin attracts major employers and startups relocating from the coasts.",
+    techScene:
+      "Austin has become one of the fastest-growing US tech hubs, drawing major employers and startups relocating from the coasts, with rising demand across software, product and data.",
+  },
+  {
+    slug: "boston", name: "Boston", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "Massachusetts", stateCode: "MA", metro: "Greater Boston",
+    timezone: "Eastern Time (ET)",
+    blurb:
+      "A world-class research and deep-tech hub, Boston pairs leading universities with strong biotech and enterprise software demand.",
+    techScene:
+      "Greater Boston combines world-class universities with deep strengths in biotech, enterprise software and robotics, fueling steady demand for technical and data specialists.",
+  },
+  {
+    slug: "chicago", name: "Chicago", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "Illinois", stateCode: "IL", metro: "Chicagoland",
+    timezone: "Central Time (CT)",
+    blurb:
+      "The Midwest's business and tech anchor, Chicago is strong in fintech, logistics and enterprise software.",
+    techScene:
+      "Chicago anchors the Midwest tech scene with strengths in fintech, logistics and enterprise software, and a large, competitively-priced engineering talent market.",
+  },
+  {
+    slug: "denver", name: "Denver", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "Colorado", stateCode: "CO", metro: "Denver–Aurora",
+    timezone: "Mountain Time (MT)",
+    blurb:
+      "A magnet for remote-first tech workers and startups, Denver and the Front Range are a fast-rising talent market.",
+    techScene:
+      "Denver and the Front Range have emerged as a magnet for remote-first tech workers and startups, with growing demand for software, cloud and data skills.",
+  },
+  {
+    slug: "miami", name: "Miami", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "Florida", stateCode: "FL", metro: "South Florida",
+    timezone: "Eastern Time (ET)",
+    blurb:
+      "A rising hub for fintech, crypto and Latin-America-facing tech, Miami attracts founders, investors and remote talent.",
+    techScene:
+      "Miami has rapidly positioned itself as a hub for fintech, crypto and Latin-America-facing tech, attracting founders, investors and a growing base of remote talent.",
+  },
+  {
+    slug: "atlanta", name: "Atlanta", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "Georgia", stateCode: "GA", metro: "Metro Atlanta",
+    timezone: "Eastern Time (ET)",
+    blurb:
+      "The tech capital of the US Southeast, Atlanta is strong in fintech, logistics and media.",
+    techScene:
+      "Atlanta is the tech capital of the US Southeast — strong in fintech, logistics and media, with a deep and diverse engineering talent pool.",
+  },
+  {
+    slug: "washington-dc", name: "Washington, D.C.", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "us-capitol",
+    state: "District of Columbia", stateCode: "DC", metro: "Washington metro (DMV)",
+    timezone: "Eastern Time (ET)",
+    blurb:
+      "Pairing government and defense technology with a strong cybersecurity and cloud market across the DMV.",
+    techScene:
+      "The Washington, D.C. area pairs government and defense technology with a strong cybersecurity, data and cloud market across Northern Virginia and Maryland.",
+  },
+  {
+    slug: "san-diego", name: "San Diego", country: "United States",
+    countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
+    state: "California", stateCode: "CA", metro: "San Diego County",
+    timezone: "Pacific Time (PT)",
+    blurb:
+      "Blending biotech, defense and a growing software scene on the Southern California coast.",
+    techScene:
+      "San Diego blends biotech, defense and a growing software scene, with demand for engineering, data and product specialists along the Southern California coast.",
   },
 ];
 

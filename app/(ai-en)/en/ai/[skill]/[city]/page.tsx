@@ -155,7 +155,7 @@ export default async function SkillCityPage({
           <div className="flex items-center gap-3 mb-5">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
             <span className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--ai-text-tertiary)]" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
-              {city.country} · {city.region}
+              {city.state ? `${city.state} · United States` : `${city.country} · ${city.region}`}
             </span>
           </div>
           <h1 className="font-black text-[var(--ai-text)] max-w-3xl" style={{ fontSize: "clamp(34px, 6vw, 68px)", lineHeight: 0.97, letterSpacing: "-0.04em" }}>
@@ -174,6 +174,57 @@ export default async function SkillCityPage({
           </div>
         </div>
       </section>
+
+      {/* THE LOCAL SCENE — section premium, rendue seulement si data riche (US) */}
+      {city.techScene && (
+        <section className="border-t border-[var(--ai-border-subtle)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-14">
+            <div className="lg:col-span-2">
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--ai-text-tertiary)] mb-4" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+                The local scene
+              </p>
+              <h2 className="font-black text-[var(--ai-text)] mb-5 max-w-2xl" style={{ fontSize: "clamp(24px, 4vw, 38px)", lineHeight: 1.0, letterSpacing: "-0.03em" }}>
+                {skill.label} &amp; freelance work in {city.name}
+              </h2>
+              <p className="text-[16px] sm:text-[17px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
+                {city.techScene}
+              </p>
+              <p className="mt-4 text-[15px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
+                Most freelance {skill.noun} work remotely, so you can hire the best fit whether they&rsquo;re based in {city.name} or elsewhere — and brief them in your own timezone.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] p-6 self-start">
+              <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mb-4" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+                {city.name} · at a glance
+              </p>
+              <dl className="space-y-3.5 text-[14px]">
+                {city.state && (
+                  <div className="flex justify-between gap-4 border-b border-[var(--ai-border-subtle)] pb-3.5">
+                    <dt className="text-[var(--ai-text-tertiary)]">State</dt>
+                    <dd className="text-[var(--ai-text)] font-medium text-right">{city.state}</dd>
+                  </div>
+                )}
+                {city.metro && (
+                  <div className="flex justify-between gap-4 border-b border-[var(--ai-border-subtle)] pb-3.5">
+                    <dt className="text-[var(--ai-text-tertiary)]">Metro area</dt>
+                    <dd className="text-[var(--ai-text)] font-medium text-right">{city.metro}</dd>
+                  </div>
+                )}
+                {city.timezone && (
+                  <div className="flex justify-between gap-4 border-b border-[var(--ai-border-subtle)] pb-3.5">
+                    <dt className="text-[var(--ai-text-tertiary)]">Timezone</dt>
+                    <dd className="text-[var(--ai-text)] font-medium text-right">{city.timezone}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between gap-4">
+                  <dt className="text-[var(--ai-text-tertiary)]">Engagement</dt>
+                  <dd className="text-[var(--ai-accent)] font-semibold text-right">Remote-first</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* DAY RATES */}
       {tjm && (

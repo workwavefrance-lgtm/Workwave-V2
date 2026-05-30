@@ -26,7 +26,11 @@ export type MonumentName =
   | "paris"
   | "berlin"
   | "riyadh"
-  | "amsterdam";
+  | "amsterdam"
+  | "golden-gate"
+  | "statue-liberty"
+  | "space-needle"
+  | "us-capitol";
 
 type Monument = { viewBox: string; content: ReactNode };
 
@@ -174,6 +178,110 @@ const MONUMENTS: Record<MonumentName, Monument> = {
         <path d="M152 180 V64 H160 V56 H168 V48 H176 V56 H184 V64 H192 V180" />
         <path d="M196 180 V72 L214 52 L232 72 V180" />
         <path d="M8 180 H232" />
+      </>
+    ),
+  },
+  // San Francisco — Golden Gate Bridge (2 pylones + cable suspendu + tablier).
+  "golden-gate": {
+    viewBox: "0 0 340 200",
+    content: (
+      <>
+        {/* Tablier (route) */}
+        <path d="M12 142 H328" />
+        {/* Pylone gauche */}
+        <path d="M88 142 V34" />
+        <path d="M102 142 V34" />
+        <path d="M86 58 H104" />
+        <path d="M86 92 H104" />
+        {/* Pylone droit */}
+        <path d="M238 142 V34" />
+        <path d="M252 142 V34" />
+        <path d="M236 58 H254" />
+        <path d="M236 92 H254" />
+        {/* Cable principal : ancrage -> sommet pylone -> creux -> sommet -> ancrage */}
+        <path d="M12 104 Q44 56 95 34" />
+        <path d="M95 34 Q170 116 245 34" />
+        <path d="M245 34 Q296 56 328 104" />
+        {/* Suspentes verticales */}
+        <path d="M50 84 V142" />
+        <path d="M140 92 V142" />
+        <path d="M170 110 V142" />
+        <path d="M200 92 V142" />
+        <path d="M290 84 V142" />
+        {/* Ligne d'eau */}
+        <path d="M0 178 H340" />
+      </>
+    ),
+  },
+  // New York — Statue de la Liberte (couronne + torche levee + robe + socle).
+  "statue-liberty": {
+    viewBox: "0 0 200 300",
+    content: (
+      <>
+        {/* Bras leve + torche */}
+        <path d="M110 150 L132 92" />
+        <path d="M123 92 H141" />
+        <path d="M127 92 L125 72 M132 92 L132 70 M137 92 L139 74" />
+        {/* Tete */}
+        <circle cx="98" cy="122" r="11" />
+        {/* Couronne (pointes) */}
+        <path d="M87 116 L82 103 M93 112 L91 98 M98 111 L98 96 M103 112 L105 98 M109 116 L114 103" />
+        {/* Robe (corps) */}
+        <path d="M88 132 L78 248" />
+        <path d="M108 134 L120 248" />
+        <path d="M78 248 H120" />
+        {/* Tablette (bras gauche) */}
+        <path d="M90 152 L72 170 L78 200" />
+        {/* Socle / pedestal */}
+        <path d="M64 300 V248 H134 V300" />
+        <path d="M74 248 V228 H124 V248" />
+        <path d="M20 300 H180" />
+      </>
+    ),
+  },
+  // Seattle — Space Needle (tripode + soucoupe + antenne).
+  "space-needle": {
+    viewBox: "0 0 200 300",
+    content: (
+      <>
+        {/* Pieds (tripode) */}
+        <path d="M66 300 C82 218 92 158 97 112" />
+        <path d="M134 300 C118 218 108 158 103 112" />
+        <path d="M100 300 V112" />
+        {/* Soucoupe */}
+        <path d="M60 112 Q100 90 140 112 Q100 132 60 112 Z" />
+        {/* Anneau sous la soucoupe */}
+        <path d="M70 120 Q100 134 130 120" />
+        {/* Antenne */}
+        <path d="M100 90 V54" />
+        {/* Sol */}
+        <path d="M22 300 H178" />
+      </>
+    ),
+  },
+  // Washington D.C. — Capitole (dome + colonnade).
+  "us-capitol": {
+    viewBox: "0 0 280 200",
+    content: (
+      <>
+        {/* Corps / colonnade */}
+        <path d="M22 190 V118 H258 V190" />
+        <path d="M44 190 V118" />
+        <path d="M68 190 V118" />
+        <path d="M92 190 V118" />
+        <path d="M188 190 V118" />
+        <path d="M212 190 V118" />
+        <path d="M236 190 V118" />
+        {/* Bloc central sous le dome */}
+        <path d="M112 118 V94 H168 V118" />
+        {/* Tambour du dome */}
+        <path d="M120 94 V82 H160 V94" />
+        {/* Dome */}
+        <path d="M120 82 Q140 34 160 82" />
+        {/* Statue / lanterne au sommet */}
+        <path d="M140 34 V20" />
+        {/* Marches */}
+        <path d="M10 190 H270" />
       </>
     ),
   },
