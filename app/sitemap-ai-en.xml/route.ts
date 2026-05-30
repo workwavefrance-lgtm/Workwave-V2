@@ -2,6 +2,7 @@ import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
 import { visaGuideSlugs } from "@/lib/data/freelance-visa";
 import { US_STATES } from "@/lib/data/us-states";
+import { usaGuideSlugs } from "@/lib/data/freelance-usa";
 
 /**
  * Sitemap DÉDIÉ et STABLE du contenu EN international (Workwave AI), servi sur
@@ -61,6 +62,19 @@ function buildEntries(): Entry[] {
   for (const slug of visaGuideSlugs()) {
     entries.push({
       loc: `${AI_EN_BASE}/en/ai/freelance-visa/${slug}`,
+      changefreq: "monthly",
+      priority: 0.65,
+    });
+  }
+  // Guides freelance US (hub + par topic : LLC, taxes/1099, work authorization).
+  entries.push({
+    loc: `${AI_EN_BASE}/en/ai/freelance-usa`,
+    changefreq: "monthly",
+    priority: 0.7,
+  });
+  for (const slug of usaGuideSlugs()) {
+    entries.push({
+      loc: `${AI_EN_BASE}/en/ai/freelance-usa/${slug}`,
       changefreq: "monthly",
       priority: 0.65,
     });
