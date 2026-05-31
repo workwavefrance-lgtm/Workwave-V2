@@ -63,6 +63,7 @@ type ProjectEmailData = {
   phone: string;
   categoryName: string;
   cityName: string;
+  departmentName?: string;
   description: string;
   urgency: string;
   budget: string;
@@ -130,6 +131,7 @@ export async function sendProjectNotification(
         <tr><td colspan="2" style="padding:0 0 8px;font-size:16px;font-weight:600;color:#0A0A0A;">Projet</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Catégorie</td><td style="padding:6px 0;color:#0A0A0A;">${data.categoryName}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Ville</td><td style="padding:6px 0;color:#0A0A0A;">${data.cityName}</td></tr>
+        <tr><td style="padding:6px 0;color:#6B7280;">Département</td><td style="padding:6px 0;color:#0A0A0A;">${data.departmentName || "—"}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Urgence</td><td style="padding:6px 0;color:#0A0A0A;">${urgencyLabel}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Budget</td><td style="padding:6px 0;color:#0A0A0A;">${budgetLabel}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;vertical-align:top;">Description</td><td style="padding:6px 0;color:#0A0A0A;">${data.description}</td></tr>

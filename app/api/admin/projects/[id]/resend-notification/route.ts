@@ -40,7 +40,7 @@ export async function POST(
   const { data, error: fetchErr } = await db
     .from("projects")
     .select(
-      "id, first_name, email, phone, description, urgency, budget, ai_qualification, suspicion_score, category:categories(name), city:cities(name)"
+      "id, first_name, email, phone, description, urgency, budget, ai_qualification, suspicion_score, category:categories(name), city:cities(name, department:departments(name, code))"
     )
     .eq("id", projectId)
     .single();
@@ -51,7 +51,15 @@ export async function POST(
 
   const project = data as unknown as Record<string, unknown>;
   const category = project.category as { name?: string } | null;
-  const city = project.city as { name?: string } | null;
+  const city = project.city as {
+    name?: string;
+    department?: { name?: string; code?: string } | { name?: string; code?: string }[] | null;
+  } | null;
+  const deptRel = city?.department;
+  const deptObj = Array.isArray(deptRel) ? deptRel[0] : deptRel;
+  const departmentName = deptObj?.name
+    ? `${deptObj.name}${deptObj.code ? ` (${deptObj.code})` : ""}`
+    : undefined;
   const suspicionScore = project.suspicion_score as number | null;
 
   // Re-appelle sendProjectNotification : elle tracke le resultat
@@ -62,6 +70,7 @@ export async function POST(
     phone: (project.phone as string) ?? "",
     categoryName: category?.name ?? "—",
     cityName: city?.name ?? "—",
+    departmentName,
     description: (project.description as string) ?? "",
     urgency: (project.urgency as string) ?? "",
     budget: (project.budget as string) ?? "",

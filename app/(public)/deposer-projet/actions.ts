@@ -167,7 +167,7 @@ export async function submitProject(
 
   const { data: city } = await supabase
     .from("cities")
-    .select("name, department_id")
+    .select("name, department_id, department:departments(name, code)")
     .eq("id", data.cityId)
     .single();
 
@@ -231,6 +231,15 @@ export async function submitProject(
     };
   }
 
+  // Département (pour le brief admin) — dérivé de la ville
+  const deptRel = (city as unknown as {
+    department?: { name?: string; code?: string } | { name?: string; code?: string }[] | null;
+  }).department;
+  const deptObj = Array.isArray(deptRel) ? deptRel[0] : deptRel;
+  const departmentName = deptObj?.name
+    ? `${deptObj.name}${deptObj.code ? ` (${deptObj.code})` : ""}`
+    : undefined;
+
   // Emails (non bloquants)
   sendProjectNotification({
     firstName: data.firstName,
@@ -238,6 +247,7 @@ export async function submitProject(
     phone: data.phone,
     categoryName: category.name,
     cityName: city.name,
+    departmentName,
     description: data.description,
     urgency: data.urgency,
     budget: data.budget,
