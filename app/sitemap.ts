@@ -75,13 +75,17 @@ const AI_CATEGORY_IDS = AI_CATEGORY_IDS_HELPER as unknown as number[];
 // ============================================================================
 export async function generateSitemaps() {
   const supabase = getAdminServiceClient();
-  // count: "estimated" : lit pg_class stats, instantane (vs "exact" qui
-  // scanne toute la table = 3-5s sur 226k rows). +/-0.1% d'ecart sur le
-  // count, mais on s'en fiche : on l'utilise juste pour calculer le nombre
-  // de batches sub-sitemaps. Cf. lesson learned CLAUDE.md 2026-04-28.
+  // count: "exact" OBLIGATOIRE ici (pas "estimated") : le nombre de batches DOIT
+  // être juste, sinon on PERD des fiches dans le sitemap. estimated lit pg_class
+  // (FAUSSÉ après un gros scrape tant que la table n'est pas réanalysée) ET
+  // ignore .in() → il avait sous-compté /artisan à ~540k vs 1,07M réels (~530k
+  // fiches non annoncées à Google). exact = quelques secondes, acceptable :
+  // generateSitemaps ne s'exécute qu'au build / à la revalidation ISR (pas par
+  // requête). Cf. CLAUDE.md 31/05 (la reco "estimated" du 28/04 ne vaut que pour
+  // le comptage par-requête, PAS pour ce calcul du nombre de batches).
   const { count } = await supabase
     .from("pros")
-    .select("id", { count: "estimated", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("is_active", true)
     .is("deleted_at", null);
 
@@ -92,7 +96,7 @@ export async function generateSitemaps() {
   // simple sur le category_id avec count exact (limited rows).
   const { count: techCount } = await supabase
     .from("pros")
-    .select("id", { count: "estimated", head: true })
+    .select("id", { count: "exact", head: true })
     .in("category_id", AI_CATEGORY_IDS)
     .eq("is_active", true)
     .is("deleted_at", null);
