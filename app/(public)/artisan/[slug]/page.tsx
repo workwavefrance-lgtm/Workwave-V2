@@ -10,6 +10,8 @@ import { getNearbyCities } from "@/lib/queries/cities";
 import ProCard from "@/components/pro/ProCard";
 import ProReviewsBlock from "@/components/pro/ProReviewsBlock";
 import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
+import ProSeoSections from "@/components/pro/ProSeoSections";
+import { buildProContent } from "@/lib/seo/pro-seo-sections";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
 import { getCategoryArticle } from "@/lib/utils/category-grammar";
@@ -135,6 +137,8 @@ export default async function ProPage({ params }: Props) {
   ];
 
   const isClaimed = !!pro.claimed_by_user_id;
+  // Contenu SEO/AEO unique par fiche (À propos + FAQ sourcés, zéro invention).
+  const proContent = buildProContent(pro);
   const openingHours = pro.opening_hours as OpeningHours | null;
 
   const jsonLd: Record<string, unknown> = {
@@ -591,6 +595,13 @@ export default async function ProPage({ params }: Props) {
               </div>
             )}
           </div>
+
+          {/* Bloc SEO unique sur l'entreprise (À propos + FAQ + FAQPage schema) :
+              sort la fiche du « squelette » — contenu factuel Sirene + prix sourcés,
+              centré sur CETTE entreprise (anti-duplicate listings), zéro invention. */}
+          {proContent && (
+            <ProSeoSections content={proContent} proName={pro.name} />
+          )}
 
           {/* Certifications (fiches réclamées) */}
           {isClaimed && certifications.length > 0 && (
