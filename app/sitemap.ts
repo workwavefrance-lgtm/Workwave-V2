@@ -327,10 +327,16 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
 // 1. Cat x Dept (ex: 38 cat x 12 dept = 456)
 // ============================================================================
 async function buildCategoryDeptUrls(): Promise<MetadataRoute.Sitemap> {
-  const [categories, departments] = await Promise.all([
+  const [allCategories, departments] = await Promise.all([
     getAllCategories(),
     getAllDepartments(),
   ]);
+  // Anti-fuite vertical : uniquement BTP/domicile/personne. Les ~145 cat tech
+  // (Workwave AI) ont leurs URLs sur /ai/* (sitemap dédié) ; sur une route BTP
+  // elles redirigent en 308 → ne pas polluer ce sitemap de ~5 800 redirects.
+  const categories = allCategories.filter((c) =>
+    ["btp", "domicile", "personne"].includes(c.vertical)
+  );
   return categories.flatMap((cat) =>
     departments.map((dept) => ({
       url: `${BASE_URL}/${cat.slug}/${generateDepartmentSlug(dept)}`,
@@ -345,10 +351,14 @@ async function buildCategoryDeptUrls(): Promise<MetadataRoute.Sitemap> {
 // ============================================================================
 async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
   const supabase = getAdminServiceClient();
-  const [categories, topCities] = await Promise.all([
+  const [allCategories, topCities] = await Promise.all([
     getAllCategories(),
     getTopCities(TOP_CITIES_FOR_LISTINGS),
   ]);
+  // Anti-fuite vertical : exclure les cat tech (AI) — cf. buildCategoryDeptUrls.
+  const categories = allCategories.filter((c) =>
+    ["btp", "domicile", "personne"].includes(c.vertical)
+  );
 
   const topCityIds = topCities.map((c) => c.id);
   if (topCityIds.length === 0) return [];
