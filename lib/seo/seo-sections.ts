@@ -338,6 +338,52 @@ function getPriceRanges(
   );
 }
 
+// ── Données structurées prix (AEO) : parse les fourchettes affichées
+//    (« 80 € à 150 € ») en OfferCatalog Schema.org pour extraction par
+//    Google (rich results) et les moteurs IA (GEO/AEO).
+function parseEuros(range: string): number[] {
+  const nums: number[] = [];
+  const re = /(\d[\d\s]*)\s*€/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(range)) !== null) {
+    const n = parseInt(m[1].replace(/\s/g, ""), 10);
+    if (!Number.isNaN(n)) nums.push(n);
+  }
+  return nums;
+}
+
+function buildPriceOfferCatalog(
+  prices: { label: string; range: string }[],
+  categoryName: string,
+  locationName: string,
+  preposition: string
+): Record<string, unknown> | null {
+  const itemListElement: Record<string, unknown>[] = [];
+  for (const p of prices) {
+    const nums = parseEuros(p.range);
+    if (nums.length === 0) continue;
+    const min = Math.min(...nums);
+    const max = Math.max(...nums);
+    itemListElement.push({
+      "@type": "Offer",
+      itemOffered: { "@type": "Service", name: p.label },
+      priceSpecification: {
+        "@type": "PriceSpecification",
+        priceCurrency: "EUR",
+        minPrice: min,
+        ...(max !== min ? { maxPrice: max } : {}),
+      },
+    });
+  }
+  if (itemListElement.length === 0) return null;
+  return {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    name: `Tarifs indicatifs ${categoryName.toLowerCase()} ${preposition} ${locationName}`,
+    itemListElement,
+  };
+}
+
 // ============================================================================
 // Vocabulaire par vertical
 // ============================================================================
@@ -439,6 +485,7 @@ export type SeoFaqItem = {
 export type SeoContentBundle = {
   sections: SeoSection[];
   faqs: SeoFaqItem[];
+  priceSchema?: Record<string, unknown> | null;
 };
 
 export type SeoContext = {
@@ -636,7 +683,8 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     },
   ];
 
-  return { sections, faqs };
+  const priceSchema = buildPriceOfferCatalog(prices, cat.name, locationName, preposition);
+  return { sections, faqs, priceSchema };
 }
 
 /**

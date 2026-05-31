@@ -34,6 +34,7 @@ export default function ProgrammaticSeoSections({
   return (
     <>
       <JsonLd data={faqJsonLd} />
+      {content.priceSchema ? <JsonLd data={content.priceSchema} /> : null}
 
       <div className="mt-16 pt-8 border-t border-[var(--border-color)] space-y-12">
         {content.sections.map((section, i) => (
