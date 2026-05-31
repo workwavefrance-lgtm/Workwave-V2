@@ -22,6 +22,7 @@ import type {
   Department,
 } from "@/lib/types/database";
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
+import { SOURCED_MARKET_CONTEXT } from "@/lib/data/sourced-market-context";
 
 export type Vertical = "btp" | "domicile" | "personne";
 
@@ -627,7 +628,22 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     ],
   };
 
-  const sections: SeoSection[] = [pourquoi, travaux, choisir, prix];
+  // Section "marché local" SOURCÉE par Perplexity (par dépt) — contenu unique +
+  // cité, zéro chiffre inventé. Présente uniquement pour les dépts sourcés
+  // (4 nouvelles régions) ; ailleurs, pas de section (pas de fallback inventé).
+  const market = SOURCED_MARKET_CONTEXT[deptCode];
+  const marcheSection: SeoSection | null = market
+    ? {
+        h2: `Le marché du bâtiment et de l'artisanat ${preposition} ${locationName}`,
+        paragraphs: [market.text],
+        source: market.sources?.[0]
+          ? { cite: `Sources · ${market.retrievedAt}`, url: market.sources[0] }
+          : undefined,
+      }
+    : null;
+  const sections: SeoSection[] = [pourquoi];
+  if (marcheSection) sections.push(marcheSection);
+  sections.push(travaux, choisir, prix);
   if (urgenceSection) sections.push(urgenceSection);
   sections.push(workwave);
 
