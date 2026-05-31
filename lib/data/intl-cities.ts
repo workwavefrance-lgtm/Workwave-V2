@@ -129,6 +129,21 @@ export const INTL_CITIES: IntlCity[] = [
       "A leading Northern-European tech hub, Amsterdam is a magnet for product, design and engineering freelancers.",
   },
   {
+    slug: "monaco",
+    name: "Monaco",
+    country: "Monaco",
+    countryCode: "MC",
+    region: "Europe",
+    currency: "EUR",
+    monument: "monaco",
+    blurb:
+      "A sovereign city-state on the French Riviera, Monaco concentrates finance, luxury and a state-backed digital drive into barely two square kilometres — a compact, high-end market for senior freelance talent.",
+    metro: "French Riviera (Côte d'Azur)",
+    timezone: "Central European Time (CET)",
+    techScene:
+      "Few places pack as much wealth and high-end business into so little ground as Monaco — a sovereign principality of barely two square kilometres, ruled by the House of Grimaldi and wrapped around the yachts of Port Hercule and the Belle Époque grandeur of Monte-Carlo. The government-led Extended Monaco programme is digitising public services and courting fintech, sustainability and deep-tech ventures, while private banking, real estate, yachting, hospitality and the Formula 1 Grand Prix sustain steady demand for senior digital, design and engineering freelancers. French is the official language, with English and Italian widely spoken, and the principality levies no personal income tax on residents — a combination that keeps it a magnet for international talent across the wider Côte d'Azur.",
+  },
+  {
     slug: "berlin",
     name: "Berlin",
     country: "Germany",

@@ -57,6 +57,15 @@ export const FR_CITIES: FrCity[] = [
     blurb:
       "Place financière et numérique européenne, le Luxembourg offre un marché dense pour les freelances tech et data.",
   },
+  {
+    slug: "monaco",
+    name: "Monaco",
+    country: "Monaco",
+    region: "Europe",
+    monument: "monaco",
+    blurb:
+      "Cité-État souveraine de la Côte d'Azur, Monaco concentre finance, luxe et une stratégie numérique d'État (Extended Monaco) sur à peine deux kilomètres carrés — un marché compact et haut de gamme pour les freelances tech et créatifs.",
+  },
   // ─── Amérique francophone ────────────────────────────────────────────
   {
     slug: "montreal",

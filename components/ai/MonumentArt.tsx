@@ -30,7 +30,8 @@ export type MonumentName =
   | "golden-gate"
   | "statue-liberty"
   | "space-needle"
-  | "us-capitol";
+  | "us-capitol"
+  | "monaco";
 
 type Monument = { viewBox: string; content: ReactNode };
 
@@ -282,6 +283,40 @@ const MONUMENTS: Record<MonumentName, Monument> = {
         <path d="M140 34 V20" />
         {/* Marches */}
         <path d="M10 190 H270" />
+      </>
+    ),
+  },
+  // Monaco — Casino de Monte-Carlo (facade Belle Epoque : deux tours a coupole
+  // encadrant un pavillon central a dome, arcades cintrees). Hommage a la
+  // principaute (Charles Garnier, 1879).
+  monaco: {
+    viewBox: "0 0 280 200",
+    content: (
+      <>
+        {/* Corps principal de la facade */}
+        <path d="M44 190 V126 H236 V190" />
+        {/* Pavillon central + dome + fleuron */}
+        <path d="M110 126 V96 H170 V126" />
+        <path d="M110 96 Q140 66 170 96" />
+        <path d="M140 66 V52" />
+        {/* Tour gauche : corps + coupole + fleuron */}
+        <path d="M56 126 V84 H88 V126" />
+        <path d="M54 84 Q72 54 90 84" />
+        <path d="M72 54 V40" />
+        {/* Tour droite : corps + coupole + fleuron */}
+        <path d="M192 126 V84 H224 V126" />
+        <path d="M190 84 Q208 54 226 84" />
+        <path d="M208 54 V40" />
+        {/* Entree centrale cintree */}
+        <path d="M124 190 V152 Q140 134 156 152 V190" />
+        {/* Arcades laterales cintrees */}
+        <path d="M90 190 V158 Q98 146 106 158 V190" />
+        <path d="M174 190 V158 Q182 146 190 158 V190" />
+        {/* Fenetres cintrees a la base des tours */}
+        <path d="M64 126 V108 Q72 100 80 108 V126" />
+        <path d="M200 126 V108 Q208 100 216 108 V126" />
+        {/* Sol / terrasse */}
+        <path d="M12 190 H268" />
       </>
     ),
   },
