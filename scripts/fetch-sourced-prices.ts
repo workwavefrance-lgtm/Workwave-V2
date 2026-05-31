@@ -63,8 +63,9 @@ type Entry = { ranges: Range[]; sources: string[]; retrievedAt: string };
 
 function buildPrompt(slug: string, labels: string[]): string {
   const metier = NOM[slug] || slug;
+  const year = new Date().getFullYear();
   return (
-    `En France en 2025, indique la fourchette de prix moyenne TTC FACTURÉE PAR UN ARTISAN pour un ${metier}, ` +
+    `En France en ${year}, indique la fourchette de prix moyenne TTC FACTURÉE PAR UN ARTISAN pour un ${metier}, ` +
     `pour CHACUNE de ces prestations précises, en te basant sur des sources web récentes et fiables :\n` +
     labels.map((l, i) => `${i + 1}. ${l}`).join("\n") +
     `\n\nRÈGLES IMPÉRATIVES :\n` +
