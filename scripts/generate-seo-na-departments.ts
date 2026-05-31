@@ -2,10 +2,11 @@
  * Generation SEO IA pour les pages categorie x departement sur la
  * Nouvelle-Aquitaine (Phase E expansion NA).
  *
- * Cible : 38 cat actives x 11 nouveaux dpts = 418 pages.
- * Skip automatique si la page existe deja en base (Vienne 86 deja faite).
+ * Cible : 38 cat actives x les departements cibles (cf. TARGET_DEPT_CODES).
+ * Skip automatique si la page existe deja en base + si 0 pro dans le dept.
  *
- * Cout estime : ~$12 (Claude Sonnet 4.6, ~$0.028 par page).
+ * Cout estime : ~$0.028 par page (Claude Sonnet 4.6). 28 depts des 4 nouvelles
+ * regions x 38 cat, moins les skips 0-pro ~ $25-30.
  *
  * Usage :
  *   npx tsx scripts/generate-seo-na-departments.ts --dry-run
@@ -27,8 +28,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Departements NA hors Vienne (deja fait)
-const TARGET_DEPT_CODES = ["16", "17", "19", "23", "24", "33", "40", "47", "64", "79", "87"];
+// Departements des 4 nouvelles regions (Bretagne, Pays de la Loire, Occitanie,
+// PACA). La Nouvelle-Aquitaine (12 depts, dont Vienne) est deja generee — skip
+// auto via existingSlugs si jamais on les remet ici.
+const TARGET_DEPT_CODES = [
+  // Bretagne
+  "22", "29", "35", "56",
+  // Pays de la Loire
+  "44", "49", "53", "72", "85",
+  // Occitanie
+  "09", "11", "12", "30", "31", "32", "34", "46", "48", "65", "66", "81", "82",
+  // Provence-Alpes-Cote d'Azur
+  "04", "05", "06", "13", "83", "84",
+];
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
