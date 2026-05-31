@@ -106,7 +106,7 @@ function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string): string {
       </table>
     </div>
 
-    <a href="${baseUrl}/pro/dashboard/projets" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 24px 0;">
+    <a href="${baseUrl}/pro/dashboard/leads" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 24px 0;">
       Voir le projet &rarr;
     </a>
 
