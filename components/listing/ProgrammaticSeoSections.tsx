@@ -126,6 +126,24 @@ function SectionRenderer({ section }: { section: SeoSection }) {
           </table>
         </div>
       )}
+
+      {section.source && (
+        <p className="mt-3 text-[12px] text-[var(--text-tertiary)]">
+          Fourchettes consolidées —{" "}
+          {section.source.url ? (
+            <a
+              href={section.source.url}
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              className="underline hover:text-[var(--text-secondary)]"
+            >
+              {section.source.cite}
+            </a>
+          ) : (
+            section.source.cite
+          )}
+        </p>
+      )}
     </section>
   );
 }

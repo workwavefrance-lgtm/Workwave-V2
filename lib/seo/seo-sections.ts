@@ -21,6 +21,7 @@ import type {
   CityWithDepartment,
   Department,
 } from "@/lib/types/database";
+import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
 
 export type Vertical = "btp" | "domicile" | "personne";
 
@@ -324,6 +325,10 @@ const PRICE_RANGES: Record<string, { label: string; range: string }[]> = {
 function getPriceRanges(
   categorySlug: string
 ): { label: string; range: string }[] {
+  // Prix sourcés via Perplexity en priorité (chiffres web réels + cités) ;
+  // fallback sur les fourchettes hardcodées si la catégorie n'a pas été sourcée.
+  const sourced = SOURCED_PRICES[categorySlug];
+  if (sourced && sourced.ranges.length > 0) return sourced.ranges;
   return (
     PRICE_RANGES[categorySlug] ?? [
       { label: "Prestation simple", range: "à partir de 80 €" },
@@ -423,6 +428,7 @@ export type SeoSection = {
   paragraphs: string[];
   bullets?: string[];
   table?: Array<{ label: string; value: string }>;
+  source?: { cite: string; url?: string };
 };
 
 export type SeoFaqItem = {
@@ -536,12 +542,18 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   };
 
   // ─── Section 4 : Prix
+  const sourcedPrice = SOURCED_PRICES[cat.slug];
   const prix: SeoSection = {
     h2: `Tarifs d'un ${catLower} ${preposition} ${locationName}`,
     paragraphs: [
-      `Les tarifs ${preposition} ${locationName} se situent dans les fourchettes nationales standard pour la profession. Voici les ordres de prix indicatifs (hors devis personnalisé) :`,
+      sourcedPrice
+        ? `Voici les fourchettes de prix indicatives pour un ${catLower}, consolidées d'après des sources web récentes (${sourcedPrice.retrievedAt}) :`
+        : `Les tarifs ${preposition} ${locationName} se situent dans les fourchettes nationales standard pour la profession. Voici les ordres de prix indicatifs (hors devis personnalisé) :`,
     ],
     table: prices.map((p) => ({ label: p.label, value: p.range })),
+    source: sourcedPrice?.sources?.[0]
+      ? { cite: `Sources web · ${sourcedPrice.retrievedAt}`, url: sourcedPrice.sources[0] }
+      : undefined,
   };
   prix.paragraphs.push(
     vertical === "btp"
