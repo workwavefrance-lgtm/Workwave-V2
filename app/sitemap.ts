@@ -16,11 +16,17 @@ import { FR_CITIES } from "@/lib/data/intl-fr-cities";
 // dans cet index. Il a son propre sitemap dedie + stable :
 // app/sitemap-ai-en.xml/route.ts (evite de polluer l'index .fr avec des URLs .co).
 
-// Cache 24h sur les sub-sitemaps. Vercel pre-genere et garde le resultat,
-// donc la 2e+ requete (notamment Googlebot) repond en quelques ms au lieu
-// de re-calculer la sitemap a chaque appel. C'est la cle pour eviter les
-// timeouts cote Googlebot (limite ~30s par fetch).
-export const revalidate = 86400;
+// force-dynamic : le sitemap est recalcule a CHAQUE requete (pas de cache ISR).
+// POURQUOI (et pas revalidate=86400) : generateSitemaps() est memoise au build par
+// Next ; le nb de sub-sitemaps /artisan est donc fige au build et le cache ISR de
+// l'INDEX persiste a travers les deploiements sur Vercel (un purge CDN ne le decolle
+// pas). Apres le scrape (12->24 batches), l'index restait bloque a 12 = ~530k fiches
+// non annoncees a Google. En dynamique, generateSitemaps() relit le count EXACT a
+// chaque hit -> l'index reflete toujours la realite + tout futur scrape est annonce
+// sans delai ni manip. Cout : 2 count exact (~1,6s) pour l'index ; chaque sub-sitemap
+// recalcule sa tranche en cursor pagination (rapide, mesure < 1s, bien sous les 30s
+// Googlebot). Sur Micro c'est confortable.
+export const dynamic = "force-dynamic";
 
 // Limites :
 // - Google : 50 000 URLs max par sitemap, 50 MB max
