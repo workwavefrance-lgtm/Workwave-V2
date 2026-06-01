@@ -54,8 +54,8 @@ function commonHtmlWrap(content: string, signature: string): string {
     </div>
     <div style="background:#FAFAFA;padding:16px 32px;border-top:1px solid #F1F1F3;text-align:center;">
       <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.5;">
-        Workwave — Plateforme gratuite de mise en relation entre particuliers et artisans en Nouvelle-Aquitaine.<br>
-        <a href="${baseUrl()}" style="color:#FF5A36;text-decoration:none;">workwave.fr</a> · 226 478 artisans référencés
+        Workwave — Plateforme gratuite de mise en relation entre particuliers et artisans en France.<br>
+        <a href="${baseUrl()}" style="color:#FF5A36;text-decoration:none;">workwave.fr</a> · 1 069 733 artisans référencés
       </p>
     </div>
   </div>
@@ -143,11 +143,11 @@ const TEMPLATE_OFFICE_TOURISME: PartnershipTemplate = {
 <p style="margin:0 0 16px;">Bonjour,</p>
 
 <p style="margin:0 0 16px;">
-  Je suis le fondateur de <strong>Workwave</strong>, un annuaire en ligne d'artisans locaux en Nouvelle-Aquitaine. Service entièrement gratuit pour les particuliers, sans inscription requise.
+  Je suis le fondateur de <strong>Workwave</strong>, un annuaire en ligne d'artisans locaux en France. Service entièrement gratuit pour les particuliers, sans inscription requise.
 </p>
 
 <p style="margin:0 0 16px;">
-  Les visiteurs et résidents secondaires de ${cityLabel} cherchent régulièrement des artisans pour des petits travaux ou des urgences pendant leur séjour. Workwave référence 226 000+ artisans en Nouvelle-Aquitaine — une ressource utile à intégrer dans votre rubrique « Vie pratique » ou « Services » à côté des contacts urgents.
+  Les visiteurs et résidents secondaires de ${cityLabel} cherchent régulièrement des artisans pour des petits travaux ou des urgences pendant leur séjour. Workwave référence 1 000 000+ artisans en France — une ressource utile à intégrer dans votre rubrique « Vie pratique » ou « Services » à côté des contacts urgents.
 </p>
 
 <p style="margin:0 0 16px;">
@@ -161,9 +161,9 @@ const TEMPLATE_OFFICE_TOURISME: PartnershipTemplate = {
     return `
 Bonjour,
 
-Je suis le fondateur de Workwave, un annuaire en ligne d'artisans locaux en Nouvelle-Aquitaine. Service entièrement gratuit pour les particuliers, sans inscription requise.
+Je suis le fondateur de Workwave, un annuaire en ligne d'artisans locaux en France. Service entièrement gratuit pour les particuliers, sans inscription requise.
 
-Les visiteurs et résidents secondaires de ${cityLabel} cherchent régulièrement des artisans pour des petits travaux ou des urgences pendant leur séjour. Workwave référence 226 000+ artisans en Nouvelle-Aquitaine — une ressource utile à intégrer dans votre rubrique « Vie pratique » ou « Services » à côté des contacts urgents.
+Les visiteurs et résidents secondaires de ${cityLabel} cherchent régulièrement des artisans pour des petits travaux ou des urgences pendant leur séjour. Workwave référence 1 000 000+ artisans en France — une ressource utile à intégrer dans votre rubrique « Vie pratique » ou « Services » à côté des contacts urgents.
 
 Seriez-vous d'accord pour un lien depuis votre site officiel ? Je peux aussi proposer une page dédiée « Artisans de ${cityLabel} » sur Workwave avec votre logo et un message d'accueil de votre office si vous le souhaitez.
 ${SIGNATURE_TEXT}
@@ -186,7 +186,7 @@ const TEMPLATE_AGENCE_IMMO: PartnershipTemplate = {
 </p>
 
 <p style="margin:0 0 16px;">
-  <strong>Workwave</strong> est un annuaire en ligne gratuit d'artisans locaux en Nouvelle-Aquitaine (226 000+ professionnels référencés). Vos clients peuvent y déposer un projet en 30 secondes et recevoir 3 devis sans inscription ni démarchage.
+  <strong>Workwave</strong> est un annuaire en ligne gratuit d'artisans locaux en France (1 000 000+ professionnels référencés). Vos clients peuvent y déposer un projet en 30 secondes et recevoir 3 devis sans inscription ni démarchage.
 </p>
 
 <p style="margin:0 0 16px;">
@@ -206,7 +206,7 @@ Bonjour,
 
 Je vous contacte au sujet d'un service que vos clients acquéreurs et vendeurs sollicitent souvent : trouver un artisan de confiance localement (plombier, électricien, peintre, carreleur, paysagiste…) après l'achat ou pour préparer un bien à la vente.
 
-Workwave est un annuaire en ligne gratuit d'artisans locaux en Nouvelle-Aquitaine (226 000+ professionnels référencés). Vos clients peuvent y déposer un projet en 30 secondes et recevoir 3 devis sans inscription ni démarchage.
+Workwave est un annuaire en ligne gratuit d'artisans locaux en France (1 000 000+ professionnels référencés). Vos clients peuvent y déposer un projet en 30 secondes et recevoir 3 devis sans inscription ni démarchage.
 
 L'idée : vous gagnez du temps en redirigeant vos clients vers Workwave plutôt que de chercher vous-même chaque fois un artisan. En échange, je vous propose un lien depuis nos pages locales vers votre site, et la mise en avant de votre agence dans nos contenus liés à ${cityLabel}.
 
@@ -231,7 +231,7 @@ const TEMPLATE_NOTAIRE: PartnershipTemplate = {
 </p>
 
 <p style="margin:0 0 16px;">
-  <strong>Workwave</strong> est un annuaire en ligne gratuit d'artisans locaux en Nouvelle-Aquitaine (226 000+ professionnels référencés, dont les artisans RGE certifiés ADEME pour la rénovation énergétique). Sans inscription pour les particuliers, sans démarchage commercial.
+  <strong>Workwave</strong> est un annuaire en ligne gratuit d'artisans locaux en France (1 000 000+ professionnels référencés, dont les artisans RGE certifiés ADEME pour la rénovation énergétique). Sans inscription pour les particuliers, sans démarchage commercial.
 </p>
 
 <p style="margin:0 0 16px;">
@@ -252,7 +252,7 @@ Maître,
 
 Après un achat immobilier, vos clients cherchent souvent des artisans de confiance pour des travaux d'aménagement, des diagnostics complémentaires ou des urgences. C'est une question récurrente lors de la signature.
 
-Workwave est un annuaire en ligne gratuit d'artisans locaux en Nouvelle-Aquitaine (226 000+ professionnels référencés, dont les artisans RGE certifiés ADEME pour la rénovation énergétique). Sans inscription pour les particuliers, sans démarchage commercial.
+Workwave est un annuaire en ligne gratuit d'artisans locaux en France (1 000 000+ professionnels référencés, dont les artisans RGE certifiés ADEME pour la rénovation énergétique). Sans inscription pour les particuliers, sans démarchage commercial.
 
 Une simple mention de Workwave dans votre brochure d'accueil ou sur votre site internet — à côté des liens utiles pour vos clients post-acquisition — pourrait leur rendre service. Je ne demande rien en contrepartie, juste votre validation de pertinence.
 
@@ -270,17 +270,17 @@ const TEMPLATE_CCI_CMA: PartnershipTemplate = {
   label: "CCI / Chambre des Métiers",
   subject: (p) =>
     p.type === "cci"
-      ? `Partenariat institutionnel — Annuaire artisans Nouvelle-Aquitaine`
+      ? `Partenariat institutionnel — Annuaire artisans en France`
       : `Plateforme de mise en relation pour vos ressortissants artisans`,
   html: (p) => {
     const isCma = p.type === "chambre_metiers";
     const intro = isCma
-      ? `Je suis le fondateur de <strong>Workwave</strong>, un annuaire en ligne d'artisans en Nouvelle-Aquitaine. Notre plateforme référence aujourd'hui <strong>226 000+ artisans</strong>, dont nous avons synchronisé l'ensemble des certifications RGE officielles via l'ADEME.`
+      ? `Je suis le fondateur de <strong>Workwave</strong>, un annuaire en ligne d'artisans en France. Notre plateforme référence aujourd'hui <strong>1 000 000+ artisans</strong>, dont nous avons synchronisé l'ensemble des certifications RGE officielles via l'ADEME.`
       : `Je suis le fondateur de <strong>Workwave</strong>, une plateforme régionale de mise en relation entre particuliers et artisans, lancée en Nouvelle-Aquitaine. Service entièrement gratuit pour les particuliers — sans création de compte, sans démarchage.`;
 
     const pitch = isCma
       ? `Workwave peut offrir à vos ressortissants une visibilité gratuite supplémentaire et leur transmettre automatiquement des projets de particuliers de leur zone. Aucun frais pour les artisans (référencement à vie gratuit), abonnement optionnel uniquement pour ceux qui veulent recevoir les leads automatiquement.`
-      : `Workwave couvre l'ensemble des 12 départements de Nouvelle-Aquitaine et 38 métiers du BTP, services à domicile et aide à la personne. Une ressource utile à mentionner dans la rubrique « Services aux particuliers » de votre site, à côté des autres ressources locales.`;
+      : `Workwave couvre 40 départements de France et 38 métiers du BTP, services à domicile et aide à la personne. Une ressource utile à mentionner dans la rubrique « Services aux particuliers » de votre site, à côté des autres ressources locales.`;
 
     const ask = isCma
       ? `Seriez-vous disposé à étudier un partenariat institutionnel — au minimum un lien réciproque, idéalement une mention de Workwave dans votre communication aux artisans nouvellement immatriculés ?`
@@ -302,11 +302,11 @@ const TEMPLATE_CCI_CMA: PartnershipTemplate = {
   text: (p) => {
     const isCma = p.type === "chambre_metiers";
     const intro = isCma
-      ? `Je suis le fondateur de Workwave, un annuaire en ligne d'artisans en Nouvelle-Aquitaine. Notre plateforme référence aujourd'hui 226 000+ artisans, dont nous avons synchronisé l'ensemble des certifications RGE officielles via l'ADEME.`
+      ? `Je suis le fondateur de Workwave, un annuaire en ligne d'artisans en France. Notre plateforme référence aujourd'hui 1 000 000+ artisans, dont nous avons synchronisé l'ensemble des certifications RGE officielles via l'ADEME.`
       : `Je suis le fondateur de Workwave, une plateforme régionale de mise en relation entre particuliers et artisans, lancée en Nouvelle-Aquitaine. Service entièrement gratuit pour les particuliers — sans création de compte, sans démarchage.`;
     const pitch = isCma
       ? `Workwave peut offrir à vos ressortissants une visibilité gratuite supplémentaire et leur transmettre automatiquement des projets de particuliers de leur zone.`
-      : `Workwave couvre les 12 départements de Nouvelle-Aquitaine et 38 métiers. Une ressource à mentionner dans la rubrique « Services aux particuliers » de votre site.`;
+      : `Workwave couvre 40 départements de France et 38 métiers. Une ressource à mentionner dans la rubrique « Services aux particuliers » de votre site.`;
     const ask = isCma
       ? `Seriez-vous disposé à étudier un partenariat institutionnel — au minimum un lien réciproque ?`
       : `Seriez-vous d'accord pour un lien depuis votre site officiel ?`;

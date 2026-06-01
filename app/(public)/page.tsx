@@ -32,7 +32,7 @@ const homeFaqs = [
   {
     question: "Qu'est-ce que Workwave ?",
     answer:
-      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant les 12 départements de la Nouvelle-Aquitaine. La plateforme référence plus de 226 000 professionnels dans 4 293 communes et met en relation les particuliers avec des artisans locaux.",
+      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant 40 départements sur 5 régions de France. La plateforme référence plus de 1 000 000 de professionnels dans 12 115 communes et met en relation les particuliers avec des artisans locaux.",
   },
   {
     question: "Workwave est-il gratuit pour les particuliers ?",
@@ -62,7 +62,7 @@ const homeFaqs = [
   {
     question: "Quelle zone géographique couvre Workwave ?",
     answer:
-      "Workwave couvre l'ensemble de la région Nouvelle-Aquitaine, soit 12 départements : Charente, Charente-Maritime, Corrèze, Creuse, Dordogne, Gironde, Landes, Lot-et-Garonne, Pyrénées-Atlantiques, Deux-Sèvres, Vienne et Haute-Vienne.",
+      "Workwave couvre 40 départements répartis sur 5 régions de France : Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie et Provence-Alpes-Côte d'Azur.",
   },
 ];
 
@@ -118,20 +118,20 @@ export default async function Home() {
             className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
             style={{ animationDelay: "120ms" }}
           >
-            Des centaines de milliers de professionnels référencés en
-            Nouvelle-Aquitaine, à portée d&apos;un clic.
+            Plus d&apos;un million de professionnels référencés dans 5 régions
+            de France, à portée d&apos;un clic.
           </p>
           <SearchForm categories={allCategories} />
           <p className="mt-6 text-sm text-[var(--text-tertiary)]">
             Plus de{" "}
             <span className="font-semibold text-[var(--text-primary)]">
-              226 000
+              1 000 000
             </span>{" "}
             professionnels référencés dans{" "}
             <span className="font-semibold text-[var(--text-primary)]">
-              4 293
+              12 115
             </span>{" "}
-            communes de Nouvelle-Aquitaine
+            communes, sur 5 régions de France
           </p>
         </div>
       </section>

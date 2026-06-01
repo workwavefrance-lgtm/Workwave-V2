@@ -23,20 +23,20 @@ export const metadata: Metadata = {
     template: "%s | Workwave",
   },
   description:
-    "Annuaire des professionnels de Nouvelle-Aquitaine. Trouvez un plombier, électricien, peintre et plus de 35 métiers près de chez vous.",
+    "Annuaire des professionnels en France. Trouvez un plombier, électricien, peintre et plus de 35 métiers près de chez vous.",
   openGraph: {
     type: "website",
     locale: "fr_FR",
     siteName: "Workwave",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 226 000 professionnels en Nouvelle-Aquitaine. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
+      "Plus de 1 000 000 de professionnels en France. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 226 000 professionnels en Nouvelle-Aquitaine. Comparez et contactez gratuitement.",
+      "Plus de 1 000 000 de professionnels en France. Comparez et contactez gratuitement.",
   },
   // Nom affiché si le site est ajouté à l'écran d'accueil iOS.
   appleWebApp: { title: "Workwave" },

@@ -17,7 +17,7 @@ type Props = {
  *
  * Pourquoi : contenu unique factuel par ville = exactement ce que Google
  * recompense pour le SEO local et ce que les LLM citent. Casse le risque
- * "duplicate content" entre nos 4 293 pages ville.
+ * "duplicate content" entre nos 12 000+ pages ville.
  */
 export default function CityFactsBlock({
   city,

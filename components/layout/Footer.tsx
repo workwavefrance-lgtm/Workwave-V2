@@ -49,7 +49,7 @@ export default async function Footer() {
           </Link>
           <p className="text-sm text-zinc-400 mt-2 max-w-md">
             Trouvez les meilleurs professionnels près de chez vous. Annuaire
-            gratuit de Nouvelle-Aquitaine.
+            gratuit en France.
           </p>
         </div>
 

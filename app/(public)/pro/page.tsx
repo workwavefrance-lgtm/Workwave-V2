@@ -82,9 +82,9 @@ const features = [
 ];
 
 const stats = [
-  { value: "226 000+", label: "professionnels référencés" },
-  { value: "4 293", label: "communes couvertes" },
-  { value: "12", label: "départements de Nouvelle-Aquitaine" },
+  { value: "1 000 000+", label: "professionnels référencés" },
+  { value: "12 115", label: "communes couvertes" },
+  { value: "40", label: "départements sur 5 régions" },
   { value: "9,90 €", label: "TTC par lead, paiement unique" },
 ];
 

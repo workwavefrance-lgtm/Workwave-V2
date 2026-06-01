@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   // Override twitter meta du root layout BTP (QA agent finding P1) :
   // sans ca, partages sociaux des pages /ai affichent le pitch BTP
-  // "226 000 professionnels en Nouvelle-Aquitaine".
+  // "1 000 000+ professionnels en France".
   twitter: {
     card: "summary_large_image",
     title: "Workwave AI — Trouvez le freelance tech ideal",

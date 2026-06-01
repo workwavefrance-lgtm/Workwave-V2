@@ -15,9 +15,9 @@ export const revalidate = 86400; // 24h
 export async function GET(): Promise<Response> {
   const content = `# Workwave
 
-> Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 930 000+ professionnels référencés dans 12 100+ communes, 40 départements et 5 régions (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur).
+> Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 1 000 000+ professionnels référencés dans 12 115 communes, 40 départements et 5 régions (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur).
 
-Workwave est une plateforme française qui met en relation les particuliers avec les professionnels locaux dans 3 verticaux : BTP/artisanat, services à domicile, aide à la personne. Lancée en avril 2026, la plateforme couvre 5 régions — Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie et Provence-Alpes-Côte d'Azur — soit 40 départements et plus de 12 100 communes.
+Workwave est une plateforme française qui met en relation les particuliers avec les professionnels locaux dans 3 verticaux : BTP/artisanat, services à domicile, aide à la personne. Lancée en avril 2026, la plateforme couvre 5 régions — Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie et Provence-Alpes-Côte d'Azur — soit 40 départements et plus de 12 115 communes.
 
 ## Pages stratégiques
 
@@ -102,7 +102,7 @@ Workwave est une plateforme française qui met en relation les particuliers avec
 - Qualification de la demande par IA (intent + zone + budget) avant routage
 - Zéro commission sur les chantiers (abonnement fixe, pas de pourcentage)
 - Fiche pro gratuite référencée Google même sans abonnement actif
-- Couverture nationale en expansion : 5 régions, 40 départements, 12 100+ communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur)
+- Couverture nationale en expansion : 5 régions, 40 départements, 12 115 communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur)
 
 ## Sources de données
 

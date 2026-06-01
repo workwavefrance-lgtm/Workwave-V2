@@ -78,33 +78,17 @@ const AI_CATEGORY_IDS = AI_CATEGORY_IDS_HELPER as unknown as number[];
 // et /sitemap/N.xml pour chaque id retourne.
 // ============================================================================
 export async function generateSitemaps() {
-  const supabase = getAdminServiceClient();
-  // count: "exact" OBLIGATOIRE ici (pas "estimated") : le nombre de batches DOIT
-  // être juste, sinon on PERD des fiches dans le sitemap. estimated lit pg_class
-  // (FAUSSÉ après un gros scrape tant que la table n'est pas réanalysée) ET
-  // ignore .in() → il avait sous-compté /artisan à ~540k vs 1,07M réels (~530k
-  // fiches non annoncées à Google). exact = quelques secondes, acceptable :
-  // generateSitemaps ne s'exécute qu'au build / à la revalidation ISR (pas par
-  // requête). Cf. CLAUDE.md 31/05 (la reco "estimated" du 28/04 ne vaut que pour
-  // le comptage par-requête, PAS pour ce calcul du nombre de batches).
-  const { count } = await supabase
-    .from("pros")
-    .select("id", { count: "exact", head: true })
-    .eq("is_active", true)
-    .is("deleted_at", null);
-
-  const proSitemapsCount = Math.ceil((count || 0) / PROS_PER_SITEMAP);
-
-  // Count pros tech (Workwave AI) pour les sub-sitemaps AI_PROS_OFFSET+.
-  // count estimated ne supporte pas les filtres .in(), on fait un select
-  // simple sur le category_id avec count exact (limited rows).
-  const { count: techCount } = await supabase
-    .from("pros")
-    .select("id", { count: "exact", head: true })
-    .in("category_id", AI_CATEGORY_IDS)
-    .eq("is_active", true)
-    .is("deleted_at", null);
-  const aiProSitemapsCount = Math.ceil((techCount || 0) / PROS_PER_SITEMAP);
+  // Nombre de sous-sitemaps EN DUR (déterministe). Le calcul via un count DB au
+  // build s'est révélé non fiable : le prérendu STATIQUE de l'index restait figé
+  // sur d'anciennes valeurs (count pendant le scrape) et l'entrée de cache ISR
+  // survivait aux redéploiements + purges (cf. CLAUDE.md 01/06). En figeant les
+  // valeurs, generateSitemaps() devient pur (aucun appel réseau) → résultat
+  // déterministe, plus rien à invalider.
+  // ⚠️ À BUMPER après un gros scrape :
+  //   pros : Math.ceil(pros_actifs / 45000)   |   ai : Math.ceil(pros_tech / 45000)
+  //   01/06/2026 : 1 069 733 pros actifs → 24  ;  110 085 pros tech → 3.
+  const proSitemapsCount = 24;
+  const aiProSitemapsCount = 3;
 
   const sitemaps = [
     { id: SITEMAP_STATIC },

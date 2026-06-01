@@ -57,11 +57,10 @@ export function toBreadcrumbSchema(
 /**
  * Schema Organization pour Workwave (enrichi pour LLM/GEO)
  *
- * Enrichi avec areaServed (12 dept Nouvelle-Aquitaine), foundingDate,
+ * Enrichi avec areaServed (5 régions de France), foundingDate,
  * description longue, slogan, knowsAbout (categories metier), pour aider
  * les LLM a comprendre le scope precis de l'entreprise et la citer
- * correctement quand on leur pose des questions sur les artisans en
- * Nouvelle-Aquitaine.
+ * correctement quand on leur pose des questions sur les artisans en France.
  */
 export function getOrganizationSchema(baseUrl: string): Record<string, unknown> {
   return {
@@ -72,7 +71,7 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     description:
-      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en Nouvelle-Aquitaine. 226 000+ artisans référencés dans les 12 départements et 4 293 communes de la région. Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + abonnement optionnel à partir de 32,50 €/mois pour recevoir les leads.",
+      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 1 000 000+ artisans référencés dans 40 départements et 12 115 communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur). Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + abonnement optionnel à partir de 32,50 €/mois pour recevoir les leads.",
     slogan: "Tout le savoir-faire local, enfin accessible",
     foundingDate: "2025-03-28",
     sameAs: [
@@ -87,21 +86,14 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
       addressCountry: "FR",
     },
     areaServed: {
-      "@type": "AdministrativeArea",
-      name: "Nouvelle-Aquitaine",
+      "@type": "Country",
+      name: "France",
       containsPlace: [
-        { "@type": "AdministrativeArea", name: "Charente", identifier: "16" },
-        { "@type": "AdministrativeArea", name: "Charente-Maritime", identifier: "17" },
-        { "@type": "AdministrativeArea", name: "Corrèze", identifier: "19" },
-        { "@type": "AdministrativeArea", name: "Creuse", identifier: "23" },
-        { "@type": "AdministrativeArea", name: "Dordogne", identifier: "24" },
-        { "@type": "AdministrativeArea", name: "Gironde", identifier: "33" },
-        { "@type": "AdministrativeArea", name: "Landes", identifier: "40" },
-        { "@type": "AdministrativeArea", name: "Lot-et-Garonne", identifier: "47" },
-        { "@type": "AdministrativeArea", name: "Pyrénées-Atlantiques", identifier: "64" },
-        { "@type": "AdministrativeArea", name: "Deux-Sèvres", identifier: "79" },
-        { "@type": "AdministrativeArea", name: "Vienne", identifier: "86" },
-        { "@type": "AdministrativeArea", name: "Haute-Vienne", identifier: "87" },
+        { "@type": "AdministrativeArea", name: "Nouvelle-Aquitaine" },
+        { "@type": "AdministrativeArea", name: "Bretagne" },
+        { "@type": "AdministrativeArea", name: "Pays de la Loire" },
+        { "@type": "AdministrativeArea", name: "Occitanie" },
+        { "@type": "AdministrativeArea", name: "Provence-Alpes-Côte d'Azur" },
       ],
     },
     knowsAbout: [
