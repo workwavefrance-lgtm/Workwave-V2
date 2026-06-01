@@ -229,7 +229,7 @@ export async function generateOnboardingPdf(
     color: GRAY,
   });
 
-  page3.drawText("PRO \u2014 39\u20AC/mois", {
+  page3.drawText("LEADS \u2014 9,90\u20AC/lead", {
     x: colRight,
     y: tableY,
     size: 14,
@@ -253,7 +253,7 @@ export async function generateOnboardingPdf(
     { left: "", right: "\u2713 Routing IA automatique" },
     { left: "", right: "\u2713 Notifications en temps r\u00E9el" },
     { left: "", right: "\u2713 Dashboard et statistiques" },
-    { left: "", right: "\u2713 14 jours d'essai gratuit" },
+    { left: "", right: "\u2713 Paiement \u00e0 la demande (9,90\u20ac)" },
     { left: "", right: "\u2713 Sans engagement" },
   ];
 
@@ -308,14 +308,14 @@ export async function generateOnboardingPdf(
 
   // CTA
   tableY -= 50;
-  page3.drawText("Activez votre essai gratuit sur", {
+  page3.drawText("Réclamez votre fiche gratuite sur", {
     x: MARGIN,
     y: tableY,
     size: 16,
     font: helvetica,
     color: BLACK,
   });
-  page3.drawText(`${BASE_URL}/pro/tarifs`, {
+  page3.drawText(`${BASE_URL}/pro`, {
     x: MARGIN,
     y: tableY - 24,
     size: 16,

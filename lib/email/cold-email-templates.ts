@@ -128,7 +128,7 @@ function buildStep1(
       Cette fiche est gratuite. Vous pouvez la réclamer en 3 minutes pour ajouter vos coordonnées, vos horaires, vos photos de réalisations et personnaliser votre présentation. Aucun engagement, aucune carte bancaire demandée.
     </p>
     <p style="margin:0 0 16px;font-size:15px;color:#1a1a1a;line-height:1.7;">
-      Pour aller plus loin et recevoir directement les demandes de devis qualifiées dans votre zone, j'ai mis en place une formule Pro à 39€ TTC par mois, sans engagement. Tous les détails dans le PDF joint.
+      Et pour recevoir directement les demandes de devis qualifiées de votre zone, c'est gratuit : vous ne payez que 9,90€ TTC pour débloquer les coordonnées d'un client qui vous intéresse, sans abonnement ni engagement. Tous les détails dans le PDF joint.
     </p>
     <p style="margin:0 0 16px;font-size:15px;color:#1a1a1a;line-height:1.7;">
       Réclamer votre fiche : <a href="${claimUrl}" style="color:#FF5A36;text-decoration:underline;">${claimUrl}</a>
