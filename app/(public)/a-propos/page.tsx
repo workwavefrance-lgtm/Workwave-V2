@@ -108,12 +108,12 @@ export default function AProposPage() {
                 Un ancrage local
               </p>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                Basé en Vienne
+                Une entreprise française
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-                Workwave est une SAS française, sans capital étranger. On
-                connaît la Vienne, on y vit, on travaille avec les pros qui y
-                bossent au quotidien.
+                Workwave est une SAS française, sans capital étranger, née en
+                Vienne. On référence aujourd&apos;hui plus d&apos;un million
+                d&apos;artisans sur 5 régions de France.
               </p>
             </div>
             <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8">
@@ -124,9 +124,9 @@ export default function AProposPage() {
                 Une fiche gratuite pour tous les pros
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-                Tous les artisans de la Vienne sont déjà référencés
-                gratuitement. Vous reclamez la vôtre en 3 minutes pour la
-                personnaliser, sans rien à payer.
+                Plus d&apos;un million d&apos;artisans, dans 5 régions de
+                France, sont déjà référencés gratuitement. Vous réclamez la
+                vôtre en 3 minutes pour la personnaliser, sans rien à payer.
               </p>
             </div>
           </div>
