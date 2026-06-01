@@ -2,6 +2,7 @@ export const revalidate = 3600; // 1h
 
 import Link from "next/link";
 import SearchForm from "@/components/search/SearchForm";
+import CountUp from "@/components/ui/CountUp";
 import JsonLd from "@/components/seo/JsonLd";
 // Imports publics (sans cookies) pour permettre le caching ISR de la home.
 // Ne PAS remplacer par `lib/queries/categories` ou `lib/queries/cities` :
@@ -124,13 +125,15 @@ export default async function Home() {
           <SearchForm categories={allCategories} />
           <p className="mt-6 text-sm text-[var(--text-tertiary)]">
             Plus de{" "}
-            <span className="font-semibold text-[var(--text-primary)]">
-              1 000 000
-            </span>{" "}
+            <CountUp
+              end={1000000}
+              className="font-semibold text-[var(--text-primary)] tabular-nums"
+            />{" "}
             professionnels référencés dans{" "}
-            <span className="font-semibold text-[var(--text-primary)]">
-              12 115
-            </span>{" "}
+            <CountUp
+              end={12115}
+              className="font-semibold text-[var(--text-primary)] tabular-nums"
+            />{" "}
             communes, sur 5 régions de France
           </p>
         </div>
