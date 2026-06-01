@@ -500,7 +500,7 @@ export default function ProLandingPage() {
           </h2>
           <p className="text-lg text-[var(--text-secondary)] mb-8 max-w-xl mx-auto">
             Trouvez votre fiche dans l&apos;annuaire et réclamez-la
-            gratuitement. L&apos;essai de 14 jours démarre immédiatement.
+            gratuitement, sans carte bancaire.
           </p>
           <Link
             href="/recherche"

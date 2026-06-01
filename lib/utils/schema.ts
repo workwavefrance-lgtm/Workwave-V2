@@ -71,7 +71,7 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     description:
-      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 1 000 000+ artisans référencés dans 40 départements et 12 115 communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur). Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + abonnement optionnel à partir de 32,50 €/mois pour recevoir les leads.",
+      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 1 000 000+ artisans référencés dans 40 départements et 12 115 communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur). Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
     slogan: "Tout le savoir-faire local, enfin accessible",
     foundingDate: "2025-03-28",
     sameAs: [

@@ -58,7 +58,7 @@ const homeFaqs = [
   {
     question: "Combien coûte Workwave pour un professionnel ?",
     answer:
-      "Le référencement de base est gratuit à vie. Un abonnement optionnel à 39 € par mois, ou 390 € par an, permet de recevoir automatiquement les demandes de projets des particuliers. Un essai gratuit de 14 jours sans carte bancaire est proposé.",
+      "Le référencement est gratuit à vie et les professionnels reçoivent gratuitement par email tous les projets de leur zone. Ils paient uniquement 9,90 € pour débloquer les coordonnées d'un client qui les intéresse : un paiement unique par lead, sans abonnement, sans commission et sans carte bancaire à l'inscription.",
   },
   {
     question: "Quelle zone géographique couvre Workwave ?",

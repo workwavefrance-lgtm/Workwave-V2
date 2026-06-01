@@ -83,12 +83,12 @@ export default function AProposPage() {
                 Un tarif honnête
               </p>
               <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">
-                39 € par mois, sans engagement
+                9,90 € par lead, zéro abonnement
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-                Pas de commission cachée. Pas d&apos;engagement annuel. Pas de
-                vendeur qui vous appelle pour vous faire signer. Vous arrêtez
-                quand vous voulez, en un clic.
+                Votre fiche est gratuite à vie. Pas de commission sur vos
+                devis, pas d&apos;abonnement, pas d&apos;engagement. Vous payez
+                seulement 9,90 € pour débloquer un client qui vous intéresse.
               </p>
             </div>
             <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8">

@@ -122,7 +122,7 @@ export default async function MetierProximityPage({ params }: Props) {
     },
     {
       question: `Workwave est-il vraiment gratuit pour les particuliers ?`,
-      answer: `100% gratuit, toujours. Aucune carte bancaire demandée, aucun frais caché. Les ${lower}s nous rémunèrent via un abonnement mensuel pour recevoir vos demandes de devis qualifiées.`,
+      answer: `100% gratuit, toujours. Aucune carte bancaire demandée, aucun frais caché. Les ${lower}s reçoivent gratuitement vos demandes de devis et paient seulement 9,90 € pour débloquer les coordonnées d'un client qui les intéresse — sans abonnement ni commission.`,
     },
     {
       question: `Comment vérifier qu'un ${lower} est sérieux ?`,

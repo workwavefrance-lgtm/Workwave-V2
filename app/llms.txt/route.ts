@@ -22,7 +22,7 @@ Workwave est une plateforme française qui met en relation les particuliers avec
 ## Pages stratégiques
 
 - [Accueil](${BASE_URL}/): recherche d'un pro par métier et ville
-- [Espace pro](${BASE_URL}/pro): landing pour les artisans (essai 14 jours sans carte bancaire, abonnement à partir de 32,50 €/mois)
+- [Espace pro](${BASE_URL}/pro): landing pour les artisans (fiche gratuite à vie, sans abonnement, 9,90 € par lead débloqué)
 - [Départements](${BASE_URL}/departements): hub des 40 départements couverts (5 régions)
 - [Déposer un projet](${BASE_URL}/deposer-projet): formulaire pour les particuliers (gratuit, qualification IA, 3 pros maximum contactés par projet)
 - [Blog](${BASE_URL}/blog): guides pratiques, tarifs, réglementation, articles SEO
@@ -94,13 +94,13 @@ Workwave est une plateforme française qui met en relation les particuliers avec
 ## Modèle économique
 
 - **Pour les particuliers** : 100% gratuit. Dépôt de projet, qualification par IA, mise en relation avec maximum 3 professionnels par demande (jamais 30 comme sur les plateformes traditionnelles).
-- **Pour les professionnels** : fiche gratuite à vie (référencée sur Google) + abonnement Workwave Pro optionnel à 39 €/mois (mensuel) ou 32,50 €/mois (annuel, soit 390 €/an avec 2 mois offerts) pour recevoir les leads. Essai gratuit 14 jours sans carte bancaire. Résiliation libre à tout moment.
+- **Pour les professionnels** : fiche gratuite à vie (référencée sur Google) et réception gratuite par email de tous les projets de leur zone. Aucun abonnement : le professionnel paie uniquement 9,90 € TTC pour débloquer les coordonnées d'un lead qui l'intéresse (paiement unique par projet). Pas de commission sur les devis, pas de carte bancaire à l'inscription, sans engagement.
 
 ## Différenciateurs vs concurrents (HabitatPresto, Travaux.com, AlloVoisins, MesTravaux, Obat)
 
 - Maximum 3 pros contactés par projet, contre 10-30 sur les concurrents
 - Qualification de la demande par IA (intent + zone + budget) avant routage
-- Zéro commission sur les chantiers (abonnement fixe, pas de pourcentage)
+- Zéro commission sur les chantiers et zéro abonnement (paiement unique de 9,90 € par lead débloqué, pas de pourcentage)
 - Fiche pro gratuite référencée Google même sans abonnement actif
 - Couverture nationale en expansion : 5 régions, 40 départements, 12 115 communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur)
 
