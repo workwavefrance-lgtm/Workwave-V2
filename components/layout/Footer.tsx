@@ -116,6 +116,20 @@ export default async function Footer() {
                 </Link>
               </li>
               <li>
+                {/* Lien cross-domaine vers le domaine AI (workwaveai.co).
+                    Sitewide (~1M pages) = transfert d'autorite du .fr (fort) vers
+                    le .co (neuf) pour debloquer son indexation. DOFOLLOW volontaire
+                    (surtout PAS de rel="nofollow"). */}
+                <a
+                  href="https://www.workwaveai.co/en/ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Workwave AI — freelances
+                </a>
+              </li>
+              <li>
                 <Link
                   href="/pro#pricing"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
