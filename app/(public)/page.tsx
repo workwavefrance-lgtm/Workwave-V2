@@ -3,6 +3,7 @@ export const revalidate = 3600; // 1h
 import Link from "next/link";
 import SearchForm from "@/components/search/SearchForm";
 import CountUp from "@/components/ui/CountUp";
+import RecentProjectsSection from "@/components/home/RecentProjectsSection";
 import JsonLd from "@/components/seo/JsonLd";
 // Imports publics (sans cookies) pour permettre le caching ISR de la home.
 // Ne PAS remplacer par `lib/queries/categories` ou `lib/queries/cities` :
@@ -10,6 +11,7 @@ import JsonLd from "@/components/seo/JsonLd";
 // la page en dynamic => cache CDN inactif (TTFB 0.4s a chaque visite).
 import { getCategoriesByVerticalPublic } from "@/lib/queries/home-public";
 import { getTopCitiesPublic, getAllDepartmentsPublic } from "@/lib/queries/home-public";
+import { getRecentProjectsForHome } from "@/lib/queries/recent-projects";
 import {
   getWebSiteSchema,
   getOrganizationSchema,
@@ -68,13 +70,15 @@ const homeFaqs = [
 ];
 
 export default async function Home() {
-  const [btp, domicile, personne, topCities, departments] = await Promise.all([
-    getCategoriesByVerticalPublic("btp"),
-    getCategoriesByVerticalPublic("domicile"),
-    getCategoriesByVerticalPublic("personne"),
-    getTopCitiesPublic(30),
-    getAllDepartmentsPublic(),
-  ]);
+  const [btp, domicile, personne, topCities, departments, recentProjects] =
+    await Promise.all([
+      getCategoriesByVerticalPublic("btp"),
+      getCategoriesByVerticalPublic("domicile"),
+      getCategoriesByVerticalPublic("personne"),
+      getTopCitiesPublic(30),
+      getAllDepartmentsPublic(),
+      getRecentProjectsForHome(10),
+    ]);
 
   const allCategories = [...btp, ...domicile, ...personne].sort((a, b) =>
     a.name.localeCompare(b.name)
@@ -164,6 +168,10 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Projets déposés récemment — double CTA (particulier dépose / pro reçoit).
+          Modulable : 1→10 vrais projets anonymisés, se masque si 0. */}
+      <RecentProjectsSection projects={recentProjects} />
 
       {/* Categories par vertical */}
       {verticals.map((vertical) => (

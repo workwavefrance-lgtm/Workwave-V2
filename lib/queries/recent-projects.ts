@@ -1,0 +1,59 @@
+import { getAdminServiceClient } from "@/lib/admin/service-client";
+
+/**
+ * Projets récents ANONYMISÉS pour la home (section "Projets déposés récemment").
+ *
+ * RGPD : on ne SELECT QUE des champs non-identifiants — métier, ville, budget
+ * (fourchette), urgence, date. JAMAIS first_name / email / phone / description /
+ * ai_qualification. Le résultat (anonyme) est mis en cache ISR avec la home.
+ *
+ * Service client obligatoire : la table `projects` a une RLS qui bloque l'anon
+ * (elle contient des PII). On bypasse via service_role MAIS on ne remonte que les
+ * colonnes safe ci-dessus → aucune PII ne sort jamais.
+ *
+ * Filtres : statut new/routed (pas suspicious/deleted/unrouted), ville non nulle,
+ * verticaux BTP/domicile/personne (le vertical tech a sa propre home /ai).
+ * Modulable : renvoie jusqu'à `limit` projets (la section s'adapte au nombre réel).
+ */
+export type PublicProject = {
+  id: number;
+  categoryName: string;
+  categorySlug: string;
+  cityName: string;
+  deptCode: string;
+  budget: string | null;
+  urgency: string | null;
+  createdAt: string;
+};
+
+export async function getRecentProjectsForHome(
+  limit = 10
+): Promise<PublicProject[]> {
+  const sb = getAdminServiceClient();
+  const { data, error } = await sb
+    .from("projects")
+    .select(
+      "id, budget, urgency, created_at, category:categories(name, slug), city:cities(name, department:departments(code))"
+    )
+    .in("status", ["new", "routed"])
+    .in("vertical", ["btp", "domicile", "personne"])
+    .not("city_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data as any[])
+    .map((p) => ({
+      id: p.id as number,
+      categoryName: (p.category?.name as string) || "",
+      categorySlug: (p.category?.slug as string) || "",
+      cityName: (p.city?.name as string) || "",
+      deptCode: (p.city?.department?.code as string) || "",
+      budget: p.budget && p.budget !== "unknown" ? (p.budget as string) : null,
+      urgency: (p.urgency as string) || null,
+      createdAt: p.created_at as string,
+    }))
+    .filter((p) => p.categoryName && p.cityName);
+}
