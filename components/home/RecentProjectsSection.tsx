@@ -60,6 +60,14 @@ export default function RecentProjectsSection({
             Des particuliers cherchent un pro près de chez eux. Déposez le
             vôtre — gratuit, en 60 secondes, sans inscription.
           </p>
+          <div className="mt-7">
+            <Link
+              href="/deposer-projet"
+              className="inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-[var(--accent)] text-white font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
+            >
+              Déposer mon projet — gratuit
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -114,18 +122,13 @@ export default function RecentProjectsSection({
           })}
         </div>
 
-        <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Link
-            href="/deposer-projet"
-            className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-[var(--accent)] text-white font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
-          >
-            Déposer mon projet
-          </Link>
+        <div className="mt-8 text-center">
           <Link
             href="/pro"
-            className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-transparent border border-[var(--border-color)] text-[var(--text-primary)] font-semibold transition-all duration-250 hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors duration-250 hover:text-[var(--accent)]"
           >
             Vous êtes artisan ? Recevez ces demandes
+            <span aria-hidden>→</span>
           </Link>
         </div>
       </div>
