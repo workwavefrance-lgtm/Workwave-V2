@@ -133,7 +133,7 @@ export default async function Home() {
             <div className="text-center">
               <CountUp
                 end={1000000}
-                className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
+                className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
                 professionnels référencés
@@ -146,7 +146,7 @@ export default async function Home() {
             <div className="text-center">
               <CountUp
                 end={12115}
-                className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
+                className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
                 communes couvertes
@@ -159,7 +159,7 @@ export default async function Home() {
             <div className="text-center">
               <CountUp
                 end={5}
-                className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
+                className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
                 régions de France
