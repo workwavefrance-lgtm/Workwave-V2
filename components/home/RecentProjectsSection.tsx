@@ -68,7 +68,7 @@ export default function RecentProjectsSection({
             return (
               <Link
                 key={p.id}
-                href="/deposer-projet"
+                href="/pro"
                 className="group block bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-5 transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]"
               >
                 <div className="flex items-start justify-between gap-3 mb-1.5">
