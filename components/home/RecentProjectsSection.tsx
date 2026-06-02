@@ -60,14 +60,6 @@ export default function RecentProjectsSection({
             Des particuliers cherchent un pro près de chez eux. Déposez le
             vôtre — gratuit, en 60 secondes, sans inscription.
           </p>
-          <div className="mt-7">
-            <Link
-              href="/deposer-projet"
-              className="inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-[var(--accent)] text-white font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
-            >
-              Déposer mon projet — gratuit
-            </Link>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
