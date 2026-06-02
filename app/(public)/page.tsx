@@ -127,44 +127,47 @@ export default async function Home() {
             de France, à portée d&apos;un clic.
           </p>
           <SearchForm categories={allCategories} />
-          {/* Bande de stats impactante : gros chiffres coral animés = preuve de
-              couverture immédiate ("je vais forcément trouver mon artisan"). */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
-            <div className="text-center">
-              <CountUp
-                end={1000000}
-                className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
-              />
-              <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                professionnels référencés
-              </span>
-            </div>
-            <div
-              className="hidden sm:block h-14 w-px bg-[var(--card-border)]"
-              aria-hidden="true"
+        </div>
+        {/* Bande de stats impactante : gros chiffres coral animés = preuve de
+            couverture immédiate. Conteneur plus large que le hero (max-w-6xl)
+            pour que les 3 chiffres — dont "1 000 000" — tiennent sur UNE seule
+            ligne au format desktop, sans retour bancal. Paliers de taille :
+            mobile 48px (empilé), tablette 60px, desktop 72px (1 ligne). */}
+        <div className="max-w-6xl mx-auto mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
+          <div className="text-center">
+            <CountUp
+              end={1000000}
+              className="block text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
             />
-            <div className="text-center">
-              <CountUp
-                end={12115}
-                className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
-              />
-              <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                communes couvertes
-              </span>
-            </div>
-            <div
-              className="hidden sm:block h-14 w-px bg-[var(--card-border)]"
-              aria-hidden="true"
+            <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
+              professionnels référencés
+            </span>
+          </div>
+          <div
+            className="hidden sm:block h-14 w-px bg-[var(--card-border)]"
+            aria-hidden="true"
+          />
+          <div className="text-center">
+            <CountUp
+              end={12115}
+              className="block text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
             />
-            <div className="text-center">
-              <CountUp
-                end={5}
-                className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
-              />
-              <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                régions de France
-              </span>
-            </div>
+            <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
+              communes couvertes
+            </span>
+          </div>
+          <div
+            className="hidden sm:block h-14 w-px bg-[var(--card-border)]"
+            aria-hidden="true"
+          />
+          <div className="text-center">
+            <CountUp
+              end={5}
+              className="block text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
+            />
+            <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
+              régions de France
+            </span>
           </div>
         </div>
       </section>
