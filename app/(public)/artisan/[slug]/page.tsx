@@ -152,17 +152,13 @@ export default async function ProPage({ params }: Props) {
   // Phrase "perte" du bandeau construite en STRING (pas en JSX interpolé) :
   // évite les espaces avalés aux frontières {expr}/saut-de-ligne (bug "Poitierspartent").
   const claimLossText = `Les demandes des particuliers pour ${claimArticle} ${claimMetier}${claimCityPart} vont aux pros inscrits sur Workwave. Pas à vous, tant que vous n'avez pas réclamé votre fiche.`;
-  // FLOU DES COORDONNÉES (fiche non réclamée) — TEST gated sur PICTAV.
-  // Masquer tel/email/site force le particulier à déposer un projet (= lead
-  // capté par Workwave) et incite le pro à réclamer sa fiche pour récupérer
-  // ses clients. ROLLOUT après validation : supprimer la dernière condition
-  // `&& COORD_BLUR_TEST_SLUGS.has(slug)` pour l'appliquer à toutes les fiches
-  // non réclamées qui ont au moins une coordonnée.
-  const COORD_BLUR_TEST_SLUGS = new Set(["pictav-energie-00013"]);
+  // FLOU DES COORDONNÉES : sur une fiche NON réclamée qui a au moins une
+  // coordonnée, on masque le téléphone (à moitié), l'email et le site. Ça force
+  // le particulier à déposer un projet (= lead capté par Workwave) et incite le
+  // pro à réclamer sa fiche pour récupérer ses clients. Une fiche réclamée
+  // affiche ses coordonnées normalement.
   const blurCoords =
-    !isClaimed &&
-    (!!pro.phone || !!pro.email || !!pro.website) &&
-    COORD_BLUR_TEST_SLUGS.has(slug);
+    !isClaimed && (!!pro.phone || !!pro.email || !!pro.website);
   // Téléphone "à moitié flouté" (teaser) : 1ère moitié visible, 2e floutée.
   // Plus frustrant qu'un flou total → pousse le pro à réclamer et le particulier
   // à déposer. Le numéro vient de Sirene (donnée publique) ; le flou = friction.
