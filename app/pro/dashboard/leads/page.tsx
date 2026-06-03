@@ -105,16 +105,25 @@ export default async function LeadsPage({
     .eq("department_id", proDeptId);
   const cityIds = (cities || []).map((c: { id: number }) => c.id);
 
-  // Charger tous les projets BTP eligibles (meme catégorie + même département)
+  // Catégories du pro = principale + secondaires. Un pro multi-métiers voit
+  // les projets de TOUS ses métiers, pas seulement sa catégorie principale.
+  const leadCategoryIds = Array.from(
+    new Set<number>([
+      pro.category_id,
+      ...((pro.secondary_category_ids as number[] | null) || []),
+    ])
+  );
+
+  // Charger tous les projets BTP eligibles (métiers du pro + même département)
   let projects: ProjectRow[] = [];
   if (cityIds.length > 0) {
     const { data: projectsRaw } = await service
       .from("projects")
       .select(
-        "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, cleaned_description, has_contact_in_description, cities(name)"
+        "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, cleaned_description, has_contact_in_description, cities(name), categories(name)"
       )
       .eq("vertical", "btp")
-      .eq("category_id", pro.category_id)
+      .in("category_id", leadCategoryIds)
       .in("city_id", cityIds)
       .neq("status", "deleted")
       .order("created_at", { ascending: false })
@@ -171,9 +180,9 @@ export default async function LeadsPage({
           Leads reçus
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Tous les projets {pro.category?.name || ""} de votre département
-          ({proDeptId}). Débloquez les coordonnées pour <strong>9,90€ TTC</strong> par projet (paiement unique,
-          sans abonnement).
+          Tous les projets de vos métiers dans votre département. Débloquez les
+          coordonnées pour <strong>9,90€ TTC</strong> par projet (paiement
+          unique, sans abonnement).
         </p>
       </div>
 
@@ -191,6 +200,7 @@ export default async function LeadsPage({
                 : 0;
             const isSuspicious = p.status === "suspicious" || suspicionScore > 70;
             const cityName = Array.isArray(p.cities) ? p.cities[0]?.name : p.cities?.name;
+            const catName = Array.isArray(p.categories) ? p.categories[0]?.name : p.categories?.name;
             const fullDesc = p.description || "";
             const parts = fullDesc.split(/\n\n+/);
             const title = (parts[0] || "Projet sans titre").slice(0, 100);
@@ -223,7 +233,7 @@ export default async function LeadsPage({
                     </h3>
                     <div className="flex items-center gap-2 text-xs">
                       <span className="px-2 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] font-semibold uppercase tracking-wider">
-                        {pro.category?.name || "BTP"}
+                        {catName || pro.category?.name || "BTP"}
                       </span>
                       {cityName && (
                         <span className="text-[var(--text-tertiary)]">
@@ -340,6 +350,10 @@ type ProjectRow = {
   cleaned_description: string | null;
   has_contact_in_description: boolean;
   cities:
+    | { name: string }
+    | { name: string }[]
+    | null;
+  categories:
     | { name: string }
     | { name: string }[]
     | null;

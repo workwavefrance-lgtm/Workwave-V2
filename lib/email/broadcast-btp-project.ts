@@ -184,7 +184,9 @@ export async function broadcastBtpProject(
   const { data: pros, error: queryError } = await sb
     .from("pros")
     .select("id, email, name, paused_until")
-    .eq("category_id", input.projectCategoryId)
+    .or(
+      `category_id.eq.${input.projectCategoryId},secondary_category_ids.cs.{${input.projectCategoryId}}`
+    )
     .in("city_id", cityIds)
     .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup"])
     .eq("is_active", true)
