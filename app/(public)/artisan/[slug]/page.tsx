@@ -149,6 +149,9 @@ export default async function ProPage({ params }: Props) {
   const claimArticle = getCategoryArticle(pro.category.name);
   const claimMetier = pro.category.name.toLowerCase();
   const claimCityPart = cityName ? ` à ${cityName}` : "";
+  // Phrase "perte" du bandeau construite en STRING (pas en JSX interpolé) :
+  // évite les espaces avalés aux frontières {expr}/saut-de-ligne (bug "Poitierspartent").
+  const claimLossText = `Les demandes des particuliers pour ${claimArticle} ${claimMetier}${claimCityPart} partent aux pros inscrits sur Workwave — pas à vous tant que cette fiche n'est pas réclamée.`;
   // FLOU DES COORDONNÉES (fiche non réclamée) — TEST gated sur PICTAV.
   // Masquer tel/email/site force le particulier à déposer un projet (= lead
   // capté par Workwave) et incite le pro à réclamer sa fiche pour récupérer
@@ -303,9 +306,7 @@ export default async function ProPage({ params }: Props) {
               <span className="font-semibold text-[var(--text-primary)]">
                 Vous êtes {pro.name} ?
               </span>{" "}
-              Les demandes des particuliers pour {claimArticle} {claimMetier}
-              {claimCityPart} partent aux pros inscrits sur Workwave — pas à vous
-              tant que cette fiche n&apos;est pas réclamée.{" "}
+              {claimLossText}{" "}
               <Link
                 href={claimAcquisitionHref}
                 className="text-[var(--accent)] font-medium underline underline-offset-2 hover:text-[#E63E1A] transition-colors duration-250 whitespace-nowrap"
