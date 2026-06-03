@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getProByUserId } from "@/lib/queries/pros";
-import { getLeadStatsForPro, getRecentLeadsForPro } from "@/lib/queries/leads";
+import { getProDashboardData } from "@/lib/queries/leads";
 import DashboardHome from "@/components/pro/dashboard/DashboardHome";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
@@ -28,10 +28,18 @@ export default async function DashboardHomePage() {
     proId: pro.id,
   });
 
-  const [stats, recentLeads] = await Promise.all([
-    getLeadStatsForPro(pro.id),
-    getRecentLeadsForPro(pro.id),
-  ]);
+  // Accueil pay-per-lead : données dynamiques (projets matchant les catégories
+  // principale + secondaires du pro + son département). Cf. getProDashboardData.
+  const dashboardData = await getProDashboardData({
+    proId: pro.id,
+    categoryIds: Array.from(
+      new Set<number>([
+        pro.category_id,
+        ...((pro.secondary_category_ids as number[] | null) || []),
+      ])
+    ),
+    departmentId: pro.city?.department_id ?? null,
+  });
 
-  return <DashboardHome stats={stats} recentLeads={recentLeads} />;
+  return <DashboardHome data={dashboardData} />;
 }

@@ -257,3 +257,124 @@ export async function getLeadsReceivedLast30Days(
 
   return result;
 }
+
+// ============================================
+// Accueil dashboard BTP — modèle pay-per-lead (dynamique)
+// ============================================
+
+export type RecentProjectForPro = {
+  id: number;
+  first_name: string | null;
+  categoryName: string | null;
+  cityName: string | null;
+  created_at: string;
+  unlocked: boolean;
+};
+
+export type ProDashboardData = {
+  newThisMonth: number; // projets matchés créés ce mois
+  totalAvailable: number; // total projets matchés non supprimés
+  unlockedCount: number; // leads débloqués par le pro (achats 9,90€)
+  recentProjects: RecentProjectForPro[];
+};
+
+/**
+ * Données de l'accueil dashboard BTP en modèle pay-per-lead.
+ * DYNAMIQUE : compte les PROJETS matchant les catégories du pro (principale +
+ * secondaires) + son département — comme la page Leads — au lieu de la table
+ * `project_leads` (morte en pay-per-lead, plus aucune écriture). + lead_unlocks.
+ */
+export async function getProDashboardData(args: {
+  proId: number;
+  categoryIds: number[];
+  departmentId: number | null;
+}): Promise<ProDashboardData> {
+  const empty: ProDashboardData = {
+    newThisMonth: 0,
+    totalAvailable: 0,
+    unlockedCount: 0,
+    recentProjects: [],
+  };
+  if (!args.departmentId || args.categoryIds.length === 0) return empty;
+
+  const supabase = getAdminServiceClient();
+
+  const { data: cities } = await supabase
+    .from("cities")
+    .select("id")
+    .eq("department_id", args.departmentId);
+  const cityIds = (cities || []).map((c: { id: number }) => c.id);
+  if (cityIds.length === 0) return empty;
+
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  const [totalRes, monthRes, unlockedRes, recentRes] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id", { count: "exact", head: true })
+      .eq("vertical", "btp")
+      .in("category_id", args.categoryIds)
+      .in("city_id", cityIds)
+      .neq("status", "deleted"),
+    supabase
+      .from("projects")
+      .select("id", { count: "exact", head: true })
+      .eq("vertical", "btp")
+      .in("category_id", args.categoryIds)
+      .in("city_id", cityIds)
+      .neq("status", "deleted")
+      .gte("created_at", monthStart),
+    supabase
+      .from("lead_unlocks")
+      .select("id", { count: "exact", head: true })
+      .eq("pro_id", args.proId),
+    supabase
+      .from("projects")
+      .select("id, first_name, created_at, cities(name), categories(name)")
+      .eq("vertical", "btp")
+      .in("category_id", args.categoryIds)
+      .in("city_id", cityIds)
+      .neq("status", "deleted")
+      .order("created_at", { ascending: false })
+      .limit(5),
+  ]);
+
+  const recentRows = (recentRes.data || []) as unknown as Array<{
+    id: number;
+    first_name: string | null;
+    created_at: string;
+    cities: { name: string } | { name: string }[] | null;
+    categories: { name: string } | { name: string }[] | null;
+  }>;
+
+  const recentIds = recentRows.map((p) => p.id);
+  const { data: unlocks } = recentIds.length
+    ? await supabase
+        .from("lead_unlocks")
+        .select("project_id")
+        .eq("pro_id", args.proId)
+        .in("project_id", recentIds)
+    : { data: [] as { project_id: number }[] };
+  const unlockedSet = new Set((unlocks || []).map((u) => u.project_id));
+
+  const recentProjects: RecentProjectForPro[] = recentRows.map((p) => ({
+    id: p.id,
+    first_name: p.first_name,
+    categoryName: Array.isArray(p.categories)
+      ? p.categories[0]?.name ?? null
+      : p.categories?.name ?? null,
+    cityName: Array.isArray(p.cities)
+      ? p.cities[0]?.name ?? null
+      : p.cities?.name ?? null,
+    created_at: p.created_at,
+    unlocked: unlockedSet.has(p.id),
+  }));
+
+  return {
+    newThisMonth: monthRes.count || 0,
+    totalAvailable: totalRes.count || 0,
+    unlockedCount: unlockedRes.count || 0,
+    recentProjects,
+  };
+}

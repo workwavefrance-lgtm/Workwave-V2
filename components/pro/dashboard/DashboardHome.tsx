@@ -4,32 +4,14 @@ import Link from "next/link";
 import { useDashboard } from "@/components/pro/dashboard/DashboardProvider";
 import CountUp from "@/components/ui/CountUp";
 import { timeAgo } from "@/lib/utils/date";
-import type { LeadStats, LeadWithProject } from "@/lib/queries/leads";
+import type { ProDashboardData } from "@/lib/queries/leads";
 
 type Props = {
-  stats: LeadStats;
-  recentLeads: LeadWithProject[];
+  data: ProDashboardData;
 };
 
-const STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  sent: {
-    label: "Nouveau",
-    className: "bg-[var(--accent)]/10 text-[var(--accent)]",
-  },
-  opened: {
-    label: "Vu",
-    className: "bg-[var(--bg-tertiary)] text-[var(--text-secondary)]",
-  },
-  contacted: {
-    label: "Contacté",
-    className: "bg-green-500/10 text-green-600 dark:text-green-400",
-  },
-  not_relevant: {
-    label: "Non pertinent",
-    className: "bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]",
-  },
-};
-
+// En pay-per-lead, plus d'abonnement : tout le monde est "Gratuit". On garde
+// trialing/active/suspended pour d'éventuels comptes hérités (0 aujourd'hui).
 const SUBSCRIPTION_LABELS: Record<
   string,
   { label: string; className: string }
@@ -39,6 +21,10 @@ const SUBSCRIPTION_LABELS: Record<
     className: "bg-[var(--bg-tertiary)] text-[var(--text-secondary)]",
   },
   free: {
+    label: "Gratuit",
+    className: "bg-[var(--bg-tertiary)] text-[var(--text-secondary)]",
+  },
+  canceled: {
     label: "Gratuit",
     className: "bg-[var(--bg-tertiary)] text-[var(--text-secondary)]",
   },
@@ -54,45 +40,23 @@ const SUBSCRIPTION_LABELS: Record<
     label: "Paiement en attente",
     className: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
   },
-  canceled: {
-    label: "Résilié",
-    className: "bg-red-500/10 text-red-600 dark:text-red-400",
-  },
   suspended: {
     label: "Suspendu",
     className: "bg-red-500/10 text-red-600 dark:text-red-400",
   },
 };
 
-function DeltaIndicator({
-  current,
-  previous,
-}: {
-  current: number;
-  previous: number;
-}) {
-  if (previous === 0 && current === 0) return null;
-  if (previous === 0)
-    return (
-      <span className="text-xs font-medium text-green-500">Nouveau</span>
-    );
+const STAT_CARDS: {
+  key: keyof Pick<ProDashboardData, "newThisMonth" | "totalAvailable" | "unlockedCount">;
+  label: string;
+  suffix?: string;
+}[] = [
+  { key: "newThisMonth", label: "Nouveaux projets ce mois" },
+  { key: "totalAvailable", label: "Projets disponibles" },
+  { key: "unlockedCount", label: "Leads débloqués" },
+];
 
-  const delta = current - previous;
-  if (delta === 0) return <span className="text-xs text-[var(--text-tertiary)]">=</span>;
-
-  const percent = Math.round((Math.abs(delta) / previous) * 100);
-  const isPositive = delta > 0;
-
-  return (
-    <span
-      className={`text-xs font-medium ${isPositive ? "text-green-500" : "text-red-500"}`}
-    >
-      {isPositive ? "↑" : "↓"} {percent}%
-    </span>
-  );
-}
-
-export default function DashboardHome({ stats, recentLeads }: Props) {
+export default function DashboardHome({ data }: Props) {
   const { pro } = useDashboard();
 
   const today = new Date().toLocaleDateString("fr-FR", {
@@ -116,62 +80,31 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
         </p>
       </div>
 
-      {/* Cartes statistiques */}
+      {/* Cartes statistiques (pay-per-lead) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">
-              Leads reçus ce mois
+        {STAT_CARDS.map((card) => (
+          <div
+            key={card.key}
+            className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6"
+          >
+            <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
+              {card.label}
             </p>
-            <DeltaIndicator
-              current={stats.receivedThisMonth}
-              previous={stats.prevReceived}
-            />
-          </div>
-          <p className="text-3xl font-bold text-[var(--text-primary)]">
-            <CountUp end={stats.receivedThisMonth} duration={1200} />
-          </p>
-        </div>
-
-        <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">
-              Leads contactés
+            <p className="text-3xl font-bold text-[var(--text-primary)]">
+              <CountUp end={data[card.key]} duration={1200} />
             </p>
-            <DeltaIndicator
-              current={stats.contactedThisMonth}
-              previous={stats.prevContacted}
-            />
           </div>
-          <p className="text-3xl font-bold text-[var(--text-primary)]">
-            <CountUp end={stats.contactedThisMonth} duration={1200} />
-          </p>
-        </div>
-
-        <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">
-              Taux de réponse
-            </p>
-            <DeltaIndicator
-              current={stats.responseRate}
-              previous={stats.prevResponseRate}
-            />
-          </div>
-          <p className="text-3xl font-bold text-[var(--text-primary)]">
-            <CountUp end={stats.responseRate} duration={1200} suffix=" %" />
-          </p>
-        </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Derniers leads */}
+        {/* Derniers projets dans la zone */}
         <div className="lg:col-span-2 bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-              Derniers leads reçus
+              Derniers projets dans votre zone
             </h2>
-            {recentLeads.length > 0 && (
+            {data.recentProjects.length > 0 && (
               <Link
                 href="/pro/dashboard/leads"
                 className="text-xs font-medium text-[var(--accent)] hover:underline"
@@ -181,7 +114,7 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
             )}
           </div>
 
-          {recentLeads.length === 0 ? (
+          {data.recentProjects.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-14 h-14 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center mx-auto mb-3">
                 <svg
@@ -199,52 +132,53 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
                 </svg>
               </div>
               <p className="text-sm text-[var(--text-secondary)] mb-1">
-                Aucun lead pour le moment
+                Aucun projet pour le moment
               </p>
               <p className="text-xs text-[var(--text-tertiary)]">
-                Les demandes de clients apparaîtront ici dès qu&apos;un
-                particulier déposera un projet dans votre zone.
+                Les demandes de votre zone apparaîtront ici dès qu&apos;un
+                particulier déposera un projet dans vos métiers.
               </p>
             </div>
           ) : (
             <div className="space-y-3">
-              {recentLeads.filter((lead) => lead.project).map((lead) => {
-                const badge = STATUS_BADGES[lead.status] || STATUS_BADGES.sent;
-                return (
-                  <Link
-                    key={lead.id}
-                    href="/pro/dashboard/leads"
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center shrink-0">
-                        <span className="text-sm font-semibold text-[var(--text-secondary)]">
-                          {lead.project!.first_name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                          {lead.project!.first_name} —{" "}
-                          {lead.project!.category.name}
-                        </p>
-                        <p className="text-xs text-[var(--text-tertiary)] truncate">
-                          {lead.project!.city?.name || "Ville non précisée"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0 ml-3">
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${badge.className}`}
-                      >
-                        {badge.label}
-                      </span>
-                      <span className="text-xs text-[var(--text-tertiary)] hidden sm:block">
-                        {timeAgo(lead.sent_at)}
+              {data.recentProjects.map((p) => (
+                <Link
+                  key={p.id}
+                  href="/pro/dashboard/leads"
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors duration-200"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center shrink-0">
+                      <span className="text-sm font-semibold text-[var(--text-secondary)]">
+                        {(p.first_name || "?").charAt(0).toUpperCase()}
                       </span>
                     </div>
-                  </Link>
-                );
-              })}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                        {p.categoryName || "Projet"}
+                        {p.cityName ? ` à ${p.cityName}` : ""}
+                      </p>
+                      <p className="text-xs text-[var(--text-tertiary)] truncate">
+                        {p.first_name || "Un particulier"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-3">
+                    <span
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        p.unlocked
+                          ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                          : "bg-[var(--accent)]/10 text-[var(--accent)]"
+                      }`}
+                    >
+                      {p.unlocked ? "Débloqué" : "À débloquer"}
+                    </span>
+                    <span className="text-xs text-[var(--text-tertiary)] hidden sm:block">
+                      {timeAgo(p.created_at)}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </div>
@@ -262,34 +196,11 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
             </span>
           </div>
 
-          {pro.subscription_status === "trialing" && pro.trial_ends_at && (
-            <p className="text-sm text-[var(--text-secondary)] mb-3">
-              Essai gratuit jusqu&apos;au{" "}
-              {new Date(pro.trial_ends_at).toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-              })}
-            </p>
-          )}
-
-          {pro.subscription_status === "active" && pro.current_period_end && (
-            <p className="text-sm text-[var(--text-secondary)] mb-3">
-              Prochaine facturation le{" "}
-              {new Date(pro.current_period_end).toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-              })}
-            </p>
-          )}
-
-          {(pro.subscription_status === "none" ||
-            pro.subscription_status === "free") && (
-            <p className="text-sm text-[var(--text-tertiary)] mb-4">
-              Vous êtes listé gratuitement. Vous recevez les demandes de votre
-              zone — débloquez un contact pour 9,90 € seulement quand un projet
-              vous intéresse.
-            </p>
-          )}
+          <p className="text-sm text-[var(--text-tertiary)] mb-4">
+            Vous êtes listé gratuitement. Vous recevez les demandes de votre
+            zone — débloquez un contact pour 9,90 € seulement quand un projet
+            vous intéresse.
+          </p>
 
           <Link
             href="/pro/dashboard/abonnement"
