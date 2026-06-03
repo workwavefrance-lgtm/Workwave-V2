@@ -10,6 +10,11 @@ import {
 import { getAllCategoriesPublic } from "@/lib/queries/home-public";
 import type { Category } from "@/lib/types/database";
 
+// ISR : revalide chaque heure → les nouvelles catégories (Vague 3 et au-delà)
+// apparaissent sans rebuild, et un éventuel cache "non trouvé" servi pendant un
+// déploiement se purge tout seul.
+export const revalidate = 3600;
+
 // Programmatique pro-acquisition services : décline /trouver-des-clients sur
 // chaque métier domicile + personne ("trouver des clients ménage", "trouver
 // des clients garde d'enfants"). Les nouvelles catégories de la Vague 3

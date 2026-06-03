@@ -14,6 +14,10 @@ import {
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import type { Category, Department } from "@/lib/types/database";
 
+// ISR : revalide chaque heure → nouvelles catégories sans rebuild + purge d'un
+// éventuel cache "non trouvé" servi pendant un déploiement.
+export const revalidate = 3600;
+
 // Programmatique pro-acquisition : décline /trouver-des-chantiers sur chaque
 // métier BTP (« trouver des chantiers plombier ») et chaque département
 // (« trouver des chantiers en Vienne »). Un SEUL param dynamique [slug] pour
