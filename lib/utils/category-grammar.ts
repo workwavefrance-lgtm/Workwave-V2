@@ -25,6 +25,13 @@ const FEMININE_CATEGORIES = new Set<string>([
   "aide administrative",
   // BTP / domicile
   "vidéosurveillance",
+  // Proximité (Vague 3 AlloVoisins)
+  "manutention",
+  "coiffure à domicile",
+  "esthétique à domicile",
+  "couture et retouches",
+  "assistance informatique",
+  "promenade d'animaux",
 ]);
 
 /**
