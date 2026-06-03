@@ -156,8 +156,15 @@ export default function ProjectForm({
 
   function next() {
     if (canProceed()) {
-      setStep((s) => Math.min(s + 1, STEPS.length - 1));
+      const target = Math.min(step + 1, STEPS.length - 1);
+      setStep(target);
       isDirty.current = true;
+      // Tracking par étape : on saura ainsi OÙ, précisément, les ~92 %
+      // d'abandons se produisent (Ville ? Projet ? Contact ?).
+      trackClient(EVENTS.PROJECT_STEP_REACHED, {
+        step: target + 1,
+        name: STEPS[target],
+      });
     }
   }
   function prev() {

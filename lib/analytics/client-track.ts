@@ -3,7 +3,9 @@ import { EVENTS } from "./events";
 type ClientEvent =
   | typeof EVENTS.PAGE_VIEW
   | typeof EVENTS.PROJECT_FORM_STARTED
-  | typeof EVENTS.PROJECT_FORM_ABANDONED;
+  | typeof EVENTS.PROJECT_FORM_ABANDONED
+  | typeof EVENTS.PROJECT_STEP_REACHED
+  | typeof EVENTS.PHONE_CLICK;
 
 /**
  * Client-side fire-and-forget tracking.
