@@ -285,30 +285,54 @@ async function main() {
     return;
   }
 
-  // ---------- TEST : 1 email vers admin ----------
+  // ---------- TEST : email -> admin + SMS -> --test-sms (ton numéro) ----------
   if (TEST_MODE) {
-    if (CHANNEL === "sms") {
-      console.log("⚠️ --test n'envoie qu'un email (pas de SMS test sans numéro). Utilise --execute --limit=1 pour un vrai SMS.");
+    const testSmsNum = arg("test-sms");
+    // Email de test (sauf si --channel=sms)
+    if (CHANNEL !== "sms") {
+      const sample = emailTargets[0] || pros[0];
+      const html = buildEmail({
+        proId: sample?.id || 1,
+        proName: sample?.name || "ATSAF",
+        proSlug: sample?.slug || "atsaf",
+        metier,
+        ville,
+        summary,
+        delai,
+      });
+      await brevo("POST", "/smtp/email", {
+        sender: { email: SENDER_EMAIL, name: SENDER_NAME },
+        to: [{ email: ADMIN_TEST_EMAIL }],
+        replyTo: { email: REPLY_TO, name: SENDER_NAME },
+        subject: `[TEST] Une demande de ${metier.toLowerCase()} à ${ville} — réclamez votre fiche`,
+        htmlContent: html,
+        headers: { "X-Mailin-Track-Click": "0", "X-Mailin-Track-Open": "0" },
+      });
+      console.log(`✓ Email TEST envoyé à ${ADMIN_TEST_EMAIL}`);
     }
-    const sample = emailTargets[0] || pros[0];
-    const html = buildEmail({
-      proId: sample?.id || 1,
-      proName: sample?.name || "ATSAF",
-      proSlug: sample?.slug || "atsaf",
-      metier,
-      ville,
-      summary,
-      delai,
-    });
-    await brevo("POST", "/smtp/email", {
-      sender: { email: SENDER_EMAIL, name: SENDER_NAME },
-      to: [{ email: ADMIN_TEST_EMAIL }],
-      replyTo: { email: REPLY_TO, name: SENDER_NAME },
-      subject: `[TEST] Une demande de ${metier.toLowerCase()} à ${ville} — réclamez votre fiche`,
-      htmlContent: html,
-      headers: { "X-Mailin-Track-Click": "0", "X-Mailin-Track-Open": "0" },
-    });
-    console.log(`✓ Email TEST envoyé à ${ADMIN_TEST_EMAIL}`);
+    // SMS de test vers TON numéro (jamais un vrai pro) : --test-sms=06XXXXXXXX
+    if (CHANNEL !== "email") {
+      if (!testSmsNum) {
+        console.log("ℹ️ Pour tester le SMS : relance avec --test-sms=06XXXXXXXX --channel=sms");
+      } else {
+        const e164 = toE164(testSmsNum);
+        if (!e164) {
+          console.log(`⚠️ --test-sms : « ${testSmsNum} » n'est pas un mobile FR valide (06/07).`);
+        } else {
+          try {
+            await brevo("POST", "/transactionalSMS/sms", {
+              sender: SMS_SENDER,
+              recipient: e164,
+              content: buildSms(metier, ville),
+              type: "transactional",
+            });
+            console.log(`✓ SMS TEST envoyé à ${e164}`);
+          } catch (e) {
+            console.log(`❌ SMS test échoué : ${(e as Error).message.slice(0, 180)}`);
+          }
+        }
+      }
+    }
     return;
   }
 
