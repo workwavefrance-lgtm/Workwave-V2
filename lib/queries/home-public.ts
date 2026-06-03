@@ -50,6 +50,24 @@ export async function getAllCategoriesPublic(): Promise<Category[]> {
   return (data as Category[]) || [];
 }
 
+// Lookup CIBLÉ par slug (clé de cache distincte par slug) — utilisé par les
+// pages /trouver-des-{chantiers,clients}/[slug]. Avantage vs getAllCategoriesPublic :
+// une catégorie nouvellement créée est résolue immédiatement, sans dépendre de
+// l'expiration du cache de la requête "toutes les catégories" (bug Vague 3 :
+// multiservice & co restaient en notFound car la liste complète était périmée).
+export async function getCategoryBySlugPublic(
+  slug: string
+): Promise<Category | null> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("slug", slug)
+    .limit(1)
+    .maybeSingle();
+  return (data as Category) || null;
+}
+
 export async function getAllDepartmentsPublic(): Promise<Department[]> {
   const supabase = createPublicClient();
   const { data } = await supabase

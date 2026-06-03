@@ -7,7 +7,10 @@ import {
   getClientsFaqSchema,
   getClientsServiceSchema,
 } from "@/lib/data/clients";
-import { getAllCategoriesPublic } from "@/lib/queries/home-public";
+import {
+  getAllCategoriesPublic,
+  getCategoryBySlugPublic,
+} from "@/lib/queries/home-public";
 import type { Category } from "@/lib/types/database";
 
 // ISR : revalide chaque heure → les nouvelles catégories (Vague 3 et au-delà)
@@ -24,14 +27,13 @@ const BASE_URL = "https://workwave.fr";
 const SERVICE_VERTICALS = ["domicile", "personne"] as const;
 
 async function resolveSlug(slug: string): Promise<Category | null> {
-  const cats = await getAllCategoriesPublic();
-  return (
-    cats.find(
-      (c) =>
-        c.slug === slug &&
-        (SERVICE_VERTICALS as readonly string[]).includes(c.vertical)
-    ) ?? null
-  );
+  // Lookup ciblé par slug (pas la liste complète en cache) → une nouvelle
+  // catégorie de proximité (Vague 3 : multiservice…) est résolue immédiatement.
+  const cat = await getCategoryBySlugPublic(slug);
+  if (cat && (SERVICE_VERTICALS as readonly string[]).includes(cat.vertical)) {
+    return cat;
+  }
+  return null;
 }
 
 export async function generateStaticParams() {

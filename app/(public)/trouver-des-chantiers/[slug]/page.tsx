@@ -10,6 +10,7 @@ import {
 import {
   getAllCategoriesPublic,
   getAllDepartmentsPublic,
+  getCategoryBySlugPublic,
 } from "@/lib/queries/home-public";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import type { Category, Department } from "@/lib/types/database";
@@ -31,13 +32,12 @@ type Resolved =
   | null;
 
 async function resolveSlug(slug: string): Promise<Resolved> {
-  const [cats, depts] = await Promise.all([
-    getAllCategoriesPublic(),
-    getAllDepartmentsPublic(),
-  ]);
-  // Métier BTP (les domicile/personne auront leur propre angle "clients/missions")
-  const cat = cats.find((c) => c.slug === slug && c.vertical === "btp");
-  if (cat) return { type: "metier", cat };
+  // Lookup ciblé par slug (pas la liste complète en cache) → une nouvelle
+  // catégorie BTP est résolue immédiatement. Cf. bug Vague 3.
+  const cat = await getCategoryBySlugPublic(slug);
+  if (cat && cat.vertical === "btp") return { type: "metier", cat };
+  // Département : la liste est stable (pas de nouveaux dépts à la volée).
+  const depts = await getAllDepartmentsPublic();
   const dept = depts.find((d) => generateDepartmentSlug(d) === slug);
   if (dept) return { type: "dept", dept };
   return null;
