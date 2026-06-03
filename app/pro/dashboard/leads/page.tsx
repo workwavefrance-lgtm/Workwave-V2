@@ -208,6 +208,15 @@ export default async function LeadsPage({
             const displayBody = !isUnlocked && p.has_contact_in_description
               ? p.cleaned_description || body
               : body;
+            // Qualification IA : résumé propre du besoin + estimation budget.
+            // Affichés AVANT déblocage pour que le pro sache ce qu'il achète
+            // (sans révéler les coordonnées). Zéro PII dans summary/budget_comment.
+            const aiQual = p.ai_qualification as {
+              summary?: string;
+              budget_comment?: string;
+            } | null;
+            const aiSummary = aiQual?.summary?.trim() || "";
+            const budgetComment = aiQual?.budget_comment?.trim() || "";
 
             return (
               <li
@@ -229,7 +238,7 @@ export default async function LeadsPage({
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">
-                      {title}
+                      {aiSummary || title}
                     </h3>
                     <div className="flex items-center gap-2 text-xs">
                       <span className="px-2 py-0.5 rounded-full bg-[var(--accent)]/10 text-[var(--accent)] font-semibold uppercase tracking-wider">
@@ -273,6 +282,15 @@ export default async function LeadsPage({
                     })}
                   </span>
                 </div>
+
+                {budgetComment && (
+                  <div className="mb-4 text-xs text-[var(--text-secondary)] bg-[var(--bg-tertiary)] rounded-lg p-3 leading-relaxed">
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      Estimation Workwave :
+                    </span>{" "}
+                    {budgetComment}
+                  </div>
+                )}
 
                 {/* Acces coordonnees : Premium uniquement (post-Sprint 13 : pay-per-lead) */}
                 {isUnlocked ? (
