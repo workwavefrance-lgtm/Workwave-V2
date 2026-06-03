@@ -151,7 +151,7 @@ export default async function ProPage({ params }: Props) {
   const claimCityPart = cityName ? ` à ${cityName}` : "";
   // Phrase "perte" du bandeau construite en STRING (pas en JSX interpolé) :
   // évite les espaces avalés aux frontières {expr}/saut-de-ligne (bug "Poitierspartent").
-  const claimLossText = `Les demandes des particuliers pour ${claimArticle} ${claimMetier}${claimCityPart} partent aux pros inscrits sur Workwave — pas à vous tant que cette fiche n'est pas réclamée.`;
+  const claimLossText = `Les demandes des particuliers pour ${claimArticle} ${claimMetier}${claimCityPart} vont aux pros inscrits sur Workwave. Pas à vous, tant que vous n'avez pas réclamé votre fiche.`;
   // FLOU DES COORDONNÉES (fiche non réclamée) — TEST gated sur PICTAV.
   // Masquer tel/email/site force le particulier à déposer un projet (= lead
   // capté par Workwave) et incite le pro à réclamer sa fiche pour récupérer
@@ -163,6 +163,16 @@ export default async function ProPage({ params }: Props) {
     !isClaimed &&
     (!!pro.phone || !!pro.email || !!pro.website) &&
     COORD_BLUR_TEST_SLUGS.has(slug);
+  // Téléphone "à moitié flouté" (teaser) : 1ère moitié visible, 2e floutée.
+  // Plus frustrant qu'un flou total → pousse le pro à réclamer et le particulier
+  // à déposer. Le numéro vient de Sirene (donnée publique) ; le flou = friction.
+  const phoneDigits = (pro.phone || "").replace(/[^\d]/g, "").replace(/^33/, "0");
+  const phoneGroups = phoneDigits
+    .replace(/(\d{2})(?=\d)/g, "$1 ")
+    .trim()
+    .split(" ");
+  const phoneTeaserVisible = phoneGroups.slice(0, 3).join(" ");
+  const phoneTeaserMasked = phoneGroups.slice(3).join(" ");
   // Contenu SEO/AEO unique par fiche (À propos + FAQ sourcés, zéro invention).
   const proContent = buildProContent(pro);
   const openingHours = pro.opening_hours as OpeningHours | null;
@@ -422,7 +432,7 @@ export default async function ProPage({ params }: Props) {
               href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
               className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shadow-sm"
             >
-              Demander un devis (gratuit)
+              {isServiceVertical ? "Trouver des pros" : "Trouver des artisans"}
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -593,32 +603,32 @@ export default async function ProPage({ params }: Props) {
                 <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
                   Coordonnées
                 </h2>
-                <div
-                  className="flex items-center gap-2 mb-3"
-                  aria-hidden="true"
-                >
-                  <svg
-                    className="w-4 h-4 text-[var(--text-tertiary)] shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
+                {pro.phone ? (
+                  <p className="text-[var(--text-primary)] text-base font-medium">
+                    {phoneTeaserVisible}{" "}
+                    <span
+                      className="blur-[5px] select-none align-middle"
+                      aria-hidden="true"
+                    >
+                      {phoneTeaserMasked || "●●"}
+                    </span>
+                  </p>
+                ) : (
+                  <p
+                    className="text-[var(--text-primary)] text-base font-medium blur-[5px] select-none"
+                    aria-hidden="true"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                  <span className="text-[var(--text-primary)] text-sm blur-[5px] select-none">
-                    06 12 34 56 78 · contact@exemple.fr
-                  </span>
-                </div>
+                    {"●● ●● ●● ●● ●●"}
+                  </p>
+                )}
+                <p className="text-xs text-[var(--text-tertiary)] mt-1 mb-3">
+                  Numéro masqué — déposez votre projet pour être recontacté.
+                </p>
                 <Link
                   href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
-                  className="inline-flex items-center gap-1.5 text-[var(--accent)] text-sm font-semibold hover:underline mt-auto"
+                  className="inline-flex items-center justify-center gap-1.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250 hover:scale-[1.02] mt-auto self-start"
                 >
-                  Déposez un projet pour être mis en relation
+                  {isServiceVertical ? "Trouver des pros" : "Trouver des artisans"}
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>
@@ -846,7 +856,7 @@ export default async function ProPage({ params }: Props) {
               clair que "Deposer un projet" (jargon plateforme). */}
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 text-center">
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">
-              Besoin de ce professionnel ?
+              {blurCoords ? "Quel est votre projet ?" : "Besoin de ce professionnel ?"}
             </h3>
             {pro.phone && !blurCoords ? (
               <a
@@ -860,7 +870,7 @@ export default async function ProPage({ params }: Props) {
                 href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
                 className="block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
               >
-                Demander un devis (gratuit)
+                {isServiceVertical ? "Trouver des pros" : "Trouver des artisans"}
               </Link>
             )}
             <p className="mt-3 text-xs text-[var(--text-tertiary)]">
