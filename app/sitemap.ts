@@ -313,7 +313,28 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticUrls, ...guideUrls, ...blogUrls];
+  // Pages pro-acquisition "trouver des chantiers" : declinaisons metier BTP
+  // ("trouver des chantiers plombier") + departement ("...en Vienne").
+  const [allCats, allDepts] = await Promise.all([
+    getAllCategories(),
+    getAllDepartments(),
+  ]);
+  const chantiersUrls: MetadataRoute.Sitemap = [
+    ...allCats
+      .filter((c) => c.vertical === "btp")
+      .map((c) => ({
+        url: `${BASE_URL}/trouver-des-chantiers/${c.slug}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })),
+    ...allDepts.map((d) => ({
+      url: `${BASE_URL}/trouver-des-chantiers/${generateDepartmentSlug(d)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
+  ];
+
+  return [...staticUrls, ...chantiersUrls, ...guideUrls, ...blogUrls];
 }
 
 // ============================================================================
