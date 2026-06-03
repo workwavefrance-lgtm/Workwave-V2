@@ -249,11 +249,11 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
           )}
         </div>
 
-        {/* Statut abonnement */}
+        {/* Facturation (pay-per-lead) */}
         <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-              Abonnement
+              Facturation
             </h2>
             <span
               className={`text-xs font-medium px-2.5 py-1 rounded-full ${subInfo.className}`}
@@ -285,8 +285,9 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
           {(pro.subscription_status === "none" ||
             pro.subscription_status === "free") && (
             <p className="text-sm text-[var(--text-tertiary)] mb-4">
-              Activez votre abonnement pour commencer à recevoir des leads
-              qualifiés.
+              Vous êtes listé gratuitement. Vous recevez les demandes de votre
+              zone — débloquez un contact pour 9,90 € seulement quand un projet
+              vous intéresse.
             </p>
           )}
 
@@ -294,9 +295,7 @@ export default function DashboardHome({ stats, recentLeads }: Props) {
             href="/pro/dashboard/abonnement"
             className="block text-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
           >
-            {pro.subscription_status === "active"
-              ? "Gérer mon abonnement"
-              : "Voir les offres"}
+            Voir ma facturation
           </Link>
         </div>
       </div>
