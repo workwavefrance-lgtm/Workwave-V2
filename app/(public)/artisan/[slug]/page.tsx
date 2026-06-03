@@ -230,7 +230,7 @@ export default async function ProPage({ params }: Props) {
   if (pro.rge_certified && Array.isArray(pro.rge_qualifications) && pro.rge_qualifications.length > 0) {
     jsonLd.hasCredential = pro.rge_qualifications.map((q) => ({
       "@type": "EducationalOccupationalCredential",
-      name: q.nom,
+      name: q.domaine || q.nom,
       credentialCategory: "certification",
       ...(q.organisme
         ? {
@@ -540,16 +540,20 @@ export default async function ProPage({ params }: Props) {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                       <div className="flex-1">
+                        {/* On affiche `domaine` (vocabulaire contrôlé ADEME,
+                            accents corrects) plutôt que `nom` (champ libre dont
+                            les accents ont été strippés à l'import ADEME →
+                            "gnrateur photovoltaque"). Fallback `nom` si vide. */}
                         <p className="text-[var(--text-primary)] font-medium leading-snug">
-                          {q.nom}
+                          {q.domaine || q.nom}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                           {q.organisme && <span className="capitalize">{q.organisme}</span>}
-                          {q.organisme && q.domaine && " · "}
-                          {q.domaine}
+                          {q.organisme && q.meta_domaine && " · "}
+                          {q.meta_domaine}
                           {q.date_fin && (
                             <span className="text-[var(--text-tertiary)]">
-                              {(q.organisme || q.domaine) && " · "}
+                              {(q.organisme || q.meta_domaine) && " · "}
                               valide jusqu&apos;au {new Date(q.date_fin).toLocaleDateString("fr-FR")}
                             </span>
                           )}
