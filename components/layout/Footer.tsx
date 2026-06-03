@@ -116,6 +116,14 @@ export default async function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/trouver-des-chantiers"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Trouver des chantiers
+                </Link>
+              </li>
+              <li>
                 {/* Lien cross-domaine vers le domaine AI (workwaveai.co).
                     Sitewide (~1M pages) = transfert d'autorite du .fr (fort) vers
                     le .co (neuf) pour debloquer son indexation. DOFOLLOW volontaire

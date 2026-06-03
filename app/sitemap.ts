@@ -274,6 +274,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
   const staticUrls: MetadataRoute.Sitemap = [
     { url: BASE_URL, changeFrequency: "daily", priority: 1 },
     { url: `${BASE_URL}/pro`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/trouver-des-chantiers`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/deposer-projet`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/a-propos`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE_URL}/recherche`, changeFrequency: "weekly", priority: 0.7 },
