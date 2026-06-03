@@ -137,6 +137,18 @@ export default async function ProPage({ params }: Props) {
   ];
 
   const isClaimed = !!pro.claimed_by_user_id;
+  // CTA de réclamation (fiche non réclamée) : angle "loss aversion" — les
+  // demandes déposées sur Workwave pour ce métier partent aux pros inscrits,
+  // pas à ce pro tant qu'il n'a pas réclamé. + lien vers la page d'acquisition
+  // adaptée au vertical (chantiers pour le BTP, clients pour les services).
+  const isServiceVertical =
+    pro.category.vertical === "domicile" || pro.category.vertical === "personne";
+  const claimAcquisitionHref = isServiceVertical
+    ? `/trouver-des-clients/${pro.category.slug}`
+    : `/trouver-des-chantiers/${pro.category.slug}`;
+  const claimArticle = getCategoryArticle(pro.category.name);
+  const claimMetier = pro.category.name.toLowerCase();
+  const claimCityPart = cityName ? ` à ${cityName}` : "";
   // Contenu SEO/AEO unique par fiche (À propos + FAQ sourcés, zéro invention).
   const proContent = buildProContent(pro);
   const openingHours = pro.opening_hours as OpeningHours | null;
@@ -274,22 +286,28 @@ export default async function ProPage({ params }: Props) {
           Le pro qui visite sa fiche la voit toujours immediatement, mais
           l'espace principal de la fiche est rendu au visiteur particulier. */}
       {!isClaimed && pro.siret && (
-        <section className="mb-6 bg-[#FF5A36]/5 dark:bg-[#FF5A36]/10 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-xl px-4 py-2.5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-            <p className="text-sm text-[var(--text-secondary)]">
+        <section className="mb-6 bg-[#FF5A36]/5 dark:bg-[#FF5A36]/10 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-xl px-4 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+            <p className="text-sm text-[var(--text-secondary)] leading-snug">
               <span className="font-semibold text-[var(--text-primary)]">
                 Vous êtes {pro.name} ?
               </span>{" "}
-              <span className="hidden sm:inline text-[var(--text-tertiary)]">
-                Fiche créée automatiquement depuis la base Sirene.
-              </span>
+              Les demandes des particuliers pour {claimArticle} {claimMetier}
+              {claimCityPart} partent aux pros inscrits sur Workwave — pas à vous
+              tant que cette fiche n&apos;est pas réclamée.{" "}
+              <Link
+                href={claimAcquisitionHref}
+                className="text-[var(--accent)] font-medium underline underline-offset-2 hover:text-[#E63E1A] transition-colors duration-250 whitespace-nowrap"
+              >
+                Comment ça marche
+              </Link>
             </p>
             <Link
               href={`/pro/reclamer/${slug}`}
               rel="nofollow"
-              className="inline-flex items-center justify-center gap-1.5 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-250 hover:scale-[1.02] shrink-0 self-start sm:self-auto"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250 hover:scale-[1.02] shrink-0 self-start sm:self-auto whitespace-nowrap"
             >
-              Réclamer ma fiche
+              Réclamer ma fiche — gratuit
               <svg
                 className="w-3.5 h-3.5"
                 fill="none"
