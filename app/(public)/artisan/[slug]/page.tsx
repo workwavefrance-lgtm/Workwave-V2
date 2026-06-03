@@ -149,6 +149,17 @@ export default async function ProPage({ params }: Props) {
   const claimArticle = getCategoryArticle(pro.category.name);
   const claimMetier = pro.category.name.toLowerCase();
   const claimCityPart = cityName ? ` à ${cityName}` : "";
+  // FLOU DES COORDONNÉES (fiche non réclamée) — TEST gated sur PICTAV.
+  // Masquer tel/email/site force le particulier à déposer un projet (= lead
+  // capté par Workwave) et incite le pro à réclamer sa fiche pour récupérer
+  // ses clients. ROLLOUT après validation : supprimer la dernière condition
+  // `&& COORD_BLUR_TEST_SLUGS.has(slug)` pour l'appliquer à toutes les fiches
+  // non réclamées qui ont au moins une coordonnée.
+  const COORD_BLUR_TEST_SLUGS = new Set(["pictav-energie-00013"]);
+  const blurCoords =
+    !isClaimed &&
+    (!!pro.phone || !!pro.email || !!pro.website) &&
+    COORD_BLUR_TEST_SLUGS.has(slug);
   // Contenu SEO/AEO unique par fiche (À propos + FAQ sourcés, zéro invention).
   const proContent = buildProContent(pro);
   const openingHours = pro.opening_hours as OpeningHours | null;
@@ -163,8 +174,8 @@ export default async function ProPage({ params }: Props) {
       const d = pro.description || proAi.description_ai;
       return d ? { description: d } : {};
     })(),
-    ...(pro.phone ? { telephone: pro.phone } : {}),
-    ...(pro.email ? { email: pro.email } : {}),
+    ...(pro.phone && !blurCoords ? { telephone: pro.phone } : {}),
+    ...(pro.email && !blurCoords ? { email: pro.email } : {}),
     ...(pro.logo_url ? { image: pro.logo_url } : {}),
     address: {
       "@type": "PostalAddress",
@@ -399,7 +410,9 @@ export default async function ProPage({ params }: Props) {
               {pro.city ? ` à ${pro.city.name}` : ""} ?
             </h2>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
-              {pro.phone
+              {blurCoords
+                ? `Pour être mis en relation avec ${claimArticle} ${claimMetier}${claimCityPart}, décrivez votre projet : c'est gratuit, rapide et sans engagement. Nous transmettons votre demande aux pros disponibles dans votre zone.`
+                : pro.phone
                 ? `Contactez ${pro.name} directement au ${pro.phone}. Pour comparer plusieurs devis, décrivez votre projet — nous le transmettons à 3 artisans qualifiés dans votre zone.`
                 : `Décrivez votre projet, nous le transmettons à 3 artisans qualifiés dans votre zone. Gratuit, sans engagement.`}
             </p>
@@ -566,51 +579,93 @@ export default async function ProPage({ params }: Props) {
               </p>
             </div>
 
-            {/* Telephone */}
-            {pro.phone && (
-              <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
+            {/* Coordonnées : floutées si la fiche n'est PAS réclamée — le
+                particulier doit déposer un projet pour être mis en relation
+                (= lead capté), et le pro est incité à réclamer sa fiche pour
+                récupérer ses clients. Affichées normalement si réclamée. */}
+            {blurCoords ? (
+              <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5 flex flex-col">
                 <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
-                  Téléphone
+                  Coordonnées
                 </h2>
-                <a
-                  href={`tel:${pro.phone}`}
-                  className="text-[var(--text-primary)] text-sm hover:text-[var(--accent)] transition-colors duration-250"
+                <div
+                  className="flex items-center gap-2 mb-3"
+                  aria-hidden="true"
                 >
-                  {pro.phone}
-                </a>
+                  <svg
+                    className="w-4 h-4 text-[var(--text-tertiary)] shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                  <span className="text-[var(--text-primary)] text-sm blur-[5px] select-none">
+                    06 12 34 56 78 · contact@exemple.fr
+                  </span>
+                </div>
+                <Link
+                  href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
+                  className="inline-flex items-center gap-1.5 text-[var(--accent)] text-sm font-semibold hover:underline mt-auto"
+                >
+                  Déposez un projet pour être mis en relation
+                  <span aria-hidden="true">→</span>
+                </Link>
               </div>
-            )}
+            ) : (
+              <>
+                {/* Telephone */}
+                {pro.phone && (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
+                    <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
+                      Téléphone
+                    </h2>
+                    <a
+                      href={`tel:${pro.phone}`}
+                      className="text-[var(--text-primary)] text-sm hover:text-[var(--accent)] transition-colors duration-250"
+                    >
+                      {pro.phone}
+                    </a>
+                  </div>
+                )}
 
-            {/* Email */}
-            {pro.email && (
-              <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
-                <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
-                  Email
-                </h2>
-                <a
-                  href={`mailto:${pro.email}`}
-                  className="text-[var(--accent)] text-sm hover:underline"
-                >
-                  {pro.email}
-                </a>
-              </div>
-            )}
+                {/* Email */}
+                {pro.email && (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
+                    <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
+                      Email
+                    </h2>
+                    <a
+                      href={`mailto:${pro.email}`}
+                      className="text-[var(--accent)] text-sm hover:underline"
+                    >
+                      {pro.email}
+                    </a>
+                  </div>
+                )}
 
-            {/* Site web */}
-            {pro.website && (
-              <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
-                <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
-                  Site web
-                </h2>
-                <a
-                  href={pro.website.startsWith("http") ? pro.website : `https://${pro.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[var(--accent)] text-sm hover:underline break-all"
-                >
-                  {pro.website}
-                </a>
-              </div>
+                {/* Site web */}
+                {pro.website && (
+                  <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5">
+                    <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
+                      Site web
+                    </h2>
+                    <a
+                      href={pro.website.startsWith("http") ? pro.website : `https://${pro.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--accent)] text-sm hover:underline break-all"
+                    >
+                      {pro.website}
+                    </a>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -788,7 +843,7 @@ export default async function ProPage({ params }: Props) {
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">
               Besoin de ce professionnel ?
             </h3>
-            {pro.phone ? (
+            {pro.phone && !blurCoords ? (
               <a
                 href={`tel:${pro.phone}`}
                 className="block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
