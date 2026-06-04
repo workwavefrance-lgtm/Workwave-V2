@@ -49,6 +49,10 @@ const CITY_DEPT: Record<string, string> = {
   Limoges: "87", "Brive-la-Gaillarde": "19", Perigueux: "24", Bergerac: "24",
   Niort: "79", "La Rochelle": "17", Saintes: "17", Angouleme: "16",
   Pau: "64", Bayonne: "64", Agen: "47", "Mont-de-Marsan": "40", Dax: "40", Tarbes: "65",
+  "Salon-de-Provence": "13", Aubagne: "13", Martigues: "13", "La Ciotat": "13", Istres: "13", Manosque: "04",
+  Sete: "34", Montauban: "82", Castres: "81", Biarritz: "64", Royan: "17", Pamiers: "09", Foix: "09",
+  Lourdes: "65", "Villeneuve-sur-Lot": "47", "Sarlat-la-Caneda": "24", Anglet: "64", "Saint-Jean-de-Luz": "64",
+  "Saint-Malo": "35", Fougeres: "35", "Les Sables-d-Olonne": "85", Lannion: "22", Rochefort: "17", Millau: "12", Muret: "31", Bressuire: "79",
 };
 
 // Alias slug CSV -> slug DB quand ils diffèrent
