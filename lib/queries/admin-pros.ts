@@ -44,14 +44,10 @@ export type AdminProsFilters = {
   category?: string;
   vertical?: string; // 'all' | 'btp' | 'ai'
   source?: string; // 'all' | 'sirene' | 'ai_signup' | 'manual' | 'pagesjaunes'
-  // Etat metier composite (5 categories produit) :
-  //   scraped     = source IN (sirene, pagesjaunes) AND claimed_by_user_id IS NULL
-  //   claimed_free = claimed_by_user_id IS NOT NULL AND subscription_status IN (none, free)
-  //   paying      = subscription_status = active
-  //   trialing    = subscription_status = trialing
-  //   canceled    = subscription_status = canceled
-  // Mutuellement exclusifs par construction.
-  state?: string; // 'all' | 'scraped' | 'claimed_free' | 'paying' | 'trialing' | 'canceled'
+  // Etat metier (pay-per-lead, plus d'abonnement) :
+  //   scraped = source IN (sirene, pagesjaunes) AND claimed_by_user_id IS NULL
+  //   claimed = claimed_by_user_id IS NOT NULL (le pro a reclame sa fiche)
+  state?: string; // 'all' | 'scraped' | 'claimed'
   search?: string;
   sort?: string;
   order?: "asc" | "desc";
@@ -112,26 +108,15 @@ export const getAdminPros = cache(
       query = query.eq("source", source);
     }
 
-    // Sprint 13 polish : filtre etat metier composite. Les 5 categories
-    // (scraped / claimed_free / paying / trialing / canceled) sont
-    // mutuellement exclusives par construction. On combine claim + status
-    // + source pour identifier chacune.
+    // Modele pay-per-lead (plus d'abonnement) : 2 etats produit pertinents.
     if (state === "scraped") {
       // Fiches scrapees Sirene ou Pages Jaunes, jamais reclamees
       query = query
         .in("source", ["sirene", "pagesjaunes"])
         .is("claimed_by_user_id", null);
-    } else if (state === "claimed_free") {
-      // Reclamees mais en plan gratuit (pas d'abo actif)
-      query = query
-        .not("claimed_by_user_id", "is", null)
-        .in("subscription_status", ["none", "free"]);
-    } else if (state === "paying") {
-      query = query.eq("subscription_status", "active");
-    } else if (state === "trialing") {
-      query = query.eq("subscription_status", "trialing");
-    } else if (state === "canceled") {
-      query = query.eq("subscription_status", "canceled");
+    } else if (state === "claimed") {
+      // Le pro a reclame sa fiche (compte cree)
+      query = query.not("claimed_by_user_id", "is", null);
     }
 
     if (search) {

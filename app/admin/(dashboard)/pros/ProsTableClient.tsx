@@ -10,18 +10,8 @@ import AdminBadge from "@/components/admin/data-display/AdminBadge";
 import CsvExportButton from "@/components/admin/export/CsvExportButton";
 import type { AdminProRow, AdminProsFilters } from "@/lib/queries/admin-pros";
 
-const STATUS_BADGE: Record<
-  string,
-  { label: string; variant: "success" | "warning" | "danger" | "info" | "default" }
-> = {
-  active: { label: "Actif", variant: "success" },
-  trialing: { label: "Essai", variant: "info" },
-  past_due: { label: "Impayé", variant: "warning" },
-  canceled: { label: "Résilié", variant: "danger" },
-  none: { label: "Gratuit", variant: "default" },
-  free: { label: "Gratuit", variant: "default" },
-  suspended: { label: "Suspendu", variant: "danger" },
-};
+// Statut abonnement supprime : modele pay-per-lead (9,90 EUR/lead), plus
+// d'abonnement. La colonne "Etat" affiche desormais Reclame / Non reclame.
 
 // Tabs Vertical : separation visuelle BTP / AI
 const VERTICAL_TABS: { value: string; label: string }[] = [
@@ -34,11 +24,8 @@ const VERTICAL_TABS: { value: string; label: string }[] = [
 // L'ordre suit le funnel : prospect (scrape) -> reclame -> payant -> trial -> resilie.
 const STATE_TABS: { value: string; label: string; description: string }[] = [
   { value: "all", label: "Tous", description: "Tous les pros" },
-  { value: "scraped", label: "Scrappés", description: "Sirene/Pages Jaunes, non réclamés" },
-  { value: "claimed_free", label: "Réclamés gratuits", description: "Compte créé, plan gratuit" },
-  { value: "paying", label: "Payants", description: "Abonnement actif" },
-  { value: "trialing", label: "Essai gratuit", description: "En essai, va passer payant" },
-  { value: "canceled", label: "Résiliés", description: "Abonnement annulé" },
+  { value: "scraped", label: "Non réclamés", description: "Fiches scrapées Sirene/Pages Jaunes, jamais réclamées" },
+  { value: "claimed", label: "Réclamés", description: "Le pro a réclamé sa fiche (compte créé)" },
 ];
 
 const columns: AdminColumn<AdminProRow>[] = [
@@ -79,17 +66,18 @@ const columns: AdminColumn<AdminProRow>[] = [
     ),
   },
   {
-    key: "subscription_status",
-    label: "Statut",
-    sortable: true,
-    render: (row) => {
-      const badge = STATUS_BADGE[row.subscription_status] || STATUS_BADGE.none;
-      return (
-        <AdminBadge variant={badge.variant} dot>
-          {badge.label}
+    key: "claimed",
+    label: "État",
+    render: (row) =>
+      row.claimed_at ? (
+        <AdminBadge variant="success" dot>
+          Réclamé
         </AdminBadge>
-      );
-    },
+      ) : (
+        <AdminBadge variant="default" dot>
+          Non réclamé
+        </AdminBadge>
+      ),
   },
   {
     key: "profile_completion",
@@ -112,21 +100,27 @@ const columns: AdminColumn<AdminProRow>[] = [
     ),
   },
   {
+    // Pro réclamé -> date de réclamation (quand il a pris sa fiche).
+    // Sinon -> date de création/scraping de la fiche. (cf. colonne "État")
     key: "created_at",
     label: "Date",
     sortable: true,
-    render: (row) => (
-      <span
-        className="tabular-nums"
-        style={{ color: "var(--admin-text-tertiary)" }}
-      >
-        {new Date(row.created_at).toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "short",
-          year: "2-digit",
-        })}
-      </span>
-    ),
+    render: (row) => {
+      const d = row.claimed_at || row.created_at;
+      return (
+        <span
+          className="tabular-nums"
+          style={{ color: "var(--admin-text-tertiary)" }}
+          title={row.claimed_at ? "Date de réclamation" : "Date de création de la fiche"}
+        >
+          {new Date(d).toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "short",
+            year: "2-digit",
+          })}
+        </span>
+      );
+    },
   },
 ];
 
