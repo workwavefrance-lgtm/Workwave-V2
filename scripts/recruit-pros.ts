@@ -121,6 +121,61 @@ function toE164(phone: string): string | null {
   return "+33" + local.slice(1);
 }
 
+// ---- GARDE-FOU anti-mismatch (leçon RGPD 01/05) ----
+// Un téléphone ou un email présent sur PLUSIEURS fiches = signature d'une
+// mauvaise attribution Apify (le contact d'une autre entreprise sur cette
+// fiche). On les EXCLUT de tout envoi pour ne jamais contacter le mauvais
+// destinataire. Calculé sur toute la base (pros actifs avec contact).
+async function buildSharedContacts(): Promise<{
+  sharedPhones: Set<string>;
+  sharedEmails: Set<string>;
+}> {
+  const phoneCount = new Map<string, number>();
+  const emailCount = new Map<string, number>();
+  let off = 0;
+  while (true) {
+    const { data } = await sb
+      .from("pros")
+      .select("phone")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .not("phone", "is", null)
+      .range(off, off + 999);
+    const rows = data || [];
+    if (rows.length === 0) break;
+    for (const r of rows) {
+      const e = r.phone ? toE164(r.phone as string) : null;
+      if (e) phoneCount.set(e, (phoneCount.get(e) || 0) + 1);
+    }
+    off += rows.length;
+  }
+  off = 0;
+  while (true) {
+    const { data } = await sb
+      .from("pros")
+      .select("email")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .not("email", "is", null)
+      .range(off, off + 999);
+    const rows = data || [];
+    if (rows.length === 0) break;
+    for (const r of rows) {
+      const e = String(r.email).toLowerCase().trim();
+      if (e) emailCount.set(e, (emailCount.get(e) || 0) + 1);
+    }
+    off += rows.length;
+  }
+  return {
+    sharedPhones: new Set(
+      [...phoneCount].filter(([, c]) => c > 1).map(([k]) => k)
+    ),
+    sharedEmails: new Set(
+      [...emailCount].filter(([, c]) => c > 1).map(([k]) => k)
+    ),
+  };
+}
+
 // ---- email template (validé : pas de prix, focus "réclamer gratuit") ----
 function buildEmail(opts: {
   proId: number;
@@ -253,16 +308,25 @@ async function main() {
     (data || []).forEach((b: { email: string }) => blacklisted.add(b.email));
   }
 
-  // 5) cibles par canal
-  const emailTargets = pros.filter(
+  // 5) GARDE-FOU anti-mismatch : exclure tout contact partagé par >1 fiche.
+  const { sharedPhones, sharedEmails } = await buildSharedContacts();
+
+  // 6) cibles par canal (après garde-fou)
+  const emailAll = pros.filter(
     (x) => x.email && !blacklisted.has(x.email) && !x.email_bounced
   );
-  const smsTargets = pros
+  const smsAll = pros
     .map((x) => ({ ...x, e164: x.phone ? toE164(x.phone) : null }))
     .filter((x) => x.e164);
+  const emailTargets = emailAll.filter(
+    (x) => !sharedEmails.has(String(x.email).toLowerCase().trim())
+  );
+  const smsTargets = smsAll.filter((x) => !sharedPhones.has(x.e164!));
+  const skipE = emailAll.length - emailTargets.length;
+  const skipS = smsAll.length - smsTargets.length;
 
   console.log(
-    `→ Email : ${emailTargets.length} cibles | SMS : ${smsTargets.length} cibles (mobiles)\n`
+    `→ Email : ${emailTargets.length} cibles (${skipE} exclus mismatch) | SMS : ${smsTargets.length} cibles (${skipS} exclus mismatch)\n`
   );
 
   const track = loadTrack();
