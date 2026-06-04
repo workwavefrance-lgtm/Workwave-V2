@@ -166,16 +166,19 @@ export const getAdminProById = cache(async (id: number) => {
 
   if (!pro) return null;
 
-  // Get recent leads
-  const { data: leads } = await db
-    .from("project_leads")
-    .select("*, project:projects(id, first_name, description, status, category_id, created_at)")
+  // Leads debloques (pay-per-lead) : project_leads est morte (modele abonnement).
+  // Le vrai historique = lead_unlocks (deblocage des coordonnees a 9,90 EUR).
+  const { data: unlocks } = await db
+    .from("lead_unlocks")
+    .select(
+      "id, amount_cents, currency, paid_at, project:projects(id, first_name, description, created_at)"
+    )
     .eq("pro_id", id)
-    .order("sent_at", { ascending: false })
-    .limit(20);
+    .order("paid_at", { ascending: false })
+    .limit(50);
 
   return {
     pro,
-    leads: leads || [],
+    unlocks: unlocks || [],
   };
 });

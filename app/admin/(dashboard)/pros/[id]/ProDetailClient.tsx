@@ -31,15 +31,15 @@ type ProData = {
   city: { id: number; name: string; department: { code: string; name: string } | null } | null;
 };
 
-type LeadData = {
+type UnlockData = {
   id: number;
-  status: string;
-  sent_at: string;
+  amount_cents: number;
+  currency: string;
+  paid_at: string;
   project: {
     id: number;
     first_name: string;
     description: string;
-    status: string;
     created_at: string;
   } | null;
 };
@@ -54,21 +54,14 @@ const STATUS_BADGE: Record<string, { label: string; variant: "success" | "warnin
   suspended: { label: "Suspendu", variant: "danger" },
 };
 
-const LEAD_STATUS: Record<string, { label: string; variant: "success" | "warning" | "danger" | "info" | "default" }> = {
-  sent: { label: "Envoyé", variant: "default" },
-  opened: { label: "Vu", variant: "info" },
-  contacted: { label: "Contacté", variant: "success" },
-  not_relevant: { label: "Non pertinent", variant: "warning" },
-  expired: { label: "Expiré", variant: "danger" },
-};
-
 export default function ProDetailClient({
   pro,
-  leads,
+  unlocks,
 }: {
   pro: ProData;
-  leads: LeadData[];
+  unlocks: UnlockData[];
 }) {
+  const totalCents = unlocks.reduce((s, u) => s + (u.amount_cents || 0), 0);
   const router = useRouter();
   const { admin } = useAdmin();
   const [showSuspend, setShowSuspend] = useState(false);
@@ -165,10 +158,6 @@ export default function ProDetailClient({
             />
             <InfoRow label="Rayon" value={`${pro.intervention_radius_km} km`} />
             <InfoRow label="Profil" value={`${pro.profile_completion}%`} />
-            <InfoRow
-              label="Taux réponse"
-              value={pro.response_rate !== null ? `${pro.response_rate}%` : null}
-            />
             <InfoRow
               label="Réclamé le"
               value={
@@ -315,7 +304,7 @@ export default function ProDetailClient({
         </div>
       </div>
 
-      {/* Leads History */}
+      {/* Leads débloqués (pay-per-lead : déblocage des coordonnées à 9,90 EUR) */}
       <div
         className="rounded-xl mt-4"
         style={{
@@ -323,44 +312,63 @@ export default function ProDetailClient({
           border: "1px solid var(--admin-border)",
         }}
       >
-        <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--admin-border)" }}>
+        <div
+          className="px-4 py-3 flex items-center justify-between"
+          style={{ borderBottom: "1px solid var(--admin-border)" }}
+        >
           <h2
             className="text-sm font-semibold"
             style={{ color: "var(--admin-text)" }}
           >
-            Historique leads ({leads.length})
+            Leads débloqués ({unlocks.length})
           </h2>
+          {unlocks.length > 0 && (
+            <span
+              className="text-xs font-medium tabular-nums"
+              style={{ color: "var(--admin-accent)" }}
+            >
+              {(totalCents / 100).toLocaleString("fr-FR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              € au total
+            </span>
+          )}
         </div>
 
-        {leads.length === 0 ? (
+        {unlocks.length === 0 ? (
           <div className="px-4 py-8 text-center">
             <p className="text-xs" style={{ color: "var(--admin-text-tertiary)" }}>
-              Aucun lead reçu
+              Aucun lead débloqué
             </p>
           </div>
         ) : (
           <div>
-            {leads.map((lead) => {
-              const s = LEAD_STATUS[lead.status] || LEAD_STATUS.sent;
-              return (
-                <div
-                  key={lead.id}
-                  className="flex items-center gap-3 px-4 py-2.5 text-xs"
-                  style={{ borderBottom: "1px solid var(--admin-border)" }}
-                >
-                  <span className="tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
-                    {new Date(lead.sent_at).toLocaleDateString("fr-FR", {
-                      day: "2-digit",
-                      month: "short",
-                    })}
-                  </span>
-                  <span className="flex-1 truncate">
-                    {lead.project?.first_name || "—"} — {lead.project?.description?.slice(0, 60) || ""}
-                  </span>
-                  <AdminBadge variant={s.variant}>{s.label}</AdminBadge>
-                </div>
-              );
-            })}
+            {unlocks.map((u) => (
+              <div
+                key={u.id}
+                className="flex items-center gap-3 px-4 py-2.5 text-xs"
+                style={{ borderBottom: "1px solid var(--admin-border)" }}
+              >
+                <span className="tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
+                  {new Date(u.paid_at).toLocaleDateString("fr-FR", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "2-digit",
+                  })}
+                </span>
+                <span className="flex-1 truncate">
+                  {u.project?.first_name || "—"} — {u.project?.description?.slice(0, 60) || ""}
+                </span>
+                <span className="tabular-nums font-medium">
+                  {(u.amount_cents / 100).toLocaleString("fr-FR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}{" "}
+                  €
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </div>

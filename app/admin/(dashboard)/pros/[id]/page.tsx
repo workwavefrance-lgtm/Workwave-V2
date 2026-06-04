@@ -14,5 +14,5 @@ export default async function AdminProDetailPage({
   const result = await getAdminProById(proId);
   if (!result) notFound();
 
-  return <ProDetailClient pro={result.pro} leads={result.leads} />;
+  return <ProDetailClient pro={result.pro} unlocks={result.unlocks} />;
 }
