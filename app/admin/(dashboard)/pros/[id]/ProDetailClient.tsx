@@ -6,6 +6,7 @@ import AdminBadge from "@/components/admin/data-display/AdminBadge";
 import AdminButton from "@/components/admin/forms/AdminButton";
 import AdminConfirmDialog from "@/components/admin/forms/AdminConfirmDialog";
 import { useAdmin } from "@/components/admin/shell/AdminProvider";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 type ProData = {
   id: number;
@@ -74,7 +75,9 @@ export default function ProDetailClient({
   const [loading, setLoading] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
 
-  const statusBadge = STATUS_BADGE[pro.subscription_status] || STATUS_BADGE.none;
+  // Pro Workwave AI (catégorie tech/business/créatif) => vrai abonnement Premium.
+  // Pro BTP/services => pay-per-lead, pas d'abonnement.
+  const isAI = !!pro.category && (AI_CATEGORY_IDS as readonly number[]).includes(pro.category.id);
 
   async function handleToggleActive() {
     setLoading(true);
@@ -122,8 +125,8 @@ export default function ProDetailClient({
             {pro.name}
           </h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <AdminBadge variant={statusBadge.variant} dot>
-              {statusBadge.label}
+            <AdminBadge variant={pro.claimed_at ? "success" : "default"} dot>
+              {pro.claimed_at ? "Réclamé" : "Non réclamé"}
             </AdminBadge>
             {!pro.is_active && (
               <AdminBadge variant="danger">Désactivé</AdminBadge>
@@ -191,48 +194,60 @@ export default function ProDetailClient({
 
         {/* Sidebar */}
         <div className="space-y-4">
-          {/* Subscription Card */}
-          <div
-            className="rounded-xl p-4"
-            style={{
-              backgroundColor: "var(--admin-card)",
-              border: "1px solid var(--admin-border)",
-            }}
-          >
-            <h2
-              className="text-sm font-semibold mb-3"
-              style={{ color: "var(--admin-text)" }}
+          {/* Abonnement : UNIQUEMENT pour Workwave AI (Premium 29,90 EUR/mois).
+              En BTP/services = pay-per-lead (9,90 EUR/lead), pas d'abonnement
+              => carte masquée. */}
+          {isAI ? (
+            <div
+              className="rounded-xl p-4"
+              style={{
+                backgroundColor: "var(--admin-card)",
+                border: "1px solid var(--admin-border)",
+              }}
             >
-              Abonnement
-            </h2>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span style={{ color: "var(--admin-text-secondary)" }}>Plan</span>
-                <span>{pro.subscription_plan || "—"}</span>
+              <h2
+                className="text-sm font-semibold mb-3"
+                style={{ color: "var(--admin-text)" }}
+              >
+                Abonnement
+              </h2>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span style={{ color: "var(--admin-text-secondary)" }}>Statut</span>
+                  <AdminBadge
+                    variant={(STATUS_BADGE[pro.subscription_status] || STATUS_BADGE.none).variant}
+                  >
+                    {(STATUS_BADGE[pro.subscription_status] || STATUS_BADGE.none).label}
+                  </AdminBadge>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--admin-text-secondary)" }}>Plan</span>
+                  <span>{pro.subscription_plan || "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "var(--admin-text-secondary)" }}>
+                    Prochaine facture
+                  </span>
+                  <span className="tabular-nums">
+                    {pro.current_period_end
+                      ? new Date(pro.current_period_end).toLocaleDateString("fr-FR")
+                      : "—"}
+                  </span>
+                </div>
+                {pro.stripe_customer_id && (
+                  <a
+                    href={`https://dashboard.stripe.com/customers/${pro.stripe_customer_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-[11px] mt-2 transition-colors duration-150"
+                    style={{ color: "var(--admin-accent)" }}
+                  >
+                    Voir sur Stripe →
+                  </a>
+                )}
               </div>
-              <div className="flex justify-between">
-                <span style={{ color: "var(--admin-text-secondary)" }}>
-                  Prochaine facture
-                </span>
-                <span className="tabular-nums">
-                  {pro.current_period_end
-                    ? new Date(pro.current_period_end).toLocaleDateString("fr-FR")
-                    : "—"}
-                </span>
-              </div>
-              {pro.stripe_customer_id && (
-                <a
-                  href={`https://dashboard.stripe.com/customers/${pro.stripe_customer_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-[11px] mt-2 transition-colors duration-150"
-                  style={{ color: "var(--admin-accent)" }}
-                >
-                  Voir sur Stripe →
-                </a>
-              )}
             </div>
-          </div>
+          ) : null}
 
           {/* Actions Card */}
           <div
