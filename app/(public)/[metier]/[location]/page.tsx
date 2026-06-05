@@ -21,12 +21,18 @@ import { resolveLocation } from "@/lib/queries/location";
 import {
   getProsByCategoryAndDepartment,
   getProsByCategoryAndCity,
+  getProsByCategoryAndCityIds,
 } from "@/lib/queries/pros";
 import {
   getTopProsByCategoryAndCity,
+  getTopProsByCategoryAndCityIds,
   getTopProsByCategoryAndDepartment,
 } from "@/lib/queries/top-pros";
-import { getNearbyCities, getCitiesByDepartment } from "@/lib/queries/cities";
+import {
+  getNearbyCities,
+  getCitiesByDepartment,
+  getMetroChildCityIds,
+} from "@/lib/queries/cities";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
@@ -76,11 +82,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     resolved.type === "department" ? "department" : "city"
   );
 
-  // Compter les pros pour cette combinaison
+  // Compter les pros pour cette combinaison. Commune à arrondissements
+  // (Marseille) : on agrège ses arrondissements (null pour toute autre ville).
+  const metroIds =
+    resolved.type === "city" ? await getMetroChildCityIds(resolved.city) : null;
   const result =
     resolved.type === "department"
       ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page: 1, pageSize: 1 })
-      : await getProsByCategoryAndCity(category.id, resolved.city.id, { page: 1, pageSize: 1 });
+      : metroIds
+        ? await getProsByCategoryAndCityIds(category.id, metroIds, { page: 1, pageSize: 1 })
+        : await getProsByCategoryAndCity(category.id, resolved.city.id, { page: 1, pageSize: 1 });
 
   const prosCount = result.count;
   const displayCount = Math.min(prosCount, TOP_LIMIT);
@@ -165,18 +176,29 @@ export default async function ListingPage({ params, searchParams }: Props) {
   let totalProsCount = 0;
   let paginatedResult: Awaited<ReturnType<typeof getProsByCategoryAndCity>> | null = null;
 
+  // Commune à arrondissements (Marseille/Lyon/Paris) : la page de la commune
+  // parent (/[metier]/marseille) agrège ses arrondissements en une seule page
+  // forte (requête « plombier marseille » = la plus volumineuse). `null` pour
+  // toute autre ville → aucune query supplémentaire.
+  const metroCityIds =
+    resolved.type === "city" ? await getMetroChildCityIds(resolved.city) : null;
+
   if (isFirstPage) {
     const topResult =
       resolved.type === "department"
         ? await getTopProsByCategoryAndDepartment(category.id, resolved.department.id, TOP_LIMIT)
-        : await getTopProsByCategoryAndCity(category.id, resolved.city.id, TOP_LIMIT);
+        : metroCityIds
+          ? await getTopProsByCategoryAndCityIds(category.id, metroCityIds, TOP_LIMIT)
+          : await getTopProsByCategoryAndCity(category.id, resolved.city.id, TOP_LIMIT);
     topPros = topResult.tops;
     totalProsCount = topResult.total;
   } else {
     paginatedResult =
       resolved.type === "department"
         ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page })
-        : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
+        : metroCityIds
+          ? await getProsByCategoryAndCityIds(category.id, metroCityIds, { page })
+          : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
     totalProsCount = paginatedResult.count;
   }
 

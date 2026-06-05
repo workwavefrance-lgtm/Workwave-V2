@@ -34,6 +34,31 @@ async function paginatedQuery(
   };
 }
 
+/**
+ * Pagination des pros d'une catégorie sur un ENSEMBLE de villes (1 ou
+ * plusieurs). Utilise par la page dept et par l'agregation des arrondissements
+ * (Marseille/Lyon/Paris : /[metier]/marseille agrège les 16 arrondissements).
+ */
+export async function getProsByCategoryAndCityIds(
+  categoryId: number,
+  cityIds: number[],
+  { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
+): Promise<PaginatedResult<ProWithRelations>> {
+  if (cityIds.length === 0) {
+    return { data: [], count: 0, page, pageSize, totalPages: 0 };
+  }
+  const supabase = await createClient();
+  const query = supabase
+    .from("pros")
+    .select(PRO_SELECT, { count: "exact" })
+    .eq("category_id", categoryId)
+    .in("city_id", cityIds)
+    .is("deleted_at", null)
+    .eq("is_active", true);
+
+  return paginatedQuery(query, page, pageSize);
+}
+
 export async function getProsByCategoryAndDepartment(
   categoryId: number,
   departmentId: number,
@@ -46,21 +71,9 @@ export async function getProsByCategoryAndDepartment(
     .from("cities")
     .select("id")
     .eq("department_id", departmentId);
-
   const cityIds = (cities || []).map((c: { id: number }) => c.id);
-  if (cityIds.length === 0) {
-    return { data: [], count: 0, page, pageSize, totalPages: 0 };
-  }
 
-  const query = supabase
-    .from("pros")
-    .select(PRO_SELECT, { count: "exact" })
-    .eq("category_id", categoryId)
-    .in("city_id", cityIds)
-    .is("deleted_at", null)
-    .eq("is_active", true);
-
-  return paginatedQuery(query, page, pageSize);
+  return getProsByCategoryAndCityIds(categoryId, cityIds, { page, pageSize });
 }
 
 export async function getProsByCategoryAndCity(

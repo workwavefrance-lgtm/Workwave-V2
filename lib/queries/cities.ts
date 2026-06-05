@@ -76,3 +76,39 @@ export async function getNearbyCities(
 
   return sorted;
 }
+
+// ── Communes à arrondissements municipaux (Marseille / Lyon / Paris) ──────────
+// Le scrape SIRENE rattache chaque établissement à son arrondissement (codes
+// INSEE 132xx / 6938x / 751xx), pas à la commune "parent" (13055 / 69123 /
+// 75056). On crée donc une ville par arrondissement ET la page listing de la
+// commune parent (/[metier]/marseille) AGRÈGE ses arrondissements en une seule
+// page forte — la requête "plombier marseille" (sans arrondissement) est de
+// loin la plus volumineuse.
+const METRO_PARENT_INSEE = new Set(["13055", "69123", "75056"]); // Marseille, Lyon, Paris
+
+export function isMetroParentInsee(insee: string | null | undefined): boolean {
+  return !!insee && METRO_PARENT_INSEE.has(insee);
+}
+
+/**
+ * Retourne les city_id à agréger pour une commune parent à arrondissements
+ * (le parent lui-même + ses arrondissements), ou `null` si ce n'est pas un
+ * parent métro. Les arrondissements sont reconnus par leur nom
+ * « {commune} Ne Arrondissement » dans le même département.
+ */
+export async function getMetroChildCityIds(city: {
+  id: number;
+  insee_code: string | null;
+  department_id: number;
+  name: string;
+}): Promise<number[] | null> {
+  if (!isMetroParentInsee(city.insee_code)) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("cities")
+    .select("id")
+    .eq("department_id", city.department_id)
+    .ilike("name", `${city.name} %Arrondissement`);
+  const ids = (data || []).map((c: { id: number }) => c.id);
+  return [city.id, ...ids];
+}

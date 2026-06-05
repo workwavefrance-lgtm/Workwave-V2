@@ -116,9 +116,60 @@ export function computeProScore(pro: Pro): number {
 }
 
 /**
- * Recupere les top N pros d'une catégorie dans une ville donnee,
- * tries par score decroissant. Le total des pros disponibles est
- * aussi retourne (pour afficher "Voir les X autres" si total > limit).
+ * Score + tri DESC (tie-break alphabetique) + slice top N.
+ * Factorise la logique partagee par les variantes ville / villes / dept.
+ *
+ * Sprint 13 : les pros reclames (compte cree, engagement reel) sortent
+ * toujours AVANT les fiches scrapees Sirene non reclamees. Boost commercial
+ * fort : incite les pros a reclamer leur fiche pour gagner en visibilite. Le
+ * score departage les claimed entre eux.
+ */
+function scoreAndSelectTop(
+  pros: ProWithRelations[],
+  limit: number
+): ProWithRelations[] {
+  return pros
+    .map((p) => ({ pro: p, score: computeProScore(p) }))
+    .sort((a, b) => {
+      const aClaimed = !!a.pro.claimed_by_user_id;
+      const bClaimed = !!b.pro.claimed_by_user_id;
+      if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
+      if (b.score !== a.score) return b.score - a.score;
+      return (a.pro.name ?? "").localeCompare(b.pro.name ?? "");
+    })
+    .slice(0, limit)
+    .map((s) => s.pro);
+}
+
+/**
+ * Coeur : top N pros d'une catégorie sur un ENSEMBLE de villes (1 ou plusieurs),
+ * tries par score. Le total disponible est aussi retourne (pour "Voir les X
+ * autres"). Utilise par la variante ville unique, la variante dept et
+ * l'agregation des arrondissements (Marseille/Lyon/Paris).
+ */
+export async function getTopProsByCategoryAndCityIds(
+  categoryId: number,
+  cityIds: number[],
+  limit = 10
+): Promise<{ tops: ProWithRelations[]; total: number }> {
+  if (cityIds.length === 0) return { tops: [], total: 0 };
+  const supabase = await createClient();
+
+  const { data, count } = await supabase
+    .from("pros")
+    .select(PRO_SELECT, { count: "estimated" })
+    .eq("category_id", categoryId)
+    .in("city_id", cityIds)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .limit(MAX_FETCH);
+
+  const pros = (data as ProWithRelations[] | null) ?? [];
+  return { tops: scoreAndSelectTop(pros, limit), total: count ?? pros.length };
+}
+
+/**
+ * Top N pros d'une catégorie dans une ville donnee.
  */
 export async function getTopProsByCategoryAndCity(
   categoryId: number,
@@ -127,7 +178,6 @@ export async function getTopProsByCategoryAndCity(
 ): Promise<{ tops: ProWithRelations[]; total: number }> {
   const supabase = await createClient();
 
-  // Fetch jusqu'a MAX_FETCH pros pour scoring
   const { data, count } = await supabase
     .from("pros")
     .select(PRO_SELECT, { count: "estimated" })
@@ -138,34 +188,12 @@ export async function getTopProsByCategoryAndCity(
     .limit(MAX_FETCH);
 
   const pros = (data as ProWithRelations[] | null) ?? [];
-
-  // Score + tri DESC, tie-break alphabetique
-  const scored = pros
-    .map((p) => ({ pro: p, score: computeProScore(p) }))
-    .sort((a, b) => {
-      // Sprint 13 : les pros reclames (compte cree, engagement reel) sortent
-      // toujours AVANT les fiches scrapees Sirene non reclamees. Boost
-      // commercial fort : incite les pros a reclamer leur fiche pour gagner
-      // en visibilite. Le score departage les claimed entre eux.
-      const aClaimed = !!a.pro.claimed_by_user_id;
-      const bClaimed = !!b.pro.claimed_by_user_id;
-      if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
-
-      if (b.score !== a.score) return b.score - a.score;
-      return (a.pro.name ?? "").localeCompare(b.pro.name ?? "");
-    });
-
-  const tops = scored.slice(0, limit).map((s) => s.pro);
-  const total = count ?? pros.length;
-
-  return { tops, total };
+  return { tops: scoreAndSelectTop(pros, limit), total: count ?? pros.length };
 }
 
 /**
  * Idem pour une page departement. On recupere les city_ids du dept
- * puis on score sur l'ensemble. Sur les gros departements (ex. Gironde
- * avec ~500 communes), on peut avoir beaucoup de pros : on plafonne a
- * MAX_FETCH au total.
+ * puis on delegue au coeur multi-villes (plafond MAX_FETCH au total).
  */
 export async function getTopProsByCategoryAndDepartment(
   categoryId: number,
@@ -179,36 +207,6 @@ export async function getTopProsByCategoryAndDepartment(
     .select("id")
     .eq("department_id", departmentId);
   const cityIds = (cities || []).map((c: { id: number }) => c.id);
-  if (cityIds.length === 0) return { tops: [], total: 0 };
 
-  const { data, count } = await supabase
-    .from("pros")
-    .select(PRO_SELECT, { count: "estimated" })
-    .eq("category_id", categoryId)
-    .in("city_id", cityIds)
-    .is("deleted_at", null)
-    .eq("is_active", true)
-    .limit(MAX_FETCH);
-
-  const pros = (data as ProWithRelations[] | null) ?? [];
-
-  const scored = pros
-    .map((p) => ({ pro: p, score: computeProScore(p) }))
-    .sort((a, b) => {
-      // Sprint 13 : les pros reclames (compte cree, engagement reel) sortent
-      // toujours AVANT les fiches scrapees Sirene non reclamees. Boost
-      // commercial fort : incite les pros a reclamer leur fiche pour gagner
-      // en visibilite. Le score departage les claimed entre eux.
-      const aClaimed = !!a.pro.claimed_by_user_id;
-      const bClaimed = !!b.pro.claimed_by_user_id;
-      if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
-
-      if (b.score !== a.score) return b.score - a.score;
-      return (a.pro.name ?? "").localeCompare(b.pro.name ?? "");
-    });
-
-  const tops = scored.slice(0, limit).map((s) => s.pro);
-  const total = count ?? pros.length;
-
-  return { tops, total };
+  return getTopProsByCategoryAndCityIds(categoryId, cityIds, limit);
 }
