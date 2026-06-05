@@ -462,6 +462,44 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
       priority: count >= 10 ? 0.8 : 0.7,
     });
   }
+
+  // ── Zone Monaco (mise en relation transfrontalière) ─────────────────────────
+  // /[metier]/monaco agrège les communes frontalières (cf. getAggregatedCityIds)
+  // → Monaco a 0 pro propre, donc absent de la boucle ci-dessus. On émet une URL
+  // par métier ayant >= 3 artisans dans la zone (sinon la page 308 vers le 06).
+  const { data: borderCities } = await supabase
+    .from("cities")
+    .select("id")
+    .in("slug", ["beausoleil", "cap-d-ail", "roquebrune-cap-martin", "la-turbie"]);
+  const borderIds = (borderCities || []).map((c: { id: number }) => c.id);
+  if (borderIds.length > 0) {
+    const monacoCount = new Map<number, number>();
+    let mOffset = 0;
+    while (true) {
+      const { data } = await supabase
+        .from("pros")
+        .select("category_id")
+        .eq("is_active", true)
+        .is("deleted_at", null)
+        .in("city_id", borderIds)
+        .range(mOffset, mOffset + SUPABASE_PAGE_SIZE - 1);
+      const rows = (data || []) as { category_id: number }[];
+      for (const r of rows) monacoCount.set(r.category_id, (monacoCount.get(r.category_id) || 0) + 1);
+      if (rows.length === 0) break;
+      mOffset += rows.length;
+    }
+    for (const [catId, count] of monacoCount) {
+      if (count < 3) continue;
+      const catSlug = catSlugMap.get(catId);
+      if (!catSlug) continue; // ignore les cat hors BTP (catSlugMap = btp/domicile/personne)
+      urls.push({
+        url: `${BASE_URL}/${catSlug}/monaco`,
+        changeFrequency: "weekly" as const,
+        priority: count >= 10 ? 0.8 : 0.7,
+      });
+    }
+  }
+
   return urls;
 }
 

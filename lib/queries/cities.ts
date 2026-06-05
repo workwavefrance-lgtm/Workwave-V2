@@ -77,31 +77,57 @@ export async function getNearbyCities(
   return sorted;
 }
 
-// ── Communes à arrondissements municipaux (Marseille / Lyon / Paris) ──────────
-// Le scrape SIRENE rattache chaque établissement à son arrondissement (codes
-// INSEE 132xx / 6938x / 751xx), pas à la commune "parent" (13055 / 69123 /
-// 75056). On crée donc une ville par arrondissement ET la page listing de la
-// commune parent (/[metier]/marseille) AGRÈGE ses arrondissements en une seule
-// page forte — la requête "plombier marseille" (sans arrondissement) est de
-// loin la plus volumineuse.
+// ── Villes "parent" qui AGRÈGENT plusieurs city_id sur une seule page ─────────
+//
+// Deux cas :
+//
+// 1) Métropoles à arrondissements municipaux (Marseille / Lyon / Paris). Le
+//    scrape SIRENE rattache chaque établissement à son arrondissement (codes
+//    INSEE 132xx / 6938x / 751xx), pas à la commune "parent" (13055 / 69123 /
+//    75056). La page de la commune parent (/[metier]/marseille) agrège ses
+//    arrondissements en une seule page forte (requête "plombier marseille" =
+//    la plus volumineuse).
+//
+// 2) Zones de mise en relation TRANSFRONTALIÈRES. Monaco est un État souverain
+//    hors SIRENE, et son registre (RCI) est interdit au scraping. On ne crée
+//    donc AUCUNE fausse entreprise monégasque : la page /[metier]/monaco agrège
+//    les artisans RÉELS des communes françaises frontalières (Beausoleil,
+//    Cap-d'Ail, Roquebrune-Cap-Martin, La Turbie) qui interviennent à Monaco.
+//    La ville parent "Monaco" n'a aucun pro propre et n'est PAS incluse.
 const METRO_PARENT_INSEE = new Set(["13055", "69123", "75056"]); // Marseille, Lyon, Paris
+
+const BORDER_ZONE_CHILD_SLUGS: Record<string, string[]> = {
+  monaco: ["beausoleil", "cap-d-ail", "roquebrune-cap-martin", "la-turbie"],
+};
 
 export function isMetroParentInsee(insee: string | null | undefined): boolean {
   return !!insee && METRO_PARENT_INSEE.has(insee);
 }
 
+export function isBorderZoneSlug(slug: string | null | undefined): boolean {
+  return !!slug && slug in BORDER_ZONE_CHILD_SLUGS;
+}
+
 /**
- * Retourne les city_id à agréger pour une commune parent à arrondissements
- * (le parent lui-même + ses arrondissements), ou `null` si ce n'est pas un
- * parent métro. Les arrondissements sont reconnus par leur nom
- * « {commune} Ne Arrondissement » dans le même département.
+ * Retourne les city_id à AGRÉGER pour une "ville parent", ou `null` quand la
+ * ville n'agrège rien (cas normal : 1 ville = 1 city_id, aucune query en plus).
  */
-export async function getMetroChildCityIds(city: {
+export async function getAggregatedCityIds(city: {
   id: number;
+  slug: string;
   insee_code: string | null;
   department_id: number;
   name: string;
 }): Promise<number[] | null> {
+  // 1. Zone transfrontalière (Monaco) — enfants par slug explicite
+  const zoneSlugs = BORDER_ZONE_CHILD_SLUGS[city.slug];
+  if (zoneSlugs) {
+    const supabase = await createClient();
+    const { data } = await supabase.from("cities").select("id").in("slug", zoneSlugs);
+    const ids = (data || []).map((c: { id: number }) => c.id);
+    return ids.length > 0 ? ids : null;
+  }
+  // 2. Métropole à arrondissements (Marseille/Lyon/Paris)
   if (!isMetroParentInsee(city.insee_code)) return null;
   const supabase = await createClient();
   const { data } = await supabase

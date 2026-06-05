@@ -31,7 +31,7 @@ import {
 import {
   getNearbyCities,
   getCitiesByDepartment,
-  getMetroChildCityIds,
+  getAggregatedCityIds,
 } from "@/lib/queries/cities";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getSeoContent } from "@/lib/queries/seo-pages";
@@ -82,15 +82,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     resolved.type === "department" ? "department" : "city"
   );
 
-  // Compter les pros pour cette combinaison. Commune à arrondissements
-  // (Marseille) : on agrège ses arrondissements (null pour toute autre ville).
-  const metroIds =
-    resolved.type === "city" ? await getMetroChildCityIds(resolved.city) : null;
+  // Compter les pros pour cette combinaison. Ville "parent" agrégée
+  // (Marseille → arrondissements, Monaco → communes frontalières) : on agrège
+  // (null pour toute autre ville → aucune query en plus).
+  const aggIds =
+    resolved.type === "city" ? await getAggregatedCityIds(resolved.city) : null;
   const result =
     resolved.type === "department"
       ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page: 1, pageSize: 1 })
-      : metroIds
-        ? await getProsByCategoryAndCityIds(category.id, metroIds, { page: 1, pageSize: 1 })
+      : aggIds
+        ? await getProsByCategoryAndCityIds(category.id, aggIds, { page: 1, pageSize: 1 })
         : await getProsByCategoryAndCity(category.id, resolved.city.id, { page: 1, pageSize: 1 });
 
   const prosCount = result.count;
@@ -176,19 +177,19 @@ export default async function ListingPage({ params, searchParams }: Props) {
   let totalProsCount = 0;
   let paginatedResult: Awaited<ReturnType<typeof getProsByCategoryAndCity>> | null = null;
 
-  // Commune à arrondissements (Marseille/Lyon/Paris) : la page de la commune
-  // parent (/[metier]/marseille) agrège ses arrondissements en une seule page
-  // forte (requête « plombier marseille » = la plus volumineuse). `null` pour
-  // toute autre ville → aucune query supplémentaire.
-  const metroCityIds =
-    resolved.type === "city" ? await getMetroChildCityIds(resolved.city) : null;
+  // Ville "parent" agrégée : Marseille/Lyon/Paris → arrondissements (page
+  // "plombier marseille" = la plus volumineuse) ; Monaco → communes françaises
+  // frontalières qui interviennent à Monaco (mise en relation transfrontalière).
+  // `null` pour toute autre ville → aucune query supplémentaire.
+  const aggCityIds =
+    resolved.type === "city" ? await getAggregatedCityIds(resolved.city) : null;
 
   if (isFirstPage) {
     const topResult =
       resolved.type === "department"
         ? await getTopProsByCategoryAndDepartment(category.id, resolved.department.id, TOP_LIMIT)
-        : metroCityIds
-          ? await getTopProsByCategoryAndCityIds(category.id, metroCityIds, TOP_LIMIT)
+        : aggCityIds
+          ? await getTopProsByCategoryAndCityIds(category.id, aggCityIds, TOP_LIMIT)
           : await getTopProsByCategoryAndCity(category.id, resolved.city.id, TOP_LIMIT);
     topPros = topResult.tops;
     totalProsCount = topResult.total;
@@ -196,8 +197,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
     paginatedResult =
       resolved.type === "department"
         ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page })
-        : metroCityIds
-          ? await getProsByCategoryAndCityIds(category.id, metroCityIds, { page })
+        : aggCityIds
+          ? await getProsByCategoryAndCityIds(category.id, aggCityIds, { page })
           : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
     totalProsCount = paginatedResult.count;
   }
@@ -407,6 +408,24 @@ export default async function ListingPage({ params, searchParams }: Props) {
         </h1>
         <p className="text-[var(--text-secondary)]">{subTitle}</p>
       </div>
+
+      {/* Transparence zone transfrontalière Monaco : on n'invente aucune
+          entreprise monégasque. On affiche les artisans RÉELS de la Riviera
+          frontalière qui interviennent à Monaco, et chaque fiche montre leur
+          vraie ville d'origine. */}
+      {resolved.type === "city" && resolved.city.slug === "monaco" && (
+        <div className="mb-6 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-4 sm:px-5 text-sm leading-relaxed text-[var(--text-secondary)]">
+          <span className="font-semibold text-[var(--text-primary)]">
+            Mise en relation pour Monaco.
+          </span>{" "}
+          Monaco étant un État souverain, ces professionnels sont basés dans les
+          communes françaises{" "}
+          <span className="font-semibold text-[var(--text-primary)]">frontalières</span>{" "}
+          (Beausoleil, Cap-d&apos;Ail, Roquebrune-Cap-Martin, La Turbie) et
+          interviennent à Monaco. La ville d&apos;origine de chaque artisan est
+          affichée sur sa fiche.
+        </div>
+      )}
 
       {/* Section "Quel est votre projet ?" : capture du lead AVANT la liste.
           Pattern Travaux.com. Affichee uniquement sur page 1 (sur les pages
