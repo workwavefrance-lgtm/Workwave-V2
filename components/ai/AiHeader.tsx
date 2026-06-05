@@ -30,6 +30,7 @@ import { en } from "@/lib/i18n/en";
 // Nav FR (inchangee — pages /ai/* existantes).
 const NAV_ITEMS_FR = [
   { href: "/ai/deposer", label: "Deposer un projet" },
+  { href: "/ai/projets", label: "Projets en ligne" },
   { href: "/ai/pour-les-freelances", label: "Pour freelances" },
   { href: "/ai/tarifs", label: "Tarifs" },
 ];
