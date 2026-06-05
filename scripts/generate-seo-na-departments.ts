@@ -102,9 +102,14 @@ async function main() {
   if (FILTER_DEPT) console.log(`FILTRE : departement ${FILTER_DEPT} uniquement`);
 
   // 1. Charger categories
+  // IMPORTANT : ne garder que les verticaux BTP/domicile/personne (38 cat).
+  // Les 145 cat "tech" (Workwave AI / international) vivent sur /ai et /en/ai,
+  // PAS sur les pages BTP /[metier]/[dept] — il ne faut surtout pas générer
+  // de contenu dépt pour elles (junk + coût ×5).
   const { data: catsRaw } = await supabase
     .from("categories")
     .select("id, slug, name")
+    .in("vertical", ["btp", "domicile", "personne"])
     .order("name");
   const categories = (catsRaw || []) as Array<{
     id: number;
