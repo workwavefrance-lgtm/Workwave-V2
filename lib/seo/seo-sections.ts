@@ -631,7 +631,10 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   // Section "marché local" SOURCÉE par Perplexity (par dépt) — contenu unique +
   // cité, zéro chiffre inventé. Présente uniquement pour les dépts sourcés
   // (4 nouvelles régions) ; ailleurs, pas de section (pas de fallback inventé).
-  const market = SOURCED_MARKET_CONTEXT[deptCode];
+  // Cas spécial Monaco (zone transfrontalière, pas un dépt FR) : paragraphe
+  // marché monégasque dédié (clé "monaco") au lieu du contexte Alpes-Maritimes.
+  const market =
+    SOURCED_MARKET_CONTEXT[ctx.city?.slug === "monaco" ? "monaco" : deptCode];
   const marcheSection: SeoSection | null = market
     ? {
         h2: `Le marché du bâtiment et de l'artisanat ${preposition} ${locationName}`,

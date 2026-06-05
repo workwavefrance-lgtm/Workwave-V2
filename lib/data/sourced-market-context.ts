@@ -5,7 +5,18 @@
 export type MarketContext = { text: string; sources: string[]; retrievedAt: string };
 
 // Clé = code département (ex. "31" pour Haute-Garonne).
+// Clé spéciale "monaco" = zone de mise en relation transfrontalière (Monaco
+// n'est pas un dépt FR) ; utilisée en override dans lib/seo/seo-sections.ts.
 export const SOURCED_MARKET_CONTEXT: Record<string, MarketContext> = {
+  "monaco": {
+    "text": "Le marché monégasque du bâtiment et de la rénovation est tiré par un immobilier parmi les plus chers au monde, avec une activité orientée vers des réalisations et des finitions de haute qualité, comme l’illustre le poids de la construction dans l’économie locale. Sur un territoire d’environ 2 km², très dense, la rareté du foncier pousse Monaco à privilégier les opérations en hauteur et les extensions sur la mer pour créer de nouveaux espaces bâtis. Une part importante des entreprises et artisans intervenant sur ces chantiers vient aussi de la Riviera française voisine, notamment des Alpes-Maritimes et de communes frontalières comme Beausoleil, Cap-d’Ail, Menton ou Nice, où se concentrent des prestataires habitués au marché monégasque.",
+    "sources": [
+      "https://lobservateurdemonaco.com/infos/cinq-chiffres-impressionnants-sur-le-secteur-de-la-construction-a-monaco/",
+      "https://monaco-hebdo.com/economie/btp-le-seuil-des-3-milliards-deuros-de-chiffre-daffaires-franchi-pour-la-premiere-fois/",
+      "https://fr.indeed.com/q-construction-l-monaco-(06)-emplois.html"
+    ],
+    "retrievedAt": "2026-06-05"
+  },
   "11": {
     "text": "En 2026, le marché du bâtiment en France reste contrasté, avec un redressement du logement neuf mais une activité encore faible dans l’ensemble, tandis que l’entretien-amélioration se tasse selon la FFB. Dans l’Aude, le tissu d’artisanat du BTP est porté par la CAPEB départementale, et l’activité se concentre surtout autour de Carcassonne, Narbonne et des autres pôles urbains du littoral et de l’axe A61. Le département combine un bâti ancien, souvent en pierre ou en centre historique, et des besoins de rénovation énergétique liés au climat méditerranéen, marqué par la chaleur estivale et les épisodes de sécheresse.",
     "sources": [
