@@ -64,7 +64,7 @@ export const getAdminPros = cache(
       source = "all",
       state = "all",
       search = "",
-      sort = "created_at",
+      sort = "id",
       order = "desc",
       page = 1,
       pageSize = 25,
@@ -137,14 +137,18 @@ export const getAdminPros = cache(
     }
 
     // Sort
+    // Tri par defaut = id (PK, scan d'index instantane sur 1M+ lignes).
+    // id DESC = plus recent d'abord (= created_at DESC, l'id etant assigne a
+    // l'insert). Evite le tri full-table sur created_at (7s -> ~ms).
     const validSorts = [
+      "id",
       "name",
       "created_at",
       "subscription_status",
       "profile_completion",
       "response_rate",
     ];
-    const sortCol = validSorts.includes(sort) ? sort : "created_at";
+    const sortCol = validSorts.includes(sort) ? sort : "id";
     query = query.order(sortCol, { ascending: order === "asc" });
 
     // Paginate

@@ -138,7 +138,8 @@ const columns: AdminColumn<AdminProRow>[] = [
   {
     // Pro réclamé -> date de réclamation (quand il a pris sa fiche).
     // Sinon -> date de création/scraping de la fiche. (cf. colonne "État")
-    key: "created_at",
+    // Tri par "id" (PK indexé, instantané) : id DESC ≈ date DESC.
+    key: "id",
     label: "Date",
     sortable: true,
     render: (row) => {
