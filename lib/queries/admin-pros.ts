@@ -44,10 +44,9 @@ export type AdminProsFilters = {
   category?: string;
   vertical?: string; // 'all' | 'btp' | 'ai'
   source?: string; // 'all' | 'sirene' | 'ai_signup' | 'manual' | 'pagesjaunes'
-  // Etat metier (pay-per-lead, plus d'abonnement) :
-  //   scraped = source IN (sirene, pagesjaunes) AND claimed_by_user_id IS NULL
-  //   claimed = claimed_by_user_id IS NOT NULL (le pro a reclame sa fiche)
-  state?: string; // 'all' | 'scraped' | 'claimed'
+  // Etat metier. BTP : scraped / claimed. AI (abo Premium) : + claimed_free /
+  // paying / trialing / canceled.
+  state?: string; // 'all' | 'scraped' | 'claimed' | 'claimed_free' | 'paying' | 'trialing' | 'canceled'
   search?: string;
   sort?: string;
   order?: "asc" | "desc";
@@ -108,15 +107,27 @@ export const getAdminPros = cache(
       query = query.eq("source", source);
     }
 
-    // Modele pay-per-lead (plus d'abonnement) : 2 etats produit pertinents.
+    // Etats produit. BTP (pay-per-lead, pas d'abo) : scraped / claimed.
+    // AI (abonnement Premium) : en plus claimed_free / paying / trialing / canceled.
     if (state === "scraped") {
       // Fiches scrapees Sirene ou Pages Jaunes, jamais reclamees
       query = query
         .in("source", ["sirene", "pagesjaunes"])
         .is("claimed_by_user_id", null);
     } else if (state === "claimed") {
-      // Le pro a reclame sa fiche (compte cree)
+      // Le pro a reclame sa fiche (compte cree), abonne ou non
       query = query.not("claimed_by_user_id", "is", null);
+    } else if (state === "claimed_free") {
+      // Reclame mais sans abonnement actif (AI gratuit)
+      query = query
+        .not("claimed_by_user_id", "is", null)
+        .in("subscription_status", ["none", "free"]);
+    } else if (state === "paying") {
+      query = query.eq("subscription_status", "active");
+    } else if (state === "trialing") {
+      query = query.eq("subscription_status", "trialing");
+    } else if (state === "canceled") {
+      query = query.eq("subscription_status", "canceled");
     }
 
     if (search) {

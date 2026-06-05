@@ -9,9 +9,22 @@ import AdminTablePagination from "@/components/admin/data-display/AdminTablePagi
 import AdminBadge from "@/components/admin/data-display/AdminBadge";
 import CsvExportButton from "@/components/admin/export/CsvExportButton";
 import type { AdminProRow, AdminProsFilters } from "@/lib/queries/admin-pros";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
-// Statut abonnement supprime : modele pay-per-lead (9,90 EUR/lead), plus
-// d'abonnement. La colonne "Etat" affiche desormais Reclame / Non reclame.
+// Statut d'abonnement : UNIQUEMENT pertinent pour les pros Workwave AI
+// (Premium 29,90 EUR/mois). En BTP = pay-per-lead, pas d'abonnement.
+const AI_SUB_BADGE: Record<
+  string,
+  { label: string; variant: "success" | "warning" | "danger" | "info" | "default" }
+> = {
+  active: { label: "Premium", variant: "success" },
+  trialing: { label: "Essai", variant: "info" },
+  past_due: { label: "Impayé", variant: "warning" },
+  canceled: { label: "Résilié", variant: "danger" },
+  none: { label: "Gratuit", variant: "default" },
+  free: { label: "Gratuit", variant: "default" },
+  suspended: { label: "Suspendu", variant: "danger" },
+};
 
 // Tabs Vertical : separation visuelle BTP / AI
 const VERTICAL_TABS: { value: string; label: string }[] = [
@@ -20,12 +33,21 @@ const VERTICAL_TABS: { value: string; label: string }[] = [
   { value: "ai", label: "Workwave AI" },
 ];
 
-// Tabs Etat metier : 5 categories produit mutuellement exclusives.
-// L'ordre suit le funnel : prospect (scrape) -> reclame -> payant -> trial -> resilie.
+// Etat metier — BTP : pas d'abonnement, juste reclame / non reclame.
 const STATE_TABS: { value: string; label: string; description: string }[] = [
   { value: "all", label: "Tous", description: "Tous les pros" },
   { value: "scraped", label: "Non réclamés", description: "Fiches scrapées Sirene/Pages Jaunes, jamais réclamées" },
   { value: "claimed", label: "Réclamés", description: "Le pro a réclamé sa fiche (compte créé)" },
+];
+
+// Etat metier — Workwave AI : on distingue en plus les abonnes Premium.
+const AI_STATE_TABS: { value: string; label: string; description: string }[] = [
+  { value: "all", label: "Tous", description: "Tous les pros AI" },
+  { value: "scraped", label: "Non réclamés", description: "Fiches scrapées, jamais réclamées" },
+  { value: "claimed_free", label: "Réclamés gratuits", description: "Compte créé, plan gratuit" },
+  { value: "paying", label: "Abonnés Premium", description: "Abonnement Premium 29,90 €/mois actif" },
+  { value: "trialing", label: "Essai", description: "En essai gratuit" },
+  { value: "canceled", label: "Résiliés", description: "Abonnement annulé" },
 ];
 
 const columns: AdminColumn<AdminProRow>[] = [
@@ -68,16 +90,30 @@ const columns: AdminColumn<AdminProRow>[] = [
   {
     key: "claimed",
     label: "État",
-    render: (row) =>
-      row.claimed_at ? (
+    // BTP : Réclamé / Non réclamé. AI : statut d'abonnement (Premium/Essai/...).
+    render: (row) => {
+      if (!row.claimed_at) {
+        return (
+          <AdminBadge variant="default" dot>
+            Non réclamé
+          </AdminBadge>
+        );
+      }
+      const isAI = (AI_CATEGORY_IDS as readonly number[]).includes(row.category_id);
+      if (isAI) {
+        const s = AI_SUB_BADGE[row.subscription_status] || AI_SUB_BADGE.none;
+        return (
+          <AdminBadge variant={s.variant} dot>
+            {s.label}
+          </AdminBadge>
+        );
+      }
+      return (
         <AdminBadge variant="success" dot>
           Réclamé
         </AdminBadge>
-      ) : (
-        <AdminBadge variant="default" dot>
-          Non réclamé
-        </AdminBadge>
-      ),
+      );
+    },
   },
   {
     key: "profile_completion",
@@ -159,6 +195,8 @@ export default function ProsTableClient({
 
   const activeVertical = filters.vertical || "all";
   const activeState = filters.state || "all";
+  // En vue AI : onglets avec les abonnés Premium. Sinon : réclamé / non réclamé.
+  const stateTabs = activeVertical === "ai" ? AI_STATE_TABS : STATE_TABS;
 
   return (
     <div>
@@ -196,7 +234,7 @@ export default function ProsTableClient({
             <button
               key={tab.value}
               type="button"
-              onClick={() => updateParams({ vertical: tab.value })}
+              onClick={() => updateParams({ vertical: tab.value, state: "all" })}
               className="px-4 py-2 text-sm font-medium rounded-md transition-colors"
               style={{
                 backgroundColor: isActive
@@ -216,9 +254,9 @@ export default function ProsTableClient({
         })}
       </div>
 
-      {/* Tabs Etat metier : 5 categories produit */}
+      {/* Tabs Etat metier : contextuels (AI = abonnement, BTP = reclame) */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {STATE_TABS.map((tab) => {
+        {stateTabs.map((tab) => {
           const isActive = activeState === tab.value;
           return (
             <button
