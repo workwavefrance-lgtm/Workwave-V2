@@ -48,3 +48,6 @@ scripts/.brevo-recovery-sent.json
 scripts/.brevo-cold-batch*-sent.json
 scripts/.backup-sent-logs-*/
 .env*.local
+
+# Données concurrentielles (analyse SEO) — ne pas committer
+data/competitive/

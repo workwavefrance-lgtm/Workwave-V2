@@ -284,6 +284,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/cgv`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/mentions-legales`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/blog`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${BASE_URL}/guide-des-prix`, changeFrequency: "daily", priority: 0.8 },
   ];
 
   const { data: guidesRaw } = await supabase
@@ -313,6 +314,30 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
+
+  // Guides des prix : /[metier]/prix (scope metier) + /guide-des-prix/[slug] (prestation).
+  const priceGuideUrls: MetadataRoute.Sitemap = [];
+  {
+    let offset = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data } = await supabase
+        .from("price_guides")
+        .select("slug, scope, metier_slug, updated_at")
+        .eq("status", "published")
+        .order("id")
+        .range(offset, offset + PAGE - 1);
+      const rows = (data || []) as { slug: string; scope: string; metier_slug: string | null; updated_at: string }[];
+      if (rows.length === 0) break;
+      for (const g of rows) {
+        const url = g.scope === "metier" && g.metier_slug
+          ? `${BASE_URL}/${g.metier_slug}/prix`
+          : `${BASE_URL}/guide-des-prix/${g.slug}`;
+        priceGuideUrls.push({ url, lastModified: new Date(g.updated_at), changeFrequency: "monthly" as const, priority: 0.8 });
+      }
+      offset += rows.length;
+    }
+  }
 
   // Pages pro-acquisition "trouver des chantiers" : declinaisons metier BTP
   // ("trouver des chantiers plombier") + departement ("...en Vienne").
@@ -349,6 +374,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     ...clientsUrls,
     ...guideUrls,
     ...blogUrls,
+    ...priceGuideUrls,
   ];
 }
 
