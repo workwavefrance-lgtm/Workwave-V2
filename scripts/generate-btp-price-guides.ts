@@ -58,15 +58,17 @@ function buildPrompt(s: Subject): string {
     `Pour ${s.what}, en ${YEAR}, rédige un guide de prix FACTUEL et SOURCÉ à partir de sources web françaises récentes et fiables. ` +
     `Réponds UNIQUEMENT en JSON valide, sans texte autour :\n` +
     `{\n` +
-    `  "intro": "<2 phrases factuelles d'introduction, ~50 mots, qui situent la prestation et l'ordre de prix>",\n` +
+    `  "intro": "<3 phrases factuelles d'introduction, ~70 mots, qui situent la prestation, l'ordre de prix et ce qui le compose>",\n` +
     `  "ranges": [{"label":"<sous-prestation précise>","low":<entier euros>,"high":<entier euros>,"unit":"<un parmi: /m², /h, /ml, /arbre, /m³ ou vide pour un forfait>"}],\n` +
     `  "factors": ["<facteur concret qui fait varier le prix>"],\n` +
     `  "devis": [{"label":"<cas type réaliste>","total":"<ex: 1 500 € à 2 000 €>","detail":"<1 phrase de contexte>"}],\n` +
-    `  "faq": [{"q":"<question fréquente>","a":"<réponse factuelle ~40 mots avec une fourchette de prix>"}]\n` +
+    `  "faq": [{"q":"<question fréquente>","a":"<réponse factuelle ~45 mots avec une fourchette de prix>"}]\n` +
     `}\n` +
-    `CONTRAINTES : 4 à 6 lignes dans "ranges", 4 à 6 "factors", 2 à 3 "devis", 4 à 5 "faq". ` +
-    `Tous les prix sont en euros TTC, France ${YEAR}, et proviennent de sources web réelles — n'invente AUCUN chiffre. ` +
-    `Pas de superlatif marketing. Les questions FAQ doivent notamment couvrir ces recherches : ${s.longtail}.`
+    `CONTRAINTES : 5 à 8 lignes dans "ranges" (couvre les variantes de matériau/taille/gamme), 5 à 7 "factors", 3 "devis" chiffrés, 7 à 8 "faq". ` +
+    `Parmi les FAQ, inclure obligatoirement : une question "comment payer moins cher / économiser sur ${s.what}", ` +
+    `une question sur les aides, subventions ou crédit d'impôt éventuels (si pertinent), et une sur ce que doit contenir un bon devis. ` +
+    `Les autres FAQ couvrent ces recherches réelles : ${s.longtail}. ` +
+    `Tous les prix sont en euros TTC, France ${YEAR}, et proviennent de sources web réelles — n'invente AUCUN chiffre. Pas de superlatif marketing, ton factuel et utile.`
   );
 }
 

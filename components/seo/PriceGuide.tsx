@@ -126,6 +126,26 @@ export default function PriceGuide({
         </p>
       )}
 
+      {/* Badge prix "coup d'œil" — la réponse immédiate, tout en haut */}
+      {ranges.length > 0 && (
+        <div className="mb-8 rounded-2xl bg-[var(--accent-muted)] border border-[var(--accent)]/20 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)] mb-1">
+              {ranges[0].label}
+            </p>
+            <p className="text-3xl sm:text-4xl font-bold text-[var(--accent)] tracking-tight">
+              {rangeLabel(ranges[0].low, ranges[0].high, ranges[0].unit)}
+            </p>
+          </div>
+          <Link
+            href={`/deposer-projet?categorie=${metierSlug}`}
+            className="shrink-0 inline-flex items-center justify-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+          >
+            Devis gratuit →
+          </Link>
+        </div>
+      )}
+
       {/* Encart fourchette de prix — tout en haut (le réflexe travaux.com) */}
       {ranges.length > 0 && (
         <div className="rounded-2xl border border-[var(--card-border)] overflow-hidden mb-8">
