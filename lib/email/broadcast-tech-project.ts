@@ -144,11 +144,13 @@ async function sendOne(
 }
 
 /**
- * Broadcast principal : selectionne TOUS les freelances tech actifs claimed
+ * Broadcast principal : selectionne TOUS les freelances AI actifs claimed
  * avec email, et envoie le mail en chunks de 50.
  *
  * Filtres durs :
- *   - category_id IN tech (43-48)
+ *   - category_id IN AI_CATEGORY_IDS = LES 14 categories AI (43-48 tech +
+ *     79-87 business/creatif). Tout le monde recoit, pas seulement le tech
+ *     (decision Willy 05/06 : "tout le monde doit recevoir").
  *   - claimed_by_user_id IS NOT NULL (compte active)
  *   - is_active = true
  *   - deleted_at IS NULL
