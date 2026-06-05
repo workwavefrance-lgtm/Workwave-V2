@@ -35,8 +35,14 @@ function handle(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // ?path=/ → revalide CE path précis (ex. la home après suppression/ajout d'un
+  // projet, qui est en cache ISR 1h). Sans param → revalide les sitemaps (défaut
+  // historique). Plusieurs paths possibles : ?path=/&path=/recherche.
+  const targets = new URL(req.url).searchParams.getAll("path");
+  const list = targets.length > 0 ? targets : PATHS;
+
   const revalidated: string[] = [];
-  for (const p of PATHS) {
+  for (const p of list) {
     try {
       if (p.includes("[")) {
         // route dynamique (sous-sitemaps) → revalidation de toutes les instances
