@@ -12,7 +12,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "Guides des prix travaux 2026 : tarifs artisans par métier — Workwave",
   description:
-    "Tous les prix des travaux en 2026 : tarifs, fourchettes et devis par métier et prestation. Données indicatives sourcées, et 3 devis gratuits d'artisans près de chez vous.",
+    "Tous les prix des travaux en 2026 : tarifs et fourchettes par métier et prestation. Données indicatives sourcées. Déposez votre projet gratuitement pour être mis en relation avec des artisans près de chez vous.",
   alternates: { canonical: `${BASE_URL}/guide-des-prix` },
 };
 
@@ -47,14 +47,14 @@ export default async function PriceGuidesHubPage() {
       </h1>
       <p className="text-base text-[var(--text-secondary)] max-w-2xl mb-8 leading-relaxed">
         Combien coûte votre projet ? Retrouvez les tarifs indicatifs par métier et par
-        prestation, basés sur des données du marché. Et comparez gratuitement les devis
-        d&apos;artisans vérifiés près de chez vous.
+        prestation, basés sur des données du marché. Puis déposez votre projet
+        gratuitement pour être mis en relation avec des artisans vérifiés près de chez vous.
       </p>
       <Link
         href="/deposer-projet"
         className="inline-flex items-center justify-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-7 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] mb-12"
       >
-        Recevoir 3 devis gratuits →
+        Déposer votre projet gratuitement →
       </Link>
 
       {sections.length === 0 ? (

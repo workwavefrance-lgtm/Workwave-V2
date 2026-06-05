@@ -20,15 +20,18 @@ function rangeLabel(low: number | null, high: number | null, unit: string): stri
   return "sur devis";
 }
 
-/** CTA réutilisable — déposer un projet (mise en relation = notre avantage). */
+/** CTA réutilisable — déposer un projet (mise en relation = notre avantage).
+ *  Wording "Déposer votre projet" (jamais "devis"), avec variantes par placement. */
 function DepositCTA({
   metierSlug,
   label,
   sub,
+  cta = "Déposer votre projet gratuitement →",
 }: {
   metierSlug: string;
   label: string;
   sub?: string;
+  cta?: string;
 }) {
   return (
     <div className="my-10 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-6 sm:p-8 text-center">
@@ -39,7 +42,7 @@ function DepositCTA({
         className="inline-flex items-center justify-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-8 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
         style={{ boxShadow: "0 4px 16px -4px rgba(255,90,54,0.45)" }}
       >
-        Recevoir 3 devis gratuits →
+        {cta}
       </Link>
       <p className="mt-3 text-xs text-[var(--text-tertiary)]">Gratuit · sans engagement · réponse sous 24h</p>
     </div>
@@ -113,6 +116,8 @@ export default function PriceGuide({
         citySlug={null}
         locationName="près de chez vous"
         preposition=""
+        tagline="Déposez votre projet en 30 sec., c'est gratuit."
+        ctaText="Déposer mon projet"
       />
 
       <Breadcrumb items={breadcrumbItems} />
@@ -141,7 +146,7 @@ export default function PriceGuide({
             href={`/deposer-projet?categorie=${metierSlug}`}
             className="shrink-0 inline-flex items-center justify-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
           >
-            Devis gratuit →
+            Déposer mon projet →
           </Link>
         </div>
       )}
@@ -186,7 +191,8 @@ export default function PriceGuide({
       <DepositCTA
         metierSlug={metierSlug}
         label={`Votre projet ${categoryName.toLowerCase()} ?`}
-        sub="Décrivez votre besoin en 30 secondes, des artisans qualifiés près de chez vous vous envoient un devis gratuit."
+        sub="Décrivez votre besoin en 30 secondes, des artisans près de chez vous vous répondent."
+        cta="Déposer votre projet gratuitement →"
       />
 
       {/* Intro */}
@@ -218,7 +224,11 @@ export default function PriceGuide({
       )}
 
       {/* CTA milieu */}
-      <DepositCTA metierSlug={metierSlug} label="Comparez les devis avant de vous décider" />
+      <DepositCTA
+        metierSlug={metierSlug}
+        label="Comparez plusieurs artisans avant de vous décider"
+        cta="Déposer mon projet — c'est gratuit →"
+      />
 
       {/* FAQ (UI + schema FAQPage déjà injecté) */}
       {faqs.length > 0 && <FaqAccordion faqs={faqs} />}
@@ -269,7 +279,8 @@ export default function PriceGuide({
       <DepositCTA
         metierSlug={metierSlug}
         label={`Prêt à lancer votre projet ${categoryName.toLowerCase()} ?`}
-        sub="Workwave met en relation avec des artisans près de chez vous. Comparez gratuitement plusieurs devis."
+        sub="Workwave vous met en relation avec des artisans près de chez vous, gratuitement."
+        cta="Décrire mon projet gratuitement →"
       />
       {/* canonical via metadata côté page */}
       <link rel="canonical" href={canonical} />

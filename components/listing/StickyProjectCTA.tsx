@@ -17,6 +17,8 @@ export default function StickyProjectCTA({
   locationName,
   preposition,
   specialitySlug,
+  tagline = "Recevez 3 devis gratuits en 30 sec.",
+  ctaText = "Demander un devis",
 }: {
   categorySlug: string;
   categoryName: string;
@@ -25,6 +27,9 @@ export default function StickyProjectCTA({
   preposition: string;
   /** Sous-specialite si on est sur /[metier]/[specialite]/[ville] */
   specialitySlug?: string | null;
+  /** Wording personnalisable (ex. guides des prix : "Déposez votre projet"). */
+  tagline?: string;
+  ctaText?: string;
 }) {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState<boolean | null>(null);
@@ -105,7 +110,7 @@ export default function StickyProjectCTA({
               {categoryName} {preposition} {locationName} ?
             </span>{" "}
             <span className="text-[var(--text-secondary)]">
-              Recevez 3 devis gratuits en 30 sec.
+              {tagline}
             </span>
           </p>
           <Link
@@ -113,7 +118,7 @@ export default function StickyProjectCTA({
             className="inline-flex items-center justify-center h-9 px-4 rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white text-[13px] font-semibold transition-all duration-200 hover:scale-105 shrink-0"
             style={{ boxShadow: "0 2px 8px -2px rgba(255, 90, 54, 0.4)" }}
           >
-            Demander un devis
+            {ctaText}
           </Link>
           <button
             type="button"
