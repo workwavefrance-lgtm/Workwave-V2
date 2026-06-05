@@ -7,7 +7,7 @@ import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
 const NAV_ITEMS = [
   { href: "/ai/dashboard", label: "Accueil", icon: "01" },
-  { href: "/ai/dashboard/projets", label: "Projets recus", icon: "02" },
+  { href: "/ai/dashboard/projets", label: "Tous les projets", icon: "02" },
   { href: "/ai/dashboard/profil", label: "Mon profil", icon: "03" },
   { href: "/ai/dashboard/preferences", label: "Preferences", icon: "04" },
   { href: "/ai/dashboard/abonnement", label: "Abonnement", icon: "05" },
@@ -239,7 +239,7 @@ export default async function AiDashboardLayout({
                 {item.icon}
               </span>
               <span className="truncate px-1">
-                {item.label.replace("Mon ", "").replace("Projets recus", "Projets")}
+                {item.label.replace("Mon ", "").replace("Tous les projets", "Projets")}
               </span>
             </Link>
           ))}
