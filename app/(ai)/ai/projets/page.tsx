@@ -98,7 +98,7 @@ export default async function AiProjetsPublicPage() {
             <>
               {total} projet{total > 1 ? "s" : ""}
               <br />
-              cherchent un freelance.
+              cherche{total > 1 ? "nt" : ""} un freelance.
             </>
           ) : (
             <>Les premiers projets arrivent.</>
