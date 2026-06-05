@@ -165,7 +165,13 @@ export async function getTopProsByCategoryAndCityIds(
     .limit(MAX_FETCH);
 
   const pros = (data as ProWithRelations[] | null) ?? [];
-  return { tops: scoreAndSelectTop(pros, limit), total: count ?? pros.length };
+  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré —
+  // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
+  // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
+  // leçon "estimated ignore/sous-estime les filtres" — ici pros.length est la
+  // source fiable pour les petites zones (arrondissements, zone Monaco).
+  const total = Math.max(count ?? 0, pros.length);
+  return { tops: scoreAndSelectTop(pros, limit), total };
 }
 
 /**
@@ -188,7 +194,13 @@ export async function getTopProsByCategoryAndCity(
     .limit(MAX_FETCH);
 
   const pros = (data as ProWithRelations[] | null) ?? [];
-  return { tops: scoreAndSelectTop(pros, limit), total: count ?? pros.length };
+  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré —
+  // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
+  // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
+  // leçon "estimated ignore/sous-estime les filtres" — ici pros.length est la
+  // source fiable pour les petites zones (arrondissements, zone Monaco).
+  const total = Math.max(count ?? 0, pros.length);
+  return { tops: scoreAndSelectTop(pros, limit), total };
 }
 
 /**
