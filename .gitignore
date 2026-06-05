@@ -51,3 +51,5 @@ scripts/.backup-sent-logs-*/
 
 # Données concurrentielles (analyse SEO) — ne pas committer
 data/competitive/
+scripts/_archive/
+scraping/*.log
