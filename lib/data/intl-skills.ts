@@ -159,6 +159,147 @@ export const INTL_SKILLS: IntlSkill[] = [
     blurb:
       "Strategy, transformation and operations consultants who help you plan and execute with clarity.",
   },
+
+  // ─── Wave 3 : skills à plus forte demande 2026 (Upwork/Fiverr) ────────
+  // Recherche web 05/06/2026 : mobile, UX/UI, SEO, social, WordPress,
+  // e-commerce, VA, email, cybersécurité, Web3, traduction, voix off,
+  // motion/3D, jeux vidéo, agents IA. Pas de tjmKey (pas de chiffre inventé :
+  // seuls les 6 tech d'origine ont une réf TJM ; le bloc tarif reste masqué).
+  {
+    slug: "mobile-development",
+    label: "Mobile App Development",
+    noun: "mobile app developers",
+    nounSingular: "mobile app developer",
+    frCategorySlug: "developpement-web",
+    blurb:
+      "iOS, Android and cross-platform engineers building native, React Native and Flutter apps.",
+  },
+  {
+    slug: "ux-ui-design",
+    label: "UX/UI Design",
+    noun: "UX/UI designers",
+    nounSingular: "UX/UI designer",
+    frCategorySlug: "design-produit",
+    blurb:
+      "User-experience and interface designers crafting intuitive, conversion-focused products in Figma.",
+  },
+  {
+    slug: "seo",
+    label: "SEO",
+    noun: "SEO specialists",
+    nounSingular: "SEO specialist",
+    frCategorySlug: "marketing-communication",
+    blurb:
+      "Search-optimisation experts covering technical SEO, content, link building and AI-search visibility.",
+  },
+  {
+    slug: "social-media-marketing",
+    label: "Social Media Marketing",
+    noun: "social media managers",
+    nounSingular: "social media manager",
+    frCategorySlug: "marketing-communication",
+    blurb:
+      "Social media managers and strategists who grow audiences and run paid campaigns across every platform.",
+  },
+  {
+    slug: "wordpress-development",
+    label: "WordPress Development",
+    noun: "WordPress developers",
+    nounSingular: "WordPress developer",
+    frCategorySlug: "developpement-web",
+    blurb:
+      "WordPress developers building custom themes, plugins and fast, secure sites for any business.",
+  },
+  {
+    slug: "ecommerce-development",
+    label: "E-commerce Development",
+    noun: "e-commerce developers",
+    nounSingular: "e-commerce developer",
+    frCategorySlug: "developpement-web",
+    blurb:
+      "Shopify, WooCommerce and headless-commerce specialists who build and optimise online stores.",
+  },
+  {
+    slug: "virtual-assistant",
+    label: "Virtual Assistant",
+    noun: "virtual assistants",
+    nounSingular: "virtual assistant",
+    frCategorySlug: "strategie-management",
+    blurb:
+      "Virtual assistants handling admin, scheduling, inbox, research and operations so you can focus on growth.",
+  },
+  {
+    slug: "email-marketing",
+    label: "Email Marketing",
+    noun: "email marketing experts",
+    nounSingular: "email marketing expert",
+    frCategorySlug: "marketing-communication",
+    blurb:
+      "Email and lifecycle marketers building automations, newsletters and campaigns that convert.",
+  },
+  {
+    slug: "cybersecurity",
+    label: "Cybersecurity",
+    noun: "cybersecurity experts",
+    nounSingular: "cybersecurity expert",
+    frCategorySlug: "cloud-devops",
+    blurb:
+      "Security engineers and pentesters who audit, harden and protect your apps, cloud and data.",
+  },
+  {
+    slug: "blockchain-development",
+    label: "Blockchain & Web3",
+    noun: "blockchain developers",
+    nounSingular: "blockchain developer",
+    frCategorySlug: "developpement-web",
+    blurb:
+      "Smart-contract, Solidity and Web3 engineers building dApps, tokens and on-chain integrations.",
+  },
+  {
+    slug: "translation",
+    label: "Translation & Localization",
+    noun: "translators",
+    nounSingular: "translator",
+    frCategorySlug: "redaction-copywriting",
+    blurb:
+      "Professional translators and localisation experts adapting your content for every market and language.",
+  },
+  {
+    slug: "voice-over",
+    label: "Voice Over & Audio",
+    noun: "voice-over artists",
+    nounSingular: "voice-over artist",
+    frCategorySlug: "audiovisuel-medias",
+    blurb:
+      "Voice-over artists, sound designers and audio producers for ads, videos, games and podcasts.",
+  },
+  {
+    slug: "motion-graphics",
+    label: "Motion & 3D",
+    noun: "motion designers",
+    nounSingular: "motion designer",
+    frCategorySlug: "audiovisuel-medias",
+    blurb:
+      "Motion designers and 3D artists creating animations, explainers and visual effects.",
+  },
+  {
+    slug: "game-development",
+    label: "Game Development",
+    noun: "game developers",
+    nounSingular: "game developer",
+    frCategorySlug: "developpement-web",
+    blurb:
+      "Unity, Unreal and mobile game developers building gameplay, mechanics and full titles.",
+  },
+  {
+    slug: "ai-agents",
+    label: "AI Agents & Automation",
+    noun: "AI agent developers",
+    nounSingular: "AI agent developer",
+    frCategorySlug: "intelligence-artificielle",
+    blurb:
+      "Builders of custom AI agents, chatbots and automations that streamline operations end-to-end.",
+  },
 ];
 
 const SKILL_MAP = new Map(INTL_SKILLS.map((s) => [s.slug, s]));
@@ -190,4 +331,20 @@ export const SKILL_FR: Record<
   copywriting: { label: "Rédaction & Copywriting", noun: "rédacteurs", nounSingular: "rédacteur" },
   "video-production": { label: "Audiovisuel & Médias", noun: "monteurs & producteurs vidéo", nounSingular: "monteur vidéo" },
   strategy: { label: "Stratégie & Management", noun: "consultants en stratégie", nounSingular: "consultant en stratégie" },
+  // Wave 3
+  "mobile-development": { label: "Développement Mobile", noun: "développeurs mobile", nounSingular: "développeur mobile" },
+  "ux-ui-design": { label: "Design UX/UI", noun: "designers UX/UI", nounSingular: "designer UX/UI" },
+  seo: { label: "SEO / Référencement", noun: "experts SEO", nounSingular: "expert SEO" },
+  "social-media-marketing": { label: "Réseaux Sociaux", noun: "community managers", nounSingular: "community manager" },
+  "wordpress-development": { label: "Développement WordPress", noun: "développeurs WordPress", nounSingular: "développeur WordPress" },
+  "ecommerce-development": { label: "Développement E-commerce", noun: "développeurs e-commerce", nounSingular: "développeur e-commerce" },
+  "virtual-assistant": { label: "Assistant Virtuel", noun: "assistants virtuels", nounSingular: "assistant virtuel" },
+  "email-marketing": { label: "Email Marketing", noun: "experts email marketing", nounSingular: "expert email marketing" },
+  cybersecurity: { label: "Cybersécurité", noun: "experts cybersécurité", nounSingular: "expert cybersécurité" },
+  "blockchain-development": { label: "Blockchain & Web3", noun: "développeurs blockchain", nounSingular: "développeur blockchain" },
+  translation: { label: "Traduction & Localisation", noun: "traducteurs", nounSingular: "traducteur" },
+  "voice-over": { label: "Voix Off & Audio", noun: "comédiens voix off", nounSingular: "comédien voix off" },
+  "motion-graphics": { label: "Motion & 3D", noun: "motion designers", nounSingular: "motion designer" },
+  "game-development": { label: "Développement de Jeux", noun: "développeurs de jeux", nounSingular: "développeur de jeux" },
+  "ai-agents": { label: "Agents IA & Automatisation", noun: "développeurs d'agents IA", nounSingular: "développeur d'agents IA" },
 };
