@@ -44,6 +44,14 @@ const BUDGET_OPTIONS = [
 const STEPS = ["Métier", "Ville", "Projet", "Contact"];
 const initialState: FormState = { success: false };
 
+// Validation client des coordonnées (étape 4), alignée sur le schéma Zod serveur
+// (cf. deposer-projet/actions.ts). Sert UNIQUEMENT à activer/griser le bouton
+// "Envoyer ma demande" — pas à afficher des erreurs. Évite le "mur rouge" quand
+// l'utilisateur clique Envoyer sur des champs vides : le bouton reste simplement
+// grisé tant que ce n'est pas valide, comme le bouton "Continuer" des étapes 1-3.
+const PHONE_RE = /^(?:(?:\+33|0)\s?[1-9])(?:[\s.-]?\d{2}){4}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 /**
  * Formulaire multi-step "Déposer un projet".
  *
@@ -180,6 +188,15 @@ export default function ProjectForm({
 
   const isLast = step === STEPS.length - 1;
   const progressPct = Math.round(((step + 1) / STEPS.length) * 100);
+
+  // Étape 4 (coordonnées) valide ? → active "Envoyer ma demande". Tant que c'est
+  // faux, le bouton reste grisé (au lieu de laisser cliquer → mur d'erreurs
+  // rouges sur des champs vides). Mêmes règles que le schéma Zod serveur.
+  const contactValid =
+    firstName.trim().length >= 2 &&
+    EMAIL_RE.test(email) &&
+    PHONE_RE.test(phone) &&
+    consent;
 
   return (
     <form
@@ -558,6 +575,16 @@ export default function ProjectForm({
         />
       </div>
 
+      {/* Indice doux (gris, pas rouge) quand le bouton Envoyer est grisé :
+          explique ce qui reste à remplir SANS crier en rouge sur des champs
+          vides. N'apparaît qu'à l'étape Contact tant que ce n'est pas valide. */}
+      {isLast && !contactValid && (
+        <p className="text-sm text-[var(--text-tertiary)]">
+          Renseignez votre prénom, votre email et votre téléphone, puis cochez la
+          case pour envoyer votre demande.
+        </p>
+      )}
+
       {/* Navigation entre étapes */}
       <div className="flex items-center justify-between gap-3 pt-6 border-t border-[var(--border-color)]">
         {step > 0 ? (
@@ -584,7 +611,7 @@ export default function ProjectForm({
         ) : (
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || !contactValid}
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-10 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2"
           >
             {isPending ? (

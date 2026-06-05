@@ -31,9 +31,12 @@ const projectSchema = z.object({
     .int()
     .positive("Veuillez choisir un type de travaux"),
   cityId: z.coerce.number().int().positive("Veuillez choisir une ville"),
-  description: z
-    .string()
-    .min(20, "Décrivez votre besoin en au moins 20 caractères"),
+  // Description OPTIONNELLE : l'UI l'annonce comme telle (« Laissez vide si vous
+  // préférez, les artisans vous rappelleront pour préciser ») — choix délibéré
+  // pour réduire la friction et le drop-off du tunnel. Le serveur doit donc
+  // accepter une description vide (avant : .min(20) → submit en échec SILENCIEUX
+  // quand l'user suivait l'invitation à laisser vide, erreur sur l'étape cachée).
+  description: z.string().max(5000, "Description trop longue (5000 caractères max)"),
   urgency: z.enum(["today", "this_week", "this_month", "not_urgent"], {
     message: "Veuillez indiquer l'urgence",
   }),
