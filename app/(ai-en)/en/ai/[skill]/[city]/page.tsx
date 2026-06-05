@@ -13,9 +13,11 @@ import {
 } from "@/lib/data/intl-skills";
 import {
   getIntlCity,
+  getCountryHomage,
   INTL_CITIES,
   type IntlCity,
 } from "@/lib/data/intl-cities";
+import { SOURCED_INTL_CITY } from "@/lib/data/sourced-intl-market";
 
 /**
  * Page programmatique EN : /en/ai/[skill]/[city]
@@ -100,7 +102,14 @@ export default async function SkillCityPage({
 
   const faq = buildFaq(skill, city, seniorRange);
 
-  const otherCities = INTL_CITIES.filter((c) => c.slug !== city.slug);
+  const homage = getCountryHomage(city.countryCode);
+  const sourced = SOURCED_INTL_CITY[city.slug];
+
+  // Maillage : on relie aux villes de la MÊME région (pertinence + évite des
+  // centaines de liens par page quand le dataset est mondial).
+  const otherCities = INTL_CITIES.filter(
+    (c) => c.slug !== city.slug && c.region === city.region
+  ).slice(0, 23);
   const otherSkills = INTL_SKILLS.filter((s) => s.slug !== skill.slug);
 
   const path = `/en/ai/${skill.slug}/${city.slug}`;
@@ -158,6 +167,18 @@ export default async function SkillCityPage({
               {city.state ? `${city.state} · United States` : `${city.country} · ${city.region}`}
             </span>
           </div>
+          {homage && (
+            <p className="mb-4 text-[15px] sm:text-[16px] text-[var(--ai-text-secondary)]">
+              <span className="font-semibold text-[var(--ai-text)]">{homage.phrase}</span>
+              {homage.roman ? (
+                <span className="text-[var(--ai-text-tertiary)]"> ({homage.roman})</span>
+              ) : null}
+              <span className="text-[var(--ai-text-tertiary)]">
+                {" "}
+                — {homage.lang} for &ldquo;{homage.translation}&rdquo;
+              </span>
+            </p>
+          )}
           <h1 className="font-black text-[var(--ai-text)] max-w-3xl" style={{ fontSize: "clamp(34px, 6vw, 68px)", lineHeight: 0.97, letterSpacing: "-0.04em" }}>
             Hire {skill.noun} in {city.name}
           </h1>
@@ -222,6 +243,32 @@ export default async function SkillCityPage({
                 </div>
               </dl>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* MARKET — paragraphe sourcé Perplexity (vague mondiale). Zéro chiffre
+          inventé : texte web cité. Rendu seulement si la donnée existe. */}
+      {sourced && (
+        <section className="border-t border-[var(--ai-border-subtle)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--ai-text-tertiary)] mb-4" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+              The local scene
+            </p>
+            <h2 className="font-black text-[var(--ai-text)] mb-5 max-w-2xl" style={{ fontSize: "clamp(24px, 4vw, 38px)", lineHeight: 1.0, letterSpacing: "-0.03em" }}>
+              Freelance {skill.noun} in {city.name}
+            </h2>
+            <p className="text-[16px] sm:text-[17px] leading-relaxed text-[var(--ai-text-secondary)] max-w-3xl">
+              {sourced.text}
+            </p>
+            {sourced.sources?.[0] && (
+              <p className="mt-4 text-[12px] text-[var(--ai-text-tertiary)]">
+                Sources · {sourced.retrievedAt} ·{" "}
+                <a href={sourced.sources[0]} target="_blank" rel="noopener noreferrer nofollow" className="underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-text)]">
+                  reference
+                </a>
+              </p>
+            )}
           </div>
         </section>
       )}

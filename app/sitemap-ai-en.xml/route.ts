@@ -1,5 +1,6 @@
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
+import { CONTINENTS, WORLD_COUNTRIES } from "@/lib/data/intl-countries";
 import { visaGuideSlugs } from "@/lib/data/freelance-visa";
 import { US_STATES } from "@/lib/data/us-states";
 import { usaGuideSlugs } from "@/lib/data/freelance-usa";
@@ -52,6 +53,30 @@ function buildEntries(): Entry[] {
         priority: 0.65,
       });
     }
+    // Skill × pays (vague mondiale) : /en/ai/[skill]/country/[country]
+    for (const c of WORLD_COUNTRIES) {
+      entries.push({
+        loc: `${AI_EN_BASE}/en/ai/${skill.slug}/country/${c.slug}`,
+        changefreq: "weekly",
+        priority: 0.65,
+      });
+    }
+  }
+  // Hubs continent : /en/ai/continent/[continent]
+  for (const cont of CONTINENTS) {
+    entries.push({
+      loc: `${AI_EN_BASE}/en/ai/continent/${cont.slug}`,
+      changefreq: "weekly",
+      priority: 0.75,
+    });
+  }
+  // Hubs pays : /en/ai/country/[country]
+  for (const c of WORLD_COUNTRIES) {
+    entries.push({
+      loc: `${AI_EN_BASE}/en/ai/country/${c.slug}`,
+      changefreq: "weekly",
+      priority: 0.7,
+    });
   }
   // Guides visa/permis freelance (hub + par pays).
   entries.push({

@@ -31,7 +31,18 @@ export type MonumentName =
   | "statue-liberty"
   | "space-needle"
   | "us-capitol"
-  | "monaco";
+  | "monaco"
+  // ─── Vague mondiale (Asie / Latam / Océanie / Afrique) ───────────────
+  | "tokyo"
+  | "shanghai"
+  | "singapore"
+  | "kuala-lumpur"
+  | "taipei"
+  | "seoul"
+  | "mumbai"
+  | "bangkok"
+  | "sydney"
+  | "rio";
 
 type Monument = { viewBox: string; content: ReactNode };
 
@@ -317,6 +328,162 @@ const MONUMENTS: Record<MonumentName, Monument> = {
         <path d="M200 126 V108 Q208 100 216 108 V126" />
         {/* Sol / terrasse */}
         <path d="M12 190 H268" />
+      </>
+    ),
+  },
+  // ─── Vague mondiale — line-art épuré, évocateur (décoratif, 10% opacité). ──
+  // Tokyo — Tour de Tokyo (treillis rouge, base large, antenne).
+  tokyo: {
+    viewBox: "0 0 200 300",
+    content: (
+      <>
+        <path d="M52 300 C84 210 96 150 100 96" />
+        <path d="M148 300 C116 210 104 150 100 96" />
+        <path d="M100 96 V40" />
+        <path d="M100 40 V18" />
+        <path d="M70 232 H130" />
+        <path d="M80 176 H120" />
+        <path d="M88 132 H112" />
+        <path d="M8 300 H192" />
+      </>
+    ),
+  },
+  // Shanghai — Tour de la Perle d'Orient (colonne + deux sphères).
+  shanghai: {
+    viewBox: "0 0 200 300",
+    content: (
+      <>
+        <path d="M94 300 V214" />
+        <path d="M106 300 V214" />
+        <circle cx="100" cy="196" r="22" />
+        <path d="M97 174 V120" />
+        <path d="M103 174 V120" />
+        <circle cx="100" cy="104" r="15" />
+        <path d="M100 89 V46" />
+        <path d="M100 46 V22" />
+        <path d="M70 300 H130" />
+        <path d="M8 300 H192" />
+      </>
+    ),
+  },
+  // Singapour — Marina Bay Sands (3 piliers + pont-bateau au sommet).
+  singapore: {
+    viewBox: "0 0 280 220",
+    content: (
+      <>
+        <path d="M40 210 V70" />
+        <path d="M64 210 V70" />
+        <path d="M128 210 V70" />
+        <path d="M152 210 V70" />
+        <path d="M216 210 V70" />
+        <path d="M240 210 V70" />
+        <path d="M30 70 Q140 38 250 70 L250 56 Q140 24 30 56 Z" />
+        <path d="M12 210 H268" />
+      </>
+    ),
+  },
+  // Kuala Lumpur — Tours Petronas (jumelles effilées + skybridge).
+  "kuala-lumpur": {
+    viewBox: "0 0 240 300",
+    content: (
+      <>
+        <path d="M58 300 V96 L74 70 L90 96 V300" />
+        <path d="M74 70 V40" />
+        <path d="M150 300 V96 L166 70 L182 96 V300" />
+        <path d="M166 70 V40" />
+        <path d="M90 168 H150" />
+        <path d="M104 168 V158 H136 V168" />
+        <path d="M20 300 H220" />
+      </>
+    ),
+  },
+  // Taipei — Taipei 101 (tronc + 8 segments évasés type pagode + flèche).
+  taipei: {
+    viewBox: "0 0 200 300",
+    content: (
+      <>
+        <path d="M84 300 V120 H116 V300" />
+        <path d="M82 120 L88 102 H112 L118 120" />
+        <path d="M84 102 L90 84 H110 L116 102" />
+        <path d="M86 84 L92 66 H108 L114 84" />
+        <path d="M100 66 V36" />
+        <path d="M100 36 V16" />
+        <path d="M8 300 H192" />
+      </>
+    ),
+  },
+  // Séoul — Tour N Seoul (mât sur colline triangulaire).
+  seoul: {
+    viewBox: "0 0 240 240",
+    content: (
+      <>
+        <path d="M10 230 L120 110 L230 230" />
+        <path d="M112 130 V96 H128 V130" />
+        <path d="M108 96 H132" />
+        <path d="M120 96 V60" />
+        <path d="M120 60 V36" />
+        <path d="M114 70 H126" />
+        <path d="M10 230 H230" />
+      </>
+    ),
+  },
+  // Mumbai — Gateway of India (grande arche centrale + arches latérales).
+  mumbai: {
+    viewBox: "0 0 280 220",
+    content: (
+      <>
+        <path d="M96 210 V96 Q140 44 184 96 V210" />
+        <path d="M84 96 V210" />
+        <path d="M196 96 V210" />
+        <path d="M84 96 H196" />
+        <path d="M60 210 V120 Q72 104 84 120" />
+        <path d="M196 120 Q208 104 220 120 V210" />
+        <path d="M84 80 H196" />
+        <path d="M12 210 H268" />
+      </>
+    ),
+  },
+  // Bangkok — flèche de temple (prang à étages effilés).
+  bangkok: {
+    viewBox: "0 0 200 300",
+    content: (
+      <>
+        <path d="M70 300 L86 150 H114 L130 300" />
+        <path d="M80 200 H120" />
+        <path d="M86 150 L93 110 H107 L114 150" />
+        <path d="M91 110 L96 78 H104 L109 110" />
+        <path d="M100 78 V40" />
+        <path d="M100 40 V18" />
+        <path d="M8 300 H192" />
+      </>
+    ),
+  },
+  // Sydney — Opéra (voiles imbriquées).
+  sydney: {
+    viewBox: "0 0 320 200",
+    content: (
+      <>
+        <path d="M40 180 Q70 70 120 180" />
+        <path d="M84 180 Q118 84 168 180" />
+        <path d="M150 180 Q188 96 236 180" />
+        <path d="M210 180 Q244 110 284 180" />
+        <path d="M20 182 H300" />
+        <path d="M0 196 H320" />
+      </>
+    ),
+  },
+  // Rio — Christ Rédempteur (figure bras écartés sur mont triangulaire).
+  rio: {
+    viewBox: "0 0 240 280",
+    content: (
+      <>
+        <path d="M20 270 L120 120 L220 270" />
+        <circle cx="120" cy="78" r="9" />
+        <path d="M120 87 V150" />
+        <path d="M66 116 H174" />
+        <path d="M120 150 L104 184" />
+        <path d="M120 150 L136 184" />
+        <path d="M20 270 H220" />
       </>
     ),
   },

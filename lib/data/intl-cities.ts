@@ -22,7 +22,7 @@ export type IntlCity = {
   name: string;
   country: string;
   countryCode: string; // ISO 3166-1 alpha-2
-  region: "Gulf" | "Europe" | "USA";
+  region: "Gulf" | "Europe" | "USA" | "Asia" | "Latam" | "Oceania" | "Africa";
   currency: Currency;
   monument: MonumentName;
   blurb: string;
@@ -1367,6 +1367,155 @@ export const INTL_CITIES: IntlCity[] = [
     techScene:
       "New Haven is a Connecticut university city with strengths in biotech and life-sciences research, supplying a highly-skilled technical and scientific talent pool.",
   },
+
+  // ════════════════════════════════════════════════════════════════════
+  // VAGUE MONDIALE — Asie / Amérique latine / Océanie / Afrique.
+  // currency: "USD" = repère freelance international (Upwork/Toptal/Arc).
+  // Les taux affichés sont un BENCHMARK USD, jamais un faux taux local
+  // (cf. garde-fou "zéro chiffre inventé"). blurb = faits publics vérifiables.
+  // ════════════════════════════════════════════════════════════════════
+
+  // ─── Asie ────────────────────────────────────────────────────────────
+  { slug: "beijing", name: "Beijing", country: "China", countryCode: "CN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "China's capital and a major technology centre, home to the Zhongguancun district and the headquarters of leading Chinese internet firms." },
+  { slug: "shanghai", name: "Shanghai", country: "China", countryCode: "CN", region: "Asia", currency: "USD", monument: "shanghai",
+    blurb: "China's financial capital, with a dense concentration of multinationals, fintech and digital teams around Pudong." },
+  { slug: "shenzhen", name: "Shenzhen", country: "China", countryCode: "CN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "China's hardware and electronics capital next to Hong Kong, home to global technology companies and a vast manufacturing supply chain." },
+  { slug: "guangzhou", name: "Guangzhou", country: "China", countryCode: "CN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A historic trade and manufacturing hub in the Pearl River Delta with a large base of digital commerce and design talent." },
+  { slug: "hangzhou", name: "Hangzhou", country: "China", countryCode: "CN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A major e-commerce and software centre, best known as the home of large Chinese internet platforms." },
+  { slug: "hong-kong", name: "Hong Kong", country: "Hong Kong", countryCode: "HK", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A leading international finance hub and gateway between China and the world, with strong demand for fintech, product and design talent." },
+  { slug: "tokyo", name: "Tokyo", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "tokyo",
+    blurb: "The capital of Japan and one of the world's largest metropolitan economies, with deep demand for software, product and design specialists." },
+  { slug: "osaka", name: "Osaka", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Japan's second economic centre and the commercial heart of the Kansai region, with strong manufacturing and digital activity." },
+  { slug: "kyoto", name: "Kyoto", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A research and university city blending heritage with technology, including a notable games and electronics presence." },
+  { slug: "fukuoka", name: "Fukuoka", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A startup-friendly city and gateway to the rest of Asia, with growing support for founders and freelancers." },
+  { slug: "nagoya", name: "Nagoya", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "An industrial powerhouse in central Japan with a strong automotive and engineering base and rising software demand." },
+  { slug: "seoul", name: "Seoul", country: "South Korea", countryCode: "KR", region: "Asia", currency: "USD", monument: "seoul",
+    blurb: "South Korea's technology and entertainment capital, home to major electronics, gaming and internet companies." },
+  { slug: "busan", name: "Busan", country: "South Korea", countryCode: "KR", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "South Korea's largest port city, combining logistics, film and a growing technology sector." },
+  { slug: "bangalore", name: "Bangalore", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Widely known as India's Silicon Valley, Bangalore concentrates the country's largest software, IT-services and startup ecosystem." },
+  { slug: "mumbai", name: "Mumbai", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "mumbai",
+    blurb: "India's financial capital and media centre, with a fast-growing startup and digital-services community." },
+  { slug: "delhi", name: "Delhi", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "India's capital region, including the Gurugram and Noida tech corridors, with a deep pool of IT and services talent." },
+  { slug: "hyderabad", name: "Hyderabad", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A major IT and pharmaceutical hub centred on HITEC City, hosting large global technology campuses." },
+  { slug: "pune", name: "Pune", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "An education, IT and automotive centre near Mumbai with a large engineering talent base." },
+  { slug: "chennai", name: "Chennai", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A leading IT-services and manufacturing hub in southern India with a strong software and SaaS community." },
+  { slug: "ahmedabad", name: "Ahmedabad", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A fast-growing business city in Gujarat with rising IT, design and startup activity." },
+  { slug: "singapore", name: "Singapore", country: "Singapore", countryCode: "SG", region: "Asia", currency: "USD", monument: "singapore",
+    blurb: "A leading Asia-Pacific hub for technology and finance, home to the regional headquarters of many global companies." },
+  { slug: "taipei", name: "Taipei", country: "Taiwan", countryCode: "TW", region: "Asia", currency: "USD", monument: "taipei",
+    blurb: "The centre of Taiwan's world-leading semiconductor and hardware industry, with a strong software and design scene." },
+  { slug: "bangkok", name: "Bangkok", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "bangkok",
+    blurb: "Southeast Asia's business gateway and a fast-growing digital economy with a large pool of creative and tech freelancers." },
+  { slug: "chiang-mai", name: "Chiang Mai", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A well-known remote-work and digital-nomad hub with an established community of independent professionals." },
+  { slug: "ho-chi-minh-city", name: "Ho Chi Minh City", country: "Vietnam", countryCode: "VN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Vietnam's economic engine and a fast-growing centre for software outsourcing and digital startups." },
+  { slug: "hanoi", name: "Hanoi", country: "Vietnam", countryCode: "VN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Vietnam's capital, with a rapidly expanding technology sector and a deep engineering talent pool." },
+  { slug: "jakarta", name: "Jakarta", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "The hub of Southeast Asia's largest economy, home to several technology unicorns and a vibrant startup scene." },
+  { slug: "bali", name: "Bali", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A global remote-work and digital-nomad destination with a large community of independent designers and developers." },
+  { slug: "surabaya", name: "Surabaya", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Indonesia's second-largest city and an industrial and commercial centre with growing digital activity." },
+  { slug: "kuala-lumpur", name: "Kuala Lumpur", country: "Malaysia", countryCode: "MY", region: "Asia", currency: "USD", monument: "kuala-lumpur",
+    blurb: "A regional technology and finance hub with a multilingual talent pool and strong digital-economy support." },
+  { slug: "penang", name: "Penang", country: "Malaysia", countryCode: "MY", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A long-standing electronics and engineering centre on Malaysia's northwest coast with rising software demand." },
+  { slug: "manila", name: "Manila", country: "Philippines", countryCode: "PH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A major centre for business-process outsourcing and a large English-speaking pool of digital and support talent." },
+  { slug: "cebu", name: "Cebu", country: "Philippines", countryCode: "PH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "The Philippines' second outsourcing and IT hub, with a strong base of developers, designers and support specialists." },
+  { slug: "karachi", name: "Karachi", country: "Pakistan", countryCode: "PK", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Pakistan's largest city and financial centre, with a fast-growing community of software and freelance professionals." },
+  { slug: "lahore", name: "Lahore", country: "Pakistan", countryCode: "PK", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A major education and technology centre with one of South Asia's largest freelance and software communities." },
+  { slug: "dhaka", name: "Dhaka", country: "Bangladesh", countryCode: "BD", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "The capital of Bangladesh and home to a large, fast-growing freelance and IT-services workforce." },
+  { slug: "colombo", name: "Colombo", country: "Sri Lanka", countryCode: "LK", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Sri Lanka's commercial capital, with a growing software, design and business-services sector." },
+  { slug: "tel-aviv", name: "Tel Aviv", country: "Israel", countryCode: "IL", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "A dense deep-tech and startup hub often called the heart of the 'Startup Nation', strong in cybersecurity and AI." },
+  { slug: "phnom-penh", name: "Phnom Penh", country: "Cambodia", countryCode: "KH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Cambodia's capital and a fast-emerging market with growing demand for web, mobile and digital-marketing talent." },
+
+  // ─── Amérique latine ─────────────────────────────────────────────────
+  { slug: "sao-paulo", name: "São Paulo", country: "Brazil", countryCode: "BR", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Latin America's largest economy and its leading technology and fintech hub, with a deep pool of engineering talent." },
+  { slug: "rio-de-janeiro", name: "Rio de Janeiro", country: "Brazil", countryCode: "BR", region: "Latam", currency: "USD", monument: "rio",
+    blurb: "A major creative, media and technology centre on Brazil's coast with a vibrant startup and design community." },
+  { slug: "belo-horizonte", name: "Belo Horizonte", country: "Brazil", countryCode: "BR", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Home to the 'San Pedro Valley' startup community and a strong base of software developers." },
+  { slug: "mexico-city", name: "Mexico City", country: "Mexico", countryCode: "MX", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "The largest metropolis in the Spanish-speaking world and a fast-growing hub for fintech, software and design." },
+  { slug: "guadalajara", name: "Guadalajara", country: "Mexico", countryCode: "MX", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Often called Mexico's Silicon Valley, with a dense concentration of software and electronics companies." },
+  { slug: "monterrey", name: "Monterrey", country: "Mexico", countryCode: "MX", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "A leading industrial and technology centre in northern Mexico with strong engineering and nearshoring activity." },
+  { slug: "buenos-aires", name: "Buenos Aires", country: "Argentina", countryCode: "AR", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Known for its highly-skilled software and design talent, Buenos Aires has produced several global technology companies." },
+  { slug: "cordoba-ar", name: "Córdoba", country: "Argentina", countryCode: "AR", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "A major university and technology city, one of Argentina's leading software and engineering hubs." },
+  { slug: "bogota", name: "Bogotá", country: "Colombia", countryCode: "CO", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Colombia's capital and a fast-growing centre for startups, software and business-process services." },
+  { slug: "medellin", name: "Medellín", country: "Colombia", countryCode: "CO", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "An innovation and remote-work hub recognised for its growing technology and creative ecosystem." },
+  { slug: "santiago", name: "Santiago", country: "Chile", countryCode: "CL", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Home to one of Latin America's strongest startup ecosystems, sometimes called 'Chilecon Valley'." },
+  { slug: "lima", name: "Lima", country: "Peru", countryCode: "PE", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Peru's capital and a growing market for software, e-commerce and digital-services talent." },
+  { slug: "montevideo", name: "Montevideo", country: "Uruguay", countryCode: "UY", region: "Latam", currency: "USD", monument: "skyline",
+    blurb: "Uruguay's capital, internationally recognised for high-quality software development and outsourcing." },
+
+  // ─── Océanie ─────────────────────────────────────────────────────────
+  { slug: "sydney", name: "Sydney", country: "Australia", countryCode: "AU", region: "Oceania", currency: "USD", monument: "sydney",
+    blurb: "Australia's largest technology and finance hub, home to many startups and global company offices." },
+  { slug: "melbourne", name: "Melbourne", country: "Australia", countryCode: "AU", region: "Oceania", currency: "USD", monument: "skyline",
+    blurb: "A major technology, design and creative centre with a strong startup and university ecosystem." },
+  { slug: "brisbane", name: "Brisbane", country: "Australia", countryCode: "AU", region: "Oceania", currency: "USD", monument: "skyline",
+    blurb: "A fast-growing technology city in Queensland with rising demand for software and digital talent." },
+  { slug: "auckland", name: "Auckland", country: "New Zealand", countryCode: "NZ", region: "Oceania", currency: "USD", monument: "skyline",
+    blurb: "New Zealand's largest city and its primary technology and business hub." },
+  { slug: "wellington", name: "Wellington", country: "New Zealand", countryCode: "NZ", region: "Oceania", currency: "USD", monument: "skyline",
+    blurb: "New Zealand's capital, combining government, a renowned film-effects industry and a growing tech scene." },
+
+  // ─── Afrique ─────────────────────────────────────────────────────────
+  { slug: "lagos", name: "Lagos", country: "Nigeria", countryCode: "NG", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Nigeria's economic engine and Africa's largest fintech hub, with a fast-growing community of developers and founders." },
+  { slug: "nairobi", name: "Nairobi", country: "Kenya", countryCode: "KE", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Often called 'Silicon Savannah', Nairobi is East Africa's leading technology and innovation centre." },
+  { slug: "cape-town", name: "Cape Town", country: "South Africa", countryCode: "ZA", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "South Africa's leading technology and creative hub, with a strong base of designers and software developers." },
+  { slug: "johannesburg", name: "Johannesburg", country: "South Africa", countryCode: "ZA", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "South Africa's economic centre, with deep demand for software, data and digital-business talent." },
+  { slug: "cairo", name: "Cairo", country: "Egypt", countryCode: "EG", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "One of the largest cities in the MENA region, with a vast and fast-growing pool of developer and design talent." },
+  { slug: "casablanca", name: "Casablanca", country: "Morocco", countryCode: "MA", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Morocco's economic capital and a growing hub for software, offshoring and digital services." },
+  { slug: "accra", name: "Accra", country: "Ghana", countryCode: "GH", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Ghana's capital and a rising West African technology centre with an active startup community." },
+  { slug: "kigali", name: "Kigali", country: "Rwanda", countryCode: "RW", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Rwanda's capital, known for its technology-forward policies and growing digital-services sector." },
+  { slug: "tunis", name: "Tunis", country: "Tunisia", countryCode: "TN", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Tunisia's capital and a growing offshoring and software hub with strong French- and English-speaking talent." },
+  { slug: "dakar", name: "Dakar", country: "Senegal", countryCode: "SN", region: "Africa", currency: "USD", monument: "skyline",
+    blurb: "Senegal's capital and a leading francophone West African technology and digital-services hub." },
 ];
 
 const CITY_MAP = new Map(INTL_CITIES.map((c) => [c.slug, c]));
@@ -1377,4 +1526,72 @@ export function getIntlCity(slug: string): IntlCity | null {
 
 export function allIntlCitySlugs(): string[] {
   return INTL_CITIES.map((c) => c.slug);
+}
+
+export function getCitiesByRegion(region: IntlCity["region"]): IntlCity[] {
+  return INTL_CITIES.filter((c) => c.region === region);
+}
+
+export function getCitiesByCountry(countryCode: string): IntlCity[] {
+  return INTL_CITIES.filter((c) => c.countryCode === countryCode);
+}
+
+/**
+ * Hommage en langue locale — salutation native rendue en filigrane sur les
+ * pages ville/pays de la vague mondiale (kicker hero). Référence respectueuse
+ * au pays. Keyed par countryCode (ISO alpha-2). `roman` = romanisation pour les
+ * scripts non latins. Renseigné UNIQUEMENT pour la vague mondiale (les pages
+ * Gulf/Europe/US existantes restent inchangées : getCountryHomage renvoie null).
+ */
+export type CountryHomage = {
+  phrase: string;
+  roman?: string;
+  translation: string;
+  lang: string;
+};
+
+export const COUNTRY_HOMAGE: Record<string, CountryHomage> = {
+  // Asie
+  CN: { phrase: "你好", roman: "Nǐ hǎo", translation: "Hello", lang: "Mandarin" },
+  HK: { phrase: "你好", roman: "Néih hóu", translation: "Hello", lang: "Cantonese" },
+  JP: { phrase: "こんにちは", roman: "Konnichiwa", translation: "Hello", lang: "Japanese" },
+  KR: { phrase: "안녕하세요", roman: "Annyeonghaseyo", translation: "Hello", lang: "Korean" },
+  IN: { phrase: "नमस्ते", roman: "Namaste", translation: "Greetings", lang: "Hindi" },
+  SG: { phrase: "Selamat datang", translation: "Welcome", lang: "Malay" },
+  TW: { phrase: "你好", roman: "Nǐ hǎo", translation: "Hello", lang: "Mandarin" },
+  TH: { phrase: "สวัสดี", roman: "Sawasdee", translation: "Hello", lang: "Thai" },
+  VN: { phrase: "Xin chào", translation: "Hello", lang: "Vietnamese" },
+  ID: { phrase: "Selamat datang", translation: "Welcome", lang: "Indonesian" },
+  MY: { phrase: "Selamat datang", translation: "Welcome", lang: "Malay" },
+  PH: { phrase: "Mabuhay", translation: "Welcome", lang: "Filipino" },
+  PK: { phrase: "السلام علیکم", roman: "Assalam-o-Alaikum", translation: "Peace be upon you", lang: "Urdu" },
+  BD: { phrase: "স্বাগতম", roman: "Swagatam", translation: "Welcome", lang: "Bengali" },
+  LK: { phrase: "ආයුබෝවන්", roman: "Ayubowan", translation: "May you live long", lang: "Sinhala" },
+  IL: { phrase: "שלום", roman: "Shalom", translation: "Hello", lang: "Hebrew" },
+  KH: { phrase: "សួស្តី", roman: "Sour sdey", translation: "Hello", lang: "Khmer" },
+  // Amérique latine
+  BR: { phrase: "Olá", translation: "Hello", lang: "Portuguese" },
+  MX: { phrase: "¡Hola!", translation: "Hello", lang: "Spanish" },
+  AR: { phrase: "¡Hola!", translation: "Hello", lang: "Spanish" },
+  CO: { phrase: "¡Hola!", translation: "Hello", lang: "Spanish" },
+  CL: { phrase: "¡Hola!", translation: "Hello", lang: "Spanish" },
+  PE: { phrase: "¡Hola!", translation: "Hello", lang: "Spanish" },
+  UY: { phrase: "¡Hola!", translation: "Hello", lang: "Spanish" },
+  // Océanie
+  AU: { phrase: "G'day", translation: "Hello", lang: "Australian English" },
+  NZ: { phrase: "Kia ora", translation: "Hello", lang: "Māori" },
+  // Afrique
+  NG: { phrase: "Sannu", translation: "Hello", lang: "Hausa" },
+  KE: { phrase: "Karibu", translation: "Welcome", lang: "Swahili" },
+  ZA: { phrase: "Sawubona", translation: "Hello", lang: "Zulu" },
+  EG: { phrase: "مرحبا", roman: "Marhaba", translation: "Hello", lang: "Arabic" },
+  MA: { phrase: "مرحبا", roman: "Marhaba", translation: "Hello", lang: "Arabic" },
+  GH: { phrase: "Akwaaba", translation: "Welcome", lang: "Akan" },
+  RW: { phrase: "Muraho", translation: "Hello", lang: "Kinyarwanda" },
+  TN: { phrase: "مرحبا", roman: "Marhaba", translation: "Hello", lang: "Arabic" },
+  SN: { phrase: "Nanga def", translation: "Hello", lang: "Wolof" },
+};
+
+export function getCountryHomage(countryCode: string): CountryHomage | null {
+  return COUNTRY_HOMAGE[countryCode] ?? null;
 }

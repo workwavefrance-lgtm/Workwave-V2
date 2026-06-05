@@ -7,7 +7,7 @@ import { aiAlternatesEnOnly } from "@/lib/i18n/alternates";
 import { formatTjmRange } from "@/lib/i18n/format";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { getIntlSkill, INTL_SKILLS } from "@/lib/data/intl-skills";
-import { INTL_CITIES } from "@/lib/data/intl-cities";
+import { INTL_CITIES, getCitiesByRegion } from "@/lib/data/intl-cities";
 
 /**
  * Hub EN par skill : /en/ai/[skill] (ex. /en/ai/web-development).
@@ -32,11 +32,11 @@ export async function generateMetadata({
   const path = `/en/ai/${skill.slug}`;
   return {
     title: `Hire freelance ${skill.noun} — day rates & talent (${year})`,
-    description: `Hire vetted freelance ${skill.noun} across Europe and the Gulf. Compare day rates, get matched in 24h, 0% commission. Free to post on Workwave AI.`,
+    description: `Hire vetted freelance ${skill.noun} worldwide. Compare day rates, get matched in 24h, 0% commission. Free to post on Workwave AI.`,
     alternates: aiAlternatesEnOnly(path),
     openGraph: {
       title: `Hire freelance ${skill.noun}`,
-      description: `Vetted freelance ${skill.noun}, AI-matched, 0% commission. Europe & the Gulf.`,
+      description: `Vetted freelance ${skill.noun}, AI-matched, 0% commission. Worldwide, remote-first.`,
       url: `${SITE_URL}${path}`,
       siteName: "Workwave AI",
       locale: "en_US",
@@ -56,8 +56,12 @@ export default async function SkillHubPage({
 
   const tjm = skill.tjmKey ? TJM_REFERENCE[skill.tjmKey] : undefined;
   const path = `/en/ai/${skill.slug}`;
-  const gulf = INTL_CITIES.filter((c) => c.region === "Gulf");
-  const europe = INTL_CITIES.filter((c) => c.region === "Europe");
+  const asia = getCitiesByRegion("Asia");
+  const europe = getCitiesByRegion("Europe");
+  const gulf = getCitiesByRegion("Gulf");
+  const latam = getCitiesByRegion("Latam");
+  const oceania = getCitiesByRegion("Oceania");
+  const africa = getCitiesByRegion("Africa");
   const otherSkills = INTL_SKILLS.filter((s) => s.slug !== skill.slug);
 
   const tiers: { label: string; key: "junior" | "mid" | "senior" | "expert" }[] = [
@@ -76,7 +80,7 @@ export default async function SkillHubPage({
     },
     {
       q: `Where can I hire freelance ${skill.noun} on Workwave?`,
-      a: `Across Europe (London, Berlin, Amsterdam, Paris, Lisbon, Madrid and more) and the Gulf (Dubai, Abu Dhabi, Riyadh, Doha). Most freelancers work remotely, so you can hire across borders.`,
+      a: `Worldwide — across Asia (Bangalore, Singapore, Tokyo, Dubai and more), Europe, the Americas, Africa and Oceania. Most freelancers work remotely, so you can hire across borders and timezones.`,
     },
     {
       q: `How does hiring work?`,
@@ -144,7 +148,7 @@ export default async function SkillHubPage({
             Hire freelance {skill.noun}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            {skill.blurb} Post your project for free — our AI alerts matching {skill.noun} across Europe and the Gulf, and they contact you directly. 0% commission.
+            {skill.blurb} Post your project for free — our AI alerts matching {skill.noun} worldwide, and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
@@ -187,10 +191,18 @@ export default async function SkillHubPage({
           <h2 className="font-black uppercase text-[var(--ai-text)] mb-8" style={{ fontSize: "clamp(26px, 4.5vw, 44px)", lineHeight: 0.97, letterSpacing: "-0.04em" }}>
             {skill.label} by city
           </h2>
-          <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mb-4">Gulf &amp; Middle East</p>
-          <CityGrid cities={gulf} />
+          <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mb-4">Asia</p>
+          <CityGrid cities={asia} />
           <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mt-10 mb-4">Europe</p>
           <CityGrid cities={europe} />
+          <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mt-10 mb-4">Gulf &amp; Middle East</p>
+          <CityGrid cities={gulf} />
+          <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mt-10 mb-4">Latin America</p>
+          <CityGrid cities={latam} />
+          <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mt-10 mb-4">Oceania</p>
+          <CityGrid cities={oceania} />
+          <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-[var(--ai-text-tertiary)] mt-10 mb-4">Africa</p>
+          <CityGrid cities={africa} />
         </div>
       </section>
 
