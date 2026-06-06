@@ -300,6 +300,57 @@ export const INTL_SKILLS: IntlSkill[] = [
     blurb:
       "Builders of custom AI agents, chatbots and automations that streamline operations end-to-end.",
   },
+
+  // ─── Wave 4 : services IA SPÉCIFIQUES (vs Fiverr, lot 1 P1) ───────────
+  // Pages dédiées sur des mots-clés service-IA précis que Fiverr ranke
+  // (rapport SEMrush) et que nos skills larges (ai-engineering, ai-agents)
+  // ne couvrent pas en propre. Pas de tjmKey (zéro chiffre inventé). Tous
+  // mappés à une catégorie TECH/business (AI_CATEGORY_IDS), jamais BTP.
+  {
+    slug: "ai-chatbot-development",
+    label: "AI Chatbot Development",
+    noun: "AI chatbot developers",
+    nounSingular: "AI chatbot developer",
+    frCategorySlug: "intelligence-artificielle",
+    blurb:
+      "Developers building custom AI chatbots and conversational assistants — GPT-powered support bots, WhatsApp and website chatbots, and enterprise virtual agents.",
+  },
+  {
+    slug: "ai-app-development",
+    label: "AI App Development",
+    noun: "AI app developers",
+    nounSingular: "AI app developer",
+    frCategorySlug: "intelligence-artificielle",
+    blurb:
+      "Engineers shipping AI-powered applications end to end — from custom models and APIs to production apps that put generative AI, automation and ML to work.",
+  },
+  {
+    slug: "ai-logo-design",
+    label: "AI Logo Design",
+    noun: "AI logo designers",
+    nounSingular: "AI logo designer",
+    frCategorySlug: "design-creation",
+    blurb:
+      "Designers crafting brand logos with AI tools and a human eye — unique, polished identities generated fast and refined to production quality.",
+  },
+  {
+    slug: "ai-content-writing",
+    label: "AI Content Writing",
+    noun: "AI content writers",
+    nounSingular: "AI content writer",
+    frCategorySlug: "redaction-copywriting",
+    blurb:
+      "Writers who pair AI with editorial craft to produce SEO articles, website copy and content at scale — fast drafts, human polish, on-brand voice.",
+  },
+  {
+    slug: "prompt-engineering",
+    label: "Prompt Engineering",
+    noun: "prompt engineers",
+    nounSingular: "prompt engineer",
+    frCategorySlug: "intelligence-artificielle",
+    blurb:
+      "Specialists who design, test and optimise prompts for LLMs — building reliable AI workflows, custom GPTs and evaluation pipelines for production.",
+  },
 ];
 
 const SKILL_MAP = new Map(INTL_SKILLS.map((s) => [s.slug, s]));
@@ -347,4 +398,10 @@ export const SKILL_FR: Record<
   "motion-graphics": { label: "Motion & 3D", noun: "motion designers", nounSingular: "motion designer" },
   "game-development": { label: "Développement de Jeux", noun: "développeurs de jeux", nounSingular: "développeur de jeux" },
   "ai-agents": { label: "Agents IA & Automatisation", noun: "développeurs d'agents IA", nounSingular: "développeur d'agents IA" },
+  // Wave 4 — services IA spécifiques (lot 1)
+  "ai-chatbot-development": { label: "Développement de Chatbots IA", noun: "développeurs de chatbots IA", nounSingular: "développeur de chatbots IA" },
+  "ai-app-development": { label: "Développement d'Applications IA", noun: "développeurs d'applications IA", nounSingular: "développeur d'applications IA" },
+  "ai-logo-design": { label: "Création de Logo IA", noun: "designers de logo IA", nounSingular: "designer de logo IA" },
+  "ai-content-writing": { label: "Rédaction de Contenu IA", noun: "rédacteurs de contenu IA", nounSingular: "rédacteur de contenu IA" },
+  "prompt-engineering": { label: "Prompt Engineering", noun: "prompt engineers", nounSingular: "prompt engineer" },
 };
