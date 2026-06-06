@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { qualifyProject } from "@/lib/ai/qualify-project";
 import { sendProjectNotification } from "@/lib/email/send-project-notification";
@@ -281,38 +280,42 @@ export async function submitProject(
     },
   });
 
-  // Sprint 13 — Broadcast BTP en BACKGROUND via after() (Next.js 16).
-  // Le redirect vers /deposer-projet/merci arrive IMMEDIATEMENT a l'user
-  // (UX rapide), et le broadcast s'execute apres que la response soit envoyee.
-  // after() est l'API officielle Next.js pour le post-response work, equivalent
-  // a waitUntil de Vercel. Pas de "promise detachee morte" : la function lifetime
-  // est etendue automatiquement.
+  // Sprint 14 (06/06/2026) — Broadcast BTP en SYNCHRONE, AWAIT direct.
+  // Pourquoi pas after() : after() de Next.js 16 n'execute PAS la callback
+  // en prod Vercel sur les Server Actions (bug confirme : projet #55 cree le
+  // 02/06 broadcast_count=0 jusqu'au cron rescue du 06/06 = 4 jours de
+  // retard). Le user veut un envoi IMMEDIAT au pro des le depot, pas un
+  // rattrapage J+1/J+4.
+  // Cout en UX : ~1-2s de latence ajoutee sur le submit (1 SELECT cities +
+  // 1 SELECT pros + 1 mail Resend chunk de 50). Invisible quand le submit
+  // dure deja ~3-4s avec la qualification IA. Le cron rescue reste actif
+  // comme filet de securite si jamais le mail Resend echoue ou que la
+  // function timeout.
   // NB : on broadcast meme si le projet est suspicious, mais avec le banner
-  // "Projet flague par notre IA" pour que les pros decident en connaissance de
-  // cause.
-  console.log(`[submitProject] project ${project.id} created, scheduling broadcast in background`);
-  after(async () => {
-    try {
-      const result = await broadcastBtpProject({
-        projectId: project.id,
-        projectTitle: data.description.split("\n")[0].slice(0, 100) || "Nouveau projet",
-        projectDescription: data.description,
-        projectBudget: data.budget,
-        projectTimeline: data.urgency,
-        projectCategoryName: category.name,
-        projectCategoryId: data.categoryId,
-        projectCityName: city.name,
-        projectCityId: data.cityId,
-        projectDepartmentId: city.department_id,
-        isSuspicious,
-      });
-      console.log(
-        `[submitProject] broadcast project ${project.id} : ${result.sent}/${result.totalTargets} sent, ${result.failed} failed`
-      );
-    } catch (err) {
-      console.error(`[submitProject] broadcast project ${project.id} failed :`, err);
-    }
-  });
+  // "Projet flague par notre IA" pour que les pros decident en connaissance.
+  console.log(`[submitProject] project ${project.id} created, broadcasting NOW (sync)`);
+  try {
+    const result = await broadcastBtpProject({
+      projectId: project.id,
+      projectTitle: data.description.split("\n")[0].slice(0, 100) || "Nouveau projet",
+      projectDescription: data.description,
+      projectBudget: data.budget,
+      projectTimeline: data.urgency,
+      projectCategoryName: category.name,
+      projectCategoryId: data.categoryId,
+      projectCityName: city.name,
+      projectCityId: data.cityId,
+      projectDepartmentId: city.department_id,
+      isSuspicious,
+    });
+    console.log(
+      `[submitProject] broadcast project ${project.id} : ${result.sent}/${result.totalTargets} sent, ${result.failed} failed`
+    );
+  } catch (err) {
+    // Non bloquant : si le broadcast plante, le projet reste cree et le cron
+    // de rattrapage 9h/15h reprendra le relais. L'user ne voit pas l'erreur.
+    console.error(`[submitProject] broadcast project ${project.id} failed :`, err);
+  }
 
   redirect("/deposer-projet/merci");
 }
