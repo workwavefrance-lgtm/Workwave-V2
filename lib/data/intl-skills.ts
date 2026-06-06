@@ -351,6 +351,53 @@ export const INTL_SKILLS: IntlSkill[] = [
     blurb:
       "Specialists who design, test and optimise prompts for LLMs — building reliable AI workflows, custom GPTs and evaluation pipelines for production.",
   },
+
+  // ─── Wave 4 — lot 2 (P2) ─────────────────────────────────────────────
+  {
+    slug: "ai-voice-over",
+    label: "AI Voice Over",
+    noun: "AI voice-over artists",
+    nounSingular: "AI voice-over artist",
+    frCategorySlug: "audiovisuel-medias",
+    blurb:
+      "Voice-over talent and audio producers using AI voices and editing — ads, explainers, e-learning, YouTube and podcasts, delivered fast and on-brand.",
+  },
+  {
+    slug: "generative-ai-art",
+    label: "Generative AI Art",
+    noun: "generative AI artists",
+    nounSingular: "generative AI artist",
+    frCategorySlug: "design-creation",
+    blurb:
+      "Artists generating images, product visuals and brand art with Midjourney, DALL·E and Stable Diffusion — concepts to polished, commercial-ready assets.",
+  },
+  {
+    slug: "ai-video-editing",
+    label: "AI Video Editing",
+    noun: "AI video editors",
+    nounSingular: "AI video editor",
+    frCategorySlug: "audiovisuel-medias",
+    blurb:
+      "Video editors using AI to cut, caption and repurpose footage at scale — short-form, social, YouTube and podcast video, fast turnaround.",
+  },
+  {
+    slug: "ai-data-annotation",
+    label: "AI Data Annotation",
+    noun: "data annotation specialists",
+    nounSingular: "data annotation specialist",
+    frCategorySlug: "data-analytics",
+    blurb:
+      "Specialists labelling and annotating training data — image, text, audio and video — to power accurate machine-learning and computer-vision models.",
+  },
+  {
+    slug: "ai-consulting",
+    label: "AI Consulting",
+    noun: "AI consultants",
+    nounSingular: "AI consultant",
+    frCategorySlug: "strategie-management",
+    blurb:
+      "Consultants who turn AI into business value — strategy, use-case scoping, tool selection and implementation roadmaps for generative AI and automation.",
+  },
 ];
 
 const SKILL_MAP = new Map(INTL_SKILLS.map((s) => [s.slug, s]));
@@ -404,4 +451,10 @@ export const SKILL_FR: Record<
   "ai-logo-design": { label: "Création de Logo IA", noun: "designers de logo IA", nounSingular: "designer de logo IA" },
   "ai-content-writing": { label: "Rédaction de Contenu IA", noun: "rédacteurs de contenu IA", nounSingular: "rédacteur de contenu IA" },
   "prompt-engineering": { label: "Prompt Engineering", noun: "prompt engineers", nounSingular: "prompt engineer" },
+  // Wave 4 — lot 2
+  "ai-voice-over": { label: "Voix Off IA", noun: "comédiens voix off IA", nounSingular: "comédien voix off IA" },
+  "generative-ai-art": { label: "Art Génératif IA", noun: "artistes IA générative", nounSingular: "artiste IA générative" },
+  "ai-video-editing": { label: "Montage Vidéo IA", noun: "monteurs vidéo IA", nounSingular: "monteur vidéo IA" },
+  "ai-data-annotation": { label: "Annotation de Données IA", noun: "annotateurs de données", nounSingular: "annotateur de données" },
+  "ai-consulting": { label: "Conseil en IA", noun: "consultants IA", nounSingular: "consultant IA" },
 };
