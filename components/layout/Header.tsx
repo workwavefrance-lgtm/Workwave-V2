@@ -130,8 +130,14 @@ export default function Header() {
           />
         </div>
 
-        {/* Mobile: ThemeToggle + Hamburger */}
+        {/* Mobile: CTA Déposer + ThemeToggle + Hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          {/* CTA modal visible AVANT le hamburger pour ne pas être caché.
+              Compact : "Déposer" suffit (le titre du H1 dans la modal complète). */}
+          <QuickProjectModalTrigger
+            label="Déposer"
+            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250"
+          />
           <ThemeToggle />
           <button
             onClick={() => setMenuOpen(!menuOpen)}
