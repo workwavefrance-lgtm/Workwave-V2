@@ -19,14 +19,10 @@ type EditableProValues = {
  * Section ÉDITION admin pour la fiche pro. Apparaît dans ProDetailClient
  * juste après l'en-tête. Compactée par défaut, dépliable au clic.
  *
- * Champs : catégorie principale + secondaires (multi-pick), description,
- * phone, email, website. Pour la ville/is_active : actions existantes
- * dans ProDetailClient suffisent.
- *
- * Garde-fous :
- * - Reset state si l'édition échoue (message d'erreur affiché)
- * - useTransition pour le pending state (UX bouton désactivé)
- * - router.refresh() au succès pour repull les données fraîches
+ * Couleurs : on n'utilise PAS les CSS vars du site public (--bg-primary etc.)
+ * car elles ne sont pas définies dans l'admin → texte noir sur fond noir.
+ * À la place : tailwind explicite (bg-white, text-zinc-900, etc.), thème
+ * lisible en light ET dark mode.
  */
 export default function EditProSection({
   proId,
@@ -50,7 +46,6 @@ export default function EditProSection({
   const [email, setEmail] = useState(initial.email || "");
   const [website, setWebsite] = useState(initial.website || "");
 
-  // Regroupement des catégories par vertical pour l'UX
   const byVertical = categories.reduce<Record<string, Category[]>>((acc, c) => {
     (acc[c.vertical] = acc[c.vertical] || []).push(c);
     return acc;
@@ -76,10 +71,10 @@ export default function EditProSection({
         proId,
         categoryId: categoryId ?? undefined,
         secondaryCategoryIds: secondaryIds,
-        description: description,
-        phone: phone,
-        email: email,
-        website: website,
+        description,
+        phone,
+        email,
+        website,
       });
       if (!res.ok) {
         setError(res.error || "Erreur inconnue");
@@ -90,6 +85,10 @@ export default function EditProSection({
       setTimeout(() => setSuccess(false), 3000);
     });
   }
+
+  // Classes input réutilisables : blanc + bordure grise, texte noir, sur tous thèmes
+  const inputCls =
+    "w-full rounded-lg border border-zinc-300 bg-white text-zinc-900 placeholder-zinc-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5A36] focus:border-[#FF5A36]";
 
   if (!open) {
     return (
@@ -106,15 +105,15 @@ export default function EditProSection({
   }
 
   return (
-    <section className="mt-6 mb-6 rounded-2xl border border-[#FF5A36]/30 bg-orange-50 dark:bg-orange-950/20 p-6">
+    <section className="mt-6 mb-6 rounded-2xl border border-[#FF5A36]/40 bg-orange-50 p-6 text-zinc-900">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-bold text-[var(--text-primary)]">
+        <h3 className="text-lg font-bold text-zinc-900">
           ✏️ Édition admin de la fiche
         </h3>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="text-sm text-zinc-600 hover:text-zinc-900"
         >
           Annuler
         </button>
@@ -122,11 +121,13 @@ export default function EditProSection({
 
       {/* Catégorie principale */}
       <div className="mb-5">
-        <label className="block text-sm font-semibold mb-2">Catégorie principale</label>
+        <label className="block text-sm font-semibold mb-2 text-zinc-900">
+          Catégorie principale
+        </label>
         <select
           value={categoryId ?? ""}
           onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : null)}
-          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
+          className={inputCls}
         >
           <option value="">— Aucune —</option>
           {Object.entries(byVertical).map(([vertical, cats]) => (
@@ -145,19 +146,22 @@ export default function EditProSection({
 
       {/* Catégories secondaires (multi-pick) */}
       <div className="mb-5">
-        <label className="block text-sm font-semibold mb-2">
-          Catégories secondaires <span className="font-normal text-[var(--text-secondary)]">(cochez pour ajouter / décochez pour retirer)</span>
+        <label className="block text-sm font-semibold mb-2 text-zinc-900">
+          Catégories secondaires{" "}
+          <span className="font-normal text-zinc-600">
+            (cochez pour ajouter / décochez pour retirer)
+          </span>
         </label>
-        <div className="max-h-64 overflow-y-auto rounded-lg border border-[var(--card-border)] bg-[var(--bg-primary)] p-3 space-y-3">
+        <div className="max-h-64 overflow-y-auto rounded-lg border border-zinc-300 bg-white p-3 space-y-3">
           {Object.entries(byVertical).map(([vertical, cats]) => (
             <div key={vertical}>
-              <h4 className="text-xs font-bold uppercase tracking-wide text-[var(--text-secondary)] mb-1.5">
+              <h4 className="text-xs font-bold uppercase tracking-wide text-zinc-500 mb-1.5">
                 {verticalLabels[vertical] || vertical}
               </h4>
               <div className="flex flex-wrap gap-1.5">
                 {cats
                   .sort((a, b) => a.name.localeCompare(b.name))
-                  .filter((c) => c.id !== categoryId) // exclut la principale
+                  .filter((c) => c.id !== categoryId)
                   .map((c) => {
                     const active = secondaryIds.includes(c.id);
                     return (
@@ -168,7 +172,7 @@ export default function EditProSection({
                         className={
                           active
                             ? "rounded-full bg-[#FF5A36] text-white px-3 py-1 text-xs font-semibold"
-                            : "rounded-full border border-[var(--card-border)] hover:border-[#FF5A36] px-3 py-1 text-xs"
+                            : "rounded-full border border-zinc-300 bg-white text-zinc-900 hover:border-[#FF5A36] hover:text-[#FF5A36] px-3 py-1 text-xs"
                         }
                       >
                         {active ? "✓ " : "+ "}
@@ -181,24 +185,25 @@ export default function EditProSection({
           ))}
         </div>
         {secondaryIds.length > 0 && (
-          <p className="mt-2 text-xs text-[var(--text-secondary)]">
-            {secondaryIds.length} catégorie{secondaryIds.length > 1 ? "s" : ""} secondaire{secondaryIds.length > 1 ? "s" : ""}.
+          <p className="mt-2 text-xs text-zinc-600">
+            {secondaryIds.length} catégorie{secondaryIds.length > 1 ? "s" : ""} secondaire
+            {secondaryIds.length > 1 ? "s" : ""}.
           </p>
         )}
       </div>
 
       {/* Description */}
       <div className="mb-5">
-        <label className="block text-sm font-semibold mb-2">Description</label>
+        <label className="block text-sm font-semibold mb-2 text-zinc-900">Description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           maxLength={1000}
-          className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
+          className={inputCls + " resize-y"}
           placeholder="Présentation de l'entreprise…"
         />
-        <p className="mt-1 text-xs text-[var(--text-secondary)]">
+        <p className="mt-1 text-xs text-zinc-600">
           {description.length} / 1000 caractères
         </p>
       </div>
@@ -206,32 +211,32 @@ export default function EditProSection({
       {/* Coordonnées */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-semibold mb-2">Téléphone</label>
+          <label className="block text-sm font-semibold mb-2 text-zinc-900">Téléphone</label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
+            className={inputCls}
             placeholder="+33…"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold mb-2">Email</label>
+          <label className="block text-sm font-semibold mb-2 text-zinc-900">Email</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
+            className={inputCls}
             placeholder="…@…"
           />
         </div>
         <div>
-          <label className="block text-sm font-semibold mb-2">Site web</label>
+          <label className="block text-sm font-semibold mb-2 text-zinc-900">Site web</label>
           <input
             type="url"
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
-            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
+            className={inputCls}
             placeholder="https://…"
           />
         </div>
@@ -248,11 +253,9 @@ export default function EditProSection({
           {pending ? "Enregistrement…" : "Enregistrer les modifications"}
         </button>
         {success && (
-          <span className="text-sm text-green-600 font-semibold">✓ Enregistré</span>
+          <span className="text-sm text-green-700 font-semibold">✓ Enregistré</span>
         )}
-        {error && (
-          <span className="text-sm text-red-600 font-semibold">{error}</span>
-        )}
+        {error && <span className="text-sm text-red-700 font-semibold">{error}</span>}
       </div>
     </section>
   );
