@@ -1455,6 +1455,69 @@ export const INTL_CITIES: IntlCity[] = [
   { slug: "phnom-penh", name: "Phnom Penh", country: "Cambodia", countryCode: "KH", region: "Asia", currency: "USD", monument: "skyline",
     blurb: "Cambodia's capital and a fast-emerging market with growing demand for web, mobile and digital-marketing talent." },
 
+  // ─── Asie — destinations digital nomad / remote work ────────────────
+  // 🇹🇭 Thaïlande
+  { slug: "phuket", name: "Phuket", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Thailand's largest island and a major digital nomad hub with co-working spaces, English-friendly visa options and a strong remote-work community." },
+  { slug: "koh-samui", name: "Koh Samui", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Popular tropical island in the Gulf of Thailand with a growing community of remote workers, co-livings and co-working spaces." },
+  { slug: "koh-phangan", name: "Koh Phangan", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Wellness-oriented island in southern Thailand known for yoga retreats, longer stays and a tight-knit remote-work community." },
+  { slug: "pai", name: "Pai", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Mountain town in northern Thailand popular with creative freelancers seeking a quieter base than Chiang Mai." },
+  { slug: "krabi", name: "Krabi", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Coastal province in southern Thailand with growing co-working infrastructure and a relaxed remote-work lifestyle." },
+  { slug: "pattaya", name: "Pattaya", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Coastal city near Bangkok with international communities and a growing presence of freelancers and digital service providers." },
+  // 🇮🇩 Indonésie — Bali éclaté + autres
+  { slug: "ubud", name: "Ubud", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Bali's cultural heart and one of the world's most established digital nomad destinations, with abundant co-working and creative spaces." },
+  { slug: "canggu", name: "Canggu", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Bali's beachside digital nomad capital with world-class co-working spaces and a dense remote-work community." },
+  { slug: "seminyak", name: "Seminyak", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Upscale beach district in Bali with a strong design and creative-freelance scene and international remote workers." },
+  { slug: "sanur", name: "Sanur", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Quieter east-coast Bali town popular with longer-stay remote workers and freelancers seeking a calmer base." },
+  { slug: "yogyakarta", name: "Yogyakarta", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Indonesia's cultural and academic hub with a fast-growing creative and tech freelance community and a low cost base." },
+  // 🇻🇳 Vietnam
+  { slug: "da-nang", name: "Da Nang", country: "Vietnam", countryCode: "VN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Vietnam's central coastal tech hub and one of Asia's most popular digital nomad destinations, with growing IT services and co-working." },
+  { slug: "hoi-an", name: "Hoi An", country: "Vietnam", countryCode: "VN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "UNESCO heritage town near Da Nang, popular with creative freelancers and remote workers who prefer a smaller pace." },
+  { slug: "nha-trang", name: "Nha Trang", country: "Vietnam", countryCode: "VN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Coastal city in central Vietnam emerging as an affordable remote-work base with growing international communities." },
+  // 🇵🇭 Philippines
+  { slug: "siargao", name: "Siargao", country: "Philippines", countryCode: "PH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Surf island in the Philippines that has become a notable digital nomad destination with co-livings and coworking." },
+  { slug: "palawan", name: "Palawan", country: "Philippines", countryCode: "PH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Tropical archipelago popular with remote workers seeking nature, with growing community hubs in El Nido and Coron." },
+  // 🇲🇾 Malaisie
+  { slug: "langkawi", name: "Langkawi", country: "Malaysia", countryCode: "MY", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Duty-free island in northwestern Malaysia popular with long-stay remote workers and freelancers seeking a quieter base." },
+  // 🇱🇰 Sri Lanka
+  { slug: "galle", name: "Galle", country: "Sri Lanka", countryCode: "LK", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Colonial coastal city in southern Sri Lanka emerging as a digital nomad base with growing co-working infrastructure." },
+  { slug: "ella", name: "Ella", country: "Sri Lanka", countryCode: "LK", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Mountain town in Sri Lanka's hill country popular with remote workers seeking a slower-paced highland base." },
+  // 🇰🇭 Cambodge
+  { slug: "siem-reap", name: "Siem Reap", country: "Cambodia", countryCode: "KH", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Cultural hub near Angkor Wat with a small but growing community of digital nomads and remote freelancers." },
+  // 🇮🇳 Inde
+  { slug: "goa", name: "Goa", country: "India", countryCode: "IN", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "India's coastal state and a long-standing digital nomad favorite, with co-livings concentrated around Anjuna, Vagator and Arambol." },
+  // 🇯🇵 Japon
+  { slug: "sapporo", name: "Sapporo", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Hokkaido's main city with a growing technology and creative scene and a comfortable base for remote work in northern Japan." },
+  { slug: "okinawa", name: "Okinawa", country: "Japan", countryCode: "JP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Japan's tropical southern islands with growing co-working spaces and an emerging remote-work scene around Naha." },
+  // 🇰🇷 Corée
+  { slug: "jeju", name: "Jeju", country: "South Korea", countryCode: "KR", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "South Korea's tropical southern island known for tech retreats, longer stays and government-supported remote-work initiatives." },
+  // 🇳🇵 Népal
+  { slug: "kathmandu", name: "Kathmandu", country: "Nepal", countryCode: "NP", region: "Asia", currency: "USD", monument: "skyline",
+    blurb: "Himalayan capital with a fast-growing freelance technology community and an affordable base for South-Asia remote work." },
+
   // ─── Amérique latine ─────────────────────────────────────────────────
   { slug: "sao-paulo", name: "São Paulo", country: "Brazil", countryCode: "BR", region: "Latam", currency: "USD", monument: "skyline",
     blurb: "Latin America's largest economy and its leading technology and fintech hub, with a deep pool of engineering talent." },
