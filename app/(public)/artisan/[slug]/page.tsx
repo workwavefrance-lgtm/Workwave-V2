@@ -7,6 +7,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
 import { getPublishedReviewsForPro } from "@/lib/queries/reviews";
 import { getNearbyCities } from "@/lib/queries/cities";
+import { createClient } from "@/lib/supabase/server";
 import ProCard from "@/components/pro/ProCard";
 import ProReviewsBlock from "@/components/pro/ProReviewsBlock";
 import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
@@ -110,12 +111,23 @@ export default async function ProPage({ params }: Props) {
     permanentRedirect(`/ai/freelance/${slug}`);
   }
 
-  // Charger les pros similaires, villes voisines et avis en parallele
-  const [similarPros, nearbyCities, reviews] = await Promise.all([
+  // Charger les pros similaires, villes voisines, avis ET catégories secondaires
+  // en parallèle (les cat. secondaires permettent à la fiche d'apparaître sur
+  // plusieurs listings /[metier]/[ville] et boostent le maillage interne SEO).
+  const secondaryIds = (pro.secondary_category_ids || []) as number[];
+  const supabaseForCats = await createClient();
+  const [similarPros, nearbyCities, reviews, secondaryCategoriesRes] = await Promise.all([
     pro.city ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
     pro.city ? getNearbyCities(pro.city.id, 5) : Promise.resolve([]),
     getPublishedReviewsForPro(pro.id, 20),
+    secondaryIds.length > 0
+      ? supabaseForCats
+          .from("categories")
+          .select("id, name, slug")
+          .in("id", secondaryIds)
+      : Promise.resolve({ data: [] as { id: number; name: string; slug: string }[] }),
   ]);
+  const secondaryCategories = (secondaryCategoriesRes.data || []) as { id: number; name: string; slug: string }[];
 
   const cityName = pro.city?.name || "";
   const deptSlug = pro.city?.department
@@ -379,6 +391,19 @@ export default async function ProPage({ params }: Props) {
                 >
                   {pro.category.name}
                 </span>
+                {/* Catégories secondaires : chips cliquables (lien vers
+                    /[cat]/[ville]) qui boostent le maillage interne SEO et
+                    montrent à l'user les autres métiers que ce pro pratique. */}
+                {secondaryCategories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={pro.city ? `/${cat.slug}/${pro.city.slug}` : `/${cat.slug}`}
+                    className="inline-block bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-[var(--accent-muted)] hover:text-[var(--accent-badge-text)] text-sm font-medium px-3 py-1 rounded-full transition-colors"
+                    title={`Voir tous les ${cat.name.toLowerCase()}s${pro.city ? ` à ${pro.city.name}` : ""}`}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
                 {/* Badge RGE certifie — source officielle ADEME, plus credible
                     que le champ certifications user-input. Affiche tel quel
                     quand pro.rge_certified=true (sync via match-rge-pros.ts). */}
