@@ -302,6 +302,7 @@ export async function submitProject(
         projectCategoryName: category.name,
         projectCategoryId: data.categoryId,
         projectCityName: city.name,
+        projectCityId: data.cityId,
         projectDepartmentId: city.department_id,
         isSuspicious,
       });

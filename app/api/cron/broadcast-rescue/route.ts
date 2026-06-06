@@ -76,6 +76,7 @@ export async function GET(req: Request) {
           projectCategoryName: cat.name,
           projectCategoryId: cat.id,
           projectCityName: cit.name,
+          projectCityId: cit.id,
           projectDepartmentId: cit.department_id,
           isSuspicious: (p.suspicion_score ?? 0) >= 50,
         });

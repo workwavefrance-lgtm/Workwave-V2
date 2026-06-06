@@ -1,17 +1,22 @@
 /**
  * Broadcast email a TOUS les pros BTP de la categorie + zone du projet.
  * Phase Sprint 13 (2026-05-27) : nouveau modele pay-per-lead.
+ * Phase Sprint 14 (2026-06-06) : matching par distance Haversine (rayon
+ * d'intervention du pro), au lieu du filtre "meme departement" qui ratait
+ * les leads cross-departementaux.
  *
  * Difference avec broadcastTechProject :
- *   - BTP : filtre par categorie EXACTE du projet + meme departement que la ville du projet
+ *   - BTP : filtre par categorie EXACTE du projet + distance(pro, projet) <= rayon pro
  *     (le pro n'a pas besoin d'etre Premium pour recevoir, mais doit payer 9,90€
  *      par lead unlock pour voir les coordonnees)
  *   - Tech : broadcast a tous les freelances dans les 14 categories AI (modele
  *     Codeur.com generaliste)
  *
  * Filtres durs (cote SELECT pros) :
- *   - category_id = project.category_id (BTP categorie exacte du projet)
- *   - cities.department_id = project.city.department_id (meme departement)
+ *   - category_id = project.category_id OU project.category_id dans secondary_category_ids
+ *   - pro.city dans une bounding box ~200km autour du projet (pre-filtre SQL rapide)
+ *   - distance(pro.city.lat/lng <-> projet.city.lat/lng) <= pro.intervention_radius_km
+ *     (filtre exact Haversine cote JS apres SELECT)
  *   - is_active = true, deleted_at IS NULL
  *   - claimed_by_user_id IS NOT NULL (fiche revendiquee, donc auto-subscribed)
  *   - email IS NOT NULL
@@ -19,15 +24,19 @@
  *   - do_not_contact = false
  *   - source IN ('sirene', 'pagesjaunes', 'manual', 'ai_signup')
  *
+ * Fallback si projet sans lat/lng (ville sans coordonnees en base) :
+ *   filtre "meme departement" (comportement legacy avant 2026-06-06).
+ *
  * NB : on ne filtre PAS par subscription_status. Tous les pros BTP claimed
  * recoivent les mails. La paywall est sur l'unlock (9,90€ par lead).
  *
- * Volume estime : sur les ~226k pros BTP, environ 5-10% sont claimed/actifs.
- * Pour un projet sur une categorie x departement donne, on cible quelques
- * dizaines a centaines de pros max.
+ * Volume estime : sur les ~1M pros BTP, ~14 claimed aujourd'hui. Au volume
+ * cible (~1000+ claimed), la bounding box pre-filtre SQL evite de fetcher
+ * des dizaines de milliers de pros pour rien.
  */
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import { haversineKm } from "@/lib/utils/haversine";
 
 let _resend: Resend | null = null;
 function getResendClient(): Resend {
@@ -59,6 +68,9 @@ export type BroadcastBtpInput = {
   projectCategoryName: string;
   projectCategoryId: number;
   projectCityName: string | null;
+  /** Id de la ville du projet — utilise pour fetcher lat/lng et calculer la distance vs rayon des pros. */
+  projectCityId: number | null;
+  /** Fallback si la ville du projet n'a pas de lat/lng (filtre "meme departement"). */
   projectDepartmentId: number;
   isSuspicious: boolean;
 };
@@ -157,16 +169,52 @@ export async function broadcastBtpProject(
   const sb = getServiceClient();
   const nowIso = new Date().toISOString();
 
-  // 1) Recuperer les city_ids du meme departement que la ville du projet
-  const { data: cities, error: citiesError } = await sb
-    .from("cities")
-    .select("id")
-    .eq("department_id", input.projectDepartmentId);
+  // 1) Recuperer lat/lng de la ville du projet (pour matching par distance)
+  let projectLat: number | null = null;
+  let projectLng: number | null = null;
+  if (input.projectCityId != null) {
+    const { data: projCity } = await sb
+      .from("cities")
+      .select("latitude, longitude")
+      .eq("id", input.projectCityId)
+      .single();
+    projectLat = (projCity?.latitude as number | null | undefined) ?? null;
+    projectLng = (projCity?.longitude as number | null | undefined) ?? null;
+  }
 
-  if (citiesError || !cities || cities.length === 0) {
-    // Important : update broadcasted_at meme quand 0 cibles, sinon l'audit
-    // BDD ne distingue plus "broadcast jamais tente" d'un "broadcast OK avec
-    // 0 plombiers eligibles". Bug detecte sur projet #42 (Laurent) le 28/05.
+  // 2) Pre-filtre cities en bounding box ~200km (rayon max d'intervention pro).
+  //    Si la ville du projet n'a pas de lat/lng en base, fallback "meme departement"
+  //    (comportement legacy avant Sprint 14 du 2026-06-06).
+  const DELTA_LAT = 1.85; // ~205 km nord/sud
+  const DELTA_LNG = 2.55; // ~200 km est/ouest a ~47°N (France metropole)
+  const useDistance = projectLat != null && projectLng != null;
+
+  let cityIds: number[] = [];
+  if (useDistance) {
+    const { data: bboxCities, error: bboxErr } = await sb
+      .from("cities")
+      .select("id")
+      .gte("latitude", (projectLat as number) - DELTA_LAT)
+      .lte("latitude", (projectLat as number) + DELTA_LAT)
+      .gte("longitude", (projectLng as number) - DELTA_LNG)
+      .lte("longitude", (projectLng as number) + DELTA_LNG)
+      .limit(5000);
+    if (bboxErr) {
+      console.error("[broadcastBtpProject] bbox cities error:", bboxErr);
+    }
+    cityIds = (bboxCities || []).map((c: { id: number }) => c.id);
+  } else {
+    const { data: deptCities, error: deptErr } = await sb
+      .from("cities")
+      .select("id")
+      .eq("department_id", input.projectDepartmentId);
+    if (deptErr) {
+      console.error("[broadcastBtpProject] dept cities error:", deptErr);
+    }
+    cityIds = (deptCities || []).map((c: { id: number }) => c.id);
+  }
+
+  if (cityIds.length === 0) {
     await sb
       .from("projects")
       .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
@@ -175,15 +223,16 @@ export async function broadcastBtpProject(
       totalTargets: 0,
       sent: 0,
       failed: 0,
-      errors: ["no_cities_in_department"],
+      errors: useDistance ? ["no_cities_in_bbox"] : ["no_cities_in_department"],
     };
   }
-  const cityIds = cities.map((c: { id: number }) => c.id);
 
-  // 2) Selection des pros BTP eligibles
+  // 3) Selection des pros BTP eligibles (filtres SQL + city JOIN pour lat/lng)
   const { data: pros, error: queryError } = await sb
     .from("pros")
-    .select("id, email, name, paused_until")
+    .select(
+      "id, email, name, paused_until, intervention_radius_km, city:cities!inner(latitude, longitude)"
+    )
     .or(
       `category_id.eq.${input.projectCategoryId},secondary_category_ids.cs.{${input.projectCategoryId}}`
     )
@@ -198,7 +247,6 @@ export async function broadcastBtpProject(
 
   if (queryError) {
     console.error("[broadcastBtpProject] query error:", queryError);
-    // Track meme en erreur pour audit
     await sb
       .from("projects")
       .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
@@ -206,9 +254,38 @@ export async function broadcastBtpProject(
     return { totalTargets: 0, sent: 0, failed: 0, errors: [queryError.message] };
   }
 
-  const targets = (pros || []).filter(
-    (f): f is { id: number; email: string; name: string; paused_until: string | null } =>
-      typeof f.email === "string" && f.email.length > 0
+  // 4) Filtre exact Haversine (cote JS) : distance(pro, projet) <= rayon pro.
+  //    Si on a pas la lat/lng projet, on garde tout le pool dept (fallback legacy).
+  //    Si un pro n'a pas de lat/lng (city sans coords), on l'inclut par securite
+  //    (= ne pas penaliser les pros a cause d'une donnee manquante cote BDD).
+  type ProRow = {
+    id: number;
+    email: string | null;
+    name: string;
+    paused_until: string | null;
+    intervention_radius_km: number | null;
+    city: { latitude: number | null; longitude: number | null } | null;
+  };
+  const DEFAULT_RADIUS_KM = 20;
+  const targets = ((pros || []) as unknown as ProRow[]).filter(
+    (
+      p
+    ): p is ProRow & { email: string } => {
+      if (typeof p.email !== "string" || p.email.length === 0) return false;
+      if (!useDistance) return true; // fallback dept : pas de filtre distance
+      const proCity = p.city;
+      if (!proCity || proCity.latitude == null || proCity.longitude == null) {
+        return true; // pas de coords pro -> inclure par securite
+      }
+      const dist = haversineKm(
+        proCity.latitude,
+        proCity.longitude,
+        projectLat as number,
+        projectLng as number
+      );
+      const radius = p.intervention_radius_km ?? DEFAULT_RADIUS_KM;
+      return dist <= radius;
+    }
   );
 
   if (targets.length === 0) {
