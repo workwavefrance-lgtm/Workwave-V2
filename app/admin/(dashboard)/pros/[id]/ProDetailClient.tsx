@@ -7,6 +7,7 @@ import AdminButton from "@/components/admin/forms/AdminButton";
 import AdminConfirmDialog from "@/components/admin/forms/AdminConfirmDialog";
 import { useAdmin } from "@/components/admin/shell/AdminProvider";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import EditProSection from "./EditProSection";
 
 type ProData = {
   id: number;
@@ -15,7 +16,9 @@ type ProData = {
   siret: string | null;
   email: string | null;
   phone: string | null;
+  website: string | null;
   description: string | null;
+  secondary_category_ids: number[] | null;
   subscription_status: string;
   subscription_plan: string | null;
   trial_ends_at: string | null;
@@ -30,6 +33,8 @@ type ProData = {
   category: { id: number; name: string } | null;
   city: { id: number; name: string; department: { code: string; name: string } | null } | null;
 };
+
+type Category = { id: number; name: string; vertical: string };
 
 type UnlockData = {
   id: number;
@@ -57,9 +62,11 @@ const STATUS_BADGE: Record<string, { label: string; variant: "success" | "warnin
 export default function ProDetailClient({
   pro,
   unlocks,
+  categories,
 }: {
   pro: ProData;
   unlocks: UnlockData[];
+  categories: Category[];
 }) {
   const totalCents = unlocks.reduce((s, u) => s + (u.amount_cents || 0), 0);
   const router = useRouter();
@@ -127,6 +134,21 @@ export default function ProDetailClient({
           </div>
         </div>
       </div>
+
+      {/* Édition admin : catégorie principale + secondaires + description + contacts.
+          Plié par défaut, dépliable au clic sur "✏️ Éditer la fiche". */}
+      <EditProSection
+        proId={pro.id}
+        categories={categories}
+        initial={{
+          category_id: pro.category?.id ?? null,
+          secondary_category_ids: pro.secondary_category_ids || [],
+          description: pro.description || "",
+          phone: pro.phone || "",
+          email: pro.email || "",
+          website: pro.website || "",
+        }}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Info Card */}
