@@ -13,6 +13,7 @@ type EditableProValues = {
   phone: string;
   email: string;
   website: string;
+  intervention_radius_km: number;
 };
 
 /**
@@ -45,6 +46,7 @@ export default function EditProSection({
   const [phone, setPhone] = useState(initial.phone || "");
   const [email, setEmail] = useState(initial.email || "");
   const [website, setWebsite] = useState(initial.website || "");
+  const [radius, setRadius] = useState<number>(initial.intervention_radius_km || 20);
 
   const byVertical = categories.reduce<Record<string, Category[]>>((acc, c) => {
     (acc[c.vertical] = acc[c.vertical] || []).push(c);
@@ -75,6 +77,7 @@ export default function EditProSection({
         phone,
         email,
         website,
+        interventionRadiusKm: radius,
       });
       if (!res.ok) {
         setError(res.error || "Erreur inconnue");
@@ -206,6 +209,49 @@ export default function EditProSection({
         <p className="mt-1 text-xs text-zinc-600">
           {description.length} / 1000 caractères
         </p>
+      </div>
+
+      {/* Distance d'intervention (slider + input numérique côte à côte) */}
+      <div className="mb-5">
+        <div className="flex items-baseline justify-between mb-2">
+          <label className="block text-sm font-semibold text-zinc-900">
+            Distance d&apos;intervention
+          </label>
+          <span className="text-xs text-zinc-600">
+            Rayon autour de l&apos;adresse — détermine quels projets reçoit ce pro.
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <input
+            type="range"
+            min={1}
+            max={200}
+            step={1}
+            value={radius}
+            onChange={(e) => setRadius(parseInt(e.target.value))}
+            className="flex-1 accent-[#FF5A36]"
+          />
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min={1}
+              max={200}
+              value={radius}
+              onChange={(e) => {
+                const v = parseInt(e.target.value);
+                if (!isNaN(v)) setRadius(Math.max(1, Math.min(200, v)));
+              }}
+              className="w-20 rounded-lg border border-zinc-300 bg-white text-zinc-900 px-2 py-1.5 text-sm text-center font-semibold focus:outline-none focus:ring-2 focus:ring-[#FF5A36] focus:border-[#FF5A36]"
+            />
+            <span className="text-sm font-semibold text-zinc-900">km</span>
+          </div>
+        </div>
+        <div className="flex justify-between text-xs text-zinc-500 mt-1">
+          <span>1 km</span>
+          <span>50 km</span>
+          <span>100 km</span>
+          <span>200 km</span>
+        </div>
       </div>
 
       {/* Coordonnées */}

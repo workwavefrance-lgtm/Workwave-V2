@@ -21,6 +21,7 @@ export type UpdateProInput = {
   website?: string | null;
   cityId?: number | null;
   isActive?: boolean;
+  interventionRadiusKm?: number; // 5-100 km (cf. Sprint 5)
 };
 
 export type UpdateProResult = {
@@ -77,6 +78,13 @@ export async function updateProByAdmin(
   }
   if (input.isActive !== undefined) {
     payload.is_active = !!input.isActive;
+  }
+  if (input.interventionRadiusKm !== undefined) {
+    const r = Math.round(input.interventionRadiusKm);
+    if (!Number.isInteger(r) || r < 1 || r > 200) {
+      return { ok: false, error: "Distance d'intervention invalide (1-200 km)" };
+    }
+    payload.intervention_radius_km = r;
   }
 
   // Récup du slug du pro pour revalidate la fiche publique
