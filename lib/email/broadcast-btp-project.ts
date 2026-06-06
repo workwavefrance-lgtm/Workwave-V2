@@ -182,61 +182,23 @@ export async function broadcastBtpProject(
     projectLng = (projCity?.longitude as number | null | undefined) ?? null;
   }
 
-  // 2) Pre-filtre cities en bounding box ~200km (rayon max d'intervention pro).
-  //    Si la ville du projet n'a pas de lat/lng en base, fallback "meme departement"
-  //    (comportement legacy avant Sprint 14 du 2026-06-06).
-  const DELTA_LAT = 1.85; // ~205 km nord/sud
-  const DELTA_LNG = 2.55; // ~200 km est/ouest a ~47°N (France metropole)
+  // 2) Selection des pros BTP eligibles (categorie + claimed + actif).
+  //    On NE filtre PAS par city_id en SQL : la bbox naive serait plafonnee
+  //    a 1000 cities par PostgREST (leçon 09/05/2026 — recidive du bug
+  //    cap 1000). Le pool des pros claimed etant petit (~quelques dizaines
+  //    aujourd'hui, ~quelques milliers cibles), filtrer 100% cote JS via
+  //    Haversine sur le SELECT joint avec cities est plus simple et correct.
+  //    NB : a l'echelle 50k+ pros claimed par categorie, il faudra introduire
+  //    une vraie bbox paginee ou une RPC PostGIS — pas pour aujourd'hui.
   const useDistance = projectLat != null && projectLng != null;
-
-  let cityIds: number[] = [];
-  if (useDistance) {
-    const { data: bboxCities, error: bboxErr } = await sb
-      .from("cities")
-      .select("id")
-      .gte("latitude", (projectLat as number) - DELTA_LAT)
-      .lte("latitude", (projectLat as number) + DELTA_LAT)
-      .gte("longitude", (projectLng as number) - DELTA_LNG)
-      .lte("longitude", (projectLng as number) + DELTA_LNG)
-      .limit(5000);
-    if (bboxErr) {
-      console.error("[broadcastBtpProject] bbox cities error:", bboxErr);
-    }
-    cityIds = (bboxCities || []).map((c: { id: number }) => c.id);
-  } else {
-    const { data: deptCities, error: deptErr } = await sb
-      .from("cities")
-      .select("id")
-      .eq("department_id", input.projectDepartmentId);
-    if (deptErr) {
-      console.error("[broadcastBtpProject] dept cities error:", deptErr);
-    }
-    cityIds = (deptCities || []).map((c: { id: number }) => c.id);
-  }
-
-  if (cityIds.length === 0) {
-    await sb
-      .from("projects")
-      .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
-      .eq("id", input.projectId);
-    return {
-      totalTargets: 0,
-      sent: 0,
-      failed: 0,
-      errors: useDistance ? ["no_cities_in_bbox"] : ["no_cities_in_department"],
-    };
-  }
-
-  // 3) Selection des pros BTP eligibles (filtres SQL + city JOIN pour lat/lng)
-  const { data: pros, error: queryError } = await sb
+  let queryBuilder = sb
     .from("pros")
     .select(
-      "id, email, name, paused_until, intervention_radius_km, city:cities!inner(latitude, longitude)"
+      "id, email, name, paused_until, intervention_radius_km, city:cities!inner(latitude, longitude, department_id)"
     )
     .or(
       `category_id.eq.${input.projectCategoryId},secondary_category_ids.cs.{${input.projectCategoryId}}`
     )
-    .in("city_id", cityIds)
     .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)
@@ -244,6 +206,29 @@ export async function broadcastBtpProject(
     .not("email", "is", null)
     .eq("do_not_contact", false)
     .or(`paused_until.is.null,paused_until.lt.${nowIso}`);
+
+  // Fallback : si pas de lat/lng projet, on garde le filtre "meme departement"
+  // via city_ids du dept (max ~1000 cities par dept, pas de cap atteint).
+  if (!useDistance) {
+    const { data: deptCities, error: deptErr } = await sb
+      .from("cities")
+      .select("id")
+      .eq("department_id", input.projectDepartmentId);
+    if (deptErr) {
+      console.error("[broadcastBtpProject] dept cities error:", deptErr);
+    }
+    const deptCityIds = (deptCities || []).map((c: { id: number }) => c.id);
+    if (deptCityIds.length === 0) {
+      await sb
+        .from("projects")
+        .update({ broadcast_count: 0, broadcasted_at: new Date().toISOString() })
+        .eq("id", input.projectId);
+      return { totalTargets: 0, sent: 0, failed: 0, errors: ["no_cities_in_department"] };
+    }
+    queryBuilder = queryBuilder.in("city_id", deptCityIds);
+  }
+
+  const { data: pros, error: queryError } = await queryBuilder;
 
   if (queryError) {
     console.error("[broadcastBtpProject] query error:", queryError);
