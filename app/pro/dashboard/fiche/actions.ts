@@ -229,8 +229,12 @@ export async function updateProProfile(
     metadata: { profileCompletion: updateData.profile_completion },
   });
 
-  revalidatePath("/pro/dashboard/fiche");
-  revalidatePath("/pro/dashboard");
+  // ⚠️ NE PAS revalidatePath("/pro/dashboard/fiche") : ça fait un re-render RSC
+  // pendant que le pro est sur la page → reset des uncontrolled inputs (mail,
+  // tel, site web disparaissent et le user doit les retaper) + réaffichage de
+  // fieldErrors stale d'un précédent submit. Cf. leçon CLAUDE.md 28/04/2026.
+  // On revalidate uniquement la fiche publique /artisan/[slug] qui doit
+  // refléter les modifs côté visiteur.
   revalidatePath(`/artisan/${pro.slug}`);
   return { success: true };
 }
@@ -270,7 +274,10 @@ export async function uploadProLogo(
     .from("pro-logos")
     .upload(fileName, file, { contentType: file.type, upsert: false });
 
-  if (uploadError) return { error: "Erreur lors de l\u2019upload" };
+  if (uploadError) {
+    console.error("[uploadProLogo] storage error :", uploadError.message);
+    return { error: `Upload impossible : ${uploadError.message}` };
+  }
 
   const { data: urlData } = admin.storage
     .from("pro-logos")
@@ -333,7 +340,12 @@ export async function uploadProPhoto(
     .from("pro-photos")
     .upload(fileName, file, { contentType: file.type, upsert: false });
 
-  if (uploadError) return { error: "Erreur lors de l\u2019upload" };
+  if (uploadError) {
+    // Log la vraie erreur c\u00f4t\u00e9 serveur pour debug (bucket manquant, RLS,
+    // policies storage, quota, etc.) + remonter un message + d\u00e9taill\u00e9 au pro.
+    console.error("[uploadProPhoto] storage error :", uploadError.message);
+    return { error: `Upload impossible : ${uploadError.message}` };
+  }
 
   const { data: urlData } = admin.storage
     .from("pro-photos")
