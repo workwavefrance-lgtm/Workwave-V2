@@ -10,7 +10,7 @@ const preferencesSchema = z.object({
     .number()
     .int()
     .min(5, "Le rayon minimum est de 5 km")
-    .max(100, "Le rayon maximum est de 100 km"),
+    .max(200, "Le rayon maximum est de 200 km"),
   enabled_category_ids: z.array(z.coerce.number()).optional().default([]),
   min_budget: z.union([z.coerce.number().min(0), z.literal(0), z.nan()]).optional(),
   urgency_available: z.boolean().optional().default(false),

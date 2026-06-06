@@ -142,7 +142,7 @@ export default function PreferencesEditor({
               type="range"
               name="intervention_radius_km"
               min={5}
-              max={100}
+              max={200}
               step={5}
               value={radius}
               onChange={(e) => setRadius(Number(e.target.value))}
@@ -151,6 +151,7 @@ export default function PreferencesEditor({
             <div className="flex justify-between text-xs text-[var(--text-tertiary)]">
               <span>5 km</span>
               <span>100 km</span>
+              <span>200 km</span>
             </div>
           </div>
           {state.fieldErrors?.intervention_radius_km && (
