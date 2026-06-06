@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import QuickProjectModalTrigger from "@/components/project/QuickProjectModalTrigger";
 import { createClient } from "@/lib/supabase/client";
 
 export default function Header() {
@@ -121,6 +122,12 @@ export default function Header() {
           >
             Trouver un pro
           </Link>
+          {/* CTA "Déposer mon projet" : modal directe (pas de redirect) →
+              capture lead à zéro friction. Levier business critique. */}
+          <QuickProjectModalTrigger
+            label="Déposer un projet"
+            className="border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+          />
         </div>
 
         {/* Mobile: ThemeToggle + Hamburger */}
