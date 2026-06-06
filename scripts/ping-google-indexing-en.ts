@@ -1,27 +1,27 @@
 /**
- * Ping Google Indexing API sur les NOUVELLES pages internationales (vague
- * mondiale : Asie / Latam / Océanie / Afrique + hubs pays/continent).
+ * Ping Google Indexing API sur les pages EN internationales (Workwave AI).
  *
- * Le quota Indexing API = 200 URLs/jour. On priorise (le sitemap-ai-en.xml
- * couvre le reste via le crawl naturel) :
- *   1. Hubs continent (6)
- *   2. Hubs pays (~50)
- *   3. web-development × pays (~50)
- *   4. ai-engineering × pays (~50)
- *   5. web-development × villes phares (~30)
- * -> ~186, capé à 200. Ce qui dépasse est LOGGÉ (pas de cap silencieux).
+ * URLs (115) :
+ *   1. Home /en/ai (1)
+ *   2. Hubs /en/ai/{skill} (6)
+ *   3. Pages metier x ville /en/ai/{skill}/{city} (6 x 18 = 108)
  *
- * Pre-requis ADC : `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/indexing,https://www.googleapis.com/auth/cloud-platform`
+ * Total 115 / 200 quota jour.
+ *
+ * BTP reste 100% FR : aucune URL BTP ici.
+ *
+ * Pre-requis : `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/indexing,https://www.googleapis.com/auth/cloud-platform`
+ * (cf. lecon CLAUDE.md 29/04/2026 sur les scopes ADC)
  *
  * Usage :
- *   npx tsx scripts/ping-google-indexing-intl.ts --dry-run
- *   npx tsx scripts/ping-google-indexing-intl.ts
+ *   npx tsx scripts/ping-google-indexing-en.ts --dry-run
+ *   npx tsx scripts/ping-google-indexing-en.ts
  */
 import { config } from "dotenv";
 import * as path from "path";
 import { google } from "googleapis";
+import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { INTL_CITIES } from "@/lib/data/intl-cities";
-import { WORLD_COUNTRIES, CONTINENTS } from "@/lib/data/intl-countries";
 
 config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
 
@@ -32,27 +32,16 @@ const RATE_LIMIT_MS = 110;
 // de la cible. À TOUJOURS pinger sur le domaine canonical workwaveai.co.
 const BASE = "https://www.workwaveai.co";
 const DRY_RUN = process.argv.includes("--dry-run");
-const QUOTA = 200;
-const NEW_REGIONS = ["Asia", "Latam", "Oceania", "Africa"];
 
-function buildUrls(): { urls: string[]; dropped: number } {
-  const newCities = INTL_CITIES.filter((c) => NEW_REGIONS.includes(c.region));
-  // Villes phares = monument dédié d'abord.
-  const marquee = [
-    ...newCities.filter((c) => c.monument !== "skyline" && c.monument !== "skyline-global"),
-    ...newCities.filter((c) => c.monument === "skyline" || c.monument === "skyline-global"),
-  ].slice(0, 30);
-
-  const all: string[] = [
-    ...CONTINENTS.map((c) => `${BASE}/en/ai/continent/${c.slug}`),
-    ...WORLD_COUNTRIES.map((c) => `${BASE}/en/ai/country/${c.slug}`),
-    ...WORLD_COUNTRIES.map((c) => `${BASE}/en/ai/web-development/country/${c.slug}`),
-    ...WORLD_COUNTRIES.map((c) => `${BASE}/en/ai/ai-engineering/country/${c.slug}`),
-    ...marquee.map((c) => `${BASE}/en/ai/web-development/${c.slug}`),
-  ];
-  const deduped = [...new Set(all)];
-  const urls = deduped.slice(0, QUOTA);
-  return { urls, dropped: deduped.length - urls.length };
+function buildUrls(): string[] {
+  const urls: string[] = [`${BASE}/en/ai`];
+  for (const skill of INTL_SKILLS) {
+    urls.push(`${BASE}/en/ai/${skill.slug}`);
+    for (const city of INTL_CITIES) {
+      urls.push(`${BASE}/en/ai/${skill.slug}/${city.slug}`);
+    }
+  }
+  return urls.slice(0, 200); // safety cap quota
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,13 +61,12 @@ async function pingUrl(client: any, url: string): Promise<{ ok: boolean; error?:
 }
 
 async function main() {
-  const { urls, dropped } = buildUrls();
+  const urls = buildUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs internationales qui seraient pingées ===\n");
+    console.log("=== DRY RUN — URLs EN qui seraient pingées ===\n");
     urls.forEach((url, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${url.replace(BASE, "")}`));
-    console.log(`\nTotal pingées : ${urls.length} / quota ${QUOTA}`);
-    if (dropped > 0) console.log(`⚠️  ${dropped} URLs au-delà du quota — relancer demain ou compter sur le sitemap.`);
+    console.log(`\nTotal: ${urls.length}\n`);
     return;
   }
 
@@ -90,8 +78,7 @@ async function main() {
   const client = (await auth.getClient()) as any;
   console.log("✅ Authentifié.\n");
 
-  console.log(`Ping de ${urls.length} URLs intl (delay ${RATE_LIMIT_MS}ms)...\n`);
-  if (dropped > 0) console.log(`⚠️  ${dropped} URLs prioritaires au-delà du quota du jour (sitemap couvre le reste).\n`);
+  console.log(`Ping de ${urls.length} URLs /en/ai/* (delay ${RATE_LIMIT_MS}ms)...\n`);
 
   let okCount = 0;
   let failCount = 0;
@@ -100,6 +87,7 @@ async function main() {
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i];
     const result = await pingUrl(client, url);
+
     if (result.ok) {
       okCount++;
       console.log(`\x1b[32m  [${(i + 1).toString().padStart(3)}/${urls.length}] ✓ ${url.replace(BASE, "")}\x1b[0m`);
@@ -113,6 +101,7 @@ async function main() {
         break;
       }
     }
+
     if (i < urls.length - 1) await new Promise((r) => setTimeout(r, RATE_LIMIT_MS));
   }
 
@@ -120,6 +109,7 @@ async function main() {
   console.log(`  Total tentés : ${okCount + failCount}`);
   console.log(`  ✓ OK         : \x1b[32m${okCount}\x1b[0m`);
   console.log(`  ✗ Echecs     : \x1b[31m${failCount}\x1b[0m`);
+
   if (failCount > 0) {
     console.log("\n=== Détail échecs ===");
     Array.from(failureReasons.entries()).sort((a, b) => b[1] - a[1]).forEach(([msg, n]) => console.log(`  [${n}] ${msg}`));
