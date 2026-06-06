@@ -81,11 +81,8 @@ export async function GET(req: Request) {
         });
         results.push({ id: p.id, vertical: "btp", sent: r.sent, total: r.totalTargets });
       } else if (p.vertical === "tech") {
-        // Tech broadcast (workwave AI) — appelle l'équivalent
-        const [{ data: cat }, { data: cit }] = await Promise.all([
-          sb.from("categories").select("id, name").eq("id", p.category_id).single(),
-          sb.from("cities").select("id, name").eq("id", p.city_id).single(),
-        ]);
+        // Tech broadcast (workwave AI) — signature plus simple (pas de city, c'est remote)
+        const { data: cat } = await sb.from("categories").select("id, name").eq("id", p.category_id).single();
         const r = await broadcastTechProject({
           projectId: p.id,
           projectTitle: p.description?.split("\n")[0].slice(0, 100) || "Nouveau projet",
@@ -93,7 +90,6 @@ export async function GET(req: Request) {
           projectBudget: p.budget || null,
           projectTimeline: p.urgency || null,
           projectCategoryName: cat?.name || "AI",
-          projectCityName: cit?.name || "Remote",
           isSuspicious: (p.suspicion_score ?? 0) >= 50,
         });
         results.push({ id: p.id, vertical: "tech", sent: r.sent, total: r.totalTargets });
