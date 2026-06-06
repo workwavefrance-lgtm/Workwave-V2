@@ -82,11 +82,42 @@ export type BroadcastBtpResult = {
   errors: string[];
 };
 
+/**
+ * Mappe les enums du form deposer-projet vers des libelles humains FR.
+ * Si la valeur est inconnue, on la renvoie telle quelle (defensive — evite
+ * de cacher l'info en cas de nouveau enum non encore mappe).
+ */
+function humanBudget(value: string | null): string | null {
+  if (!value) return null;
+  const m: Record<string, string> = {
+    lt500: "Moins de 500 €",
+    "500_2000": "500 à 2 000 €",
+    "2000_5000": "2 000 à 5 000 €",
+    "5000_15000": "5 000 à 15 000 €",
+    gt15000: "Plus de 15 000 €",
+    unknown: "Non précisé",
+  };
+  return m[value] ?? value;
+}
+
+function humanUrgency(value: string | null): string | null {
+  if (!value) return null;
+  const m: Record<string, string> = {
+    today: "Aujourd'hui (urgent)",
+    this_week: "Cette semaine",
+    this_month: "Ce mois-ci",
+    not_urgent: "Pas urgent",
+  };
+  return m[value] ?? value;
+}
+
 function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string): string {
   const previewDesc =
     input.projectDescription.length > 220
       ? input.projectDescription.slice(0, 220).trim() + "..."
       : input.projectDescription;
+  const budgetLabel = humanBudget(input.projectBudget);
+  const timelineLabel = humanUrgency(input.projectTimeline);
 
   const suspiciousBanner = input.isSuspicious
     ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
@@ -113,8 +144,8 @@ function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string): string {
       <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${input.projectTitle}</h2>
       <p style="font-size:13px;color:#525252;line-height:1.6;margin:0 0 16px 0;white-space:pre-wrap;">${previewDesc}</p>
       <table style="font-size:12px;width:100%;border-collapse:collapse;">
-        ${input.projectBudget ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Budget</td><td style="color:#0A0A0A;font-weight:600;">${input.projectBudget}</td></tr>` : ""}
-        ${input.projectTimeline ? `<tr><td style="padding:4px 0;color:#999;">Delai</td><td style="color:#0A0A0A;font-weight:600;">${input.projectTimeline}</td></tr>` : ""}
+        ${budgetLabel ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Budget</td><td style="color:#0A0A0A;font-weight:600;">${budgetLabel}</td></tr>` : ""}
+        ${timelineLabel ? `<tr><td style="padding:4px 0;color:#999;">D&eacute;lai</td><td style="color:#0A0A0A;font-weight:600;">${timelineLabel}</td></tr>` : ""}
       </table>
     </div>
 
