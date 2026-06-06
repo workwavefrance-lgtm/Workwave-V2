@@ -183,8 +183,10 @@ export async function updateProProfile(
 
   const data = parsed.data;
 
-  // Limiter les catégories secondaires à 3
-  const secondaryCats = (data.secondary_category_ids || []).slice(0, 3);
+  // Limite catégories secondaires : 10 (vs 3 historique). 10 = couvre une vraie
+  // entreprise BTP multi-métiers (ex. Frederick Florit fait plaquiste +
+  // plombier + électricien + chauffagiste + couvreur + peintre + climaticien).
+  const secondaryCats = (data.secondary_category_ids || []).slice(0, 10);
 
   const updateData: Record<string, unknown> = {
     name: data.name,

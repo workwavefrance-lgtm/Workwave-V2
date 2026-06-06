@@ -219,10 +219,23 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
     prevError.current = undefined;
   }
 
-  // Available secondary categories (exclude primary)
-  const availableSecondary = categories.filter(
-    (c) => c.id !== pro.category_id
-  );
+  // Catégories secondaires disponibles : filtrées par vertical pour éviter
+  // qu'un maçon voie React/Python/Kubernetes etc. (tech) dans la liste.
+  // Règle : tech ↔ tech, BTP/domicile/personne (= "physique") restent ensemble
+  // car un maçon peut aussi être peintre (BTP), un paysagiste peut faire de
+  // l'aide aux seniors, etc. Tri alphabétique pour rendre la liste navigable.
+  const PHYSICAL_VERTICALS = ["btp", "domicile", "personne"] as const;
+  const primaryVertical = categories.find((c) => c.id === pro.category_id)?.vertical;
+  const isPhysical = primaryVertical && (PHYSICAL_VERTICALS as readonly string[]).includes(primaryVertical);
+  const MAX_SECONDARY = 10;
+  const availableSecondary = categories
+    .filter((c) => c.id !== pro.category_id)
+    .filter((c) => {
+      if (!primaryVertical) return true;
+      if (isPhysical) return (PHYSICAL_VERTICALS as readonly string[]).includes(c.vertical);
+      return c.vertical === primaryVertical;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"));
 
   function toggleCert(cert: string) {
     setCerts((prev) =>
@@ -239,7 +252,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
   function toggleSecondaryCat(id: number) {
     setSecondaryCats((prev) => {
       if (prev.includes(id)) return prev.filter((c) => c !== id);
-      if (prev.length >= 3) return prev;
+      if (prev.length >= MAX_SECONDARY) return prev;
       return [...prev, id];
     });
   }
@@ -787,7 +800,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               <p className="text-sm font-medium text-[var(--text-primary)] mb-2">
                 Catégories secondaires{" "}
                 <span className="text-xs text-[var(--text-tertiary)]">
-                  (max 3)
+                  (max {MAX_SECONDARY} · {secondaryCats.length}/{MAX_SECONDARY} sélectionnée{secondaryCats.length > 1 ? "s" : ""})
                 </span>
               </p>
               <div className="flex flex-wrap gap-2">
@@ -798,7 +811,7 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
                     onClick={() => toggleSecondaryCat(cat.id)}
                     disabled={
                       !secondaryCats.includes(cat.id) &&
-                      secondaryCats.length >= 3
+                      secondaryCats.length >= MAX_SECONDARY
                     }
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                       secondaryCats.includes(cat.id)
