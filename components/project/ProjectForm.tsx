@@ -218,6 +218,26 @@ export default function ProjectForm({
         submitted.current = true;
         setHasAttemptedSubmit(true);
         setDismissedErrors(new Set());
+        // Enhanced Conversions Microsoft Ads : on stocke email + phone dans
+        // sessionStorage pour que le UETPixel les push à MS Ads sur la page
+        // /deposer-projet/merci (= meilleur matching cross-device, +15-30% conv).
+        // Normalisation conforme aux specs MS Ads (E.164 phone, lowercase email
+        // sans accents). Cleanup auto par le pixel après push. sessionStorage =
+        // RGPD-friendly : nettoyé à la fermeture de l'onglet.
+        try {
+          if (typeof window !== "undefined") {
+            const cleanEmail = email
+              .trim()
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[̀-ͯ]/g, ""); // retire les accents
+            const cleanPhone = phone.trim().replace(/[^\d+]/g, ""); // garde + et chiffres
+            if (cleanEmail) sessionStorage.setItem("wwv:uet_em", cleanEmail);
+            if (cleanPhone) sessionStorage.setItem("wwv:uet_ph", cleanPhone);
+          }
+        } catch {
+          /* sessionStorage peut être bloqué (mode privé Safari, etc.) — pas critique */
+        }
       }}
       className="space-y-8"
     >

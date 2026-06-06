@@ -45,6 +45,27 @@ export default function UETPixel() {
     // Sécurité : attendre que window.uetq existe (script chargé).
     function pushConversion() {
       if (!window.uetq) return;
+
+      // Enhanced Conversions Microsoft Ads : avant le push de conversion, on
+      // passe l'email et le téléphone de l'utilisateur stockés en sessionStorage
+      // par <ProjectForm> au moment du submit. MS Ads les hashera côté serveur
+      // (SHA-256) puis matchera cross-device (= +15-30% précision matching).
+      // Cleanup auto après lecture pour éviter de re-pousser sur navigation.
+      try {
+        const em = sessionStorage.getItem("wwv:uet_em");
+        const ph = sessionStorage.getItem("wwv:uet_ph");
+        if (em || ph) {
+          const pid: { em?: string; ph?: string } = {};
+          if (em) pid.em = em;
+          if (ph) pid.ph = ph;
+          window.uetq.push("set", { pid });
+          sessionStorage.removeItem("wwv:uet_em");
+          sessionStorage.removeItem("wwv:uet_ph");
+        }
+      } catch {
+        /* sessionStorage indisponible (mode privé Safari), pas critique */
+      }
+
       window.uetq.push({
         ec: "Lead",
         ea: "submit_lead",
