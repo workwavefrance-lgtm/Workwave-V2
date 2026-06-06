@@ -111,6 +111,24 @@ export default async function SkillHubPage({
       url: `${SITE_URL}/en/ai/${skill.slug}/${c.slug}`,
     })),
   };
+  // Schema Service : type le plus pertinent pour une page "hire freelance X"
+  // (rich results / AEO). Pas de prix chiffré dans le schema (les TJM affichés
+  // sont convertis en USD à l'affichage ; on ne duplique pas un nombre ici pour
+  // éviter toute incohérence). Provider = Workwave AI, zone = mondial.
+  const serviceLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: `Freelance ${skill.label}`,
+    serviceType: skill.label,
+    description: skill.blurb,
+    provider: {
+      "@type": "Organization",
+      name: "Workwave AI",
+      url: `${SITE_URL}/en/ai`,
+    },
+    areaServed: "Worldwide",
+    url: `${SITE_URL}${path}`,
+  };
 
   const CityGrid = ({ cities }: { cities: typeof INTL_CITIES }) => (
     <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -240,6 +258,7 @@ export default async function SkillHubPage({
         </div>
       </section>
 
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
     </>
