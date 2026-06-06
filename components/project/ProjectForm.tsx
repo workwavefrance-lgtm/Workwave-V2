@@ -79,7 +79,11 @@ export default function ProjectForm({
     initialState
   );
 
-  const [step, setStep] = useState(0);
+  // Step initial intelligent : skip auto les étapes déjà remplies via les
+  // props (cas embed sur pages listing où catégorie+ville sont connues).
+  // Comportement par défaut (sans pré-remplissage) inchangé = step 0.
+  const initialStep = defaultCategoryId && defaultCity ? 2 : defaultCategoryId ? 1 : 0;
+  const [step, setStep] = useState(initialStep);
   const [categoryId, setCategoryId] = useState<number | null>(
     defaultCategoryId ?? null
   );

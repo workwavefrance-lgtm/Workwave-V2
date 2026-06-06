@@ -9,6 +9,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
 import ProjectIntentSection from "@/components/listing/ProjectIntentSection";
 import StickyProjectCTA from "@/components/listing/StickyProjectCTA";
+import InlineProjectForm from "@/components/project/InlineProjectForm";
 import ProgrammaticSeoSections from "@/components/listing/ProgrammaticSeoSections";
 import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
@@ -541,6 +542,22 @@ export default async function ListingPage({ params, searchParams }: Props) {
           />
           <FaqAccordion faqs={seo.faq_json} />
         </>
+      )}
+
+      {/* Form de dépôt projet inline : capture les visiteurs qui ont scrollé
+          la liste sans cliquer une fiche pro (= intention forte, lead chaud).
+          Pré-remplissage catégorie + ville → l'user arrive directement à
+          l'étape 3 (Projet) du form, saute Métier + Ville. Zéro redirect = +50%
+          conversion attendue vs StickyProjectCTA qui redirige vers /deposer-projet. */}
+      {totalProsCount > 0 && (
+        <InlineProjectForm
+          category={{ id: category.id, name: category.name }}
+          city={
+            resolved.type === "city"
+              ? { id: resolved.city.id, name: resolved.city.name }
+              : null
+          }
+        />
       )}
 
       <InternalLinks
