@@ -177,6 +177,14 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
 
   // Local state for controlled fields
   const [description, setDescription] = useState(pro.description || "");
+  // Bug du dashboard 06/06 : avec defaultValue + useActionState, React peut
+  // re-render le composant et perdre les valeurs DOM des inputs uncontrolled
+  // (formData.get retourne null alors que la valeur est visible à l'écran).
+  // Phone et email sont passés en CONTROLLED (state + value + onChange) pour
+  // garantir que formData récupère bien la valeur tapée par l'user.
+  const [phoneValue, setPhoneValue] = useState(pro.phone || "");
+  const [emailValue, setEmailValue] = useState(pro.email || "");
+  const [websiteValue, setWebsiteValue] = useState(pro.website || "");
   const [certs, setCerts] = useState<string[]>(pro.certifications || []);
   const [payments, setPayments] = useState<string[]>(pro.payment_methods || []);
   const [secondaryCats, setSecondaryCats] = useState<number[]>(
@@ -480,7 +488,8 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               <input
                 name="phone"
                 type="tel"
-                defaultValue={pro.phone || ""}
+                value={phoneValue}
+                onChange={(e) => setPhoneValue(e.target.value)}
                 placeholder="06 12 34 56 78"
                 className={profileState.fieldErrors?.phone ? inputErrorClass : inputClass}
                 required
@@ -494,7 +503,8 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               <input
                 name="email"
                 type="email"
-                defaultValue={pro.email || ""}
+                value={emailValue}
+                onChange={(e) => setEmailValue(e.target.value)}
                 placeholder="contact@monentreprise.fr"
                 className={profileState.fieldErrors?.email ? inputErrorClass : inputClass}
                 required
@@ -505,7 +515,8 @@ export default function FicheEditor({ categories, profileCompletion }: Props) {
               <input
                 name="website"
                 type="url"
-                defaultValue={pro.website || ""}
+                value={websiteValue}
+                onChange={(e) => setWebsiteValue(e.target.value)}
                 placeholder="https://monentreprise.fr"
                 className={inputClass}
               />

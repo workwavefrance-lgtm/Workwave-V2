@@ -121,8 +121,8 @@ export async function updateProProfile(
   const rawData: Record<string, unknown> = {
     name: formData.get("name"),
     description: formData.get("description") || "",
-    phone: formData.get("phone"),
-    email: formData.get("email"),
+    phone: formData.get("phone") || "",
+    email: formData.get("email") || "",
     website: formData.get("website") || "",
     instagram: formData.get("instagram") || "",
     facebook: formData.get("facebook") || "",
