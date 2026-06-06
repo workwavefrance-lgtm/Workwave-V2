@@ -2,7 +2,7 @@ export type Category = {
   id: number;
   slug: string;
   name: string;
-  vertical: "btp" | "domicile" | "personne";
+  vertical: "btp" | "domicile" | "personne" | "tech";
   parent_id: number | null;
   description: string | null;
   seo_keywords: string[] | null;

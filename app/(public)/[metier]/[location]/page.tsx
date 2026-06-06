@@ -16,7 +16,6 @@ import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
 import CityFactsBlock from "@/components/listing/CityFactsBlock";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
-import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { resolveLocation } from "@/lib/queries/location";
 import {
   getProsByCategoryAndDepartment,
@@ -154,9 +153,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();
 
-  // Anti-fuite vertical : categorie AI ne doit pas s'afficher sur route BTP.
-  // Redirect 308 vers /ai/[skill] (preserve SEO + bon vertical).
-  if (AI_CATEGORY_IDS.includes(category.id)) {
+  // Anti-fuite vertical : AUCUNE catégorie tech sur une route BTP. Test du
+  // VERTICAL (pas une liste d'ids) → couvre les 145 cat tech, pas seulement les
+  // 14 d'AI_CATEGORY_IDS. Redirect 308 vers /ai/[slug] (preserve SEO + bon vertical).
+  if (category.vertical === "tech") {
     permanentRedirect(`/ai/${category.slug}`);
   }
 

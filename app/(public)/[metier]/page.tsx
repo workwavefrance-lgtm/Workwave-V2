@@ -10,7 +10,6 @@ import {
   getAllCategories,
 } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
-import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getCitiesByDepartment } from "@/lib/queries/cities";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
@@ -54,11 +53,12 @@ export default async function MetierProximityPage({ params }: Props) {
   const category = await getCategoryBySlug(metier);
   if (!category) notFound();
 
-  // Anti-fuite vertical : une categorie AI (vertical=tech) ne doit JAMAIS
-  // s'afficher sur une route BTP. Redirect 308 vers l'equivalent /ai/[skill]
-  // (preserve le SEO + envoie l'user sur le bon vertical). Sans ca,
-  // /developpement-web listait 153 freelances AI sur une page BTP.
-  if (AI_CATEGORY_IDS.includes(category.id)) {
+  // Anti-fuite vertical : AUCUNE catégorie tech ne doit s'afficher sur une route
+  // BTP. On teste le VERTICAL (pas une liste d'ids) → couvre les 145 catégories
+  // tech, pas seulement les 14 d'AI_CATEGORY_IDS (sinon les 131 sous-catégories
+  // tech orphelines — react, python, prompt-engineering, ux-designer… — fuyaient
+  // sur /[slug]/[ville] côté BTP). Redirect 308 vers /ai/[slug] (bon vertical).
+  if (category.vertical === "tech") {
     permanentRedirect(`/ai/${category.slug}`);
   }
 
