@@ -14,6 +14,7 @@ import {
   getContinent,
 } from "@/lib/data/intl-countries";
 import { SOURCED_INTL_COUNTRY } from "@/lib/data/sourced-intl-market";
+import { getAiCountryRate } from "@/lib/data/ai-country-rates";
 
 /**
  * Skill × PAYS : /en/ai/[skill]/country/[country]
@@ -69,6 +70,11 @@ export default async function SkillCountryPage({
   const cities = getCitiesByCountry(country.countryCode);
   const homage = getCountryHomage(country.countryCode);
   const sourced = SOURCED_INTL_COUNTRY[country.countryCode];
+  // Tarif horaire freelance SENIOR sourcé pour ce pays (USD). Affiché seulement
+  // si la fourchette est sourcée+plausible (les aberrations ont été neutralisées
+  // en null → on retombe sur le contexte marché sans chiffre).
+  const countryRate = getAiCountryRate(country.slug);
+  const hasRate = !!countryRate && countryRate.seniorHourlyMinUsd != null && countryRate.seniorHourlyMaxUsd != null;
   const continent = getContinent(country.continentSlug);
   const otherCountries = getCountriesByContinent(country.continentSlug)
     .filter((c) => c.slug !== country.slug)
@@ -238,6 +244,49 @@ export default async function SkillCountryPage({
                 );
               })}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* HOURLY RATE (sourcé par PAYS, USD) — ancre géographique affichée pour
+          TOUS les skills (pas seulement ceux avec TJM jour). Indicatif + sourcé ;
+          masqué si le pays n'a pas de tarif sourcé/plausible. */}
+      {hasRate && (
+        <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-[var(--ai-text-tertiary)] mb-4" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
+              Pricing
+            </p>
+            <h2 className="font-black text-[var(--ai-text)] mb-3 max-w-2xl" style={{ fontSize: "clamp(24px, 4vw, 38px)", lineHeight: 1.0, letterSpacing: "-0.03em" }}>
+              How much do freelance {skill.noun} charge in {country.name}?
+            </h2>
+            <p className="text-[14px] text-[var(--ai-text-secondary)] mb-8 max-w-2xl">
+              Indicative hourly rate for an experienced freelancer based in {country.name} (USD). Rates vary by skill, seniority and project — you agree the final rate directly with the freelancer, with 0% commission.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg)] p-6">
+                <p className="text-[12px] font-semibold tracking-wide uppercase text-[var(--ai-text-tertiary)]">Senior · hourly</p>
+                <p className="mt-2 text-[22px] sm:text-[26px] font-black text-[var(--ai-accent)] tracking-tight">
+                  ${countryRate!.seniorHourlyMinUsd}–${countryRate!.seniorHourlyMaxUsd}/hr
+                </p>
+              </div>
+              {countryRate!.level && (
+                <span className="inline-flex items-center px-3.5 py-2 rounded-full border border-[var(--ai-border-subtle)] text-[12px] font-medium text-[var(--ai-text-secondary)] capitalize">
+                  {countryRate!.level} market
+                </span>
+              )}
+            </div>
+            {countryRate!.note && (
+              <p className="mt-6 text-[15px] leading-relaxed text-[var(--ai-text-secondary)] max-w-3xl">{countryRate!.note}</p>
+            )}
+            {countryRate!.sources?.[0] && (
+              <p className="mt-4 text-[12px] text-[var(--ai-text-tertiary)]">
+                Sources · {countryRate!.retrievedAt} ·{" "}
+                <a href={countryRate!.sources[0]} target="_blank" rel="noopener noreferrer nofollow" className="underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-text)]">
+                  reference
+                </a>
+              </p>
+            )}
           </div>
         </section>
       )}
