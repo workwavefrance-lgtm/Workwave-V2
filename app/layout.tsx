@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import Providers from "@/app/providers";
+import UETPixel from "@/components/analytics/UETPixel";
 import "./globals.css";
 
 const GTM_ID = "GTM-W65L4PJD";
@@ -86,6 +87,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
+        {/* Microsoft Advertising UET pixel — track conversions /deposer-projet/merci.
+            S'active si NEXT_PUBLIC_UET_TAG_ID est défini en env. Sinon : skip silencieux. */}
+        <UETPixel />
         <Providers>{children}</Providers>
       </body>
     </html>
