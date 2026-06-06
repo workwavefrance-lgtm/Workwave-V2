@@ -7,6 +7,7 @@ import { aiAlternatesEnOnly } from "@/lib/i18n/alternates";
 import { formatTjmRange } from "@/lib/i18n/format";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { getAiCountryRate } from "@/lib/data/ai-country-rates";
+import { getDnCityQueries } from "@/lib/data/digital-nomad-city-queries";
 import {
   getIntlSkill,
   INTL_SKILLS,
@@ -121,6 +122,10 @@ export default async function SkillCityPage({
     !!cityCountryRate &&
     cityCountryRate.seniorHourlyMinUsd != null &&
     cityCountryRate.seniorHourlyMaxUsd != null;
+
+  // Digital nomad city data (Perplexity sourced) : popular services + top hubs
+  const dnData = getDnCityQueries(city.slug);
+  const hasDnData = !!dnData && (dnData.popularServices.length > 0 || dnData.hubs.length > 0);
 
   // Maillage : on relie aux villes de la MÊME région (pertinence + évite des
   // centaines de liens par page quand le dataset est mondial).
@@ -352,6 +357,85 @@ export default async function SkillCityPage({
                 <a href={cityCountryRate!.sources[0]} target="_blank" rel="noopener noreferrer nofollow" className="underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-text)]">
                   reference
                 </a>
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* DIGITAL NOMAD CITY DATA — sections sourcées Perplexity (services + hubs) */}
+      {hasDnData && (
+        <section className="border-t border-[var(--ai-border-subtle)]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-[var(--ai-text)] tracking-tight">
+              {city.name} for {skill.label.toLowerCase()} freelancers
+            </h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-[var(--ai-text-secondary)] max-w-3xl">
+              {city.name} is a known digital nomad and remote-work destination in {city.country}.
+              Below : the most in-demand freelance services on the ground and the main coworking
+              spaces where remote workers gather.
+            </p>
+
+            <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Popular services chips */}
+              {dnData!.popularServices.length > 0 && (
+                <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] p-6">
+                  <h3 className="text-[15px] font-semibold text-[var(--ai-text)]">
+                    Popular freelance services in {city.name}
+                  </h3>
+                  <p className="mt-1.5 text-[13px] text-[var(--ai-text-secondary)]">
+                    Most in-demand digital services among clients in {city.name}.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {dnData!.popularServices.map((s) => (
+                      <span
+                        key={s}
+                        className="inline-flex items-center rounded-full border border-[var(--ai-border-subtle)] bg-[var(--ai-bg)] px-3 py-1.5 text-[13px] text-[var(--ai-text)]"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Top coworking hubs */}
+              {dnData!.hubs.length > 0 && (
+                <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] p-6">
+                  <h3 className="text-[15px] font-semibold text-[var(--ai-text)]">
+                    Top coworking & coliving spaces in {city.name}
+                  </h3>
+                  <p className="mt-1.5 text-[13px] text-[var(--ai-text-secondary)]">
+                    Where the local remote-work community gathers.
+                  </p>
+                  <ul className="mt-5 space-y-2">
+                    {dnData!.hubs.map((h) => (
+                      <li
+                        key={h}
+                        className="flex items-start gap-2 text-[14px] text-[var(--ai-text)]"
+                      >
+                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[var(--ai-accent)] flex-shrink-0" />
+                        <span>{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {dnData!.sources.length > 0 && (
+              <p className="mt-6 text-[12px] text-[var(--ai-text-secondary)]">
+                Sources :{" "}
+                {dnData!.sources.slice(0, 3).map((s, i) => (
+                  <span key={s}>
+                    {i > 0 && " · "}
+                    <a href={s} target="_blank" rel="noopener nofollow" className="underline">
+                      {(() => {
+                        try { return new URL(s).hostname.replace(/^www\./, ""); } catch { return "source"; }
+                      })()}
+                    </a>
+                  </span>
+                ))}
               </p>
             )}
           </div>
