@@ -36,6 +36,7 @@ import {
 } from "@/lib/queries/cities";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getPriceGuidesByMetier } from "@/lib/queries/price-guides";
+import { getCommuneData } from "@/lib/queries/commune-data";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
@@ -232,6 +233,14 @@ export default async function ListingPage({ params, searchParams }: Props) {
   // Projets populaires : maillage par prestation via les guides de prix BTP
   // (scope='prestation'). Affiche seulement si le metier a des guides rattaches.
   const popularProjects = await getPriceGuidesByMetier(category.slug, 12);
+
+  // Enrichissement commune (data.gouv.fr : prix immo DVF, revenus, vacance,
+  // densité) — uniquement pour les pages VILLE (pas dept), affiché dans
+  // CityFactsBlock. Vraie donnée unique factuelle par commune = moat SEO.
+  const communeData =
+    resolved.type === "city"
+      ? await getCommuneData(resolved.city.insee_code)
+      : null;
 
   // Contenu SEO
   const locationId =
@@ -591,6 +600,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           city={resolved.city}
           categoryName={category.name}
           prosCount={totalProsCount}
+          communeData={communeData}
         />
       )}
 
