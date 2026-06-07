@@ -68,6 +68,9 @@ DEPARTMENTS = [
     ("971", "Guadeloupe", "Guadeloupe"), ("972", "Martinique", "Martinique"),
     ("973", "Guyane", "Guyane"), ("974", "La Réunion", "La Réunion"),
     ("976", "Mayotte", "Mayotte"),
+    # Corse — codes alphanumériques 2A/2B (regex slug dépt fixée pour les
+    # accepter : lib/utils/slugs.ts + lib/queries/departments.ts).
+    ("2A", "Corse-du-Sud", "Corse"), ("2B", "Haute-Corse", "Corse"),
 ]
 
 
@@ -137,7 +140,7 @@ def main():
             base = make_slug(c["nom"])
             slug = base
             if slug in slugs:
-                slug = f"{base}-{code}"  # collision -> suffixe dépt
+                slug = f"{base}-{code.lower()}"  # collision -> suffixe dépt (minuscule : Corse 2a/2b propres)
             while slug in slugs:
                 slug = f"{slug}b"  # ultra-rare : même nom même dépt
             slugs.add(slug)
