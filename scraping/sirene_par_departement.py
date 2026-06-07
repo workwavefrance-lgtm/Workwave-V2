@@ -101,9 +101,12 @@ def format_naf(code):
 def query_sirene(naf_code, dept_code, cursor=None):
     """Requete API Sirene pour un code NAF dans le departement specifie."""
     naf_formatted = format_naf(naf_code)
-    # Code postal range : XX000 TO XX999 (les codes postaux commencent par le code dpt)
-    cp_min = f"{dept_code}000"
-    cp_max = f"{dept_code}999"
+    # Code postal range : XX000 TO XX999 (les codes postaux commencent par le code dpt).
+    # Corse : codes dept alphanumeriques 2A/2B mais codes postaux numeriques 20xxx
+    # -> sans ce mapping, [2A000 TO 2A999] ne matche aucun CP -> SIRENE 404 -> 0 pro.
+    postal_prefix = "20" if dept_code in ("2A", "2B") else dept_code
+    cp_min = f"{postal_prefix}000"
+    cp_max = f"{postal_prefix}999"
 
     q = (
         f"periode(activitePrincipaleEtablissement:{naf_formatted} "
