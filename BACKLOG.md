@@ -46,7 +46,21 @@
   - non-claimed → tel visible + 1 CTA discret "Besoin d'autres devis ?". + carotte au claim ("réclame ta fiche → les visiteurs te contactent en 1 clic").
 - [ ] **Simplifier les CTA** des fiches artisan (5 CTA + Léa = surcharge ; Travaux = 1 CTA). Réduction, pas ajout.
 
-### 4. Analytics
+### 4. Qualité données `price_guides` (audit 07/06)
+- [x] **11 mismatches métier sous maçon recatégorisés** (07/06) : 7 cheminée → chauffagiste, 2 porte garage → menuisier, 1 soudure → serrurier, 1 tapissier → decorateur-interieur. maçon 77→66. ✅
+- [ ] **10 bugs H1↔slug** (H1 générique/faux) — ⚠️ peut cacher un contenu mal généré (à régénérer, pas juste changer le H1) :
+  - macon : `prix-traitement-humidite` (H1 "maçon pour travaux"), `prix-renovation-magasin`, `prix-renovation-maison-dappartement-paris`, `...-lyon` (H1 "prestation de maçonnerie" générique)
+  - facadier : `prix-retirer-crepi-plafond` (H1 affiche "ponçage de parquet" !)
+  - menuisier : `prix-remplacement-vitrage` (H1 "vitre d'insert de cheminée")
+  - menage : `prix-demenagement-jusqu-a-1000-km`, `prix-amenagement-dinterieur`, `prix-demenagement-m3` (H1 "ménage à domicile")
+  - carreleur : `prix-restauration-sol-pierre-polie` (H1 "carrelage générique")
+- [ ] **7 slugs corrompus** (typos URL — ⚠️ changer le slug = 301 obligatoire car déjà indexé) :
+  - terrassier : `prix-ocation-dengins-terrassement`, `prix-ocation-benne` (→ location), `prix-travaux-fouilles-trancheesxf` (suffixe xf)
+  - vitrier : `prix-simple-et-d-double-vitrage` (→ et-double)
+  - electricien : `prix-cablage-telephonique` (H1 "service" parasite, mineur)
+- [ ] **Méta** : la section `menage` est un fourre-tout (déménagement/aménagement mélangés au ménage) — pas de métier cible valide → à clarifier (créer `demenagement` ? réassigner ?).
+
+### 5. Analytics
 - [ ] **Configurer l'événement clé GA4** "dépôt projet" (aujourd'hui 0 conversion mesurée dans GA4 — il compte les pages vues mais aucun objectif). Via GTM-W65L4PJD déjà en place. ~15 min.
 
 ---
