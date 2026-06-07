@@ -103,9 +103,9 @@ const routingSteps = [
   },
   {
     number: "3",
-    title: "Tous les pros éligibles reçoivent le projet",
+    title: "Vous recevez les projets de votre zone",
     description:
-      "Tous les pros de la catégorie + département reçoivent un email avec la demande. Chacun décide librement s'il veut débloquer pour 9,90 € TTC.",
+      "Vous recevez par email les demandes qui correspondent à votre métier et à votre zone d'intervention. Vous débloquez librement celles qui vous intéressent pour 9,90 € TTC.",
   },
 ];
 
@@ -128,7 +128,7 @@ const faqs = [
   {
     question: "Combien de leads vais-je recevoir ?",
     answer:
-      "Tous les pros éligibles (même catégorie + même département) reçoivent les projets en temps réel. Vous décidez ensuite lesquels vous intéressent et que vous voulez débloquer pour 9,90 € TTC. Pas de limite de réception, pas de mise en concurrence forcée.",
+      "Vous recevez en temps réel, par email, les projets publiés dans votre métier et votre zone d'intervention. Il n'y a pas de limite : à vous de choisir ensuite lesquels débloquer pour 9,90 € TTC, selon ceux qui vous intéressent.",
   },
   {
     question: "Mes coordonnées sont-elles partagées ?",
