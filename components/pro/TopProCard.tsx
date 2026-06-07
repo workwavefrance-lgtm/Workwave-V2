@@ -31,7 +31,25 @@ export default function TopProCard({
 }) {
   const initial = pro.name.charAt(0).toUpperCase();
   const summary = buildProSummary(pro);
-  const badges = buildProBadges(pro);
+  // On retire la pastille "avis Google" des badges : elle est desormais
+  // affichee dans le bloc avis dedie (etoiles + lien). Evite le doublon.
+  const badges = buildProBadges(pro).filter((b) => !b.includes("avis Google"));
+
+  // Bloc avis : on affiche la note + le nombre d'avis Google (donnee factuelle
+  // qu'on a en base pour 281 pros). Lien "Voir sur Google" via google_place_id
+  // = on RENVOIE vers la fiche Google (compliant, pas de republication de texte
+  // d'avis scrape, ce qui violerait les CGU Google + le droit d'auteur des
+  // auteurs). Le texte d'avis viendra plus tard des avis natifs Workwave.
+  const rating = pro.google_rating;
+  const reviewsCount = pro.google_reviews_count;
+  const hasGoogleReviews = typeof rating === "number" && rating > 0 && (reviewsCount ?? 0) > 0;
+  const googleReviewsUrl = pro.google_place_id
+    ? `https://search.google.com/local/reviews?placeid=${pro.google_place_id}`
+    : null;
+  // Etoiles pleines / demi / vides pour la note (sur 5).
+  const fullStars = hasGoogleReviews ? Math.floor(rating as number) : 0;
+  const halfStar = hasGoogleReviews && (rating as number) - fullStars >= 0.25 && (rating as number) - fullStars < 0.75;
+  const roundedUp = hasGoogleReviews && (rating as number) - fullStars >= 0.75;
 
   // Lien devis avec contexte pre-rempli (categorie + ville + specialite si dispo)
   const projectParams = new URLSearchParams();
@@ -112,7 +130,50 @@ export default function TopProCard({
         {summary}
       </p>
 
-      {/* Badges (RGE, certifs, anciennete, note Google) */}
+      {/* Bloc avis Google : etoiles + note + nombre + lien vers la fiche Google */}
+      {hasGoogleReviews && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center gap-0.5" aria-hidden>
+            {[0, 1, 2, 3, 4].map((i) => {
+              const filled = i < fullStars || (i === fullStars && roundedUp);
+              const half = i === fullStars && halfStar;
+              return (
+                <svg key={i} className="w-[15px] h-[15px]" viewBox="0 0 20 20">
+                  <defs>
+                    <linearGradient id={`half-${pro.id}-${i}`}>
+                      <stop offset="50%" stopColor="#FBBF24" />
+                      <stop offset="50%" stopColor="#D1D5DB" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.77l-5.2 2.73.99-5.79L1.58 7.62l5.82-.85L10 1.5z"
+                    fill={half ? `url(#half-${pro.id}-${i})` : filled ? "#FBBF24" : "#D1D5DB"}
+                  />
+                </svg>
+              );
+            })}
+          </span>
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">
+            {(rating as number).toFixed(1)}
+          </span>
+          {googleReviewsUrl ? (
+            <a
+              href={googleReviewsUrl}
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              className="text-[12px] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+            >
+              {reviewsCount} avis Google →
+            </a>
+          ) : (
+            <span className="text-[12px] text-[var(--text-secondary)]">
+              {reviewsCount} avis Google
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Badges (RGE, certifs, anciennete) */}
       {badges.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-4">
           {badges.map((badge) => (

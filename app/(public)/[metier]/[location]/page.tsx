@@ -7,6 +7,7 @@ import ProCard from "@/components/pro/ProCard";
 import TopProCard from "@/components/pro/TopProCard";
 import EmptyState from "@/components/ui/EmptyState";
 import InternalLinks from "@/components/listing/InternalLinks";
+import PopularProjectsBlock from "@/components/listing/PopularProjectsBlock";
 import ProjectIntentSection from "@/components/listing/ProjectIntentSection";
 import StickyProjectCTA from "@/components/listing/StickyProjectCTA";
 import InlineProjectForm from "@/components/project/InlineProjectForm";
@@ -34,6 +35,7 @@ import {
   getAggregatedCityIds,
 } from "@/lib/queries/cities";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
+import { getPriceGuidesByMetier } from "@/lib/queries/price-guides";
 import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
@@ -226,6 +228,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const relatedCategories = allCategories
     .filter((c) => c.vertical === category.vertical && c.id !== category.id)
     .slice(0, 8);
+
+  // Projets populaires : maillage par prestation via les guides de prix BTP
+  // (scope='prestation'). Affiche seulement si le metier a des guides rattaches.
+  const popularProjects = await getPriceGuidesByMetier(category.slug, 12);
 
   // Contenu SEO
   const locationId =
@@ -569,6 +575,11 @@ export default async function ListingPage({ params, searchParams }: Props) {
         locationName={locationName}
         popularCategories={popularCategories}
       />
+
+      {/* Projets populaires : maillage par prestation (guides de prix BTP).
+          Reprend la mecanique travaux.com mais alimente par nos guides sources.
+          Affiche uniquement si le metier a des guides rattaches en base. */}
+      <PopularProjectsBlock guides={popularProjects} metierName={category.name} />
 
       {/* Bloc CityFacts : passage factuel "X en chiffres" affiche UNIQUEMENT
           sur les pages ville (pas dept) et seulement si la commune a une

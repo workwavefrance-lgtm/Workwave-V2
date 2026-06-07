@@ -3,6 +3,16 @@ import { SPECIALTIES } from "@/lib/specialties";
 import { getCategoryServiceLabel } from "@/lib/utils/category-grammar";
 
 /**
+ * Elision francaise : "de" -> "d'" devant une voyelle ou un h muet.
+ * Evite les "projet de électricité" / "de isolation" disgracieux.
+ * (Aucun metier ne commence par un h aspire, donc h est traite comme elidable.)
+ */
+function deOrDApostrophe(label: string): string {
+  const first = label.trim().charAt(0).toLowerCase();
+  return "aàâäeéèêëiîïoôöuùûüyh".includes(first) ? `d'${label}` : `de ${label}`;
+}
+
+/**
  * Section "Quel est votre projet de [metier] a [ville] ?"
  *
  * Pattern Travaux.com / Habitatpresto : on capte le lead AVANT que
@@ -62,7 +72,7 @@ export default function ProjectIntentSection({
         id="project-intent-title"
         className="text-lg sm:text-xl font-semibold tracking-tight text-[var(--text-primary)] mb-1"
       >
-        Quel est votre projet de {getCategoryServiceLabel(categorySlug, categoryName)} à {locationName} ?
+        Quel est votre projet {deOrDApostrophe(getCategoryServiceLabel(categorySlug, categoryName))} à {locationName} ?
       </h2>
       <p className="text-sm text-[var(--text-secondary)] mb-5">
         Décrivez votre besoin en 30 secondes — nous transmettons votre demande à 3 artisans qualifiés. Gratuit, sans engagement.
