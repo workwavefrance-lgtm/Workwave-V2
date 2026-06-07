@@ -1,5 +1,38 @@
 # BACKLOG Workwave — post-mesure (figé le 07/06/2026)
 
+---
+
+## 🚀 PROGRAMME EN COURS — Expansion France entière + pages pro (lancé 07/06)
+
+**Objectif** : couvrir TOUTE la France (métropole + DOM) + créer les pages d'acquisition pro (national ET local). **Règle absolue : données réelles uniques sourcées Perplexity, zéro chiffre inventé. Aucune erreur tolérée → contrôle par sous-agents à chaque étape.**
+
+### ✅ FAIT (07/06)
+- **Communes chargées** : 59 nouveaux dépts (8 régions métropole restantes + 5 DOM) = **22 400 communes**, base à **34 532 communes**. Vérifié par sous-agent QA : 0 dépt manquant, 0 slug/insee/lat-lng nul, grandes villes + DOM corrects. Script : `scraping/load_cities_regions.py` (étendu).
+- **Scraping pros LANCÉ** : `scraping/scrape_all_france.sh` (détaché nohup caffeinate), 59 dépts, petits d'abord → Paris en dernier. **Job multi-JOURS** (SIRENE ~2s/req, ~2M pros attendus). Log : `scraping/scrape_all_france_*.log`.
+
+### ⏳ EN COURS / À FAIRE
+- [ ] **Scrape pros** : laisser tourner. Vérifier la santé par sous-agent après les 1ers dépts (pas de régression NAF, counts cohérents). ⚠️ surveiller perf Supabase Micro pendant les gros ingests (Paris/Lyon/Lille). Leçons : cursor pagination sitemap, count estimated.
+- [ ] **CORSE (2A/2B)** : EXCLUE du chargement (code dépt alphanumérique casse la regex slug dépt `\d{2,3}`). À faire à part : fixer `parseDepartmentSlug`/`generateDepartmentSlug` pour accepter `2a`/`2b`, PUIS charger + scraper Corse.
+- [ ] **Pages pro #1 — Comparatives "sans abonnement"** (national) : `/pro/alternative-habitatpresto`, `/pro/vs-travaux-com`, `/pro/plateforme-sans-abonnement`. Tarifs concurrents RÉELS sourcés Perplexity + cités. LE levier de conversion pro (notre 9,90€/lead vs leurs 39-150€/mois).
+- [ ] **Pages pro #2 — Géo "trouver des chantiers [métier] à [ville]"** (national + local) : template métier×ville, contexte marché local sourcé Perplexity par dépt (étendre `sourced-market-context`). Maillage + CTA "réclame ta fiche".
+- [ ] **Pages pro #3 — Guides pro** : "trouver des clients [métier]", "fixer ses tarifs [métier]", "devenir auto-entrepreneur [métier]". Sourcés Perplexity.
+- [ ] **Génération contenu SEO dépt** pour les nouvelles régions (étendre `generate-seo-na-departments.ts` — ⚠️ FOOTGUN connu : ce générateur Claude INVENTE les prix, cf. leçon 31/05 → ne PAS l'utiliser pour les prix, path programmatique sourcé only).
+- [ ] **Ping Indexing API** sur les hubs des nouvelles régions une fois scrapées.
+
+### 🐛 BUG PRÉ-EXISTANT détecté par le QA (07/06) — à corriger séparément
+- **114 slugs `cities` dupliqués / 140 communes injoignables par slug nu**, TOUTES dans l'ancienne Nouvelle-Aquitaine (`mazerolles` ×5, `saint-christophe` ×4…). Cause : l'ancien import n'a pas suffixé le code dépt sur les slugs ambigus (le nouveau loader le fait). Impact : `getCityBySlug` sert toujours la commune la + peuplée → les 140 perdantes servent la mauvaise ville (duplicate content latent). Fix : suffixer ces 140 slugs en `-NN` + redirect 308 (pas noindex, règle CLAUDE.md), 0 modif sur un pro `claimed`.
+
+### 🔒 Méthode anti-erreur (6 gardes-fous, à appliquer sur chaque build)
+1. Template testé sur 1 page d'abord (vérif chaque élément) avant tout scale.
+2. Compartimentage région par région (erreur isolée).
+3. CTA = composant source unique.
+4. Contenu Perplexity = dry-run + croisement slug↔contenu AVANT apply.
+5. Script de vérif auto (champ vide / lien cassé / contenu mismatché / CTA manquant / noindex).
+6. Rollout par lots de 10-15 → vérif sous-agent → scale.
+
+---
+
+
 > Décision cadre : on a poussé plein de changements aujourd'hui. On **laisse
 > respirer 5-7 jours**, on **mesure**, PUIS on attaque ce backlog. Ne rien
 > lancer avant la mesure pour ne pas polluer les données de conversion.
