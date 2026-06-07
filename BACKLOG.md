@@ -10,6 +10,12 @@
 - **Communes chargées** : 59 nouveaux dépts (8 régions métropole restantes + 5 DOM) = **22 400 communes**, base à **34 532 communes**. Vérifié par sous-agent QA : 0 dépt manquant, 0 slug/insee/lat-lng nul, grandes villes + DOM corrects. Script : `scraping/load_cities_regions.py` (étendu).
 - **Scraping pros LANCÉ** : `scraping/scrape_all_france.sh` (détaché nohup caffeinate), 59 dépts, petits d'abord → Paris en dernier. **Job multi-JOURS** (SIRENE ~2s/req, ~2M pros attendus). Log : `scraping/scrape_all_france_*.log`.
 
+### 🌐 Enrichissement communes via MCP data.gouv.fr (données réelles uniques "à fond")
+- [x] **DVF prix immobilier par commune** PRÊT (07/06) : dataset data.gouv.fr `63dd1cc420bf925d5d1d8b1e` (Licence Ouverte), 29 832 communes, `prix_m2_moyen` / `prix_moyen_bien` / `nb_mutations` / `surface_moy` / `prop_maison`. Migration `migrations/2026-06-07_commune_data.sql` (table dédiée `commune_data` keyée insee_code, extensible). ETL `scripts/enrich-communes-dvf.ts` (dry-run validé). **⏸ EN ATTENTE : appliquer la migration → lancer l'ETL → sous-agent vérifie.**
+- [ ] **Revenus médians par commune** (FiLoSoFi / INSEE) → pouvoir d'achat = budget travaux. À découvrir + ajouter à `commune_data`.
+- [ ] **Parc de logements** (âge du bâti, résidences principales/secondaires) → vieux bâti = demande rénovation. À ajouter.
+- [ ] **Intégration** : afficher ces données réelles sur les pages `/[metier]/[ville]` (CityFactsBlock enrichi) + pages géo pro → contenu unique par commune (le moat "données à fond").
+
 ### ⏳ EN COURS / À FAIRE
 - [ ] **Scrape pros** : laisser tourner. Vérifier la santé par sous-agent après les 1ers dépts (pas de régression NAF, counts cohérents). ⚠️ surveiller perf Supabase Micro pendant les gros ingests (Paris/Lyon/Lille). Leçons : cursor pagination sitemap, count estimated.
 - [ ] **CORSE (2A/2B)** : EXCLUE du chargement (code dépt alphanumérique casse la regex slug dépt `\d{2,3}`). À faire à part : fixer `parseDepartmentSlug`/`generateDepartmentSlug` pour accepter `2a`/`2b`, PUIS charger + scraper Corse.
