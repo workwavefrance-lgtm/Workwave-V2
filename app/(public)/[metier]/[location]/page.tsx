@@ -16,6 +16,8 @@ import ListingIntro from "@/components/listing/ListingIntro";
 import OtherDepartmentsBlock from "@/components/listing/OtherDepartmentsBlock";
 import DuplicateNoticeBlock from "@/components/listing/DuplicateNoticeBlock";
 import CityFactsBlock from "@/components/listing/CityFactsBlock";
+import DeptMarketBlock from "@/components/listing/DeptMarketBlock";
+import { DEPARTMENT_MARKET } from "@/lib/data/department-market";
 import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
@@ -601,6 +603,20 @@ export default async function ListingPage({ params, searchParams }: Props) {
           categoryName={category.name}
           prosCount={totalProsCount}
           communeData={communeData}
+        />
+      )}
+
+      {/* Bloc "Marche immobilier en [dept]" : VRAIES donnees data.gouv.fr
+          agregees au niveau departement (DVF prix, FiLoSoFi revenus, LOVAC
+          vacance, ponderees population, gate de representativite applique a la
+          generation). Affiche UNIQUEMENT sur les pages dept et seulement si la
+          donnee est exploitable. Contenu unique factuel par dept = moat SEO. */}
+      {resolved.type === "department" && (
+        <DeptMarketBlock
+          deptName={resolved.department.name}
+          deptCode={resolved.department.code}
+          categoryName={category.name}
+          market={DEPARTMENT_MARKET[resolved.department.code] ?? null}
         />
       )}
 
