@@ -48,17 +48,12 @@
 
 ### 4. Qualité données `price_guides` (audit 07/06)
 - [x] **11 mismatches métier sous maçon recatégorisés** (07/06) : 7 cheminée → chauffagiste, 2 porte garage → menuisier, 1 soudure → serrurier, 1 tapissier → decorateur-interieur. maçon 77→66. ✅
-- [ ] **10 bugs H1↔slug** (H1 générique/faux) — ⚠️ peut cacher un contenu mal généré (à régénérer, pas juste changer le H1) :
-  - macon : `prix-traitement-humidite` (H1 "maçon pour travaux"), `prix-renovation-magasin`, `prix-renovation-maison-dappartement-paris`, `...-lyon` (H1 "prestation de maçonnerie" générique)
-  - facadier : `prix-retirer-crepi-plafond` (H1 affiche "ponçage de parquet" !)
-  - menuisier : `prix-remplacement-vitrage` (H1 "vitre d'insert de cheminée")
-  - menage : `prix-demenagement-jusqu-a-1000-km`, `prix-amenagement-dinterieur`, `prix-demenagement-m3` (H1 "ménage à domicile")
-  - carreleur : `prix-restauration-sol-pierre-polie` (H1 "carrelage générique")
-- [ ] **7 slugs corrompus** (typos URL — ⚠️ changer le slug = 301 obligatoire car déjà indexé) :
+- [x] **13 guides au contenu ne matchant PAS le slug — RÉGÉNÉRÉS** (07/06, Perplexity sourcé, ~$0.09) : le contenu parlait d'un autre sujet que l'URL. Détectés via 2 méthodes croisées (sous-agent sémantique sur les 478 + détecteur token-overlap slug↔H1). Corrigés + recatégorisés au bon métier : `prix-retirer-crepi-plafond` (était ponçage parquet→crépi plafond), `prix-goudronnage-bicouche` (gravillonnage→bicouche), `prix-restauration-sol-pierre-polie` (carrelage→pierre polie), `prix-arrosage-automatique` (générique→arrosage), `prix-decoller-papier-peint` (peinture→papier peint), `prix-traitement-humidite` (maçon générique→humidité), `prix-renovation-magasin` (maçonnerie générique→magasin), `prix-remplacement-vitrage` (insert cheminée→vitrage, →vitrier), `prix-demenagement-jusqu-a-1000-km` + `prix-demenagement-m3` (ménage→déménagement, →demenagement), `prix-amenagement-dinterieur` (ménage→aménagement, →decorateur-interieur), `prix-renovation-maison-...-paris` + `...-lyon` (maçonnerie générique→rénovation géo-ciblée). ✅
+- [ ] **7 slugs corrompus** (typos URL — ⚠️ changer le slug = 301 obligatoire car déjà indexé, à faire avec soin) :
   - terrassier : `prix-ocation-dengins-terrassement`, `prix-ocation-benne` (→ location), `prix-travaux-fouilles-trancheesxf` (suffixe xf)
   - vitrier : `prix-simple-et-d-double-vitrage` (→ et-double)
   - electricien : `prix-cablage-telephonique` (H1 "service" parasite, mineur)
-- [ ] **Méta** : la section `menage` est un fourre-tout (déménagement/aménagement mélangés au ménage) — pas de métier cible valide → à clarifier (créer `demenagement` ? réassigner ?).
+  → Le contenu de ces 7 est OK, seul le slug (URL) est typé. Faible priorité (l'utilisateur voit le bon H1, juste l'URL est moche).
 
 ### 5. Analytics
 - [ ] **Configurer l'événement clé GA4** "dépôt projet" (aujourd'hui 0 conversion mesurée dans GA4 — il compte les pages vues mais aucun objectif). Via GTM-W65L4PJD déjà en place. ~15 min.
