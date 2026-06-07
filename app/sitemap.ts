@@ -12,6 +12,7 @@ import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { FR_CITIES } from "@/lib/data/intl-fr-cities";
+import { COMPETITOR_OFFERS } from "@/lib/data/competitor-offers";
 // NB : le contenu EN international (/en/ai/*, gTLD workwaveai.co) n'est PLUS
 // dans cet index. Il a son propre sitemap dedie + stable :
 // app/sitemap-ai-en.xml/route.ts (evite de polluer l'index .fr avec des URLs .co).
@@ -274,6 +275,15 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
   const staticUrls: MetadataRoute.Sitemap = [
     { url: BASE_URL, changeFrequency: "daily", priority: 1 },
     { url: `${BASE_URL}/pro`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/pro/sans-abonnement`, changeFrequency: "weekly", priority: 0.85 },
+    // Comparatifs concurrents (uniquement les modèles confirmés/sourcés).
+    ...Object.values(COMPETITOR_OFFERS)
+      .filter((c) => c.model && c.price_text)
+      .map((c) => ({
+        url: `${BASE_URL}/pro/alternatives/${c.slug}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.75,
+      })),
     { url: `${BASE_URL}/trouver-des-chantiers`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/trouver-des-clients`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/deposer-projet`, changeFrequency: "monthly", priority: 0.8 },

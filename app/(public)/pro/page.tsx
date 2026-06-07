@@ -47,7 +47,7 @@ const advantages = [
   {
     title: "Leads qualifiés dans votre zone",
     description:
-      "Chaque demande est analysée par notre IA et routée vers les 3 professionnels les mieux placés. Pas de spam, que des projets réels.",
+      "Chaque demande est analysée par notre IA, qui identifie le métier exact et vérifie la cohérence avant de la transmettre aux pros concernés de votre zone. Pas de spam, que des projets réels.",
   },
   {
     title: "Zéro commission sur vos chantiers",
@@ -395,8 +395,8 @@ export default function ProLandingPage() {
             Comment vous recevez vos leads
           </h2>
           <p className="text-[var(--text-secondary)] text-center mb-16 max-w-2xl mx-auto">
-            3 étapes, zéro spam. Notre IA qualifie chaque projet et
-            sélectionne les 3 professionnels les mieux placés.
+            3 étapes, zéro spam. Notre IA qualifie chaque projet et le
+            transmet aux professionnels concernés de votre zone d&apos;intervention.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 relative">
@@ -442,9 +442,10 @@ export default function ProLandingPage() {
 
           <div className="mt-12 text-center">
             <p className="text-sm text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
-              Pas de mise en concurrence à 30 comme sur les plateformes
-              traditionnelles. Maximum 3 pros par projet, ce qui garantit des
-              leads qualifiés et une compétition raisonnable.
+              Vous recevez le projet gratuitement et ne payez 9,90 € que si
+              vous décidez de débloquer les coordonnées. Pas d&apos;abonnement,
+              pas de lead acheté à l&apos;aveugle : vous gardez le contrôle,
+              projet par projet.
             </p>
           </div>
         </div>
