@@ -11,10 +11,15 @@
 - **Scraping pros LANCÉ** : `scraping/scrape_all_france.sh` (détaché nohup caffeinate), 59 dépts, petits d'abord → Paris en dernier. **Job multi-JOURS** (SIRENE ~2s/req, ~2M pros attendus). Log : `scraping/scrape_all_france_*.log`.
 
 ### 🌐 Enrichissement communes via MCP data.gouv.fr (données réelles uniques "à fond")
-- [x] **DVF prix immobilier par commune** PRÊT (07/06) : dataset data.gouv.fr `63dd1cc420bf925d5d1d8b1e` (Licence Ouverte), 29 832 communes, `prix_m2_moyen` / `prix_moyen_bien` / `nb_mutations` / `surface_moy` / `prop_maison`. Migration `migrations/2026-06-07_commune_data.sql` (table dédiée `commune_data` keyée insee_code, extensible). ETL `scripts/enrich-communes-dvf.ts` (dry-run validé). **⏸ EN ATTENTE : appliquer la migration → lancer l'ETL → sous-agent vérifie.**
-- [ ] **Revenus médians par commune** (FiLoSoFi / INSEE) → pouvoir d'achat = budget travaux. À découvrir + ajouter à `commune_data`.
-- [ ] **Parc de logements** (âge du bâti, résidences principales/secondaires) → vieux bâti = demande rénovation. À ajouter.
-- [ ] **Intégration** : afficher ces données réelles sur les pages `/[metier]/[ville]` (CityFactsBlock enrichi) + pages géo pro → contenu unique par commune (le moat "données à fond").
+5 datasets nationaux par commune validés par sous-agents (07/06), tous Licence Ouverte. Table dédiée `commune_data` (migration `migrations/2026-06-07_commune_data.sql`, keyée insee_code). ETL combiné `scripts/enrich-communes-datagouv.ts` (--source=dvf|revenus|logements|equipements|all, dry-run validé sur les 4).
+- [x] **DVF prix immobilier** (`63dd1cc4…`, 29 832 communes) : prix m², prix bien, nb mutations, surface, % maisons. ETL PRÊT ✅
+- [x] **Revenus FiLoSoFi** (`693975a1…`, 31 322 communes) : revenu médian, quartiles, % ménages imposés. ETL PRÊT ✅
+- [x] **Logements vacants LOVAC** (`61816c6e…`, 16 511 communes) : total parc privé, vacants, vacants >2 ans, taux vacance (= demande rénovation). ETL PRÊT ✅
+- [x] **Équipements + densité** (`6745d9ae…`, 34 935 communes) : niveau équipements (centralité), grille densité, densité hab/km². ETL PRÊT ✅
+- **⏸ EN ATTENTE : appliquer migration → `npx tsx scripts/enrich-communes-datagouv.ts --source=all` → sous-agent vérifie l'intégrité.**
+- [ ] **Construction SITADEL** (SDES `689c42f4…`, 36 737 communes, logements autorisés/commencés) : CSV 88 Mo → ETL STREAMING séparé à écrire (filter TYPE_LGT="Tous Logements" + ANNEE=2024). Colonnes déjà dans la migration.
+- [ ] **Démographie fine** (ménages, âge, évolution) : PAS sur data.gouv Tabular (seulement insee.fr base-cc-*) → script download insee.fr séparé si voulu.
+- [ ] **Intégration UI** : afficher ces données réelles sur `/[metier]/[ville]` (CityFactsBlock enrichi) + pages géo pro → contenu unique factuel par commune (le moat "données à fond"). Croiser avec les prix sourcés Perplexity.
 
 ### ⏳ EN COURS / À FAIRE
 - [ ] **Scrape pros** : laisser tourner. Vérifier la santé par sous-agent après les 1ers dépts (pas de régression NAF, counts cohérents). ⚠️ surveiller perf Supabase Micro pendant les gros ingests (Paris/Lyon/Lille). Leçons : cursor pagination sitemap, count estimated.
