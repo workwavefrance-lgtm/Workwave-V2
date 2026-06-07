@@ -123,18 +123,18 @@ export default function FinancesClient({
   const mrrFormatter = (value: number) => fmtEurCompact(value);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1
-            className="text-xl font-semibold mb-0.5"
+          <h2
+            className="text-base font-semibold mb-0.5"
             style={{ color: "var(--admin-text)" }}
           >
-            Finances
-          </h1>
+            IA — Abonnements Premium
+          </h2>
           <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-            Données Stripe en temps réel
+            Abonnements Stripe (29,90 €/mois) — freelances Premium
           </p>
         </div>
 
