@@ -57,5 +57,14 @@ $$;
 GRANT EXECUTE ON FUNCTION sitemap_city_cat_counts(int[]) TO service_role, anon, authenticated;
 GRANT EXECUTE ON FUNCTION sitemap_ai_city_cat_counts() TO service_role, anon, authenticated;
 
+-- Index couvrant pour accélérer sitemap_city_cat_counts : sans lui,
+-- city_id = ANY(<300 villes>) sur 1,78M lignes timeoutait (>120s). Avec cet
+-- index partiel (city_id, category_id), un index-only scan ramène le comptage à
+-- quelques secondes. ⚠️ Pose un verrou bref (~30s) sur les écritures de `pros`
+-- pendant la création — à lancer à une heure creuse.
+CREATE INDEX IF NOT EXISTS idx_pros_active_city_cat
+  ON pros (city_id, category_id)
+  WHERE is_active = true AND deleted_at IS NULL;
+
 -- Recharge le cache de schéma PostgREST pour exposer les 2 RPC immédiatement.
 NOTIFY pgrst, 'reload schema';
