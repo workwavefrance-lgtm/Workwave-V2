@@ -41,8 +41,27 @@ function toE164(phone: string): string | null {
   if (!/^0[67]\d{8}$/.test(d)) return null;
   return "+33" + d.slice(1);
 }
-function buildMessage(metier: string, lieu: string): string {
-  return `Workwave : une demande de ${metier} vient d'arriver pres de ${lieu}. Inscrivez gratuitement votre entreprise pour la recevoir : workwave.fr/pro - ${STOP}`;
+// Retire les accents -> le SMS reste en GSM-7 (160 car/segment au lieu de 70 en
+// UCS-2 avec accents) => message plus long pour le meme nombre de segments.
+function deburr(s: string): string {
+  return s.normalize("NFD").replace(/\p{M}/gu, "");
+}
+const URGENCE_FR: Record<string, string> = {
+  this_week: "cette semaine", urgent: "en urgence", asap: "en urgence",
+  this_month: "ce mois-ci", flexible: "",
+};
+function buildMessage(
+  metier: string,
+  lieu: string,
+  opts: { urgence?: string; besoin?: string } = {}
+): string {
+  const u = opts.urgence ? ` (${opts.urgence})` : "";
+  // resume du projet, tronque proprement a ~150 car. pour rester lisible
+  let b = (opts.besoin || "").replace(/\s+/g, " ").trim();
+  if (b.length > 170) b = b.slice(0, 167).replace(/[\s,;.]+\S*$/, "") + "...";
+  const projet = b ? ` Le projet : ${b}${/[.!?]$/.test(b) ? "" : "."}` : "";
+  const msg = `Bonjour, c'est Workwave. Un particulier recherche un ${metier} a ${lieu}${u}.${projet} Pour voir la demande en entier et le contacter, activez gratuitement votre fiche sur workwave.fr/pro. ${STOP}`;
+  return deburr(msg);
 }
 async function sendSms(recipient: string, content: string): Promise<void> {
   const resp = await fetch("https://api.brevo.com/v3/transactionalSMS/sms", {
@@ -54,8 +73,8 @@ async function sendSms(recipient: string, content: string): Promise<void> {
 }
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function resolveFromProject(id: string): Promise<{ slug: string; dept: string; lieu: string; metier: string } | null> {
-  const { data: p } = await sb.from("projects").select("category_id, city_id").eq("id", id).single();
+async function resolveFromProject(id: string): Promise<{ slug: string; dept: string; lieu: string; metier: string; urgence: string; besoin: string } | null> {
+  const { data: p } = await sb.from("projects").select("category_id, city_id, urgency, ai_qualification, description").eq("id", id).single();
   if (!p) return null;
   const { data: cat } = await sb.from("categories").select("slug, name").eq("id", p.category_id).single();
   const { data: city } = await sb.from("cities").select("name, department_id").eq("id", p.city_id).single();
@@ -65,22 +84,27 @@ async function resolveFromProject(id: string): Promise<{ slug: string; dept: str
     dept = d?.code || "";
     lieu = city?.name || d?.name || "";
   }
-  return { slug: cat?.slug || "", dept, lieu, metier: (cat?.name || cat?.slug || "").toLowerCase() };
+  // resume du projet : on prefere le resume IA (concis) sinon la description brute
+  const aiq = (p as { ai_qualification?: { summary?: string } }).ai_qualification || {};
+  const besoin = (aiq.summary || (p as { description?: string }).description || "").toString();
+  const urgence = URGENCE_FR[(p as { urgency?: string }).urgency || ""] ?? "";
+  return { slug: cat?.slug || "", dept, lieu, metier: (cat?.name || cat?.slug || "").toLowerCase(), urgence, besoin };
 }
 
 async function main() {
   console.log(`\n=== RECRUTEMENT PROSPECTS — ${DRY_RUN ? "DRY-RUN" : TEST_SMS ? "TEST" : "EXECUTE"} ===\n`);
 
   let slug = CAT || "", dept = DEPT || "", lieu = LABEL || "", metier = CAT || "";
+  let urgence = "", besoin = "";
   if (PROJECT) {
     const r = await resolveFromProject(PROJECT);
     if (!r) return console.log(`⚠️ projet ${PROJECT} introuvable`);
-    ({ slug, dept, lieu, metier } = r);
+    ({ slug, dept, lieu, metier, urgence, besoin } = r);
     console.log(`Projet ${PROJECT} -> métier=${slug} (${metier}) | dept=${dept} | lieu=${lieu}`);
   }
   if (!slug || !dept) return console.log("⚠️ il faut --project=<id> OU --category=<slug> --dept=<code>");
   if (!lieu) lieu = `votre secteur (${dept})`;
-  const message = buildMessage(metier || slug, lieu);
+  const message = buildMessage(metier || slug, lieu, { urgence, besoin });
   console.log("Message :\n  " + message + "\n");
 
   if (TEST_SMS) {
