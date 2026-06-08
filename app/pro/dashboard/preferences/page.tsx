@@ -7,7 +7,7 @@ import { getAllCategories } from "@/lib/queries/categories";
 import PreferencesEditor from "@/components/pro/dashboard/PreferencesEditor";
 
 export const metadata: Metadata = {
-  title: "Préférences leads — Workwave Pro",
+  title: "Zone d'intervention — Workwave Pro",
   robots: { index: false, follow: false },
 };
 
