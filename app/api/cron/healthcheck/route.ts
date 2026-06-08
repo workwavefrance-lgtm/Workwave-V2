@@ -168,7 +168,11 @@ export async function GET(req: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
         from: "Workwave Healthcheck <contact@workwave.fr>",
-        to: ["contact@workwave.fr"],
+        // Destinataire = Gmail admin EN DIRECT. contact@workwave.fr est
+        // intercepté par le MX inbound Resend (priorité 4 > Hostinger) → les
+        // alertes ne tombaient jamais dans la boîte Gmail (cf. capture Resend
+        // "Receiving" du 08/06). On envoie donc directement à l'admin Gmail.
+        to: [process.env.ADMIN_EMAIL || "workwave.france@gmail.com"],
         subject: `🚨 Workwave : ${criticalFailures.length} route critique${criticalFailures.length > 1 ? "s" : ""} KO`,
         html: buildAlertHtml(failures, results),
       });
