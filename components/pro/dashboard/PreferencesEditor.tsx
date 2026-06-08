@@ -57,8 +57,17 @@ export default function PreferencesEditor({
   );
 
   const [radius, setRadius] = useState(pro.intervention_radius_km);
+
+  // Catégories du pro : principale + secondaires. Par défaut, TOUTES sont
+  // activées — un pro veut recevoir les leads de tous ses métiers, il ne doit
+  // en rater aucun (et le broadcast envoie de toute façon sur toutes ses
+  // catégories). On ne restreint à un sous-ensemble que s'il l'a explicitement
+  // enregistré.
+  const allProCatIds = [pro.category_id, ...(pro.secondary_category_ids || [])];
   const [enabledCats, setEnabledCats] = useState<number[]>(
-    pro.enabled_category_ids || [pro.category_id]
+    pro.enabled_category_ids && pro.enabled_category_ids.length > 0
+      ? pro.enabled_category_ids
+      : allProCatIds
   );
   const [urgencyAvailable, setUrgencyAvailable] = useState(
     pro.urgency_available
@@ -72,11 +81,7 @@ export default function PreferencesEditor({
       : ""
   );
 
-  // Catégories disponibles : principale + secondaires
-  const allProCatIds = [
-    pro.category_id,
-    ...(pro.secondary_category_ids || []),
-  ];
+  // Catégories disponibles : principale + secondaires (allProCatIds défini plus haut)
   const availableCats = categories.filter((c) => allProCatIds.includes(c.id));
 
   function toggleCategory(id: number) {
