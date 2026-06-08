@@ -19,7 +19,7 @@
     },
     {
       "path": "/api/cron/broadcast-rescue",
-      "schedule": "0 9,15 * * *"
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/cron/relance-projets",

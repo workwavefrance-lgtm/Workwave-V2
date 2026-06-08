@@ -44,7 +44,7 @@ export async function GET(req: Request) {
     .from("projects")
     .select("id, first_name, description, category_id, city_id, budget, urgency, status, vertical, suspicion_score, created_at")
     .neq("status", "deleted")
-    .eq("broadcast_count", 0)
+    .is("broadcasted_at", null)
     .gte("created_at", sevenDaysAgo)
     .order("created_at", { ascending: false });
   if (error) {
