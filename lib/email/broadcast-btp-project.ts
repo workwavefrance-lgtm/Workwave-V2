@@ -255,6 +255,21 @@ export async function broadcastBtpProject(
   //    NB : a l'echelle 50k+ pros claimed par categorie, il faudra introduire
   //    une vraie bbox paginee ou une RPC PostGIS — pas pour aujourd'hui.
   const useDistance = projectLat != null && projectLng != null;
+
+  // Relance : ne JAMAIS re-notifier un pro qui a déjà débloqué ce projet — il a
+  // déjà les coordonnées du particulier, le rappel "toujours disponible" serait
+  // absurde (et énervant). On exclut ses id du SELECT.
+  let excludeProIds: number[] = [];
+  if (input.isRelance) {
+    const { data: unlocks } = await sb
+      .from("lead_unlocks")
+      .select("pro_id")
+      .eq("project_id", input.projectId);
+    excludeProIds = (unlocks || [])
+      .map((u: { pro_id: number | null }) => u.pro_id)
+      .filter((id): id is number => id != null);
+  }
+
   let queryBuilder = sb
     .from("pros")
     .select(
@@ -270,6 +285,11 @@ export async function broadcastBtpProject(
     .not("email", "is", null)
     .eq("do_not_contact", false)
     .or(`paused_until.is.null,paused_until.lt.${nowIso}`);
+
+  // Exclut les pros ayant déjà débloqué ce projet (relance uniquement).
+  if (excludeProIds.length > 0) {
+    queryBuilder = queryBuilder.not("id", "in", `(${excludeProIds.join(",")})`);
+  }
 
   // Fallback : si pas de lat/lng projet, on garde le filtre "meme departement"
   // via city_ids du dept (max ~1000 cities par dept, pas de cap atteint).
