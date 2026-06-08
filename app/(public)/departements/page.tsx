@@ -8,7 +8,7 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 
-// Page hub : liste les 40 departements couverts (5 regions) avec liens vers
+// Page hub : liste les 101 departements couverts (toute la France) avec liens vers
 // les categories vedettes par dept. Cree en commit B de l'audit 2026-05-03
 // pour booster la decouverte des pages /[metier]/[dept] hors-Vienne par Google
 // (gap d'indexation 226k -> 29k a cause d'un maillage interne trop focalise).
@@ -29,7 +29,7 @@ const FEATURED_CATEGORIES: { slug: string; name: string }[] = [
 export const metadata: Metadata = {
   title: "Professionnels par département en France - Workwave",
   description:
-    "Annuaire des artisans et professionnels par département en France. Plus de 1 000 000 de pros référencés dans 40 départements de 5 régions : Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie et Provence-Alpes-Côte d'Azur.",
+    "Annuaire des artisans et professionnels par département dans toute la France. Plus d'1,7 million de pros référencés dans 101 départements et 34 046 communes (métropole et outre-mer).",
   alternates: {
     canonical: `${BASE_URL}/departements`,
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "Professionnels par département en France",
     description:
-      "Annuaire des artisans par département en France. 1 000 000+ pros référencés dans 40 départements de 5 régions.",
+      "Annuaire des artisans par département dans toute la France. 1 700 000+ pros référencés dans 101 départements.",
     url: `${BASE_URL}/departements`,
   },
 };
@@ -80,8 +80,8 @@ export default async function DepartmentsHubPage() {
           Professionnels par département
         </h1>
         <p className="text-lg text-[var(--text-secondary)] max-w-3xl">
-          Plus de 1 000 000 d&apos;artisans et professionnels référencés dans 40
-          départements de 5 régions de France. Choisissez votre département pour
+          Plus d&apos;1,7 million d&apos;artisans et professionnels référencés dans les 101
+          départements français. Choisissez votre département pour
           découvrir les pros près de chez vous.
         </p>
       </div>
@@ -158,9 +158,9 @@ export default async function DepartmentsHubPage() {
           Pourquoi Workwave ?
         </h2>
         <p className="text-[var(--text-secondary)] max-w-3xl leading-relaxed">
-          Workwave référence gratuitement plus de 1 000 000 de professionnels
-          dans 5 régions de France, issus du registre Sirene. Notre annuaire
-          couvre 40 départements avec les principaux corps de métier
+          Workwave référence gratuitement plus d&apos;1,7 million de professionnels
+          dans toute la France, issus du registre Sirene. Notre annuaire
+          couvre les 101 départements avec les principaux corps de métier
           du BTP, des services à domicile et de l&apos;aide à la personne. Les
           fiches sont enrichies au fil de l&apos;eau et chaque artisan peut
           réclamer la sienne gratuitement pour la compléter.

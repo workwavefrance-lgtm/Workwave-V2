@@ -35,7 +35,7 @@ const homeFaqs = [
   {
     question: "Qu'est-ce que Workwave ?",
     answer:
-      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant 40 départements sur 5 régions de France. La plateforme référence plus de 1 000 000 de professionnels dans 12 115 communes et met en relation les particuliers avec des artisans locaux.",
+      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France. La plateforme référence plus de 1,7 million de professionnels dans 34 046 communes et met en relation les particuliers avec des artisans locaux.",
   },
   {
     question: "Workwave est-il gratuit pour les particuliers ?",
@@ -50,7 +50,7 @@ const homeFaqs = [
   {
     question: "Comment déposer un projet de travaux ?",
     answer:
-      "Remplissez le formulaire de dépôt de projet en décrivant votre besoin. La demande est analysée puis transmise automatiquement à un maximum de 3 professionnels qualifiés dans la catégorie et la zone concernées. Ces professionnels recontactent ensuite directement le particulier.",
+      "Remplissez le formulaire de dépôt de projet en décrivant votre besoin. La demande est analysée puis transmise automatiquement aux professionnels qualifiés de la catégorie et de la zone concernées. Ces professionnels recontactent ensuite directement le particulier.",
   },
   {
     question: "D'où proviennent les fiches des professionnels ?",
@@ -65,7 +65,7 @@ const homeFaqs = [
   {
     question: "Quelle zone géographique couvre Workwave ?",
     answer:
-      "Workwave couvre 40 départements répartis sur 5 régions de France : Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie et Provence-Alpes-Côte d'Azur.",
+      "Workwave couvre toute la France : les 101 départements, en métropole comme en outre-mer, soit plus de 34 000 communes référencées.",
   },
 ];
 
@@ -123,15 +123,15 @@ export default async function Home() {
             className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
             style={{ animationDelay: "120ms" }}
           >
-            Plus d&apos;un million de professionnels référencés dans 5 régions
-            de France, à portée d&apos;un clic.
+            Plus d&apos;1,7 million de professionnels référencés dans toute
+            la France, à portée d&apos;un clic.
           </p>
           <SearchForm categories={allCategories} />
           {/* Bande de stats : preuve de couverture immédiate (chiffres coral animés). */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
             <div className="text-center">
               <CountUp
-                end={1000000}
+                end={1782549}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
@@ -144,7 +144,7 @@ export default async function Home() {
             />
             <div className="text-center">
               <CountUp
-                end={12115}
+                end={34046}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
@@ -157,11 +157,11 @@ export default async function Home() {
             />
             <div className="text-center">
               <CountUp
-                end={5}
+                end={101}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                régions de France
+                départements couverts
               </span>
             </div>
           </div>

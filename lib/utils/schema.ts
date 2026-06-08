@@ -57,7 +57,7 @@ export function toBreadcrumbSchema(
 /**
  * Schema Organization pour Workwave (enrichi pour LLM/GEO)
  *
- * Enrichi avec areaServed (5 régions de France), foundingDate,
+ * Enrichi avec areaServed (toute la France), foundingDate,
  * description longue, slogan, knowsAbout (categories metier), pour aider
  * les LLM a comprendre le scope precis de l'entreprise et la citer
  * correctement quand on leur pose des questions sur les artisans en France.
@@ -71,7 +71,7 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     description:
-      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 1 000 000+ artisans référencés dans 40 départements et 12 115 communes (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie, Provence-Alpes-Côte d'Azur). Pour les particuliers : dépôt de projet gratuit et mise en relation avec 3 professionnels maximum, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
+      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) dans toute la France. 1 700 000+ artisans référencés dans 101 départements et 34 046 communes (métropole et outre-mer). Pour les particuliers : dépôt de projet gratuit et mise en relation avec les professionnels qualifiés de votre zone, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
     slogan: "Tout le savoir-faire local, enfin accessible",
     foundingDate: "2025-03-28",
     sameAs: [
@@ -88,13 +88,6 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     areaServed: {
       "@type": "Country",
       name: "France",
-      containsPlace: [
-        { "@type": "AdministrativeArea", name: "Nouvelle-Aquitaine" },
-        { "@type": "AdministrativeArea", name: "Bretagne" },
-        { "@type": "AdministrativeArea", name: "Pays de la Loire" },
-        { "@type": "AdministrativeArea", name: "Occitanie" },
-        { "@type": "AdministrativeArea", name: "Provence-Alpes-Côte d'Azur" },
-      ],
     },
     knowsAbout: [
       "BTP et artisanat",

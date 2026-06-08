@@ -404,7 +404,7 @@ type VerticalTerms = {
     h2: string;
     paragraphs: string[];
   }) | null;
-  /** Phrase "demander 3 devis en 30 secondes" adaptée */
+  /** Phrase "demander des devis en 30 secondes" adaptée */
   cta_phrase: string;
   /** Phrase pour la "garantie/assurance" — varie selon vertical */
   garantie_phrase: (cat: string) => string;
@@ -427,7 +427,7 @@ const VERTICAL_TERMS: Record<Vertical, VerticalTerms> = {
         `Sur Workwave, vous pouvez déposer une demande "urgente" et recevoir des contacts dans l'heure, ou contacter directement les pros qui affichent leur disponibilité en astreinte sur leur fiche.`,
       ],
     }),
-    cta_phrase: "comparer 3 devis gratuits en 30 secondes",
+    cta_phrase: "comparer des devis gratuits en 30 secondes",
     garantie_phrase: () =>
       "C'est aussi l'assurance d'un devis détaillé, d'une responsabilité civile professionnelle et — pour les travaux concernés — d'une garantie décennale.",
     qualif: "qualifié",
@@ -446,7 +446,7 @@ const VERTICAL_TERMS: Record<Vertical, VerticalTerms> = {
         `Les paiements en CESU (Chèque Emploi Service Universel) ouvrent droit à un crédit d'impôt de 50% sur les sommes versées, dans la limite des plafonds en vigueur. Pensez à demander si le pro accepte ce mode de paiement.`,
       ],
     }),
-    cta_phrase: "recevoir 3 propositions gratuites en 30 secondes",
+    cta_phrase: "recevoir des propositions gratuites en 30 secondes",
     garantie_phrase: () =>
       "C'est aussi la garantie d'un professionnel déclaré (paiement CESU possible, crédit d'impôt 50%) plutôt que du travail au noir.",
     qualif: "fiable",
@@ -459,7 +459,7 @@ const VERTICAL_TERMS: Record<Vertical, VerticalTerms> = {
     intro_works: (catPlural, loc, prep) =>
       `Les ${catPlural} ${prep} ${loc} accompagnent les familles et les particuliers sur une grande variété de besoins, ponctuels ou réguliers. Voici les principales formes d'accompagnement proposées :`,
     section_urgence: null, // pas de "depannage" sur l'aide a la personne
-    cta_phrase: "être mis en relation avec 3 intervenants qualifiés en 30 secondes",
+    cta_phrase: "être mis en relation avec les intervenants qualifiés de votre zone en 30 secondes",
     garantie_phrase: () =>
       "C'est aussi la garantie d'un intervenant déclaré (paiement CESU possible, crédit d'impôt 50%) qualifié pour ce type d'accompagnement.",
     qualif: "qualifié",

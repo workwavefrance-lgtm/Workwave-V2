@@ -43,10 +43,10 @@ export default function ProjectCTABlock({
   // Sous-titre adapte : avec metier + ville si possible, sinon generique.
   const subtitle =
     categoryName && cityName
-      ? `Decrivez votre besoin de ${categoryName.toLowerCase()} a ${cityName}, on contacte jusqu'a 3 artisans qualifies dans votre zone. Gratuit, sans engagement.`
+      ? `Decrivez votre besoin de ${categoryName.toLowerCase()} a ${cityName}, on contacte les artisans qualifies de votre zone. Gratuit, sans engagement.`
       : categoryName
-      ? `Decrivez votre besoin de ${categoryName.toLowerCase()}, on contacte jusqu'a 3 artisans qualifies dans votre zone. Gratuit, sans engagement.`
-      : "Decrivez votre projet, on contacte jusqu'a 3 artisans qualifies dans votre zone. Gratuit, sans engagement.";
+      ? `Decrivez votre besoin de ${categoryName.toLowerCase()}, on contacte les artisans qualifies de votre zone. Gratuit, sans engagement.`
+      : "Decrivez votre projet, on contacte les artisans qualifies de votre zone. Gratuit, sans engagement.";
 
   return (
     <section className="mt-12 pt-8 border-t border-[var(--border-color)]">

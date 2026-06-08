@@ -94,7 +94,7 @@ export async function sendLeadNotificationEmail({
         </a>
 
         <p style="font-size: 13px; color: #9CA3AF; line-height: 1.6; margin-top: 24px;">
-          Ce projet a été envoyé à 3 professionnels de votre zone. Soyez réactif pour maximiser vos chances.
+          Ce projet a été envoyé aux professionnels qualifiés de votre zone. Soyez réactif pour maximiser vos chances.
         </p>
 
         <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;" />

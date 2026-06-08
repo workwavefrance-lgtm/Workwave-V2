@@ -445,8 +445,8 @@ export default async function ProPage({ params }: Props) {
               {blurCoords
                 ? `Pour être mis en relation avec ${claimArticle} ${claimMetier}${claimCityPart}, décrivez votre projet : c'est gratuit, rapide et sans engagement. Nous transmettons votre demande aux pros disponibles dans votre zone.`
                 : pro.phone
-                ? `Contactez ${pro.name} directement au ${pro.phone}. Pour comparer plusieurs devis, décrivez votre projet — nous le transmettons à 3 artisans qualifiés dans votre zone.`
-                : `Décrivez votre projet, nous le transmettons à 3 artisans qualifiés dans votre zone. Gratuit, sans engagement.`}
+                ? `Contactez ${pro.name} directement au ${pro.phone}. Pour comparer plusieurs devis, décrivez votre projet — nous le transmettons aux artisans qualifiés de votre zone.`
+                : `Décrivez votre projet, nous le transmettons aux artisans qualifiés de votre zone. Gratuit, sans engagement.`}
             </p>
 
             <Link

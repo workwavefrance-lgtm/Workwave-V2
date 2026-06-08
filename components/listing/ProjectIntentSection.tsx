@@ -75,7 +75,7 @@ export default function ProjectIntentSection({
         Quel est votre projet {deOrDApostrophe(getCategoryServiceLabel(categorySlug, categoryName))} à {locationName} ?
       </h2>
       <p className="text-sm text-[var(--text-secondary)] mb-5">
-        Décrivez votre besoin en 30 secondes — nous transmettons votre demande à 3 artisans qualifiés. Gratuit, sans engagement.
+        Décrivez votre besoin en 30 secondes — nous transmettons votre demande aux artisans qualifiés de votre zone. Gratuit, sans engagement.
       </p>
 
       {/* Boutons rapides par specialite (si la categorie en a) */}

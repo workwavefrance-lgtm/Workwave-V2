@@ -31,13 +31,13 @@ export const metadata: Metadata = {
     siteName: "Workwave",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 1 000 000 de professionnels en France. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
+      "Plus d'1,7 million de professionnels dans toute la France. BTP, services à domicile, aide à la personne. Comparez et contactez gratuitement.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Workwave — Trouvez un professionnel de confiance",
     description:
-      "Plus de 1 000 000 de professionnels en France. Comparez et contactez gratuitement.",
+      "Plus d'1,7 million de professionnels dans toute la France. Comparez et contactez gratuitement.",
   },
   // Nom affiché si le site est ajouté à l'écran d'accueil iOS.
   appleWebApp: { title: "Workwave" },

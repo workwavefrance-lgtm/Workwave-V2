@@ -99,7 +99,7 @@ function buildWelcomeMessage(ctx: AgentContext | null): string {
     }
     case "listing": {
       const art = getCategoryArticle(ctx.categoryName);
-      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez ${art} ${ctx.categoryName.toLowerCase()} à **${ctx.locationName}** ? Au lieu d'éplucher toute la liste, décrivez-moi votre projet en 30 secondes — je vous trouve 3 artisans qualifiés, gratuitement et sans engagement.`;
+      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez ${art} ${ctx.categoryName.toLowerCase()} à **${ctx.locationName}** ? Au lieu d'éplucher toute la liste, décrivez-moi votre projet en 30 secondes — je le transmets aux artisans qualifiés de votre zone, gratuitement et sans engagement.`;
     }
     case "home":
       return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez un artisan pour un projet, ou vous êtes vous-même artisan et voulez gérer votre fiche ?`;

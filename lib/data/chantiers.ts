@@ -24,7 +24,7 @@ export const CHANTIERS_FAQ: FaqItem[] = [
   },
   {
     q: "Comment recevoir des demandes de chantiers ?",
-    a: "Votre fiche existe peut-être déjà : Workwave référence plus de 1 000 000 d'artisans à partir du registre officiel Sirene. Retrouvez-la avec votre SIRET et réclamez-la gratuitement en 2 minutes. Si elle n'existe pas encore, vous pouvez la créer. Vous recevez ensuite les demandes des particuliers de votre zone et de votre métier.",
+    a: "Votre fiche existe peut-être déjà : Workwave référence plus d'1,7 million d'artisans à partir du registre officiel Sirene. Retrouvez-la avec votre SIRET et réclamez-la gratuitement en 2 minutes. Si elle n'existe pas encore, vous pouvez la créer. Vous recevez ensuite les demandes des particuliers de votre zone et de votre métier.",
   },
   {
     q: "Quand est-ce que je paie ?",
@@ -36,7 +36,7 @@ export const CHANTIERS_FAQ: FaqItem[] = [
   },
   {
     q: "Dans quelles zones Workwave trouve-t-il des chantiers ?",
-    a: "Workwave couvre 12 115 communes sur 40 départements et 5 régions de France (Nouvelle-Aquitaine, Bretagne, Pays de la Loire, Occitanie et PACA), avec une couverture qui continue de s'étendre.",
+    a: "Workwave couvre 34 046 communes dans toute la France (101 départements, métropole et outre-mer).",
   },
 ];
 
