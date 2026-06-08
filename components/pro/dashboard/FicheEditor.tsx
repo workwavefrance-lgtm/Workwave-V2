@@ -90,7 +90,14 @@ function Accordion({
           />
         </svg>
       </button>
-      {open && <div className="pb-6 space-y-4">{children}</div>}
+      {/* On garde TOUJOURS les children montés, juste cachés en CSS quand
+          l'accordéon est fermé. Raison : un <input> retiré du DOM (rendu
+          conditionnel `{open && ...}`) n'est PAS sérialisé dans le FormData
+          au submit. Tél/email/site/réseaux/tarifs vivant dans des accordéons
+          fermés par défaut partaient donc « vides » → erreurs « Téléphone
+          obligatoire / Email invalide » alors que les valeurs sont à l'écran.
+          display:none conserve l'input (et sa valeur) dans le formulaire. */}
+      <div className={open ? "pb-6 space-y-4" : "hidden"}>{children}</div>
     </div>
   );
 }
