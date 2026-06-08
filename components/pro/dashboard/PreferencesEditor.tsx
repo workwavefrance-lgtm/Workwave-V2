@@ -7,10 +7,8 @@ import {
   type PreferencesFormState,
 } from "@/app/pro/dashboard/preferences/actions";
 import CountUp from "@/components/ui/CountUp";
-import type { Category } from "@/lib/types/database";
 
 type Props = {
-  categories: Category[];
   previewCount: number;
 };
 
@@ -45,10 +43,7 @@ function Toggle({
   );
 }
 
-export default function PreferencesEditor({
-  categories,
-  previewCount,
-}: Props) {
+export default function PreferencesEditor({ previewCount }: Props) {
   const { pro } = useDashboard();
 
   const [state, formAction, pending] = useActionState(
@@ -57,18 +52,6 @@ export default function PreferencesEditor({
   );
 
   const [radius, setRadius] = useState(pro.intervention_radius_km);
-
-  // Catégories du pro : principale + secondaires. Par défaut, TOUTES sont
-  // activées — un pro veut recevoir les leads de tous ses métiers, il ne doit
-  // en rater aucun (et le broadcast envoie de toute façon sur toutes ses
-  // catégories). On ne restreint à un sous-ensemble que s'il l'a explicitement
-  // enregistré.
-  const allProCatIds = [pro.category_id, ...(pro.secondary_category_ids || [])];
-  const [enabledCats, setEnabledCats] = useState<number[]>(
-    pro.enabled_category_ids && pro.enabled_category_ids.length > 0
-      ? pro.enabled_category_ids
-      : allProCatIds
-  );
   const [urgencyAvailable, setUrgencyAvailable] = useState(
     pro.urgency_available
   );
@@ -80,17 +63,6 @@ export default function PreferencesEditor({
       ? new Date(pro.paused_until).toISOString().split("T")[0]
       : ""
   );
-
-  // Catégories disponibles : principale + secondaires (allProCatIds défini plus haut)
-  const availableCats = categories.filter((c) => allProCatIds.includes(c.id));
-
-  function toggleCategory(id: number) {
-    // La catégorie principale ne peut pas être désactivée
-    if (id === pro.category_id) return;
-    setEnabledCats((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
-    );
-  }
 
   // Tomorrow for min date
   const tomorrow = new Date();
@@ -115,14 +87,6 @@ export default function PreferencesEditor({
           name="urgency_available"
           value={String(urgencyAvailable)}
         />
-        {enabledCats.map((id) => (
-          <input
-            key={id}
-            type="hidden"
-            name="enabled_category_ids"
-            value={id}
-          />
-        ))}
         {!paused && <input type="hidden" name="paused_until" value="" />}
 
         {/* Rayon d'intervention */}
@@ -162,48 +126,6 @@ export default function PreferencesEditor({
           {state.fieldErrors?.intervention_radius_km && (
             <p className="text-xs text-red-500 mt-2">
               {state.fieldErrors.intervention_radius_km}
-            </p>
-          )}
-        </div>
-
-        {/* Catégories activées */}
-        <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
-          <h2 className="text-sm font-semibold text-[var(--text-primary)] mb-4">
-            Catégories activées
-          </h2>
-          <p className="text-xs text-[var(--text-tertiary)] mb-3">
-            Choisissez pour quelles catégories vous souhaitez recevoir des leads
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {availableCats.map((cat) => {
-              const isActive = enabledCats.includes(cat.id);
-              const isPrimary = cat.id === pro.category_id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => toggleCategory(cat.id)}
-                  disabled={isPrimary}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-[var(--accent)] text-white"
-                      : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
-                  } ${isPrimary ? "cursor-not-allowed opacity-80" : ""}`}
-                >
-                  {cat.name}
-                  {isPrimary && (
-                    <span className="ml-1 text-xs opacity-70">
-                      (principale)
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {availableCats.length <= 1 && (
-            <p className="text-xs text-[var(--text-tertiary)] mt-3">
-              Ajoutez des catégories secondaires dans &laquo; Ma fiche &raquo; pour avoir
-              plus d&apos;options ici.
             </p>
           )}
         </div>

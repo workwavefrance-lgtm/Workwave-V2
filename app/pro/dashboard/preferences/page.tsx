@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getProByUserId } from "@/lib/queries/pros";
 import { getLeadPreviewCount } from "@/lib/queries/leads";
-import { getAllCategories } from "@/lib/queries/categories";
 import PreferencesEditor from "@/components/pro/dashboard/PreferencesEditor";
 
 export const metadata: Metadata = {
@@ -18,19 +17,15 @@ export default async function PreferencesPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/pro/connexion");
 
-  const [pro, categories] = await Promise.all([
-    getProByUserId(user.id),
-    getAllCategories(),
-  ]);
+  const pro = await getProByUserId(user.id);
   if (!pro) redirect("/pro/reclamer");
 
-  // Catégories activées pour l'aperçu
-  const enabledIds = pro.enabled_category_ids || [pro.category_id];
+  // Aperçu basé sur TOUTES les catégories du pro (principale + secondaires) :
+  // le pro reçoit les leads de l'ensemble de ses métiers (le broadcast diffuse
+  // sur category_id + secondary_category_ids).
+  const allCatIds = [pro.category_id, ...(pro.secondary_category_ids || [])];
   const departmentId = pro.city?.department?.id || null;
+  const previewCount = await getLeadPreviewCount(allCatIds, departmentId);
 
-  const previewCount = await getLeadPreviewCount(enabledIds, departmentId);
-
-  return (
-    <PreferencesEditor categories={categories} previewCount={previewCount} />
-  );
+  return <PreferencesEditor previewCount={previewCount} />;
 }
