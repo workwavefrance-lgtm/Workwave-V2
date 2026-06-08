@@ -482,11 +482,18 @@ export default async function ProPage({ params }: Props) {
             const text = pro.description || proAi.description_ai;
             if (!text) return null;
             return (
-              <div>
-                <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
-                  Description
-                </h2>
-                <p className="text-[var(--text-secondary)] leading-relaxed">
+              <div className="relative rounded-2xl bg-[var(--bg-secondary)] border border-[var(--card-border)] p-6 sm:p-7 overflow-hidden">
+                {/* accent coral signature à gauche — met en valeur la voix du pro */}
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent)]" aria-hidden="true" />
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-4 h-4 text-[var(--accent)] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M7.17 6A4.17 4.17 0 0 0 3 10.17V18h7.5v-7.5H6.34A2.84 2.84 0 0 1 9 7.5V6H7.17Zm10 0A4.17 4.17 0 0 0 13 10.17V18h7.5v-7.5h-4.16A2.84 2.84 0 0 1 19 7.5V6h-1.83Z" />
+                  </svg>
+                  <h2 className="text-xs font-semibold text-[var(--accent)] uppercase tracking-wider">
+                    À propos
+                  </h2>
+                </div>
+                <p className="text-[var(--text-primary)] text-[15px] sm:text-base leading-[1.75] whitespace-pre-line">
                   {text}
                 </p>
               </div>
