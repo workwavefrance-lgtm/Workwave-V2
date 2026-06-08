@@ -26,6 +26,9 @@ import { COMPETITOR_OFFERS } from "@/lib/data/competitor-offers";
 // generateSitemaps() au build ; pour le rafraichir apres un gros scrape, redeployer
 // (build neuf = count exact recalcule).
 export const revalidate = 86400;
+// Les builders cat×ville et /ai agrègent beaucoup de villes : on laisse de la
+// marge d'exécution (le défaut court coupait le build du sous-sitemap → 0 URL).
+export const maxDuration = 300;
 
 // Limites :
 // - Google : 50 000 URLs max par sitemap, 50 MB max
@@ -86,10 +89,14 @@ export async function generateSitemaps() {
   // valeurs, generateSitemaps() devient pur (aucun appel réseau) → résultat
   // déterministe, plus rien à invalider.
   // ⚠️ À BUMPER après un gros scrape :
-  //   pros : Math.ceil(pros_actifs / 45000)   |   ai : Math.ceil(pros_tech / 45000)
+  //   pros : Math.ceil(pros_non_tech / 45000)   |   ai : Math.ceil(pros_tech / 45000)
   //   01/06/2026 : 1 069 733 pros actifs → 24  ;  110 085 pros tech → 3.
-  const proSitemapsCount = 24;
-  const aiProSitemapsCount = 3;
+  //   08/06/2026 : 1 271 741 non-tech → 29 (marge 32) ; 510 808 tech → 12 (marge 14).
+  //   Marge volontaire : un sous-sitemap vide est inoffensif (Google l'ignore),
+  //   mais un sous-sitemap NON déclaré = des pros invisibles pour Google. Le
+  //   "24" figé depuis le 01/06 tronquait ~568k pros (bug détecté le 08/06).
+  const proSitemapsCount = 32;
+  const aiProSitemapsCount = 14;
 
   const sitemaps = [
     { id: SITEMAP_STATIC },
@@ -168,25 +175,27 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
   // tech (vs 60 villes hardcodees auparavant). Charge depuis pros + cities.
   const supabase = getAdminServiceClient();
 
-  // 1) Charger la map (category_id, city_id) -> count pour les pros tech
-  let offset = 0;
+  // 1) Map (category_id, city_id) -> count des pros tech, via RPC d'agrégat
+  // Postgres. Remplace la boucle qui chargeait les ~510k pros tech en JS (102
+  // round-trips) et faisait planter tout buildAiUrls → sous-sitemap /ai VIDE.
+  // Migration : migrations/2026-06-08_sitemap_count_rpcs.sql
   const countMap = new Map<string, number>(); // key = "cat_id-city_id"
-  while (true) {
-    const { data } = await supabase
-      .from("pros")
-      .select("category_id, city_id")
-      .in("category_id", AI_CATEGORY_IDS)
-      .eq("is_active", true)
-      .is("deleted_at", null)
-      .not("city_id", "is", null)
-      .range(offset, offset + SUPABASE_PAGE_SIZE - 1);
-    const rows = (data || []) as { category_id: number; city_id: number }[];
-    if (rows.length === 0) break;
-    for (const row of rows) {
-      const key = `${row.category_id}-${row.city_id}`;
-      countMap.set(key, (countMap.get(key) || 0) + 1);
-    }
-    offset += rows.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: aiCountRows, error: aiRpcErr } = await (supabase as any).rpc(
+    "sitemap_ai_city_cat_counts"
+  );
+  if (aiRpcErr) {
+    console.error(
+      "[sitemap] RPC sitemap_ai_city_cat_counts KO (migration 2026-06-08 appliquée ?):",
+      aiRpcErr.message
+    );
+  }
+  for (const r of (aiCountRows || []) as {
+    category_id: number;
+    city_id: number;
+    cnt: number;
+  }[]) {
+    countMap.set(`${r.category_id}-${r.city_id}`, Number(r.cnt));
   }
 
   // 2) Charger les slugs des villes referencees dans countMap
@@ -428,32 +437,29 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
   const topCityIds = topCities.map((c) => c.id);
   if (topCityIds.length === 0) return [];
 
-  // Pagination 5000 par 5000 (limite max Supabase) -> /5 le nombre de
-  // round-trips reseau vs l'ancien PAGE_SIZE=1000.
-  let offset = 0;
-  let hasMore = true;
+  // Comptage par (cat, ville) via RPC d'agrégat Postgres (GROUP BY HAVING >= 3
+  // côté serveur). Remplace l'ancienne boucle qui chargeait ~700k lignes en JS
+  // (top 300 villes × tous métiers : Paris seul ≈ 77k pros) → la 1re requête
+  // timeoutait, la boucle cassait sur data=null, et le sous-sitemap sortait VIDE.
+  // Migration : migrations/2026-06-08_sitemap_count_rpcs.sql
   const countMap = new Map<string, number>();
-
-  while (hasMore) {
-    const { data } = await supabase
-      .from("pros")
-      .select("category_id, city_id")
-      .eq("is_active", true)
-      .is("deleted_at", null)
-      .in("city_id", topCityIds)
-      .range(offset, offset + SUPABASE_PAGE_SIZE - 1);
-
-    const rows = (data || []) as { category_id: number; city_id: number }[];
-    for (const row of rows) {
-      const key = `${row.category_id}-${row.city_id}`;
-      countMap.set(key, (countMap.get(key) || 0) + 1);
-    }
-    // Supabase peut plafonner a 1000 rows par defaut (PostgREST max-rows).
-    // On continue tant qu'on recoit des lignes, et on incremente par le
-    // nombre reel recu (pas par SUPABASE_PAGE_SIZE suppose). Cf. lecon
-    // apprise du 30/04/2026.
-    if (rows.length === 0) break;
-    offset += rows.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countRows, error: rpcErr } = await (supabase as any).rpc(
+    "sitemap_city_cat_counts",
+    { p_city_ids: topCityIds }
+  );
+  if (rpcErr) {
+    console.error(
+      "[sitemap] RPC sitemap_city_cat_counts KO (migration 2026-06-08 appliquée ?):",
+      rpcErr.message
+    );
+  }
+  for (const r of (countRows || []) as {
+    category_id: number;
+    city_id: number;
+    cnt: number;
+  }[]) {
+    countMap.set(`${r.category_id}-${r.city_id}`, Number(r.cnt));
   }
 
   const citySlugMap = new Map(topCities.map((c) => [c.id, c.slug]));
