@@ -191,7 +191,13 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     );
   }
   // La RPC renvoie un jsonb : tableau [{ c: cat_id, v: city_id, n: count }].
+  // Seuil >= 3 pros tech par ville : sans lui, 70 483 combos (≥1) feraient
+  // exploser le sous-sitemap au-delà de la limite de 50 000 URLs/sitemap, avec
+  // des dizaines de milliers de pages ultra-fines (1 seul freelance). À >= 3 :
+  // ~21 800 combos = surface saine, sous la limite. (Le BTP applique le même
+  // seuil côté SQL ; ici on filtre en JS pour ne pas re-toucher la RPC.)
   for (const r of (aiCountRows || []) as { c: number; v: number; n: number }[]) {
+    if (Number(r.n) < 3) continue;
     countMap.set(`${r.c}-${r.v}`, Number(r.n));
   }
 
