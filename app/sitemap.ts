@@ -190,12 +190,9 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
       aiRpcErr.message
     );
   }
-  for (const r of (aiCountRows || []) as {
-    category_id: number;
-    city_id: number;
-    cnt: number;
-  }[]) {
-    countMap.set(`${r.category_id}-${r.city_id}`, Number(r.cnt));
+  // La RPC renvoie un jsonb : tableau [{ c: cat_id, v: city_id, n: count }].
+  for (const r of (aiCountRows || []) as { c: number; v: number; n: number }[]) {
+    countMap.set(`${r.c}-${r.v}`, Number(r.n));
   }
 
   // 2) Charger les slugs des villes referencees dans countMap
@@ -454,12 +451,9 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
       rpcErr.message
     );
   }
-  for (const r of (countRows || []) as {
-    category_id: number;
-    city_id: number;
-    cnt: number;
-  }[]) {
-    countMap.set(`${r.category_id}-${r.city_id}`, Number(r.cnt));
+  // La RPC renvoie un jsonb : tableau [{ c: cat_id, v: city_id, n: count }].
+  for (const r of (countRows || []) as { c: number; v: number; n: number }[]) {
+    countMap.set(`${r.c}-${r.v}`, Number(r.n));
   }
 
   const citySlugMap = new Map(topCities.map((c) => [c.id, c.slug]));
