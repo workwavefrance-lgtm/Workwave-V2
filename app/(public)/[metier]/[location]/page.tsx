@@ -44,7 +44,8 @@ import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
 import { getCategoryListing } from "@/lib/utils/category-grammar";
-import { toBreadcrumbSchema } from "@/lib/utils/schema";
+import { buildListingFaq } from "@/lib/seo/listing-faq";
+import { toBreadcrumbSchema, getFaqSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { generateSeoContent } from "@/lib/seo/seo-sections";
@@ -119,10 +120,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // « | Workwave » (template du root layout) — titre court = meilleur CTR.
   const title = dynamicTitle;
 
-  const description =
-    prosCount > 0
-      ? `Besoin d'${listing.article} ${listing.singular} ${preposition} ${locationName} ? Comparez les ${displayCount} ${meilleurs} ${listing.plural}, avis vérifiés et 3 devis gratuits.`
-      : `Trouvez ${listing.article} ${listing.singular} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`;
+  // Meta description enrichie : case un MAXIMUM de secondaires naturels
+  // (devis gratuits, intervention rapide, avis vérifiés, tarifs transparents)
+  // tout en restant ≤ 160 caractères. Fallback raccourci pour les noms longs.
+  let description: string;
+  if (prosCount > 0) {
+    const full = `Comparez les ${displayCount} ${meilleurs} ${listing.plural} ${preposition} ${locationName} : devis gratuits, intervention rapide, avis vérifiés et tarifs transparents.`;
+    description =
+      full.length <= 160
+        ? full
+        : `Comparez les ${displayCount} ${meilleurs} ${listing.plural} ${preposition} ${locationName} : devis gratuits, intervention rapide, avis vérifiés.`;
+  } else {
+    description = `Trouvez ${listing.article} ${listing.singular} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`;
+  }
 
   return {
     title: { absolute: title },
@@ -375,6 +385,20 @@ export default async function ListingPage({ params, searchParams }: Props) {
       })
     : null;
 
+  // FAQ programmatique "mots-clés longue traîne" (prix / urgence / pas cher /
+  // RGE / devis gratuit). Affichée UNIQUEMENT quand il y a des pros ET qu'il
+  // n'existe PAS déjà de seo.faq_json (sinon doublon FAQ + double schema).
+  const showKwFaq = totalProsCount > 0 && !(seo?.faq_json && seo.faq_json.length > 0);
+  const kwFaq = showKwFaq
+    ? buildListingFaq({
+        categorySlug: category.slug,
+        categoryName: category.name,
+        locationName,
+        preposition,
+        isBtp: category.vertical === "btp",
+      })
+    : [];
+
   const serviceJsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -556,6 +580,23 @@ export default async function ListingPage({ params, searchParams }: Props) {
             }}
           />
           <FaqAccordion faqs={seo.faq_json} />
+        </>
+      )}
+
+      {/* FAQ "mots-clés longue traîne" (prix / urgence / pas cher / RGE /
+          devis). Mutuellement exclusive avec la FAQ seo.faq_json ci-dessus
+          (cf. showKwFaq) → jamais de doublon FAQ ni de double schema FAQPage. */}
+      {kwFaq.length > 0 && (
+        <>
+          <JsonLd
+            data={getFaqSchema(
+              kwFaq.map((f) => ({ question: f.question, answer: f.answer }))
+            )}
+          />
+          <FaqAccordion
+            faqs={kwFaq}
+            title={`Questions fréquentes sur ${listing.plural} ${preposition} ${locationName}`}
+          />
         </>
       )}
 

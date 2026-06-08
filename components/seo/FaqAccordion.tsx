@@ -4,7 +4,13 @@ import { useState } from "react";
 
 type FaqItem = { question: string; answer: string };
 
-export default function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
+export default function FaqAccordion({
+  faqs,
+  title = "Questions frequentes",
+}: {
+  faqs: FaqItem[];
+  title?: string;
+}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   if (!faqs || faqs.length === 0) return null;
@@ -12,7 +18,7 @@ export default function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
   return (
     <div className="mt-10">
       <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-6">
-        Questions frequentes
+        {title}
       </h2>
       <div className="space-y-3">
         {faqs.map((faq, i) => (
