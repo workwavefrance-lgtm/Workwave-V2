@@ -23,19 +23,29 @@ import type { Category, City, Department } from "@/lib/types/database";
 // 08/06. Parade : on retry court, puis on THROW si echec persistant. Next.js
 // conserve alors la derniere bonne version cachee (stale-while-revalidate) au
 // lieu d'ecraser le cache avec du vide. Ne JAMAIS revenir a `data || []` ici.
+// Au BUILD (`next build`) on NE casse PAS le déploiement si la BDD est injoignable :
+// dernier recours = []. (Déployer BDD saine / scrape coupé pour éviter ce cas.)
+// Au RUNTIME (revalidation ISR) on THROW => Next conserve la dernière bonne version
+// cachée au lieu d'écraser avec du vide.
+const IS_BUILD = process.env.NEXT_PHASE === "phase-production-build";
+
 async function publicQueryWithRetry<T>(
   label: string,
   run: () => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
   opts: { allowEmpty?: boolean } = {}
 ): Promise<T[]> {
   let last = "";
-  for (let attempt = 1; attempt <= 5; attempt++) {
+  for (let attempt = 1; attempt <= 6; attempt++) {
     const { data, error } = await run();
     if (!error && data && (opts.allowEmpty || data.length > 0)) return data as T[];
     last = error?.message ?? (data ? "resultat vide" : "data null");
-    if (attempt < 5) await new Promise((r) => setTimeout(r, 150 * attempt));
+    if (attempt < 6) await new Promise((r) => setTimeout(r, 200 * attempt));
   }
-  throw new Error(`[home-public] ${label}: echec apres 5 tentatives (${last})`);
+  if (IS_BUILD) {
+    console.error(`[home-public] ${label}: echec au build (${last}) -> fallback [] (ne pas deployer pendant un scrape lourd)`);
+    return [] as T[];
+  }
+  throw new Error(`[home-public] ${label}: echec apres 6 tentatives runtime (${last})`);
 }
 
 export async function getCategoriesByVerticalPublic(
