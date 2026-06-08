@@ -17,37 +17,55 @@ import type { Category, City, Department } from "@/lib/types/database";
 // Ne PAS utiliser ces fonctions dans des pages qui dependent de la
 // session utilisateur (dashboard pro, admin, claim flow, etc.).
 
+// Sous forte charge BDD (scrape massif), une requete publique peut timeouter et
+// renvoyer { data: null }. Le pattern `data || []` cachait alors une page VIDE en
+// ISR (select metier sans <option>, grille categories vide) — bug constate le
+// 08/06. Parade : on retry court, puis on THROW si echec persistant. Next.js
+// conserve alors la derniere bonne version cachee (stale-while-revalidate) au
+// lieu d'ecraser le cache avec du vide. Ne JAMAIS revenir a `data || []` ici.
+async function publicQueryWithRetry<T>(
+  label: string,
+  run: () => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>,
+  opts: { allowEmpty?: boolean } = {}
+): Promise<T[]> {
+  let last = "";
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    const { data, error } = await run();
+    if (!error && data && (opts.allowEmpty || data.length > 0)) return data as T[];
+    last = error?.message ?? (data ? "resultat vide" : "data null");
+    if (attempt < 5) await new Promise((r) => setTimeout(r, 150 * attempt));
+  }
+  throw new Error(`[home-public] ${label}: echec apres 5 tentatives (${last})`);
+}
+
 export async function getCategoriesByVerticalPublic(
   vertical: string
 ): Promise<Category[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("vertical", vertical)
-    .order("name");
-  return (data as Category[]) || [];
+  // btp / domicile / personne ont toujours des lignes => un retour vide = anomalie BDD
+  return publicQueryWithRetry<Category>(`categories[${vertical}]`, () =>
+    supabase.from("categories").select("*").eq("vertical", vertical).order("name")
+  );
 }
 
 export async function getTopCitiesPublic(
   limit: number = 20
 ): Promise<City[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("cities")
-    .select("*")
-    .order("population", { ascending: false, nullsFirst: false })
-    .limit(limit);
-  return (data as City[]) || [];
+  return publicQueryWithRetry<City>("topCities", () =>
+    supabase
+      .from("cities")
+      .select("*")
+      .order("population", { ascending: false, nullsFirst: false })
+      .limit(limit)
+  );
 }
 
 export async function getAllCategoriesPublic(): Promise<Category[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
-  return (data as Category[]) || [];
+  return publicQueryWithRetry<Category>("allCategories", () =>
+    supabase.from("categories").select("*").order("name")
+  );
 }
 
 // Lookup CIBLÉ par slug (clé de cache distincte par slug) — utilisé par les
@@ -70,9 +88,7 @@ export async function getCategoryBySlugPublic(
 
 export async function getAllDepartmentsPublic(): Promise<Department[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("departments")
-    .select("*")
-    .order("code");
-  return (data as Department[]) || [];
+  return publicQueryWithRetry<Department>("allDepartments", () =>
+    supabase.from("departments").select("*").order("code")
+  );
 }
