@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Les sous-sitemaps (1.78M pros, 369k pages cat×ville) peuvent dépasser le
+  // timeout par défaut de 60s/page statique au build (surtout en local :
+  // latence machine→Supabase × nombreux round-trips). 180s laisse la marge
+  // sans masquer un vrai problème. Vercel build largement sous cette limite.
+  staticPageGenerationTimeout: 180,
   images: {
     remotePatterns: [
       {
