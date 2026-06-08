@@ -19,7 +19,7 @@ const BASE_URL = "https://workwave.fr";
 export const metadata: Metadata = {
   title: "Trouver des chantiers : 9,90 €/lead, sans abonnement",
   description:
-    "Trouvez des chantiers près de chez vous. Recevez les demandes de votre zone et payez 9,90 € seulement pour débloquer les contacts qui vous intéressent — sans abonnement, sans engagement, sans commission. Créez votre fiche gratuite.",
+    "Recevez les demandes de votre zone et payez 9,90 € seulement pour débloquer un contact. Sans abonnement, sans commission. Créez votre fiche gratuite.",
   alternates: { canonical: `${BASE_URL}/trouver-des-chantiers` },
   openGraph: {
     title:

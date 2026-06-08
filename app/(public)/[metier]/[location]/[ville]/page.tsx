@@ -22,10 +22,7 @@ import {
   isValidSpecialty,
 } from "@/lib/specialties";
 import { BASE_URL } from "@/lib/constants";
-import {
-  getCategoryBestForm,
-  pluralizeCategoryName,
-} from "@/lib/utils/category-grammar";
+import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
@@ -58,28 +55,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
   const prosCount = result.count;
   const displayCount = Math.min(prosCount, TOP_LIMIT);
-  const bestForm = getCategoryBestForm(category.name);
-  const pluralCategory = pluralizeCategoryName(category.name);
+  const listing = getCategoryListing(category.slug, category.name);
+  const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
+  const pluralCategory = listing.plural;
   const currentYear = new Date().getFullYear();
 
-  // Title clickbait style Travaux.com adapté à la sous-spécialité :
-  // "Top 10 plombiers spécialisés en dépannage à Poitiers (2026) | Devis gratuit"
+  // Title plus court adapté à la sous-spécialité (sans « | Devis gratuit | Workwave ») :
+  // "Top 10 entreprises de ménage spécialisées en repassage à Poitiers — 2026"
   let title: string;
   if (prosCount === 0) {
     title = `${category.name} ${specialty.shortLabel} à ${city.name}`;
   } else if (prosCount === 1) {
-    title = `${category.name} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis gratuit`;
+    title = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${specialty.shortLabel} à ${city.name} — ${currentYear}`;
   } else {
-    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} (${currentYear}) | Devis gratuit`;
+    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} — ${currentYear}`;
   }
 
   const description =
     prosCount > 0
-      ? `Sélection des ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${city.name} en ${currentYear}. ${specialty.description}`
+      ? `Sélection des ${displayCount} ${meilleurs} ${pluralCategory} ${specialty.shortLabel} à ${city.name} en ${currentYear}. ${specialty.description}`
       : specialty.description;
 
   return {
-    title,
+    title: { absolute: title },
     description: description.length > 160 ? description.slice(0, 157) + "…" : description,
     alternates: {
       canonical: `${BASE_URL}/${metier}/${specialite}/${ville}`,
@@ -127,8 +125,9 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
   const currentYear = new Date().getFullYear();
   const lower = category.name.toLowerCase();
   const cityLabel = city.name;
-  const bestForm = getCategoryBestForm(category.name);
-  const pluralCategory = pluralizeCategoryName(category.name);
+  const listing = getCategoryListing(category.slug, category.name);
+  const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
+  const pluralCategory = listing.plural;
 
   // Page 1 : fetch les TOP N tries par score + total.
   // Pages 2+ : pagination classique sur tous les pros (ordre alpha).
@@ -200,7 +199,7 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: isFirstPage
-      ? `Les ${displayCount} ${bestForm} ${pluralCategory} ${specialty.shortLabel} à ${cityLabel}`
+      ? `Les ${displayCount} ${meilleurs} ${pluralCategory} ${specialty.shortLabel} à ${cityLabel}`
       : `${category.name} ${specialty.shortLabel} à ${cityLabel}`,
     numberOfItems: totalProsCount,
     itemListElement: itemsForSchema.map((pro, i) => {

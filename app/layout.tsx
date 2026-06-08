@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | Workwave",
   },
   description:
-    "Annuaire des professionnels en France. Trouvez un plombier, électricien, peintre et plus de 35 métiers près de chez vous.",
+    "Annuaire des professionnels en France. Trouvez un plombier, électricien, peintre et plus de 50 métiers près de chez vous.",
   openGraph: {
     type: "website",
     locale: "fr_FR",

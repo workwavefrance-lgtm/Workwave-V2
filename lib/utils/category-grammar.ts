@@ -150,3 +150,75 @@ export function getCategoryServiceLabel(categorySlug: string, categoryName: stri
   if (mapped) return mapped;
   return categoryName.toLowerCase().trim();
 }
+
+/**
+ * Phrasé des LISTINGS (titres "Top 10 ...", H1, meta).
+ *
+ * Probleme : pluralizeCategoryName casse pour les services ("Top 10 menages",
+ * "Top 10 gardes d'enfants", "Trouver un menage"). Ce template marche pour les
+ * METIERS BTP (plombiers, macons) mais pas pour les SERVICES.
+ *
+ * Solution : un override par categorie qui fournit explicitement :
+ *   - plural   : le nom au pluriel apres "Top 10 ..." (ex. "entreprises de menage")
+ *   - singular : le nom au singulier apres "Trouver un/une ..." (ex. "entreprise de menage")
+ *   - article  : "un"/"une" (accord avec le singulier)
+ *   - notes    : "notes"/"notees" (accord avec le PLURIEL, pour "les mieux X")
+ *
+ * Defaut (BTP non mappe) : pluralizeCategoryName + nom au singulier + article auto.
+ */
+export type CategoryListing = {
+  plural: string;
+  singular: string;
+  article: "un" | "une";
+  notes: "notés" | "notées";
+};
+
+const CATEGORY_LISTING_OVERRIDES: Record<string, CategoryListing> = {
+  // ---- BTP qui pluralisent mal ----
+  "decorateur-interieur": { plural: "décorateurs d'intérieur", singular: "décorateur d'intérieur", article: "un", notes: "notés" },
+  "diagnostic-immobilier": { plural: "diagnostiqueurs immobiliers", singular: "diagnostiqueur immobilier", article: "un", notes: "notés" },
+  videosurveillance: { plural: "installateurs de vidéosurveillance", singular: "installateur de vidéosurveillance", article: "un", notes: "notés" },
+  "installateur-videosurveillance": { plural: "installateurs de vidéosurveillance", singular: "installateur de vidéosurveillance", article: "un", notes: "notés" },
+  // ---- DOMICILE ----
+  menage: { plural: "entreprises de ménage", singular: "entreprise de ménage", article: "une", notes: "notées" },
+  repassage: { plural: "services de repassage", singular: "service de repassage", article: "un", notes: "notés" },
+  "petit-bricolage": { plural: "professionnels du bricolage", singular: "professionnel du bricolage", article: "un", notes: "notés" },
+  "nettoyage-vitres": { plural: "professionnels du nettoyage de vitres", singular: "laveur de vitres", article: "un", notes: "notés" },
+  debarras: { plural: "entreprises de débarras", singular: "entreprise de débarras", article: "une", notes: "notées" },
+  demenagement: { plural: "déménageurs", singular: "déménageur", article: "un", notes: "notés" },
+  "livraison-de-courses": { plural: "services de livraison de courses", singular: "service de livraison de courses", article: "un", notes: "notés" },
+  "entreprise-de-nettoyage": { plural: "entreprises de nettoyage", singular: "entreprise de nettoyage", article: "une", notes: "notées" },
+  "nettoyage-pro": { plural: "entreprises de nettoyage", singular: "entreprise de nettoyage", article: "une", notes: "notées" },
+  jardinage: { plural: "jardiniers", singular: "jardinier", article: "un", notes: "notés" },
+  multiservice: { plural: "professionnels multiservices", singular: "professionnel multiservice", article: "un", notes: "notés" },
+  // ---- PERSONNE ----
+  "garde-enfants": { plural: "services de garde d'enfants", singular: "garde d'enfants", article: "une", notes: "notés" },
+  "garde-d-enfants": { plural: "services de garde d'enfants", singular: "garde d'enfants", article: "une", notes: "notés" },
+  "garde-animaux": { plural: "services de garde d'animaux", singular: "garde d'animaux", article: "une", notes: "notés" },
+  "soutien-scolaire": { plural: "professeurs de soutien scolaire", singular: "professeur de soutien scolaire", article: "un", notes: "notés" },
+  "cours-particuliers": { plural: "professeurs particuliers", singular: "professeur particulier", article: "un", notes: "notés" },
+  "aide-aux-seniors": { plural: "services d'aide aux seniors", singular: "service d'aide aux seniors", article: "un", notes: "notés" },
+  "aide-administrative": { plural: "professionnels de l'aide administrative", singular: "professionnel de l'aide administrative", article: "un", notes: "notés" },
+  "accompagnement-handicap": { plural: "services d'accompagnement", singular: "service d'accompagnement", article: "un", notes: "notés" },
+  "coach-sportif": { plural: "coachs sportifs", singular: "coach sportif", article: "un", notes: "notés" },
+  "coiffure-a-domicile": { plural: "coiffeurs à domicile", singular: "coiffeur à domicile", article: "un", notes: "notés" },
+  "esthetique-a-domicile": { plural: "esthéticiennes à domicile", singular: "esthéticienne à domicile", article: "une", notes: "notées" },
+  "cours-de-musique": { plural: "professeurs de musique", singular: "professeur de musique", article: "un", notes: "notés" },
+  "promenade-animaux": { plural: "promeneurs d'animaux", singular: "promeneur d'animaux", article: "un", notes: "notés" },
+};
+
+/**
+ * Renvoie le phrasé de listing (pluriel, singulier, article, accord) pour une
+ * catégorie. Override explicite si dispo (services), sinon fallback BTP.
+ */
+export function getCategoryListing(categorySlug: string, categoryName: string): CategoryListing {
+  const o = CATEGORY_LISTING_OVERRIDES[categorySlug];
+  if (o) return o;
+  const article = getCategoryArticle(categoryName);
+  return {
+    plural: pluralizeCategoryName(categoryName),
+    singular: categoryName.toLowerCase().trim(),
+    article,
+    notes: article === "une" ? "notées" : "notés",
+  };
+}

@@ -43,11 +43,7 @@ import { getSeoContent } from "@/lib/queries/seo-pages";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
 import { BASE_URL } from "@/lib/constants";
-import {
-  getCategoryArticle,
-  getCategoryBestForm,
-  pluralizeCategoryName,
-} from "@/lib/utils/category-grammar";
+import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
@@ -101,34 +97,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const prosCount = result.count;
   const displayCount = Math.min(prosCount, TOP_LIMIT);
-  const bestForm = getCategoryBestForm(category.name);
-  const pluralCategory = pluralizeCategoryName(category.name);
+  const listing = getCategoryListing(category.slug, category.name);
+  const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
 
-  // Title style Travaux.com : clickbait optimise pour le CTR SERP.
-  // "Top 10 plombiers les mieux notés à Poitiers (2026) | Devis gratuit"
+  // Title plus court, optimise CTR SERP (sans « | Devis gratuit | Workwave »).
+  // "Top 10 entreprises de ménage les mieux notées à Poitiers — 2026"
   // Si peu de pros, on adapte le nombre.
   let dynamicTitle: string;
   if (prosCount === 0) {
     dynamicTitle = `${category.name} ${preposition} ${locationName}`;
   } else if (prosCount === 1) {
-    dynamicTitle = `${category.name} ${preposition} ${locationName} (${currentYear}) | Devis gratuit`;
+    dynamicTitle = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${preposition} ${locationName} — ${currentYear}`;
   } else {
-    dynamicTitle = `Top ${displayCount} ${pluralCategory} les ${bestForm === "meilleurs" ? "mieux notés" : "mieux notées"} ${preposition} ${locationName} (${currentYear}) | Devis gratuit`;
+    dynamicTitle = `Top ${displayCount} ${listing.plural} les mieux ${listing.notes} ${preposition} ${locationName} — ${currentYear}`;
   }
 
-  // PRIORITE au nouveau title clickbait (sprint 25/05/2026).
+  // PRIORITE au nouveau title (sprint 25/05/2026).
   // L'ancien seo.title du sprint 3 est en format "X à Y — N pros"
   // qui n'est PAS optimise CTR. On force le nouveau format meme sur les
-  // 588 pages avec seo_pages rempli.
+  // 588 pages avec seo_pages rempli. `absolute` pour ne PAS suffixer
+  // « | Workwave » (template du root layout) — titre court = meilleur CTR.
   const title = dynamicTitle;
 
   const description =
     prosCount > 0
-      ? `Besoin d'${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName} ? Comparez les ${displayCount} ${bestForm} ${pluralCategory} de la zone, consultez les avis vérifiés et recevez 3 devis gratuits en 30 secondes.`
-      : `Trouvez ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`;
+      ? `Besoin d'${listing.article} ${listing.singular} ${preposition} ${locationName} ? Comparez les ${displayCount} ${meilleurs} ${listing.plural}, avis vérifiés et 3 devis gratuits.`
+      : `Trouvez ${listing.article} ${listing.singular} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: {
       canonical: `${BASE_URL}/${metier}/${locationSlug}`,
@@ -223,8 +220,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
   }
 
   const displayCount = Math.min(totalProsCount, TOP_LIMIT);
-  const bestForm = getCategoryBestForm(category.name);
-  const pluralCategory = pluralizeCategoryName(category.name);
+  const listing = getCategoryListing(category.slug, category.name);
+  const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
+  const pluralCategory = listing.plural;
   const citySlug = resolved.type === "city" ? resolved.city.slug : null;
 
   const allCategories = await getAllCategories();
@@ -288,7 +286,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: isFirstPage
-      ? `Les ${displayCount} ${bestForm} ${pluralCategory} ${preposition} ${locationName}`
+      ? `Les ${displayCount} ${meilleurs} ${pluralCategory} ${preposition} ${locationName}`
       : `${category.name} ${preposition} ${locationName}`,
     numberOfItems: totalProsCount,
     itemListElement: itemsForSchema.map((pro, i) => {
@@ -356,7 +354,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const h1Title = isFirstPage
     ? totalProsCount === 0
       ? `${category.name} ${preposition} ${locationName}`
-      : `Trouver ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}`
+      : `Trouver ${listing.article} ${listing.singular} ${preposition} ${locationName}`
     : `Tous les ${pluralCategory} ${preposition} ${locationName} — page ${page}`;
 
   // Sous-titre (count d'artisans + signal sélection objective)
@@ -364,7 +362,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     totalProsCount === 0
       ? "Aucun artisan référencé pour le moment"
       : totalProsCount === 1
-        ? `1 ${category.name.toLowerCase()} référencé en ${currentYear}`
+        ? `1 ${listing.singular} référencé en ${currentYear}`
         : `Top ${displayCount} ${pluralCategory} parmi ${totalProsCount} référencés ${preposition} ${locationName} en ${currentYear} · Sélection objective par profil, certifications et avis`;
 
   // Sections SEO programmatiques (6 H2 + FAQ avec data unique par dept)
@@ -382,7 +380,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     "@type": "Service",
     name: `${category.name} ${preposition} ${locationName}`,
     serviceType: category.name,
-    description: `Service de mise en relation avec ${getCategoryArticle(category.name)} ${category.name.toLowerCase()} ${preposition} ${locationName}.`,
+    description: `Service de mise en relation avec ${listing.article} ${listing.singular} ${preposition} ${locationName}.`,
     provider: {
       "@type": "Organization",
       name: "Workwave",

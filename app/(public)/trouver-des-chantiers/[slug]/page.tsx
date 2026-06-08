@@ -68,13 +68,13 @@ export async function generateMetadata({
     const name = r.cat.name.toLowerCase();
     return {
       title: `Trouver des chantiers ${name} : 9,90 €/lead, sans abonnement`,
-      description: `Vous êtes ${r.cat.name.toLowerCase()} ? Recevez les demandes des particuliers près de chez vous et payez 9,90 € seulement pour débloquer les contacts qui vous intéressent. Sans abonnement, sans commission.`,
+      description: `Vous êtes ${r.cat.name.toLowerCase()} ? Recevez les demandes de votre zone et payez 9,90 € pour débloquer un contact. Sans abonnement, sans commission.`,
       alternates: { canonical: `${BASE_URL}/trouver-des-chantiers/${slug}` },
     };
   }
   return {
     title: `Trouver des chantiers en ${r.dept.name} (${r.dept.code}) — 9,90 €/lead`,
-    description: `Artisans du ${r.dept.name} (${r.dept.code}) : recevez les demandes de chantiers des particuliers de votre département et payez 9,90 € seulement pour débloquer un contact. Sans abonnement, sans engagement.`,
+    description: `Artisans du ${r.dept.name} (${r.dept.code}) : recevez les demandes de chantiers de votre département et payez 9,90 € pour débloquer un contact. Sans abonnement.`,
     alternates: { canonical: `${BASE_URL}/trouver-des-chantiers/${slug}` },
   };
 }
