@@ -316,6 +316,20 @@ def main():
         if len(res.data) < 1000:
             break
         offset += 1000
+    # PLM : SIRENE renvoie les INSEE d'ARRONDISSEMENT (Paris 751xx, Marseille
+    # 132xx, Lyon 6938x) -> forcer la COMMUNE pour ne pas recreer le bug du
+    # 08/06 (pros invisibles sur /metier/marseille). Cf. incident 11/06.
+    plm = {
+        "75056": [f"751{i:02d}" for i in range(1, 21)],   # Paris
+        "13055": [f"132{i:02d}" for i in range(1, 17)],   # Marseille
+        "69123": [f"6938{i}" for i in range(1, 10)],      # Lyon
+    }
+    for commune_insee, arr_codes in plm.items():
+        cid = city_map.get(commune_insee)
+        if cid:
+            for a in arr_codes:
+                city_map[a] = cid
+    print("PLM overrides actifs (Paris/Marseille/Lyon -> commune)")
     print(f"Villes chargees pour le mapping : {len(city_map)}")
 
     # Determiner les depts a traiter
