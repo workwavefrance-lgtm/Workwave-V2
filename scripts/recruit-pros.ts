@@ -211,11 +211,13 @@ function buildEmail(opts: {
 </body></html>`;
 }
 
-function buildSms(metier: string, ville: string): string {
-  // Sans accents = GSM-7 (1 segment, moins cher). Lien court (lookup SIRET).
+function buildSms(metier: string, ville: string, summary?: string): string {
+  // Format chaleureux VALIDE (= recruit-prospects.ts, commit df9a671) :
+  // salutation + resume du projet + CTA fiche gratuite. Sans accents = GSM-7.
   const noAccent = (s: string) =>
     s.normalize("NFD").replace(/[̀-ͯ]/g, "");
-  return `Workwave : une demande de ${noAccent(metier.toLowerCase())} vient d'arriver a ${noAccent(ville)}, pres de chez vous. Reclamez votre fiche (gratuit) pour la voir : ${BASE_URL.replace("https://", "")}/pro ${SMS_STOP}`;
+  const projet = summary ? ` Le projet : ${noAccent(summary).slice(0, 160)}` : "";
+  return `Bonjour, c'est Workwave. Un particulier recherche un ${noAccent(metier.toLowerCase())} a ${noAccent(ville)}.${projet} Pour voir la demande en entier et le contacter, activez gratuitement votre fiche sur ${BASE_URL.replace("https://", "")}/pro. ${SMS_STOP}`;
 }
 
 async function main() {
@@ -341,7 +343,7 @@ async function main() {
     }
     if (CHANNEL !== "email" && smsTargets[0]) {
       console.log("\nSMS exemple →", smsTargets[0].e164, `(${smsTargets[0].name})`);
-      console.log("  " + buildSms(metier, ville));
+      console.log("  " + buildSms(metier, ville, summary));
     }
     console.log(
       `\nPour envoyer : --execute (réel) ou --test (1 email -> ${ADMIN_TEST_EMAIL}). --limit=N pour borner.`
@@ -387,7 +389,7 @@ async function main() {
             await brevo("POST", "/transactionalSMS/sms", {
               sender: SMS_SENDER,
               recipient: e164,
-              content: buildSms(metier, ville),
+              content: buildSms(metier, ville, summary),
               type: "transactional",
             });
             console.log(`✓ SMS TEST envoyé à ${e164}`);
@@ -448,7 +450,7 @@ async function main() {
       .filter((x) => !track.sms.includes(x.e164!))
       .slice(0, LIMIT === Infinity ? undefined : LIMIT);
     console.log(`[SMS] envoi à ${pool.length} pros...`);
-    const content = buildSms(metier, ville);
+    const content = buildSms(metier, ville, summary);
     let ok = 0;
     for (const t of pool) {
       try {
