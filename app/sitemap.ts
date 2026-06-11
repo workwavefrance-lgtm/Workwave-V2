@@ -309,6 +309,10 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/guide-des-prix`, changeFrequency: "daily", priority: 0.8 },
     // Pages pilier urgence (whitelist URGENCE_METIERS dans app/(public)/[metier]/urgence/page.tsx).
     { url: `${BASE_URL}/serrurier/urgence`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/chauffagiste/urgence`, changeFrequency: "weekly", priority: 0.8 },
+    // Pages pilier obligation/installation (whitelists dans app/(public)/[metier]/{obligation,installation}/page.tsx).
+    { url: `${BASE_URL}/ramoneur/obligation`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/climaticien/installation`, changeFrequency: "weekly", priority: 0.8 },
   ];
 
   const { data: guidesRaw } = await supabase
