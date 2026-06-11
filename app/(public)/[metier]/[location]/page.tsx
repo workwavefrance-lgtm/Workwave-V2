@@ -52,7 +52,7 @@ import { generateSeoContent } from "@/lib/seo/seo-sections";
 
 const TOP_LIMIT = 10;
 
-export const revalidate = 3600;
+export const revalidate = 86400; // 1h->24h (11/06) : sous crawl Google massif, la regen horaire explosait l'egress Supabase (188% du quota)
 
 type Props = {
   params: Promise<{ metier: string; location: string }>;

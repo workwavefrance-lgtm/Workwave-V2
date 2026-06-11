@@ -605,8 +605,6 @@ type ProSitemapRow = {
   slug: string;
   updated_at: string;
   claimed_by_user_id: string | null;
-  description: string | null;
-  phone: string | null;
   id: number;
 };
 
@@ -652,7 +650,7 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
     );
     const { data } = await supabase
       .from("pros")
-      .select("slug, updated_at, claimed_by_user_id, description, phone, id")
+      .select("slug, updated_at, claimed_by_user_id, id")
       .eq("is_active", true)
       .is("deleted_at", null)
       .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
@@ -666,12 +664,12 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
   }
 
   return allPros.map((pro) => {
-    const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
+    // description/phone retirés du SELECT (egress 11/06) : priority sur claimed seul
     return {
       url: `${BASE_URL}/artisan/${pro.slug}`,
       lastModified: new Date(pro.updated_at),
       changeFrequency: "monthly" as const,
-      priority: pro.claimed_by_user_id ? 0.8 : hasContent ? 0.5 : 0.3,
+      priority: pro.claimed_by_user_id ? 0.8 : 0.5,
     };
   });
 }
@@ -700,7 +698,7 @@ async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitema
     );
     const { data } = await supabase
       .from("pros")
-      .select("slug, updated_at, claimed_by_user_id, description, phone, id")
+      .select("slug, updated_at, claimed_by_user_id, id")
       .in("category_id", AI_CATEGORY_IDS)
       .eq("is_active", true)
       .is("deleted_at", null)
@@ -714,14 +712,14 @@ async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitema
   }
 
   return allPros.map((pro) => {
-    const hasContent = !!(pro.claimed_by_user_id || pro.description || pro.phone);
+
     return {
       url: `${BASE_URL}/ai/freelance/${pro.slug}`,
       lastModified: new Date(pro.updated_at),
       changeFrequency: "monthly" as const,
       // Priorite legerement plus haute pour les fiches Workwave AI : design
       // dedie + audience tech-focused = meilleur taux de conversion attendu.
-      priority: pro.claimed_by_user_id ? 0.85 : hasContent ? 0.6 : 0.4,
+      priority: pro.claimed_by_user_id ? 0.85 : 0.5,
     };
   });
 }
