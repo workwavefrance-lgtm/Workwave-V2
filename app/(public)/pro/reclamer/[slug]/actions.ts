@@ -464,6 +464,9 @@ export async function verifyClaim(
           claimed_at: new Date().toISOString(),
           subscription_status: "none",
           trial_ends_at: null,
+          // Rayon par defaut 100 km a la reclamation (decision 11/06) : la fiche
+          // scrapee porte encore l'ancien defaut 20 km, jamais choisi par le pro.
+          intervention_radius_km: 100,
         })
         .eq("slug", slug);
 
@@ -528,6 +531,8 @@ export async function verifyClaim(
       claimed_at: new Date().toISOString(),
       subscription_status: "none",
       trial_ends_at: null,
+      // Rayon par defaut 100 km a la reclamation (cf. branche ci-dessus).
+      intervention_radius_km: 100,
     })
     .eq("slug", slug);
 
