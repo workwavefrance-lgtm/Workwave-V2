@@ -17,7 +17,9 @@
  * un sprint distinct si necessaire (6 pros sur 226k ont une description
  * actuellement, donc les cas A sont rares).
  */
-import type { ProWithRelations } from "@/lib/types/database";
+// ProCardData = niveau "card" (egress reduit, cf. lib/queries/pros.ts).
+// ProWithRelations (fiche) reste structurellement assignable.
+import type { ProCardData } from "@/lib/types/database";
 
 const MAX_SUMMARY_LENGTH = 180;
 
@@ -61,7 +63,7 @@ function formatCertifications(certs: string[]): string | null {
  * Construit un fallback depuis les signaux structures.
  * Renvoie toujours une chaine non vide.
  */
-function buildStructuredFallback(pro: ProWithRelations): string {
+function buildStructuredFallback(pro: ProCardData): string {
   const parts: string[] = [];
   const categoryName = (pro.category?.name ?? "Professionnel").toLowerCase();
   const cityName = pro.city?.name ?? null;
@@ -123,7 +125,7 @@ function capitalize(s: string): string {
 /**
  * Point d'entree principal.
  */
-export function buildProSummary(pro: ProWithRelations): string {
+export function buildProSummary(pro: ProCardData): string {
   // A. Description riche -> premiere phrase
   if (pro.description && pro.description.length >= 80) {
     const extracted = extractFirstSentence(pro.description);
@@ -148,7 +150,7 @@ export function buildProSummary(pro: ProWithRelations): string {
  *
  * Max 3 badges pour rester lisible.
  */
-export function buildProBadges(pro: ProWithRelations): string[] {
+export function buildProBadges(pro: ProCardData): string[] {
   const badges: string[] = [];
 
   // Avis Workwave (verifies, le plus fort)

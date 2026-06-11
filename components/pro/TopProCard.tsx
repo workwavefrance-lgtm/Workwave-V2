@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { ProWithRelations } from "@/lib/types/database";
+import type { ProCardData } from "@/lib/types/database";
 import { buildProSummary, buildProBadges } from "@/lib/utils/pro-summary";
 
 /**
@@ -22,7 +22,7 @@ export default function TopProCard({
   citySlug,
   specialitySlug,
 }: {
-  pro: ProWithRelations;
+  pro: ProCardData;
   rank: number;
   categorySlug: string;
   citySlug: string | null;

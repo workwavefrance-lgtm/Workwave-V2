@@ -18,10 +18,33 @@
  * + claimed + photos + anciennete (toujours dispos).
  */
 import { createClient } from "@/lib/supabase/server";
-import type { Pro, ProWithRelations } from "@/lib/types/database";
+import type { Pro, ProCardData } from "@/lib/types/database";
+import { PRO_SELECT_CARD } from "@/lib/queries/pros";
 
-const PRO_SELECT =
-  "*, category:categories(*), city:cities(*, department:departments(*))";
+// Réduction egress (11/06/2026) : on fetch jusqu'à MAX_FETCH=500 rows par
+// page listing → l'ancien select fat "*, categories(*), cities(*,
+// departments(*))" (~3,4 Ko/row) était LE plus gros poste d'egress Supabase
+// sous crawl Google. PRO_SELECT_CARD (~1,1 Ko/row, -66%) contient tous les
+// champs lus par computeProScore / TopProCard / le schema ItemList.
+
+// Champs lus par computeProScore : sous-ensemble de ProCardData (et de Pro),
+// donc la fonction accepte les deux niveaux.
+type ScorablePro = Pick<
+  Pro,
+  | "profile_completion"
+  | "founded_year"
+  | "claimed_by_user_id"
+  | "certifications"
+  | "rge_certified"
+  | "has_decennale"
+  | "has_rc_pro"
+  | "photos"
+  | "description"
+  | "google_rating"
+  | "google_reviews_count"
+  | "workwave_reviews_avg"
+  | "workwave_reviews_count"
+>;
 
 // Plafond defensif : on score en JS, donc on limite le fetch pour
 // eviter d'aspirer 200+ pros sur une grosse ville. La selection
@@ -48,7 +71,7 @@ const MAX_FETCH = 500;
  * Note : on penalise legerement les "is_active: false" deja exclus
  * en amont, et on ne prend que les non-deleted.
  */
-export function computeProScore(pro: Pro): number {
+export function computeProScore(pro: ScorablePro): number {
   let score = 0;
 
   // 1. Completude profil (signal de qualite generale)
@@ -125,9 +148,9 @@ export function computeProScore(pro: Pro): number {
  * score departage les claimed entre eux.
  */
 function scoreAndSelectTop(
-  pros: ProWithRelations[],
+  pros: ProCardData[],
   limit: number
-): ProWithRelations[] {
+): ProCardData[] {
   return pros
     .map((p) => ({ pro: p, score: computeProScore(p) }))
     .sort((a, b) => {
@@ -151,20 +174,20 @@ export async function getTopProsByCategoryAndCityIds(
   categoryId: number,
   cityIds: number[],
   limit = 10
-): Promise<{ tops: ProWithRelations[]; total: number }> {
+): Promise<{ tops: ProCardData[]; total: number }> {
   if (cityIds.length === 0) return { tops: [], total: 0 };
   const supabase = await createClient();
 
   const { data, count } = await supabase
     .from("pros")
-    .select(PRO_SELECT, { count: "estimated" })
+    .select(PRO_SELECT_CARD, { count: "estimated" })
     .eq("category_id", categoryId)
     .in("city_id", cityIds)
     .is("deleted_at", null)
     .eq("is_active", true)
     .limit(MAX_FETCH);
 
-  const pros = (data as ProWithRelations[] | null) ?? [];
+  const pros = (data as unknown as ProCardData[] | null) ?? [];
   // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré —
   // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
   // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
@@ -181,19 +204,19 @@ export async function getTopProsByCategoryAndCity(
   categoryId: number,
   cityId: number,
   limit = 10
-): Promise<{ tops: ProWithRelations[]; total: number }> {
+): Promise<{ tops: ProCardData[]; total: number }> {
   const supabase = await createClient();
 
   const { data, count } = await supabase
     .from("pros")
-    .select(PRO_SELECT, { count: "estimated" })
+    .select(PRO_SELECT_CARD, { count: "estimated" })
     .eq("category_id", categoryId)
     .eq("city_id", cityId)
     .is("deleted_at", null)
     .eq("is_active", true)
     .limit(MAX_FETCH);
 
-  const pros = (data as ProWithRelations[] | null) ?? [];
+  const pros = (data as unknown as ProCardData[] | null) ?? [];
   // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré —
   // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
   // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
@@ -211,7 +234,7 @@ export async function getTopProsByCategoryAndDepartment(
   categoryId: number,
   departmentId: number,
   limit = 10
-): Promise<{ tops: ProWithRelations[]; total: number }> {
+): Promise<{ tops: ProCardData[]; total: number }> {
   const supabase = await createClient();
 
   const { data: cities } = await supabase

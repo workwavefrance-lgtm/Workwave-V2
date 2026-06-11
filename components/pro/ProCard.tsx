@@ -1,8 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { ProWithRelations } from "@/lib/types/database";
+import type { ProCardData } from "@/lib/types/database";
 
-export default function ProCard({ pro }: { pro: ProWithRelations }) {
+// ProCardData = niveau "card" (egress réduit). ProWithRelations (fiche)
+// reste assignable : le composant accepte les deux.
+export default function ProCard({ pro }: { pro: ProCardData }) {
   const initial = pro.name.charAt(0).toUpperCase();
 
   return (

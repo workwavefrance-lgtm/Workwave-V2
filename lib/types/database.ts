@@ -294,6 +294,43 @@ export type ProWithRelations = Pro & {
   city: CityWithDepartment | null;
 };
 
+// Niveau "card" : sous-ensemble de ProWithRelations chargé par PRO_SELECT_CARD
+// (listings /[metier]/[location], pros similaires, recherche, top-pros).
+// Contient UNIQUEMENT les champs consommés par ProCard / TopProCard /
+// pro-summary / computeProScore / le schema ItemList des listings.
+// Réduction egress Supabase mesurée : ~3,4 Ko -> ~1,1 Ko par row (11/06/2026).
+// NB : ProWithRelations reste structurellement assignable à ProCardData,
+// donc les composants cards acceptent les deux niveaux.
+export type ProCardData = Pick<
+  Pro,
+  | "id"
+  | "slug"
+  | "name"
+  | "address"
+  | "postal_code"
+  | "phone"
+  | "description"
+  | "logo_url"
+  | "claimed_by_user_id"
+  | "category_id"
+  | "city_id"
+  | "google_rating"
+  | "google_reviews_count"
+  | "google_place_id"
+  | "workwave_reviews_avg"
+  | "workwave_reviews_count"
+  | "founded_year"
+  | "certifications"
+  | "rge_certified"
+  | "has_decennale"
+  | "has_rc_pro"
+  | "photos"
+  | "profile_completion"
+> & {
+  category: Pick<Category, "id" | "slug" | "name" | "vertical"> | null;
+  city: Pick<City, "id" | "name" | "slug"> | null;
+};
+
 export type PaginatedResult<T> = {
   data: T[];
   count: number;

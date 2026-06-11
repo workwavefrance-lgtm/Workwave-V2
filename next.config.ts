@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
         hostname: "eifypjlyzgfpunxrouwo.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      // Logos issus de l'enrichissement Google Places (sinon next/image jette
+      // un 500 a la regeneration ISR des fiches concernees — bug 11/06).
+      {
+        protocol: "https",
+        hostname: "places.googleapis.com",
+      },
     ],
   },
   async redirects() {

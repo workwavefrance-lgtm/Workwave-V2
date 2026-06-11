@@ -2,16 +2,50 @@ import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import type {
   PaginatedResult,
+  ProCardData,
   ProWithRelations,
 } from "@/lib/types/database";
 
-const PRO_SELECT = "*, category:categories(*), city:cities(*, department:departments(*))";
+// ── Réduction egress Supabase (11/06/2026, quota dépassé 188% sous crawl
+// Google massif sur 1,8M pages) : 2 niveaux de select au lieu d'un seul fat
+// "*, categories(*), cities(*, departments(*))" partout. ──
+//
+// Niveau FICHE/DASHBOARD : `*` sur pros (trop de consommateurs — fiche
+// /artisan, dashboards BTP/AI — pour risquer d'oublier un champ), mais joins
+// amincis : on ne tire plus categories.description / seo_keywords / naf_codes
+// / popularity ni cities.equipments_count / bpe_synced_at, que AUCUN
+// consommateur de ces requêtes ne lit (vérifié par grep 11/06/2026 : les
+// dashboards lisent category.name + city.name/department_id/department.id ;
+// la fiche lit category.{id,slug,name,vertical} + city.{name,slug,latitude,
+// longitude,department.{name,code}} ; pro-seo-sections lit category.{name,
+// slug} + city.name + department.name).
+const PRO_SELECT: string =
+  "*, category:categories(id, slug, name, vertical, parent_id), " +
+  "city:cities(id, department_id, name, slug, postal_code, insee_code, population, latitude, longitude, " +
+  "department:departments(id, code, name, region))";
 
+// Niveau CARD : listings /[metier]/[location] (pages 2+), pros similaires,
+// recherche, top-pros (page 1). UNIQUEMENT les champs consommés par
+// ProCard / TopProCard / buildProSummary / buildProBadges / computeProScore
+// et le schema ItemList des pages listing (address, phone, ratings).
+// Mesuré : ~3,4 Ko -> ~1,1 Ko par row (-66%). Sur une page listing qui tire
+// jusqu'à 500 rows (top-pros MAX_FETCH), c'est LE gros poste d'egress.
+export const PRO_SELECT_CARD: string =
+  "id, slug, name, address, postal_code, phone, description, logo_url, claimed_by_user_id, " +
+  "category_id, city_id, google_rating, google_reviews_count, google_place_id, " +
+  "workwave_reviews_avg, workwave_reviews_count, founded_year, certifications, rge_certified, " +
+  "has_decennale, has_rc_pro, photos, profile_completion, " +
+  "category:categories(id, slug, name, vertical), city:cities(id, name, slug)";
+
+// NB : le param `query` est volontairement non-générique — le type-parser de
+// supabase-js ne sait pas parser les longs selects concaténés (TS2589) et le
+// résultat est de toute façon casté en ProCardData[] au retour.
 async function paginatedQuery(
-  query: ReturnType<ReturnType<Awaited<ReturnType<typeof createClient>>["from"]>["select"]>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
   page: number,
   pageSize: number
-): Promise<PaginatedResult<ProWithRelations>> {
+): Promise<PaginatedResult<ProCardData>> {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -26,7 +60,7 @@ async function paginatedQuery(
   const total = count || 0;
 
   return {
-    data: (data as ProWithRelations[]) || [],
+    data: (data as unknown as ProCardData[]) || [],
     count: total,
     page,
     pageSize,
@@ -43,14 +77,14 @@ export async function getProsByCategoryAndCityIds(
   categoryId: number,
   cityIds: number[],
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
-): Promise<PaginatedResult<ProWithRelations>> {
+): Promise<PaginatedResult<ProCardData>> {
   if (cityIds.length === 0) {
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
   const supabase = await createClient();
   const query = supabase
     .from("pros")
-    .select(PRO_SELECT, { count: "exact" })
+    .select(PRO_SELECT_CARD, { count: "exact" })
     .eq("category_id", categoryId)
     .in("city_id", cityIds)
     .is("deleted_at", null)
@@ -63,7 +97,7 @@ export async function getProsByCategoryAndDepartment(
   categoryId: number,
   departmentId: number,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
-): Promise<PaginatedResult<ProWithRelations>> {
+): Promise<PaginatedResult<ProCardData>> {
   const supabase = await createClient();
 
   // Récupérer les city_ids du département
@@ -80,11 +114,11 @@ export async function getProsByCategoryAndCity(
   categoryId: number,
   cityId: number,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
-): Promise<PaginatedResult<ProWithRelations>> {
+): Promise<PaginatedResult<ProCardData>> {
   const supabase = await createClient();
   const query = supabase
     .from("pros")
-    .select(PRO_SELECT, { count: "exact" })
+    .select(PRO_SELECT_CARD, { count: "exact" })
     .eq("category_id", categoryId)
     .eq("city_id", cityId)
     .is("deleted_at", null)
@@ -180,11 +214,11 @@ export async function getSimilarPros(
   cityId: number,
   excludeSlug: string,
   limit: number = 5
-): Promise<ProWithRelations[]> {
+): Promise<ProCardData[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("pros")
-    .select(PRO_SELECT)
+    .select(PRO_SELECT_CARD)
     .eq("category_id", categoryId)
     .eq("city_id", cityId)
     .neq("slug", excludeSlug)
@@ -192,17 +226,17 @@ export async function getSimilarPros(
     .eq("is_active", true)
     .limit(limit);
 
-  return (data as ProWithRelations[]) || [];
+  return (data as unknown as ProCardData[]) || [];
 }
 
 export async function searchPros(
   query: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
-): Promise<PaginatedResult<ProWithRelations>> {
+): Promise<PaginatedResult<ProCardData>> {
   const supabase = await createClient();
   const q = supabase
     .from("pros")
-    .select(PRO_SELECT, { count: "exact" })
+    .select(PRO_SELECT_CARD, { count: "exact" })
     .ilike("name", `%${query}%`)
     .is("deleted_at", null)
     .eq("is_active", true)
