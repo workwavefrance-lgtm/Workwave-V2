@@ -110,6 +110,52 @@ export async function getProsByCategoryAndDepartment(
   return getProsByCategoryAndCityIds(categoryId, cityIds, { page, pageSize });
 }
 
+/**
+ * Count LÉGER (head:true → AUCUNE row transférée, juste le header
+ * Content-Range). Pour les gardes anti-thin des pages programmatiques
+ * (/[metier]/urgence/[ville]) sans payer l'egress d'un listing complet.
+ */
+export async function countProsByCategoryAndCityIds(
+  categoryId: number,
+  cityIds: number[]
+): Promise<number> {
+  if (cityIds.length === 0) return 0;
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("pros")
+    .select("id", { count: "exact", head: true })
+    .eq("category_id", categoryId)
+    .in("city_id", cityIds)
+    .is("deleted_at", null)
+    .eq("is_active", true);
+  return count || 0;
+}
+
+/**
+ * Mini-cartes pros (nom + slug uniquement) — select minimal pour l'egress
+ * (~60 octets/row vs ~1,1 Ko en PRO_SELECT_CARD). Même tri que les listings
+ * (claimed d'abord, puis nom).
+ */
+export async function getProMiniCardsByCategoryAndCityIds(
+  categoryId: number,
+  cityIds: number[],
+  limit: number = 3
+): Promise<{ id: number; slug: string; name: string }[]> {
+  if (cityIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pros")
+    .select("id, slug, name")
+    .eq("category_id", categoryId)
+    .in("city_id", cityIds)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
+    .order("name")
+    .limit(limit);
+  return (data as { id: number; slug: string; name: string }[]) || [];
+}
+
 export async function getProsByCategoryAndCity(
   categoryId: number,
   cityId: number,

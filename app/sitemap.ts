@@ -398,10 +398,99 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
+  // ── Déclinaisons VILLE des pages pilier urgence : /{metier}/urgence/{ville}.
+  // Même garde anti-thin que la page (>= 3 pros actifs dans la ville).
+  // Whitelist dupliquée depuis app/(public)/[metier]/urgence/[ville]/page.tsx
+  // (un page.tsx ne peut pas exporter de constantes arbitraires).
+  // capVilles : pour les métiers volumineux (chauffagiste ≈ 55k pros), on
+  // n'émet que les N plus grosses villes par count (anti-bloat sitemap).
+  const URGENCE_VILLE_METIERS: { slug: string; capVilles: number | null }[] = [
+    { slug: "serrurier", capVilles: null }, // ~2 555 pros → toutes les villes >= 3
+    { slug: "chauffagiste", capVilles: 100 }, // ~55 500 pros → top 100 villes
+  ];
+  const urgenceVilleUrls: MetadataRoute.Sitemap = [];
+  for (const { slug: metierSlug, capVilles } of URGENCE_VILLE_METIERS) {
+    const cat = allCats.find((c) => c.slug === metierSlug);
+    if (!cat) continue;
+
+    // 1. Charger UNIQUEMENT city_id (rows minuscules — léger en egress).
+    //    Pagination canonique CLAUDE.md : break sur 0 row, increment par le
+    //    réel reçu (le cap PostgREST 1000 ne casse alors jamais la boucle).
+    const countByCityId = new Map<number, number>();
+    {
+      let offset = 0;
+      const PAGE = 1000; // cap PostgREST par défaut, ne jamais mettre plus
+      while (true) {
+        const { data } = await supabase
+          .from("pros")
+          .select("city_id")
+          .eq("category_id", cat.id)
+          .eq("is_active", true)
+          .is("deleted_at", null)
+          .not("city_id", "is", null)
+          .order("id")
+          .range(offset, offset + PAGE - 1);
+        const rows = (data || []) as { city_id: number }[];
+        if (rows.length === 0) break;
+        for (const r of rows) {
+          countByCityId.set(r.city_id, (countByCityId.get(r.city_id) || 0) + 1);
+        }
+        offset += rows.length;
+      }
+    }
+
+    // 2. Résoudre les slugs des villes par batchs de 500.
+    const cityIds = [...countByCityId.keys()];
+    const cityRows: { id: number; slug: string; name: string }[] = [];
+    for (let i = 0; i < cityIds.length; i += 500) {
+      const { data } = await supabase
+        .from("cities")
+        .select("id, slug, name")
+        .in("id", cityIds.slice(i, i + 500));
+      cityRows.push(
+        ...((data || []) as { id: number; slug: string; name: string }[])
+      );
+    }
+
+    // 3. Replier les arrondissements municipaux (Marseille/Lyon/Paris) sur la
+    //    commune parent : la page /{metier}/urgence/{ville} agrège pareil via
+    //    getAggregatedCityIds, et c'est le slug parent (ex. "marseille") qui
+    //    porte le volume SEO — on n'émet pas les arrondissements.
+    const ARRONDISSEMENT_PARENT: Record<string, string> = {
+      Paris: "paris",
+      Marseille: "marseille",
+      Lyon: "lyon",
+    };
+    const countBySlug = new Map<string, number>();
+    for (const row of cityRows) {
+      const n = countByCityId.get(row.id) || 0;
+      const isArrondissement = / \d+(?:er|e)? Arrondissement$/i.test(row.name);
+      const parentSlug = isArrondissement
+        ? ARRONDISSEMENT_PARENT[row.name.split(" ")[0]]
+        : undefined;
+      const slug = parentSlug || row.slug;
+      countBySlug.set(slug, (countBySlug.get(slug) || 0) + n);
+    }
+
+    // 4. Garde >= 3 pros (aligné sur le notFound() de la page) + cap éventuel.
+    let eligible = [...countBySlug.entries()].filter(([, n]) => n >= 3);
+    if (capVilles !== null) {
+      eligible = eligible.sort((a, b) => b[1] - a[1]).slice(0, capVilles);
+    }
+    for (const [slug] of eligible) {
+      urgenceVilleUrls.push({
+        url: `${BASE_URL}/${metierSlug}/urgence/${slug}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      });
+    }
+  }
+
   return [
     ...staticUrls,
     ...chantiersUrls,
     ...clientsUrls,
+    ...urgenceVilleUrls,
     ...guideUrls,
     ...blogUrls,
     ...priceGuideUrls,
