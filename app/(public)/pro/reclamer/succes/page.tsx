@@ -38,10 +38,10 @@ export default function ClaimSuccessPage() {
       {/* Actions */}
       <div className="flex flex-col gap-3">
         <Link
-          href="/pro/dashboard"
+          href="/pro/dashboard/fiche"
           className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-8 py-3.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] inline-flex items-center justify-center gap-2"
         >
-          Accéder à mon dashboard
+          Compléter ma fiche
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>

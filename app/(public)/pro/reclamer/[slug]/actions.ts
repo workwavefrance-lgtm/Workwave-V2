@@ -503,7 +503,7 @@ export async function verifyClaim(
       // Connecter l'utilisateur côté serveur
       await signInAndSetCookies(attempt.email, attempt.temp_password);
 
-      return { success: true, redirectUrl: "/pro/dashboard" };
+      return { success: true, redirectUrl: "/pro/dashboard/fiche" };
     }
 
     return { success: false, message: "Erreur lors de la création du compte" };
@@ -578,7 +578,7 @@ export async function verifyClaim(
   // 7. Connecter l'utilisateur côté serveur (écrire les cookies de session)
   await signInAndSetCookies(attempt.email, attempt.temp_password);
 
-  return { success: true, redirectUrl: "/pro/dashboard" };
+  return { success: true, redirectUrl: "/pro/dashboard/fiche" };
 }
 
 // ============================================
