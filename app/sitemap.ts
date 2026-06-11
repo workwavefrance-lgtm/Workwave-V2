@@ -398,18 +398,26 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-  // ── Déclinaisons VILLE des pages pilier urgence : /{metier}/urgence/{ville}.
-  // Même garde anti-thin que la page (>= 3 pros actifs dans la ville).
-  // Whitelist dupliquée depuis app/(public)/[metier]/urgence/[ville]/page.tsx
+  // ── Déclinaisons VILLE des pages pilier : /{metier}/{segment}/{ville}
+  // (urgence, installation, obligation). Même garde anti-thin que les pages
+  // (>= 3 pros actifs dans la ville). Whitelists dupliquées depuis
+  // app/(public)/[metier]/{urgence,installation,obligation}/[ville]/page.tsx
   // (un page.tsx ne peut pas exporter de constantes arbitraires).
-  // capVilles : pour les métiers volumineux (chauffagiste ≈ 55k pros), on
-  // n'émet que les N plus grosses villes par count (anti-bloat sitemap).
-  const URGENCE_VILLE_METIERS: { slug: string; capVilles: number | null }[] = [
-    { slug: "serrurier", capVilles: null }, // ~2 555 pros → toutes les villes >= 3
-    { slug: "chauffagiste", capVilles: 100 }, // ~55 500 pros → top 100 villes
+  // capVilles : pour les métiers volumineux (chauffagiste ≈ 55k pros,
+  // ramoneur ≈ 14,5k pros), on n'émet que les N plus grosses villes par count
+  // (anti-bloat sitemap).
+  const PILIER_VILLE_METIERS: {
+    slug: string;
+    segment: "urgence" | "installation" | "obligation";
+    capVilles: number | null;
+  }[] = [
+    { slug: "serrurier", segment: "urgence", capVilles: null }, // ~2 555 pros → toutes les villes >= 3
+    { slug: "chauffagiste", segment: "urgence", capVilles: 100 }, // ~55 500 pros → top 100 villes
+    { slug: "climaticien", segment: "installation", capVilles: null }, // ~5 800 pros → toutes les villes >= 3 (~420)
+    { slug: "ramoneur", segment: "obligation", capVilles: 150 }, // ~14 500 pros → top 150 villes
   ];
-  const urgenceVilleUrls: MetadataRoute.Sitemap = [];
-  for (const { slug: metierSlug, capVilles } of URGENCE_VILLE_METIERS) {
+  const pilierVilleUrls: MetadataRoute.Sitemap = [];
+  for (const { slug: metierSlug, segment, capVilles } of PILIER_VILLE_METIERS) {
     const cat = allCats.find((c) => c.slug === metierSlug);
     if (!cat) continue;
 
@@ -453,7 +461,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     }
 
     // 3. Replier les arrondissements municipaux (Marseille/Lyon/Paris) sur la
-    //    commune parent : la page /{metier}/urgence/{ville} agrège pareil via
+    //    commune parent : la page /{metier}/{segment}/{ville} agrège pareil via
     //    getAggregatedCityIds, et c'est le slug parent (ex. "marseille") qui
     //    porte le volume SEO — on n'émet pas les arrondissements.
     const ARRONDISSEMENT_PARENT: Record<string, string> = {
@@ -478,8 +486,8 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
       eligible = eligible.sort((a, b) => b[1] - a[1]).slice(0, capVilles);
     }
     for (const [slug] of eligible) {
-      urgenceVilleUrls.push({
-        url: `${BASE_URL}/${metierSlug}/urgence/${slug}`,
+      pilierVilleUrls.push({
+        url: `${BASE_URL}/${metierSlug}/${segment}/${slug}`,
         changeFrequency: "weekly" as const,
         priority: 0.7,
       });
@@ -490,7 +498,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     ...staticUrls,
     ...chantiersUrls,
     ...clientsUrls,
-    ...urgenceVilleUrls,
+    ...pilierVilleUrls,
     ...guideUrls,
     ...blogUrls,
     ...priceGuideUrls,
