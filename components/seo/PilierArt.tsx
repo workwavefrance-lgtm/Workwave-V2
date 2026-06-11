@@ -185,6 +185,64 @@ export function AcUnitArt({ className }: { className?: string }) {
   );
 }
 
+/** Maison + clé + éclats de propreté (ménage location saisonnière). */
+export function HouseSparkleArt({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 220 210"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* toit */}
+      <path d="M26 106 L104 38 L182 106" />
+      <path d="M40 106 L104 50 L168 106" opacity="0.5" />
+      {/* murs */}
+      <path d="M46 106 V188 H162 V106" />
+      {/* porte */}
+      <rect x="92" y="144" width="28" height="44" rx="3" />
+      <circle cx="114" cy="167" r="2.4" fill="currentColor" stroke="none" />
+      {/* fenêtre gauche */}
+      <rect x="58" y="120" width="24" height="22" rx="3" opacity="0.6" />
+      <path d="M70 120 V142" opacity="0.4" />
+      <path d="M58 131 H82" opacity="0.4" />
+      {/* fenêtre droite */}
+      <rect x="126" y="120" width="24" height="22" rx="3" opacity="0.6" />
+      <path d="M138 120 V142" opacity="0.4" />
+      <path d="M126 131 H150" opacity="0.4" />
+      {/* clé de la location — accent coral */}
+      <g stroke="var(--accent)" strokeWidth={1.8}>
+        <circle cx="186" cy="148" r="11" />
+        <circle cx="186" cy="148" r="4.5" opacity="0.6" />
+        <path d="M186 159 L186 186" />
+        <path d="M186 170 L194 170" />
+        <path d="M186 179 L192 179" />
+      </g>
+      {/* éclats de propreté — accent coral */}
+      <g stroke="var(--accent)" strokeWidth={1.6}>
+        <path d="M50 24 L50 44" />
+        <path d="M40 34 L60 34" />
+        <g opacity="0.8">
+          <path d="M150 16 L150 30" />
+          <path d="M143 23 L157 23" />
+        </g>
+        <g opacity="0.7">
+          <path d="M198 74 L198 86" />
+          <path d="M192 80 L204 80" />
+        </g>
+        <g opacity="0.6">
+          <path d="M22 132 L22 142" />
+          <path d="M17 137 L27 137" />
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 /** Bouclier + coche line-art (confiance / vérification). Décoratif. */
 export function ShieldCheckArt({ className }: { className?: string }) {
   return (
