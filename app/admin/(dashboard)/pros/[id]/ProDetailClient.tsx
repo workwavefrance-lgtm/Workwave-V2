@@ -147,7 +147,7 @@ export default function ProDetailClient({
           phone: pro.phone || "",
           email: pro.email || "",
           website: pro.website || "",
-          intervention_radius_km: pro.intervention_radius_km ?? 20,
+          intervention_radius_km: pro.intervention_radius_km ?? 100,
         }}
       />
 

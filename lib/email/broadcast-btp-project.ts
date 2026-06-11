@@ -329,7 +329,7 @@ export async function broadcastBtpProject(
     intervention_radius_km: number | null;
     city: { latitude: number | null; longitude: number | null } | null;
   };
-  const DEFAULT_RADIUS_KM = 20;
+  const DEFAULT_RADIUS_KM = 100; // défaut élargi 20→100 km (décision Willy 11/06 : un inscrit rate trop de leads à 20 km)
   const targets = ((pros || []) as unknown as ProRow[]).filter(
     (
       p

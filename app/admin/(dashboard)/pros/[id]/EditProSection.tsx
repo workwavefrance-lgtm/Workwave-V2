@@ -46,7 +46,7 @@ export default function EditProSection({
   const [phone, setPhone] = useState(initial.phone || "");
   const [email, setEmail] = useState(initial.email || "");
   const [website, setWebsite] = useState(initial.website || "");
-  const [radius, setRadius] = useState<number>(initial.intervention_radius_km || 20);
+  const [radius, setRadius] = useState<number>(initial.intervention_radius_km || 100);
 
   const byVertical = categories.reduce<Record<string, Category[]>>((acc, c) => {
     (acc[c.vertical] = acc[c.vertical] || []).push(c);
