@@ -16,20 +16,29 @@
 export const GOOGLE_REVIEW_URL = "https://g.page/r/CTOGdKur57CKEBM/review";
 
 export function buildGoogleReviewBlock(opts: { audience: "particulier" | "pro" }): string {
+  // ⚠️ Cadrage volontaire (décision Willy 12/06) : l'avis porte sur l'EXPÉRIENCE
+  // DE L'ÉTAPE qui vient d'être vécue (formulaire, simplicité, rapidité) — PAS
+  // sur « avez-vous trouvé un pro » : la couverture pro par zone est encore en
+  // construction, un avis basé sur le résultat serait injustement négatif.
   const question =
     opts.audience === "pro"
-      ? "Comment s'est passée la réclamation de votre fiche&nbsp;?"
-      : "Comment s'est passé votre dépôt de projet&nbsp;?";
+      ? "La réclamation de votre fiche s'est bien passée&nbsp;?"
+      : "Le dépôt de votre projet s'est bien passé&nbsp;?";
+  const steer =
+    opts.audience === "pro"
+      ? "Dites en 30&nbsp;secondes ce que vous avez pensé de cette étape&nbsp;: la vérification, la simplicité, la rapidité. Votre avis aide d'autres artisans à franchir le pas."
+      : "Dites en 30&nbsp;secondes ce que vous avez pensé de cette étape&nbsp;: le formulaire, la simplicité, la rapidité. Votre avis aide d'autres particuliers à se lancer.";
   return `
       <!-- Avis Google -->
-      <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center;">
+      <div style="background:#FFF5F2;border:1px solid #FFD4C7;border-radius:12px;padding:22px 20px;margin:0 0 24px;text-align:center;">
+        <p style="margin:0 0 8px;font-size:18px;letter-spacing:3px;color:#FF5A36;">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
         <p style="margin:0 0 6px;font-size:15px;color:#0A0A0A;font-weight:600;">${question}</p>
-        <p style="margin:0 0 14px;font-size:13px;color:#6B7280;line-height:1.6;">
-          Votre avis compte vraiment&nbsp;: il aide d'autres personnes à découvrir Workwave. Ça prend 30&nbsp;secondes.
+        <p style="margin:0 0 16px;font-size:13px;color:#6B7280;line-height:1.6;">
+          ${steer}
         </p>
         <a href="${GOOGLE_REVIEW_URL}"
-           style="display:inline-block;background:#FFFFFF;border:1px solid #D1D5DB;color:#0A0A0A;text-decoration:none;padding:10px 22px;border-radius:9999px;font-size:14px;font-weight:600;">
-          ★ Laisser un avis sur Google
+           style="display:inline-block;background:#FF5A36;color:#FFFFFF;text-decoration:none;padding:12px 26px;border-radius:9999px;font-size:14px;font-weight:600;">
+          Donner mon avis sur Google
         </a>
       </div>`;
 }
