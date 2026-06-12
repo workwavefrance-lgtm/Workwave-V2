@@ -19,9 +19,11 @@ import { useEffect } from "react";
  *    quand le pathname change (navigation client-side).
  *  - Type-safe + commentaires (vs blob de code copié).
  *
- * Mode consentement RGPD non activé pour l'instant (workwave.fr a déjà GTM-W65L4PJD
- * pour GA4 qui gère la conformité globale). À activer si Microsoft Ads impose un
- * mode strict EEE.
+ * Consent mode Microsoft (EEE) : actif et branché sur la bannière cookies
+ * (cookie `consent_analytics`, cf. components/layout/CookieBanner.tsx).
+ * Default = denied tant que l'utilisateur n'a pas cliqué Accepter ; la bannière
+ * pousse "consent update" en direct. Sans signal granted, Microsoft n'attribue
+ * AUCUNE conversion aux clics (beacons en asc=D) — découvert le 12/06/2026.
  */
 type UETQueue = unknown[] & { push: (event: unknown) => void };
 declare global {
@@ -105,7 +107,14 @@ export default function UETPixel() {
       dangerouslySetInnerHTML={{
         __html: `
           (function(w, d, t, u, o) {
-            w[u] = w[u] || [], o.ts = (new Date).getTime();
+            w[u] = w[u] || [];
+            // Consent mode Microsoft (EEE) : sans signal, UET force ad_storage=denied
+            // (asc=D sur les beacons) et AUCUNE conversion n'est attribuée aux clics.
+            // On lit le choix de la bannière cookies (consent_analytics) AVANT bat.js ;
+            // CookieBanner pousse ensuite "consent update" au clic Accepter/Refuser.
+            var granted = d.cookie.indexOf("consent_analytics=accepted") > -1;
+            w[u].push("consent", "default", { ad_storage: granted ? "granted" : "denied" });
+            o.ts = (new Date).getTime();
             var n = d.createElement(t);
             n.src = "https://bat.bing.net/bat.js?ti=" + o.ti + ("uetq" != u ? "&q=" + u : "");
             n.async = 1;

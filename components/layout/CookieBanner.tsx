@@ -27,13 +27,30 @@ export default function CookieBanner() {
     if (!consent) setVisible(true);
   }, []);
 
+  function pushUetConsent(state: "granted" | "denied") {
+    // Propage le choix au pixel Microsoft Ads (UET) sans attendre un reload.
+    // Sans ce signal, UET reste en ad_storage=denied (EEE) et les conversions
+    // ne sont jamais attribuées aux clics. Cf. components/analytics/UETPixel.tsx.
+    try {
+      (window as unknown as { uetq?: { push: (...a: unknown[]) => void } }).uetq?.push(
+        "consent",
+        "update",
+        { ad_storage: state }
+      );
+    } catch {
+      /* uetq absent (tag non chargé) : le consent default lira le cookie au prochain load */
+    }
+  }
+
   function accept() {
     setCookie(COOKIE_NAME, "accepted", COOKIE_MAX_AGE);
+    pushUetConsent("granted");
     setVisible(false);
   }
 
   function refuse() {
     setCookie(COOKIE_NAME, "refused", COOKIE_MAX_AGE);
+    pushUetConsent("denied");
     setVisible(false);
   }
 
@@ -46,9 +63,9 @@ export default function CookieBanner() {
           Cookies analytiques
         </p>
         <p className="text-xs text-[#6B7280] dark:text-[#9CA3AF] mb-3 leading-relaxed">
-          Nous utilisons des cookies pour analyser le trafic et améliorer
-          votre expérience. Aucune donnée personnelle n&apos;est partagée
-          avec des tiers.
+          Nous utilisons des cookies pour analyser le trafic, mesurer nos
+          campagnes publicitaires (Microsoft Advertising) et améliorer votre
+          expérience.
         </p>
         <div className="flex items-center gap-2">
           <button
