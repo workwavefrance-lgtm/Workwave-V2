@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { buildGoogleReviewBlock } from "./google-review-block";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -170,6 +171,7 @@ export async function sendClaimWelcomeEmail(params: {
 
     <!-- Signature -->
     <div style="padding:32px;">
+${buildGoogleReviewBlock({ audience: "pro" })}
       <p style="margin:0 0 8px;font-size:14px;color:#374151;line-height:1.6;">
         Si vous avez la moindre question, répondez simplement à cet email.
       </p>
@@ -182,7 +184,7 @@ export async function sendClaimWelcomeEmail(params: {
     <!-- Footer -->
     <div style="padding:18px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
       <p style="margin:0 0 4px;color:#9CA3AF;font-size:12px;line-height:1.6;">
-        Workwave — Annuaire gratuit de Nouvelle-Aquitaine
+        Workwave — Annuaire gratuit des professionnels en France
       </p>
       <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.6;">
         Vous recevez cet email parce que vous venez de réclamer une fiche pro sur Workwave.

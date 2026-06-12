@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { buildGoogleReviewBlock } from "./google-review-block";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -94,6 +95,8 @@ export async function sendProjectConfirmation(
           Si vous souhaitez annuler votre demande, ${data.deletionToken ? `<a href="${baseUrl}/deposer-projet/supprimer?token=${data.deletionToken}" style="color:#9A3412;font-weight:600;text-decoration:underline;">cliquez ici pour la supprimer</a>` : "répondez à cet email"}.
         </p>
       </div>
+
+${buildGoogleReviewBlock({ audience: "particulier" })}
 
       <!-- Signature -->
       <p style="margin:0;font-size:14px;color:#6B7280;line-height:1.6;">
