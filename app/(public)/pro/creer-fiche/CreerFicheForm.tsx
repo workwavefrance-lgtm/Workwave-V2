@@ -50,9 +50,11 @@ export default function CreerFicheForm({
         className="absolute left-[-9999px] w-0 h-0"
         aria-hidden="true"
       />
-      {/* Méta pré-remplies depuis l'API (transmises à l'action) */}
-      <input type="hidden" name="postal_code" defaultValue={prefill?.postalCode || ""} />
-      <input type="hidden" name="commune" defaultValue={prefill?.commune || ""} />
+      {/* Méta pré-remplies depuis l'API (transmises à l'action).
+          CP + commune sont des champs VISIBLES obligatoires plus bas : quand le
+          lookup SIRET échoue (typo, entreprise récente, non-diffusible), les
+          hidden partaient vides → fiche sans city_id, invisible des listings
+          et jamais matchée par le broadcast (cas renov-toit-00013, 12/06). */}
       <input type="hidden" name="naf" defaultValue={prefill?.naf || ""} />
       <input type="hidden" name="founding_date" defaultValue={prefill?.foundingDate || ""} />
 
@@ -116,6 +118,39 @@ export default function CreerFicheForm({
           Adresse <span className="text-[var(--text-tertiary)] font-normal">(optionnel)</span>
         </label>
         <input id="address" name="address" type="text" maxLength={300} defaultValue={prefill?.address || ""} className={INPUT} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="postal_code" className={LABEL}>Code postal</label>
+          <input
+            id="postal_code"
+            name="postal_code"
+            type="text"
+            inputMode="numeric"
+            pattern="\d{5}"
+            maxLength={5}
+            autoComplete="postal-code"
+            placeholder="56670"
+            defaultValue={prefill?.postalCode || ""}
+            className={INPUT}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="commune" className={LABEL}>Commune</label>
+          <input
+            id="commune"
+            name="commune"
+            type="text"
+            maxLength={120}
+            autoComplete="address-level2"
+            placeholder="Ex : Riantec"
+            defaultValue={prefill?.commune || ""}
+            className={INPUT}
+            required
+          />
+        </div>
       </div>
 
       <button

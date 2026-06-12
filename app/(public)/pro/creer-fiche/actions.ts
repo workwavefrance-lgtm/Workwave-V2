@@ -51,7 +51,7 @@ async function matchCityId(
   commune: string | null,
   postalCode: string | null
 ): Promise<number | null> {
-  if (!commune || !postalCode) return null;
+  if (!postalCode) return null;
   const deptCode = String(postalCode).slice(0, 2);
   const { data: dept } = await sb
     .from("departments")
@@ -61,14 +61,20 @@ async function matchCityId(
   if (!dept) return null;
   const { data: cities } = await sb
     .from("cities")
-    .select("id, name")
+    .select("id, name, postal_code")
     .eq("department_id", dept.id);
   if (!cities) return null;
-  const target = normalizeName(commune);
-  const match = (cities as { id: number; name: string }[]).find(
-    (c) => normalizeName(c.name) === target
-  );
-  return match?.id ?? null;
+  const rows = cities as { id: number; name: string; postal_code: string | null }[];
+  if (commune) {
+    const target = normalizeName(commune);
+    const match = rows.find((c) => normalizeName(c.name) === target);
+    if (match) return match.id;
+  }
+  // Fallback : nom mal orthographié → match par code postal exact (1ʳᵉ commune
+  // du CP ; approximatif sur les CP multi-communes mais >> city_id null, qui
+  // rend la fiche invisible des listings et du broadcast).
+  const byCp = rows.find((c) => c.postal_code === postalCode);
+  return byCp?.id ?? null;
 }
 
 export type CreateFicheState = { success: boolean; message?: string };
@@ -116,6 +122,10 @@ export async function createFiche(
   if (!categoryId) return { success: false, message: "Choisissez votre métier." };
   if (!isValidEmail(email)) return { success: false, message: "Adresse email invalide." };
   if (phone.length < 6) return { success: false, message: "Numéro de téléphone invalide." };
+  if (!postalCode || !/^\d{5}$/.test(postalCode))
+    return { success: false, message: "Code postal invalide (5 chiffres)." };
+  if (!commune)
+    return { success: false, message: "Indiquez votre commune." };
 
   const sb = getServiceClient();
 
