@@ -12,6 +12,7 @@ import ProCard from "@/components/pro/ProCard";
 import ProReviewsBlock from "@/components/pro/ProReviewsBlock";
 import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
 import ProSeoSections from "@/components/pro/ProSeoSections";
+import ProGuidesLinks from "@/components/pro/ProGuidesLinks";
 import { buildProContent } from "@/lib/seo/pro-seo-sections";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
@@ -873,6 +874,12 @@ export default async function ProPage({ params }: Props) {
               </Link>
             )}
           </div>
+
+          {/* Maillage interne → guides de prix du métier */}
+          <ProGuidesLinks
+            metierSlug={pro.category.slug}
+            metierName={pro.category.name}
+          />
         </div>
 
         {/* Colonne droite — Sidebar sticky */}
