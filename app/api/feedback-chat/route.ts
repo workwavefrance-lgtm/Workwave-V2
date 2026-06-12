@@ -72,6 +72,50 @@ function getIp(req: NextRequest): string {
 
 const MODEL = "claude-haiku-4-5-20251001";
 
+// ---- Garde-fous échelle (200k visiteurs/jour) ----
+// Plafond IA quotidien GLOBAL, durable multi-instances via RPC Postgres
+// (increment_daily_counter, migration 2026-06-12_feedback_scale.sql).
+// Au-delà : l'agent dégrade en mode formulaire (le retour est conservé,
+// seul le chat IA est suspendu jusqu'à minuit). Coût max/jour ≈ cap × $0.0015.
+const DAILY_AI_CAP = parseInt(process.env.FEEDBACK_CHAT_DAILY_CAP || "20000", 10);
+const MAX_USER_TURNS = 12;
+let _fallbackCount = 0; // si la RPC manque : cap conservateur par instance
+let _fallbackDay = "";
+
+async function checkDailyBudget(): Promise<boolean> {
+  try {
+    const sb = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data, error } = await sb.rpc("increment_daily_counter", {
+      counter_name: "feedback_chat",
+    });
+    if (!error && data && typeof (data as { value?: number }).value === "number") {
+      return (data as { value: number }).value <= DAILY_AI_CAP;
+    }
+  } catch {
+    /* RPC absente : fallback in-memory ci-dessous */
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  if (_fallbackDay !== today) {
+    _fallbackDay = today;
+    _fallbackCount = 0;
+  }
+  _fallbackCount++;
+  return _fallbackCount <= Math.max(100, Math.floor(DAILY_AI_CAP / 10));
+}
+
+function isAllowedOrigin(req: NextRequest): boolean {
+  const origin = req.headers.get("origin") || req.headers.get("referer") || "";
+  if (!origin) return true; // certains navigateurs strippent — ne pas casser les vrais users
+  return (
+    origin.includes("workwave.fr") ||
+    origin.includes("localhost") ||
+    origin.includes("vercel.app")
+  );
+}
+
 const SAV_PROMPT = `Tu es l'agent d'écoute de Workwave (workwave.fr), plateforme de mise en relation entre particuliers et artisans en France. Ta mission : recueillir le retour de l'utilisateur pour améliorer la plateforme. Tu parles à la première personne, comme un humain de l'équipe — chaleureux, direct, reconnaissant.
 
 CE QUE TU CHERCHES À RECUEILLIR (dans la conversation, naturellement, UNE question à la fois) :
@@ -113,6 +157,9 @@ export async function POST(req: NextRequest) {
       { status: 429 }
     );
   }
+  if (!isAllowedOrigin(req)) {
+    return NextResponse.json({ error: "Origine non autorisée" }, { status: 403 });
+  }
 
   let body: {
     action?: string;
@@ -139,19 +186,23 @@ export async function POST(req: NextRequest) {
       const transcriptText = messages
         .map((m) => `${m.role === "user" ? "Utilisateur" : "Agent"} : ${m.content}`)
         .join("\n");
-      const completion = await getClient().messages.create({
-        model: MODEL,
-        max_tokens: 300,
-        system: SUMMARIZE_PROMPT,
-        messages: [{ role: "user", content: transcriptText.slice(0, 8000) }],
-      });
-      const rawText =
-        completion.content[0]?.type === "text" ? completion.content[0].text : "{}";
       let parsed: { category?: string; summary?: string; user_kind?: string } = {};
-      try {
-        parsed = JSON.parse(rawText.match(/\{[\s\S]*\}/)?.[0] || "{}");
-      } catch {
-        /* résumé non parsable : fallback brut ci-dessous */
+      // Résumé IA seulement si le budget quotidien le permet — sinon le retour
+      // part quand même (brut) : on ne perd JAMAIS un feedback pour une question de coût.
+      if (await checkDailyBudget()) {
+        try {
+          const completion = await getClient().messages.create({
+            model: MODEL,
+            max_tokens: 300,
+            system: SUMMARIZE_PROMPT,
+            messages: [{ role: "user", content: transcriptText.slice(0, 8000) }],
+          });
+          const rawText =
+            completion.content[0]?.type === "text" ? completion.content[0].text : "{}";
+          parsed = JSON.parse(rawText.match(/\{[\s\S]*\}/)?.[0] || "{}");
+        } catch {
+          /* résumé non parsable / IA indispo : fallback brut ci-dessous */
+        }
       }
       const category = ["amelioration", "bug", "autre"].includes(parsed.category || "")
         ? (parsed.category as string)
@@ -200,6 +251,22 @@ export async function POST(req: NextRequest) {
   }
 
   // ---------- CHAT ----------
+  // Cap de tours : au-delà, on invite à envoyer (aucun appel IA).
+  const userTurns = messages.filter((m) => m.role === "user").length;
+  if (userTurns > MAX_USER_TURNS) {
+    return NextResponse.json({
+      reply:
+        "Merci pour tous ces détails ! J'ai tout noté — cliquez sur « Envoyer mon retour à l'équipe » juste en dessous pour que ça nous parvienne.",
+    });
+  }
+  // Plafond budgétaire quotidien : mode dégradé (formulaire) au-delà.
+  if (!(await checkDailyBudget())) {
+    return NextResponse.json({
+      reply:
+        "Merci de votre visite ! Notre assistant fait une pause aujourd'hui — écrivez directement votre retour (idée, bug, avis) dans le champ ci-dessous puis cliquez « Envoyer mon retour à l'équipe » : il sera lu par l'équipe, c'est promis.",
+      degraded: true,
+    });
+  }
   try {
     const completion = await getClient().messages.create({
       model: MODEL,

@@ -28,6 +28,10 @@
     {
       "path": "/api/cron/sitemap-audit",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/feedback-relance",
+      "schedule": "0 9 * * *"
     }
   ]
 }
