@@ -714,22 +714,22 @@ async function findBatchStartId(
   techFilterMode: "exclude" | "include"
 ): Promise<number> {
   if (skipCount === 0) return 0;
-  // Le calcul du startId du batch utilise OFFSET sur UN seul row (rapide :
-  // Postgres scan jusqu'au row N et stop, vs charger 1000+ rows).
-  let query = supabase
-    .from("pros")
-    .select("id")
-    .eq("is_active", true)
-    .is("deleted_at", null)
-    .order("id", { ascending: true });
-  query =
-    techFilterMode === "exclude"
-      ? query.not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
-      : query.in("category_id", AI_CATEGORY_IDS);
-  const { data } = await query.range(skipCount - 1, skipCount - 1);
-  const rows = (data || []) as { id: number }[];
-  // Pas de row a cet offset = batch hors-borne, on retourne -1 pour signaler
-  return rows.length > 0 ? rows[0].id : -1;
+  // 12/06 : lookup déplacé dans une RPC Postgres (statement_timeout 120s +
+  // index partiel idx_pros_active_id_cat). L'ancien OFFSET via PostgREST
+  // timeoutait (~8s) au-delà de ~1,5M de skip → l'erreur était IGNORÉE →
+  // sitemaps 125+ vides cachés 24h. Migration :
+  // migrations/2026-06-12_sitemap_batch_start_rpc.sql
+  const { data, error } = await (supabase as any).rpc("sitemap_batch_start_id", {
+    skip_count: skipCount,
+    tech_mode: techFilterMode === "include",
+  });
+  // THROW sur erreur : un sitemap en 500 sera re-crawlé par Google ; un
+  // sitemap vide caché 24h fait disparaître 45k fiches en silence.
+  if (error) {
+    throw new Error(`sitemap_batch_start_id(${skipCount}) : ${error.message}`);
+  }
+  // null = batch hors-borne (skip > nb total de rows) : sitemap vide légitime
+  return data === null ? -1 : Number(data);
 }
 
 async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap> {
@@ -748,7 +748,7 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
       SUPABASE_PAGE_SIZE,
       PROS_PER_SITEMAP - allPros.length
     );
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("pros")
       .select("slug, updated_at, claimed_by_user_id, id")
       .eq("is_active", true)
@@ -757,6 +757,10 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
       .gt("id", lastId)
       .order("id", { ascending: true })
       .limit(limit);
+    // THROW : un batch tronqué en silence serait caché 24h (cf. 12/06)
+    if (error) {
+      throw new Error(`buildProsUrls batch ${batchIndex} : ${error.message}`);
+    }
     const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
     allPros.push(...rows);
@@ -796,7 +800,7 @@ async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitema
       SUPABASE_PAGE_SIZE,
       PROS_PER_SITEMAP - allPros.length
     );
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("pros")
       .select("slug, updated_at, claimed_by_user_id, id")
       .in("category_id", AI_CATEGORY_IDS)
@@ -805,6 +809,10 @@ async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitema
       .gt("id", lastId)
       .order("id", { ascending: true })
       .limit(limit);
+    // THROW : un batch tronqué en silence serait caché 24h (cf. 12/06)
+    if (error) {
+      throw new Error(`buildAiProsUrls batch ${batchIndex} : ${error.message}`);
+    }
     const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
     allPros.push(...rows);
