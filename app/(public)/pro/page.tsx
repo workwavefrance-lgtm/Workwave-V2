@@ -82,7 +82,7 @@ const features = [
 ];
 
 const stats = [
-  { value: "1,7 M+", label: "professionnels référencés" },
+  { value: "2,4 M+", label: "professionnels référencés" },
   { value: "34 046", label: "communes couvertes" },
   { value: "101", label: "départements couverts" },
   { value: "9,90 €", label: "TTC par lead, paiement unique" },
