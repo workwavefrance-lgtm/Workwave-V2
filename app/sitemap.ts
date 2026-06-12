@@ -92,10 +92,13 @@ export async function generateSitemaps() {
   //   pros : Math.ceil(pros_non_tech / 45000)   |   ai : Math.ceil(pros_tech / 45000)
   //   01/06/2026 : 1 069 733 pros actifs → 24  ;  110 085 pros tech → 3.
   //   08/06/2026 : 1 271 741 non-tech → 29 (marge 32) ; 510 808 tech → 12 (marge 14).
+  //   12/06/2026 : 1 779 007 non-tech (scrape domicile/personne France) → 40
+  //   (marge 48 : le scrape tourne encore, ~+80k attendus). Alerte du cron
+  //   sitemap-audit reçue le matin même — le garde-fou a fonctionné.
   //   Marge volontaire : un sous-sitemap vide est inoffensif (Google l'ignore),
   //   mais un sous-sitemap NON déclaré = des pros invisibles pour Google. Le
   //   "24" figé depuis le 01/06 tronquait ~568k pros (bug détecté le 08/06).
-  const proSitemapsCount = 32;
+  const proSitemapsCount = 48;
   const aiProSitemapsCount = 14;
 
   const sitemaps = [
