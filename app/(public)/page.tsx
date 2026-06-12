@@ -35,7 +35,7 @@ const homeFaqs = [
   {
     question: "Qu'est-ce que Workwave ?",
     answer:
-      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France. La plateforme référence plus de 1,7 million de professionnels dans 34 046 communes et met en relation les particuliers avec des artisans locaux.",
+      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France. La plateforme référence plus de 2,4 millions de professionnels dans 34 046 communes et met en relation les particuliers avec des artisans locaux.",
   },
   {
     question: "Workwave est-il gratuit pour les particuliers ?",
@@ -123,7 +123,7 @@ export default async function Home() {
             className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
             style={{ animationDelay: "120ms" }}
           >
-            Plus d&apos;1,7 million de professionnels référencés dans toute
+            Plus de 2,4 millions de professionnels référencés dans toute
             la France, à portée d&apos;un clic.
           </p>
           <SearchForm categories={allCategories} />
@@ -131,7 +131,7 @@ export default async function Home() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
             <div className="text-center">
               <CountUp
-                end={1782549}
+                end={2439523}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">

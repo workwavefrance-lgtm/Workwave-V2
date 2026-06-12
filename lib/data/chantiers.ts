@@ -24,7 +24,7 @@ export const CHANTIERS_FAQ: FaqItem[] = [
   },
   {
     q: "Comment recevoir des demandes de chantiers ?",
-    a: "Votre fiche existe peut-être déjà : Workwave référence plus d'1,7 million d'artisans à partir du registre officiel Sirene. Retrouvez-la avec votre SIRET et réclamez-la gratuitement en 2 minutes. Si elle n'existe pas encore, vous pouvez la créer. Vous recevez ensuite les demandes des particuliers de votre zone et de votre métier.",
+    a: "Votre fiche existe peut-être déjà : Workwave référence plus de 2,4 millions d'artisans à partir du registre officiel Sirene. Retrouvez-la avec votre SIRET et réclamez-la gratuitement en 2 minutes. Si elle n'existe pas encore, vous pouvez la créer. Vous recevez ensuite les demandes des particuliers de votre zone et de votre métier.",
   },
   {
     q: "Quand est-ce que je paie ?",

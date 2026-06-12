@@ -29,7 +29,7 @@ const FEATURED_CATEGORIES: { slug: string; name: string }[] = [
 export const metadata: Metadata = {
   title: "Professionnels par département en France - Workwave",
   description:
-    "Annuaire des artisans et professionnels par département dans toute la France. Plus d'1,7 million de pros référencés dans 101 départements et 34 046 communes (métropole et outre-mer).",
+    "Annuaire des artisans et professionnels par département dans toute la France. Plus de 2,4 millions de pros référencés dans 101 départements et 34 046 communes (métropole et outre-mer).",
   alternates: {
     canonical: `${BASE_URL}/departements`,
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "Professionnels par département en France",
     description:
-      "Annuaire des artisans par département dans toute la France. 1 700 000+ pros référencés dans 101 départements.",
+      "Annuaire des artisans par département dans toute la France. 2 400 000+ pros référencés dans 101 départements.",
     url: `${BASE_URL}/departements`,
   },
 };
@@ -80,7 +80,7 @@ export default async function DepartmentsHubPage() {
           Professionnels par département
         </h1>
         <p className="text-lg text-[var(--text-secondary)] max-w-3xl">
-          Plus d&apos;1,7 million d&apos;artisans et professionnels référencés dans les 101
+          Plus de 2,4 millions d&apos;artisans et professionnels référencés dans les 101
           départements français. Choisissez votre département pour
           découvrir les pros près de chez vous.
         </p>
@@ -158,7 +158,7 @@ export default async function DepartmentsHubPage() {
           Pourquoi Workwave ?
         </h2>
         <p className="text-[var(--text-secondary)] max-w-3xl leading-relaxed">
-          Workwave référence gratuitement plus d&apos;1,7 million de professionnels
+          Workwave référence gratuitement plus de 2,4 millions de professionnels
           dans toute la France, issus du registre Sirene. Notre annuaire
           couvre les 101 départements avec les principaux corps de métier
           du BTP, des services à domicile et de l&apos;aide à la personne. Les

@@ -15,7 +15,7 @@ export const revalidate = 86400; // 24h
 export async function GET(): Promise<Response> {
   const content = `# Workwave
 
-> Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 1 700 000+ professionnels référencés dans 34 046 communes et 101 départements, sur l'ensemble du territoire français (métropole et outre-mer).
+> Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France. 2 400 000+ professionnels référencés dans 34 046 communes et 101 départements, sur l'ensemble du territoire français (métropole et outre-mer).
 
 Workwave est une plateforme française qui met en relation les particuliers avec les professionnels locaux dans 3 verticaux : BTP/artisanat, services à domicile, aide à la personne. Lancée en avril 2026, la plateforme couvre toute la France — 101 départements et plus de 34 000 communes référencées.
 
