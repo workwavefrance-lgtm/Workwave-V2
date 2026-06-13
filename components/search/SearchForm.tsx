@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type CityResult = {
+  kind: "city" | "department";
   id: number;
   name: string;
   slug: string;
   postal_code: string | null;
   department_code: string;
+  sublabel: string;
 };
 
 type Category = { slug: string; name: string; vertical: string };
@@ -129,6 +131,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
   }, []);
 
   function formatCityLabel(city: CityResult): string {
+    if (city.kind === "department") return city.name;
     return city.postal_code ? `${city.name} (${city.postal_code})` : city.name;
   }
 
@@ -251,7 +254,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
             setShowSuggestions(true);
           }}
           onFocus={() => setShowSuggestions(true)}
-          placeholder="Ville ou code postal"
+          placeholder="Ville, département ou région"
           className="flex-1 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
           autoComplete="off"
         />
@@ -263,16 +266,30 @@ export default function SearchForm({ categories }: SearchFormProps) {
           <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl shadow-lg z-50 max-h-80 overflow-y-auto">
             {suggestions.map((city) => (
               <button
-                key={city.id}
+                key={`${city.kind}-${city.id}`}
                 type="button"
                 onClick={() => handleSelectCity(city)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--bg-secondary)] transition-colors duration-150 first:rounded-t-2xl last:rounded-b-2xl"
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-[var(--bg-secondary)] transition-colors duration-150 first:rounded-t-2xl last:rounded-b-2xl"
               >
-                <span className="text-sm text-[var(--text-primary)] font-medium">
-                  {city.name}
+                <span className="flex items-center gap-2.5 min-w-0">
+                  {/* Picto : zone pour un département, pin pour une commune */}
+                  {city.kind === "department" ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-[var(--accent)] shrink-0">
+                      <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z" strokeLinejoin="round" />
+                      <path d="M9 3v15M15 6v15" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="w-4 h-4 text-[var(--text-tertiary)] shrink-0">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  )}
+                  <span className="text-sm text-[var(--text-primary)] font-medium truncate">
+                    {city.name}
+                  </span>
                 </span>
-                <span className="text-xs text-[var(--text-tertiary)]">
-                  {city.postal_code} · {city.department_code}
+                <span className="text-xs text-[var(--text-tertiary)] shrink-0">
+                  {city.sublabel}
                 </span>
               </button>
             ))}
