@@ -34,37 +34,44 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env.local"), overrid
 from supabase import create_client  # noqa: E402
 
 SB = create_client(os.environ["NEXT_PUBLIC_SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
-STOCK_URL = "https://files.data.gouv.fr/insee-sirene/StockEtablissement_utf8.zip"
+STOCK_URL = "https://static.data.gouv.fr/resources/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/20260601-092359/stock-stocketablissement-csv.zip"
 ZIP_PATH = "/tmp/StockEtablissement_utf8.zip"
 CHUNK = 500
 
 
 def load_target_sirets():
     """SIRETs des pros actifs sans founded_year. Pattern pagination 09/05."""
+    # Pagination par CURSEUR sur id (lecon 26/05 : OFFSET profond sur table
+    # filtree 2,4M rows = scan lent -> statement timeout). WHERE id > last
+    # ORDER BY id = range scan d'index, constant quel que soit l'avancement.
     sirets = set()
-    offset = 0
+    last_id = 0
+    loaded = 0
     t0 = time.time()
     while True:
         res = (
             SB.table("pros")
-            .select("siret")
+            .select("id, siret")
             .eq("is_active", True)
             .is_("deleted_at", "null")
             .is_("founded_year", "null")
             .not_.is_("siret", "null")
-            .range(offset, offset + 999)
+            .gt("id", last_id)
+            .order("id")
+            .limit(1000)
             .execute()
         )
         rows = res.data or []
         if not rows:
             break
+        last_id = rows[-1]["id"]
+        loaded += len(rows)
         for r in rows:
             s = (r.get("siret") or "").strip()
             if len(s) == 14:
                 sirets.add(s)
-        offset += len(rows)
-        if offset % 100000 == 0:
-            print(f"  ... {offset} sirets charges ({int(time.time()-t0)}s)", flush=True)
+        if loaded % 100000 < 1000:
+            print(f"  ... {loaded} sirets charges ({int(time.time()-t0)}s)", flush=True)
     print(f"SIRETs cibles : {len(sirets)} ({int(time.time()-t0)}s)", flush=True)
     return sirets
 
@@ -79,15 +86,17 @@ def download_stock():
 
 
 def flush(batch, stats):
-    """Upsert un chunk — verifie l'error de CHAQUE appel (lecon 08/06)."""
+    """Bulk UPDATE via RPC backfill_pro_founding (pas d'upsert : slug NOT NULL
+    ferait echouer l'INSERT — bug 12/06). Verifie l'error de CHAQUE appel
+    (lecon 08/06). La RPC retourne le nombre de lignes REELLEMENT modifiees."""
     if not batch:
         return
     try:
-        SB.table("pros").upsert(batch, on_conflict="siret").execute()
-        stats["updated"] += len(batch)
+        res = SB.rpc("backfill_pro_founding", {"items": batch}).execute()
+        stats["updated"] += res.data if isinstance(res.data, int) else len(batch)
     except Exception as e:  # noqa: BLE001
         stats["errors"] += 1
-        print(f"  !! upsert KO ({len(batch)} rows) : {str(e)[:150]}", flush=True)
+        print(f"  !! rpc KO ({len(batch)} rows) : {str(e)[:150]}", flush=True)
 
 
 def main():
@@ -97,9 +106,13 @@ def main():
         return
     download_stock()
 
-    print("Streaming du stock (unzip -p | csv)...", flush=True)
-    proc = subprocess.Popen(["unzip", "-p", ZIP_PATH], stdout=subprocess.PIPE)
-    reader = csv.reader(io.TextIOWrapper(proc.stdout, encoding="utf-8", errors="replace"))
+    # zipfile (zip64 natif) : l'unzip de macOS renvoie un flux VIDE sur ce
+    # zip64 de 12 Go decompresses -> StopIteration sur le header (bug 12/06).
+    import zipfile
+    print("Streaming du stock (zipfile zip64)...", flush=True)
+    zf = zipfile.ZipFile(ZIP_PATH)
+    inner = zf.namelist()[0]
+    reader = csv.reader(io.TextIOWrapper(zf.open(inner), encoding="utf-8", errors="replace"))
     header = next(reader)
     idx = {name: i for i, name in enumerate(header)}
     i_siret = idx["siret"]
@@ -134,7 +147,6 @@ def main():
             flush(batch, stats)
             batch = []
     flush(batch, stats)
-    proc.wait()
     print(f"\nTERMINE : {stats['scanned']} lignes scannees, {stats['matched']} matches, "
           f"{stats['updated']} pros mis a jour, {stats['errors']} chunks en erreur, "
           f"{int(time.time()-t0)}s", flush=True)
