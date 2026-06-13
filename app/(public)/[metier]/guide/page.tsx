@@ -11,7 +11,7 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { BASE_URL } from "@/lib/constants";
 
-export const revalidate = 86400; // 24h
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO // 24h
 
 type Props = {
   params: Promise<{ metier: string }>;

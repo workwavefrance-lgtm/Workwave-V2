@@ -16,7 +16,7 @@ import { INTL_CITIES } from "@/lib/data/intl-cities";
  */
 
 const SITE_URL = "https://www.workwaveai.co";
-export const revalidate = 86400;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 
 type Params = { country: string };
 

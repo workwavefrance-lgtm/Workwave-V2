@@ -9,7 +9,7 @@ import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 // ISR : revalide chaque 6h, la base evolue lentement
-export const revalidate = 21600;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 
 const PAGE_SIZE = 24;
 const TECH_VERTICAL = "tech";

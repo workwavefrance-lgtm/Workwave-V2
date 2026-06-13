@@ -13,7 +13,7 @@ import {
   monthsSince,
 } from "@/lib/ai/personalisation";
 
-export const revalidate = 21600; // ISR 6h
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO // ISR 6h
 
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 

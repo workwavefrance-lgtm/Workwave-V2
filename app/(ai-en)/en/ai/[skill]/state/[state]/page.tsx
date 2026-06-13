@@ -18,7 +18,7 @@ import { getUsState, US_STATES } from "@/lib/data/us-states";
  */
 
 const SITE_URL = "https://www.workwaveai.co";
-export const revalidate = 21600;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 
 type Params = { skill: string; state: string };
 

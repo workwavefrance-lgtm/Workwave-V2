@@ -44,7 +44,7 @@ function buildDeptFaq(
   ];
 }
 
-export const revalidate = 21600;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 export const dynamicParams = true; // pages non pre-buildees rendues a la demande
 const TECH_VERTICAL = "tech";
 const CURRENT_YEAR = new Date().getFullYear();

@@ -26,7 +26,7 @@ import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // duplicate content signal entre /artisan/[slug] et /ai/freelance/[slug].
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
-export const revalidate = 86400;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 
 type Props = {
   params: Promise<{ slug: string }>;

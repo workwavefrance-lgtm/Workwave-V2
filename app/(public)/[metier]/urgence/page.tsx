@@ -35,7 +35,7 @@ import {
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
  */
-export const revalidate = 86400;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 
 // Whitelist des métiers couverts — extensible (plombier, électricien...).
 const URGENCE_METIERS = new Set(["serrurier", "chauffagiste"]);

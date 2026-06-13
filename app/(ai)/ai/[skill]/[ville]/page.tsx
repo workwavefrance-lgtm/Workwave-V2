@@ -9,7 +9,7 @@ import { getTjmReference, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
 import { getCompaniesByCity } from "@/lib/data/tech-companies-by-city";
 import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
-export const revalidate = 21600; // 6h ISR
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO // 6h ISR
 export const dynamicParams = true; // pages non pre-buildees rendues a la demande
 
 const TECH_VERTICAL = "tech";

@@ -46,7 +46,7 @@ import {
  * ⚠️ Le segment doit s'appeler [ville] : Next.js impose le MÊME nom de
  *    param dynamique au niveau 3 que /[metier]/[location]/[ville].
  */
-export const revalidate = 86400;
+export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
 
 // Whitelist DUPLIQUÉE depuis app/(public)/[metier]/obligation/page.tsx :
 // un page.tsx Next.js ne peut pas exporter de constantes arbitraires. Garder
