@@ -137,7 +137,7 @@ export default function HeroSiretLookup() {
           href={createHref}
           className="text-[var(--accent)] font-semibold hover:underline underline-offset-4"
         >
-          Pas encore de fiche ? Créez-la gratuitement →
+          Pas encore référencé ? Enregistrez-vous →
         </Link>
         <Link
           href="/pro/connexion"

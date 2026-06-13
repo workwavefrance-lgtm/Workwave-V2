@@ -108,7 +108,7 @@ export default function RetrouverFicheForm() {
       {/* Alternative : creer une fiche si pas dans notre base */}
       <div className="pt-6 border-t border-[var(--border-color)]">
         <p className="text-sm text-[var(--text-secondary)] mb-3">
-          Pas encore de fiche chez nous ? Créez-la en 1 minute :
+          Pas encore référencé ? Enregistrez-vous en 1 minute :
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Link
