@@ -54,6 +54,7 @@ export default async function RecherchePage({ searchParams }: Props) {
           categories={allCategories.map((c) => ({
             slug: c.slug,
             name: c.name,
+            vertical: c.vertical,
           }))}
         />
       </div>

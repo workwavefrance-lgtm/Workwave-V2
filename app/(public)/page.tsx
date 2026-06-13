@@ -80,9 +80,13 @@ export default async function Home() {
       getRecentProjectsForHome(10),
     ]);
 
-  const allCategories = [...btp, ...domicile, ...personne].sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  // Catégories pour le sélecteur de recherche, avec leur vertical (le
+  // SearchForm les regroupe par univers + recherche au lieu d'une liste à plat).
+  const allCategories = [
+    ...btp.map((c) => ({ slug: c.slug, name: c.name, vertical: "btp" })),
+    ...domicile.map((c) => ({ slug: c.slug, name: c.name, vertical: "domicile" })),
+    ...personne.map((c) => ({ slug: c.slug, name: c.name, vertical: "personne" })),
+  ];
 
   // Rotation des 12 departements pour repartir le link juice de la home
   // sur tous les departements de Nouvelle-Aquitaine au lieu de tout pousser
