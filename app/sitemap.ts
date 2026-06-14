@@ -708,6 +708,32 @@ type ProSitemapRow = {
   id: number;
 };
 
+// Retry des requêtes sitemap qui timeout TRANSITOIREMENT (DB saturée par le
+// crawl Google pendant un `next build`). Sans ça, un seul timeout passager fait
+// planter TOUT le build → aucun déploiement ne passe (vécu 14/06 : 3 deploys
+// bloqués). On rethrow SEULEMENT si les 4 tentatives échouent → on garde la
+// garantie "pas de troncature silencieuse" (cf. 12/06) tout en survivant aux
+// pics. Même parade que le cron audit-sitemap (13/06).
+async function withSitemapRetry<T>(
+  run: () => PromiseLike<{ data: T; error: { message: string } | null }>,
+  label: string,
+  retries = 4
+): Promise<T> {
+  let lastErr = "";
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const { data, error } = await run();
+    if (!error) return data;
+    lastErr = error.message;
+    const transient =
+      /timeout|canceling statement|fetch failed|ECONN|socket|signal|terminat|503|502|gateway/i.test(
+        error.message
+      );
+    if (!transient || attempt === retries) break;
+    await new Promise((r) => setTimeout(r, attempt * 2500));
+  }
+  throw new Error(`${label} : ${lastErr}`);
+}
+
 async function findBatchStartId(
   supabase: ReturnType<typeof getAdminServiceClient>,
   skipCount: number,
@@ -719,15 +745,16 @@ async function findBatchStartId(
   // timeoutait (~8s) au-delà de ~1,5M de skip → l'erreur était IGNORÉE →
   // sitemaps 125+ vides cachés 24h. Migration :
   // migrations/2026-06-12_sitemap_batch_start_rpc.sql
-  const { data, error } = await (supabase as any).rpc("sitemap_batch_start_id", {
-    skip_count: skipCount,
-    tech_mode: techFilterMode === "include",
-  });
-  // THROW sur erreur : un sitemap en 500 sera re-crawlé par Google ; un
-  // sitemap vide caché 24h fait disparaître 45k fiches en silence.
-  if (error) {
-    throw new Error(`sitemap_batch_start_id(${skipCount}) : ${error.message}`);
-  }
+  // THROW (après 4 retries) sur erreur : un sitemap en 500 sera re-crawlé par
+  // Google ; un sitemap vide caché 24h fait disparaître 45k fiches en silence.
+  const data = await withSitemapRetry<number | null>(
+    () =>
+      (supabase as any).rpc("sitemap_batch_start_id", {
+        skip_count: skipCount,
+        tech_mode: techFilterMode === "include",
+      }),
+    `sitemap_batch_start_id(${skipCount})`
+  );
   // null = batch hors-borne (skip > nb total de rows) : sitemap vide légitime
   return data === null ? -1 : Number(data);
 }
@@ -748,19 +775,21 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
       SUPABASE_PAGE_SIZE,
       PROS_PER_SITEMAP - allPros.length
     );
-    const { data, error } = await supabase
-      .from("pros")
-      .select("slug, updated_at, claimed_by_user_id, id")
-      .eq("is_active", true)
-      .is("deleted_at", null)
-      .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
-      .gt("id", lastId)
-      .order("id", { ascending: true })
-      .limit(limit);
-    // THROW : un batch tronqué en silence serait caché 24h (cf. 12/06)
-    if (error) {
-      throw new Error(`buildProsUrls batch ${batchIndex} : ${error.message}`);
-    }
+    // THROW (après 4 retries) : un batch tronqué en silence serait caché 24h
+    // (cf. 12/06). Le retry absorbe les timeouts passagers sous crawl (14/06).
+    const data = await withSitemapRetry<ProSitemapRow[] | null>(
+      () =>
+        supabase
+          .from("pros")
+          .select("slug, updated_at, claimed_by_user_id, id")
+          .eq("is_active", true)
+          .is("deleted_at", null)
+          .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
+          .gt("id", lastId)
+          .order("id", { ascending: true })
+          .limit(limit),
+      `buildProsUrls batch ${batchIndex}`
+    );
     const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
     allPros.push(...rows);
@@ -800,19 +829,21 @@ async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitema
       SUPABASE_PAGE_SIZE,
       PROS_PER_SITEMAP - allPros.length
     );
-    const { data, error } = await supabase
-      .from("pros")
-      .select("slug, updated_at, claimed_by_user_id, id")
-      .in("category_id", AI_CATEGORY_IDS)
-      .eq("is_active", true)
-      .is("deleted_at", null)
-      .gt("id", lastId)
-      .order("id", { ascending: true })
-      .limit(limit);
-    // THROW : un batch tronqué en silence serait caché 24h (cf. 12/06)
-    if (error) {
-      throw new Error(`buildAiProsUrls batch ${batchIndex} : ${error.message}`);
-    }
+    // THROW (après 4 retries) : un batch tronqué en silence serait caché 24h
+    // (cf. 12/06). Le retry absorbe les timeouts passagers sous crawl (14/06).
+    const data = await withSitemapRetry<ProSitemapRow[] | null>(
+      () =>
+        supabase
+          .from("pros")
+          .select("slug, updated_at, claimed_by_user_id, id")
+          .in("category_id", AI_CATEGORY_IDS)
+          .eq("is_active", true)
+          .is("deleted_at", null)
+          .gt("id", lastId)
+          .order("id", { ascending: true })
+          .limit(limit),
+      `buildAiProsUrls batch ${batchIndex}`
+    );
     const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
     allPros.push(...rows);
