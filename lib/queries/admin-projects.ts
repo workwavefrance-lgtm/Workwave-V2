@@ -100,15 +100,37 @@ export const getAdminProjectById = cache(async (id: number) => {
     .eq("project_id", id)
     .order("sent_at", { ascending: false });
 
+  // Qui a PAYÉ (débloqué le lead à 9,90 €) parmi les destinataires.
+  const { data: unlocks } = await db
+    .from("lead_unlocks")
+    .select("pro_id, paid_at, amount_cents")
+    .eq("project_id", id);
+  const paidMap = new Map<number, { paidAt: string; amountEur: number }>();
+  for (const u of (unlocks || []) as { pro_id: number; paid_at: string; amount_cents: number | null }[]) {
+    if (u.pro_id != null) paidMap.set(u.pro_id, { paidAt: u.paid_at, amountEur: (u.amount_cents || 0) / 100 });
+  }
+
+  type LeadRow = {
+    id: number;
+    status: string;
+    sent_at: string;
+    opened_at: string | null;
+    contacted_at: string | null;
+    pro: { id: number; name: string; slug: string; email: string | null; phone: string | null; subscription_status: string } | null;
+  };
+  const enriched = ((leads || []) as unknown as LeadRow[]).map((l) => {
+    const paid = l.pro ? paidMap.get(l.pro.id) : undefined;
+    return { ...l, paid: !!paid, paidAt: paid?.paidAt ?? null, paidAmountEur: paid?.amountEur ?? null };
+  });
+
   return {
     project: project as Record<string, unknown>,
-    leads: (leads || []) as unknown as {
-      id: number;
-      status: string;
-      sent_at: string;
-      opened_at: string | null;
-      contacted_at: string | null;
-      pro: { id: number; name: string; slug: string; email: string | null; phone: string | null; subscription_status: string } | null;
-    }[],
+    leads: enriched,
+    // Stats du routing pour l'en-tête (à qui envoyé, combien ont payé, CA).
+    routingStats: {
+      sentCount: enriched.length,
+      paidCount: paidMap.size,
+      revenueEur: [...paidMap.values()].reduce((s, p) => s + p.amountEur, 0),
+    },
   };
 });

@@ -329,7 +329,7 @@ export async function broadcastBtpProject(
     intervention_radius_km: number | null;
     city: { latitude: number | null; longitude: number | null } | null;
   };
-  const DEFAULT_RADIUS_KM = 100; // défaut élargi 20→100 km (décision Willy 11/06 : un inscrit rate trop de leads à 20 km)
+  const DEFAULT_RADIUS_KM = 200; // défaut large (décision Willy 14/06 : 200 km par défaut, le pro réduit ensuite via le slider)
   const targets = ((pros || []) as unknown as ProRow[]).filter(
     (
       p
@@ -384,6 +384,33 @@ export async function broadcastBtpProject(
 
   // 4) Track le broadcast (ou la relance) en BDD
   await markProjectDone(sb, input.projectId, input.isRelance ?? false, sent);
+
+  // 5) Trace QUI a reçu le projet (project_leads, status "sent") pour les stats
+  //    admin "à qui c'est envoyé". N'insère que les pros pas déjà tracés (pas
+  //    de contrainte unique → dédup côté code). Best-effort : un échec ici ne
+  //    casse JAMAIS le broadcast (l'email est déjà parti).
+  try {
+    const { data: existing } = await sb
+      .from("project_leads")
+      .select("pro_id")
+      .eq("project_id", input.projectId);
+    const already = new Set((existing || []).map((r: { pro_id: number }) => r.pro_id));
+    const sentAtIso = new Date().toISOString();
+    const toInsert = targets
+      .filter((t) => !already.has(t.id))
+      .map((t) => ({
+        project_id: input.projectId,
+        pro_id: t.id,
+        status: "sent" as const,
+        sent_at: sentAtIso,
+      }));
+    if (toInsert.length > 0) {
+      const { error: leadErr } = await sb.from("project_leads").insert(toInsert);
+      if (leadErr) console.error("[broadcastBtpProject] project_leads insert KO:", leadErr.message);
+    }
+  } catch (e) {
+    console.error("[broadcastBtpProject] tracking destinataires KO:", (e as Error).message);
+  }
 
   return { totalTargets: targets.length, sent, failed, errors };
 }

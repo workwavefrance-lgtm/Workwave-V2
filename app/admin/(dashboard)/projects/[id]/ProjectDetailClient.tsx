@@ -27,6 +27,9 @@ type LeadData = {
   sent_at: string;
   opened_at: string | null;
   contacted_at: string | null;
+  paid?: boolean;
+  paidAt?: string | null;
+  paidAmountEur?: number | null;
   pro: {
     id: number;
     name: string;
@@ -238,14 +241,24 @@ export default function ProjectDetailClient({
             const broadcastCount = project.broadcast_count as number | null;
             const broadcastedAt = project.broadcasted_at as string | null;
             const isAi = project.vertical === "tech";
+            const paidCount = leads.filter((l) => l.paid).length;
             return (
               <Card
                 title={
                   isAi
                     ? `Broadcast (${broadcastCount ?? 0} freelances) — ${leads.length} contact${leads.length > 1 ? "s" : ""}`
-                    : `Routing (${leads.length} pros)`
+                    : `Routing — ${leads.length} destinataire${leads.length > 1 ? "s" : ""}${paidCount > 0 ? ` · ${paidCount} payé${paidCount > 1 ? "s" : ""}` : ""}`
                 }
               >
+                {!isAi && broadcastedAt && (
+                  <p className="text-xs mb-3" style={{ color: "var(--admin-text-tertiary)" }}>
+                    Diffusé à {leads.length} pro{leads.length > 1 ? "s" : ""} le{" "}
+                    {new Date(broadcastedAt).toLocaleString("fr-FR", {
+                      day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+                    })}
+                    {paidCount > 0 ? ` — ${paidCount} a${paidCount > 1 ? "/ont" : ""} débloqué (${(paidCount * 9.9).toFixed(2).replace(".", ",")} €)` : ""}.
+                  </p>
+                )}
                 {isAi && broadcastedAt && (
                   <p className="text-xs mb-3" style={{ color: "var(--admin-text-tertiary)" }}>
                     Diffuse a {broadcastCount ?? 0} freelance{(broadcastCount ?? 0) > 1 ? "s" : ""} le{" "}
@@ -293,7 +306,11 @@ export default function ProjectDetailClient({
                           minute: "2-digit",
                         })}
                       </span>
-                      <AdminBadge variant={s.variant}>{s.label}</AdminBadge>
+                      {lead.paid ? (
+                        <AdminBadge variant="success">Payé 9,90 €</AdminBadge>
+                      ) : (
+                        <AdminBadge variant={s.variant}>{s.label}</AdminBadge>
+                      )}
                     </div>
                   );
                 })}
