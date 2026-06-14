@@ -20,7 +20,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
-export const maxDuration = 90;
+export const maxDuration = 300;
 
 const BASE = "https://workwave.fr";
 const PROS_PER_SITEMAP = 45000;
@@ -34,18 +34,28 @@ function getServiceClient() {
   );
 }
 
+// Retry 3× : un seul fetch qui timeout pendant le pic de crawl Google
+// (base surchargée → le sous-sitemap qui fait une RPC dépasse le timeout)
+// renvoyait -1 et déclenchait une FAUSSE alerte "sitemap KO" (cas 13/06 08:02
+// alors que le sitemap servait bien 9809 URLs 30 min plus tard). On ne conclut
+// à un échec qu'après 3 tentatives espacées.
 async function countUrls(url: string): Promise<number> {
-  try {
-    const res = await fetch(url, {
-      headers: { "User-Agent": UA },
-      signal: AbortSignal.timeout(60000),
-    });
-    if (!res.ok) return -1;
-    const txt = await res.text();
-    return (txt.match(/<url>/g) || []).length;
-  } catch {
-    return -1;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": UA },
+        signal: AbortSignal.timeout(60000),
+      });
+      if (res.ok) {
+        const txt = await res.text();
+        return (txt.match(/<url>/g) || []).length;
+      }
+    } catch {
+      /* timeout/réseau : on retente */
+    }
+    if (attempt < 3) await new Promise((r) => setTimeout(r, 8000));
   }
+  return -1;
 }
 
 export async function GET(req: Request) {
