@@ -1,3 +1,9 @@
+"use client";
+
+// Server Component → Client Component avec une prop fonction (formatter du
+// graphe) = interdit ("Functions cannot be passed to Client Components"). Cette
+// section affiche juste des data sérialisables (BtpFinances) → "use client" OK.
+// Bug latent depuis le 07/06 (page jamais rendue en prod jusqu'ici).
 import AdminKPICard from "@/components/admin/data-display/AdminKPICard";
 import AdminAreaChartComponent from "@/components/admin/charts/AdminAreaChart";
 import type { BtpFinances } from "@/lib/queries/admin-finances-btp";
