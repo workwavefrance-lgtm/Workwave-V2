@@ -6,11 +6,12 @@ import { verifyClaim, type VerifyFormState } from "@/app/(public)/pro/reclamer/[
 type Props = {
   attemptId: string;
   slug: string;
+  destinationEmail?: string | null;
 };
 
 const initialState: VerifyFormState = { success: false };
 
-export default function VerificationForm({ attemptId, slug }: Props) {
+export default function VerificationForm({ attemptId, slug, destinationEmail }: Props) {
   const [state, formAction, isPending] = useActionState(
     verifyClaim,
     initialState
@@ -111,7 +112,17 @@ export default function VerificationForm({ attemptId, slug }: Props) {
           Vérification par email
         </h2>
         <p className="text-sm text-[var(--text-secondary)]">
-          Saisissez le code à 6 chiffres envoyé à votre adresse email.
+          {destinationEmail ? (
+            <>
+              Saisissez le code à 6 chiffres envoyé à{" "}
+              <span className="font-semibold text-[var(--text-primary)] whitespace-nowrap">
+                {destinationEmail}
+              </span>
+              .
+            </>
+          ) : (
+            <>Saisissez le code à 6 chiffres envoyé à votre adresse email.</>
+          )}
         </p>
       </div>
 
@@ -181,6 +192,37 @@ export default function VerificationForm({ attemptId, slug }: Props) {
 
       <p className="text-xs text-[var(--text-tertiary)] text-center">
         Le code est valable 15 minutes. Vous disposez de 3 tentatives.
+      </p>
+
+      {/* Pas reçu ? — anti-spam + solution boîtes filtrantes (OVH, Orange, pro…) */}
+      <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl p-4 text-left">
+        <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">
+          Vous n&apos;avez pas reçu le code ?
+        </p>
+        <ul className="space-y-1.5 text-xs text-[var(--text-secondary)] leading-relaxed">
+          <li>
+            • Vérifiez votre dossier <strong>spam / indésirables</strong> — l&apos;email vient
+            de <span className="font-mono">contact@workwave.fr</span>.
+          </li>
+          <li>
+            • Certaines messageries professionnelles (OVH, Orange…) filtrent fortement.
+            Le plus simple : <strong>recommencez avec une adresse Gmail</strong> — votre SIRET
+            reste le même, c&apos;est lui qui valide la fiche.
+          </li>
+          <li>• Le code arrive en général en moins de 2 minutes.</li>
+        </ul>
+      </div>
+
+      {/* Fallback contact (filet de sécurité — évite l'abandon / la plainte) */}
+      <p className="text-xs text-[var(--text-tertiary)] text-center">
+        Un problème ? Écrivez-nous à{" "}
+        <a
+          href="mailto:contact@workwave.fr"
+          className="text-[var(--accent)] hover:underline font-medium"
+        >
+          contact@workwave.fr
+        </a>{" "}
+        en précisant votre SIRET, on vous répond sous 48h.
       </p>
     </form>
   );

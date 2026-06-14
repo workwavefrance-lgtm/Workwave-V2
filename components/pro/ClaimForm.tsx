@@ -113,6 +113,11 @@ export default function ClaimForm({ slug, proName }: Props) {
         {state.errors?.email && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
         )}
+        <p className="mt-1.5 text-xs text-[var(--text-tertiary)] leading-relaxed">
+          Un code de vérification y sera envoyé — utilisez une adresse à laquelle vous
+          avez accès. En cas de boîte pro qui filtre (OVH, Orange…), une adresse Gmail
+          passe le mieux.
+        </p>
       </div>
 
       {/* SIRET */}

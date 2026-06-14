@@ -13,11 +13,42 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+// Obfusque l'email pour rassurer l'utilisateur sans rien leaker (f***@domaine.fr).
+function obfuscateEmail(email: string | null | undefined): string | null {
+  if (!email || !email.includes("@")) return null;
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return null;
+  return `${local.slice(0, 1)}***@${domain}`;
+}
+
+// Récupère l'email destinataire du code (depuis la tentative) pour l'afficher obfusqué.
+async function getAttemptEmail(attemptId: string): Promise<string | null> {
+  const id = Number(attemptId);
+  if (!Number.isFinite(id)) return null;
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const sb = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data } = await sb
+      .from("claim_attempts")
+      .select("email")
+      .eq("id", id)
+      .single();
+    return obfuscateEmail((data as { email?: string } | null)?.email);
+  } catch {
+    return null;
+  }
+}
+
 export default async function VerificationPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { attempt } = await searchParams;
 
   if (!attempt) notFound();
+
+  const destinationEmail = await getAttemptEmail(attempt);
 
   return (
     <main className="max-w-md mx-auto px-4 py-16">
@@ -41,7 +72,7 @@ export default async function VerificationPage({ params, searchParams }: Props) 
           </svg>
         </div>
 
-        <VerificationForm attemptId={attempt} slug={slug} />
+        <VerificationForm attemptId={attempt} slug={slug} destinationEmail={destinationEmail} />
       </div>
     </main>
   );
