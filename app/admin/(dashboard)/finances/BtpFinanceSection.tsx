@@ -51,6 +51,55 @@ export default function BtpFinanceSection({ data }: { data: BtpFinances }) {
         />
       </div>
 
+      {/* Top acheteurs : les pros qui débloquent le plus de leads */}
+      <div
+        className="rounded-xl overflow-hidden mb-4"
+        style={{ backgroundColor: "var(--admin-card)", border: "1px solid var(--admin-border)" }}
+      >
+        <div className="px-5 py-3.5" style={{ borderBottom: "1px solid var(--admin-border)" }}>
+          <h3 className="text-sm font-semibold" style={{ color: "var(--admin-text)" }}>
+            Top acheteurs
+          </h3>
+          <p className="text-[11px] mt-0.5" style={{ color: "var(--admin-text-secondary)" }}>
+            Les professionnels qui achètent le plus de leads (classés par CA généré)
+          </p>
+        </div>
+        {data.topBuyers.length === 0 ? (
+          <div className="px-5 py-8 text-center text-xs" style={{ color: "var(--admin-text-tertiary)" }}>
+            Aucun acheteur pour le moment.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: "1px solid var(--admin-border)" }}>
+                <th className="text-left font-medium px-5 py-2.5 text-[11px]" style={{ color: "var(--admin-text-secondary)" }}>#</th>
+                <th className="text-left font-medium px-5 py-2.5 text-[11px]" style={{ color: "var(--admin-text-secondary)" }}>Professionnel</th>
+                <th className="text-right font-medium px-5 py-2.5 text-[11px]" style={{ color: "var(--admin-text-secondary)" }}>Leads achetés</th>
+                <th className="text-right font-medium px-5 py-2.5 text-[11px]" style={{ color: "var(--admin-text-secondary)" }}>Dernier achat</th>
+                <th className="text-right font-medium px-5 py-2.5 text-[11px]" style={{ color: "var(--admin-text-secondary)" }}>CA généré</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.topBuyers.map((b, i) => (
+                <tr key={b.proId} style={{ borderBottom: "1px solid var(--admin-border)" }}>
+                  <td className="px-5 py-2.5 tabular-nums font-medium" style={{ color: i < 3 ? "var(--admin-accent)" : "var(--admin-text-tertiary)" }}>
+                    {i + 1}
+                  </td>
+                  <td className="px-5 py-2.5" style={{ color: "var(--admin-text)" }}>{b.proName ?? "—"}</td>
+                  <td className="px-5 py-2.5 text-right tabular-nums" style={{ color: "var(--admin-text-secondary)" }}>{b.unlocks}</td>
+                  <td className="px-5 py-2.5 text-right tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
+                    {new Date(b.lastPaidAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" })}
+                  </td>
+                  <td className="px-5 py-2.5 text-right tabular-nums font-semibold" style={{ color: "var(--admin-text)" }}>
+                    {fmtEur(b.totalEur)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
       {/* Derniers déblocages */}
       <div
         className="rounded-xl overflow-hidden"

@@ -19,6 +19,14 @@ export type BtpFinances = {
     proName: string | null;
     projectId: number;
   }[];
+  // Classement des pros qui achètent le plus de leads (CA + nb déblocages).
+  topBuyers: {
+    proId: number;
+    proName: string | null;
+    unlocks: number;
+    totalEur: number;
+    lastPaidAt: string;
+  }[];
 };
 
 type Row = {
@@ -63,6 +71,41 @@ export const getBtpFinances = cache(async (): Promise<BtpFinances> => {
     if (byMonthMap.has(key)) byMonthMap.set(key, byMonthMap.get(key)! + (r.amount_cents || 0));
   }
 
+  // Top acheteurs : agrégation par pro (nb déblocages + CA), trié par CA décroissant.
+  const proName = (r: Row) =>
+    Array.isArray(r.pros) ? r.pros[0]?.name ?? null : r.pros?.name ?? null;
+  const buyersMap = new Map<
+    number,
+    { proId: number; proName: string | null; unlocks: number; totalCents: number; lastPaidAt: string }
+  >();
+  for (const r of rows) {
+    if (r.pro_id == null) continue;
+    const prev = buyersMap.get(r.pro_id);
+    if (prev) {
+      prev.unlocks += 1;
+      prev.totalCents += r.amount_cents || 0;
+      if (r.paid_at > prev.lastPaidAt) prev.lastPaidAt = r.paid_at;
+    } else {
+      buyersMap.set(r.pro_id, {
+        proId: r.pro_id,
+        proName: proName(r),
+        unlocks: 1,
+        totalCents: r.amount_cents || 0,
+        lastPaidAt: r.paid_at,
+      });
+    }
+  }
+  const topBuyers = [...buyersMap.values()]
+    .sort((a, b) => b.totalCents - a.totalCents || b.unlocks - a.unlocks)
+    .slice(0, 20)
+    .map((b) => ({
+      proId: b.proId,
+      proName: b.proName,
+      unlocks: b.unlocks,
+      totalEur: Math.round(b.totalCents) / 100,
+      lastPaidAt: b.lastPaidAt,
+    }));
+
   return {
     totalRevenueEur: Math.round(totalCents) / 100,
     unlockCount,
@@ -73,8 +116,9 @@ export const getBtpFinances = cache(async (): Promise<BtpFinances> => {
       id: r.id,
       amountEur: (r.amount_cents || 0) / 100,
       paidAt: r.paid_at,
-      proName: Array.isArray(r.pros) ? r.pros[0]?.name ?? null : r.pros?.name ?? null,
+      proName: proName(r),
       projectId: r.project_id,
     })),
+    topBuyers,
   };
 });
