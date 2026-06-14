@@ -231,7 +231,11 @@ export default async function ProPage({ params }: Props) {
 
   // Sirene v3 : foundingDate + numberOfEmployees pour Schema.org
   // (signal d'anciennete et de taille pour Google + LLM)
-  if (pro.founding_date) {
+  // founded_year (éditable par le pro dans son dashboard) prime sur founding_date
+  // (date Sirene de l'établissement, parfois plus récente que le début d'activité).
+  if (pro.founded_year && pro.founded_year > 1800) {
+    jsonLd.foundingDate = String(pro.founded_year);
+  } else if (pro.founding_date) {
     jsonLd.foundingDate = pro.founding_date;
   }
   if (pro.effectif_range) {
@@ -506,12 +510,19 @@ export default async function ProPage({ params }: Props) {
               majeur pour les particuliers : c'est ce qu'ils regardent en
               premier (anciennete + taille). Affiche uniquement si on a
               au moins une des deux infos. */}
-          {(pro.founding_date || pro.effectif_range) && (
+          {(pro.founded_year || pro.founding_date || pro.effectif_range) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {pro.founding_date && (() => {
-                const year = formatFoundingYear(pro.founding_date);
-                const age = formatAgeYears(pro.founding_date);
+              {(pro.founded_year || pro.founding_date) && (() => {
+                // founded_year (édité par le pro) prime sur founding_date Sirene.
+                const year =
+                  pro.founded_year && pro.founded_year > 1800
+                    ? String(pro.founded_year)
+                    : formatFoundingYear(pro.founding_date);
                 if (!year) return null;
+                const age =
+                  pro.founded_year && pro.founded_year > 1800
+                    ? new Date().getFullYear() - pro.founded_year
+                    : formatAgeYears(pro.founding_date);
                 return (
                   <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
