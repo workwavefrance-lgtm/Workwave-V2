@@ -201,6 +201,30 @@ export async function submitProject(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
+  // Dédup anti double-soumission : si un projet identique (même email + ville +
+  // métier + description) a été déposé dans les 5 dernières minutes, on NE
+  // recrée PAS et on NE re-broadcast PAS — on renvoie l'utilisateur sur l'écran
+  // de confirmation comme si c'était passé. Cas réel 15/06 : projet #74/#75
+  // déposé 2× à 44 s d'écart (le particulier a re-cliqué pendant la qualif IA
+  // qui dure ~4 s). Évite le doublon en base + le double mail aux pros.
+  const dedupSince = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+  const { data: recentDup } = await serviceClient
+    .from("projects")
+    .select("id")
+    .eq("email", data.email)
+    .eq("city_id", data.cityId)
+    .eq("category_id", data.categoryId)
+    .eq("description", data.description)
+    .neq("status", "deleted")
+    .gte("created_at", dedupSince)
+    .limit(1);
+  if (recentDup && recentDup.length > 0) {
+    console.log(
+      `[submitProject] doublon détecté (projet ${recentDup[0].id} < 5min) — skip insert + broadcast`
+    );
+    redirect("/deposer-projet/merci");
+  }
+
   // Déterminer le statut et le score de suspicion
   const suspicionScore = aiQualification?.suspicion_score ?? null;
   const isSuspicious = suspicionScore !== null && suspicionScore > 70;
