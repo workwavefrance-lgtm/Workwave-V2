@@ -6,7 +6,9 @@ import { submitClaim, type ClaimFormState } from "@/app/(public)/pro/reclamer/[s
 
 type Props = {
   slug: string;
-  proName: string;
+  // SIRET masqué (ex. "508 056 249 0••••") affiché en placeholder : le pro
+  // "confirme" un numéro déjà montré plutôt que de le saisir à l'aveugle.
+  maskedSiret: string;
 };
 
 const initialState: ClaimFormState = { success: false };
@@ -36,26 +38,19 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
-export default function ClaimForm({ slug, proName }: Props) {
+export default function ClaimForm({ slug, maskedSiret }: Props) {
   const [state, formAction, isPending] = useActionState(
     submitClaim,
     initialState
   );
 
-  // Inputs controlled : preserver les valeurs au re-render apres echec validation
-  // (SIRET deja saisi, email, etc.). Sans ca, l'user re-tape tout a chaque erreur.
-  const [email, setEmail] = useState("");
+  // Inputs controlled : préserver les valeurs au re-render après échec validation.
   const [siret, setSiret] = useState("");
-  const [managerName, setManagerName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const passwordValid = password.length >= 8 && /\d/.test(password);
-  const passwordsMatch = password.length > 0 && passwordConfirm.length > 0 && password === passwordConfirm;
-  const passwordsMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
 
   function handleSiretInput(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value.replace(/\D/g, "");
@@ -69,10 +64,10 @@ export default function ClaimForm({ slug, proName }: Props) {
   const inputError = "border-red-500 focus:ring-2 focus:ring-red-500/20";
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="slug" value={slug} />
 
-      {/* Message d'erreur global (cache pendant isPending pour pas de flash rouge) */}
+      {/* Message d'erreur global (caché pendant isPending pour pas de flash rouge) */}
       {state.message && !state.success && !isPending && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-sm text-red-600 dark:text-red-400">
@@ -81,52 +76,13 @@ export default function ClaimForm({ slug, proName }: Props) {
         </div>
       )}
 
-      {/* En-tête */}
-      <div className="text-center pb-2">
-        <h2 className="text-xl font-bold text-[var(--text-primary)] mb-1">
-          Réclamer la fiche
-        </h2>
-        <p className="text-sm text-[var(--text-secondary)]">
-          <span className="font-medium text-[var(--text-primary)]">{proName}</span>
-        </p>
-      </div>
-
-      {/* Email */}
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-        >
-          Email professionnel
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          placeholder="contact@entreprise.fr"
-          required
-          className={`${inputBase} ${state.errors?.email && !isPending ? inputError : inputNormal}`}
-        />
-        {state.errors?.email && !isPending && (
-          <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
-        )}
-        <p className="mt-1.5 text-xs text-[var(--text-tertiary)] leading-relaxed">
-          Un code de vérification y sera envoyé — utilisez une adresse à laquelle vous
-          avez accès. En cas de boîte pro qui filtre (OVH, Orange…), une adresse Gmail
-          passe le mieux.
-        </p>
-      </div>
-
-      {/* SIRET */}
+      {/* SIRET — reframé "confirmez" : on l'affiche masqué au-dessus, le pro le recopie */}
       <div>
         <label
           htmlFor="siret"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          Numéro SIRET
+          Confirmez votre SIRET
         </label>
         <input
           id="siret"
@@ -136,70 +92,48 @@ export default function ClaimForm({ slug, proName }: Props) {
           onChange={handleSiretInput}
           inputMode="numeric"
           autoComplete="off"
-          placeholder="123 456 789 01234"
+          placeholder={maskedSiret}
           maxLength={17}
           required
           className={`${inputBase} font-mono tracking-wide ${state.errors?.siret && !isPending ? inputError : inputNormal}`}
         />
-        <p className="mt-1 text-xs text-[var(--text-tertiary)]">
-          14 chiffres, visible sur vos documents officiels
+        <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
+          On l&apos;affiche au-dessus — recopiez-le, c&apos;est votre preuve d&apos;identité.
         </p>
         {state.errors?.siret && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.siret}</p>
         )}
       </div>
 
-      {/* Nom du gérant */}
+      {/* Email */}
       <div>
         <label
-          htmlFor="managerName"
+          htmlFor="email"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          Nom du gérant
+          Votre email
         </label>
         <input
-          id="managerName"
-          name="managerName"
-          type="text"
-          value={managerName}
-          onChange={(e) => setManagerName(e.target.value)}
-          autoComplete="name"
-          placeholder="Jean Dupont"
+          id="email"
+          name="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          placeholder="vous@exemple.fr"
           required
-          className={`${inputBase} ${state.errors?.managerName && !isPending ? inputError : inputNormal}`}
+          className={`${inputBase} ${state.errors?.email && !isPending ? inputError : inputNormal}`}
         />
-        {state.errors?.managerName && !isPending && (
-          <p className="mt-1.5 text-sm text-red-500">
-            {state.errors.managerName}
-          </p>
+        {state.errors?.email && !isPending && (
+          <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
         )}
+        <p className="mt-1.5 text-xs text-[var(--text-tertiary)] leading-relaxed">
+          Pour recevoir le code de vérification + vous connecter. Boîte pro qui
+          filtre (OVH, Orange…)&nbsp;? Une adresse Gmail passe le mieux.
+        </p>
       </div>
 
-      {/* Téléphone */}
-      <div>
-        <label
-          htmlFor="phone"
-          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-        >
-          Téléphone
-        </label>
-        <input
-          id="phone"
-          name="phone"
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          autoComplete="tel"
-          placeholder="06 12 34 56 78"
-          required
-          className={`${inputBase} ${state.errors?.phone && !isPending ? inputError : inputNormal}`}
-        />
-        {state.errors?.phone && !isPending && (
-          <p className="mt-1.5 text-sm text-red-500">{state.errors.phone}</p>
-        )}
-      </div>
-
-      {/* Mot de passe */}
+      {/* Mot de passe — un seul champ + œil */}
       <div>
         <label
           htmlFor="password"
@@ -213,7 +147,7 @@ export default function ClaimForm({ slug, proName }: Props) {
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
-            placeholder="Minimum 8 caractères"
+            placeholder="8 caractères minimum"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -224,82 +158,24 @@ export default function ClaimForm({ slug, proName }: Props) {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-200"
             tabIndex={-1}
+            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
           >
             <EyeIcon open={showPassword} />
           </button>
         </div>
-        <p className="mt-1 text-xs text-[var(--text-tertiary)]">
-          Minimum 8 caractères dont au moins 1 chiffre
+        <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
+          Minimum 8 caractères dont au moins 1 chiffre.
         </p>
         {state.errors?.password && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.password}</p>
         )}
       </div>
 
-      {/* Confirmation mot de passe */}
-      <div>
-        <label
-          htmlFor="passwordConfirm"
-          className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-        >
-          Confirmer le mot de passe
-        </label>
-        <div className="relative">
-          <input
-            id="passwordConfirm"
-            name="passwordConfirm"
-            type={showPasswordConfirm ? "text" : "password"}
-            autoComplete="new-password"
-            placeholder="Retapez votre mot de passe"
-            required
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            className={`${inputBase} pr-12 ${
-              state.errors?.passwordConfirm || passwordsMismatch
-                ? inputError
-                : passwordsMatch
-                ? "border-green-500 focus:ring-2 focus:ring-green-500/20"
-                : inputNormal
-            }`}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors duration-200"
-            tabIndex={-1}
-          >
-            <EyeIcon open={showPasswordConfirm} />
-          </button>
-        </div>
-        {passwordsMatch && (
-          <p className="mt-1.5 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Les mots de passe correspondent
-          </p>
-        )}
-        {passwordsMismatch && (
-          <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Les mots de passe ne correspondent pas
-          </p>
-        )}
-        {state.errors?.passwordConfirm && (
-          <p className="mt-1.5 text-sm text-red-500">{state.errors.passwordConfirm}</p>
-        )}
-      </div>
-
-      {/* Submit : bouton coral large + texte action-oriente + rassurance dessous.
-          Pattern CRO : le bouton doit etre l'element le plus visible de la page,
-          le texte doit promettre un benefice (recevoir des demandes), et la
-          rassurance doit lever les freins (rapide, sans engagement). */}
+      {/* Submit : bouton coral large + bénéfice + rassurance dessous. */}
       <button
         type="submit"
-        disabled={isPending || !passwordValid || passwordsMismatch}
-        className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-5 rounded-full text-base sm:text-lg font-bold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[var(--accent)]/25"
+        disabled={isPending || !passwordValid}
+        className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white px-8 py-4 rounded-full text-base font-bold transition-all duration-250 hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-[var(--accent)]/25"
       >
         {isPending ? (
           <>
@@ -327,7 +203,7 @@ export default function ClaimForm({ slug, proName }: Props) {
           </>
         ) : (
           <>
-            Activer mon accès pro et recevoir des demandes
+            Recevoir mon code de validation
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
@@ -335,15 +211,15 @@ export default function ClaimForm({ slug, proName }: Props) {
         )}
       </button>
 
-      <div className="text-center space-y-1.5">
-        <p className="text-sm font-medium text-[var(--text-secondary)] flex items-center justify-center gap-1.5">
-          <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <div className="text-center space-y-2">
+        <p className="text-xs text-[var(--text-tertiary)]">
+          Gratuit · 2 min · sans engagement
+        </p>
+        <p className="text-[11px] text-[var(--text-secondary)] flex items-center justify-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
-          Validation rapide en 30&nbsp;secondes. Sans aucun engagement.
-        </p>
-        <p className="text-xs text-[var(--text-tertiary)]">
-          Un code de vérification à 6 chiffres sera envoyé à votre adresse email.
+          Téléphone, photos, description… à compléter juste après dans votre espace.
         </p>
       </div>
     </form>

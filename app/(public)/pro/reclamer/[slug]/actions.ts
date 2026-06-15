@@ -133,31 +133,20 @@ async function notifyProOfClaimSuccess(params: {
 // Validation
 // ============================================
 
-const claimSchema = z
-  .object({
-    email: z.string().email("Adresse email invalide"),
-    siret: z
-      .string()
-      .regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres"),
-    managerName: z
-      .string()
-      .min(2, "Le nom doit contenir au moins 2 caractères"),
-    phone: z
-      .string()
-      .regex(
-        /^(?:(?:\+33|0033|0)\s*[1-9])(?:[\s.-]*\d{2}){4}$/,
-        "Numéro de téléphone invalide"
-      ),
-    password: z
-      .string()
-      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
-      .regex(/\d/, "Le mot de passe doit contenir au moins 1 chiffre"),
-    passwordConfirm: z.string(),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["passwordConfirm"],
-  });
+// Formulaire de réclamation allégé (refonte 15/06, variante A) : on ne demande
+// que l'identité (SIRET = preuve) + email (où recevoir le code) + mot de passe.
+// managerName/phone étaient collectés mais JAMAIS stockés (le pro les complète
+// dans son espace après) ; passwordConfirm retiré au profit de l'œil afficher.
+const claimSchema = z.object({
+  email: z.string().email("Adresse email invalide"),
+  siret: z
+    .string()
+    .regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres"),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+    .regex(/\d/, "Le mot de passe doit contenir au moins 1 chiffre"),
+});
 
 // ============================================
 // submitClaim — Vérification SIRET + envoi code
@@ -176,10 +165,7 @@ export async function submitClaim(
   const raw = {
     email: (formData.get("email") as string)?.trim(),
     siret: (formData.get("siret") as string)?.replace(/\s/g, ""),
-    managerName: (formData.get("managerName") as string)?.trim(),
-    phone: (formData.get("phone") as string)?.trim(),
     password: formData.get("password") as string,
-    passwordConfirm: formData.get("passwordConfirm") as string,
   };
 
   const result = claimSchema.safeParse(raw);
