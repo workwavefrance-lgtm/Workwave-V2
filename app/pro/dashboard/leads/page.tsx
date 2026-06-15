@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getBtpProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { haversineKm } from "@/lib/utils/haversine";
 import { startBtpUnlock } from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
 
@@ -70,9 +71,8 @@ export default async function LeadsPage({
   const pro = await getBtpProByUserId(user.id);
   if (!pro) redirect("/pro/reclamer");
 
-  // Récupérer le département du pro (via cities.department_id)
-  const proDeptId = pro.city?.department_id;
-  if (!proDeptId) {
+  // Le pro doit avoir une ville renseignée pour qu'on connaisse sa zone.
+  if (!pro.city) {
     return (
       <div className="space-y-8">
         <div>
@@ -94,19 +94,22 @@ export default async function LeadsPage({
     );
   }
 
-  // Charger toutes les villes du département du pro
   const service = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  const { data: cities } = await service
-    .from("cities")
-    .select("id")
-    .eq("department_id", proDeptId);
-  const cityIds = (cities || []).map((c: { id: number }) => c.id);
 
-  // Catégories du pro = principale + secondaires. Un pro multi-métiers voit
-  // les projets de TOUS ses métiers, pas seulement sa catégorie principale.
+  // Zone du pro = son RAYON d'intervention (distance Haversine), pas son seul
+  // département. Doit matcher EXACTEMENT le broadcast qui lui envoie les mails
+  // (lib/email/broadcast-btp-project.ts) — sinon il reçoit un lead inter-dépt
+  // (ex. maçon Vienne 86, rayon 200 km → lead Charente 16) qu'il ne retrouve
+  // pas ici → impossible à débloquer = revenu perdu (bug 15/06).
+  const proLat = pro.city.latitude ?? null;
+  const proLng = pro.city.longitude ?? null;
+  const proDeptId = pro.city.department_id ?? null;
+  const radiusKm = pro.intervention_radius_km ?? 200;
+
+  // Catégories du pro = principale + secondaires (multi-métiers).
   const leadCategoryIds = Array.from(
     new Set<number>([
       pro.category_id,
@@ -114,22 +117,31 @@ export default async function LeadsPage({
     ])
   );
 
-  // Charger tous les projets BTP eligibles (métiers du pro + même département)
-  let projects: ProjectRow[] = [];
-  if (cityIds.length > 0) {
-    const { data: projectsRaw } = await service
-      .from("projects")
-      .select(
-        "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, cleaned_description, has_contact_in_description, cities(name), categories(name)"
-      )
-      .eq("vertical", "btp")
-      .in("category_id", leadCategoryIds)
-      .in("city_id", cityIds)
-      .neq("status", "deleted")
-      .order("created_at", { ascending: false })
-      .limit(PROJECTS_LIMIT);
-    projects = (projectsRaw || []) as unknown as ProjectRow[];
-  }
+  // La table projects est petite : on charge les projets des métiers du pro,
+  // puis on filtre par distance Haversine côté JS (même logique que le broadcast).
+  const { data: projectsRaw } = await service
+    .from("projects")
+    .select(
+      "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, cleaned_description, has_contact_in_description, cities(name, latitude, longitude, department_id), categories(name)"
+    )
+    .eq("vertical", "btp")
+    .in("category_id", leadCategoryIds)
+    .neq("status", "deleted")
+    .order("created_at", { ascending: false })
+    .limit(PROJECTS_LIMIT * 5);
+
+  const projects: ProjectRow[] = ((projectsRaw || []) as unknown as ProjectRow[])
+    .filter((p) => {
+      const c = Array.isArray(p.cities) ? p.cities[0] : p.cities;
+      const cLat = c?.latitude ?? null;
+      const cLng = c?.longitude ?? null;
+      if (proLat != null && proLng != null && cLat != null && cLng != null) {
+        return haversineKm(proLat, proLng, cLat, cLng) <= radiusKm;
+      }
+      // Fallback (coordonnées manquantes) : on retombe sur le département du pro.
+      return proDeptId != null && (c?.department_id ?? null) === proDeptId;
+    })
+    .slice(0, PROJECTS_LIMIT);
 
   // Charger les unlocks existants du pro pour savoir lesquels sont deja debloqués
   const projectIds = projects.map((p) => p.id);
@@ -368,8 +380,8 @@ type ProjectRow = {
   cleaned_description: string | null;
   has_contact_in_description: boolean;
   cities:
-    | { name: string }
-    | { name: string }[]
+    | { name: string; latitude?: number | null; longitude?: number | null; department_id?: number | null }
+    | { name: string; latitude?: number | null; longitude?: number | null; department_id?: number | null }[]
     | null;
   categories:
     | { name: string }
