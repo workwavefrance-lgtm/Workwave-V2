@@ -38,6 +38,9 @@ export default async function DashboardHomePage() {
         ...((pro.secondary_category_ids as number[] | null) || []),
       ])
     ),
+    lat: pro.city?.latitude ?? null,
+    lng: pro.city?.longitude ?? null,
+    radiusKm: pro.intervention_radius_km ?? 200,
     departmentId: pro.city?.department_id ?? null,
   });
 

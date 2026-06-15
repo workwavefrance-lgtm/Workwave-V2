@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
+import { haversineKm } from "@/lib/utils/haversine";
 import type {
   ProjectLead,
   ProjectLeadStatus,
@@ -182,9 +183,13 @@ export async function getLeadById(
  */
 export async function getLeadPreviewCount(
   categoryIds: number[],
+  lat: number | null,
+  lng: number | null,
+  radiusKm: number,
   departmentId: number | null
 ): Promise<number> {
-  if (categoryIds.length === 0 || !departmentId) return 0;
+  if (categoryIds.length === 0) return 0;
+  if (lat == null && departmentId == null) return 0;
 
   // Service client pour bypass RLS sur la table projects
   const supabase = getAdminServiceClient();
@@ -200,25 +205,33 @@ export async function getLeadPreviewCount(
     1
   ).toISOString();
 
-  // Récupérer les city_ids du département
-  const { data: cities } = await supabase
-    .from("cities")
-    .select("id")
-    .eq("department_id", departmentId);
-
-  const cityIds = (cities || []).map((c: { id: number }) => c.id);
-  if (cityIds.length === 0) return 0;
-
-  const { count } = await supabase
+  // Zone = RAYON d'intervention (Haversine), pas le seul département — cohérent
+  // avec le broadcast + la page Leads. La table projects est petite : on charge
+  // les projets des métiers du pro sur le mois puis on filtre par distance.
+  const { data: rows } = await supabase
     .from("projects")
-    .select("*", { count: "exact", head: true })
+    .select("id, cities(latitude, longitude, department_id)")
     .in("category_id", categoryIds)
-    .in("city_id", cityIds)
     .gte("created_at", lastMonthStart)
     .lt("created_at", lastMonthEnd)
-    .not("status", "eq", "deleted");
+    .not("status", "eq", "deleted")
+    .limit(2000);
 
-  return count || 0;
+  type R = {
+    cities:
+      | { latitude?: number | null; longitude?: number | null; department_id?: number | null }
+      | { latitude?: number | null; longitude?: number | null; department_id?: number | null }[]
+      | null;
+  };
+  return ((rows || []) as unknown as R[]).filter((p) => {
+    const c = Array.isArray(p.cities) ? p.cities[0] : p.cities;
+    const cLat = c?.latitude ?? null;
+    const cLng = c?.longitude ?? null;
+    if (lat != null && lng != null && cLat != null && cLng != null) {
+      return haversineKm(lat, lng, cLat, cLng) <= radiusKm;
+    }
+    return departmentId != null && (c?.department_id ?? null) === departmentId;
+  }).length;
 }
 
 /**
@@ -281,12 +294,16 @@ export type ProDashboardData = {
 /**
  * Données de l'accueil dashboard BTP en modèle pay-per-lead.
  * DYNAMIQUE : compte les PROJETS matchant les catégories du pro (principale +
- * secondaires) + son département — comme la page Leads — au lieu de la table
- * `project_leads` (morte en pay-per-lead, plus aucune écriture). + lead_unlocks.
+ * secondaires) dans son RAYON d'intervention (distance Haversine) — comme la
+ * page Leads et le broadcast — au lieu de la table `project_leads` (morte en
+ * pay-per-lead). + lead_unlocks. Fallback département si coords manquantes.
  */
 export async function getProDashboardData(args: {
   proId: number;
   categoryIds: number[];
+  lat: number | null;
+  lng: number | null;
+  radiusKm: number;
   departmentId: number | null;
 }): Promise<ProDashboardData> {
   const empty: ProDashboardData = {
@@ -295,60 +312,63 @@ export async function getProDashboardData(args: {
     unlockedCount: 0,
     recentProjects: [],
   };
-  if (!args.departmentId || args.categoryIds.length === 0) return empty;
+  if (args.categoryIds.length === 0) return empty;
+  if (args.lat == null && args.departmentId == null) return empty;
 
   const supabase = getAdminServiceClient();
 
-  const { data: cities } = await supabase
-    .from("cities")
-    .select("id")
-    .eq("department_id", args.departmentId);
-  const cityIds = (cities || []).map((c: { id: number }) => c.id);
-  if (cityIds.length === 0) return empty;
+  // Table projects petite : on charge les projets des métiers du pro puis on
+  // filtre par distance Haversine côté JS (même logique que la page Leads).
+  const { data: rows } = await supabase
+    .from("projects")
+    .select(
+      "id, first_name, created_at, cities(name, latitude, longitude, department_id), categories(name)"
+    )
+    .eq("vertical", "btp")
+    .in("category_id", args.categoryIds)
+    .neq("status", "deleted")
+    .order("created_at", { ascending: false })
+    .limit(500);
 
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-  const [totalRes, monthRes, unlockedRes, recentRes] = await Promise.all([
-    supabase
-      .from("projects")
-      .select("id", { count: "exact", head: true })
-      .eq("vertical", "btp")
-      .in("category_id", args.categoryIds)
-      .in("city_id", cityIds)
-      .neq("status", "deleted"),
-    supabase
-      .from("projects")
-      .select("id", { count: "exact", head: true })
-      .eq("vertical", "btp")
-      .in("category_id", args.categoryIds)
-      .in("city_id", cityIds)
-      .neq("status", "deleted")
-      .gte("created_at", monthStart),
-    supabase
-      .from("lead_unlocks")
-      .select("id", { count: "exact", head: true })
-      .eq("pro_id", args.proId),
-    supabase
-      .from("projects")
-      .select("id, first_name, created_at, cities(name), categories(name)")
-      .eq("vertical", "btp")
-      .in("category_id", args.categoryIds)
-      .in("city_id", cityIds)
-      .neq("status", "deleted")
-      .order("created_at", { ascending: false })
-      .limit(5),
-  ]);
-
-  const recentRows = (recentRes.data || []) as unknown as Array<{
+  type Row = {
     id: number;
     first_name: string | null;
     created_at: string;
-    cities: { name: string } | { name: string }[] | null;
+    cities:
+      | { name?: string; latitude?: number | null; longitude?: number | null; department_id?: number | null }
+      | { name?: string; latitude?: number | null; longitude?: number | null; department_id?: number | null }[]
+      | null;
     categories: { name: string } | { name: string }[] | null;
-  }>;
+  };
 
-  const recentIds = recentRows.map((p) => p.id);
+  const inZone = ((rows || []) as unknown as Row[]).filter((p) => {
+    const c = Array.isArray(p.cities) ? p.cities[0] : p.cities;
+    const cLat = c?.latitude ?? null;
+    const cLng = c?.longitude ?? null;
+    if (args.lat != null && args.lng != null && cLat != null && cLng != null) {
+      return haversineKm(args.lat, args.lng, cLat, cLng) <= args.radiusKm;
+    }
+    return args.departmentId != null && (c?.department_id ?? null) === args.departmentId;
+  });
+
+  const monthStartMs = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1
+  ).getTime();
+  const totalAvailable = inZone.length;
+  const newThisMonth = inZone.filter(
+    (p) => new Date(p.created_at).getTime() >= monthStartMs
+  ).length;
+
+  // Leads débloqués par le pro : total + lesquels parmi les 5 récents.
+  const { count: unlockedCount } = await supabase
+    .from("lead_unlocks")
+    .select("id", { count: "exact", head: true })
+    .eq("pro_id", args.proId);
+
+  const recent = inZone.slice(0, 5);
+  const recentIds = recent.map((p) => p.id);
   const { data: unlocks } = recentIds.length
     ? await supabase
         .from("lead_unlocks")
@@ -358,7 +378,7 @@ export async function getProDashboardData(args: {
     : { data: [] as { project_id: number }[] };
   const unlockedSet = new Set((unlocks || []).map((u) => u.project_id));
 
-  const recentProjects: RecentProjectForPro[] = recentRows.map((p) => ({
+  const recentProjects: RecentProjectForPro[] = recent.map((p) => ({
     id: p.id,
     first_name: p.first_name,
     categoryName: Array.isArray(p.categories)
@@ -372,9 +392,9 @@ export async function getProDashboardData(args: {
   }));
 
   return {
-    newThisMonth: monthRes.count || 0,
-    totalAvailable: totalRes.count || 0,
-    unlockedCount: unlockedRes.count || 0,
+    newThisMonth,
+    totalAvailable,
+    unlockedCount: unlockedCount || 0,
     recentProjects,
   };
 }
