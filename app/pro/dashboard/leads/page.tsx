@@ -122,7 +122,7 @@ export default async function LeadsPage({
   const { data: projectsRaw } = await service
     .from("projects")
     .select(
-      "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, cleaned_description, has_contact_in_description, cities(name, latitude, longitude, department_id), categories(name)"
+      "id, description, budget, urgency, status, created_at, ai_qualification, first_name, email, phone, category_id, cleaned_description, has_contact_in_description, cities(name, postal_code, latitude, longitude, department_id), categories(name)"
     )
     .eq("vertical", "btp")
     .in("category_id", leadCategoryIds)
@@ -211,7 +211,15 @@ export default async function LeadsPage({
                 ? ((p.ai_qualification as Record<string, unknown>).suspicion_score as number)
                 : 0;
             const isSuspicious = p.status === "suspicious" || suspicionScore > 70;
-            const cityName = Array.isArray(p.cities) ? p.cities[0]?.name : p.cities?.name;
+            const cityObj = Array.isArray(p.cities) ? p.cities[0] : p.cities;
+            const cityName = cityObj?.name;
+            const postalCode = cityObj?.postal_code ?? null;
+            // Distance projet → pro (à vol d'oiseau) : le pro sait tout de suite
+            // si le chantier est dans son coin ou à l'autre bout de son rayon.
+            const distKm =
+              proLat != null && proLng != null && cityObj?.latitude != null && cityObj?.longitude != null
+                ? Math.round(haversineKm(proLat, proLng, cityObj.latitude, cityObj.longitude))
+                : null;
             const catName = Array.isArray(p.categories) ? p.categories[0]?.name : p.categories?.name;
             const fullDesc = p.description || "";
             const parts = fullDesc.split(/\n\n+/);
@@ -259,7 +267,16 @@ export default async function LeadsPage({
                       {cityName && (
                         <span className="text-[var(--text-tertiary)]">
                           {cityName}
+                          {postalCode ? ` (${postalCode})` : ""}
                         </span>
+                      )}
+                      {distKm != null && (
+                        <>
+                          <span className="text-[var(--text-tertiary)]">·</span>
+                          <span className="text-[var(--text-tertiary)] font-medium">
+                            à {distKm} km
+                          </span>
+                        </>
                       )}
                     </div>
                   </div>
@@ -380,8 +397,8 @@ type ProjectRow = {
   cleaned_description: string | null;
   has_contact_in_description: boolean;
   cities:
-    | { name: string; latitude?: number | null; longitude?: number | null; department_id?: number | null }
-    | { name: string; latitude?: number | null; longitude?: number | null; department_id?: number | null }[]
+    | { name: string; postal_code?: string | null; latitude?: number | null; longitude?: number | null; department_id?: number | null }
+    | { name: string; postal_code?: string | null; latitude?: number | null; longitude?: number | null; department_id?: number | null }[]
     | null;
   categories:
     | { name: string }
