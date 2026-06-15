@@ -11,7 +11,7 @@ import SubmitButton from "@/components/ai/SubmitButton";
 export const metadata: Metadata = {
   title: "Leads reçus — Workwave Pro",
   description:
-    "Tous les projets de votre zone (catégorie + département). Débloquez les coordonnées pour 9,90€ TTC par projet.",
+    "Tous les projets de vos métiers dans votre rayon d'intervention. Débloquez les coordonnées pour 9,90€ TTC par projet.",
   robots: { index: false, follow: false },
 };
 
@@ -192,9 +192,9 @@ export default async function LeadsPage({
           Leads reçus
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
-          Tous les projets de vos métiers dans votre département. Débloquez les
-          coordonnées pour <strong>9,90€ TTC</strong> par projet (paiement
-          unique, sans abonnement).
+          Tous les projets de vos métiers dans votre rayon d&apos;intervention.
+          Débloquez les coordonnées pour <strong>9,90€ TTC</strong> par projet
+          (paiement unique, sans abonnement).
         </p>
       </div>
 
