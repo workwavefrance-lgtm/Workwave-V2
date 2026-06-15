@@ -207,13 +207,21 @@ export default async function ClaimPage({ params }: Props) {
         <p className="text-xs font-mono text-[var(--text-tertiary)] mt-1.5">
           SIRET {formatSiret(pro.siret)}
         </p>
+      </section>
 
-        {(!pro.email || !pro.phone) && (
-          <div className="flex items-start gap-2 mt-3 pt-3 border-t border-[#FF5A36]/20">
-            <svg className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-px" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      {/* Alerte contact manquant : box rouge bien visible = pression principale. */}
+      {(!pro.email || !pro.phone) && (
+        <div className="bg-red-50 dark:bg-red-950/30 border-2 border-red-400 dark:border-red-700 rounded-2xl p-4 mb-5 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            <p className="text-[11px] font-semibold text-red-600 dark:text-red-400 leading-snug">
+          </div>
+          <div>
+            <p className="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-0.5">
+              Action requise
+            </p>
+            <p className="text-sm font-bold text-red-700 dark:text-red-300 leading-snug">
               {!pro.email && !pro.phone
                 ? "Email et téléphone manquants — vos clients ne peuvent pas vous joindre."
                 : !pro.email
@@ -221,8 +229,8 @@ export default async function ClaimPage({ params }: Props) {
                   : "Téléphone manquant — vos clients ne peuvent pas vous joindre."}
             </p>
           </div>
-        )}
-      </section>
+        </div>
+      )}
 
       <p className="text-sm text-[var(--text-secondary)] mb-3 px-1">
         Prouvez que c&apos;est bien vous pour prendre le contrôle de votre fiche&nbsp;:
