@@ -50,7 +50,11 @@ type ScorablePro = Pick<
 // eviter d'aspirer 200+ pros sur une grosse ville. La selection
 // reste bonne meme avec un sample partiel : les meilleurs scores
 // sortent au-dessus de toute facon.
-const MAX_FETCH = 500;
+// 15/06 : egress Supabase à 313 % du quota (crawl Google × 500 lignes/listing).
+// Réduit 500→100 + tri "réclamés/complets d'abord" dans la requête → on divise
+// l'egress par ~5 sur les grosses villes SANS dégrader le top 10 (les meilleurs
+// pros sont chargés en premier, donc toujours dans l'échantillon scoré).
+const MAX_FETCH = 100;
 
 /**
  * Calcule un score composite pour un pro.
@@ -185,6 +189,10 @@ export async function getTopProsByCategoryAndCityIds(
     .in("city_id", cityIds)
     .is("deleted_at", null)
     .eq("is_active", true)
+    // Charger les meilleurs candidats EN PREMIER (réclamés, puis profil complet)
+    // pour que le top scoré reste juste même avec MAX_FETCH réduit (egress).
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
+    .order("profile_completion", { ascending: false, nullsFirst: false })
     .limit(MAX_FETCH);
 
   const pros = (data as unknown as ProCardData[] | null) ?? [];
@@ -214,6 +222,10 @@ export async function getTopProsByCategoryAndCity(
     .eq("city_id", cityId)
     .is("deleted_at", null)
     .eq("is_active", true)
+    // Charger les meilleurs candidats EN PREMIER (réclamés, puis profil complet)
+    // pour que le top scoré reste juste même avec MAX_FETCH réduit (egress).
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
+    .order("profile_completion", { ascending: false, nullsFirst: false })
     .limit(MAX_FETCH);
 
   const pros = (data as unknown as ProCardData[] | null) ?? [];

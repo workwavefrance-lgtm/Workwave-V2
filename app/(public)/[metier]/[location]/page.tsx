@@ -52,7 +52,7 @@ import { generateSeoContent } from "@/lib/seo/seo-sections";
 
 const TOP_LIMIT = 10;
 
-export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO // 1h->24h (11/06) : sous crawl Google massif, la regen horaire explosait l'egress Supabase (188% du quota)
+export const revalidate = 2592000; // 30j (15/06) : egress Supabase 313% sous crawl ; donnees Sirene quasi-statiques, 0 impact SEO ; un deploiement reset le cache ISR de toute facon. // 7j (13/06) // 24h (11/06)
 
 type Props = {
   params: Promise<{ metier: string; location: string }>;
