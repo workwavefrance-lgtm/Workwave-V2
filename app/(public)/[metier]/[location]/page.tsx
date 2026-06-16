@@ -276,7 +276,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     ]);
   } else {
     const [deptCities, depts] = await Promise.all([
-      getCitiesByDepartment(resolved.department.id),
+      getCitiesByDepartment(resolved.department.id, 15), // n'affiche que 10 (slice) — limite l'egress
       getAllDepartmentsPublic(),
     ]);
     nearbyCities = deptCities.slice(0, 10);

@@ -10,7 +10,7 @@ import {
   getAllCategories,
 } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
-import { getCitiesByDepartment } from "@/lib/queries/cities";
+import { getCitiesByDepartment, getTotalCitiesCount } from "@/lib/queries/cities";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
@@ -62,19 +62,19 @@ export default async function MetierProximityPage({ params }: Props) {
     permanentRedirect(`/ai/${category.slug}`);
   }
 
-  // Charger tous les départements actifs + leurs villes (parallèle)
+  // Charger tous les départements + leurs villes (parallèle). On limite à 15
+  // villes/dept (top population) : la page n'affiche que 10/dept + 12 géoloc.
+  // Avant : ~34 000 communes chargées → timeout + egress (16/06).
   const departments = await getAllDepartments();
-  const deptsWithCities = await Promise.all(
-    departments.map(async (dept) => ({
-      dept,
-      cities: await getCitiesByDepartment(dept.id),
-    }))
-  );
-
-  const totalCities = deptsWithCities.reduce(
-    (acc, d) => acc + d.cities.length,
-    0
-  );
+  const [deptsWithCities, totalCities] = await Promise.all([
+    Promise.all(
+      departments.map(async (dept) => ({
+        dept,
+        cities: await getCitiesByDepartment(dept.id, 15),
+      }))
+    ),
+    getTotalCitiesCount(), // vrai total "X villes couvertes" sans charger les lignes
+  ]);
 
   // Liste plate des villes (avec lat/lng) pour la géoloc client
   const allCitiesForGeoloc = deptsWithCities.flatMap((d) =>

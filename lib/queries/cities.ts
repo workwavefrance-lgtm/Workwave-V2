@@ -12,15 +12,32 @@ export async function getTopCities(limit: number = 20): Promise<City[]> {
 }
 
 export async function getCitiesByDepartment(
-  departmentId: number
+  departmentId: number,
+  limit?: number
 ): Promise<City[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  // 16/06 : ajout d'un `limit` optionnel. La racine métier /[metier] appelait
+  // ça sur 101 départements (= ~34 000 communes chargées toutes colonnes) pour
+  // n'en afficher que 10/dept → timeout (healthcheck KO) + gros egress sous le
+  // crawl. Les pages n'utilisent qu'un top par population → on limite à la source.
+  let q = supabase
     .from("cities")
     .select("*")
     .eq("department_id", departmentId)
     .order("population", { ascending: false, nullsFirst: false });
+  if (limit && limit > 0) q = q.limit(limit);
+  const { data } = await q;
   return (data as City[]) || [];
+}
+
+// Count global des communes (pour les stats "X villes couvertes") sans charger
+// les lignes — estimated + head:true = quasi 0 egress.
+export async function getTotalCitiesCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("cities")
+    .select("id", { count: "estimated", head: true });
+  return count || 0;
 }
 
 export async function getCityBySlug(
