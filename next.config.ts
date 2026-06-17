@@ -23,56 +23,63 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // ─── Workwave AI (workwaveai.co + .ai + .io) → workwave.fr/ai ────────
-      // Phase 10 : si l'utilisateur achete un domaine vanity pour le vertical
-      // tech (ex. workwaveai.co), tout traffic est redirige 301 vers le
-      // sous-chemin /ai du domaine principal. Ca preserve le link juice et
-      // garde 1 seul domaine indexable pour le SEO.
+      // ─── Workwave AI EN PAUSE (16/06/2026) ────────────────────────────────
+      // Décision Willy : on met TOUTE la partie AI internationale en sommeil.
+      // workwaveai.co (+ .io / .ai) redirige désormais 301 vers workwave.fr
+      // (BTP). Le code AI reste dans le repo (route groups (ai-en)/(ai)) mais
+      // n'est plus servi publiquement sur .co. Objectifs : (1) tuer le duplicate
+      // content — .co servait/indexait les pages BTP (requêtes "plan de travail
+      // céramique", "débroussaillage"… apparaissaient sur .co) ; (2) consolider
+      // tout le jus SEO sur le BTP ; (3) 100 % réversible (retirer ces règles
+      // = relancer l'AI). IMPORTANT : les règles /en/ai passent AVANT le
+      // catch-all .co (l'ordre détermine la 1ʳᵉ match).
       //
-      // Requiert : domaine ajoute en "redirect domain" dans Vercel project
-      // settings + DNS configure vers Vercel.
-      //
-      // Pattern `has: [{ type: 'host', value: 'workwaveai.co' }]` matche
-      // le header Host de la requete. Le destination utilise :path* pour
-      // preserver l'eventuel sub-path.
-      // ─── Workwave AI international : workwaveai.co SERT le contenu EN ──────
-      // Le .co (gTLD) heberge le contenu anglais international (/en/ai/*). Un
-      // gTLD ranke a l'international, contrairement au .fr (geo-cible France).
-      // Le contenu BTP/FR servi aussi sur .co garde son canonical sur .fr
-      // (metadataBase=workwave.fr) => pas de duplicate. Seules les pages EN
-      // ont leur canonical sur .co (cf. lib/i18n/alternates.ts).
-      //
-      // 1. workwave.fr/en/ai/* -> 301 vers www.workwaveai.co/en/ai/* (consolide).
+      // 1. .co : contenu EN (/en/ai/*) en pause -> home BTP (1 hop, pas de boucle).
       {
         source: "/en/ai",
-        has: [{ type: "host", value: "workwave.fr" }],
-        destination: "https://www.workwaveai.co/en/ai",
+        has: [{ type: "host", value: "(www\\.)?workwaveai\\.co" }],
+        destination: "https://workwave.fr/",
         permanent: true,
       },
       {
         source: "/en/ai/:path*",
-        has: [{ type: "host", value: "workwave.fr" }],
-        destination: "https://www.workwaveai.co/en/ai/:path*",
+        has: [{ type: "host", value: "(www\\.)?workwaveai\\.co" }],
+        destination: "https://workwave.fr/",
         permanent: true,
       },
-      // 2. www.workwaveai.co/ -> /en/ai : la racine du .co = home AI EN.
-      {
-        source: "/",
-        has: [{ type: "host", value: "www.workwaveai.co" }],
-        destination: "/en/ai",
-        permanent: true,
-      },
-      // 3. Vanity .io / .ai (inactifs) -> home EN du .co.
+      // 2. .co : tout le reste (dont les pages BTP qui avaient fuité) -> même
+      //    chemin sur .fr (consolide le duplicate vers le canonical BTP).
       {
         source: "/:path*",
-        has: [{ type: "host", value: "workwaveai.io" }],
-        destination: "https://www.workwaveai.co/en/ai",
+        has: [{ type: "host", value: "(www\\.)?workwaveai\\.co" }],
+        destination: "https://workwave.fr/:path*",
+        permanent: true,
+      },
+      // 3. Vanity .io / .ai -> home BTP.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "workwaveai\\.io" }],
+        destination: "https://workwave.fr/",
         permanent: true,
       },
       {
         source: "/:path*",
-        has: [{ type: "host", value: "workwave.ai" }],
-        destination: "https://www.workwaveai.co/en/ai",
+        has: [{ type: "host", value: "workwave\\.ai" }],
+        destination: "https://workwave.fr/",
+        permanent: true,
+      },
+      // 4. workwave.fr/en/ai/* (servi par le route group (ai-en)) -> home BTP.
+      //    Pause le contenu EN aussi côté .fr ET évite la boucle avec la règle 1.
+      {
+        source: "/en/ai",
+        has: [{ type: "host", value: "workwave\\.fr" }],
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/en/ai/:path*",
+        has: [{ type: "host", value: "workwave\\.fr" }],
+        destination: "/",
         permanent: true,
       },
 
