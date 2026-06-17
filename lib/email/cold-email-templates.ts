@@ -66,7 +66,7 @@ function buildFooter(data: ProEmailData): string {
         <a href="${globalUnsubscribeUrl}" style="color:#9CA3AF;text-decoration:underline;">Ne plus jamais recevoir d'emails de Workwave</a>
       </p>
       <p style="margin:0;">
-        Workwave SAS, 3 rue des Rosiers 86110 Craon. Protection des données : contact@workwave.fr
+        Workwave (Willy Gauvrit, entrepreneur individuel), 3 rue des Rosiers 86110 Craon. Protection des données : contact@workwave.fr
       </p>
     </div>`;
 }
@@ -141,7 +141,7 @@ function buildStep1(
     </p>
     <div style="margin-top:16px;font-size:14px;color:#6B7280;line-height:1.6;">
       <strong style="color:#1a1a1a;">Willy Gauvrit</strong><br>
-      Fondateur, Workwave SAS<br>
+      Fondateur, Workwave<br>
       3 rue des Rosiers, 86110 Craon<br>
       <a href="mailto:contact@workwave.fr" style="color:#FF5A36;text-decoration:none;">contact@workwave.fr</a><br>
       ${FOUNDER_PHONE}

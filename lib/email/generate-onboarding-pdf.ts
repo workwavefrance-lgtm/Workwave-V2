@@ -28,7 +28,7 @@ export async function generateOnboardingPdf(
   const helvetica = await doc.embedFont(StandardFonts.Helvetica);
   const helveticaBold = await doc.embedFont(StandardFonts.HelveticaBold);
 
-  const footer = "Workwave SAS \u00B7 3 rue des Rosiers, 86110 Craon";
+  const footer = "Workwave \u00B7 3 rue des Rosiers, 86110 Craon";
 
   // ============================================
   // Page 1 — Couverture

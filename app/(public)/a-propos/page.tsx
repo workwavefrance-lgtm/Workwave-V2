@@ -111,9 +111,9 @@ export default function AProposPage() {
                 Une entreprise française
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-                Workwave est une SAS française, sans capital étranger, née en
-                Vienne. On référence aujourd&apos;hui plus de 2,4 millions
-                d&apos;artisans dans toute la France.
+                Workwave est une entreprise française indépendante, sans capital
+                étranger, née en Vienne. On référence aujourd&apos;hui plus de 2,4
+                millions d&apos;artisans dans toute la France.
               </p>
             </div>
             <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8">

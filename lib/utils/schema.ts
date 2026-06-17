@@ -67,7 +67,7 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Workwave",
-    legalName: "Workwave SAS",
+    legalName: "Workwave",
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     description:

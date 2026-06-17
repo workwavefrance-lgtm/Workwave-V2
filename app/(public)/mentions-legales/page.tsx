@@ -22,8 +22,17 @@ export default function MentionsLegalesPage() {
             Éditeur du site
           </h2>
           <div className="text-[var(--text-secondary)] leading-relaxed space-y-1">
-            <p>Workwave</p>
-            <p>Adresse : Poitiers, France</p>
+            <p>
+              Le site <strong className="text-[var(--text-primary)]">workwave.fr</strong>{" "}
+              est édité par <strong className="text-[var(--text-primary)]">Willy
+              Gauvrit</strong>, entrepreneur individuel (micro-entreprise),
+              exploitant sous le nom commercial «&nbsp;Workwave&nbsp;».
+            </p>
+            <p>SIREN : 985&nbsp;169&nbsp;473 (immatriculée au RNE le 16/06/2026)</p>
+            <p>Code APE : 62.02A</p>
+            <p>Siège : 3 rue des Rosiers, 86110 Craon (Vienne)</p>
+            <p>TVA non applicable — article 293 B du CGI (franchise en base de TVA)</p>
+            <p>Directeur de la publication : Willy Gauvrit</p>
             <p>
               Email :{" "}
               <a
@@ -62,7 +71,8 @@ export default function MentionsLegalesPage() {
             </p>
             <p>
               <strong className="text-[var(--text-primary)]">Responsable du traitement :</strong>{" "}
-              Workwave SAS, 3 rue des Rosiers, 86110 Craon. Contact DPO :{" "}
+              Workwave (Willy Gauvrit, entrepreneur individuel), 3 rue des
+              Rosiers, 86110 Craon. Contact DPO :{" "}
               <a href="mailto:contact@workwave.fr" className="text-[var(--accent)] hover:underline">
                 contact@workwave.fr
               </a>

@@ -40,7 +40,7 @@ const FAQ_PRICING: FaqItem[] = [
   },
   {
     q: "TVA et facturation pour entreprises (B2B) ?",
-    a: "Oui. Le tarif affiche 29,90€ TTC = 24,92€ HT + 4,98€ TVA (20%). Les factures sont generees automatiquement chaque mois et disponibles dans votre dashboard (PDF + acces Stripe Customer Portal). Vous pouvez ajouter votre numero TVA intracommunautaire pour la deduction. Workwave est une SAS francaise immatriculee, SIRET disponible sur demande dans les mentions legales.",
+    a: "Le tarif de 29,90€ s'entend toutes taxes comprises. Workwave bénéficie de la franchise en base de TVA (article 293 B du CGI) : la TVA n'est donc pas applicable et aucune TVA n'est facturée. Les factures sont générées automatiquement chaque mois et disponibles dans votre dashboard (PDF + accès Stripe Customer Portal). Workwave est exploité par Willy Gauvrit, entrepreneur individuel ; SIREN disponible dans les mentions légales.",
   },
 ];
 
