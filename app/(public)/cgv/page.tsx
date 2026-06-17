@@ -149,12 +149,18 @@ export default function CGVPage() {
             6. Caractère définitif du Déblocage — absence de remboursement
           </h2>
           <p>
-            Chaque Déblocage est <strong>ferme et définitif</strong>. Les
-            coordonnées constituant un contenu numérique fourni immédiatement, le
-            Professionnel reconnaît expressément y accéder dès le paiement et,
-            agissant dans le cadre de son activité professionnelle, renonce à tout
-            droit de rétractation. <strong>Aucun remboursement</strong> ne pourra
-            être exigé une fois le Lead débloqué.
+            Chaque Déblocage est <strong>ferme et définitif</strong>. Le
+            Professionnel agit dans le cadre de son activité professionnelle :
+            l&apos;achat d&apos;un Lead de travaux relevant de son activité principale, le
+            droit de rétractation prévu par le Code de la consommation ne lui est
+            en principe pas applicable (article L.&nbsp;221-3 du Code de la
+            consommation). En tout état de cause, en validant le Déblocage, le
+            Professionnel <strong>demande expressément l&apos;exécution immédiate</strong>{" "}
+            de la fourniture des coordonnées et reconnaît, dans la mesure où
+            l&apos;article L.&nbsp;221-28 du Code de la consommation serait applicable,
+            perdre son droit de rétractation dès le début de cette exécution.{" "}
+            <strong>Aucun remboursement</strong> ne pourra être exigé une fois le
+            Lead débloqué.
           </p>
           <p>
             En particulier, et sans que cette liste soit limitative,{" "}
@@ -186,14 +192,19 @@ export default function CGVPage() {
               l&apos;ampleur du Projet par rapport à ce qui a été déclaré.
             </li>
           </ul>
-          <p className="text-sm text-[var(--text-tertiary)]">
-            À titre purement commercial et à sa seule discrétion, sans que cela
-            constitue un droit pour le Professionnel ni une obligation pour elle,
-            Workwave pourra accorder un avoir (et non un remboursement) lorsque la
-            coordonnée téléphonique principale d&apos;un Lead s&apos;avère manifestement
-            inexploitable (numéro inexistant ou non attribué). Une telle demande
-            doit être adressée à contact@workwave.fr dans les 7 jours suivant le
-            Déblocage, justificatif à l&apos;appui.
+          <p>
+            <strong>Garantie «&nbsp;coordonnée inexploitable&nbsp;».</strong>{" "}
+            Si la coordonnée téléphonique principale d&apos;un Lead s&apos;avère manifestement
+            inexploitable (numéro inexistant ou non attribué), Workwave procède,
+            sur demande adressée à contact@workwave.fr dans les 7 jours suivant le
+            Déblocage et après vérification, au <strong>remplacement du Lead</strong>{" "}
+            par un Lead équivalent ou, à défaut de Lead disponible, à
+            l&apos;octroi d&apos;un <strong>avoir d&apos;un montant équivalent</strong>. Cette
+            garantie couvre exclusivement l&apos;inexploitabilité technique de la
+            coordonnée ; elle ne s&apos;applique pas à l&apos;absence de réponse, à
+            l&apos;injoignabilité ou au comportement du Particulier, qui relèvent du
+            risque normal du service et ne donnent lieu à aucun remboursement,
+            remplacement ou avoir.
           </p>
         </section>
 
@@ -220,7 +231,9 @@ export default function CGVPage() {
             En toute hypothèse, et dans la mesure permise par la loi, la
             responsabilité de Workwave au titre d&apos;un Déblocage, si elle était
             engagée, est limitée au montant effectivement payé pour ce Déblocage,
-            soit 9,90&nbsp;€.
+            soit 9,90&nbsp;€. Cette limitation ne s&apos;applique pas en cas de faute
+            lourde ou dolosive de Workwave, ni dans les cas où la loi en interdit
+            la limitation.
           </p>
         </section>
 
@@ -271,8 +284,10 @@ export default function CGVPage() {
           <p>
             Workwave se réserve le droit de modifier les présentes CGV à tout
             moment. La version applicable est celle en vigueur au jour du
-            Déblocage. Les présentes CGV sont soumises au droit français. À défaut
-            de résolution amiable, tout litige relève de la compétence des
+            Déblocage. Toute réclamation relative à un Déblocage doit être adressée
+            à contact@workwave.fr ; Workwave s&apos;engage à y répondre dans un délai
+            raisonnable. Les présentes CGV sont soumises au droit français. À
+            défaut de résolution amiable, tout litige relève de la compétence des
             juridictions françaises compétentes.
           </p>
         </section>
