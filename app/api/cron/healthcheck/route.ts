@@ -1,9 +1,13 @@
 /**
- * Cron horaire : healthcheck des routes critiques BTP + AI FR + AI EN.
+ * Cron horaire : healthcheck des routes critiques BTP + AI FR.
  *
- * Pingue ~30 URLs en parallèle. Si une route renvoie un code inattendu
+ * Pingue ~20 URLs en parallèle. Si une route renvoie un code inattendu
  * (typiquement 500 ou 404 sur une route critique), envoie une alerte email
  * IMMÉDIATE à contact@workwave.fr.
+ *
+ * NB (16/06/2026) : l'AI international EN (workwaveai.co) est EN PAUSE — tout
+ * redirige en 301/308 vers le BTP. Le healthcheck ne teste plus le contenu IA
+ * EN (en sommeil), juste que la redirection .co → BTP renvoie bien 307/308.
  *
  * Pourquoi ça compte : le user pousse plusieurs commits par jour sur 2
  * domaines (workwave.fr BTP + workwaveai.co AI). Cette protection automatique
@@ -47,22 +51,19 @@ const ROUTES: RouteCheck[] = [
   { label: "AI-FR inscription",              url: "https://workwave.fr/ai/inscription",                         expect: [200], critical: true },
   { label: "AI-FR /monde",                   url: "https://workwave.fr/ai/monde/web-development/geneve",        expect: [200], critical: false },
 
-  // ════════ AI EN — workwaveai.co ════════
-  { label: "AI-EN home",                     url: "https://www.workwaveai.co/en/ai",                            expect: [200], critical: true },
-  { label: "AI-EN skill hub",                url: "https://www.workwaveai.co/en/ai/web-development",            expect: [200], critical: true },
-  { label: "AI-EN skill × city TJM",         url: "https://www.workwaveai.co/en/ai/web-development/london",     expect: [200], critical: true },
-  { label: "AI-EN skill × city DN",          url: "https://www.workwaveai.co/en/ai/web-development/ubud",       expect: [200], critical: false },
-  { label: "AI-EN country hub sourcé",       url: "https://www.workwaveai.co/en/ai/marketing/country/germany",  expect: [200], critical: false },
-  { label: "AI-EN state hub",                url: "https://www.workwaveai.co/en/ai/web-development/state/california", expect: [200], critical: false },
-  { label: "AI-EN deposer",                  url: "https://www.workwaveai.co/en/ai/deposer",                    expect: [200], critical: true },
-  { label: "AI-EN inscription",              url: "https://www.workwaveai.co/en/ai/inscription",                expect: [200], critical: true },
+  // ════════ AI international (EN) — EN PAUSE depuis le 16/06/2026 ════════
+  // workwaveai.co redirige désormais TOUT en 301/308 vers workwave.fr (BTP).
+  // On ne monitore plus le contenu IA (en sommeil) — on VÉRIFIE seulement que
+  // la redirection fonctionne (sinon le .co re-servirait du duplicate content).
+  // expect: [307, 308] => la pause est active et propre. warning, pas critique
+  // (workwave.fr BTP reste up de toute façon, donc 0 urgence si ça casse).
+  { label: "AI .co /en/ai → BTP (pause)",    url: "https://www.workwaveai.co/en/ai",                            expect: [307, 308], critical: false },
+  { label: "AI .co catch-all → BTP (pause)", url: "https://www.workwaveai.co/plombier",                         expect: [307, 308], critical: false },
 
   // ════════ Infra ════════
   { label: "Sitemap-index BTP",              url: "https://workwave.fr/sitemap-index.xml",                      expect: [200], critical: true },
   { label: "Sitemap pros BTP",               url: "https://workwave.fr/sitemap/100.xml",                        expect: [200], critical: false },
-  { label: "Sitemap AI EN",                  url: "https://www.workwaveai.co/sitemap-ai-en.xml",                expect: [200], critical: true },
   { label: "robots.txt BTP",                 url: "https://workwave.fr/robots.txt",                             expect: [200], critical: true },
-  { label: "robots.txt AI EN",               url: "https://www.workwaveai.co/robots.txt",                       expect: [200], critical: true },
 ];
 
 type CheckResult = {
