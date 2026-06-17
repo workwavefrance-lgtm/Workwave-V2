@@ -42,6 +42,7 @@ const PARAM_ERRORS: Record<string, string> = {
   project_deleted: "Ce projet a été supprimé par le particulier.",
   stripe_not_configured: "Service de paiement temporairement indisponible.",
   checkout_failed: "Erreur Stripe Checkout. Réessayez.",
+  cgv_required: "Veuillez accepter les conditions générales de vente pour débloquer.",
 };
 
 export default async function LeadsPage({
@@ -361,6 +362,26 @@ export default async function LeadsPage({
                     </p>
                     <form action={startBtpUnlock}>
                       <input type="hidden" name="projectId" value={p.id} />
+                      <label className="flex items-start gap-2 mb-3 cursor-pointer text-[11px] text-[var(--text-tertiary)]">
+                        <input
+                          type="checkbox"
+                          name="cgvAccepted"
+                          value="1"
+                          required
+                          className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--accent)]"
+                        />
+                        <span>
+                          J&apos;accepte les{" "}
+                          <a
+                            href="/cgv"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[var(--accent)] hover:underline"
+                          >
+                            conditions générales de vente
+                          </a>
+                        </span>
+                      </label>
                       <SubmitButton
                         pendingText="Redirection Stripe..."
                         className="inline-flex items-center justify-center h-11 px-5 text-sm font-semibold rounded-lg bg-[var(--accent)] hover:opacity-90 text-white transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"

@@ -38,6 +38,13 @@ export async function startBtpUnlock(formData: FormData): Promise<void> {
     redirect("/pro/dashboard/leads?error=invalid_project");
   }
 
+  // 0) Acceptation des CGV obligatoire (case cochée au point de vente).
+  // Le `required` HTML bloque déjà côté navigateur ; ce garde-fou empêche tout
+  // contournement (JS désactivé, requête forgée) et garantit le consentement.
+  if (!formData.get("cgvAccepted")) {
+    redirect("/pro/dashboard/leads?error=cgv_required");
+  }
+
   // 1) Auth
   const supabase = await createClient();
   const {
