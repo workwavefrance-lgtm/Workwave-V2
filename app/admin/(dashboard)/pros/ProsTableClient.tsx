@@ -138,7 +138,9 @@ const columns: AdminColumn<AdminProRow>[] = [
   {
     // Pro réclamé -> date de réclamation (quand il a pris sa fiche).
     // Sinon -> date de création/scraping de la fiche. (cf. colonne "État")
-    // Tri par "id" (PK indexé, instantané) : id DESC ≈ date DESC.
+    // Clé "id" : en vue générale = ordre de scraping (id DESC ≈ date DESC,
+    // PK indexé instantané) ; en vue "Réclamés" le serveur mappe ce tri sur
+    // claimed_at DESC pour que les derniers arrivés soient en haut.
     key: "id",
     label: "Date",
     sortable: true,

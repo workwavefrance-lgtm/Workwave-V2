@@ -144,12 +144,27 @@ export const getAdminPros = cache(
       "id",
       "name",
       "created_at",
+      "claimed_at",
       "subscription_status",
       "profile_completion",
       "response_rate",
     ];
-    const sortCol = validSorts.includes(sort) ? sort : "id";
-    query = query.order(sortCol, { ascending: order === "asc" });
+    let sortCol = validSorts.includes(sort) ? sort : "id";
+    // Vue "Réclamés" : la colonne Date affiche claimed_at (date de réclamation),
+    // pas l'id de scraping. Donc le tri par défaut (et le clic sur "Date", qui
+    // envoie sort="id") doit trier par claimed_at => les derniers arrivés en
+    // haut, sans avoir à chercher. Le filtre claimed ne renvoie que quelques
+    // dizaines de lignes : tri instantané, aucun scan full-table.
+    const viewingClaimed =
+      claimed === "claimed" ||
+      ["claimed", "claimed_free", "paying", "trialing", "canceled"].includes(
+        state
+      );
+    if (viewingClaimed && sortCol === "id") sortCol = "claimed_at";
+    query = query.order(sortCol, {
+      ascending: order === "asc",
+      nullsFirst: false,
+    });
 
     // Paginate
     const from = (page - 1) * pageSize;
