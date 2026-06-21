@@ -19,20 +19,18 @@ create table if not exists pro_survey_responses (
   source        text
 );
 
--- Sécurité : INSERT public (anon, formulaire), lecture réservée aux comptes connectés (admin).
+-- Sécurité : INSERT public (visiteurs anon ET utilisateurs connectés), lecture
+-- réservée au service role (vue admin via getAdminServiceClient, bypass RLS).
+-- NB : on N'autorise PAS le SELECT au rôle "authenticated" — ça exposerait
+-- toutes les réponses (dont les contacts) à n'importe quel pro connecté.
 alter table pro_survey_responses enable row level security;
 
-drop policy if exists "survey_anon_insert" on pro_survey_responses;
-create policy "survey_anon_insert" on pro_survey_responses
-  for insert to anon with check (true);
+drop policy if exists "survey_public_insert" on pro_survey_responses;
+create policy "survey_public_insert" on pro_survey_responses
+  for insert to anon, authenticated with check (true);
 
-drop policy if exists "survey_authenticated_select" on pro_survey_responses;
-create policy "survey_authenticated_select" on pro_survey_responses
-  for select to authenticated using (true);
-
--- Grants explicites : anon écrit, authenticated lit. service_role bypasse la RLS (admin).
-grant insert on pro_survey_responses to anon;
-grant select on pro_survey_responses to authenticated;
+-- Grant d'insert pour les deux rôles publics. service_role bypasse la RLS (admin).
+grant insert on pro_survey_responses to anon, authenticated;
 
 create index if not exists idx_pro_survey_created_at
   on pro_survey_responses (created_at desc);
