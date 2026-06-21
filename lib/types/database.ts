@@ -514,3 +514,21 @@ export type EmailBlacklist = {
   reason: string | null;
   created_at: string;
 };
+
+export type ProSurveyResponse = {
+  id: string;
+  created_at: string;
+  metier: string;
+  taille: string | null;
+  departement: string | null;
+  taches_chrono: string[];
+  heures_admin: string | null;
+  corvee_libre: string | null;
+  outils_actuels: string | null;
+  outils_detail: string | null;
+  outils_essayes: string | null;
+  prenom: string | null;
+  contact: string | null;
+  consent: boolean;
+  source: string | null;
+};
