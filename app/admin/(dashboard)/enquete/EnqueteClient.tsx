@@ -79,6 +79,7 @@ export default function EnqueteClient({ responses }: { responses: ProSurveyRespo
   const [fTaille, setFTaille] = useState("");
   const [fDept, setFDept] = useState("");
   const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const [selected, setSelected] = useState<ProSurveyResponse | null>(null);
 
   const total = responses.length;
   const avecContact = responses.filter((r) => r.contact && r.contact.trim()).length;
@@ -183,15 +184,72 @@ export default function EnqueteClient({ responses }: { responses: ProSurveyRespo
           </div>
         }
       >
+        <p className="text-xs mb-3" style={{ color: "var(--admin-text-tertiary)" }}>
+          Clique une ligne pour lire la réponse complète.
+        </p>
         <AdminTable
           columns={columns}
           data={filtered}
           sortKey="created_at"
           sortDir={sortDir}
           onSort={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+          onRowClick={setSelected}
           emptyMessage="Aucune réponse pour ce filtre."
         />
       </Card>
+
+      {selected && (
+        <div
+          onClick={() => setSelected(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 50, backgroundColor: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-xl border w-full max-w-lg max-h-[85vh] overflow-y-auto"
+            style={{ backgroundColor: "var(--admin-card)", borderColor: "var(--admin-border)" }}
+          >
+            <div className="flex items-center justify-between p-5 border-b sticky top-0" style={{ borderColor: "var(--admin-border)", backgroundColor: "var(--admin-card)" }}>
+              <div>
+                <h3 className="text-sm font-semibold" style={{ color: "var(--admin-text)" }}>{selected.metier}</h3>
+                <p className="text-xs mt-0.5" style={{ color: "var(--admin-text-tertiary)" }}>{fmtDate(selected.created_at)}</p>
+              </div>
+              <button onClick={() => setSelected(null)} aria-label="Fermer" style={{ color: "var(--admin-text-tertiary)" }}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <Field label="Taille de l'équipe" value={selected.taille} />
+              <Field label="Département" value={selected.departement} />
+              <Field label="Tâches chronophages" value={(selected.taches_chrono || []).join(" · ")} />
+              <Field label="Heures d'admin / semaine" value={selected.heures_admin} />
+              <Field label="Outils actuels" value={[selected.outils_actuels, selected.outils_detail].filter(Boolean).join(" — ")} />
+              <Field label="Corvée à supprimer" value={selected.corvee_libre} multiline />
+              <Field label="Outils essayés / abandonnés" value={selected.outils_essayes} multiline />
+              <Field
+                label="Contact"
+                value={
+                  selected.contact
+                    ? `${selected.prenom || ""}${selected.prenom ? " — " : ""}${selected.contact}${selected.consent ? "  ·  consentement ✓" : ""}`
+                    : "—"
+                }
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Field({ label, value, multiline }: { label: string; value: string | null; multiline?: boolean }) {
+  return (
+    <div>
+      <p className="text-[11px] font-medium uppercase tracking-wider mb-1" style={{ color: "var(--admin-text-tertiary)" }}>{label}</p>
+      <p className="text-sm" style={{ color: "var(--admin-text)", whiteSpace: multiline ? "pre-wrap" : "normal" }}>
+        {value && value.trim() ? value : "—"}
+      </p>
     </div>
   );
 }
