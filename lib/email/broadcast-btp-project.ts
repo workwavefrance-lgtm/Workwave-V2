@@ -13,7 +13,9 @@
  *     Codeur.com generaliste)
  *
  * Filtres durs (cote SELECT pros) :
- *   - category_id = project.category_id OU project.category_id dans secondary_category_ids
+ *   - category_id du pro dans le CLUSTER de la categorie projet (genie climatique :
+ *     plombier+chauffagiste+climaticien matches ensemble) OU une de ces categories
+ *     dans secondary_category_ids du pro. Hors cluster : categorie exacte du projet.
  *   - pro.city dans une bounding box ~200km autour du projet (pre-filtre SQL rapide)
  *   - distance(pro.city.lat/lng <-> projet.city.lat/lng) <= pro.intervention_radius_km
  *     (filtre exact Haversine cote JS apres SELECT)
@@ -49,6 +51,41 @@ function getServiceClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
+}
+
+/**
+ * Clusters de metiers "reellement le meme artisan" → un lead dans l'un doit
+ * toucher les pros des autres. Les pages SEO restent SEPAREES (recherches
+ * distinctes) ; c'est uniquement le MATCHING du broadcast qui est elargi.
+ * Decision Willy 23/06/2026 :
+ *   - genie climatique (CVC) : plombier + chauffagiste + climaticien (meme
+ *     artisan ; "climaticien" comme metier autonome n'existe quasiment pas).
+ * Resolu slug → id au runtime (JAMAIS d'id en dur — lecon CATEGORY_ID_MAP 26/05).
+ */
+const MATCHING_CLUSTERS: string[][] = [
+  ["plombier", "chauffagiste", "climaticien"],
+];
+
+/**
+ * Si la categorie du projet appartient a un cluster, retourne TOUS les ids du
+ * cluster (le lead touchera les metiers lies). Sinon, juste la categorie projet.
+ */
+export async function getMatchCategoryIds(
+  sb: ReturnType<typeof getServiceClient>,
+  projectCategoryId: number
+): Promise<number[]> {
+  const slugs = [...new Set(MATCHING_CLUSTERS.flat())];
+  const { data } = await sb.from("categories").select("id, slug").in("slug", slugs);
+  const idBySlug = new Map(
+    ((data || []) as { id: number; slug: string }[]).map((c) => [c.slug, c.id])
+  );
+  for (const cluster of MATCHING_CLUSTERS) {
+    const ids = cluster
+      .map((s) => idBySlug.get(s))
+      .filter((x): x is number => x != null);
+    if (ids.includes(projectCategoryId)) return ids;
+  }
+  return [projectCategoryId];
 }
 
 /**
@@ -270,14 +307,24 @@ export async function broadcastBtpProject(
       .filter((id): id is number => id != null);
   }
 
+  // Matching catégorie : si le projet est dans un cluster (génie climatique :
+  // plombier+chauffagiste+climaticien), on cible les pros des 3 métiers. Sinon,
+  // catégorie exacte. Un pro est éligible si sa catégorie principale OU une de
+  // ses catégories secondaires figure dans l'ensemble ciblé.
+  const matchCategoryIds = await getMatchCategoryIds(sb, input.projectCategoryId);
+  const categoryOrFilter = matchCategoryIds
+    .flatMap((id) => [
+      `category_id.eq.${id}`,
+      `secondary_category_ids.cs.{${id}}`,
+    ])
+    .join(",");
+
   let queryBuilder = sb
     .from("pros")
     .select(
       "id, email, name, paused_until, intervention_radius_km, city:cities!inner(latitude, longitude, department_id)"
     )
-    .or(
-      `category_id.eq.${input.projectCategoryId},secondary_category_ids.cs.{${input.projectCategoryId}}`
-    )
+    .or(categoryOrFilter)
     .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)

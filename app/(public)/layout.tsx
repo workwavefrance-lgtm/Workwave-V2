@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import RecentClaimsToast from "@/components/social-proof/RecentClaimsToast";
 import CommercialAgent from "@/components/agent/CommercialAgent";
 import ClarityScript from "@/components/analytics/ClarityScript";
+import CaniculePopup from "@/components/marketing/CaniculePopup";
 
 export default function PublicLayout({
   children,
@@ -22,6 +23,9 @@ export default function PublicLayout({
       {/* Microsoft Clarity (heatmaps + enregistrements) — chargé après
           consentement analytics uniquement (RGPD). */}
       <ClarityScript />
+      {/* Popup "Alerte canicule" → pousse le dépôt de projet clim. Auto-contenu,
+          s'éteint via ENABLED=false dans le composant. */}
+      <CaniculePopup />
     </>
   );
 }
