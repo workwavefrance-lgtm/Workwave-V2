@@ -32,8 +32,10 @@ export default function CaniculePopup() {
       pathname.startsWith("/deposer-projet") ||
       pathname === "/pro" ||
       pathname.startsWith("/pro/")
-    )
+    ) {
+      setOpen(false);
       return;
+    }
     try {
       if (localStorage.getItem(STORAGE_KEY)) return;
     } catch {
@@ -231,7 +233,7 @@ export default function CaniculePopup() {
 
         <Link
           href="/deposer-projet?categorie=climaticien"
-          onClick={remember}
+          onClick={dismiss}
           className="ww-canic-cta"
           style={{
             display: "block",
