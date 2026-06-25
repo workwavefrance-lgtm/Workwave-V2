@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PublicProject } from "@/lib/queries/recent-projects";
+import { getCategoryIcon } from "@/lib/data/category-icons";
 
 /**
  * Section "Projets déposés récemment" — double CTA sous la bande de stats de la home.
@@ -78,6 +79,7 @@ export default function RecentProjectsSection({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {projects.map((p) => {
             const urgent = p.urgency === "today";
+            const Icon = getCategoryIcon(p.categorySlug);
             return (
               <Link
                 key={p.id}
@@ -86,11 +88,11 @@ export default function RecentProjectsSection({
               >
                 <div className="flex items-start gap-3.5">
                   <div
-                    className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl text-[var(--accent)]"
+                    className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-[var(--accent)]"
                     style={{ backgroundColor: "var(--accent-muted)" }}
                     aria-hidden
                   >
-                    {p.categoryName.charAt(0).toUpperCase()}
+                    <Icon className="w-6 h-6" strokeWidth={2} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
