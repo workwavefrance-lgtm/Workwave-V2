@@ -37,16 +37,16 @@ export default function RetrouverFichePage() {
           <RetrouverFicheForm />
         </div>
 
-        {/* Footer link : deja un compte */}
-        <div className="text-center mt-6">
+        {/* Pro déjà inscrit : accès connexion bien visible (gros) */}
+        <div className="text-center mt-8">
+          <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-3">
+            Vous avez déjà un compte&nbsp;?
+          </p>
           <Link
             href="/pro/connexion"
-            className="text-sm text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] text-lg font-semibold hover:bg-[var(--accent)] hover:text-white transition-colors"
           >
-            Vous avez déjà un compte ?{" "}
-            <span className="text-[var(--accent)] font-medium">
-              Se connecter
-            </span>
+            Se connecter
           </Link>
         </div>
       </div>
