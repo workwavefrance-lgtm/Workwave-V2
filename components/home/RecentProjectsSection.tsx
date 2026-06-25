@@ -121,6 +121,19 @@ export default function RecentProjectsSection({
                     </p>
                   </div>
                 </div>
+                {p.teaser && (
+                  <p
+                    className="text-sm text-[var(--text-secondary)] mt-3 leading-snug"
+                    style={{
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {p.teaser}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] mt-4 pt-4 border-t border-[var(--card-border)]">
                   {p.budget && BUDGET_LABELS[p.budget] && (
                     <>
