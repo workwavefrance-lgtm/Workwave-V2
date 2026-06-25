@@ -221,9 +221,12 @@ function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: 
       </table>
     </div>
 
-    <a href="${baseUrl}/pro/dashboard/leads" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 24px 0;">
+    <a href="${baseUrl}/pro/dashboard/leads" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 12px 0;">
       Voir le projet &rarr;
     </a>
+    <p style="font-size:12px;color:#525252;line-height:1.6;margin:0 0 24px 0;">
+      Pas le temps maintenant&nbsp;? Vous retrouverez ce projet &agrave; tout moment dans votre <a href="${baseUrl}/pro/dashboard/leads" style="color:#FF6803;font-weight:600;text-decoration:none;">dashboard, onglet &laquo;&nbsp;Leads&nbsp;&raquo;</a>&nbsp;&mdash; rien ne se perd.
+    </p>
 
     <p style="font-size:12px;color:#525252;line-height:1.6;margin:24px 0 0 0;">
       <strong>Comment ca marche ?</strong> Acces gratuit a tous les projets de votre zone. Pour debloquer les coordonnees d'un particulier (telephone + email) et le contacter directement : ${UNLOCK_PRICE_EUR_TTC}&euro; TTC par projet. Sans engagement, sans abonnement, sans commission.
