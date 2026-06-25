@@ -169,13 +169,16 @@ function humanUrgency(value: string | null): string | null {
   return m[value] ?? value;
 }
 
-function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string): string {
+function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: string | null): string {
   const previewDesc =
     input.projectDescription.length > 220
       ? input.projectDescription.slice(0, 220).trim() + "..."
       : input.projectDescription;
   const budgetLabel = humanBudget(input.projectBudget);
   const timelineLabel = humanUrgency(input.projectTimeline);
+  const lieuLabel = input.projectCityName
+    ? `${input.projectCityName}${postalCode ? ` (${postalCode})` : ""}`
+    : postalCode || null;
 
   // Mode relance J+3 : texte plus doux ("toujours disponible"), même mise en page.
   const isRelance = input.isRelance === true;
@@ -212,6 +215,7 @@ function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string): string {
       <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${input.projectTitle}</h2>
       <p style="font-size:13px;color:#525252;line-height:1.6;margin:0 0 16px 0;white-space:pre-wrap;">${previewDesc}</p>
       <table style="font-size:12px;width:100%;border-collapse:collapse;">
+        ${lieuLabel ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Lieu</td><td style="color:#0A0A0A;font-weight:600;">${lieuLabel}</td></tr>` : ""}
         ${budgetLabel ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Budget</td><td style="color:#0A0A0A;font-weight:600;">${budgetLabel}</td></tr>` : ""}
         ${timelineLabel ? `<tr><td style="padding:4px 0;color:#999;">D&eacute;lai</td><td style="color:#0A0A0A;font-weight:600;">${timelineLabel}</td></tr>` : ""}
       </table>
@@ -261,27 +265,34 @@ async function sendOne(
 export async function broadcastBtpProject(
   input: BroadcastBtpInput
 ): Promise<BroadcastBtpResult> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
+  // baseUrl nettoyé (un espace/nbsp dans l'env casserait tous les liens du mail — leçon 18/04).
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr")
+    .replace(/\s+/g, "")
+    .replace(/\/+$/, "");
   const subject = input.isRelance
     ? `Rappel : projet ${input.projectCategoryName}${input.projectCityName ? ` a ${input.projectCityName}` : ""} toujours disponible — Workwave`
     : `Nouveau projet ${input.projectCategoryName}${input.projectCityName ? ` a ${input.projectCityName}` : ""} — Workwave`;
-  const html = buildEmailHtml(input, baseUrl);
 
   const sb = getServiceClient();
   const nowIso = new Date().toISOString();
 
-  // 1) Recuperer lat/lng de la ville du projet (pour matching par distance)
+  // 1) Recuperer lat/lng + code postal de la ville du projet (matching distance + affichage email)
   let projectLat: number | null = null;
   let projectLng: number | null = null;
+  let projectPostalCode: string | null = null;
   if (input.projectCityId != null) {
     const { data: projCity } = await sb
       .from("cities")
-      .select("latitude, longitude")
+      .select("latitude, longitude, postal_code")
       .eq("id", input.projectCityId)
       .single();
     projectLat = (projCity?.latitude as number | null | undefined) ?? null;
     projectLng = (projCity?.longitude as number | null | undefined) ?? null;
+    projectPostalCode = (projCity?.postal_code as string | null | undefined) ?? null;
   }
+
+  // Email construit ici (apres le fetch ville) pour inclure le code postal.
+  const html = buildEmailHtml(input, baseUrl, projectPostalCode);
 
   // 2) Selection des pros BTP eligibles (categorie + claimed + actif).
   //    On NE filtre PAS par city_id en SQL : la bbox naive serait plafonnee
