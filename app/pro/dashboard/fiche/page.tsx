@@ -21,7 +21,7 @@ export default async function FichePage() {
     getProByUserId(user.id),
     getAllCategories(),
   ]);
-  if (!pro) redirect("/pro/reclamer");
+  if (!pro) redirect("/pro/retrouver-fiche");
 
   return (
     <FicheEditor

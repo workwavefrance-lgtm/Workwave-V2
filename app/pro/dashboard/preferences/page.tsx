@@ -18,7 +18,7 @@ export default async function PreferencesPage() {
   if (!user) redirect("/pro/connexion");
 
   const pro = await getProByUserId(user.id);
-  if (!pro) redirect("/pro/reclamer");
+  if (!pro) redirect("/pro/retrouver-fiche");
 
   // Aperçu basé sur TOUTES les catégories du pro (principale + secondaires) :
   // le pro reçoit les leads de l'ensemble de ses métiers (le broadcast diffuse

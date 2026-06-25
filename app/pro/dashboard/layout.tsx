@@ -34,7 +34,7 @@ export default async function DashboardLayout({
     if (aiPro) {
       redirect("/ai/dashboard");
     }
-    redirect("/pro/reclamer");
+    redirect("/pro/retrouver-fiche");
   }
 
   // Vérifier le cookie d'impersonation admin

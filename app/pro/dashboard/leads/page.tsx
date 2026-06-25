@@ -70,7 +70,7 @@ export default async function LeadsPage({
   if (!user) redirect("/pro/connexion");
 
   const pro = await getBtpProByUserId(user.id);
-  if (!pro) redirect("/pro/reclamer");
+  if (!pro) redirect("/pro/retrouver-fiche");
 
   // Le pro doit avoir une ville renseignée pour qu'on connaisse sa zone.
   if (!pro.city) {
