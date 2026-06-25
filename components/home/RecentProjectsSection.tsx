@@ -49,12 +49,25 @@ export default function RecentProjectsSection({
   return (
     <section className="px-4 py-16 sm:py-20 border-t border-[var(--border-color)] bg-[var(--bg-secondary)]">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-sm font-medium text-[var(--accent)] mb-3 tracking-wide uppercase">
-            En ce moment sur Workwave
-          </p>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
-            Des projets déposés récemment
+        <div className="text-center mb-12">
+          <span
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--accent)] mb-5 tracking-wider uppercase px-3.5 py-1.5 rounded-full"
+            style={{ backgroundColor: "var(--accent-muted)" }}
+          >
+            <span className="relative flex h-2 w-2">
+              <span
+                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                style={{ backgroundColor: "var(--accent)" }}
+              />
+              <span
+                className="relative inline-flex rounded-full h-2 w-2"
+                style={{ backgroundColor: "var(--accent)" }}
+              />
+            </span>
+            Ils nous font confiance
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] mb-4">
+            De vraies demandes, partout en France
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
             Des particuliers cherchent un pro près de chez eux. Déposez le
@@ -62,46 +75,54 @@ export default function RecentProjectsSection({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {projects.map((p) => {
             const urgent = p.urgency === "today";
             return (
               <Link
                 key={p.id}
                 href="/pro"
-                className="group block bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-5 transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]"
+                className="group block bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 shadow-sm transition-all duration-250 hover:-translate-y-1 hover:shadow-lg hover:border-[var(--accent)]"
               >
-                <div className="flex items-start justify-between gap-3 mb-1.5">
-                  <span className="font-semibold text-[var(--text-primary)] text-[15px] group-hover:text-[var(--accent)] transition-colors duration-250">
-                    {p.categoryName}
-                  </span>
-                  {p.urgency && URGENCY_LABELS[p.urgency] && (
-                    <span
-                      className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
-                      style={
-                        urgent
-                          ? {
-                              backgroundColor: "var(--accent-muted)",
-                              color: "var(--accent-badge-text)",
-                            }
-                          : {
-                              backgroundColor: "var(--bg-tertiary)",
-                              color: "var(--text-tertiary)",
-                            }
-                      }
-                    >
-                      {URGENCY_LABELS[p.urgency]}
-                    </span>
-                  )}
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl text-[var(--accent)]"
+                    style={{ backgroundColor: "var(--accent-muted)" }}
+                    aria-hidden
+                  >
+                    {p.categoryName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-semibold text-[var(--text-primary)] text-base leading-tight group-hover:text-[var(--accent)] transition-colors duration-250">
+                        {p.categoryName}
+                      </span>
+                      {p.urgency && URGENCY_LABELS[p.urgency] && (
+                        <span
+                          className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                          style={
+                            urgent
+                              ? { backgroundColor: "var(--accent)", color: "#ffffff" }
+                              : {
+                                  backgroundColor: "var(--bg-tertiary)",
+                                  color: "var(--text-tertiary)",
+                                }
+                          }
+                        >
+                          {URGENCY_LABELS[p.urgency]}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)] mt-1 truncate">
+                      {p.cityName}
+                      {p.deptCode ? ` (${p.deptCode})` : ""}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-[var(--text-secondary)] mb-3">
-                  {p.cityName}
-                  {p.deptCode ? ` (${p.deptCode})` : ""}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
+                <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] mt-4 pt-4 border-t border-[var(--card-border)]">
                   {p.budget && BUDGET_LABELS[p.budget] && (
                     <>
-                      <span className="font-medium text-[var(--text-secondary)]">
+                      <span className="font-semibold text-[var(--text-secondary)]">
                         {BUDGET_LABELS[p.budget]}
                       </span>
                       <span aria-hidden>·</span>
@@ -114,10 +135,10 @@ export default function RecentProjectsSection({
           })}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-10 text-center">
           <Link
             href="/pro"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors duration-250 hover:text-[var(--accent)]"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[var(--accent)] text-white font-semibold text-base transition-all duration-250 hover:opacity-90 hover:-translate-y-0.5"
           >
             Vous êtes artisan ? Recevez ces demandes
             <span aria-hidden>→</span>
