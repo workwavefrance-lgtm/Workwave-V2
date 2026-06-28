@@ -132,18 +132,15 @@ export default async function Footer() {
                 </Link>
               </li>
               <li>
-                {/* Lien cross-domaine vers le domaine AI (workwaveai.co).
-                    Sitewide (~1M pages) = transfert d'autorite du .fr (fort) vers
-                    le .co (neuf) pour debloquer son indexation. DOFOLLOW volontaire
-                    (surtout PAS de rel="nofollow"). */}
-                <a
-                  href="https://www.workwaveai.co/en/ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                {/* Vertical freelance désormais intégré à workwave.fr (/ai).
+                    Lien INTERNE (le .co est en cours de sunset, redirigé .fr) :
+                    garde l'autorité sur .fr + rend /ai visible sitewide. */}
+                <Link
+                  href="/ai"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
-                  Workwave AI — freelances
-                </a>
+                  Freelances &amp; services digitaux
+                </Link>
               </li>
               <li>
                 <Link

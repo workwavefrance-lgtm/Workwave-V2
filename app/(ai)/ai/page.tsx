@@ -52,7 +52,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "C'est gratuit pour les clients ?",
-    a: "Oui, 100% gratuit. Deposer un projet, etre contacte par les freelances, signer un devis : tout est gratuit cote client. Workwave ne prend aucune commission sur la mission. Les freelances financent la plateforme via un abonnement optionnel de 29,90€/mois TTC qui leur permet de repondre aux projets publies.",
+    a: "Oui, 100% gratuit. Deposer un projet, etre contacte par les freelances, signer un devis : tout est gratuit cote client. Workwave ne prend aucune commission sur la mission. Les freelances s'inscrivent gratuitement et debloquent les projets qui les interessent pour 9,90 € l'unite, sans abonnement.",
   },
   {
     q: "Quels metiers sont couverts par Workwave AI ?",
@@ -60,7 +60,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "En combien de temps est-on contacte par les freelances ?",
-    a: "Sous 24h dans 90% des cas, souvent en quelques heures. Des qu'un freelance Premium voit votre projet correspondant a son savoir-faire dans son dashboard, il peut vous contacter directement. Plus votre brief est clair (techno, budget, delai), plus les freelances pertinents repondent vite.",
+    a: "Sous 24h dans 90% des cas, souvent en quelques heures. Des qu'un freelance voit votre projet correspondant a son savoir-faire dans son dashboard, il peut debloquer vos coordonnees et vous contacter directement. Plus votre brief est clair (techno, budget, delai), plus les freelances pertinents repondent vite.",
   },
   {
     q: "Quel est le TJM moyen d'un freelance tech en France en 2026 ?",
@@ -76,7 +76,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "Comment Workwave AI se differencie de Malt, Comet, Free-Work ?",
-    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances inscrits (tech + business + creatif), ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele freemium pour les freelances (29,90€/mois sans credits limites, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
+    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances inscrits (tech + business + creatif), ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele pay-per-lead pour les freelances (9,90 € pour debloquer un projet qui les interesse, sans abonnement ni credits, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
   },
 ];
 
@@ -136,7 +136,7 @@ const VS_COMPETITORS = [
   },
   {
     feature: "Abonnement freelance",
-    workwave: "29,90€/mois fixe",
+    workwave: "9,90 €/projet débloqué",
     malt: "12€/mois Premium",
     comet: "Aucun (commission)",
     freeWork: "29€/mois Premium",
@@ -398,7 +398,7 @@ const WHY = [
   },
   {
     title: "Sans credit, sans commission",
-    desc: "Les freelances paient 29,90€/mois pour repondre, sans systeme de credits limites. Workwave ne prend aucune commission sur vos missions.",
+    desc: "Les freelances debloquent les projets qui les interessent pour 9,90 € l'unite, sans abonnement ni systeme de credits. Workwave ne prend aucune commission sur vos missions.",
   },
   {
     title: "France & Europe",
@@ -1556,8 +1556,8 @@ export default function AiHomePage() {
               <p className="text-sm text-white/70 leading-relaxed mb-8 relative z-10">
                 Inscription gratuite — tech, marketing, finance, juridique, RH,
                 design, creation. Recevez tous les projets de votre vertical en
-                temps reel. Repondez sans credit a 29,90€/mois TTC. Resiliable
-                a tout moment, aucun engagement.
+                temps reel. Debloquez un projet pour 9,90 € quand il vous
+                interesse. Sans abonnement, sans engagement.
               </p>
 
               <Link

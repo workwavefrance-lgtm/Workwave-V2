@@ -1,11 +1,12 @@
 /* ============================================================================
    Workwave AI — Design tokens scopés (style peec.ai / Linear / Vercel)
    ============================================================================
-   Ces variables sont VOLONTAIREMENT séparées des --accent / --bg coral du
-   Workwave BTP. Aucun fichier hors /ai ne doit utiliser ces tokens.
+   Tokens scopés au vertical freelance. Depuis le 28/06/2026 : l'accent est
+   la CORAL Workwave (#FF5A36), unifiée avec le site principal workwave.fr —
+   le vertical freelance est désormais une section normale de workwave.fr.
 
-   Palette : noir / blanc / gris (zéro coral, zéro indigo flashy).
-   Inspiration : peec.ai, linear.app, vercel.com, stripe.com.
+   Palette : blanc / noir / gris + accent coral Workwave (#FF5A36).
+   Inspiration : workwave.fr (cohérence de marque sur tout le site).
    ============================================================================ */
 
 .ai-theme {
@@ -37,15 +38,15 @@
   --ai-secondary-text: #0A0A0A;
   --ai-secondary-border: #E5E5E5;
 
-  /* ─── Accent signature retro-tech (style Pixel Rise) ──────────────
-     Orange brûlé volontairement différent de la coral BTP (#FF5A36) :
-     plus saturé, plus jaune, contexte d'usage display bold + watermark.
+  /* ─── Accent coral Workwave (unifié avec le site principal) ────────
+     Même coral que workwave.fr (#FF5A36) pour une identité de marque unique
+     sur tout le site. Remplace l'ancien orange brûlé #FF6803 (28/06/2026).
      ────────────────────────────────────────────────────────────────── */
-  --ai-accent: #FF6803;
-  --ai-accent-hover: #AE3A02;
+  --ai-accent: #FF5A36;
+  --ai-accent-hover: #E63E1A;
   --ai-accent-text: #FFFFFF;
-  --ai-accent-subtle: #FFF1E6;
-  --ai-accent-border: #FFD9BA;
+  --ai-accent-subtle: #FFEDE8;
+  --ai-accent-border: #FFD0C4;
 
   /* ─── Watermark (giant typography derrière hero) ──────────────────── */
   --ai-text-watermark: rgba(10, 10, 10, 0.045);

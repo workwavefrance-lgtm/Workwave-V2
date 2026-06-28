@@ -173,10 +173,6 @@ export default async function AiDashboardParametresPage({
           <ul className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-4 list-disc list-inside space-y-1">
             <li>Suppression de votre fiche publique sur Workwave AI</li>
             <li>
-              Annulation immediate de votre abonnement Premium (la periode en
-              cours est perdue, aucun remboursement automatique)
-            </li>
-            <li>
               Nullification de vos coordonnees (email, telephone, site web,
               reseaux sociaux)
             </li>

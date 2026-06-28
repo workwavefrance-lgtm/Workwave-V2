@@ -45,8 +45,8 @@ export type SignupData = {
 };
 
 const PLAN_LABELS = {
-  free: "Gratuit (visibilite uniquement, 0€/mois)",
-  premium: "Premium (reponse illimitee, 29,90€/mois TTC)",
+  free: "Gratuit (profil visible, reception des projets par email)",
+  premium: "Gratuit (profil visible, reception des projets par email)",
 };
 
 const AVAILABILITY_LABELS: Record<string, string> = {
@@ -67,7 +67,7 @@ export async function sendAiSignupAdminNotification(data: SignupData): Promise<v
     <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ AI · NEW SIGNUP ]</p>
 
     <h1 style="font-size:22px;color:#0A0A0A;margin:0 0 8px 0;font-weight:800;letter-spacing:-0.02em;">${data.firstName} ${data.lastName}</h1>
-    <p style="font-size:14px;color:#525252;margin:0 0 24px 0;">Categorie : <strong>${data.categoryName}</strong> · Plan : <strong>${data.plan === "premium" ? "★ Premium" : "Gratuit"}</strong></p>
+    <p style="font-size:14px;color:#525252;margin:0 0 24px 0;">Categorie : <strong>${data.categoryName}</strong> · Plan : <strong>Gratuit (pay-per-lead 9,90€)</strong></p>
 
     <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Identite :</h3>
     <table style="font-size:13px;width:100%;border-collapse:collapse;">
@@ -130,7 +130,7 @@ export async function sendAiSignupWelcome(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
   // Variante EN : pointe vers le tunnel anglais sur le gTLD workwaveai.co,
-  // free-only (pas de mention premium). Le freelance US recoit un mail anglais.
+  // pay-per-lead uniquement. Le freelance US recoit un mail anglais.
   if (locale === "en") {
     const aiBase = "https://www.workwaveai.co/en/ai";
     const enHtml = `<!DOCTYPE html>
@@ -202,8 +202,7 @@ export async function sendAiSignupWelcome(
     <ol style="font-size:14px;color:#525252;line-height:1.7;padding-left:20px;margin:0 0 24px 0;">
       <li>Connectez-vous a votre dashboard via <a href="${baseUrl}/ai/connexion" style="color:#FF6803;">workwave.fr/ai/connexion</a> (code a 6 chiffres envoye par mail)</li>
       <li>Completez votre profil (bio, stack, GitHub, LinkedIn) pour gagner des badges</li>
-      ${data.plan === "premium" ? `<li>Activez votre abonnement Premium 29,90€/mois TTC dans <a href="${baseUrl}/ai/dashboard/abonnement" style="color:#FF6803;">le dashboard</a> (resiliable en 1 clic)</li>` : `<li>Profil visible sur la plateforme. Passez Premium quand vous voulez pour repondre aux projets.</li>`}
-      <li>Vous recevez par mail chaque projet tech publie en temps reel ${data.plan === "premium" ? "(reponse illimitee)" : "(reponse reservee aux Premium)"}</li>
+      <li>Vous recevez par mail chaque projet tech publie en temps reel. Debloque ceux qui vous interessent a 9,90€ l&rsquo;unite pour voir les coordonnees du client et le contacter.</li>
     </ol>
 
     <div style="text-align:center;margin:32px 0;">

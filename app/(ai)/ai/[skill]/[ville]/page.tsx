@@ -219,7 +219,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
         name: `Workwave AI prend-il une commission sur les missions ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Non. Workwave AI ne prend aucune commission sur les missions, ni cote client ni cote freelance. Le service est entierement gratuit pour les porteurs de projet. Les freelances paient un abonnement fixe de 29,90€/mois pour repondre aux briefs, sans systeme de credits.`,
+          text: `Non. Workwave AI ne prend aucune commission sur les missions, ni cote client ni cote freelance. Le service est entierement gratuit pour les porteurs de projet. Les freelances debloquent les projets qui les interessent a 9,90€ l'unite, sans abonnement.`,
         },
       },
       {

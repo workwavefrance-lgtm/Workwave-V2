@@ -3,8 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
-import { markProjectAsContacted } from "./actions";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { markProjectAsContacted, startTechUnlock } from "./actions";
 
 export const metadata: Metadata = {
   title: "Tous les projets — Dashboard Workwave AI",
@@ -30,6 +30,16 @@ const TIMELINE_LABELS: Record<string, string> = {
 // Limite d'affichage : 50 projets les plus recents (pagination future si besoin)
 const PROJECTS_LIMIT = 50;
 
+/**
+ * Masque les coordonnées (email + téléphone FR) d'un texte tant que le projet
+ * n'est pas débloqué — défense RGPD : aucune PII dans le HTML d'un projet locké.
+ */
+function scrubPii(text: string): string {
+  return text
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "•••@•••")
+    .replace(/(?:\+33|0)[\s.-]?[1-9](?:[\s.-]?\d{2}){4}/g, "•• •• •• •• ••");
+}
+
 export default async function AiDashboardProjetsPage({
   searchParams,
 }: {
@@ -38,10 +48,16 @@ export default async function AiDashboardProjetsPage({
     error?: string;
     cat?: string;
     budget?: string;
+    unlocked?: string;
+    canceled?: string;
+    already_unlocked?: string;
   }>;
 }) {
   const sp = await searchParams;
   const justMarked = sp.marked === "contacted";
+  const justUnlocked = !!sp.unlocked;
+  const justCanceled = !!sp.canceled;
+  const alreadyUnlocked = !!sp.already_unlocked;
   const errKey = sp.error;
   const filterCat = sp.cat || "all";
   const filterBudget = sp.budget || "all";
@@ -53,8 +69,14 @@ export default async function AiDashboardProjetsPage({
       ? "Vous n'avez pas acces a ce projet."
       : errKey === "project_not_found"
       ? "Projet introuvable."
-      : errKey === "premium_required"
-      ? "Reservé aux abonnes Premium. Activez votre abonnement pour repondre."
+      : errKey === "not_unlocked"
+      ? "Débloquez d'abord ce projet pour accéder aux coordonnées."
+      : errKey === "cgv_required"
+      ? "Vous devez accepter les CGV pour débloquer un projet."
+      : errKey === "stripe_not_configured"
+      ? "Le paiement est momentanément indisponible. Réessayez plus tard."
+      : errKey === "checkout_failed"
+      ? "Le paiement n'a pas pu démarrer. Réessayez."
       : "";
 
   const supabase = await createClient();
@@ -65,8 +87,6 @@ export default async function AiDashboardProjetsPage({
 
   const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
-
-  const isPremium = isAiPremium(pro);
 
   const service = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -145,6 +165,18 @@ export default async function AiDashboardProjetsPage({
     if (l.contacted_at) contactedMap.set(l.project_id, true);
   });
 
+  // Unlocks (pay-per-lead) : quels projets ce pro a déjà débloqués (9,90 €)
+  const { data: unlocksRaw } = projectIds.length
+    ? await service
+        .from("lead_unlocks")
+        .select("project_id")
+        .eq("pro_id", pro.id)
+        .in("project_id", projectIds)
+    : { data: [] as { project_id: number }[] };
+  const unlockedSet = new Set<number>(
+    (unlocksRaw || []).map((u) => u.project_id)
+  );
+
   const projects = projectsRows.map((proj) => {
     const fullDesc = proj.description || "";
     const parts = fullDesc.split(/\n\n+/);
@@ -156,10 +188,12 @@ export default async function AiDashboardProjetsPage({
       typeof (proj.ai_qualification as Record<string, unknown>).suspicion_score === "number"
         ? ((proj.ai_qualification as Record<string, unknown>).suspicion_score as number)
         : 0;
+    const unlocked = unlockedSet.has(proj.id);
     return {
       id: proj.id,
-      title: title.slice(0, 100),
-      description: body,
+      title: (unlocked ? title : scrubPii(title)).slice(0, 100),
+      // Description scrubée (emails/tél masqués) tant que pas débloqué.
+      description: unlocked ? body : scrubPii(body),
       budget: BUDGET_LABELS[proj.budget || ""] || proj.budget || "A definir",
       timeline: TIMELINE_LABELS[proj.urgency || ""] || proj.urgency || "Flexible",
       receivedAt: proj.created_at,
@@ -167,9 +201,11 @@ export default async function AiDashboardProjetsPage({
       isSuspicious: proj.status === "suspicious" || suspicionScore > 70,
       categoryName: cat?.name || "Workwave AI",
       categorySlug: cat?.slug || "ai",
-      clientName: proj.first_name,
-      clientEmail: proj.email,
-      clientPhone: proj.phone,
+      unlocked,
+      // Coordonnées UNIQUEMENT si débloqué (sinon jamais envoyées dans le HTML).
+      clientName: unlocked ? proj.first_name : null,
+      clientEmail: unlocked ? proj.email : null,
+      clientPhone: unlocked ? proj.phone : null,
       alreadyContacted: contactedMap.get(proj.id) || false,
     };
   });
@@ -182,6 +218,37 @@ export default async function AiDashboardProjetsPage({
           role="status"
         >
           <p className="text-sm font-medium">✓ Projet marque comme contacte.</p>
+        </div>
+      )}
+      {justUnlocked && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-800"
+          role="status"
+        >
+          <p className="text-sm font-medium">
+            ✓ Projet débloqué ! Les coordonnées du client sont visibles
+            ci-dessous.
+          </p>
+        </div>
+      )}
+      {alreadyUnlocked && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-[var(--ai-border)] bg-[var(--ai-bg-subtle)] text-[var(--ai-text-secondary)]"
+          role="status"
+        >
+          <p className="text-sm font-medium">
+            Vous aviez déjà débloqué ce projet — coordonnées visibles ci-dessous.
+          </p>
+        </div>
+      )}
+      {justCanceled && (
+        <div
+          className="mb-6 p-4 rounded-lg border border-[var(--ai-border)] bg-[var(--ai-bg-subtle)] text-[var(--ai-text-secondary)]"
+          role="status"
+        >
+          <p className="text-sm font-medium">
+            Paiement annulé. Le projet n&apos;a pas été débloqué.
+          </p>
         </div>
       )}
       {errorMsg && (
@@ -211,16 +278,12 @@ export default async function AiDashboardProjetsPage({
           Tous les projets.
         </h1>
         <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed">
-          Tous les projets publies sur Workwave AI, en temps reel. Filtrez par
-          savoir-faire pour ne voir que ceux qui vous interessent.
-          {!isPremium && (
-            <>
-              {" "}
-              <strong className="text-[var(--ai-text)]">
-                Activez Premium pour repondre aux projets.
-              </strong>
-            </>
-          )}
+          Tous les projets publiés sur Workwave, en temps réel. Filtrez par
+          savoir-faire pour ne voir que ceux qui vous intéressent.{" "}
+          <strong className="text-[var(--ai-text)]">
+            Débloquez les coordonnées d&apos;un projet pour 9,90 € — sans
+            abonnement.
+          </strong>
         </p>
       </div>
 
@@ -326,8 +389,8 @@ export default async function AiDashboardProjetsPage({
                 </span>
               </div>
 
-              {/* Acces aux coordonnees : Premium uniquement */}
-              {isPremium && p.clientEmail ? (
+              {/* Acces aux coordonnees : pay-per-lead 9,90 € (deblocage par projet) */}
+              {p.unlocked ? (
                 <>
                   <div className="pt-4 border-t border-[var(--ai-border-subtle)] grid grid-cols-1 sm:grid-cols-2 gap-2 text-[13px] mb-4">
                     <div>
@@ -342,12 +405,14 @@ export default async function AiDashboardProjetsPage({
                       <p className="text-[10px] uppercase font-semibold text-[var(--ai-text-tertiary)] tracking-wider mb-1">
                         Contact
                       </p>
-                      <a
-                        href={`mailto:${p.clientEmail}`}
-                        className="text-[var(--ai-accent)] underline decoration-[var(--ai-border)] hover:text-[var(--ai-accent-hover)]"
-                      >
-                        {p.clientEmail}
-                      </a>
+                      {p.clientEmail && (
+                        <a
+                          href={`mailto:${p.clientEmail}`}
+                          className="text-[var(--ai-accent)] underline decoration-[var(--ai-border)] hover:text-[var(--ai-accent-hover)]"
+                        >
+                          {p.clientEmail}
+                        </a>
+                      )}
                       {p.clientPhone && (
                         <a
                           href={`tel:${p.clientPhone}`}
@@ -365,36 +430,41 @@ export default async function AiDashboardProjetsPage({
                         type="submit"
                         className="text-[12px] font-semibold text-[var(--ai-text-secondary)] hover:text-[var(--ai-accent)] underline decoration-[var(--ai-border)] underline-offset-2 transition-colors"
                       >
-                        ✓ J&apos;ai contacte ce client
+                        ✓ J&apos;ai contacté ce client
                       </button>
                     </form>
                   )}
                 </>
               ) : (
                 <div className="pt-4 border-t border-[var(--ai-border-subtle)]">
-                  <p className="text-[12px] text-[var(--ai-text-tertiary)] mb-2">
-                    Pour voir les coordonnees du client et repondre :
-                  </p>
-                  <Link
-                    href="/ai/dashboard/abonnement"
-                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--ai-accent)] hover:text-[var(--ai-accent-hover)]"
-                  >
-                    Activer Premium (29,90€/mois)
-                    <svg
-                      className="w-3.5 h-3.5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M5 12h14M13 6l6 6-6 6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                  <form action={startTechUnlock}>
+                    <input type="hidden" name="projectId" value={p.id} />
+                    <label className="flex items-start gap-2 text-[12px] text-[var(--ai-text-secondary)] mb-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="cgvAccepted"
+                        required
+                        className="mt-0.5 accent-[var(--ai-accent)]"
                       />
-                    </svg>
-                  </Link>
+                      <span>
+                        J&apos;accepte les{" "}
+                        <Link href="/cgv" target="_blank" className="underline">
+                          CGV
+                        </Link>
+                        . Le déblocage donne accès aux coordonnées de ce projet.
+                      </span>
+                    </label>
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-2 h-11 px-6 text-[14px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
+                    >
+                      Débloquer ce projet — 9,90 €
+                    </button>
+                    <p className="text-[11px] text-[var(--ai-text-tertiary)] mt-2">
+                      Paiement unique, sans abonnement. Vous voyez le projet
+                      avant de payer.
+                    </p>
+                  </form>
                 </div>
               )}
             </li>

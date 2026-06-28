@@ -56,3 +56,6 @@ scripts/.backup-sent-logs-*/
 data/competitive/
 scripts/_archive/
 scraping/*.log
+
+# Coffre Obsidian "Workwave" (base de connaissances) — perso, pas du code à déployer
+/Workwave/

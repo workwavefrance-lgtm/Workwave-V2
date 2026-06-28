@@ -31,6 +31,10 @@ export type BtpUnlockCheckoutInput = {
   existingCustomerId?: string | null;
   successUrl: string;
   cancelUrl: string;
+  /** Vertical du pro/projet — "btp" (defaut) ou "tech" (freelance AI). Sert au
+   *  metadata client Stripe + description. Le prix (9,90 €) et le routing
+   *  webhook (product="btp_lead_unlock" → lead_unlocks) sont communs aux deux. */
+  vertical?: "btp" | "tech";
 };
 
 export type BtpUnlockCheckoutResult =
@@ -47,6 +51,7 @@ export async function createBtpUnlockCheckoutSession(
   }
 
   const stripe = getStripeServer();
+  const vertical = input.vertical || "btp";
   let customerId = input.existingCustomerId || null;
 
   // Si on a un existingCustomerId, verifier qu'il n'est pas deleted/invalid
@@ -75,7 +80,7 @@ export async function createBtpUnlockCheckoutSession(
   if (!customerId) {
     try {
       const search = await stripe.customers.search({
-        query: `metadata['pro_id']:'${input.proId}' AND metadata['vertical']:'btp'`,
+        query: `metadata['pro_id']:'${input.proId}' AND metadata['vertical']:'${vertical}'`,
         limit: 1,
       });
       if (search.data.length > 0) {
@@ -89,7 +94,7 @@ export async function createBtpUnlockCheckoutSession(
       const customer = await stripe.customers.create({
         email: input.email,
         name: input.name || undefined,
-        metadata: { pro_id: String(input.proId), vertical: "btp" },
+        metadata: { pro_id: String(input.proId), vertical },
       });
       customerId = customer.id;
     }
@@ -111,7 +116,7 @@ export async function createBtpUnlockCheckoutSession(
       metadata: {
         pro_id: String(input.proId),
         project_id: String(input.projectId),
-        vertical: "btp",
+        vertical,
         product: "btp_lead_unlock",
       },
       payment_intent_data: {
@@ -122,7 +127,7 @@ export async function createBtpUnlockCheckoutSession(
           vertical: "btp",
           product: "btp_lead_unlock",
         },
-        description: `Workwave BTP — Deblocage lead #${input.projectId}`,
+        description: `Workwave — Deblocage lead #${input.projectId}`,
       },
       success_url: input.successUrl,
       cancel_url: input.cancelUrl,

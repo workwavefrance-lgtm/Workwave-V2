@@ -114,9 +114,9 @@ export default async function Home() {
       <section className="py-24 sm:py-32 lg:py-40 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.1] mb-6">
-            Tout le savoir-faire local,
+            Trouvez le bon artisan
             <br />
-            enfin accessible
+            près de chez vous
             {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
                 = le point est rendu serveur-side, LCP intact. */}
             <span className="text-[var(--accent)] animate-accent-pulse">.</span>
@@ -127,10 +127,39 @@ export default async function Home() {
             className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
             style={{ animationDelay: "120ms" }}
           >
-            Plus de 2,4 millions de professionnels référencés dans toute
-            la France, à portée d&apos;un clic.
+            Tout le savoir-faire local, enfin accessible. Décrivez votre projet
+            et recevez des devis gratuits d&apos;artisans près de chez vous.
           </p>
           <SearchForm categories={allCategories} />
+          {/* Réassurance QUALITÉ — uniquement des signaux VRAIS (pub honnête + RGPD) :
+              SIRET vérifiable au registre officiel (annuaire-entreprises.data.gouv.fr),
+              données publiques SIRENE, gratuité réelle. PAS de "décennale validée"
+              (auto-déclaré, non vérifié) ni d'avis inventés (0 avis natif à ce jour). */}
+          <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-[var(--text-secondary)]">
+            {[
+              "SIRET vérifié au registre officiel",
+              "Données publiques officielles",
+              "100 % gratuit, sans engagement",
+            ].map((label) => (
+              <li key={label} className="inline-flex items-center gap-1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="w-4 h-4 text-[var(--accent)] shrink-0"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 6 9 17l-5-5"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {label}
+              </li>
+            ))}
+          </ul>
           {/* Bande de stats : preuve de couverture immédiate (chiffres coral animés). */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
             <div className="text-center">

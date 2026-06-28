@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAiProByUserId } from "@/lib/queries/pros";
-import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getAvatarStyle, getInitials } from "@/lib/ai/personalisation";
 
 const NAV_ITEMS = [
@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { href: "/ai/dashboard/projets", label: "Tous les projets", icon: "02" },
   { href: "/ai/dashboard/profil", label: "Mon profil", icon: "03" },
   { href: "/ai/dashboard/preferences", label: "Preferences", icon: "04" },
-  { href: "/ai/dashboard/abonnement", label: "Abonnement", icon: "05" },
+  { href: "/ai/dashboard/abonnement", label: "Facturation", icon: "05" },
   { href: "/ai/dashboard/parametres", label: "Parametres", icon: "06" },
 ];
 
@@ -116,11 +116,7 @@ export default async function AiDashboardLayout({
           <div className="flex items-center gap-2 text-[11px] uppercase font-semibold tracking-wider">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--ai-accent)]" />
             <span className="text-[var(--ai-accent)]">
-              {isAiPremium(pro)
-                ? pro.subscription_status === "trialing"
-                  ? "Essai gratuit"
-                  : "Premium actif"
-                : "Plan gratuit"}
+              Pay-per-lead · 9,90 €/projet
             </span>
           </div>
         </div>

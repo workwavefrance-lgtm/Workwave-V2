@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title:
     "Pour les freelances — Recevez 100% des projets en temps reel | Workwave AI",
   description:
-    "Inscrivez-vous gratuitement (tech, marketing, finance, juridique, RH, design, creation, audiovisuel) et recevez en temps reel TOUS les projets publies sur Workwave AI. Filtrez par savoir-faire, repondez aux projets qui vous interessent. 29,90€/mois pour repondre, sans credit, sans commission. Alternative a Malt, Codeur, Freelancer.com.",
+    "Inscrivez-vous gratuitement (tech, marketing, finance, juridique, RH, design, creation, audiovisuel) et recevez en temps reel TOUS les projets publies sur Workwave AI. Voyez chaque projet avant de payer. Debloquez uniquement ceux qui vous interessent pour 9,90 €, sans abonnement, sans commission. Alternative a Malt, Codeur, Freelancer.com.",
   alternates: { canonical: `${SITE_URL}/ai/pour-les-freelances` },
 };
 
@@ -27,20 +27,20 @@ const PROCESS = [
   {
     n: "03",
     title: "Vous choisissez, vous repondez directement",
-    desc: "Pas de selection imposee : c'est vous qui filtrez et decidez. Premium = vous voyez les coordonnees et contactez le client. Devis, contrat, paiement : 100% libre. Aucune commission.",
+    desc: "Pas de selection imposee : c'est vous qui filtrez et decidez. Vous voyez le projet complet avant de payer. Si ce projet vous interesse, vous le debloquez pour 9,90 € et contactez le client directement. Devis, contrat, paiement : 100% libre. Aucune commission.",
   },
 ];
 
 const VS = [
   {
     title: "vs Codeur.com",
-    point: "Pas de credits a acheter",
-    desc: "Sur Codeur, chaque reponse necessite un credit a acheter. Sur Workwave AI : 29,90€/mois fixe, reponse illimitee. Plus simple a budgeter, surtout si vous repondez regulierement.",
+    point: "Vous payez apres avoir vu le projet",
+    desc: "Sur Codeur, vous achetez des credits a l'avance, a l'aveugle. Sur Workwave AI : vous voyez le projet complet (description, budget, delai) et vous ne payez 9,90 € que si ce projet vous interesse vraiment. Aucun credit gaspille sur un brief decevant.",
   },
   {
     title: "vs Malt",
     point: "0% de commission",
-    desc: "Malt prend 10% sur vos missions jusqu'a 5K€. Workwave AI : 0%, jamais. Le client paie ce qu'il vous doit, vous gardez tout.",
+    desc: "Malt prend 10% sur vos missions jusqu'a 5K€. Workwave AI : 0%, jamais. Vous debloquez le contact du client pour 9,90 €, puis tout ce que vous facturez vous appartient. Le client paie ce qu'il vous doit, vous gardez tout.",
   },
   {
     title: "vs LinkedIn outbound",
@@ -57,23 +57,23 @@ const VS = [
 const FAQ = [
   {
     q: "C'est vraiment gratuit pour s'inscrire ?",
-    a: "Oui. L'inscription, la creation du profil, la reception en temps reel des projets : tout est gratuit. L'abonnement 29,90€/mois est uniquement requis si vous voulez RÉPONDRE aux projets (voir les coordonnees du client et le contacter).",
+    a: "Oui. L'inscription, la creation du profil et la reception en temps reel de tous les projets sont gratuits. Vous ne payez que lorsque vous souhaitez debloquer un projet precis pour contacter le client : 9,90 € par projet, paiement unique, sans abonnement.",
   },
   {
     q: "Vais-je voir TOUS les projets ou juste ceux qui matchent ?",
-    a: "TOUS. A chaque projet publie sur Workwave AI dans votre vertical (tech, marketing, finance, juridique, RH, design, creatif), tous les freelances inscrits du vertical recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Modele communaute Codeur.com : pas de selection imposee, vous gardez la main.",
+    a: "TOUS. A chaque projet publie sur Workwave AI dans votre vertical (tech, marketing, finance, juridique, RH, design, creatif), tous les freelances inscrits du vertical recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Pas de selection imposee : vous voyez le projet complet avant de decider si vous le debloquez.",
   },
   {
     q: "Combien de projets vais-je recevoir ?",
-    a: "Ca depend de la demande sur Workwave AI au global. La plateforme est en lancement, donc le volume monte progressivement. Vous serez alerte par email a chaque nouveau projet publie, et le tableau de bord centralise tout avec filtres.",
+    a: "Ca depend de la demande sur Workwave AI au global. La plateforme est en lancement, donc le volume monte progressivement. Vous serez alerte par email a chaque nouveau projet publie, et le tableau de bord centralise tout avec filtres. Vous ne payez que les projets qui retiennent reellement votre attention.",
   },
   {
-    q: "Puis-je resilier a tout moment ?",
-    a: "Oui, en 1 clic depuis le dashboard. Aucun engagement. La resiliation prend effet a la fin de la periode en cours, sans frais.",
+    q: "Comment fonctionne le deblocage a 9,90 € ?",
+    a: "Dans votre dashboard, vous voyez la description complete du projet, le budget et le delai avant de payer. Si le projet vous convient, vous le debloquez pour 9,90 € : les coordonnees du client apparaissent et vous pouvez le contacter directement. Paiement unique par projet, sans abonnement, sans engagement.",
   },
   {
     q: "Workwave prend une commission sur les missions ?",
-    a: "Non. Jamais. Vous facturez le client directement, vous gardez 100%. Workwave est financee uniquement par les abonnements freelances.",
+    a: "Non. Jamais. Vous debloquez le contact du client pour 9,90 €, puis vous facturez le client librement et vous gardez 100% de vos honoraires. Workwave est financee uniquement par ces debloquages de projet.",
   },
 ];
 
@@ -93,7 +93,7 @@ export default function PourLesFreelancesPage() {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Workwave AI Premium — Abonnement freelance",
+    name: "Workwave — Deblocage de projet (freelance)",
     serviceType: "Plateforme de matching projets freelance multi-verticale",
     provider: {
       "@type": "Organization",
@@ -101,19 +101,19 @@ export default function PourLesFreelancesPage() {
       url: `${SITE_URL}/ai`,
     },
     description:
-      "Recevez les projets qualifies par IA qui matchent votre profil, tous verticaux confondus : tech, marketing, finance, juridique, RH, design, creation. Reponse illimitee, sans credit, sans commission. 29,90€/mois TTC, resiliable en 1 clic.",
+      "Recevez gratuitement les projets qualifies par IA qui matchent votre profil, tous verticaux confondus : tech, marketing, finance, juridique, RH, design, creation. Voyez chaque projet avant de payer. Debloquez uniquement les projets qui vous interessent pour 9,90 € par projet. Sans abonnement, sans commission, sans engagement.",
     areaServed: { "@type": "Place", name: "France et Europe" },
     offers: {
       "@type": "Offer",
-      price: "29.90",
+      price: "9.90",
       priceCurrency: "EUR",
       availability: "https://schema.org/InStock",
       url: `${SITE_URL}/ai/inscription`,
       priceSpecification: {
         "@type": "UnitPriceSpecification",
-        price: "29.90",
+        price: "9.90",
         priceCurrency: "EUR",
-        unitCode: "MON",
+        unitCode: "C62",
       },
     },
   };
@@ -170,9 +170,9 @@ export default function PourLesFreelancesPage() {
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed mb-10">
               <strong className="text-[var(--ai-text)]">Profil et alertes 100&nbsp;% gratuits</strong> : à chaque
               nouveau projet de votre domaine, vous êtes notifié par email et le voyez
-              dans votre dashboard. <strong className="text-[var(--ai-text)]">L&apos;abonnement
-              29,90&nbsp;€/mois n&apos;est requis que pour répondre</strong> (voir les coordonnées
-              du client et le contacter). Sans crédit, sans commission, résiliable en 1 clic.
+              en détail dans votre dashboard. <strong className="text-[var(--ai-text)]">Vous déverrouillez
+              les coordonnées du client pour 9,90&nbsp;€</strong> seulement si ce projet vous intéresse,
+              après l&apos;avoir lu. Sans abonnement, sans commission, sans engagement.
             </p>
 
             {/* CTA bar composite — meme pattern que /ai (landing) */}

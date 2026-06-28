@@ -70,7 +70,7 @@ export default async function MondeSkillHubPage({
     },
     {
       q: `C'est gratuit pour les clients ?`,
-      a: `Oui, 100 % gratuit. Déposer un projet, être contacté et recruter ne coûte rien. Les freelances financent la plateforme via un abonnement optionnel.`,
+      a: `Oui, 100 % gratuit. Déposer un projet, être contacté et recruter ne coûte rien. Les freelances débloquent les projets qui les intéressent à 9,90 € l'unité.`,
     },
   ];
 

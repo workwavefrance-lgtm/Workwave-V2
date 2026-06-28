@@ -308,7 +308,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
 
       <button
         type="submit"
-        className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] shrink-0"
+        className="bg-[var(--text-primary)] hover:opacity-90 text-[var(--card-bg)] px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 shrink-0"
       >
         Rechercher
       </button>

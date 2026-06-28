@@ -100,6 +100,12 @@ export default function Header() {
             Blog
           </Link>
           <Link
+            href="/ai"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
+          >
+            Freelances
+          </Link>
+          <Link
             href="/pro"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
@@ -200,6 +206,13 @@ export default function Header() {
             className="block py-3 text-[var(--text-primary)] font-medium"
           >
             Blog
+          </Link>
+          <Link
+            href="/ai"
+            onClick={() => setMenuOpen(false)}
+            className="block py-3 text-[var(--text-primary)] font-medium"
+          >
+            Freelances
           </Link>
           <Link
             href="/pro"

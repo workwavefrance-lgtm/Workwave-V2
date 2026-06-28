@@ -38,7 +38,7 @@ const FAQ_FREELANCES_HUB: FaqItem[] = [
   },
   {
     q: "Quelle est la difference entre Workwave AI et un site comme Malt ?",
-    a: "Sur Workwave AI, vous publiez votre projet et notre IA diffuse en temps reel a toute la communaute des freelances tech inscrits — ceux qui correspondent a votre besoin vous contactent directement. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). Le freelance paie un abonnement fixe 29,90€/mois (sans credit) pour repondre aux projets, au lieu d'une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
+    a: "Sur Workwave AI, vous publiez votre projet et notre IA diffuse en temps reel a toute la communaute des freelances tech inscrits — ceux qui correspondent a votre besoin vous contactent directement. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). L'inscription du freelance est gratuite ; il debloque pour 9,90 € seulement les projets qui l'interessent (apres les avoir vus), au lieu de payer un abonnement ou une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
   },
   {
     q: "Les freelances sont-ils verifies (KYC, certification) ?",

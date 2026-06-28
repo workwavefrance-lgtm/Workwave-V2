@@ -16,7 +16,10 @@ export default async function InscriptionSuccesPage({
 }) {
   const sp = await searchParams;
   const id = sp.id;
-  const plan = sp.plan === "premium" ? "Premium" : "Gratuit";
+  // Le modele n'a plus de plan Premium : l'inscription est gratuite pour tous.
+  // sp.plan est conserve en lecture pour ne pas casser d'eventuels liens entrants,
+  // mais n'influence plus l'affichage.
+  void sp.plan;
 
   return (
     <section className="relative overflow-hidden min-h-[calc(100vh-64px)] flex items-center">
@@ -63,9 +66,10 @@ export default async function InscriptionSuccesPage({
           </h1>
 
           <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-10 max-w-xl mx-auto">
-            Votre compte freelance Workwave AI est actif. Des qu&apos;un projet
-            tech est publie, vous recevez un email en temps reel. Connectez-vous
-            au dashboard pour voir tous les projets et filtrer par savoir-faire.
+            Votre profil freelance Workwave AI est cree gratuitement. Des qu&apos;un
+            projet tech est publie, vous le recevez en temps reel. Debloque
+            pour 9,90 € ceux qui vous interessent pour voir les coordonnees et
+            contacter le client — sans abonnement ni commission.
           </p>
 
           {id && (
@@ -73,7 +77,7 @@ export default async function InscriptionSuccesPage({
               className="text-[12px] text-[var(--ai-text-tertiary)] mb-10"
               style={{ fontFamily: "var(--font-geist-mono), monospace" }}
             >
-              Reference inscription : #{id} · Plan choisi : {plan}
+              Reference inscription : #{id}
             </p>
           )}
 
@@ -102,7 +106,7 @@ export default async function InscriptionSuccesPage({
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-[var(--ai-accent)] mt-0.5 flex-shrink-0 font-bold">04</span>
-                <span>Recevez en temps reel TOUS les projets tech publies, par email + dashboard.</span>
+                <span>Recevez en temps reel tous les projets tech publies. Debloque pour 9,90 € ceux qui vous interessent pour acceder aux coordonnees du client.</span>
               </li>
             </ul>
           </div>

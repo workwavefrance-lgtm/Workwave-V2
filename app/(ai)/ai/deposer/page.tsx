@@ -381,8 +381,8 @@ export default async function DeposerPage({
               Comment vous joindre ?
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Vos coordonnees ne sont visibles que par les freelances Premium
-              de notre communaute. Jamais publiees, jamais revendues.
+                Vos coordonnees ne sont visibles que par les freelances qui
+              debloquent votre projet (9,90 €). Jamais publiees, jamais revendues.
             </p>
 
             <div className="space-y-5">
@@ -508,8 +508,8 @@ export default async function DeposerPage({
                 >
                   CGU
                 </Link>{" "}
-                et que mes coordonnees soient diffusees aux freelances Premium
-                de la communaute Workwave AI. Aucune autre diffusion.
+                et que mes coordonnees soient diffusees aux freelances de la
+                communaute Workwave AI qui debloquent mon projet. Aucune autre diffusion.
               </span>
             </label>
 

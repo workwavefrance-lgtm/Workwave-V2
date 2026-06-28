@@ -1,12 +1,11 @@
 /**
  * Broadcast email a TOUS les freelances tech inscrits quand un nouveau projet
- * est publie. Modele "communauté" (Codeur.com style) : tous les freelances
- * sont alertes en temps reel, Premium et gratuits.
+ * est publie. Modele pay-per-lead : tous les freelances sont alertes en temps
+ * reel. Pour voir les coordonnees du client et le contacter, ils debloquent
+ * le projet a 9,90 EUR depuis leur dashboard /ai/dashboard/projets.
+ * Pas d'abonnement, sans engagement.
  *
- * Le mail est identique pour tous. La differentiation se fait dans le
- * dashboard /ai/dashboard/projets :
- *   - Premium : voit les coordonnees + bouton "J'ai contacte"
- *   - Gratuit : voit le projet mais coordonnees floutees + CTA "Activer Premium"
+ * Le mail est identique pour tous les destinataires.
  *
  * Volume : a 500 freelances inscrits et N projets/jour, on envoie 500N
  * mails/jour via Resend. Plan Resend Business 100€/mois = 100k mails/mois
@@ -104,7 +103,7 @@ function buildEmailHtml(input: BroadcastInput, baseUrl: string): string {
     </a>
 
     <p style="font-size:12px;color:#999;line-height:1.6;margin:24px 0 0 0;">
-      Reponse au projet : reservee aux abonnes Premium (29,90&euro;/mois, sans engagement). <a href="${baseUrl}/ai/dashboard/abonnement" style="color:#FF6803;">Activer Premium</a>.
+      Si ce projet vous interesse, debloque-le a 9,90&euro; depuis votre dashboard pour acc&eacute;der aux coordonn&eacute;es du client et le contacter directement. Sans abonnement, sans engagement.
     </p>
     <p style="font-size:12px;color:#999;line-height:1.6;margin:8px 0 0 0;">
       Pour ne plus recevoir ces notifications, mettez votre profil en pause depuis votre <a href="${baseUrl}/ai/dashboard/preferences" style="color:#999;">dashboard</a>.

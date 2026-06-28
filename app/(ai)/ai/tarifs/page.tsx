@@ -8,9 +8,9 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Tarifs Workwave AI — Gratuit cote client, 29,90€/mois cote freelance",
+    "Tarifs Workwave AI — Gratuit cote client, sans abonnement ni commission cote freelance",
   description:
-    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances (tech, marketing, finance, juridique, RH, design, creation, audiovisuel) paient 29,90€ TTC/mois pour repondre aux projets, sans credits limites, resiliable en 1 clic. Comparatif vs Malt et Codeur.com.",
+    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances debloquent un projet pour 9,90€ (paiement unique) uniquement quand il les interesse — sans abonnement, sans credits, sans engagement. Comparatif vs Malt et Codeur.com.",
   alternates: { canonical: `${SITE_URL}/ai/tarifs` },
 };
 
@@ -20,27 +20,27 @@ export const metadata: Metadata = {
 const FAQ_PRICING: FaqItem[] = [
   {
     q: "Quel est le vrai prix pour un porteur de projet ?",
-    a: "0€. Pour toujours. Workwave AI ne facture jamais le cote client : depot de projet, broadcast a la communaute, contact direct par les freelances, echanges, conclusion de la mission, tout est gratuit. Nous ne prenons aucune commission sur la mission, contrairement a Malt qui prend 10% jusqu'a 5 000€ par mission. Le modele est finance par l'abonnement Premium freelance (29,90€/mois TTC) qui est optionnel pour eux.",
+    a: "0€. Pour toujours. Workwave AI ne facture jamais le cote client : depot de projet, broadcast a la communaute, contact direct par les freelances, echanges, conclusion de la mission, tout est gratuit. Nous ne prenons aucune commission sur la mission, contrairement a Malt qui prend 10% jusqu'a 5 000€ par mission.",
   },
   {
-    q: "Pourquoi 29,90€/mois pour les freelances ?",
-    a: "Ce tarif est calibre pour rester accessible (vs 12€/mois Malt Premium + 10% de commission = mecaniquement plus cher des 4 missions/an) tout en finançant la plateforme. Concretement : pas de credits limites comme chez Codeur (1 credit = 1 reponse), pas de commission sur la mission. Vous reglez l'abonnement et vous repondez a autant de projets que vous voulez. Le ROI est positif des le 1er contrat.",
+    q: "Comment fonctionne le deblocage a 9,90€ ?",
+    a: "Votre inscription et votre profil sont 100% gratuits. Quand un projet est diffuse, vous voyez le brief complet (description, budget, delai) sans payer. Si ce projet vous interesse et que vous voulez contacter le client, vous debloquez ses coordonnees pour 9,90€ — un paiement unique, pour ce projet uniquement. Vous ne payez que les projets qui vous interessent vraiment. Aucun abonnement, aucun credit prepaye, aucune commission.",
   },
   {
-    q: "Comment annuler mon abonnement freelance ?",
-    a: "En 1 clic depuis votre dashboard. La resiliation prend effet a la fin de la periode en cours (ex : si vous resiliez le 15 d'un mois deja paye, l'acces continue jusqu'au 15 du mois suivant). Aucun engagement, aucune penalite, aucun frais de sortie. Votre profil reste visible sur la plateforme apres resiliation (mode lecture seule, vous ne pouvez plus repondre aux nouveaux projets).",
+    q: "Pourquoi 9,90€ par projet et pas un abonnement ?",
+    a: "Ce modele est plus juste pour vous : vous ne payez que quand vous voyez un projet qui correspond vraiment a votre profil. Chez Codeur.com, vous achetez des credits a l'unite sans voir le projet en avance. Chez Malt, vous payez 12€/mois de Premium + 10% de commission sur chaque mission. Ici : 9,90€, projet vu avant paiement, 0% de commission. Le ROI est positif des le 1er contrat conclu.",
   },
   {
-    q: "Y a-t-il un essai gratuit pour les freelances ?",
-    a: "Oui. 14 jours d'essai gratuit a l'inscription, sans carte bancaire requise. Vous pouvez voir tous les projets en temps reel, recevoir les emails et repondre normalement. A J14 sans CB ajoutee, votre acces passe en mode visibilite seule (vous voyez toujours les projets dans le dashboard, mais les coordonnees client sont floutees). Vous activez l'abonnement quand vous voulez.",
+    q: "Y a-t-il un engagement ou un abonnement cache ?",
+    a: "Non. Zero abonnement, zero engagement, zero CB requise pour s'inscrire. Votre profil est gratuit et reste visible indefiniment. Vous debloquez un projet pour 9,90€ quand vous le decidez, c'est tout. Aucun prelevement automatique, aucune reconduction.",
   },
   {
-    q: "Que se passe-t-il si Workwave ne me trouve aucun projet ?",
-    a: "Vous ne payez rien si vous n'avez pas active votre abonnement. L'inscription, la creation du profil et la reception des projets en read-only sont gratuites. Vous decidez d'activer le Premium uniquement quand vous voulez repondre. Si vous activez puis ne recevez pas de projets pertinents, vous resiliez en 1 clic. Pas de penalite, pas de frais caches.",
+    q: "Que se passe-t-il si Workwave ne me trouve aucun projet pertinent ?",
+    a: "Vous ne payez rien. L'inscription, la creation du profil et la reception des projets sont gratuites. Vous ne debloquez un projet que si son brief vous convient. Aucun risque financier a s'inscrire.",
   },
   {
     q: "TVA et facturation pour entreprises (B2B) ?",
-    a: "Le tarif de 29,90€ s'entend toutes taxes comprises. Workwave bénéficie de la franchise en base de TVA (article 293 B du CGI) : la TVA n'est donc pas applicable et aucune TVA n'est facturée. Les factures sont générées automatiquement chaque mois et disponibles dans votre dashboard (PDF + accès Stripe Customer Portal). Workwave est exploité par Willy Gauvrit, entrepreneur individuel ; SIREN disponible dans les mentions légales.",
+    a: "Le tarif de 9,90€ TTC, TVA non applicable art. 293 B CGI. Workwave bénéficie de la franchise en base de TVA : aucune TVA n'est facturée. Un reçu est émis pour chaque deblocage de projet, disponible dans votre dashboard. Workwave est exploité par Willy Gauvrit, entrepreneur individuel ; SIREN disponible dans les mentions légales.",
   },
 ];
 
@@ -57,12 +57,12 @@ const CLIENT_FEATURES = [
 ];
 
 const FREELANCE_FEATURES = [
+  "Inscription et profil 100% gratuits, sans CB",
   "Reception en temps reel de 100% des projets de votre vertical",
-  "Reponse sans limite (pas de credits)",
+  "Brief complet visible avant de payer",
+  "Deblocage des coordonnees client : 9,90€ par projet",
+  "Aucun abonnement, aucune commission, aucun engagement",
   "Profil mis en avant sur les listings",
-  "Badge Pro Workwave sur la fiche",
-  "Statistiques d'impressions et de matchs",
-  "Resiliation libre, sans engagement",
 ];
 
 const COMPARISON = [
@@ -74,7 +74,7 @@ const COMPARISON = [
   },
   {
     feature: "Inscription cote freelance",
-    workwave: { value: "Gratuite + 29,90€/mois pour repondre", positive: true },
+    workwave: { value: "Gratuite + 9,90€ par projet debloque", positive: true },
     codeur: { value: "Gratuite + credits a l'unite", positive: false },
     malt: { value: "Gratuite + 12€/mois Premium", positive: false },
   },
@@ -105,7 +105,7 @@ const COMPARISON = [
 ];
 
 export default function TarifsPage() {
-  // JSON-LD Service avec 2 offers (Free porteur projet + Premium freelance)
+  // JSON-LD Service avec 2 offers (Free porteur projet + deblocage 9,90€ freelance)
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -118,7 +118,7 @@ export default function TarifsPage() {
     },
     areaServed: { "@type": "Place", name: "France et Europe" },
     description:
-      "Plateforme de mise en relation IA entre porteurs de projet et freelances multi-verticaux (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Gratuit cote client, 29,90€/mois cote freelance.",
+      "Plateforme de mise en relation IA entre porteurs de projet et freelances multi-verticaux (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Gratuit cote client, 9,90€ par projet debloque cote freelance, sans abonnement ni commission.",
     offers: [
       {
         "@type": "Offer",
@@ -133,21 +133,13 @@ export default function TarifsPage() {
       },
       {
         "@type": "Offer",
-        name: "Workwave AI Premium (freelance)",
+        name: "Workwave AI — Deblocage projet (freelance)",
         description:
-          "Acces en temps reel a 100% des projets de votre vertical (tech, marketing, finance, juridique, RH, design, creation, audiovisuel), reponse illimitee, profil mis en avant, badge Pro Workwave, statistiques d'impressions, sans engagement.",
-        price: "29.90",
+          "Deblocage des coordonnees client pour un projet : 9,90€ paiement unique. Brief visible avant paiement. Inscription et profil gratuits. Aucun abonnement, aucune commission, aucun engagement.",
+        price: "9.90",
         priceCurrency: "EUR",
         availability: "https://schema.org/InStock",
         url: `${SITE_URL}/ai/inscription`,
-        eligibleDuration: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
-        priceSpecification: {
-          "@type": "UnitPriceSpecification",
-          price: "29.90",
-          priceCurrency: "EUR",
-          unitCode: "MON",
-          referenceQuantity: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
-        },
       },
     ],
   };
@@ -203,18 +195,19 @@ export default function TarifsPage() {
               <br />
               pour vous.{" "}
               <span className="text-[var(--ai-text-tertiary)]">
-                29,90€
+                9,90€
                 <br />
-                pour les
+                par projet
                 <br />
-                freelances.
+                debloque.
               </span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed">
               Si vous portez un projet tech : c&apos;est gratuit, sans limite,
-              sans engagement. Si vous etes freelance et voulez repondre aux
-              briefs : 29,90€ TTC/mois, sans credit, sans commission. Resiliable
-              en un clic.
+              sans engagement. Si vous etes freelance : inscription gratuite,
+              vous voyez le brief en avance, vous debloquez les coordonnees
+              client pour 9,90€ uniquement si le projet vous interesse.
+              Aucun abonnement, aucune commission.
             </p>
           </div>
         </div>
@@ -341,15 +334,15 @@ export default function TarifsPage() {
                     className="text-5xl sm:text-6xl font-black tracking-tight"
                     style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                   >
-                    29,90€
+                    9,90€
                   </span>
-                  <span className="text-sm text-white/50">/ mois TTC</span>
+                  <span className="text-sm text-white/50">/ projet debloque</span>
                 </div>
                 <p
                   className="text-[11px] uppercase font-semibold text-white/40 mb-8"
                   style={{ letterSpacing: "0.18em" }}
                 >
-                  Resiliable en 1 clic
+                  Sans abonnement, sans commission
                 </p>
 
                 <ul className="space-y-3 mb-10">
@@ -387,7 +380,7 @@ export default function TarifsPage() {
                   </svg>
                 </Link>
                 <p className="text-[11px] text-white/40 text-center mt-3">
-                  Inscription gratuite, abonnement uniquement pour repondre
+                  Inscription gratuite — vous payez uniquement les projets qui vous interessent
                 </p>
               </div>
             </div>
@@ -536,7 +529,7 @@ export default function TarifsPage() {
       <AiFaqSection
         id="faq"
         title="Questions sur les tarifs"
-        subtitle="Tout ce qu'il faut savoir sur notre modele de pricing : gratuit cote client, 29,90€ TTC pour les freelances. Sans engagement, sans piege."
+        subtitle="Tout ce qu'il faut savoir sur notre modele de pricing : gratuit cote client, 9,90€ par projet debloque cote freelance. Sans abonnement, sans commission, sans piege."
         questions={FAQ_PRICING}
         sectionIndex={4}
         sectionTotal={5}
@@ -563,8 +556,8 @@ export default function TarifsPage() {
           </h2>
           <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-xl mx-auto leading-relaxed mb-10">
             Aucune carte requise. Aucun engagement. Tout est gratuit cote
-            client, 29,90€ cote freelance uniquement quand vous voulez
-            repondre.
+            client. Cote freelance : inscription gratuite, brief visible en
+            avance, 9,90€ uniquement pour les projets qui vous interessent.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link
