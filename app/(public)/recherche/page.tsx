@@ -9,7 +9,7 @@ import { getCategoryBySlug, getAllCategories } from "@/lib/queries/categories";
 import { getCityBySlug } from "@/lib/queries/cities";
 
 export const metadata: Metadata = {
-  title: "Recherche - Trouvez un professionnel pres de chez vous",
+  title: "Trouver un artisan près de chez vous — Workwave",
   description:
     "Recherchez un artisan ou professionnel par metier et ville. Comparez les pros disponibles dans votre zone et contactez-les gratuitement.",
   alternates: { canonical: "https://workwave.fr/recherche" },

@@ -5,13 +5,13 @@ import { getFaqSchema } from "@/lib/utils/schema";
 import HeroSiretLookup from "@/components/landing/HeroSiretLookup";
 
 export const metadata: Metadata = {
-  title: "Workwave pour les professionnels - Recevez des leads qualifies",
+  title: "Trouver des chantiers près de chez vous — Workwave Pro",
   description:
     "Recevez des demandes qualifiees de particuliers dans votre zone. Fiche gratuite, pas d'abonnement, zero commission. Payez uniquement 9,90 EUR TTC par lead que vous voulez contacter.",
   alternates: { canonical: "https://workwave.fr/pro" },
   openGraph: {
     type: "website",
-    title: "Workwave pour les professionnels - Recevez des leads qualifies",
+    title: "Trouver des chantiers près de chez vous — Workwave Pro",
     description:
       "Fiche gratuite, pas d'abonnement, zero commission. Payez 9,90 EUR TTC par lead que vous voulez contacter.",
     url: "https://workwave.fr/pro",
