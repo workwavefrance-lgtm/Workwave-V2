@@ -15,9 +15,10 @@ import {
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import type { Category, Department } from "@/lib/types/database";
 
-// ISR : revalide chaque heure → nouvelles catégories sans rebuild + purge d'un
-// éventuel cache "non trouvé" servi pendant un déploiement.
-export const revalidate = 3600;
+// ISR : revalide chaque jour → nouvelles catégories sans rebuild + purge d'un
+// éventuel cache "non trouvé" servi pendant un déploiement. 1j (30/06) au lieu
+// de 1h pour réduire l'egress sous crawl (0 impact SEO, données quasi-statiques).
+export const revalidate = 86400;
 
 // Programmatique pro-acquisition : décline /trouver-des-chantiers sur chaque
 // métier BTP (« trouver des chantiers plombier ») et chaque département

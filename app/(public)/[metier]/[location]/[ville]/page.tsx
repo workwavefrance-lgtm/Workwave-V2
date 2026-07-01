@@ -26,7 +26,7 @@ import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
-export const revalidate = 3600;
+export const revalidate = 2592000; // 30j (30/06) : aligné sur les routes sœurs /[metier] et /[metier]/[location] (déjà 30j). Sous-spécialités × ville = beaucoup d'URL ; à 1h ça re-tapait la base toutes les heures sous le crawl Google = fuite egress majeure. Données Sirene quasi-statiques → 0 impact SEO, et pages plus rapides (servies du cache).
 
 const TOP_LIMIT = 10;
 

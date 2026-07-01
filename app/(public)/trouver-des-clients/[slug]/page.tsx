@@ -13,10 +13,11 @@ import {
 } from "@/lib/queries/home-public";
 import type { Category } from "@/lib/types/database";
 
-// ISR : revalide chaque heure → les nouvelles catégories (Vague 3 et au-delà)
+// ISR : revalide chaque jour → les nouvelles catégories (Vague 3 et au-delà)
 // apparaissent sans rebuild, et un éventuel cache "non trouvé" servi pendant un
-// déploiement se purge tout seul.
-export const revalidate = 3600;
+// déploiement se purge tout seul. 1j (30/06) au lieu de 1h : réduit l'egress
+// sous crawl (0 impact SEO, données quasi-statiques).
+export const revalidate = 86400;
 
 // Programmatique pro-acquisition services : décline /trouver-des-clients sur
 // chaque métier domicile + personne ("trouver des clients ménage", "trouver
