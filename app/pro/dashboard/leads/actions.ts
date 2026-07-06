@@ -5,6 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createBtpUnlockCheckoutSession } from "@/lib/stripe/create-btp-unlock-checkout";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import {
+  getFreeUnlocksRemaining,
+  grantFreeUnlock,
+} from "@/lib/billing/free-unlocks";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
@@ -97,6 +101,23 @@ export async function startBtpUnlock(formData: FormData): Promise<void> {
     .maybeSingle();
   if (existing) {
     redirect(`/pro/dashboard/leads?already_unlocked=${projectId}`);
+  }
+
+  // 5 bis) OFFRE DE LANCEMENT — les 2 premiers déblocages sont OFFERTS.
+  // Si le pro a encore un crédit offert, on débloque directement (pas de Stripe).
+  const freeRemaining = await getFreeUnlocksRemaining(service, pro.id);
+  if (freeRemaining > 0) {
+    const granted = await grantFreeUnlock(service, {
+      proId: pro.id,
+      projectId,
+      proName: pro.name || `pro #${pro.id}`,
+      vertical: "btp",
+      freeRemainingBefore: freeRemaining,
+    });
+    if (granted === "granted" || granted === "already") {
+      redirect(`/pro/dashboard/leads?unlocked=${projectId}&offert=1`);
+    }
+    // "error" → on retombe sur le checkout payant (ne jamais bloquer le business)
   }
 
   // 6) Creer la Checkout Session Stripe one-time

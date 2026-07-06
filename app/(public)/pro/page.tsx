@@ -7,13 +7,13 @@ import HeroSiretLookup from "@/components/landing/HeroSiretLookup";
 export const metadata: Metadata = {
   title: "Trouver des chantiers près de chez vous — Workwave Pro",
   description:
-    "Recevez des demandes qualifiees de particuliers dans votre zone. Fiche gratuite, pas d'abonnement, zero commission. Payez uniquement 9,90 EUR TTC par lead que vous voulez contacter.",
+    "Recevez des demandes qualifiees de particuliers dans votre zone. Vos 2 premiers leads sont offerts. Fiche gratuite, pas d'abonnement, zero commission, puis 9,90 EUR TTC par lead.",
   alternates: { canonical: "https://workwave.fr/pro" },
   openGraph: {
     type: "website",
     title: "Trouver des chantiers près de chez vous — Workwave Pro",
     description:
-      "Fiche gratuite, pas d'abonnement, zero commission. Payez 9,90 EUR TTC par lead que vous voulez contacter.",
+      "Vos 2 premiers leads sont offerts. Fiche gratuite, pas d'abonnement, zero commission, puis 9,90 EUR TTC par lead.",
     url: "https://workwave.fr/pro",
   },
 };
@@ -85,7 +85,7 @@ const stats = [
   { value: "2,4 M+", label: "professionnels référencés" },
   { value: "34 046", label: "communes couvertes" },
   { value: "101", label: "départements couverts" },
-  { value: "9,90 €", label: "TTC par lead, paiement unique" },
+  { value: "2 offerts", label: "vos 2 premiers leads, puis 9,90 € TTC/lead" },
 ];
 
 const routingSteps = [
@@ -123,7 +123,7 @@ const faqs = [
   {
     question: "Y a-t-il un abonnement à payer ?",
     answer:
-      "Non. Aucun abonnement, aucune carte bancaire requise pour s'inscrire. Vous réclamez votre fiche gratuitement et recevez automatiquement tous les projets de votre zone par email. Vous payez uniquement 9,90 € TTC par lead que vous souhaitez contacter (paiement unique par projet, via Stripe sécurisé).",
+      "Non. Aucun abonnement, aucune carte bancaire requise pour s'inscrire. Vous réclamez votre fiche gratuitement et recevez automatiquement tous les projets de votre zone par email. Vos 2 premiers déblocages sont offerts (offre de lancement), puis vous payez 9,90 € TTC par lead que vous souhaitez contacter (paiement unique par projet, via Stripe sécurisé).",
   },
   {
     question: "Combien de leads vais-je recevoir ?",
@@ -250,8 +250,9 @@ export default function ProLandingPage() {
           </h2>
           <p className="text-[var(--text-secondary)] text-center mb-12 max-w-xl mx-auto">
             Réclamez votre fiche gratuitement, recevez tous les projets de votre
-            zone. Payez uniquement 9,90 € TTC pour débloquer les coordonnées
-            d&apos;un client. Sans engagement, sans commission.
+            zone. <strong className="text-[var(--text-primary)]">Vos 2 premiers
+            leads sont offerts</strong>, puis 9,90 € TTC pour débloquer les
+            coordonnées d&apos;un client. Sans engagement, sans commission.
           </p>
 
           {/* Card unique pay-per-lead */}
@@ -260,13 +261,14 @@ export default function ProLandingPage() {
               <span
                 className="absolute -top-3 right-6 bg-[var(--accent)] text-white text-xs font-semibold px-3 py-1 rounded-full"
               >
-                Nouveau
+                🎁 2 premiers leads offerts
               </span>
               <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
                 Lead Unlock
               </h3>
               <p className="text-sm text-[var(--text-secondary)] mb-6">
-                Paiement unique, sans abonnement
+                Vos 2 premiers déblocages sont offerts · puis paiement unique,
+                sans abonnement
               </p>
               <div className="mb-1">
                 <span className="text-5xl font-bold text-[var(--text-primary)]">

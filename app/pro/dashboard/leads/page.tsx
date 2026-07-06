@@ -7,6 +7,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { haversineKm } from "@/lib/utils/haversine";
 import { startBtpUnlock } from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
+import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
 
 export const metadata: Metadata = {
   title: "Leads reçus — Workwave Pro",
@@ -53,10 +54,12 @@ export default async function LeadsPage({
     canceled?: string;
     already_unlocked?: string;
     error?: string;
+    offert?: string;
   }>;
 }) {
   const sp = await searchParams;
   const unlockedId = sp.unlocked ? parseInt(sp.unlocked, 10) : null;
+  const wasOffert = sp.offert === "1";
   const canceledId = sp.canceled ? parseInt(sp.canceled, 10) : null;
   const alreadyUnlockedId = sp.already_unlocked
     ? parseInt(sp.already_unlocked, 10)
@@ -156,14 +159,22 @@ export default async function LeadsPage({
   const unlockedMap = new Map<number, string>();
   (unlocksRaw || []).forEach((u) => unlockedMap.set(u.project_id, u.paid_at));
 
+  // Offre de lancement : les 2 premiers déblocages sont offerts.
+  const { count: totalUnlocks } = await service
+    .from("lead_unlocks")
+    .select("id", { count: "exact", head: true })
+    .eq("pro_id", pro.id);
+  const freeRemaining = Math.max(0, FREE_UNLOCK_COUNT - (totalUnlocks || 0));
+
   return (
     <div className="space-y-8">
       {/* Banners */}
       {unlockedId && (
         <div className="p-4 rounded-lg border border-green-500/20 bg-green-500/10 text-green-800">
           <p className="text-sm font-medium">
-            ✓ Projet #{unlockedId} débloqué ! Les coordonnées du particulier sont
-            maintenant visibles ci-dessous.
+            {wasOffert ? "🎁 " : "✓ "}Projet #{unlockedId} débloqué
+            {wasOffert ? " gratuitement (offre de lancement)" : ""} ! Les
+            coordonnées du particulier sont maintenant visibles ci-dessous.
           </p>
         </div>
       )}
@@ -194,8 +205,22 @@ export default async function LeadsPage({
         </h1>
         <p className="text-sm text-[var(--text-secondary)] mt-1">
           Tous les projets de vos métiers dans votre rayon d&apos;intervention.
-          Débloquez les coordonnées pour <strong>9,90€ TTC</strong> par projet
-          (paiement unique, sans abonnement).
+          {freeRemaining > 0 ? (
+            <>
+              {" "}
+              🎁 <strong>
+                Vos {freeRemaining === 1 ? "prochain déblocage est offert" : `${freeRemaining} prochains déblocages sont offerts`}
+              </strong>{" "}
+              (offre de lancement), puis 9,90€ TTC par projet (paiement unique,
+              sans abonnement).
+            </>
+          ) : (
+            <>
+              {" "}
+              Débloquez les coordonnées pour <strong>9,90€ TTC</strong> par
+              projet (paiement unique, sans abonnement).
+            </>
+          )}
         </p>
       </div>
 
@@ -383,14 +408,18 @@ export default async function LeadsPage({
                         </span>
                       </label>
                       <SubmitButton
-                        pendingText="Redirection Stripe..."
+                        pendingText={freeRemaining > 0 ? "Déblocage..." : "Redirection Stripe..."}
                         className="inline-flex items-center justify-center h-11 px-5 text-sm font-semibold rounded-lg bg-[var(--accent)] hover:opacity-90 text-white transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        Débloquer pour 9,90€ TTC
+                        {freeRemaining > 0
+                          ? `🎁 Débloquer gratuitement (${freeRemaining}/${FREE_UNLOCK_COUNT} offert${freeRemaining > 1 ? "s" : ""})`
+                          : "Débloquer pour 9,90€ TTC"}
                       </SubmitButton>
                     </form>
                     <p className="text-[11px] text-[var(--text-tertiary)] mt-2">
-                      Paiement sécurisé Stripe · Unique · Sans engagement
+                      {freeRemaining > 0
+                        ? "Offre de lancement · Aucun paiement demandé"
+                        : "Paiement sécurisé Stripe · Unique · Sans engagement"}
                     </p>
                   </div>
                 )}

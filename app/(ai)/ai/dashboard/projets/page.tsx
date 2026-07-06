@@ -5,6 +5,7 @@ import { getAiProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { markProjectAsContacted, startTechUnlock } from "./actions";
+import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
 
 export const metadata: Metadata = {
   title: "Tous les projets — Dashboard Workwave AI",
@@ -177,6 +178,13 @@ export default async function AiDashboardProjetsPage({
     (unlocksRaw || []).map((u) => u.project_id)
   );
 
+  // Offre de lancement : les 2 premiers déblocages sont offerts.
+  const { count: totalUnlocks } = await service
+    .from("lead_unlocks")
+    .select("id", { count: "exact", head: true })
+    .eq("pro_id", pro.id);
+  const freeRemaining = Math.max(0, FREE_UNLOCK_COUNT - (totalUnlocks || 0));
+
   const projects = projectsRows.map((proj) => {
     const fullDesc = proj.description || "";
     const parts = fullDesc.split(/\n\n+/);
@@ -281,8 +289,9 @@ export default async function AiDashboardProjetsPage({
           Tous les projets publiés sur Workwave, en temps réel. Filtrez par
           savoir-faire pour ne voir que ceux qui vous intéressent.{" "}
           <strong className="text-[var(--ai-text)]">
-            Débloquez les coordonnées d&apos;un projet pour 9,90 € — sans
-            abonnement.
+            {freeRemaining > 0
+              ? `🎁 Vos ${freeRemaining} prochain${freeRemaining > 1 ? "s" : ""} déblocage${freeRemaining > 1 ? "s sont offerts" : " est offert"} (offre de lancement), puis 9,90 € par projet — sans abonnement.`
+              : "Débloquez les coordonnées d'un projet pour 9,90 € — sans abonnement."}
           </strong>
         </p>
       </div>
@@ -458,11 +467,14 @@ export default async function AiDashboardProjetsPage({
                       type="submit"
                       className="inline-flex items-center gap-2 h-11 px-6 text-[14px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
                     >
-                      Débloquer ce projet — 9,90 €
+                      {freeRemaining > 0
+                        ? `🎁 Débloquer gratuitement (${freeRemaining}/${FREE_UNLOCK_COUNT} offert${freeRemaining > 1 ? "s" : ""})`
+                        : "Débloquer ce projet — 9,90 €"}
                     </button>
                     <p className="text-[11px] text-[var(--ai-text-tertiary)] mt-2">
-                      Paiement unique, sans abonnement. Vous voyez le projet
-                      avant de payer.
+                      {freeRemaining > 0
+                        ? "Offre de lancement · Aucun paiement demandé."
+                        : "Paiement unique, sans abonnement. Vous voyez le projet avant de payer."}
                     </p>
                   </form>
                 </div>

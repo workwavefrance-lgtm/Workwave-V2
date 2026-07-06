@@ -7,6 +7,10 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 import { createBtpUnlockCheckoutSession } from "@/lib/stripe/create-btp-unlock-checkout";
+import {
+  getFreeUnlocksRemaining,
+  grantFreeUnlock,
+} from "@/lib/billing/free-unlocks";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
@@ -194,6 +198,22 @@ export async function startTechUnlock(formData: FormData): Promise<void> {
     .eq("pro_id", pro.id)
     .maybeSingle();
   if (existing) redirect(`/ai/dashboard/projets?already_unlocked=${projectId}`);
+
+  // 4 bis) OFFRE DE LANCEMENT — les 2 premiers déblocages sont OFFERTS.
+  const freeRemaining = await getFreeUnlocksRemaining(service, pro.id);
+  if (freeRemaining > 0) {
+    const granted = await grantFreeUnlock(service, {
+      proId: pro.id,
+      projectId,
+      proName: pro.name || `pro #${pro.id}`,
+      vertical: "tech",
+      freeRemainingBefore: freeRemaining,
+    });
+    if (granted === "granted" || granted === "already") {
+      redirect(`/ai/dashboard/projets?unlocked=${projectId}&offert=1`);
+    }
+    // "error" → fallback checkout payant (ne jamais bloquer le business)
+  }
 
   // 5) Checkout one-time 9,90 € (vertical tech, même prix/infra que le BTP)
   const result = await createBtpUnlockCheckoutSession({
