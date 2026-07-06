@@ -177,13 +177,16 @@ export default function ProLandingPage() {
       {/* Hero */}
       <section className="py-24 sm:py-32 lg:py-40 px-4">
         <div className="max-w-4xl mx-auto text-center">
+          <span className="inline-flex items-center gap-2 bg-[var(--accent)] text-white text-sm sm:text-lg font-bold px-5 py-2.5 sm:px-7 sm:py-3 rounded-full shadow-md mb-8">
+            🎁 Vos 2 premiers leads sont offerts
+          </span>
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-[var(--text-primary)] leading-[1.1] tracking-tight mb-6">
             Développez votre activité avec Workwave
             <span className="text-[var(--accent)]">.</span>
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed mb-10">
             <strong className="text-[var(--text-primary)] font-semibold">Fiche 100&nbsp;% gratuite</strong>, sans abonnement et sans commission.
-            Recevez les demandes de particuliers dans votre zone et payez uniquement les leads que vous voulez contacter.
+            Recevez les demandes de particuliers dans votre zone — <strong className="text-[var(--text-primary)] font-semibold">vos 2 premiers leads sont offerts</strong>, puis payez uniquement ceux que vous voulez contacter.
           </p>
           {/* Hero CTA : input SIRET inline (zero friction). Le composant client
               gere la Server Action lookupBySiret + redirect intelligent. */}
