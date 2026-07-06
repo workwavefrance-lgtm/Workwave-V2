@@ -99,7 +99,7 @@ Paragraphe de conclusion qui mentionne Workwave et le nombre de professionnels d
 - Pas de H1 (sera gere par la page)`;
 
   const msg = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-opus-4-8",
     max_tokens: 4000,
     messages: [{ role: "user", content: prompt }],
   });
@@ -124,7 +124,7 @@ Paragraphe de conclusion qui mentionne Workwave et le nombre de professionnels d
 
   // Generer title + meta description
   const metaMsg = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-opus-4-8",
     max_tokens: 200,
     messages: [
       {
