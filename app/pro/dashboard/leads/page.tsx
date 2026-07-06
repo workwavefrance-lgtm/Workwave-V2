@@ -160,11 +160,14 @@ export default async function LeadsPage({
   (unlocksRaw || []).forEach((u) => unlockedMap.set(u.project_id, u.paid_at));
 
   // Offre de lancement : les 2 premiers déblocages sont offerts.
-  const { count: totalUnlocks } = await service
+  // On ne compte que les déblocages GRATUITS (amount_cents=0) — un unlock payé
+  // ne consomme pas l'offre.
+  const { count: freeUsed } = await service
     .from("lead_unlocks")
     .select("id", { count: "exact", head: true })
-    .eq("pro_id", pro.id);
-  const freeRemaining = Math.max(0, FREE_UNLOCK_COUNT - (totalUnlocks || 0));
+    .eq("pro_id", pro.id)
+    .eq("amount_cents", 0);
+  const freeRemaining = Math.max(0, FREE_UNLOCK_COUNT - (freeUsed || 0));
 
   return (
     <div className="space-y-8">

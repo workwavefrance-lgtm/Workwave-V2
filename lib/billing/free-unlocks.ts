@@ -14,7 +14,12 @@ import { sendFreeUnlockAlert } from "@/lib/email/send-free-unlock-alert";
  */
 export const FREE_UNLOCK_COUNT = 2;
 
-/** Nombre de déblocages offerts restants pour un pro (0 quand l'offre est consommée). */
+/**
+ * Nombre de déblocages offerts restants pour un pro (0 quand l'offre est consommée).
+ * On ne compte QUE les déblocages gratuits (amount_cents = 0) : un pro qui a déjà
+ * PAYÉ un lead garde ses 2 crédits offerts intacts (sinon le compteur "X/2" ment —
+ * cas réel ATSAF 06/07 : 1 unlock payé + 1er offert affichait "2/2 consommé").
+ */
 export async function getFreeUnlocksRemaining(
   service: SupabaseClient,
   proId: number
@@ -22,7 +27,8 @@ export async function getFreeUnlocksRemaining(
   const { count, error } = await service
     .from("lead_unlocks")
     .select("id", { count: "exact", head: true })
-    .eq("pro_id", proId);
+    .eq("pro_id", proId)
+    .eq("amount_cents", 0);
   // En cas d'erreur de lecture, on considère l'offre consommée (fail-safe :
   // on préfère envoyer vers Stripe que d'offrir un lead par erreur).
   if (error) return 0;
