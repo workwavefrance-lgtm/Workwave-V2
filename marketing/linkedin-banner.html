@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1584px; height: 396px; }
+  body {
+    font-family: "Geist", "Helvetica Neue", "Inter", Arial, sans-serif;
+    background: #0A0A0A;
+    color: #FAFAFA;
+    position: relative;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Halo coral discret en haut à droite (charte : jamais de gradient criard) */
+  .glow-tr {
+    position: absolute; top: -220px; right: -160px;
+    width: 720px; height: 720px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,90,54,0.16), rgba(255,90,54,0) 62%);
+    filter: blur(8px);
+  }
+  .glow-bl {
+    position: absolute; bottom: -300px; left: 40%;
+    width: 620px; height: 620px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,90,54,0.07), rgba(255,90,54,0) 60%);
+  }
+  /* Trame de points très légère */
+  .grid {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+    opacity: 0.6;
+  }
+  .stack {
+    position: relative; z-index: 2;
+    height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .eyebrow {
+    font-size: 19px; font-weight: 600; letter-spacing: 0.30em;
+    text-transform: uppercase; color: #FF6B4A; margin-bottom: 26px;
+  }
+  .brand {
+    font-size: 96px; font-weight: 700; letter-spacing: -0.045em; line-height: 1;
+    color: #FFFFFF;
+  }
+  .brand .dot { color: #FF5A36; }
+  .wave { margin: 20px auto 0; display: block; }
+  .tagline {
+    margin-top: 22px; font-size: 30px; font-weight: 500; letter-spacing: -0.015em;
+    color: #D4D4D8;
+  }
+  .proof {
+    margin-top: 22px; font-size: 19px; font-weight: 500; letter-spacing: 0.005em;
+    color: #71717A;
+  }
+  .proof b { color: #A1A1AA; font-weight: 600; }
+  .sep { color: #3F3F46; margin: 0 12px; }
+</style>
+</head>
+<body>
+  <div class="glow-tr"></div>
+  <div class="glow-bl"></div>
+  <div class="grid"></div>
+
+  <div class="stack">
+    <div class="eyebrow">Mise en relation locale</div>
+    <div class="brand">Workwave<span class="dot">.</span></div>
+
+    <svg class="wave" width="188" height="16" viewBox="0 0 188 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 9 Q 25.5 -3 49 9 T 96 9 T 143 9 T 186 9" stroke="#FF5A36" stroke-width="3.2" stroke-linecap="round"/>
+    </svg>
+
+    <div class="tagline">Le bon pro près de chez vous, sans commission.</div>
+
+    <div class="proof">
+      <b>1,7 million</b> de professionnels
+      <span class="sep">·</span>
+      <b>34 000</b> communes
+      <span class="sep">·</span>
+      BTP · Maison · Freelances
+    </div>
+  </div>
+</body>
+</html>
