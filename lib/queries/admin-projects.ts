@@ -100,15 +100,56 @@ export const getAdminProjectById = cache(async (id: number) => {
     .eq("project_id", id)
     .order("sent_at", { ascending: false });
 
-  // Qui a PAYÉ (débloqué le lead à 9,90 €) parmi les destinataires.
-  const { data: unlocks } = await db
+  // Qui a DÉBLOQUÉ ce projet — INDÉPENDAMMENT du broadcast. Un pro peut prendre
+  // un lead qu'il a trouvé dans son feed dashboard (pull) même si le broadcast
+  // (push) ne l'a jamais ciblé (broadcast_count peut être 0). C'est le cas d'un
+  // pro généraliste (multiservice) ou d'un pro inscrit APRÈS la diffusion.
+  // On joint la fiche pro pour afficher qui c'est, même hors project_leads.
+  const { data: unlockRows } = await db
     .from("lead_unlocks")
-    .select("pro_id, paid_at, amount_cents")
-    .eq("project_id", id);
+    .select(
+      "pro_id, paid_at, amount_cents, pro:pros(id, name, slug, siret, phone, email, category:categories(name), city:cities(name))"
+    )
+    .eq("project_id", id)
+    .order("paid_at", { ascending: false });
+
+  type UnlockRaw = {
+    pro_id: number;
+    paid_at: string;
+    amount_cents: number | null;
+    pro: {
+      id: number;
+      name: string;
+      slug: string;
+      siret: string | null;
+      phone: string | null;
+      email: string | null;
+      category: { name: string } | null;
+      city: { name: string } | null;
+    } | null;
+  };
+  const unlockList = (unlockRows || []) as unknown as UnlockRaw[];
+
+  // Map pour enrichir les destinataires broadcast (badge "Payé" sur la liste).
   const paidMap = new Map<number, { paidAt: string; amountEur: number }>();
-  for (const u of (unlocks || []) as { pro_id: number; paid_at: string; amount_cents: number | null }[]) {
+  for (const u of unlockList) {
     if (u.pro_id != null) paidMap.set(u.pro_id, { paidAt: u.paid_at, amountEur: (u.amount_cents || 0) / 100 });
   }
+
+  // Liste complète des déblocages (avec fiche pro) pour la section admin dédiée.
+  const unlocks = unlockList.map((u) => ({
+    proId: u.pro_id,
+    proName: u.pro?.name ?? null,
+    proSlug: u.pro?.slug ?? null,
+    siret: u.pro?.siret ?? null,
+    phone: u.pro?.phone ?? null,
+    email: u.pro?.email ?? null,
+    categoryName: u.pro?.category?.name ?? null,
+    cityName: u.pro?.city?.name ?? null,
+    paidAt: u.paid_at,
+    amountEur: (u.amount_cents || 0) / 100,
+    isFree: (u.amount_cents || 0) === 0,
+  }));
 
   type LeadRow = {
     id: number;
@@ -126,6 +167,7 @@ export const getAdminProjectById = cache(async (id: number) => {
   return {
     project: project as Record<string, unknown>,
     leads: enriched,
+    unlocks,
     // Stats du routing pour l'en-tête (à qui envoyé, combien ont payé, CA).
     routingStats: {
       sentCount: enriched.length,

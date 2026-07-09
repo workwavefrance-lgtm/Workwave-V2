@@ -39,13 +39,28 @@ type LeadData = {
     subscription_status: string;
   } | null;
 };
+type UnlockData = {
+  proId: number;
+  proName: string | null;
+  proSlug: string | null;
+  siret: string | null;
+  phone: string | null;
+  email: string | null;
+  categoryName: string | null;
+  cityName: string | null;
+  paidAt: string;
+  amountEur: number;
+  isFree: boolean;
+};
 
 export default function ProjectDetailClient({
   project,
   leads,
+  unlocks = [],
 }: {
   project: ProjectData;
   leads: LeadData[];
+  unlocks?: UnlockData[];
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -278,7 +293,9 @@ export default function ProjectDetailClient({
                       ? broadcastCount && broadcastCount > 0
                         ? "Aucun freelance Premium n'a encore marque ce projet comme contacte."
                         : "Pas encore broadcasté (ou pas de freelances eligibles)."
-                      : "Aucun pro n'a reçu ce projet"}
+                      : unlocks.length > 0
+                        ? `Aucun pro ciblé par le broadcast au moment du dépôt — mais ${unlocks.length} pro${unlocks.length > 1 ? "s ont" : " a"} pris ce projet depuis son feed (voir « Qui a pris ce projet » ci-dessous).`
+                        : "Aucun pro n'a reçu ce projet"}
                   </p>
                 ) : (
               <div className="space-y-2">
@@ -319,6 +336,89 @@ export default function ProjectDetailClient({
               </Card>
             );
           })()}
+
+          {/* Qui a PRIS ce projet — les déblocages (feed pull), indépendants du
+              broadcast. Répond au besoin "je dois voir qui a pris le projet".
+              Un pro apparaît ici même s'il n'a jamais été ciblé par le broadcast. */}
+          <Card
+            title={`Qui a pris ce projet — ${unlocks.length} déblocage${
+              unlocks.length > 1 ? "s" : ""
+            }`}
+          >
+            {unlocks.length === 0 ? (
+              <p
+                className="text-xs py-4 text-center"
+                style={{ color: "var(--admin-text-tertiary)" }}
+              >
+                Personne n&apos;a encore débloqué ce projet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {unlocks.map((u) => (
+                  <div
+                    key={u.proId}
+                    className="flex flex-col gap-1.5 py-2 text-xs"
+                    style={{ borderBottom: "1px solid var(--admin-border)" }}
+                  >
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <button
+                        onClick={() => router.push(`/admin/pros/${u.proId}`)}
+                        className="font-semibold cursor-pointer transition-colors duration-150"
+                        style={{ color: "var(--admin-accent)" }}
+                      >
+                        {u.proName || `Pro #${u.proId}`}
+                      </button>
+                      {u.categoryName && (
+                        <span style={{ color: "var(--admin-text-tertiary)" }}>
+                          · {u.categoryName}
+                        </span>
+                      )}
+                      {u.cityName && (
+                        <span style={{ color: "var(--admin-text-tertiary)" }}>
+                          · {u.cityName}
+                        </span>
+                      )}
+                      <span className="flex-1" />
+                      {u.isFree ? (
+                        <AdminBadge variant="warning">Offert</AdminBadge>
+                      ) : (
+                        <AdminBadge variant="success">
+                          Payé {u.amountEur.toFixed(2).replace(".", ",")} €
+                        </AdminBadge>
+                      )}
+                    </div>
+                    <div
+                      className="flex flex-wrap items-center gap-x-4 gap-y-1"
+                      style={{ color: "var(--admin-text-secondary)" }}
+                    >
+                      {u.phone && <span>Tél {u.phone}</span>}
+                      {u.email && <span>{u.email}</span>}
+                      {u.siret && (
+                        <span
+                          className="font-mono"
+                          style={{ color: "var(--admin-text-tertiary)" }}
+                        >
+                          SIRET {u.siret}
+                        </span>
+                      )}
+                      <span
+                        className="tabular-nums ml-auto"
+                        style={{ color: "var(--admin-text-tertiary)" }}
+                      >
+                        {new Date(u.paidAt).toLocaleString("fr-FR", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
 
         {/* Sidebar */}

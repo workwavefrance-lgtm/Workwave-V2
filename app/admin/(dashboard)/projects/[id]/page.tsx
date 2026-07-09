@@ -14,5 +14,11 @@ export default async function AdminProjectDetailPage({
   const result = await getAdminProjectById(projId);
   if (!result) notFound();
 
-  return <ProjectDetailClient project={result.project} leads={result.leads} />;
+  return (
+    <ProjectDetailClient
+      project={result.project}
+      leads={result.leads}
+      unlocks={result.unlocks}
+    />
+  );
 }
