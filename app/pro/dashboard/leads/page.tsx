@@ -8,6 +8,10 @@ import { haversineKm } from "@/lib/utils/haversine";
 import { startBtpUnlock } from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
 import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
+import {
+  getGeneralistCategoryIds,
+  getAllBtpCategoryIds,
+} from "@/lib/matching/generalist";
 
 export const metadata: Metadata = {
   title: "Leads reçus — Workwave Pro",
@@ -114,12 +118,21 @@ export default async function LeadsPage({
   const radiusKm = pro.intervention_radius_km ?? 200;
 
   // Catégories du pro = principale + secondaires (multi-métiers).
-  const leadCategoryIds = Array.from(
-    new Set<number>([
-      pro.category_id,
-      ...((pro.secondary_category_ids as number[] | null) || []),
-    ])
-  );
+  const proCategoryIds = new Set<number>([
+    pro.category_id,
+    ...((pro.secondary_category_ids as number[] | null) || []),
+  ]);
+
+  // Pro GÉNÉRALISTE (multiservice / petit-bricolage) : il voit TOUS les projets
+  // BTP de sa zone, pas seulement ceux de sa catégorie (homme toutes mains =
+  // tous corps de métier). Cohérent avec le broadcast (lib/matching/generalist).
+  const generalistIds = await getGeneralistCategoryIds(service);
+  const isGeneralist = generalistIds.some((id) => proCategoryIds.has(id));
+  if (isGeneralist) {
+    const allBtp = await getAllBtpCategoryIds(service);
+    allBtp.forEach((id) => proCategoryIds.add(id));
+  }
+  const leadCategoryIds = Array.from(proCategoryIds);
 
   // La table projects est petite : on charge les projets des métiers du pro,
   // puis on filtre par distance Haversine côté JS (même logique que le broadcast).

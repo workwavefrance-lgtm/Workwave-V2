@@ -39,6 +39,7 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { haversineKm } from "@/lib/utils/haversine";
+import { getGeneralistCategoryIds } from "@/lib/matching/generalist";
 
 let _resend: Resend | null = null;
 function getResendClient(): Resend {
@@ -325,8 +326,13 @@ export async function broadcastBtpProject(
   // plombier+chauffagiste+climaticien), on cible les pros des 3 métiers. Sinon,
   // catégorie exacte. Un pro est éligible si sa catégorie principale OU une de
   // ses catégories secondaires figure dans l'ensemble ciblé.
+  // + les pros GÉNÉRALISTES (multiservice / petit-bricolage) reçoivent TOUS les
+  // projets BTP de leur zone (homme toutes mains = tous corps de métier). Sans
+  // risque : pay-per-lead, le pro voit le projet avant de payer et filtre lui-même.
   const matchCategoryIds = await getMatchCategoryIds(sb, input.projectCategoryId);
-  const categoryOrFilter = matchCategoryIds
+  const generalistIds = await getGeneralistCategoryIds(sb);
+  const targetCategoryIds = [...new Set([...matchCategoryIds, ...generalistIds])];
+  const categoryOrFilter = targetCategoryIds
     .flatMap((id) => [
       `category_id.eq.${id}`,
       `secondary_category_ids.cs.{${id}}`,
