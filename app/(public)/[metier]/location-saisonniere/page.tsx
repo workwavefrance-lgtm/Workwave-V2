@@ -7,6 +7,7 @@ import FaqAccordion from "@/components/seo/FaqAccordion";
 import StickyProjectCTA from "@/components/listing/StickyProjectCTA";
 import { toBreadcrumbSchema, getFaqSchema } from "@/lib/utils/schema";
 import { URGENCE_CONTENT } from "@/lib/data/urgence-content";
+import { TOURISTIC_CITIES } from "@/lib/data/touristic-cities";
 import { BASE_URL } from "@/lib/constants";
 import { HouseSparkleArt } from "@/components/seo/PilierArt";
 import {
@@ -130,14 +131,17 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
   const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
   const faqJsonLd = getFaqSchema(faqs);
 
-  // Villes touristiques déjà couvertes en base (Atlantique uniquement — les
-  // villes Méditerranée/Alpes arrivent par un scrape en cours, ne pas lier).
-  const villes = [
-    { slug: "la-rochelle", name: "La Rochelle" },
-    { slug: "bayonne", name: "Bayonne" },
-    { slug: "biarritz", name: "Biarritz" },
-    { slug: "royan", name: "Royan" },
-  ];
+  // Villes phares vers les pages territoriales /menage/location-saisonniere/[ville]
+  // (toutes vérifiées en base, ≥3 pros ménage). Le reste est couvert par le
+  // maillage de zone de chaque page ville + le sitemap.
+  const flagshipSlugs = new Set([
+    "nice", "cannes", "saint-tropez", "marseille", "aix-en-provence",
+    "montpellier", "sete", "perpignan", "biarritz", "bayonne",
+    "arcachon", "bordeaux", "la-rochelle", "royan", "les-sables-d-olonne",
+    "la-baule-escoublac", "saint-malo", "dinard", "vannes", "deauville",
+    "annecy", "chamonix-mont-blanc", "ajaccio", "porto-vecchio",
+  ]);
+  const villes = TOURISTIC_CITIES.filter((c) => flagshipSlugs.has(c.slug));
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
@@ -362,9 +366,9 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
         </div>
 
         <VillePills
-          title="Ménage en zone touristique"
+          title="Ménage location saisonnière par ville touristique"
           links={villes.map((v) => ({
-            href: `/${metier}/${v.slug}`,
+            href: `/${metier}/location-saisonniere/${v.slug}`,
             label: `Ménage ${v.name}`,
           }))}
         />

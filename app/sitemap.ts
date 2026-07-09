@@ -13,6 +13,7 @@ import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
 import { FR_CITIES } from "@/lib/data/intl-fr-cities";
 import { COMPETITOR_OFFERS } from "@/lib/data/competitor-offers";
+import { TOURISTIC_CITIES } from "@/lib/data/touristic-cities";
 // NB : le contenu EN international (/en/ai/*, gTLD workwaveai.co) n'est PLUS
 // dans cet index. Il a son propre sitemap dedie + stable :
 // app/sitemap-ai-en.xml/route.ts (evite de polluer l'index .fr avec des URLs .co).
@@ -318,6 +319,12 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/climaticien/installation`, changeFrequency: "weekly", priority: 0.8 },
     // Page pilier location saisonnière (whitelist dans app/(public)/[metier]/location-saisonniere/page.tsx).
     { url: `${BASE_URL}/menage/location-saisonniere`, changeFrequency: "weekly", priority: 0.8 },
+    // Pages territoriales ménage × ville touristique (dataset vérifié lib/data/touristic-cities.ts).
+    ...TOURISTIC_CITIES.map((c) => ({
+      url: `${BASE_URL}/menage/location-saisonniere/${c.slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
   ];
 
   const { data: guidesRaw } = await supabase
