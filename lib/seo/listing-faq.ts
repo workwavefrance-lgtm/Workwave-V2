@@ -19,6 +19,7 @@
 
 import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
+import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
 
 export type ListingFaqItem = { question: string; answer: string };
 
@@ -40,9 +41,10 @@ function de(noun: string): string {
  * réponse PRIX reste générique (aucun chiffre inventé).
  */
 function getSourcedPriceForFaq(
-  categorySlug: string
+  categorySlug: string,
+  isBE = false
 ): { label: string; range: string } | null {
-  const sourced = SOURCED_PRICES[categorySlug];
+  const sourced = isBE ? SOURCED_PRICES_BE[categorySlug] : SOURCED_PRICES[categorySlug];
   if (sourced && sourced.ranges.length > 0) {
     return sourced.ranges[0];
   }
@@ -55,12 +57,14 @@ export function buildListingFaq({
   locationName,
   preposition,
   isBtp,
+  isBE = false,
 }: {
   categorySlug: string;
   categoryName: string;
   locationName: string;
   preposition: string;
   isBtp: boolean;
+  isBE?: boolean;
 }): ListingFaqItem[] {
   const { plural, singular, article } = getCategoryListing(
     categorySlug,
@@ -70,7 +74,7 @@ export function buildListingFaq({
   const faqs: ListingFaqItem[] = [];
 
   // 1. PRIX (prix sourcé si dispo, sinon générique SANS chiffre inventé)
-  const sourcedPrice = getSourcedPriceForFaq(categorySlug);
+  const sourcedPrice = getSourcedPriceForFaq(categorySlug, isBE);
   faqs.push({
     question: `Combien coûte ${article} ${singular} ${preposition} ${locationName} ?`,
     answer: sourcedPrice
@@ -92,10 +96,17 @@ export function buildListingFaq({
 
   // 4. RGE (uniquement BTP)
   if (isBtp) {
-    faqs.push({
-      question: `Les ${plural} ${preposition} ${locationName} sont-ils certifiés RGE ?`,
-      answer: `Certains ${plural} ${preposition} ${locationName} sont certifiés RGE (Reconnu Garant de l'Environnement), ce qui ouvre droit aux aides comme MaPrimeRénov'. La certification est indiquée sur leur fiche.`,
-    });
+    faqs.push(
+      isBE
+        ? {
+            question: `Les ${plural} ${preposition} ${locationName} donnent-ils droit aux primes rénovation ?`,
+            answer: `Pour certains travaux d'amélioration énergétique, faire appel à un professionnel qualifié ${preposition} ${locationName} peut ouvrir droit aux primes rénovation régionales (Prime Habitation en Wallonie, prime RENOLUTION à Bruxelles). Vérifiez les conditions et l'agréation avant de vous engager.`,
+          }
+        : {
+            question: `Les ${plural} ${preposition} ${locationName} sont-ils certifiés RGE ?`,
+            answer: `Certains ${plural} ${preposition} ${locationName} sont certifiés RGE (Reconnu Garant de l'Environnement), ce qui ouvre droit aux aides comme MaPrimeRénov'. La certification est indiquée sur leur fiche.`,
+          }
+    );
   }
 
   // 5. DEVIS

@@ -22,6 +22,7 @@ import type {
   Department,
 } from "@/lib/types/database";
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
+import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
 import { SOURCED_MARKET_CONTEXT } from "@/lib/data/sourced-market-context";
 
 export type Vertical = "btp" | "domicile" | "personne";
@@ -324,11 +325,12 @@ const PRICE_RANGES: Record<string, { label: string; range: string }[]> = {
 };
 
 function getPriceRanges(
-  categorySlug: string
+  categorySlug: string,
+  isBE = false
 ): { label: string; range: string }[] {
-  // Prix sourcés via Perplexity en priorité (chiffres web réels + cités) ;
-  // fallback sur les fourchettes hardcodées si la catégorie n'a pas été sourcée.
-  const sourced = SOURCED_PRICES[categorySlug];
+  // Belgique : prix belges sourcés (TVAC) en priorité. France : prix FR sourcés.
+  // Fallback sur les fourchettes hardcodées si la catégorie n'a pas été sourcée.
+  const sourced = isBE ? SOURCED_PRICES_BE[categorySlug] : SOURCED_PRICES[categorySlug];
   if (sourced && sourced.ranges.length > 0) return sourced.ranges;
   return (
     PRICE_RANGES[categorySlug] ?? [
@@ -504,6 +506,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const cat = ctx.category;
   const vertical = (cat.vertical ?? "btp") as Vertical;
   const v = VERTICAL_TERMS[vertical];
+  const isBE = ctx.department.country === "BE";
 
   const catLower = cat.name.toLowerCase();
   const catPlural = pluralizeLower(cat.name);
@@ -519,12 +522,11 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     res_principales_pct: 80,
   };
   const works = getWorksList(cat.slug);
-  const prices = getPriceRanges(cat.slug);
+  const prices = getPriceRanges(cat.slug, isBE);
 
   // ─── Localisation pays (belgicisation) : les pages belges NE DOIVENT PAS
   // afficher SIRET/Sirene/RGE/MaPrimeRénov/CESU (= signaux "site français"
   // pour Google ET l'utilisateur belge). Équivalents belges officiels.
-  const isBE = ctx.department.country === "BE";
   const L = {
     // Registre d'entreprises
     registreLabel: isBE ? "numéro d'entreprise (BCE)" : "numéro SIRET",
@@ -624,7 +626,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   };
 
   // ─── Section 4 : Prix
-  const sourcedPrice = SOURCED_PRICES[cat.slug];
+  const sourcedPrice = isBE ? SOURCED_PRICES_BE[cat.slug] : SOURCED_PRICES[cat.slug];
   const prix: SeoSection = {
     h2: `Tarifs d'un ${catLower} ${preposition} ${locationName}`,
     paragraphs: [

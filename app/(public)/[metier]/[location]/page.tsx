@@ -421,6 +421,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
         locationName,
         preposition,
         isBtp: category.vertical === "btp",
+        isBE:
+          (resolved.type === "department"
+            ? resolved.department
+            : resolved.city.department)?.country === "BE",
       })
     : [];
 

@@ -7,6 +7,7 @@
  * Coût : 0 $ (assemblage de données existantes, pas d'appel IA).
  */
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
+import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
 
 type ProForContent = {
   name: string;
@@ -75,7 +76,7 @@ export function buildProContent(pro: ProForContent): ProContent | null {
     },
   ];
 
-  const sourced = !isBE && pro.category?.slug ? SOURCED_PRICES[pro.category.slug] : undefined;
+  const sourced = pro.category?.slug ? (isBE ? SOURCED_PRICES_BE : SOURCED_PRICES)[pro.category.slug] : undefined;
   if (sourced && sourced.ranges.length >= 2) {
     const ex = sourced.ranges
       .slice(0, 2)
