@@ -12,7 +12,7 @@ import {
   getAllDepartmentsPublic,
   getCategoryBySlugPublic,
 } from "@/lib/queries/home-public";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import { generateDepartmentSlug, formatDepartmentLabel } from "@/lib/utils/slugs";
 import type { Category, Department } from "@/lib/types/database";
 
 // ISR : revalide chaque jour → nouvelles catégories sans rebuild + purge d'un
@@ -74,8 +74,8 @@ export async function generateMetadata({
     };
   }
   return {
-    title: `Trouver des chantiers en ${r.dept.name} (${r.dept.code}) — 9,90 €/lead`,
-    description: `Artisans du ${r.dept.name} (${r.dept.code}) : recevez les demandes de chantiers de votre département et payez 9,90 € pour débloquer un contact. Sans abonnement.`,
+    title: `Trouver des chantiers en ${formatDepartmentLabel(r.dept)} — 9,90 €/lead`,
+    description: `Artisans du ${formatDepartmentLabel(r.dept)} : recevez les demandes de chantiers de votre département et payez 9,90 € pour débloquer un contact. Sans abonnement.`,
     alternates: { canonical: `${BASE_URL}/trouver-des-chantiers/${slug}` },
   };
 }
@@ -91,7 +91,7 @@ export default async function Page({
 
   // Variables d'affichage selon métier ou département
   const isMetier = r.type === "metier";
-  const name = isMetier ? r.cat.name : `${r.dept.name} (${r.dept.code})`;
+  const name = isMetier ? r.cat.name : formatDepartmentLabel(r.dept);
   const nameLower = isMetier ? r.cat.name.toLowerCase() : r.dept.name;
 
   const h1 = isMetier
@@ -100,7 +100,7 @@ export default async function Page({
 
   const intro = isMetier
     ? `Recevez les demandes des particuliers qui cherchent un ${nameLower} près de chez eux. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse — pas d'abonnement, pas de commission sur vos chantiers.`
-    : `Recevez les demandes de chantiers des particuliers du ${r.dept.name} (${r.dept.code}), tous métiers du bâtiment. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse — sans abonnement ni engagement.`;
+    : `Recevez les demandes de chantiers des particuliers du ${formatDepartmentLabel(r.dept)}, tous métiers du bâtiment. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse — sans abonnement ni engagement.`;
 
   // Maillage interne : vers la page listing correspondante + le hub
   const listingHref = isMetier ? `/${r.cat.slug}` : "/departements";

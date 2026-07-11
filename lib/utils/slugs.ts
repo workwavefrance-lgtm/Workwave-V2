@@ -1,5 +1,37 @@
 import type { Department } from "@/lib/types/database";
 
+/**
+ * Label d'affichage d'un département/province : "Vienne (86)" en France
+ * (le numéro de département est un repère naturel), "Hainaut (Belgique)"
+ * pour une province belge (le code technique WHT ne parle à personne).
+ */
+export function formatDepartmentLabel(
+  dept: Pick<Department, "name" | "code" | "country">
+): string {
+  return dept.country === "BE"
+    ? `${dept.name} (Belgique)`
+    : `${dept.name} (${dept.code})`;
+}
+
+/** Nom de pays schema.org pour un département/province. */
+export function departmentCountryName(
+  dept: Pick<Department, "country">
+): string {
+  return dept.country === "BE" ? "Belgique" : "France";
+}
+
+/**
+ * Préposition devant le nom : "en Hainaut", "en Vienne", mais "à
+ * Bruxelles-Capitale" (personne ne dit "en Bruxelles-Capitale").
+ */
+export function departmentPreposition(
+  dept: Pick<Department, "name" | "country">
+): string {
+  return dept.country === "BE" && dept.name.startsWith("Bruxelles")
+    ? "à"
+    : "en";
+}
+
 export function generateDepartmentSlug(dept: Department): string {
   const name = dept.name
     .toLowerCase()

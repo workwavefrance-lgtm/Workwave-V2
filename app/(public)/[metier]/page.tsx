@@ -11,7 +11,11 @@ import {
 } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
 import { getCitiesByDepartment, getTotalCitiesCount } from "@/lib/queries/cities";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import {
+  generateDepartmentSlug,
+  formatDepartmentLabel,
+  departmentCountryName,
+} from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 
@@ -146,10 +150,10 @@ export default async function MetierProximityPage({ params }: Props) {
     },
     areaServed: deptsWithCities.map(({ dept }) => ({
       "@type": "AdministrativeArea",
-      name: `${dept.name} (${dept.code})`,
+      name: formatDepartmentLabel(dept),
       containedInPlace: {
         "@type": "Country",
-        name: "France",
+        name: departmentCountryName(dept),
       },
     })),
   };

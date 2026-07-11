@@ -47,7 +47,11 @@ import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { buildListingFaq } from "@/lib/seo/listing-faq";
 import { toBreadcrumbSchema, getFaqSchema } from "@/lib/utils/schema";
 import { extractIntro, stripIntro } from "@/lib/utils/seo";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import {
+  generateDepartmentSlug,
+  formatDepartmentLabel,
+  departmentPreposition,
+} from "@/lib/utils/slugs";
 import { generateSeoContent } from "@/lib/seo/seo-sections";
 
 const TOP_LIMIT = 10;
@@ -68,10 +72,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const locationName =
     resolved.type === "department"
-      ? `${resolved.department.name} (${resolved.department.code})`
+      ? formatDepartmentLabel(resolved.department)
       : resolved.city.name;
 
-  const preposition = resolved.type === "department" ? "en" : "à";
+  const preposition =
+    resolved.type === "department"
+      ? departmentPreposition(resolved.department)
+      : "à";
   const currentYear = new Date().getFullYear();
 
   const locationId =
@@ -178,10 +185,13 @@ export default async function ListingPage({ params, searchParams }: Props) {
 
   const locationName =
     resolved.type === "department"
-      ? `${resolved.department.name} (${resolved.department.code})`
+      ? formatDepartmentLabel(resolved.department)
       : resolved.city.name;
 
-  const preposition = resolved.type === "department" ? "en" : "à";
+  const preposition =
+    resolved.type === "department"
+      ? departmentPreposition(resolved.department)
+      : "à";
   const currentYear = new Date().getFullYear();
 
   // Page 1 : fetch les TOP N tries par score + total.
@@ -314,7 +324,16 @@ export default async function ListingPage({ params, searchParams }: Props) {
           streetAddress: pro.address,
           addressLocality: pro.city.name,
           ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
-          addressCountry: "FR",
+          // Pays de la PAGE (province belge → BE) : les pros listés sont tous
+          // de la zone, et pro.city n'embarque pas department.country ici.
+          addressCountry:
+            resolved.type === "department"
+              ? resolved.department.country === "BE"
+                ? "BE"
+                : "FR"
+              : resolved.city.department?.country === "BE"
+                ? "BE"
+                : "FR",
         };
       }
       if (pro.phone) business.telephone = pro.phone;
