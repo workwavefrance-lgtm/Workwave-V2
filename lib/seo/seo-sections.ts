@@ -23,6 +23,7 @@ import type {
 } from "@/lib/types/database";
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
 import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
+import { getBelgicisme } from "@/lib/data/belgicismes";
 import { SOURCED_MARKET_CONTEXT } from "@/lib/data/sourced-market-context";
 
 export type Vertical = "btp" | "domicile" | "personne";
@@ -507,6 +508,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const vertical = (cat.vertical ?? "btp") as Vertical;
   const v = VERTICAL_TERMS[vertical];
   const isBE = ctx.department.country === "BE";
+  const belg = isBE ? getBelgicisme(cat.slug) : null;
 
   const catLower = cat.name.toLowerCase();
   const catPlural = pluralizeLower(cat.name);
@@ -579,6 +581,14 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
       `Vous pouvez comparer leurs profils, leurs spécialités et — quand l'information est publique — leurs avis vérifiés, avant de prendre contact ou de demander plusieurs propositions.`,
     ],
   };
+
+  if (belg) {
+    pourquoi.paragraphs.splice(
+      1,
+      0,
+      `En Belgique (Wallonie et Bruxelles), un ${catLower} est aussi appelé ${belg.syn} : les deux termes désignent le même métier. Que vous cherchiez un ${catLower} ou un ${belg.syn} ${preposition} ${locationName}, vous trouverez les professionnels ci-dessous.`
+    );
+  }
 
   // ─── Section 2 : Prestations / Travaux / Accompagnement
   const travaux: SeoSection = {

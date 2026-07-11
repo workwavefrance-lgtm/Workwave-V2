@@ -53,6 +53,7 @@ import {
   departmentPreposition,
 } from "@/lib/utils/slugs";
 import { generateSeoContent } from "@/lib/seo/seo-sections";
+import { getBelgicisme } from "@/lib/data/belgicismes";
 
 const TOP_LIMIT = 10;
 
@@ -109,6 +110,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const displayCount = Math.min(prosCount, TOP_LIMIT);
   const listing = getCategoryListing(category.slug, category.name);
   const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
+  // Belgicisme (Belgique) : "couvreurs & toituriers", "plaquistes & plafonneurs"…
+  // pour capter la requête belge en plus du terme français standard.
+  const metaBelg =
+    (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
+      ? getBelgicisme(category.slug)
+      : null;
+  const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
 
   // Title plus court, optimise CTR SERP (sans « | Devis gratuit | Workwave »).
   // "Top 10 entreprises de ménage les mieux notées à Poitiers — 2026"
@@ -119,7 +127,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } else if (prosCount === 1) {
     dynamicTitle = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${preposition} ${locationName} — ${currentYear}`;
   } else {
-    dynamicTitle = `Top ${displayCount} ${listing.plural} les mieux ${listing.notes} ${preposition} ${locationName} — ${currentYear}`;
+    dynamicTitle = `Top ${displayCount} ${listing.plural}${belgPlural} les mieux ${listing.notes} ${preposition} ${locationName} — ${currentYear}`;
   }
 
   // PRIORITE au nouveau title (sprint 25/05/2026).
@@ -246,6 +254,13 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const displayCount = Math.min(totalProsCount, TOP_LIMIT);
   const listing = getCategoryListing(category.slug, category.name);
   const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
+  // Belgicisme (Belgique) : "couvreurs & toituriers", "plaquistes & plafonneurs"…
+  // pour capter la requête belge en plus du terme français standard.
+  const metaBelg =
+    (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
+      ? getBelgicisme(category.slug)
+      : null;
+  const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
   const pluralCategory = listing.plural;
   const citySlug = resolved.type === "city" ? resolved.city.slug : null;
 
