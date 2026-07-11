@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
   // 1) Communes (par CP si numérique, sinon par nom) — comportement existant.
   const cityQuery = supabase
     .from("cities")
-    .select("id, name, slug, postal_code, population, departments!inner(code)")
+    .select("id, name, slug, postal_code, population, departments!inner(code, country)")
     .order("population", { ascending: false, nullsFirst: false })
     .limit(8);
   const { data: cityData } = isNumeric
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
   //    côté JS pour gérer accents + régions + alias sans extension Postgres.
   const { data: allDepts } = await supabase
     .from("departments")
-    .select("id, code, name, region");
+    .select("id, code, name, region, country");
 
   const aliasTerm = REGION_ALIASES[nq];
   const matchedDepts = (allDepts || []).filter((d) => {
@@ -76,20 +76,26 @@ export async function GET(request: NextRequest) {
   const deptResults: CitySearchResult[] = matchedDepts
     .sort((a, b) => a.code.localeCompare(b.code))
     .slice(0, 8)
-    .map((d) => ({
-      kind: "department" as const,
-      id: d.id,
-      name: d.name,
-      slug: generateDepartmentSlug(d as unknown as Department),
-      postal_code: null,
-      department_code: d.code,
-      population: null,
-      sublabel: `Tout le département · ${d.code}`,
-    }));
+    .map((d) => {
+      const isBE = (d as { country?: string }).country === "BE";
+      return {
+        kind: "department" as const,
+        id: d.id,
+        name: d.name,
+        slug: generateDepartmentSlug(d as unknown as Department),
+        postal_code: null,
+        department_code: d.code,
+        population: null,
+        // Belgique : le code technique (BRU/WLG) ne parle à personne → "Belgique".
+        sublabel: isBE ? "Toute la province · Belgique" : `Tout le département · ${d.code}`,
+      };
+    });
 
   const cityResults: CitySearchResult[] = (cityData || []).map((c) => {
     // @ts-expect-error - join syntax
     const dept = c.departments?.code || "";
+    // @ts-expect-error - join syntax
+    const isBE = c.departments?.country === "BE";
     return {
       kind: "city" as const,
       id: c.id as number,
@@ -98,7 +104,9 @@ export async function GET(request: NextRequest) {
       postal_code: (c.postal_code as string) || null,
       department_code: dept,
       population: (c.population as number) || null,
-      sublabel: `${(c.postal_code as string) || ""} · ${dept}`,
+      sublabel: isBE
+        ? `${(c.postal_code as string) || ""} · Belgique`
+        : `${(c.postal_code as string) || ""} · ${dept}`,
     };
   });
 

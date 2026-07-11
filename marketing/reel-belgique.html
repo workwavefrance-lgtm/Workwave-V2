@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0A0A0A; }
+  body {
+    font-family: "Geist", "Helvetica Neue", "Inter", Arial, sans-serif;
+    color: #FAFAFA; -webkit-font-smoothing: antialiased;
+  }
+  #stage { position: relative; width: 1080px; height: 1920px; }
+
+  /* Halo coral persistant */
+  .glow {
+    position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 900px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,90,54,0.18), rgba(255,90,54,0) 62%);
+    filter: blur(10px);
+  }
+  /* Tricolore belge, fine barre en bas, persistante */
+  .be-bar {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; display: flex;
+  }
+  .be-bar i { flex: 1; }
+  .be-bar .k { background: #1A1A1A; }
+  .be-bar .y { background: #FFD90C; }
+  .be-bar .r { background: #F31830; }
+
+  .scene {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 0 90px;
+    will-change: opacity, transform;
+  }
+
+  .eyebrow { font-size: 30px; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; color: #FF6B4A; margin-bottom: 40px; }
+  .brand { font-size: 132px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+  .brand .d { color: #FF5A36; }
+  .wave { margin-top: 34px; }
+
+  .big { font-size: 118px; font-weight: 800; letter-spacing: -0.045em; line-height: 1.02; }
+  .big .accent { color: #FF5A36; }
+  .flagchip { display: inline-flex; align-items: center; gap: 20px; margin-bottom: 48px; }
+  .flagsvg { width: 78px; height: 52px; border-radius: 8px; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
+  .country { font-size: 40px; font-weight: 600; color: #A1A1AA; letter-spacing: 0.04em; }
+
+  .props { display: flex; flex-direction: column; gap: 30px; align-items: center; }
+  .prop { font-size: 58px; font-weight: 700; letter-spacing: -0.02em; }
+  .prop .c { color: #FF6B4A; }
+  .prop small { display: block; font-size: 30px; font-weight: 500; color: #71717A; margin-top: 6px; letter-spacing: 0.01em; }
+
+  .kicker { font-size: 44px; font-weight: 600; color: #D4D4D8; margin-bottom: 30px; letter-spacing: -0.01em; }
+  .count { font-size: 150px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+  .count .u { color: #FF5A36; }
+  .url {
+    margin-top: 56px; font-size: 46px; font-weight: 700; color: #FAFAFA;
+    border: 2px solid rgba(255,90,54,0.5); background: rgba(255,90,54,0.08);
+    padding: 22px 46px; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="glow" id="glow"></div>
+
+  <!-- Scène 1 : marque -->
+  <div class="scene" id="s1">
+    <div class="eyebrow">Le Free du bâtiment</div>
+    <div class="brand">Workwave<span class="d">.</span></div>
+    <svg class="wave" width="230" height="18" viewBox="0 0 230 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 10 Q 31 -4 60 10 T 118 10 T 176 10 T 228 10" stroke="#FF5A36" stroke-width="3.6" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <!-- Scène 2 : annonce -->
+  <div class="scene" id="s2">
+    <div class="flagchip">
+      <svg class="flagsvg" viewBox="0 0 30 20"><rect width="10" height="20" fill="#1A1A1A"/><rect x="10" width="10" height="20" fill="#FFD90C"/><rect x="20" width="10" height="20" fill="#F31830"/></svg>
+      <span class="country">Belgique</span>
+    </div>
+    <div class="big">La Belgique,<br><span class="accent">on arrive.</span></div>
+  </div>
+
+  <!-- Scène 3 : promesse de valeur -->
+  <div class="scene" id="s3">
+    <div class="props">
+      <div class="prop"><span class="c">9,90 €</span> le contact<small>Tu vois le chantier avant de payer</small></div>
+      <div class="prop">0 abonnement · 0 commission<small>Ce que tu gagnes reste à toi</small></div>
+      <div class="prop">Tes 2 premiers <span class="c">offerts</span><small>Sans carte bancaire</small></div>
+    </div>
+  </div>
+
+  <!-- Scène 4 : compte à rebours -->
+  <div class="scene" id="s4">
+    <div class="kicker">Artisans belges, disponible dans</div>
+    <div class="count">24<span class="u">H</span></div>
+    <div class="url">workwave.fr/pro</div>
+  </div>
+
+  <div class="be-bar"><i class="k"></i><i class="y"></i><i class="r"></i></div>
+</div>
+
+<script>
+  window.TOTAL = 9600;
+
+  function clamp(x){ return Math.max(0, Math.min(1, x)); }
+  function easeOut(x){ return 1 - Math.pow(1 - x, 3); }
+
+  // Chaque scène : [début, fin] en ms. Fade in 500ms, hold, fade out 400ms + léger slide.
+  var SCENES = [
+    { el: "s1", a: 0,    b: 2600 },
+    { el: "s2", a: 2600, b: 5100 },
+    { el: "s3", a: 5100, b: 7600 },
+    { el: "s4", a: 7600, b: 9600 }
+  ];
+
+  window.renderFrame = function(t){
+    SCENES.forEach(function(s){
+      var el = document.getElementById(s.el);
+      var IN = 520, OUT = 420;
+      var op = 0, ty = 40;
+      if (t >= s.a && t <= s.b){
+        var local = t - s.a;
+        var dur = s.b - s.a;
+        var fin = clamp(local / IN);
+        var fout = clamp((dur - local) / OUT);
+        op = Math.min(easeOut(fin), fout <= 1 ? easeOut(fout) : 1);
+        ty = (1 - easeOut(fin)) * 40;   // slide up à l'entrée
+      }
+      el.style.opacity = op;
+      el.style.transform = "translateY(" + ty + "px)";
+    });
+    // Glow qui respire légèrement
+    var g = document.getElementById("glow");
+    g.style.opacity = 0.75 + 0.25 * Math.sin(t / 900);
+  };
+
+  window.renderFrame(0);
+</script>
+</body>
+</html>

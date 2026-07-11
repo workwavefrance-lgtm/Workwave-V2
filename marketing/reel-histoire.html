@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0A0A0A; }
+  body { font-family: "Geist", "Helvetica Neue", "Inter", Arial, sans-serif; color: #FAFAFA; -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; width: 1080px; height: 1920px; }
+
+  .glow {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 1000px; height: 1000px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,90,54,0.16), rgba(255,90,54,0) 60%);
+    filter: blur(12px);
+  }
+  .scene {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 0 96px;
+    will-change: opacity, transform;
+  }
+  .line { font-size: 104px; font-weight: 800; letter-spacing: -0.045em; line-height: 1.04; }
+  .line.sm { font-size: 82px; }
+  .accent { color: #FF5A36; }
+  .brandword { color: #FAFAFA; }
+  .brandword .d { color: #FF5A36; }
+  .sub { font-size: 40px; font-weight: 500; color: #71717A; margin-top: 40px; letter-spacing: 0.01em; }
+
+  /* Scène finale */
+  .brand { font-size: 140px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+  .brand .d { color: #FF5A36; }
+  .wave { margin-top: 30px; }
+  .url {
+    margin-top: 54px; font-size: 48px; font-weight: 700;
+    border: 2px solid rgba(255,90,54,0.5); background: rgba(255,90,54,0.08);
+    padding: 22px 48px; border-radius: 999px;
+  }
+  .sign { margin-top: 46px; font-size: 38px; font-weight: 500; color: #9CA3AF; font-style: italic; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="glow" id="glow"></div>
+
+  <div class="scene" id="s1"><div class="line">J'ai été<br>artisan.</div></div>
+
+  <div class="scene" id="s2"><div class="line sm">J'en avais marre<br>de payer <span class="accent">150 €/mois</span></div></div>
+
+  <div class="scene" id="s3"><div class="line sm">à des plateformes,<br>pour des leads<br>hors de prix.</div></div>
+
+  <div class="scene" id="s4"><div class="line">Alors j'ai créé<br><span class="brandword">Workwave<span class="d">.</span></span></div></div>
+
+  <div class="scene" id="s5"><div class="line">Le <span class="accent">Free</span><br>du bâtiment.</div></div>
+
+  <div class="scene" id="s6"><div class="line sm"><span class="accent">9,90 €</span> le contact.<br>0 abonnement.<br>0 commission.</div></div>
+
+  <div class="scene" id="s7"><div class="line sm">Ce que tu gagnes<br><span class="accent">reste à toi.</span></div></div>
+
+  <div class="scene" id="s8">
+    <div class="brand">Workwave<span class="d">.</span></div>
+    <svg class="wave" width="220" height="18" viewBox="0 0 220 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2 10 Q 29 -4 56 10 T 112 10 T 168 10 T 218 10" stroke="#FF5A36" stroke-width="3.6" stroke-linecap="round"/>
+    </svg>
+    <div class="url">workwave.fr/pro</div>
+    <div class="sign">— Willy, ancien artisan</div>
+  </div>
+</div>
+
+<script>
+  window.TOTAL = 13200;
+  function clamp(x){ return Math.max(0, Math.min(1, x)); }
+  function easeOut(x){ return 1 - Math.pow(1 - x, 3); }
+
+  // 7 phrases ~1.5s + scène finale plus longue
+  var SCENES = [
+    { el: "s1", a: 0,     b: 1650 },
+    { el: "s2", a: 1650,  b: 3300 },
+    { el: "s3", a: 3300,  b: 4950 },
+    { el: "s4", a: 4950,  b: 6650 },
+    { el: "s5", a: 6650,  b: 8500 },
+    { el: "s6", a: 8500,  b: 10200 },
+    { el: "s7", a: 10200, b: 11700 },
+    { el: "s8", a: 11700, b: 13200 }
+  ];
+
+  window.renderFrame = function(t){
+    SCENES.forEach(function(s){
+      var el = document.getElementById(s.el);
+      var IN = 420, OUT = 360;
+      var op = 0, ty = 34, sc = 0.96;
+      if (t >= s.a && t <= s.b){
+        var local = t - s.a, dur = s.b - s.a;
+        var fin = clamp(local / IN);
+        var fout = clamp((dur - local) / OUT);
+        op = Math.min(easeOut(fin), fout <= 1 ? easeOut(fout) : 1);
+        ty = (1 - easeOut(fin)) * 34;
+        sc = 0.96 + 0.04 * easeOut(fin);
+      }
+      el.style.opacity = op;
+      el.style.transform = "translateY(" + ty + "px) scale(" + sc + ")";
+    });
+    var g = document.getElementById("glow");
+    g.style.opacity = 0.7 + 0.3 * Math.sin(t / 1000);
+  };
+  window.renderFrame(0);
+</script>
+</body>
+</html>
