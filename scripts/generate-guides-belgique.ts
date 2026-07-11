@@ -45,7 +45,43 @@ const GUIDES: Guide[] = [
     meta: `Primes RENOLUTION à Bruxelles ${YEAR} : prime unique rénovation + énergie, montants selon revenus, travaux éligibles, conditions et démarches. Guide à jour.`,
     topic: `les primes RENOLUTION en Région de Bruxelles-Capitale en ${YEAR} (prime unique fusionnant rénovation et énergie) : les catégories de revenus, les travaux éligibles (isolation, toiture, châssis, chauffage, audit), le principe de la demande (avant ou après travaux selon les cas), les montants, et l'état actuel du dispositif (évolutions/suspensions récentes éventuelles). Sois précis sur ce qui est à jour en ${YEAR}. `,
   },
+  {
+    slug: "certificat-peb-belgique",
+    title: `Certificat PEB en Belgique ${YEAR} : obligation, prix, validité`,
+    meta: `Certificat PEB (Performance Énergétique des Bâtiments) en Belgique : quand il est obligatoire (vente, location), qui le réalise, sa validité, son prix. Guide ${YEAR}.`,
+    topic: `le certificat PEB (Performance Énergétique des Bâtiments) en Belgique (Wallonie et Bruxelles) en ${YEAR} : quand il est OBLIGATOIRE (mise en vente ou en location d'un logement), qui peut le réaliser (certificateur agréé), sa durée de validité (10 ans), le prix indicatif selon la taille du logement, l'échelle de classes énergétiques (de A à G), les sanctions en cas d'absence, et le lien avec les travaux de rénovation énergétique. Précise les différences éventuelles entre Wallonie et Bruxelles. `,
+  },
+  {
+    slug: "permis-urbanisme-wallonie-bruxelles",
+    title: `Permis d'urbanisme en Belgique ${YEAR} : quand est-il obligatoire ?`,
+    meta: `Permis d'urbanisme en Wallonie et à Bruxelles : quels travaux nécessitent un permis, lesquels en sont dispensés, délais et démarches. Guide ${YEAR}.`,
+    topic: `le permis d'urbanisme en Wallonie et à Bruxelles en ${YEAR} : quels travaux nécessitent un permis (extension, changement d'affectation, modification de façade, certaines toitures), lesquels sont dispensés de permis ou soumis à simple déclaration, le rôle de l'architecte (obligatoire au-delà de certains travaux), les délais d'instruction indicatifs, et les risques en cas de travaux sans permis. Distingue Wallonie et Bruxelles quand c'est pertinent. `,
+  },
+  {
+    slug: "controle-citerne-mazout-belgique",
+    title: `Contrôle de la citerne à mazout en Belgique : obligations ${YEAR}`,
+    meta: `Contrôle des citernes à mazout en Wallonie et à Bruxelles : périodicité obligatoire, qui contrôle, plaquette verte/rouge/orange, prix. Guide ${YEAR}.`,
+    topic: `le contrôle obligatoire des citernes à mazout (cuves de stockage de combustible) en Wallonie et à Bruxelles en ${YEAR} : l'obligation de contrôle périodique selon la capacité et l'emplacement (aérienne/enterrée), la périodicité, le système de plaquette de conformité (verte, orange, rouge) et sa signification, qui réalise le contrôle (technicien agréé), le prix indicatif, et ce qu'il faut faire en cas de non-conformité. Distingue Wallonie et Bruxelles. `,
+  },
+  {
+    slug: "responsabilite-decennale-belgique",
+    title: `Responsabilité décennale en Belgique : ce que couvre l'entrepreneur`,
+    meta: `Responsabilité décennale en Belgique (art. 1792 et 2270 du Code civil) : ce qu'elle couvre, sa durée de 10 ans, l'assurance obligatoire, vos recours. Guide ${YEAR}.`,
+    topic: `la responsabilité décennale de l'entrepreneur et de l'architecte en Belgique (articles 1792 et 2270 du Code civil) en ${YEAR} : ce qu'elle couvre (vices graves affectant la solidité ou l'étanchéité de l'ouvrage), sa durée de 10 ans à compter de la réception des travaux, l'obligation d'assurance de la responsabilité décennale (loi Peeters-Borsus pour le gros œuvre), qui est concerné, et les recours du maître d'ouvrage en cas de malfaçon. `,
+  },
+  {
+    slug: "audit-logement-wallonie-primes",
+    title: `Audit logement en Wallonie ${YEAR} : obligatoire pour les primes`,
+    meta: `Audit logement en Wallonie : pourquoi il est obligatoire avant les primes rénovation, qui le réalise (auditeur agréé), prix, prime pour l'audit. Guide ${YEAR}.`,
+    topic: `l'audit logement en Wallonie en ${YEAR} : son caractère obligatoire préalable pour bénéficier de la plupart des primes rénovation Habitation, en quoi il consiste (état des lieux énergétique complet + bouquet de travaux recommandés et ordonnés), qui peut le réaliser (auditeur agréé), le prix indicatif, la prime qui couvre une partie du coût de l'audit, et comment il conditionne l'ordre des travaux subventionnés. `,
+  },
 ];
+
+// Ne pas régénérer un guide déjà publié (économise le coût Perplexity)
+async function alreadyPublished(slug: string): Promise<boolean> {
+  const { data } = await sb.from("blog_posts").select("id").eq("slug", slug).maybeSingle();
+  return !!data;
+}
 
 function buildPrompt(g: Guide): string {
   return (
@@ -85,8 +121,13 @@ async function fetchGuide(g: Guide): Promise<{ content: string; sources: string[
 
 async function main() {
   console.log(`Guides réglementaires belges — ${GUIDES.length} guides${DRY ? " (DRY, 1)" : ""}\n`);
+  const FORCE = process.argv.includes("--force");
   const list = DRY ? GUIDES.slice(0, 1) : GUIDES;
   for (const g of list) {
+    if (!DRY && !FORCE && (await alreadyPublished(g.slug))) {
+      console.log(`  = ${g.slug} déjà publié, skip`);
+      continue;
+    }
     const r = await fetchGuide(g);
     if (!r) continue;
     // Ajoute une note de source + disclaimer en pied
