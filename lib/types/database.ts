@@ -14,6 +14,8 @@ export type Department = {
   code: string;
   name: string;
   region: string;
+  /** ISO 3166-1 alpha-2 : "FR" (défaut) ou "BE" (provinces belges, codes alpha WHT/WLG/WNA/WBR/WLX/BRU). */
+  country: string;
 };
 
 export type City = {
@@ -22,10 +24,13 @@ export type City = {
   name: string;
   slug: string;
   postal_code: string | null;
+  /** France : code INSEE. Belgique : code NIS (5 chiffres aussi) — la clé logique est (country, insee_code). */
   insee_code: string | null;
   population: number | null;
   latitude: number | null;
   longitude: number | null;
+  /** ISO 3166-1 alpha-2 : "FR" (défaut) ou "BE". */
+  country: string;
 };
 
 export type CityWithDepartment = City & {

@@ -1,0 +1,3925 @@
+[
+ {
+  "nis": "52011",
+  "name": "Charleroi",
+  "slug": "charleroi",
+  "dept": "wht",
+  "postal_code": "6000",
+  "all_postcodes": [
+   "6000",
+   "6001",
+   "6010",
+   "6020",
+   "6030",
+   "6030",
+   "6031",
+   "6032",
+   "6040",
+   "6041",
+   "6042",
+   "6043",
+   "6044",
+   "6060",
+   "6061"
+  ],
+  "lat": 50.421054,
+  "lng": 4.434599,
+  "population": 205763
+ },
+ {
+  "nis": "21004",
+  "name": "Bruxelles",
+  "slug": "bruxelles",
+  "dept": "bru",
+  "postal_code": "1000",
+  "all_postcodes": [
+   "1000",
+   "1005",
+   "1006",
+   "1007",
+   "1008",
+   "1009",
+   "1011",
+   "1012",
+   "1020",
+   "1040",
+   "1041",
+   "1048",
+   "1099",
+   "1105",
+   "1110",
+   "1120",
+   "1130",
+   "612"
+  ],
+  "lat": 50.872973,
+  "lng": 4.375237,
+  "population": 198314
+ },
+ {
+  "nis": "62063",
+  "name": "Liège",
+  "slug": "liege",
+  "dept": "wlg",
+  "postal_code": "4000",
+  "all_postcodes": [
+   "4000",
+   "4000",
+   "4020",
+   "4030",
+   "4031",
+   "4032"
+  ],
+  "lat": 50.631779,
+  "lng": 5.590471,
+  "population": 197323
+ },
+ {
+  "nis": "21015",
+  "name": "Schaerbeek",
+  "slug": "schaerbeek",
+  "dept": "bru",
+  "postal_code": "1030",
+  "all_postcodes": [
+   "1030",
+   "1031",
+   "1033",
+   "1035",
+   "1043",
+   "1044"
+  ],
+  "lat": 50.861805,
+  "lng": 4.386062,
+  "population": 129775
+ },
+ {
+  "nis": "21001",
+  "name": "Anderlecht",
+  "slug": "anderlecht",
+  "dept": "bru",
+  "postal_code": "1070",
+  "all_postcodes": [
+   "1070"
+  ],
+  "lat": 50.828978,
+  "lng": 4.292906,
+  "population": 128724
+ },
+ {
+  "nis": "92094",
+  "name": "Namur",
+  "slug": "namur",
+  "dept": "wna",
+  "postal_code": "5000",
+  "all_postcodes": [
+   "5000",
+   "5001",
+   "5002",
+   "5003",
+   "5004",
+   "5010",
+   "5012",
+   "5020",
+   "5020",
+   "5021",
+   "5022",
+   "5024",
+   "5100",
+   "5101"
+  ],
+  "lat": 50.46045,
+  "lng": 4.872577,
+  "population": 115029
+ },
+ {
+  "nis": "21012",
+  "name": "Molenbeek-Saint-Jean",
+  "slug": "molenbeek-saint-jean",
+  "dept": "bru",
+  "postal_code": "1080",
+  "all_postcodes": [
+   "1080"
+  ],
+  "lat": 50.855231,
+  "lng": 4.31846,
+  "population": 98713
+ },
+ {
+  "nis": "53053",
+  "name": "Mons",
+  "slug": "mons",
+  "dept": "wht",
+  "postal_code": "7000",
+  "all_postcodes": [
+   "7000",
+   "7010",
+   "7011",
+   "7012",
+   "7020",
+   "7021",
+   "7022",
+   "7024",
+   "7030",
+   "7031",
+   "7032",
+   "7033",
+   "7034"
+  ],
+  "lat": 50.452419,
+  "lng": 3.971936,
+  "population": 97120
+ },
+ {
+  "nis": "21009",
+  "name": "Ixelles",
+  "slug": "ixelles",
+  "dept": "bru",
+  "postal_code": "1000",
+  "all_postcodes": [
+   "1000",
+   "1047",
+   "1050"
+  ],
+  "lat": 50.822321,
+  "lng": 4.377092,
+  "population": 89897
+ },
+ {
+  "nis": "21016",
+  "name": "Uccle",
+  "slug": "uccle",
+  "dept": "bru",
+  "postal_code": "1180",
+  "all_postcodes": [
+   "1180"
+  ],
+  "lat": 50.789869,
+  "lng": 4.361378,
+  "population": 87194
+ },
+ {
+  "nis": "58001",
+  "name": "La Louvière",
+  "slug": "la-louviere",
+  "dept": "wht",
+  "postal_code": "7100",
+  "all_postcodes": [
+   "7100",
+   "7110"
+  ],
+  "lat": 50.473494,
+  "lng": 4.156667,
+  "population": 81674
+ },
+ {
+  "nis": "57081",
+  "name": "Tournai",
+  "slug": "tournai",
+  "dept": "wht",
+  "postal_code": "7500",
+  "all_postcodes": [
+   "7500",
+   "7501",
+   "7502",
+   "7503",
+   "7504",
+   "7506",
+   "7510",
+   "7511",
+   "7512",
+   "7513",
+   "7520",
+   "7521",
+   "7522",
+   "7530",
+   "7531",
+   "7532",
+   "7533",
+   "7534",
+   "7536",
+   "7538",
+   "7540",
+   "7542",
+   "7543",
+   "7548"
+  ],
+  "lat": 50.616213,
+  "lng": 3.407978,
+  "population": 68991
+ },
+ {
+  "nis": "62096",
+  "name": "Seraing",
+  "slug": "seraing",
+  "dept": "wlg",
+  "postal_code": "4100",
+  "all_postcodes": [
+   "4100",
+   "4101",
+   "4102"
+  ],
+  "lat": 50.589128,
+  "lng": 5.515828,
+  "population": 64609
+ },
+ {
+  "nis": "21018",
+  "name": "Woluwe-Saint-Lambert",
+  "slug": "woluwe-saint-lambert",
+  "dept": "bru",
+  "postal_code": "1200",
+  "all_postcodes": [
+   "1200"
+  ],
+  "lat": 50.8479,
+  "lng": 4.431553,
+  "population": 60956
+ },
+ {
+  "nis": "57096",
+  "name": "Mouscron",
+  "slug": "mouscron",
+  "dept": "wht",
+  "postal_code": "7700",
+  "all_postcodes": [
+   "7700",
+   "7711",
+   "7712"
+  ],
+  "lat": 50.736409,
+  "lng": 3.251073,
+  "population": 60304
+ },
+ {
+  "nis": "21007",
+  "name": "Forest",
+  "slug": "forest",
+  "dept": "bru",
+  "postal_code": "1190",
+  "all_postcodes": [
+   "1190"
+  ],
+  "lat": 50.81406,
+  "lng": 4.32418,
+  "population": 58675
+ },
+ {
+  "nis": "63079",
+  "name": "Verviers",
+  "slug": "verviers",
+  "dept": "wlg",
+  "postal_code": "4800",
+  "all_postcodes": [
+   "4800",
+   "4800",
+   "4801",
+   "4802"
+  ],
+  "lat": 50.584981,
+  "lng": 5.866794,
+  "population": 56127
+ },
+ {
+  "nis": "21010",
+  "name": "Jette",
+  "slug": "jette",
+  "dept": "bru",
+  "postal_code": "1090",
+  "all_postcodes": [
+   "1090"
+  ],
+  "lat": 50.88172,
+  "lng": 4.32138,
+  "population": 54390
+ },
+ {
+  "nis": "21005",
+  "name": "Etterbeek",
+  "slug": "etterbeek",
+  "dept": "bru",
+  "postal_code": "1040",
+  "all_postcodes": [
+   "1040"
+  ],
+  "lat": 50.832984,
+  "lng": 4.394606,
+  "population": 49131
+ },
+ {
+  "nis": "21013",
+  "name": "Saint-Gilles",
+  "slug": "saint-gilles",
+  "dept": "bru",
+  "postal_code": "1050",
+  "all_postcodes": [
+   "1050",
+   "1060"
+  ],
+  "lat": 50.829485,
+  "lng": 4.344655,
+  "population": 48827
+ },
+ {
+  "nis": "21006",
+  "name": "Evere",
+  "slug": "evere",
+  "dept": "bru",
+  "postal_code": "1046",
+  "all_postcodes": [
+   "1046",
+   "1049",
+   "1140"
+  ],
+  "lat": 50.870015,
+  "lng": 4.408234,
+  "population": 45892
+ },
+ {
+  "nis": "21019",
+  "name": "Woluwe-Saint-Pierre",
+  "slug": "woluwe-saint-pierre",
+  "dept": "bru",
+  "postal_code": "1150",
+  "all_postcodes": [
+   "1150"
+  ],
+  "lat": 50.8311,
+  "lng": 4.443088,
+  "population": 42549
+ },
+ {
+  "nis": "62051",
+  "name": "Herstal",
+  "slug": "herstal",
+  "dept": "wlg",
+  "postal_code": "4040",
+  "all_postcodes": [
+   "4040",
+   "4041",
+   "4042"
+  ],
+  "lat": 50.68147,
+  "lng": 5.606506,
+  "population": 40834
+ },
+ {
+  "nis": "25014",
+  "name": "Braine-l'Alleud",
+  "slug": "braine-l-alleud",
+  "dept": "wbr",
+  "postal_code": "1420",
+  "all_postcodes": [
+   "1420",
+   "1421",
+   "1428"
+  ],
+  "lat": 50.673333,
+  "lng": 4.35469,
+  "population": 40756
+ },
+ {
+  "nis": "52012",
+  "name": "Châtelet",
+  "slug": "chatelet",
+  "dept": "wht",
+  "postal_code": "6200",
+  "all_postcodes": [
+   "6200"
+  ],
+  "lat": 50.397175,
+  "lng": 4.522423,
+  "population": 35979
+ },
+ {
+  "nis": "21002",
+  "name": "Auderghem",
+  "slug": "auderghem",
+  "dept": "bru",
+  "postal_code": "1160",
+  "all_postcodes": [
+   "1160"
+  ],
+  "lat": 50.810184,
+  "lng": 4.43803,
+  "population": 35698
+ },
+ {
+  "nis": "25112",
+  "name": "Wavre",
+  "slug": "wavre",
+  "dept": "wbr",
+  "postal_code": "1300",
+  "all_postcodes": [
+   "1300",
+   "1300",
+   "1301"
+  ],
+  "lat": 50.715805,
+  "lng": 4.593243,
+  "population": 35581
+ },
+ {
+  "nis": "58002",
+  "name": "Binche",
+  "slug": "binche",
+  "dept": "wht",
+  "postal_code": "7130",
+  "all_postcodes": [
+   "7130",
+   "7130",
+   "7131",
+   "7133",
+   "7134"
+  ],
+  "lat": 50.408695,
+  "lng": 4.177188,
+  "population": 33784
+ },
+ {
+  "nis": "25121",
+  "name": "Ottignies-Louvain-la-Neuve",
+  "slug": "ottignies-louvain-la-neuve",
+  "dept": "wbr",
+  "postal_code": "1340",
+  "all_postcodes": [
+   "1340",
+   "1341",
+   "1342",
+   "1348"
+  ],
+  "lat": 50.670355,
+  "lng": 4.564155,
+  "population": 31766
+ },
+ {
+  "nis": "81001",
+  "name": "Arlon",
+  "slug": "arlon",
+  "dept": "wlx",
+  "postal_code": "6700",
+  "all_postcodes": [
+   "6700",
+   "6704",
+   "6706"
+  ],
+  "lat": 49.675189,
+  "lng": 5.793886,
+  "population": 31492
+ },
+ {
+  "nis": "52015",
+  "name": "Courcelles",
+  "slug": "courcelles",
+  "dept": "wht",
+  "postal_code": "6180",
+  "all_postcodes": [
+   "6180",
+   "6181",
+   "6182",
+   "6183"
+  ],
+  "lat": 50.472448,
+  "lng": 4.341059,
+  "population": 31436
+ },
+ {
+  "nis": "25110",
+  "name": "Waterloo",
+  "slug": "waterloo",
+  "dept": "wbr",
+  "postal_code": "1410",
+  "all_postcodes": [
+   "1410"
+  ],
+  "lat": 50.709765,
+  "lng": 4.403521,
+  "population": 30389
+ },
+ {
+  "nis": "51004",
+  "name": "Ath",
+  "slug": "ath",
+  "dept": "wht",
+  "postal_code": "7800",
+  "all_postcodes": [
+   "7800",
+   "7801",
+   "7802",
+   "7803",
+   "7803",
+   "7804",
+   "7810",
+   "7811",
+   "7812",
+   "7822",
+   "7823"
+  ],
+  "lat": 50.639365,
+  "lng": 3.772895,
+  "population": 30123
+ },
+ {
+  "nis": "25072",
+  "name": "Nivelles",
+  "slug": "nivelles",
+  "dept": "wbr",
+  "postal_code": "1400",
+  "all_postcodes": [
+   "1400",
+   "1401",
+   "1402",
+   "1404"
+  ],
+  "lat": 50.596982,
+  "lng": 4.332197,
+  "population": 29429
+ },
+ {
+  "nis": "55040",
+  "name": "Soignies",
+  "slug": "soignies",
+  "dept": "wht",
+  "postal_code": "7060",
+  "all_postcodes": [
+   "7060",
+   "7061",
+   "7062",
+   "7063"
+  ],
+  "lat": 50.566142,
+  "lng": 4.038338,
+  "population": 29249
+ },
+ {
+  "nis": "62003",
+  "name": "Ans",
+  "slug": "ans",
+  "dept": "wlg",
+  "postal_code": "4430",
+  "all_postcodes": [
+   "4430",
+   "4431",
+   "4432"
+  ],
+  "lat": 50.682772,
+  "lng": 5.506111,
+  "population": 29110
+ },
+ {
+  "nis": "25105",
+  "name": "Tubize",
+  "slug": "tubize",
+  "dept": "wbr",
+  "postal_code": "1480",
+  "all_postcodes": [
+   "1480"
+  ],
+  "lat": 50.690176,
+  "lng": 4.190558,
+  "population": 28716
+ },
+ {
+  "nis": "92137",
+  "name": "Sambreville",
+  "slug": "sambreville",
+  "dept": "wna",
+  "postal_code": "5060",
+  "all_postcodes": [
+   "5060"
+  ],
+  "lat": 50.446569,
+  "lng": 4.620727,
+  "population": 28638
+ },
+ {
+  "nis": "92003",
+  "name": "Andenne",
+  "slug": "andenne",
+  "dept": "wna",
+  "postal_code": "5300",
+  "all_postcodes": [
+   "5300"
+  ],
+  "lat": 50.486747,
+  "lng": 5.057822,
+  "population": 28231
+ },
+ {
+  "nis": "21014",
+  "name": "Saint-Josse-ten-Noode",
+  "slug": "saint-josse-ten-noode",
+  "dept": "bru",
+  "postal_code": "1000",
+  "all_postcodes": [
+   "1000",
+   "1210",
+   "1212"
+  ],
+  "lat": 50.853813,
+  "lng": 4.36936,
+  "population": 27258
+ },
+ {
+  "nis": "62120",
+  "name": "Flémalle",
+  "slug": "flemalle",
+  "dept": "wlg",
+  "postal_code": "4400",
+  "all_postcodes": [
+   "4400"
+  ],
+  "lat": 50.597036,
+  "lng": 5.44131,
+  "population": 27045
+ },
+ {
+  "nis": "92142",
+  "name": "Gembloux",
+  "slug": "gembloux",
+  "dept": "wna",
+  "postal_code": "5030",
+  "all_postcodes": [
+   "5030",
+   "5031",
+   "5032"
+  ],
+  "lat": 50.554302,
+  "lng": 4.70911,
+  "population": 26550
+ },
+ {
+  "nis": "62079",
+  "name": "Oupeye",
+  "slug": "oupeye",
+  "dept": "wlg",
+  "postal_code": "4680",
+  "all_postcodes": [
+   "4680",
+   "4681",
+   "4682",
+   "4683",
+   "4684"
+  ],
+  "lat": 50.721178,
+  "lng": 5.641419,
+  "population": 25846
+ },
+ {
+  "nis": "21003",
+  "name": "Berchem-Sainte-Agathe",
+  "slug": "berchem-sainte-agathe",
+  "dept": "bru",
+  "postal_code": "1082",
+  "all_postcodes": [
+   "1082"
+  ],
+  "lat": 50.86466,
+  "lng": 4.293926,
+  "population": 25803
+ },
+ {
+  "nis": "21008",
+  "name": "Ganshoren",
+  "slug": "ganshoren",
+  "dept": "bru",
+  "postal_code": "1083",
+  "all_postcodes": [
+   "1083"
+  ],
+  "lat": 50.874384,
+  "lng": 4.309484,
+  "population": 25693
+ },
+ {
+  "nis": "21017",
+  "name": "Watermael-Boitsfort",
+  "slug": "watermael-boitsfort",
+  "dept": "bru",
+  "postal_code": "1170",
+  "all_postcodes": [
+   "1170"
+  ],
+  "lat": 50.792925,
+  "lng": 4.423489,
+  "population": 25327
+ },
+ {
+  "nis": "62093",
+  "name": "Saint-Nicolas",
+  "slug": "saint-nicolas",
+  "dept": "wlg",
+  "postal_code": "4420",
+  "all_postcodes": [
+   "4420"
+  ],
+  "lat": 50.632146,
+  "lng": 5.526434,
+  "population": 24517
+ },
+ {
+  "nis": "55086",
+  "name": "Manage",
+  "slug": "manage",
+  "dept": "wht",
+  "postal_code": "7170",
+  "all_postcodes": [
+   "7170"
+  ],
+  "lat": 50.493243,
+  "lng": 4.23909,
+  "population": 24202
+ },
+ {
+  "nis": "53070",
+  "name": "Saint-Ghislain",
+  "slug": "saint-ghislain",
+  "dept": "wht",
+  "postal_code": "7330",
+  "all_postcodes": [
+   "7330",
+   "7331",
+   "7332",
+   "7333",
+   "7334"
+  ],
+  "lat": 50.487265,
+  "lng": 3.800941,
+  "population": 23756
+ },
+ {
+  "nis": "55004",
+  "name": "Braine-le-Comte",
+  "slug": "braine-le-comte",
+  "dept": "wht",
+  "postal_code": "7090",
+  "all_postcodes": [
+   "7090"
+  ],
+  "lat": 50.616169,
+  "lng": 4.142453,
+  "population": 23604
+ },
+ {
+  "nis": "62118",
+  "name": "Grâce-Hollogne",
+  "slug": "grace-hollogne",
+  "dept": "wlg",
+  "postal_code": "4460",
+  "all_postcodes": [
+   "4460"
+  ],
+  "lat": 50.637746,
+  "lng": 5.439469,
+  "population": 23416
+ },
+ {
+  "nis": "25091",
+  "name": "Rixensart",
+  "slug": "rixensart",
+  "dept": "wbr",
+  "postal_code": "1330",
+  "all_postcodes": [
+   "1330",
+   "1331",
+   "1332"
+  ],
+  "lat": 50.720826,
+  "lng": 4.525625,
+  "population": 23052
+ },
+ {
+  "nis": "21011",
+  "name": "Koekelberg",
+  "slug": "koekelberg",
+  "dept": "bru",
+  "postal_code": "1081",
+  "all_postcodes": [
+   "1081"
+  ],
+  "lat": 50.862991,
+  "lng": 4.324087,
+  "population": 22979
+ },
+ {
+  "nis": "52021",
+  "name": "Fleurus",
+  "slug": "fleurus",
+  "dept": "wht",
+  "postal_code": "6075",
+  "all_postcodes": [
+   "6075",
+   "6099",
+   "6220",
+   "6221",
+   "6222",
+   "6223",
+   "6224"
+  ],
+  "lat": 50.486373,
+  "lng": 4.539207,
+  "population": 22922
+ },
+ {
+  "nis": "61031",
+  "name": "Huy",
+  "slug": "huy",
+  "dept": "wlg",
+  "postal_code": "4500",
+  "all_postcodes": [
+   "4500"
+  ],
+  "lat": 50.508796,
+  "lng": 5.222415,
+  "population": 21850
+ },
+ {
+  "nis": "53028",
+  "name": "Frameries",
+  "slug": "frameries",
+  "dept": "wht",
+  "postal_code": "7080",
+  "all_postcodes": [
+   "7080"
+  ],
+  "lat": 50.389968,
+  "lng": 3.886214,
+  "population": 21630
+ },
+ {
+  "nis": "82039",
+  "name": "Bastogne",
+  "slug": "bastogne",
+  "dept": "wlx",
+  "postal_code": "6600",
+  "all_postcodes": [
+   "6600",
+   "6686",
+   "6687",
+   "6688"
+  ],
+  "lat": 50.032183,
+  "lng": 5.721559,
+  "population": 20940
+ },
+ {
+  "nis": "53082",
+  "name": "Colfontaine",
+  "slug": "colfontaine",
+  "dept": "wht",
+  "postal_code": "7340",
+  "all_postcodes": [
+   "7340"
+  ],
+  "lat": 50.405869,
+  "lng": 3.84418,
+  "population": 20813
+ },
+ {
+  "nis": "62022",
+  "name": "Chaudfontaine",
+  "slug": "chaudfontaine",
+  "dept": "wlg",
+  "postal_code": "4050",
+  "all_postcodes": [
+   "4050",
+   "4051",
+   "4052",
+   "4053"
+  ],
+  "lat": 50.581447,
+  "lng": 5.633739,
+  "population": 20523
+ },
+ {
+  "nis": "53014",
+  "name": "Boussu",
+  "slug": "boussu",
+  "dept": "wht",
+  "postal_code": "7300",
+  "all_postcodes": [
+   "7300",
+   "7301"
+  ],
+  "lat": 50.4271,
+  "lng": 3.799638,
+  "population": 20401
+ },
+ {
+  "nis": "92140",
+  "name": "Jemeppe-sur-Sambre",
+  "slug": "jemeppe-sur-sambre",
+  "dept": "wna",
+  "postal_code": "5190",
+  "all_postcodes": [
+   "5190"
+  ],
+  "lat": 50.471699,
+  "lng": 4.676174,
+  "population": 19225
+ },
+ {
+  "nis": "58004",
+  "name": "Morlanwelz",
+  "slug": "morlanwelz",
+  "dept": "wht",
+  "postal_code": "7140",
+  "all_postcodes": [
+   "7140",
+   "7141"
+  ],
+  "lat": 50.447514,
+  "lng": 4.243611,
+  "population": 19113
+ },
+ {
+  "nis": "53065",
+  "name": "Quaregnon",
+  "slug": "quaregnon",
+  "dept": "wht",
+  "postal_code": "7390",
+  "all_postcodes": [
+   "7390"
+  ],
+  "lat": 50.43782,
+  "lng": 3.858655,
+  "population": 19022
+ },
+ {
+  "nis": "51069",
+  "name": "Lessines",
+  "slug": "lessines",
+  "dept": "wht",
+  "postal_code": "7860",
+  "all_postcodes": [
+   "7860",
+   "7861",
+   "7862",
+   "7863",
+   "7864",
+   "7866"
+  ],
+  "lat": 50.712532,
+  "lng": 3.833074,
+  "population": 18853
+ },
+ {
+  "nis": "93088",
+  "name": "Walcourt",
+  "slug": "walcourt",
+  "dept": "wna",
+  "postal_code": "5650",
+  "all_postcodes": [
+   "5650",
+   "5651"
+  ],
+  "lat": 50.266608,
+  "lng": 4.43495,
+  "population": 18353
+ },
+ {
+  "nis": "57097",
+  "name": "Comines-Warneton",
+  "slug": "comines-warneton",
+  "dept": "wht",
+  "postal_code": "7780",
+  "all_postcodes": [
+   "7780",
+   "7781",
+   "7782",
+   "7783",
+   "7784"
+  ],
+  "lat": 50.751586,
+  "lng": 2.930367,
+  "population": 18337
+ },
+ {
+  "nis": "62108",
+  "name": "Visé",
+  "slug": "vise",
+  "dept": "wlg",
+  "postal_code": "4600",
+  "all_postcodes": [
+   "4600",
+   "4601",
+   "4602"
+  ],
+  "lat": 50.738364,
+  "lng": 5.687462,
+  "population": 18110
+ },
+ {
+  "nis": "52022",
+  "name": "Fontaine-l'Évêque",
+  "slug": "fontaine-l-eveque",
+  "dept": "wht",
+  "postal_code": "6140",
+  "all_postcodes": [
+   "6140",
+   "6141",
+   "6142"
+  ],
+  "lat": 50.407345,
+  "lng": 4.321807,
+  "population": 17985
+ },
+ {
+  "nis": "83034",
+  "name": "Marche-en-Famenne",
+  "slug": "marche-en-famenne",
+  "dept": "wlx",
+  "postal_code": "6900",
+  "all_postcodes": [
+   "6900"
+  ],
+  "lat": 50.209289,
+  "lng": 5.343638,
+  "population": 17946
+ },
+ {
+  "nis": "81004",
+  "name": "Aubange",
+  "slug": "aubange",
+  "dept": "wlx",
+  "postal_code": "6790",
+  "all_postcodes": [
+   "6790",
+   "6791",
+   "6792"
+  ],
+  "lat": 49.574901,
+  "lng": 5.776973,
+  "population": 17871
+ },
+ {
+  "nis": "63035",
+  "name": "Herve",
+  "slug": "herve",
+  "dept": "wlg",
+  "postal_code": "4650",
+  "all_postcodes": [
+   "4650",
+   "4650",
+   "4650",
+   "4650",
+   "4651",
+   "4652",
+   "4653",
+   "4654"
+  ],
+  "lat": 50.648702,
+  "lng": 5.796261,
+  "population": 17784
+ },
+ {
+  "nis": "52055",
+  "name": "Pont-à-Celles",
+  "slug": "pont-a-celles",
+  "dept": "wht",
+  "postal_code": "6230",
+  "all_postcodes": [
+   "6230",
+   "6238"
+  ],
+  "lat": 50.513891,
+  "lng": 4.381326,
+  "population": 17662
+ },
+ {
+  "nis": "57064",
+  "name": "Péruwelz",
+  "slug": "peruwelz",
+  "dept": "wht",
+  "postal_code": "7600",
+  "all_postcodes": [
+   "7600",
+   "7601",
+   "7602",
+   "7603",
+   "7604",
+   "7608"
+  ],
+  "lat": 50.529458,
+  "lng": 3.563869,
+  "population": 17350
+ },
+ {
+  "nis": "62099",
+  "name": "Soumagne",
+  "slug": "soumagne",
+  "dept": "wlg",
+  "postal_code": "4630",
+  "all_postcodes": [
+   "4630",
+   "4630",
+   "4631",
+   "4632",
+   "4633"
+  ],
+  "lat": 50.632556,
+  "lng": 5.731263,
+  "population": 17265
+ },
+ {
+  "nis": "91030",
+  "name": "Ciney",
+  "slug": "ciney",
+  "dept": "wna",
+  "postal_code": "5590",
+  "all_postcodes": [
+   "5590"
+  ],
+  "lat": 50.269472,
+  "lng": 5.122615,
+  "population": 17220
+ },
+ {
+  "nis": "64034",
+  "name": "Hannut",
+  "slug": "hannut",
+  "dept": "wlg",
+  "postal_code": "4280",
+  "all_postcodes": [
+   "4280"
+  ],
+  "lat": 50.666022,
+  "lng": 5.073103,
+  "population": 17202
+ },
+ {
+  "nis": "92035",
+  "name": "Éghezée",
+  "slug": "eghezee",
+  "dept": "wna",
+  "postal_code": "5310",
+  "all_postcodes": [
+   "5310"
+  ],
+  "lat": 50.586615,
+  "lng": 4.893893,
+  "population": 16954
+ },
+ {
+  "nis": "53020",
+  "name": "Dour",
+  "slug": "dour",
+  "dept": "wht",
+  "postal_code": "7370",
+  "all_postcodes": [
+   "7370"
+  ],
+  "lat": 50.387351,
+  "lng": 3.787008,
+  "population": 16559
+ },
+ {
+  "nis": "62038",
+  "name": "Fléron",
+  "slug": "fleron",
+  "dept": "wlg",
+  "postal_code": "4620",
+  "all_postcodes": [
+   "4620",
+   "4621",
+   "4623",
+   "4624"
+  ],
+  "lat": 50.615176,
+  "lng": 5.684011,
+  "population": 16374
+ },
+ {
+  "nis": "25031",
+  "name": "Genappe",
+  "slug": "genappe",
+  "dept": "wbr",
+  "postal_code": "1470",
+  "all_postcodes": [
+   "1470",
+   "1470",
+   "1471",
+   "1472",
+   "1473",
+   "1474",
+   "1476"
+  ],
+  "lat": 50.610166,
+  "lng": 4.456119,
+  "population": 16160
+ },
+ {
+  "nis": "64074",
+  "name": "Waremme",
+  "slug": "waremme",
+  "dept": "wlg",
+  "postal_code": "4300",
+  "all_postcodes": [
+   "4300"
+  ],
+  "lat": 50.693856,
+  "lng": 5.266924,
+  "population": 15366
+ },
+ {
+  "nis": "63020",
+  "name": "Dison",
+  "slug": "dison",
+  "dept": "wlg",
+  "postal_code": "4820",
+  "all_postcodes": [
+   "4820",
+   "4821"
+  ],
+  "lat": 50.613975,
+  "lng": 5.874502,
+  "population": 15226
+ },
+ {
+  "nis": "62100",
+  "name": "Sprimont",
+  "slug": "sprimont",
+  "dept": "wlg",
+  "postal_code": "4140",
+  "all_postcodes": [
+   "4140",
+   "4141"
+  ],
+  "lat": 50.519205,
+  "lng": 5.66642,
+  "population": 15171
+ },
+ {
+  "nis": "52010",
+  "name": "Chapelle-lez-Herlaimont",
+  "slug": "chapelle-lez-herlaimont",
+  "dept": "wht",
+  "postal_code": "7160",
+  "all_postcodes": [
+   "7160"
+  ],
+  "lat": 50.462486,
+  "lng": 4.287558,
+  "population": 15030
+ },
+ {
+  "nis": "25048",
+  "name": "Jodoigne",
+  "slug": "jodoigne",
+  "dept": "wbr",
+  "postal_code": "1370",
+  "all_postcodes": [
+   "1370"
+  ],
+  "lat": 50.728388,
+  "lng": 4.860339,
+  "population": 14935
+ },
+ {
+  "nis": "56078",
+  "name": "Thuin",
+  "slug": "thuin",
+  "dept": "wht",
+  "postal_code": "6530",
+  "all_postcodes": [
+   "6530",
+   "6530",
+   "6531",
+   "6532",
+   "6533",
+   "6534",
+   "6536"
+  ],
+  "lat": 50.324245,
+  "lng": 4.310791,
+  "population": 14864
+ },
+ {
+  "nis": "51067",
+  "name": "Enghien",
+  "slug": "enghien",
+  "dept": "wht",
+  "postal_code": "7850",
+  "all_postcodes": [
+   "7850"
+  ],
+  "lat": 50.677624,
+  "lng": 4.030127,
+  "population": 14567
+ },
+ {
+  "nis": "61003",
+  "name": "Amay",
+  "slug": "amay",
+  "dept": "wlg",
+  "postal_code": "4540",
+  "all_postcodes": [
+   "4540"
+  ],
+  "lat": 50.552976,
+  "lng": 5.311566,
+  "population": 14494
+ },
+ {
+  "nis": "51008",
+  "name": "Beloeil",
+  "slug": "beloeil",
+  "dept": "wht",
+  "postal_code": "7970",
+  "all_postcodes": [
+   "7970",
+   "7971",
+   "7972",
+   "7973"
+  ],
+  "lat": 50.532511,
+  "lng": 3.688628,
+  "population": 14232
+ },
+ {
+  "nis": "57094",
+  "name": "Leuze-en-Hainaut",
+  "slug": "leuze-en-hainaut",
+  "dept": "wht",
+  "postal_code": "7900",
+  "all_postcodes": [
+   "7900",
+   "7901",
+   "7903",
+   "7904",
+   "7906"
+  ],
+  "lat": 50.59727,
+  "lng": 3.628784,
+  "population": 14200
+ },
+ {
+  "nis": "25119",
+  "name": "Lasne",
+  "slug": "lasne",
+  "dept": "wbr",
+  "postal_code": "1380",
+  "all_postcodes": [
+   "1380"
+  ],
+  "lat": 50.682333,
+  "lng": 4.461589,
+  "population": 14175
+ },
+ {
+  "nis": "25037",
+  "name": "Grez-Doiceau",
+  "slug": "grez-doiceau",
+  "dept": "wbr",
+  "postal_code": "1390",
+  "all_postcodes": [
+   "1390"
+  ],
+  "lat": 50.748455,
+  "lng": 4.68804,
+  "population": 14014
+ },
+ {
+  "nis": "61072",
+  "name": "Wanze",
+  "slug": "wanze",
+  "dept": "wlg",
+  "postal_code": "4520",
+  "all_postcodes": [
+   "4520"
+  ],
+  "lat": 50.550291,
+  "lng": 5.197936,
+  "population": 14005
+ },
+ {
+  "nis": "93014",
+  "name": "Couvin",
+  "slug": "couvin",
+  "dept": "wna",
+  "postal_code": "5660",
+  "all_postcodes": [
+   "5660"
+  ],
+  "lat": 50.037871,
+  "lng": 4.480927,
+  "population": 13919
+ },
+ {
+  "nis": "56086",
+  "name": "Ham-sur-Heure-Nalinnes",
+  "slug": "ham-sur-heure-nalinnes",
+  "dept": "wht",
+  "postal_code": "6120",
+  "all_postcodes": [
+   "6120"
+  ],
+  "lat": 50.327408,
+  "lng": 4.413864,
+  "population": 13838
+ },
+ {
+  "nis": "92087",
+  "name": "Mettet",
+  "slug": "mettet",
+  "dept": "wna",
+  "postal_code": "5640",
+  "all_postcodes": [
+   "5640",
+   "5641",
+   "5644",
+   "5646"
+  ],
+  "lat": 50.323195,
+  "lng": 4.671218,
+  "population": 13613
+ },
+ {
+  "nis": "62119",
+  "name": "Blegny",
+  "slug": "blegny",
+  "dept": "wlg",
+  "postal_code": "4670",
+  "all_postcodes": [
+   "4670",
+   "4671",
+   "4672"
+  ],
+  "lat": 50.674482,
+  "lng": 5.708907,
+  "population": 13579
+ },
+ {
+  "nis": "91034",
+  "name": "Dinant",
+  "slug": "dinant",
+  "dept": "wna",
+  "postal_code": "5500",
+  "all_postcodes": [
+   "5500",
+   "5501",
+   "5502",
+   "5503",
+   "5504"
+  ],
+  "lat": 50.249494,
+  "lng": 4.943227,
+  "population": 13261
+ },
+ {
+  "nis": "63049",
+  "name": "Malmedy",
+  "slug": "malmedy",
+  "dept": "wlg",
+  "postal_code": "4960",
+  "all_postcodes": [
+   "4960"
+  ],
+  "lat": 50.431457,
+  "lng": 6.041609,
+  "population": 12991
+ },
+ {
+  "nis": "62009",
+  "name": "Aywaille",
+  "slug": "aywaille",
+  "dept": "wlg",
+  "postal_code": "4920",
+  "all_postcodes": [
+   "4920"
+  ],
+  "lat": 50.457525,
+  "lng": 5.701517,
+  "population": 12969
+ },
+ {
+  "nis": "56001",
+  "name": "Anderlues",
+  "slug": "anderlues",
+  "dept": "wht",
+  "postal_code": "6150",
+  "all_postcodes": [
+   "6150"
+  ],
+  "lat": 50.403611,
+  "lng": 4.265673,
+  "population": 12955
+ },
+ {
+  "nis": "52025",
+  "name": "Gerpinnes",
+  "slug": "gerpinnes",
+  "dept": "wht",
+  "postal_code": "6280",
+  "all_postcodes": [
+   "6280"
+  ],
+  "lat": 50.347478,
+  "lng": 4.527759,
+  "population": 12900
+ },
+ {
+  "nis": "62032",
+  "name": "Esneux",
+  "slug": "esneux",
+  "dept": "wlg",
+  "postal_code": "4130",
+  "all_postcodes": [
+   "4130"
+  ],
+  "lat": 50.537601,
+  "lng": 5.568855,
+  "population": 12794
+ },
+ {
+  "nis": "91114",
+  "name": "Rochefort",
+  "slug": "rochefort",
+  "dept": "wna",
+  "postal_code": "5580",
+  "all_postcodes": [
+   "5580",
+   "5589"
+  ],
+  "lat": 50.156992,
+  "lng": 5.169196,
+  "population": 12772
+ },
+ {
+  "nis": "92101",
+  "name": "Profondeville",
+  "slug": "profondeville",
+  "dept": "wna",
+  "postal_code": "5170",
+  "all_postcodes": [
+   "5170"
+  ],
+  "lat": 50.375205,
+  "lng": 4.828675,
+  "population": 12322
+ },
+ {
+  "nis": "51065",
+  "name": "Frasnes-lez-Anvaing",
+  "slug": "frasnes-lez-anvaing",
+  "dept": "wht",
+  "postal_code": "7910",
+  "all_postcodes": [
+   "7910",
+   "7911",
+   "7912"
+  ],
+  "lat": 50.682386,
+  "lng": 3.600706,
+  "population": 12256
+ },
+ {
+  "nis": "63076",
+  "name": "Theux",
+  "slug": "theux",
+  "dept": "wlg",
+  "postal_code": "4910",
+  "all_postcodes": [
+   "4910"
+  ],
+  "lat": 50.509957,
+  "lng": 5.817605,
+  "population": 12144
+ },
+ {
+  "nis": "84077",
+  "name": "Libramont-Chevigny",
+  "slug": "libramont-chevigny",
+  "dept": "wlx",
+  "postal_code": "6800",
+  "all_postcodes": [
+   "6800"
+  ],
+  "lat": 49.946173,
+  "lng": 5.422403,
+  "population": 12033
+ },
+ {
+  "nis": "62015",
+  "name": "Beyne-Heusay",
+  "slug": "beyne-heusay",
+  "dept": "wlg",
+  "postal_code": "4610",
+  "all_postcodes": [
+   "4610"
+  ],
+  "lat": 50.628401,
+  "lng": 5.661563,
+  "population": 11977
+ },
+ {
+  "nis": "25018",
+  "name": "Chaumont-Gistoux",
+  "slug": "chaumont-gistoux",
+  "dept": "wbr",
+  "postal_code": "1325",
+  "all_postcodes": [
+   "1325"
+  ],
+  "lat": 50.687142,
+  "lng": 4.690609,
+  "population": 11894
+ },
+ {
+  "nis": "51009",
+  "name": "Bernissart",
+  "slug": "bernissart",
+  "dept": "wht",
+  "postal_code": "7320",
+  "all_postcodes": [
+   "7320",
+   "7321",
+   "7322"
+  ],
+  "lat": 50.479531,
+  "lng": 3.686535,
+  "population": 11894
+ },
+ {
+  "nis": "55085",
+  "name": "Seneffe",
+  "slug": "seneffe",
+  "dept": "wht",
+  "postal_code": "7180",
+  "all_postcodes": [
+   "7180",
+   "7181"
+  ],
+  "lat": 50.547824,
+  "lng": 4.262642,
+  "population": 11631
+ },
+ {
+  "nis": "55050",
+  "name": "Écaussinnes",
+  "slug": "ecaussinnes",
+  "dept": "wht",
+  "postal_code": "7190",
+  "all_postcodes": [
+   "7190",
+   "7191"
+  ],
+  "lat": 50.562713,
+  "lng": 4.179441,
+  "population": 11622
+ },
+ {
+  "nis": "83012",
+  "name": "Durbuy",
+  "slug": "durbuy",
+  "dept": "wlx",
+  "postal_code": "6940",
+  "all_postcodes": [
+   "6940",
+   "6941"
+  ],
+  "lat": 50.360726,
+  "lng": 5.488276,
+  "population": 11511
+ },
+ {
+  "nis": "52018",
+  "name": "Farciennes",
+  "slug": "farciennes",
+  "dept": "wht",
+  "postal_code": "6240",
+  "all_postcodes": [
+   "6240"
+  ],
+  "lat": 50.434441,
+  "lng": 4.546952,
+  "population": 11471
+ },
+ {
+  "nis": "85045",
+  "name": "Virton",
+  "slug": "virton",
+  "dept": "wlx",
+  "postal_code": "6760",
+  "all_postcodes": [
+   "6760",
+   "6761",
+   "6762"
+  ],
+  "lat": 49.571205,
+  "lng": 5.572257,
+  "population": 11466
+ },
+ {
+  "nis": "93022",
+  "name": "Florennes",
+  "slug": "florennes",
+  "dept": "wna",
+  "postal_code": "5620",
+  "all_postcodes": [
+   "5620",
+   "5621"
+  ],
+  "lat": 50.253816,
+  "lng": 4.631165,
+  "population": 11394
+ },
+ {
+  "nis": "25123",
+  "name": "Rebecq",
+  "slug": "rebecq",
+  "dept": "wbr",
+  "postal_code": "1430",
+  "all_postcodes": [
+   "1430"
+  ],
+  "lat": 50.671495,
+  "lng": 4.13038,
+  "population": 11185
+ },
+ {
+  "nis": "25107",
+  "name": "Villers-la-Ville",
+  "slug": "villers-la-ville",
+  "dept": "wbr",
+  "postal_code": "1495",
+  "all_postcodes": [
+   "1495"
+  ],
+  "lat": 50.562403,
+  "lng": 4.526694,
+  "population": 11059
+ },
+ {
+  "nis": "52074",
+  "name": "Aiseau-Presles",
+  "slug": "aiseau-presles",
+  "dept": "wht",
+  "postal_code": "6250",
+  "all_postcodes": [
+   "6250"
+  ],
+  "lat": 50.404935,
+  "lng": 4.576911,
+  "population": 10956
+ },
+ {
+  "nis": "25023",
+  "name": "Court-Saint-Étienne",
+  "slug": "court-saint-etienne",
+  "dept": "wbr",
+  "postal_code": "1490",
+  "all_postcodes": [
+   "1490"
+  ],
+  "lat": 50.626448,
+  "lng": 4.562598,
+  "population": 10927
+ },
+ {
+  "nis": "53044",
+  "name": "Jurbise",
+  "slug": "jurbise",
+  "dept": "wht",
+  "postal_code": "7050",
+  "all_postcodes": [
+   "7050"
+  ],
+  "lat": 50.52523,
+  "lng": 3.901211,
+  "population": 10912
+ },
+ {
+  "nis": "57027",
+  "name": "Estaimpuis",
+  "slug": "estaimpuis",
+  "dept": "wht",
+  "postal_code": "7730",
+  "all_postcodes": [
+   "7730"
+  ],
+  "lat": 50.687665,
+  "lng": 3.288476,
+  "population": 10878
+ },
+ {
+  "nis": "63088",
+  "name": "Plombières",
+  "slug": "plombieres",
+  "dept": "wlg",
+  "postal_code": "4850",
+  "all_postcodes": [
+   "4850",
+   "4851",
+   "4852"
+  ],
+  "lat": 50.725604,
+  "lng": 5.94904,
+  "population": 10814
+ },
+ {
+  "nis": "25015",
+  "name": "Braine-le-Château",
+  "slug": "braine-le-chateau",
+  "dept": "wbr",
+  "postal_code": "1440",
+  "all_postcodes": [
+   "1440"
+  ],
+  "lat": 50.679668,
+  "lng": 4.28408,
+  "population": 10638
+ },
+ {
+  "nis": "63084",
+  "name": "Welkenraedt",
+  "slug": "welkenraedt",
+  "dept": "wlg",
+  "postal_code": "4840",
+  "all_postcodes": [
+   "4840",
+   "4841"
+  ],
+  "lat": 50.663505,
+  "lng": 5.939126,
+  "population": 10521
+ },
+ {
+  "nis": "92048",
+  "name": "Fosses-la-Ville",
+  "slug": "fosses-la-ville",
+  "dept": "wna",
+  "postal_code": "5070",
+  "all_postcodes": [
+   "5070"
+  ],
+  "lat": 50.393222,
+  "lng": 4.681006,
+  "population": 10436
+ },
+ {
+  "nis": "52048",
+  "name": "Montigny-le-Tilleul",
+  "slug": "montigny-le-tilleul",
+  "dept": "wht",
+  "postal_code": "6110",
+  "all_postcodes": [
+   "6110",
+   "6111"
+  ],
+  "lat": 50.376231,
+  "lng": 4.371332,
+  "population": 10170
+ },
+ {
+  "nis": "56022",
+  "name": "Erquelinnes",
+  "slug": "erquelinnes",
+  "dept": "wht",
+  "postal_code": "6560",
+  "all_postcodes": [
+   "6560"
+  ],
+  "lat": 50.303929,
+  "lng": 4.138588,
+  "population": 9983
+ },
+ {
+  "nis": "62121",
+  "name": "Neupré",
+  "slug": "neupre",
+  "dept": "wlg",
+  "postal_code": "4120",
+  "all_postcodes": [
+   "4120",
+   "4121",
+   "4122"
+  ],
+  "lat": 50.544065,
+  "lng": 5.488059,
+  "population": 9952
+ },
+ {
+  "nis": "62060",
+  "name": "Juprelle",
+  "slug": "juprelle",
+  "dept": "wlg",
+  "postal_code": "4450",
+  "all_postcodes": [
+   "4450",
+   "4451",
+   "4452",
+   "4453",
+   "4458"
+  ],
+  "lat": 50.715351,
+  "lng": 5.546275,
+  "population": 9906
+ },
+ {
+  "nis": "25084",
+  "name": "Perwez",
+  "slug": "perwez",
+  "dept": "wbr",
+  "postal_code": "1360",
+  "all_postcodes": [
+   "1360"
+  ],
+  "lat": 50.634168,
+  "lng": 4.789881,
+  "population": 9844
+ },
+ {
+  "nis": "63072",
+  "name": "Spa",
+  "slug": "spa",
+  "dept": "wlg",
+  "postal_code": "4900",
+  "all_postcodes": [
+   "4900"
+  ],
+  "lat": 50.472003,
+  "lng": 5.867054,
+  "population": 9806
+ },
+ {
+  "nis": "52075",
+  "name": "Les Bons Villers",
+  "slug": "les-bons-villers",
+  "dept": "wht",
+  "postal_code": "6210",
+  "all_postcodes": [
+   "6210",
+   "6210",
+   "6211"
+  ],
+  "lat": 50.527882,
+  "lng": 4.44818,
+  "population": 9705
+ },
+ {
+  "nis": "56016",
+  "name": "Chimay",
+  "slug": "chimay",
+  "dept": "wht",
+  "postal_code": "6460",
+  "all_postcodes": [
+   "6460",
+   "6461",
+   "6462",
+   "6463",
+   "6464"
+  ],
+  "lat": 50.040901,
+  "lng": 4.324269,
+  "population": 9673
+ },
+ {
+  "nis": "93056",
+  "name": "Philippeville",
+  "slug": "philippeville",
+  "dept": "wna",
+  "postal_code": "5600",
+  "all_postcodes": [
+   "5600"
+  ],
+  "lat": 50.169217,
+  "lng": 4.58787,
+  "population": 9589
+ },
+ {
+  "nis": "91013",
+  "name": "Beauraing",
+  "slug": "beauraing",
+  "dept": "wna",
+  "postal_code": "5570",
+  "all_postcodes": [
+   "5570",
+   "5570",
+   "5571",
+   "5572",
+   "5573",
+   "5574",
+   "5576"
+  ],
+  "lat": 50.093132,
+  "lng": 4.952606,
+  "population": 9496
+ },
+ {
+  "nis": "92141",
+  "name": "La Bruyère",
+  "slug": "la-bruyere",
+  "dept": "wna",
+  "postal_code": "5080",
+  "all_postcodes": [
+   "5080",
+   "5081"
+  ],
+  "lat": 50.529755,
+  "lng": 4.809784,
+  "population": 9397
+ },
+ {
+  "nis": "62006",
+  "name": "Awans",
+  "slug": "awans",
+  "dept": "wlg",
+  "postal_code": "4099",
+  "all_postcodes": [
+   "4099",
+   "4340",
+   "4342"
+  ],
+  "lat": 50.69283,
+  "lng": 5.455168,
+  "population": 9373
+ },
+ {
+  "nis": "63058",
+  "name": "Pepinster",
+  "slug": "pepinster",
+  "dept": "wlg",
+  "postal_code": "4860",
+  "all_postcodes": [
+   "4860",
+   "4861"
+  ],
+  "lat": 50.57219,
+  "lng": 5.797056,
+  "population": 9294
+ },
+ {
+  "nis": "91141",
+  "name": "Yvoir",
+  "slug": "yvoir",
+  "dept": "wna",
+  "postal_code": "5530",
+  "all_postcodes": [
+   "5530"
+  ],
+  "lat": 50.325309,
+  "lng": 4.940681,
+  "population": 9210
+ },
+ {
+  "nis": "25120",
+  "name": "Orp-Jauche",
+  "slug": "orp-jauche",
+  "dept": "wbr",
+  "postal_code": "1350",
+  "all_postcodes": [
+   "1350"
+  ],
+  "lat": 50.68991,
+  "lng": 4.963292,
+  "population": 9092
+ },
+ {
+  "nis": "84009",
+  "name": "Bertrix",
+  "slug": "bertrix",
+  "dept": "wlx",
+  "postal_code": "6880",
+  "all_postcodes": [
+   "6880"
+  ],
+  "lat": 49.853965,
+  "lng": 5.246272,
+  "population": 9057
+ },
+ {
+  "nis": "62011",
+  "name": "Bassenge",
+  "slug": "bassenge",
+  "dept": "wlg",
+  "postal_code": "4690",
+  "all_postcodes": [
+   "4690"
+  ],
+  "lat": 50.765574,
+  "lng": 5.610042,
+  "population": 9053
+ },
+ {
+  "nis": "63038",
+  "name": "Jalhay",
+  "slug": "jalhay",
+  "dept": "wlg",
+  "postal_code": "4845",
+  "all_postcodes": [
+   "4845"
+  ],
+  "lat": 50.530823,
+  "lng": 5.966477,
+  "population": 8770
+ },
+ {
+  "nis": "55035",
+  "name": "Le Roeulx",
+  "slug": "le-roeulx",
+  "dept": "wht",
+  "postal_code": "7070",
+  "all_postcodes": [
+   "7070"
+  ],
+  "lat": 50.507305,
+  "lng": 4.106164,
+  "population": 8709
+ },
+ {
+  "nis": "85046",
+  "name": "Habay",
+  "slug": "habay",
+  "dept": "wlx",
+  "postal_code": "6720",
+  "all_postcodes": [
+   "6720",
+   "6721",
+   "6723",
+   "6724"
+  ],
+  "lat": 49.735009,
+  "lng": 5.617126,
+  "population": 8668
+ },
+ {
+  "nis": "81015",
+  "name": "Messancy",
+  "slug": "messancy",
+  "dept": "wlx",
+  "postal_code": "6780",
+  "all_postcodes": [
+   "6780",
+   "6781",
+   "6782"
+  ],
+  "lat": 49.614765,
+  "lng": 5.811268,
+  "population": 8627
+ },
+ {
+  "nis": "25068",
+  "name": "Mont-Saint-Guibert",
+  "slug": "mont-saint-guibert",
+  "dept": "wbr",
+  "postal_code": "1348",
+  "all_postcodes": [
+   "1348",
+   "1435"
+  ],
+  "lat": 50.637341,
+  "lng": 4.623266,
+  "population": 8451
+ },
+ {
+  "nis": "51068",
+  "name": "Silly",
+  "slug": "silly",
+  "dept": "wht",
+  "postal_code": "7830",
+  "all_postcodes": [
+   "7830",
+   "7850"
+  ],
+  "lat": 50.648668,
+  "lng": 3.959011,
+  "population": 8422
+ },
+ {
+  "nis": "92114",
+  "name": "Sombreffe",
+  "slug": "sombreffe",
+  "dept": "wna",
+  "postal_code": "5140",
+  "all_postcodes": [
+   "5140"
+  ],
+  "lat": 50.526668,
+  "lng": 4.602684,
+  "population": 8384
+ },
+ {
+  "nis": "84043",
+  "name": "Neufchâteau",
+  "slug": "neufchateau",
+  "dept": "wlx",
+  "postal_code": "6840",
+  "all_postcodes": [
+   "6840"
+  ],
+  "lat": 49.851035,
+  "lng": 5.433387,
+  "population": 8350
+ },
+ {
+  "nis": "62122",
+  "name": "Trooz",
+  "slug": "trooz",
+  "dept": "wlg",
+  "postal_code": "4870",
+  "all_postcodes": [
+   "4870"
+  ],
+  "lat": 50.568099,
+  "lng": 5.707316,
+  "population": 8200
+ },
+ {
+  "nis": "53084",
+  "name": "Quévy",
+  "slug": "quevy",
+  "dept": "wht",
+  "postal_code": "7040",
+  "all_postcodes": [
+   "7040",
+   "7041"
+  ],
+  "lat": 50.366593,
+  "lng": 3.954365,
+  "population": 8194
+ },
+ {
+  "nis": "92138",
+  "name": "Fernelmont",
+  "slug": "fernelmont",
+  "dept": "wna",
+  "postal_code": "5380",
+  "all_postcodes": [
+   "5380"
+  ],
+  "lat": 50.553975,
+  "lng": 4.987218,
+  "population": 8175
+ },
+ {
+  "nis": "57093",
+  "name": "Brunehaut",
+  "slug": "brunehaut",
+  "dept": "wht",
+  "postal_code": "7620",
+  "all_postcodes": [
+   "7620",
+   "7621",
+   "7622",
+   "7623",
+   "7624"
+  ],
+  "lat": 50.52715,
+  "lng": 3.395108,
+  "population": 8129
+ },
+ {
+  "nis": "92045",
+  "name": "Floreffe",
+  "slug": "floreffe",
+  "dept": "wna",
+  "postal_code": "5150",
+  "all_postcodes": [
+   "5150"
+  ],
+  "lat": 50.434983,
+  "lng": 4.755713,
+  "population": 8083
+ },
+ {
+  "nis": "58003",
+  "name": "Estinnes",
+  "slug": "estinnes",
+  "dept": "wht",
+  "postal_code": "7120",
+  "all_postcodes": [
+   "7120"
+  ],
+  "lat": 50.37875,
+  "lng": 4.100618,
+  "population": 7947
+ },
+ {
+  "nis": "82032",
+  "name": "Vielsalm",
+  "slug": "vielsalm",
+  "dept": "wlx",
+  "postal_code": "6690",
+  "all_postcodes": [
+   "6690",
+   "6690",
+   "6692",
+   "6698"
+  ],
+  "lat": 50.278106,
+  "lng": 5.893368,
+  "population": 7853
+ },
+ {
+  "nis": "25117",
+  "name": "Chastre",
+  "slug": "chastre",
+  "dept": "wbr",
+  "postal_code": "1450",
+  "all_postcodes": [
+   "1450"
+  ],
+  "lat": 50.589432,
+  "lng": 4.623258,
+  "population": 7813
+ },
+ {
+  "nis": "62027",
+  "name": "Dalhem",
+  "slug": "dalhem",
+  "dept": "wlg",
+  "postal_code": "4606",
+  "all_postcodes": [
+   "4606",
+   "4607",
+   "4608"
+  ],
+  "lat": 50.720734,
+  "lng": 5.759038,
+  "population": 7711
+ },
+ {
+  "nis": "63080",
+  "name": "Waimes",
+  "slug": "waimes",
+  "dept": "wlg",
+  "postal_code": "4950",
+  "all_postcodes": [
+   "4950"
+  ],
+  "lat": 50.462438,
+  "lng": 6.124682,
+  "population": 7560
+ },
+ {
+  "nis": "25124",
+  "name": "Walhain",
+  "slug": "walhain",
+  "dept": "wbr",
+  "postal_code": "1457",
+  "all_postcodes": [
+   "1457"
+  ],
+  "lat": 50.631212,
+  "lng": 4.697275,
+  "population": 7556
+ },
+ {
+  "nis": "57003",
+  "name": "Antoing",
+  "slug": "antoing",
+  "dept": "wht",
+  "postal_code": "7640",
+  "all_postcodes": [
+   "7640",
+   "7641",
+   "7642",
+   "7643"
+  ],
+  "lat": 50.556162,
+  "lng": 3.465745,
+  "population": 7538
+ },
+ {
+  "nis": "25050",
+  "name": "La Hulpe",
+  "slug": "la-hulpe",
+  "dept": "wbr",
+  "postal_code": "1310",
+  "all_postcodes": [
+   "1310"
+  ],
+  "lat": 50.736296,
+  "lng": 4.464834,
+  "population": 7482
+ },
+ {
+  "nis": "92054",
+  "name": "Gesves",
+  "slug": "gesves",
+  "dept": "wna",
+  "postal_code": "5340",
+  "all_postcodes": [
+   "5340"
+  ],
+  "lat": 50.422446,
+  "lng": 5.053422,
+  "population": 7445
+ },
+ {
+  "nis": "91059",
+  "name": "Hamois",
+  "slug": "hamois",
+  "dept": "wna",
+  "postal_code": "5360",
+  "all_postcodes": [
+   "5360",
+   "5360",
+   "5361",
+   "5362",
+   "5363",
+   "5364"
+  ],
+  "lat": 50.337021,
+  "lng": 5.139618,
+  "population": 7438
+ },
+ {
+  "nis": "92006",
+  "name": "Assesse",
+  "slug": "assesse",
+  "dept": "wna",
+  "postal_code": "5330",
+  "all_postcodes": [
+   "5330",
+   "5330",
+   "5332",
+   "5333",
+   "5334",
+   "5336"
+  ],
+  "lat": 50.375473,
+  "lng": 4.993003,
+  "population": 7343
+ },
+ {
+  "nis": "63073",
+  "name": "Stavelot",
+  "slug": "stavelot",
+  "dept": "wlg",
+  "postal_code": "4970",
+  "all_postcodes": [
+   "4970"
+  ],
+  "lat": 50.416482,
+  "lng": 5.958006,
+  "population": 7279
+ },
+ {
+  "nis": "25005",
+  "name": "Beauvechain",
+  "slug": "beauvechain",
+  "dept": "wbr",
+  "postal_code": "1320",
+  "all_postcodes": [
+   "1320"
+  ],
+  "lat": 50.776149,
+  "lng": 4.764658,
+  "population": 7242
+ },
+ {
+  "nis": "64065",
+  "name": "Saint-Georges-sur-Meuse",
+  "slug": "saint-georges-sur-meuse",
+  "dept": "wlg",
+  "postal_code": "4470",
+  "all_postcodes": [
+   "4470"
+  ],
+  "lat": 50.596687,
+  "lng": 5.360581,
+  "population": 7184
+ },
+ {
+  "nis": "51014",
+  "name": "Chièvres",
+  "slug": "chievres",
+  "dept": "wht",
+  "postal_code": "7950",
+  "all_postcodes": [
+   "7950",
+   "7951"
+  ],
+  "lat": 50.571183,
+  "lng": 3.783941,
+  "population": 7145
+ },
+ {
+  "nis": "91005",
+  "name": "Anhée",
+  "slug": "anhee",
+  "dept": "wna",
+  "postal_code": "5537",
+  "all_postcodes": [
+   "5537"
+  ],
+  "lat": 50.318775,
+  "lng": 4.809993,
+  "population": 7109
+ },
+ {
+  "nis": "56005",
+  "name": "Beaumont",
+  "slug": "beaumont",
+  "dept": "wht",
+  "postal_code": "6500",
+  "all_postcodes": [
+   "6500",
+   "6511"
+  ],
+  "lat": 50.229314,
+  "lng": 4.259226,
+  "population": 7096
+ },
+ {
+  "nis": "25044",
+  "name": "Ittre",
+  "slug": "ittre",
+  "dept": "wbr",
+  "postal_code": "1460",
+  "all_postcodes": [
+   "1460",
+   "1461"
+  ],
+  "lat": 50.642466,
+  "lng": 4.257517,
+  "population": 6963
+ },
+ {
+  "nis": "61068",
+  "name": "Villers-le-Bouillet",
+  "slug": "villers-le-bouillet",
+  "dept": "wlg",
+  "postal_code": "4530",
+  "all_postcodes": [
+   "4530"
+  ],
+  "lat": 50.593354,
+  "lng": 5.242807,
+  "population": 6869
+ },
+ {
+  "nis": "53068",
+  "name": "Quiévrain",
+  "slug": "quievrain",
+  "dept": "wht",
+  "postal_code": "7380",
+  "all_postcodes": [
+   "7380",
+   "7382"
+  ],
+  "lat": 50.395834,
+  "lng": 3.702459,
+  "population": 6861
+ },
+ {
+  "nis": "53039",
+  "name": "Hensies",
+  "slug": "hensies",
+  "dept": "wht",
+  "postal_code": "7350",
+  "all_postcodes": [
+   "7350"
+  ],
+  "lat": 50.435804,
+  "lng": 3.713695,
+  "population": 6776
+ },
+ {
+  "nis": "25122",
+  "name": "Ramillies",
+  "slug": "ramillies",
+  "dept": "wbr",
+  "postal_code": "1367",
+  "all_postcodes": [
+   "1367"
+  ],
+  "lat": 50.656704,
+  "lng": 4.886082,
+  "population": 6710
+ },
+ {
+  "nis": "64015",
+  "name": "Braives",
+  "slug": "braives",
+  "dept": "wlg",
+  "postal_code": "4260",
+  "all_postcodes": [
+   "4260",
+   "4260",
+   "4261",
+   "4263"
+  ],
+  "lat": 50.615319,
+  "lng": 5.149482,
+  "population": 6476
+ },
+ {
+  "nis": "61080",
+  "name": "Engis",
+  "slug": "engis",
+  "dept": "wlg",
+  "postal_code": "4480",
+  "all_postcodes": [
+   "4480"
+  ],
+  "lat": 50.557589,
+  "lng": 5.388806,
+  "population": 6391
+ },
+ {
+  "nis": "82036",
+  "name": "Vaux-sur-Sûre",
+  "slug": "vaux-sur-sure",
+  "dept": "wlx",
+  "postal_code": "6640",
+  "all_postcodes": [
+   "6640"
+  ],
+  "lat": 49.934294,
+  "lng": 5.606594,
+  "population": 6352
+ },
+ {
+  "nis": "91120",
+  "name": "Somme-Leuze",
+  "slug": "somme-leuze",
+  "dept": "wna",
+  "postal_code": "5377",
+  "all_postcodes": [
+   "5377"
+  ],
+  "lat": 50.29965,
+  "lng": 5.318782,
+  "population": 6191
+ },
+ {
+  "nis": "91142",
+  "name": "Hastière",
+  "slug": "hastiere",
+  "dept": "wna",
+  "postal_code": "5540",
+  "all_postcodes": [
+   "5540",
+   "5541",
+   "5542",
+   "5543",
+   "5544"
+  ],
+  "lat": 50.194994,
+  "lng": 4.825737,
+  "population": 6081
+ },
+ {
+  "nis": "85009",
+  "name": "Étalle",
+  "slug": "etalle",
+  "dept": "wlx",
+  "postal_code": "6740",
+  "all_postcodes": [
+   "6740",
+   "6741",
+   "6742",
+   "6743"
+  ],
+  "lat": 49.663918,
+  "lng": 5.608965,
+  "population": 6035
+ },
+ {
+  "nis": "64063",
+  "name": "Remicourt",
+  "slug": "remicourt",
+  "dept": "wlg",
+  "postal_code": "4350",
+  "all_postcodes": [
+   "4350",
+   "4351"
+  ],
+  "lat": 50.685681,
+  "lng": 5.341212,
+  "population": 6023
+ },
+ {
+  "nis": "56044",
+  "name": "Lobbes",
+  "slug": "lobbes",
+  "dept": "wht",
+  "postal_code": "6540",
+  "all_postcodes": [
+   "6540",
+   "6542",
+   "6543"
+  ],
+  "lat": 50.355794,
+  "lng": 4.24179,
+  "population": 5958
+ },
+ {
+  "nis": "51017",
+  "name": "Ellezelles",
+  "slug": "ellezelles",
+  "dept": "wht",
+  "postal_code": "7890",
+  "all_postcodes": [
+   "7890"
+  ],
+  "lat": 50.720619,
+  "lng": 3.699069,
+  "population": 5948
+ },
+ {
+  "nis": "57062",
+  "name": "Pecq",
+  "slug": "pecq",
+  "dept": "wht",
+  "postal_code": "7740",
+  "all_postcodes": [
+   "7740",
+   "7742",
+   "7743"
+  ],
+  "lat": 50.685158,
+  "lng": 3.356785,
+  "population": 5899
+ },
+ {
+  "nis": "84033",
+  "name": "Léglise",
+  "slug": "leglise",
+  "dept": "wlx",
+  "postal_code": "6860",
+  "all_postcodes": [
+   "6860"
+  ],
+  "lat": 49.809894,
+  "lng": 5.56674,
+  "population": 5868
+ },
+ {
+  "nis": "81003",
+  "name": "Attert",
+  "slug": "attert",
+  "dept": "wlx",
+  "postal_code": "6717",
+  "all_postcodes": [
+   "6717"
+  ],
+  "lat": 49.745531,
+  "lng": 5.757496,
+  "population": 5788
+ },
+ {
+  "nis": "57018",
+  "name": "Celles",
+  "slug": "celles",
+  "dept": "wht",
+  "postal_code": "7760",
+  "all_postcodes": [
+   "7760"
+  ],
+  "lat": 50.703701,
+  "lng": 3.449064,
+  "population": 5775
+ },
+ {
+  "nis": "61043",
+  "name": "Nandrin",
+  "slug": "nandrin",
+  "dept": "wlg",
+  "postal_code": "4550",
+  "all_postcodes": [
+   "4550"
+  ],
+  "lat": 50.517154,
+  "lng": 5.400723,
+  "population": 5755
+ },
+ {
+  "nis": "83040",
+  "name": "Nassogne",
+  "slug": "nassogne",
+  "dept": "wlx",
+  "postal_code": "6950",
+  "all_postcodes": [
+   "6950",
+   "6951",
+   "6952",
+   "6953"
+  ],
+  "lat": 50.136631,
+  "lng": 5.358795,
+  "population": 5716
+ },
+ {
+  "nis": "85011",
+  "name": "Florenville",
+  "slug": "florenville",
+  "dept": "wlx",
+  "postal_code": "6820",
+  "all_postcodes": [
+   "6820",
+   "6820",
+   "6821",
+   "6823",
+   "6824"
+  ],
+  "lat": 49.707724,
+  "lng": 5.275494,
+  "population": 5705
+ },
+ {
+  "nis": "84059",
+  "name": "Saint-Hubert",
+  "slug": "saint-hubert",
+  "dept": "wlx",
+  "postal_code": "6870",
+  "all_postcodes": [
+   "6870"
+  ],
+  "lat": 50.03791,
+  "lng": 5.345597,
+  "population": 5691
+ },
+ {
+  "nis": "63046",
+  "name": "Limbourg",
+  "slug": "limbourg",
+  "dept": "wlg",
+  "postal_code": "4830",
+  "all_postcodes": [
+   "4830",
+   "4831",
+   "4834"
+  ],
+  "lat": 50.611335,
+  "lng": 5.937168,
+  "population": 5689
+ },
+ {
+  "nis": "83028",
+  "name": "Hotton",
+  "slug": "hotton",
+  "dept": "wlx",
+  "postal_code": "6990",
+  "all_postcodes": [
+   "6990"
+  ],
+  "lat": 50.267366,
+  "lng": 5.432789,
+  "population": 5682
+ },
+ {
+  "nis": "25043",
+  "name": "Incourt",
+  "slug": "incourt",
+  "dept": "wbr",
+  "postal_code": "1315",
+  "all_postcodes": [
+   "1315"
+  ],
+  "lat": 50.699106,
+  "lng": 4.781475,
+  "population": 5658
+ },
+ {
+  "nis": "61039",
+  "name": "Marchin",
+  "slug": "marchin",
+  "dept": "wlg",
+  "postal_code": "4570",
+  "all_postcodes": [
+   "4570"
+  ],
+  "lat": 50.467404,
+  "lng": 5.23951,
+  "population": 5636
+ },
+ {
+  "nis": "93090",
+  "name": "Viroinval",
+  "slug": "viroinval",
+  "dept": "wna",
+  "postal_code": "5670",
+  "all_postcodes": [
+   "5670"
+  ],
+  "lat": 50.053847,
+  "lng": 4.625237,
+  "population": 5616
+ },
+ {
+  "nis": "61028",
+  "name": "Héron",
+  "slug": "heron",
+  "dept": "wlg",
+  "postal_code": "4217",
+  "all_postcodes": [
+   "4217",
+   "4218"
+  ],
+  "lat": 50.54045,
+  "lng": 5.105364,
+  "population": 5599
+ },
+ {
+  "nis": "63089",
+  "name": "Thimister-Clermont",
+  "slug": "thimister-clermont",
+  "dept": "wlg",
+  "postal_code": "4890",
+  "all_postcodes": [
+   "4890"
+  ],
+  "lat": 50.662929,
+  "lng": 5.869808,
+  "population": 5584
+ },
+ {
+  "nis": "84050",
+  "name": "Paliseul",
+  "slug": "paliseul",
+  "dept": "wlx",
+  "postal_code": "6850",
+  "all_postcodes": [
+   "6850",
+   "6851",
+   "6852",
+   "6853",
+   "6856"
+  ],
+  "lat": 49.907731,
+  "lng": 5.136925,
+  "population": 5530
+ },
+ {
+  "nis": "91064",
+  "name": "Havelange",
+  "slug": "havelange",
+  "dept": "wna",
+  "postal_code": "5370",
+  "all_postcodes": [
+   "5370",
+   "5372",
+   "5374",
+   "5376"
+  ],
+  "lat": 50.36118,
+  "lng": 5.248163,
+  "population": 5461
+ },
+ {
+  "nis": "82037",
+  "name": "Gouvy",
+  "slug": "gouvy",
+  "dept": "wlx",
+  "postal_code": "6670",
+  "all_postcodes": [
+   "6670",
+   "6671",
+   "6672",
+   "6673",
+   "6674"
+  ],
+  "lat": 50.192577,
+  "lng": 5.911461,
+  "population": 5452
+ },
+ {
+  "nis": "84035",
+  "name": "Libin",
+  "slug": "libin",
+  "dept": "wlx",
+  "postal_code": "6890",
+  "all_postcodes": [
+   "6890"
+  ],
+  "lat": 49.978125,
+  "lng": 5.238151,
+  "population": 5367
+ },
+ {
+  "nis": "62026",
+  "name": "Comblain-au-Pont",
+  "slug": "comblain-au-pont",
+  "dept": "wlg",
+  "postal_code": "4170",
+  "all_postcodes": [
+   "4170",
+   "4171"
+  ],
+  "lat": 50.481752,
+  "lng": 5.579981,
+  "population": 5366
+ },
+ {
+  "nis": "84010",
+  "name": "Bouillon",
+  "slug": "bouillon",
+  "dept": "wlx",
+  "postal_code": "6830",
+  "all_postcodes": [
+   "6830",
+   "6830",
+   "6831",
+   "6832",
+   "6833",
+   "6834",
+   "6836",
+   "6838"
+  ],
+  "lat": 49.80599,
+  "lng": 5.083196,
+  "population": 5351
+ },
+ {
+  "nis": "57072",
+  "name": "Rumes",
+  "slug": "rumes",
+  "dept": "wht",
+  "postal_code": "7610",
+  "all_postcodes": [
+   "7610",
+   "7611",
+   "7618"
+  ],
+  "lat": 50.544489,
+  "lng": 3.319813,
+  "population": 5345
+ },
+ {
+  "nis": "82014",
+  "name": "Houffalize",
+  "slug": "houffalize",
+  "dept": "wlx",
+  "postal_code": "6660",
+  "all_postcodes": [
+   "6660",
+   "6660",
+   "6661",
+   "6662",
+   "6663",
+   "6666"
+  ],
+  "lat": 50.144392,
+  "lng": 5.770942,
+  "population": 5336
+ },
+ {
+  "nis": "92097",
+  "name": "Ohey",
+  "slug": "ohey",
+  "dept": "wna",
+  "postal_code": "5350",
+  "all_postcodes": [
+   "5350",
+   "5351",
+   "5352",
+   "5353",
+   "5354"
+  ],
+  "lat": 50.435762,
+  "lng": 5.16638,
+  "population": 5316
+ },
+ {
+  "nis": "85007",
+  "name": "Chiny",
+  "slug": "chiny",
+  "dept": "wlx",
+  "postal_code": "6810",
+  "all_postcodes": [
+   "6810",
+   "6811",
+   "6812",
+   "6813"
+  ],
+  "lat": 49.720131,
+  "lng": 5.391464,
+  "population": 5265
+ },
+ {
+  "nis": "91072",
+  "name": "Houyet",
+  "slug": "houyet",
+  "dept": "wna",
+  "postal_code": "5560",
+  "all_postcodes": [
+   "5560",
+   "5560",
+   "5561",
+   "5562",
+   "5563",
+   "5564"
+  ],
+  "lat": 50.186053,
+  "lng": 5.002874,
+  "population": 5215
+ },
+ {
+  "nis": "56051",
+  "name": "Momignies",
+  "slug": "momignies",
+  "dept": "wht",
+  "postal_code": "6590",
+  "all_postcodes": [
+   "6590",
+   "6591",
+   "6592",
+   "6593",
+   "6594",
+   "6596"
+  ],
+  "lat": 50.002548,
+  "lng": 4.217491,
+  "population": 5213
+ },
+ {
+  "nis": "61019",
+  "name": "Ferrières",
+  "slug": "ferrieres",
+  "dept": "wlg",
+  "postal_code": "4190",
+  "all_postcodes": [
+   "4190"
+  ],
+  "lat": 50.407203,
+  "lng": 5.620804,
+  "population": 5156
+ },
+ {
+  "nis": "53083",
+  "name": "Honnelles",
+  "slug": "honnelles",
+  "dept": "wht",
+  "postal_code": "7387",
+  "all_postcodes": [
+   "7387"
+  ],
+  "lat": 50.351489,
+  "lng": 3.724701,
+  "population": 5104
+ },
+ {
+  "nis": "61012",
+  "name": "Clavier",
+  "slug": "clavier",
+  "dept": "wlg",
+  "postal_code": "4560",
+  "all_postcodes": [
+   "4560"
+  ],
+  "lat": 50.412929,
+  "lng": 5.335861,
+  "population": 4989
+ },
+ {
+  "nis": "93010",
+  "name": "Cerfontaine",
+  "slug": "cerfontaine",
+  "dept": "wna",
+  "postal_code": "5630",
+  "all_postcodes": [
+   "5630"
+  ],
+  "lat": 50.179535,
+  "lng": 4.436742,
+  "population": 4989
+ },
+ {
+  "nis": "56088",
+  "name": "Sivry-Rance",
+  "slug": "sivry-rance",
+  "dept": "wht",
+  "postal_code": "6470",
+  "all_postcodes": [
+   "6470"
+  ],
+  "lat": 50.160017,
+  "lng": 4.210571,
+  "population": 4862
+ },
+ {
+  "nis": "85026",
+  "name": "Musson",
+  "slug": "musson",
+  "dept": "wlx",
+  "postal_code": "6750",
+  "all_postcodes": [
+   "6750"
+  ],
+  "lat": 49.569431,
+  "lng": 5.680952,
+  "population": 4708
+ },
+ {
+  "nis": "53046",
+  "name": "Lens",
+  "slug": "lens",
+  "dept": "wht",
+  "postal_code": "7870",
+  "all_postcodes": [
+   "7870"
+  ],
+  "lat": 50.570455,
+  "lng": 3.911492,
+  "population": 4677
+ },
+ {
+  "nis": "91054",
+  "name": "Gedinne",
+  "slug": "gedinne",
+  "dept": "wna",
+  "postal_code": "5575",
+  "all_postcodes": [
+   "5575"
+  ],
+  "lat": 49.984433,
+  "lng": 4.90277,
+  "population": 4661
+ },
+ {
+  "nis": "85039",
+  "name": "Tintigny",
+  "slug": "tintigny",
+  "dept": "wlx",
+  "postal_code": "6730",
+  "all_postcodes": [
+   "6730"
+  ],
+  "lat": 49.685906,
+  "lng": 5.484433,
+  "population": 4593
+ },
+ {
+  "nis": "63004",
+  "name": "Baelen",
+  "slug": "baelen",
+  "dept": "wlg",
+  "postal_code": "4837",
+  "all_postcodes": [
+   "4837"
+  ],
+  "lat": 50.583138,
+  "lng": 6.044756,
+  "population": 4529
+ },
+ {
+  "nis": "61063",
+  "name": "Verlaine",
+  "slug": "verlaine",
+  "dept": "wlg",
+  "postal_code": "4537",
+  "all_postcodes": [
+   "4537"
+  ],
+  "lat": 50.608802,
+  "lng": 5.302249,
+  "population": 4414
+ },
+ {
+  "nis": "63003",
+  "name": "Aubel",
+  "slug": "aubel",
+  "dept": "wlg",
+  "postal_code": "4880",
+  "all_postcodes": [
+   "4880"
+  ],
+  "lat": 50.700473,
+  "lng": 5.851307,
+  "population": 4288
+ },
+ {
+  "nis": "61079",
+  "name": "Anthisnes",
+  "slug": "anthisnes",
+  "dept": "wlg",
+  "postal_code": "4160",
+  "all_postcodes": [
+   "4160",
+   "4161",
+   "4162",
+   "4163"
+  ],
+  "lat": 50.489408,
+  "lng": 5.498589,
+  "population": 4204
+ },
+ {
+  "nis": "64076",
+  "name": "Faimes",
+  "slug": "faimes",
+  "dept": "wlg",
+  "postal_code": "4317",
+  "all_postcodes": [
+   "4317"
+  ],
+  "lat": 50.644825,
+  "lng": 5.242741,
+  "population": 4192
+ },
+ {
+  "nis": "63057",
+  "name": "Olne",
+  "slug": "olne",
+  "dept": "wlg",
+  "postal_code": "4870",
+  "all_postcodes": [
+   "4870",
+   "4877"
+  ],
+  "lat": 50.587358,
+  "lng": 5.731957,
+  "population": 4172
+ },
+ {
+  "nis": "61041",
+  "name": "Modave",
+  "slug": "modave",
+  "dept": "wlg",
+  "postal_code": "4577",
+  "all_postcodes": [
+   "4577"
+  ],
+  "lat": 50.473442,
+  "lng": 5.301859,
+  "population": 4169
+ },
+ {
+  "nis": "56049",
+  "name": "Merbes-le-Château",
+  "slug": "merbes-le-chateau",
+  "dept": "wht",
+  "postal_code": "6567",
+  "all_postcodes": [
+   "6567"
+  ],
+  "lat": 50.320951,
+  "lng": 4.194533,
+  "population": 4137
+ },
+ {
+  "nis": "56029",
+  "name": "Froidchapelle",
+  "slug": "froidchapelle",
+  "dept": "wht",
+  "postal_code": "6440",
+  "all_postcodes": [
+   "6440",
+   "6441"
+  ],
+  "lat": 50.165218,
+  "lng": 4.34749,
+  "population": 4067
+ },
+ {
+  "nis": "83031",
+  "name": "La Roche-en-Ardenne",
+  "slug": "la-roche-en-ardenne",
+  "dept": "wlx",
+  "postal_code": "6980",
+  "all_postcodes": [
+   "6980",
+   "6982",
+   "6983",
+   "6984",
+   "6986"
+  ],
+  "lat": 50.167095,
+  "lng": 5.604983,
+  "population": 4067
+ },
+ {
+  "nis": "64056",
+  "name": "Oreye",
+  "slug": "oreye",
+  "dept": "wlg",
+  "postal_code": "4360",
+  "all_postcodes": [
+   "4360"
+  ],
+  "lat": 50.723264,
+  "lng": 5.347297,
+  "population": 4062
+ },
+ {
+  "nis": "25118",
+  "name": "Hélécine",
+  "slug": "helecine",
+  "dept": "wbr",
+  "postal_code": "1357",
+  "all_postcodes": [
+   "1357"
+  ],
+  "lat": 50.74835,
+  "lng": 4.982738,
+  "population": 3894
+ },
+ {
+  "nis": "51012",
+  "name": "Brugelette",
+  "slug": "brugelette",
+  "dept": "wht",
+  "postal_code": "7940",
+  "all_postcodes": [
+   "7940",
+   "7941",
+   "7942",
+   "7943"
+  ],
+  "lat": 50.602027,
+  "lng": 3.867184,
+  "population": 3878
+ },
+ {
+  "nis": "57095",
+  "name": "Mont-de-l'Enclus",
+  "slug": "mont-de-l-enclus",
+  "dept": "wht",
+  "postal_code": "7750",
+  "all_postcodes": [
+   "7750"
+  ],
+  "lat": 50.738134,
+  "lng": 3.504557,
+  "population": 3838
+ },
+ {
+  "nis": "85034",
+  "name": "Saint-Léger",
+  "slug": "saint-leger",
+  "dept": "wlx",
+  "postal_code": "6747",
+  "all_postcodes": [
+   "6747"
+  ],
+  "lat": 49.618226,
+  "lng": 5.676482,
+  "population": 3809
+ },
+ {
+  "nis": "61024",
+  "name": "Hamoir",
+  "slug": "hamoir",
+  "dept": "wlg",
+  "postal_code": "4180",
+  "all_postcodes": [
+   "4180",
+   "4181"
+  ],
+  "lat": 50.437347,
+  "lng": 5.555034,
+  "population": 3776
+ },
+ {
+  "nis": "83055",
+  "name": "Manhay",
+  "slug": "manhay",
+  "dept": "wlx",
+  "postal_code": "6960",
+  "all_postcodes": [
+   "6960"
+  ],
+  "lat": 50.289017,
+  "lng": 5.662704,
+  "population": 3762
+ },
+ {
+  "nis": "63045",
+  "name": "Lierneux",
+  "slug": "lierneux",
+  "dept": "wlg",
+  "postal_code": "4990",
+  "all_postcodes": [
+   "4990"
+  ],
+  "lat": 50.307816,
+  "lng": 5.785532,
+  "population": 3611
+ },
+ {
+  "nis": "64021",
+  "name": "Crisnée",
+  "slug": "crisnee",
+  "dept": "wlg",
+  "postal_code": "4367",
+  "all_postcodes": [
+   "4367"
+  ],
+  "lat": 50.710616,
+  "lng": 5.396833,
+  "population": 3573
+ },
+ {
+  "nis": "64029",
+  "name": "Geer",
+  "slug": "geer",
+  "dept": "wlg",
+  "postal_code": "4250",
+  "all_postcodes": [
+   "4250",
+   "4252",
+   "4253",
+   "4254"
+  ],
+  "lat": 50.669619,
+  "lng": 5.181421,
+  "population": 3571
+ },
+ {
+  "nis": "91015",
+  "name": "Bièvre",
+  "slug": "bievre",
+  "dept": "wna",
+  "postal_code": "5555",
+  "all_postcodes": [
+   "5555"
+  ],
+  "lat": 49.921987,
+  "lng": 5.01965,
+  "population": 3467
+ },
+ {
+  "nis": "51019",
+  "name": "Flobecq",
+  "slug": "flobecq",
+  "dept": "wht",
+  "postal_code": "7880",
+  "all_postcodes": [
+   "7880"
+  ],
+  "lat": 50.753578,
+  "lng": 3.731656,
+  "population": 3441
+ },
+ {
+  "nis": "64025",
+  "name": "Fexhe-le-Haut-Clocher",
+  "slug": "fexhe-le-haut-clocher",
+  "dept": "wlg",
+  "postal_code": "4347",
+  "all_postcodes": [
+   "4347"
+  ],
+  "lat": 50.663666,
+  "lng": 5.402083,
+  "population": 3399
+ },
+ {
+  "nis": "64008",
+  "name": "Berloz",
+  "slug": "berloz",
+  "dept": "wlg",
+  "postal_code": "4257",
+  "all_postcodes": [
+   "4257"
+  ],
+  "lat": 50.703774,
+  "lng": 5.203084,
+  "population": 3394
+ },
+ {
+  "nis": "64047",
+  "name": "Lincent",
+  "slug": "lincent",
+  "dept": "wlg",
+  "postal_code": "4287",
+  "all_postcodes": [
+   "4287"
+  ],
+  "lat": 50.721442,
+  "lng": 5.027585,
+  "population": 3375
+ },
+ {
+  "nis": "83013",
+  "name": "Érezée",
+  "slug": "erezee",
+  "dept": "wlx",
+  "postal_code": "6997",
+  "all_postcodes": [
+   "6997"
+  ],
+  "lat": 50.296589,
+  "lng": 5.557817,
+  "population": 3356
+ },
+ {
+  "nis": "61010",
+  "name": "Burdinne",
+  "slug": "burdinne",
+  "dept": "wlg",
+  "postal_code": "4210",
+  "all_postcodes": [
+   "4210"
+  ],
+  "lat": 50.582597,
+  "lng": 5.099502,
+  "population": 3334
+ },
+ {
+  "nis": "91103",
+  "name": "Onhaye",
+  "slug": "onhaye",
+  "dept": "wna",
+  "postal_code": "5520",
+  "all_postcodes": [
+   "5520",
+   "5520",
+   "5521",
+   "5522",
+   "5523",
+   "5524"
+  ],
+  "lat": 50.260237,
+  "lng": 4.812226,
+  "population": 3243
+ },
+ {
+  "nis": "63075",
+  "name": "Stoumont",
+  "slug": "stoumont",
+  "dept": "wlg",
+  "postal_code": "4987",
+  "all_postcodes": [
+   "4987"
+  ],
+  "lat": 50.408216,
+  "lng": 5.798437,
+  "population": 3233
+ },
+ {
+  "nis": "84075",
+  "name": "Wellin",
+  "slug": "wellin",
+  "dept": "wlx",
+  "postal_code": "6920",
+  "all_postcodes": [
+   "6920",
+   "6920",
+   "6921",
+   "6922",
+   "6924"
+  ],
+  "lat": 50.060134,
+  "lng": 5.09849,
+  "population": 3207
+ },
+ {
+  "nis": "64075",
+  "name": "Wasseiges",
+  "slug": "wasseiges",
+  "dept": "wlg",
+  "postal_code": "4219",
+  "all_postcodes": [
+   "4219"
+  ],
+  "lat": 50.617867,
+  "lng": 5.024358,
+  "population": 3187
+ },
+ {
+  "nis": "64023",
+  "name": "Donceel",
+  "slug": "donceel",
+  "dept": "wlg",
+  "postal_code": "4357",
+  "all_postcodes": [
+   "4357"
+  ],
+  "lat": 50.649368,
+  "lng": 5.326013,
+  "population": 3128
+ },
+ {
+  "nis": "93018",
+  "name": "Doische",
+  "slug": "doische",
+  "dept": "wna",
+  "postal_code": "5680",
+  "all_postcodes": [
+   "5680"
+  ],
+  "lat": 50.144244,
+  "lng": 4.699038,
+  "population": 2973
+ },
+ {
+  "nis": "83049",
+  "name": "Tenneville",
+  "slug": "tenneville",
+  "dept": "wlx",
+  "postal_code": "6970",
+  "all_postcodes": [
+   "6970",
+   "6971",
+   "6972"
+  ],
+  "lat": 50.099709,
+  "lng": 5.490132,
+  "population": 2876
+ },
+ {
+  "nis": "85024",
+  "name": "Meix-devant-Virton",
+  "slug": "meix-devant-virton",
+  "dept": "wlx",
+  "postal_code": "6769",
+  "all_postcodes": [
+   "6769"
+  ],
+  "lat": 49.603663,
+  "lng": 5.46996,
+  "population": 2849
+ },
+ {
+  "nis": "61048",
+  "name": "Ouffet",
+  "slug": "ouffet",
+  "dept": "wlg",
+  "postal_code": "4590",
+  "all_postcodes": [
+   "4590"
+  ],
+  "lat": 50.444745,
+  "lng": 5.465864,
+  "population": 2822
+ },
+ {
+  "nis": "61081",
+  "name": "Tinlot",
+  "slug": "tinlot",
+  "dept": "wlg",
+  "postal_code": "4557",
+  "all_postcodes": [
+   "4557"
+  ],
+  "lat": 50.475113,
+  "lng": 5.380174,
+  "population": 2782
+ },
+ {
+  "nis": "83044",
+  "name": "Rendeux",
+  "slug": "rendeux",
+  "dept": "wlx",
+  "postal_code": "6987",
+  "all_postcodes": [
+   "6987"
+  ],
+  "lat": 50.219336,
+  "lng": 5.516064,
+  "population": 2717
+ },
+ {
+  "nis": "82038",
+  "name": "Sainte-Ode",
+  "slug": "sainte-ode",
+  "dept": "wlx",
+  "postal_code": "6680",
+  "all_postcodes": [
+   "6680",
+   "6681"
+  ],
+  "lat": 50.024949,
+  "lng": 5.527996,
+  "population": 2687
+ },
+ {
+  "nis": "63086",
+  "name": "Trois-Ponts",
+  "slug": "trois-ponts",
+  "dept": "wlg",
+  "postal_code": "4980",
+  "all_postcodes": [
+   "4980",
+   "4983"
+  ],
+  "lat": 50.356565,
+  "lng": 5.884297,
+  "population": 2566
+ },
+ {
+  "nis": "91143",
+  "name": "Vresse-sur-Semois",
+  "slug": "vresse-sur-semois",
+  "dept": "wna",
+  "postal_code": "5550",
+  "all_postcodes": [
+   "5550"
+  ],
+  "lat": 49.850293,
+  "lng": 4.915783,
+  "population": 2549
+ },
+ {
+  "nis": "84068",
+  "name": "Tellin",
+  "slug": "tellin",
+  "dept": "wlx",
+  "postal_code": "6927",
+  "all_postcodes": [
+   "6927"
+  ],
+  "lat": 50.075447,
+  "lng": 5.225662,
+  "population": 2519
+ },
+ {
+  "nis": "82009",
+  "name": "Fauvillers",
+  "slug": "fauvillers",
+  "dept": "wlx",
+  "postal_code": "6637",
+  "all_postcodes": [
+   "6637"
+  ],
+  "lat": 49.876995,
+  "lng": 5.696594,
+  "population": 2512
+ },
+ {
+  "nis": "81013",
+  "name": "Martelange",
+  "slug": "martelange",
+  "dept": "wlx",
+  "postal_code": "6630",
+  "all_postcodes": [
+   "6630"
+  ],
+  "lat": 49.811138,
+  "lng": 5.724825,
+  "population": 2124
+ },
+ {
+  "nis": "85047",
+  "name": "Rouvroy",
+  "slug": "rouvroy",
+  "dept": "wlx",
+  "postal_code": "6767",
+  "all_postcodes": [
+   "6767"
+  ],
+  "lat": 49.535434,
+  "lng": 5.483839,
+  "population": 2111
+ },
+ {
+  "nis": "84029",
+  "name": "Herbeumont",
+  "slug": "herbeumont",
+  "dept": "wlx",
+  "postal_code": "6887",
+  "all_postcodes": [
+   "6887"
+  ],
+  "lat": 49.795338,
+  "lng": 5.30941,
+  "population": 1743
+ },
+ {
+  "nis": "84016",
+  "name": "Daverdisse",
+  "slug": "daverdisse",
+  "dept": "wlx",
+  "postal_code": "6929",
+  "all_postcodes": [
+   "6929"
+  ],
+  "lat": 50.004175,
+  "lng": 5.066491,
+  "population": 1416
+ }
+]
