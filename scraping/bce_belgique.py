@@ -51,12 +51,13 @@ SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
-# ─── Mapping NACE-BEL 2008 -> slug categorie Workwave ──────────────────────
+# ─── Mappings NACE-BEL -> slug categorie Workwave (1 dict PAR VERSION) ─────
 # EXPLICITE et restrictif (lecon NAF 18/04 : jamais supposer qu'un code
-# generique correspond 1:1 a un metier). Les codes 5 chiffres belges sont
-# PLUS precis que les NAF francais (maçon, vitrier dedies).
-# Codes trop generiques (43999 autres travaux, 41101 promotion) : EXCLUS.
-NACE_TO_CAT = {
+# generique correspond 1:1 a un metier). Codes trop generiques EXCLUS.
+# ⚠️ CRUCIAL : un meme code change de SENS entre versions (43910 = couverture
+# en 2008, mais famille rejointoiement en 2025 ; 43410 = couverture en 2025).
+# Ne JAMAIS fusionner les deux dicts.
+NACE_2008 = {
     # Gros oeuvre / structure
     "41201": "macon",        # construction generale de maisons residentielles
     "41202": "macon",        # construction generale d'autres batiments
@@ -89,6 +90,74 @@ NACE_TO_CAT = {
     "81210": "menage",       # nettoyage courant des batiments
     "49420": "demenagement", # services de demenagement
 }
+
+# NACE-BEL 2025 (codes 5 chiffres, ou 7 chiffres nationaux -> lookup sur les
+# 5 premiers). Construit depuis les libelles officiels du dump (code.csv,
+# Category=Nace2025, FR) — verifies sur le dump du 11/07/2026.
+NACE_2025 = {
+    "41001": "macon",        # construction generale de batiments residentiels
+    "41002": "macon",        # construction generale de batiments non residentiels
+    "43910": "macon",        # travaux de maconnerie et rejointoiement (≠ 2008 !)
+    "43110": "terrassier",   # demolition
+    "43120": "terrassier",   # preparation des sites
+    "43410": "couvreur",     # travaux de couverture (nouveau code 2025)
+    "43420": "facadier",     # ravalement / travaux de facade
+    "43211": "electricien",  # installation electrotechnique
+    "43212": "electricien",  # installation electrotechnique hors batiment
+    "43221": "plombier",     # plomberie
+    "43222": "chauffagiste", # chauffage, climatisation (clim reclassee ensuite)
+    "43230": "plaquiste",    # mise en place de l'isolation (nouveau code 2025)
+    "43310": "plaquiste",    # platrerie
+    "43320": "menuisier",    # menuiserie
+    "43331": "carreleur",    # carrelage
+    "43332": "menuisier",    # revetements bois
+    "43333": "carreleur",    # autres revetements sols/murs
+    "43341": "peintre",      # peinture de batiments
+    "43343": "vitrier",      # vitrerie
+    "71111": "architecte",   # architecture de construction
+    "71113": "paysagiste",   # architecture paysagere
+    "81300": "paysagiste",   # amenagement paysager
+    "81210": "menage",       # nettoyage courant des batiments
+    "49420": "demenagement", # demenagement
+}
+
+def map_nace(version, code):
+    """Retourne le slug categorie pour (version, code) ou None. Les codes 2025
+    nationaux a 7 chiffres sont rattaches a leur classe 5 chiffres."""
+    if version == "2008":
+        return NACE_2008.get(code)
+    if version == "2025":
+        return NACE_2025.get(code) or NACE_2025.get(code[:5])
+    return None
+
+# Formes juridiques a EXCLURE (entites publiques/parapubliques : communes,
+# intercommunales, SA de droit public type Proximus/SNCB, zones de police...).
+# Detectees par leur LIBELLE officiel FR dans code.csv (data-driven, pas de
+# codes en dur).
+PUBLIC_FORM_PATTERN = re.compile(
+    r"droit public|publique|commune|communal|province|provincial|intercommunale"
+    r"|autorit|minist|f[ée]d[ée]ral|zone de police|zone de secours|r[ée]gie"
+    r"|c\.?p\.?a\.?s|centre public|association de projet|pouvoirs? public",
+    re.IGNORECASE,
+)
+
+# Ceinture supplementaire : noms manifestement publics/parapublics. SEARCH
+# (pas match) : "Association Intercommunale...", "IDELUX Eau" passaient avec
+# une forme juridique banale. Inclut les grandes intercommunales et societes
+# parapubliques wallonnes/bruxelloises connues + les societes de logement
+# social (MAIN 41001 -> polluaient "macon").
+PUBLIC_NAME_PATTERN = re.compile(
+    r"intercommunal|de droit public|zone de police|zone de secours"
+    r"|administration communale|service public|centre public|c\.p\.a\.s|\bcpas\b"
+    r"|societe nationale|société nationale|societe de developpement|société de développement"
+    r"|societe du logement|société du logement|societe wallonne|société wallonne"
+    r"|societe regionale|société régionale|port autonome|habitations sociales"
+    r"|logement social|\bfoyer\b|\ble logis\b"
+    r"|^(ville d|commune d|province d|r[ée]gie|spf )"
+    r"|\b(idelux|inasep|igretec|ipalle|ideta|hygea|tibi|vivaqua|sibelga"
+    r"|citydev|sofico|swde|stib|sncb|infrabel|ores\b|resa\b)",
+    re.IGNORECASE,
+)
 
 BATCH_SIZE = 500
 
@@ -149,7 +218,7 @@ def main():
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
     # ── Categories par slug (jamais d'ID hardcode — lecon 26/05) ──
-    slugs_needed = sorted(set(NACE_TO_CAT.values()))
+    slugs_needed = sorted(set(NACE_2008.values()) | set(NACE_2025.values()))
     cats = supabase.table("categories").select("id, slug").in_("slug", slugs_needed).execute()
     cat_id_by_slug = {c["slug"]: c["id"] for c in (cats.data or [])}
     missing = [s for s in slugs_needed if s not in cat_id_by_slug]
@@ -219,38 +288,51 @@ def main():
 
     # ── Passe 3 : entreprises (type, date creation) ──
     print("[3/6] enterprise.csv…")
+    # Formes juridiques publiques (exclusion) : depuis les libelles code.csv
+    public_forms = set()
+    for row in open_csv(zf, names["code.csv"]):
+        if row.get("Category") == "JuridicalForm" and row.get("Language") == "FR":
+            if PUBLIC_FORM_PATTERN.search(row.get("Description") or ""):
+                public_forms.add((row.get("Code") or "").strip())
+    print(f"  formes juridiques publiques exclues : {len(public_forms)} codes")
+
     ent_info = {}
+    excluded_public = 0
     for row in open_csv(zf, names["enterprise.csv"]):
         ent = norm_num(row.get("EnterpriseNumber"))
         if ent in ent_candidates:
+            jf = (row.get("JuridicalForm") or "").strip()
+            if jf in public_forms:
+                excluded_public += 1
+                continue
             ent_info[ent] = {
                 "type": (row.get("TypeOfEnterprise") or "").strip(),  # 1=personne physique, 2=morale
                 "start": (row.get("StartDate") or "").strip(),
             }
-    print(f"  {len(ent_info)} entreprises actives retenues")
+    print(f"  {len(ent_info)} entreprises retenues ({excluded_public} publiques exclues)")
 
     # ── Passe 4 : activites NACE (version 2008, MAIN puis SECO) ──
     print("[4/6] activity.csv…")
-    ent_naces_main = defaultdict(list)
-    ent_naces_other = defaultdict(list)
-    only_2025 = set()
+    # MAIN UNIQUEMENT : matcher les activites secondaires ferait entrer les
+    # geants dont un code construction est annexe (Proximus 43211, SNCB...).
+    # Le scraper SIRENE francais filtre pareil (activitePrincipale).
+    ent_slugs = defaultdict(list)   # ent -> [slug categorie] (ordre d'apparition)
+    ent_first_code = {}             # ent -> premier code NACE mappe (colonne naf_code)
     for row in open_csv(zf, names["activity.csv"]):
+        if (row.get("Classification") or "").strip().upper() != "MAIN":
+            continue
         entity = norm_num(row.get("EntityNumber"))
         ent = estab_to_ent.get(entity, entity)
         if ent not in ent_info:
             continue
-        code = (row.get("NaceCode") or "").strip()
-        version = (row.get("NaceVersion") or "").strip()
-        if version == "2008":
-            only_2025.discard(ent)
-            if code in NACE_TO_CAT:
-                cls = (row.get("Classification") or "").strip().upper()
-                (ent_naces_main if cls == "MAIN" else ent_naces_other)[ent].append(code)
-        elif version == "2025" and ent not in ent_naces_main and ent not in ent_naces_other:
-            only_2025.add(ent)
-    matched_ents = set(ent_naces_main) | set(ent_naces_other)
-    print(f"  {len(matched_ents)} entreprises avec un metier Workwave (NACE 2008)")
-    print(f"  (entites vues uniquement en NACE 2025, non mappees en v1 : {len(only_2025 - matched_ents)})")
+        slug = map_nace((row.get("NaceVersion") or "").strip(), (row.get("NaceCode") or "").strip())
+        if not slug:
+            continue
+        if slug not in ent_slugs[ent]:
+            ent_slugs[ent].append(slug)
+        ent_first_code.setdefault(ent, (row.get("NaceCode") or "").strip())
+    matched_ents = set(ent_slugs)
+    print(f"  {len(matched_ents)} entreprises avec un metier Workwave en activite PRINCIPALE (2008+2025)")
 
     # ── Passe 5 : denominations (prefere FR=1 puis NL=2 ; sociale 001 puis commerciale 003) ──
     print("[5/6] denomination.csv…")
@@ -312,12 +394,10 @@ def main():
         if not city_id:
             skipped_no_city += 1
             continue
-        naces = ent_naces_main.get(ent) or ent_naces_other.get(ent)
-        cat_slugs = []
-        for code in naces:
-            s = NACE_TO_CAT[code]
-            if s not in cat_slugs:
-                cat_slugs.append(s)
+        if PUBLIC_NAME_PATTERN.search(name_entry[1]):
+            skipped_no_name += 1  # entite publique par le nom (ceinture)
+            continue
+        cat_slugs = ent_slugs[ent]
         founding_date, founded_year = parse_date_be(ent_info[ent]["start"])
         c = contacts.get(ent, {})
         rows.append({
@@ -333,7 +413,7 @@ def main():
             "phone": c.get("TEL"),
             "email": c.get("EMAIL"),
             "website": c.get("WEB"),
-            "naf_code": naces[0],
+            "naf_code": ent_first_code.get(ent),
             "founding_date": founding_date,
             "founded_year": founded_year,
             "source": "bce",
@@ -361,7 +441,7 @@ def main():
 
     if args.dry_run:
         print("\n[DRY-RUN] aucun insert. Echantillon :")
-        for r in rows[:5]:
+        for r in rows[len(rows)//2 : len(rows)//2 + 5] + rows[:2]:
             print("   ", json.dumps({k: r[k] for k in ('slug','name','siret','postal_code','naf_code','phone','email')}, ensure_ascii=False))
         return
 
