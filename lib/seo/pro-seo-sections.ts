@@ -15,7 +15,7 @@ type ProForContent = {
   founding_date?: string | null;
   phone?: string | null;
   category?: { name?: string | null; slug?: string | null } | null;
-  city?: { name?: string | null; department?: { name?: string | null } | null } | null;
+  city?: { name?: string | null; department?: { name?: string | null; country?: string | null } | null } | null;
 };
 
 export type ProFaq = { question: string; answer: string };
@@ -42,12 +42,18 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   const year = getYear(pro);
   const anc = year ? new Date().getFullYear() - year : 0;
 
+  // Belgique : registre = Banque-Carrefour des Entreprises (BCE), pas Sirene/INSEE.
+  // Obligation d'attribution de la licence BCE (art. 2.8) + signal "site belge".
+  const isBE = pro.city?.department?.country === "BE";
+  const registreNom = isBE ? "la Banque-Carrefour des Entreprises (BCE)" : "le répertoire Sirene de l'INSEE";
+  const numLabel = isBE ? "numéro d'entreprise" : "SIRET";
+
   // ── « À propos » : prose factuelle, unique par pro (nom/métier/ville/SIRET/année) ──
   const aboutParts: string[] = [
     `${name} est référencé comme ${catLower} à ${cityName}${deptName ? ` (${deptName})` : ""} sur Workwave.`,
   ];
   const facts: string[] = [];
-  if (pro.siret) facts.push(`immatriculée au répertoire Sirene de l'INSEE sous le SIRET ${pro.siret}`);
+  if (pro.siret) facts.push(`inscrite à ${registreNom} sous le ${numLabel} ${pro.siret}`);
   if (year) facts.push(`active depuis ${year}${anc >= 1 ? ` (${anc} ${anc > 1 ? "ans" : "an"} d'activité)` : ""}`);
   if (facts.length > 0) aboutParts.push(`Cette entreprise est ${facts.join(", ")}.`);
   aboutParts.push(
@@ -65,11 +71,11 @@ export function buildProContent(pro: ProForContent): ProContent | null {
     },
     {
       question: `${name} est-elle une entreprise vérifiée ?`,
-      answer: `${name} est une entreprise immatriculée au répertoire Sirene de l'INSEE${pro.siret ? ` (SIRET ${pro.siret})` : ""}${year ? `, active depuis ${year}` : ""}. Workwave ne référence que des entreprises disposant d'un identifiant Sirene valide.`,
+      answer: `${name} est une entreprise inscrite à ${registreNom}${pro.siret ? ` (${numLabel} ${pro.siret})` : ""}${year ? `, active depuis ${year}` : ""}. Workwave ne référence que des entreprises disposant d'un identifiant officiel valide.`,
     },
   ];
 
-  const sourced = pro.category?.slug ? SOURCED_PRICES[pro.category.slug] : undefined;
+  const sourced = !isBE && pro.category?.slug ? SOURCED_PRICES[pro.category.slug] : undefined;
   if (sourced && sourced.ranges.length >= 2) {
     const ex = sourced.ranges
       .slice(0, 2)
@@ -87,7 +93,9 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   });
 
   const sourcesNote =
-    `Informations société issues du répertoire Sirene (INSEE)` +
+    (isBE
+      ? `Informations société issues de la Banque-Carrefour des Entreprises (BCE, SPF Économie)`
+      : `Informations société issues du répertoire Sirene (INSEE)`) +
     (sourced ? ` · tarifs indicatifs d'après des sources web (${sourced.retrievedAt})` : "") +
     `.`;
 
