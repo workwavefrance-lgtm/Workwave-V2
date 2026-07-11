@@ -521,6 +521,40 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const works = getWorksList(cat.slug);
   const prices = getPriceRanges(cat.slug);
 
+  // ─── Localisation pays (belgicisation) : les pages belges NE DOIVENT PAS
+  // afficher SIRET/Sirene/RGE/MaPrimeRénov/CESU (= signaux "site français"
+  // pour Google ET l'utilisateur belge). Équivalents belges officiels.
+  const isBE = ctx.department.country === "BE";
+  const L = {
+    // Registre d'entreprises
+    registreLabel: isBE ? "numéro d'entreprise (BCE)" : "numéro SIRET",
+    registreOfficiel: isBE ? "la Banque-Carrefour des Entreprises (BCE)" : "le répertoire Sirene",
+    registreVerifPhrase: isBE
+      ? "le numéro d'entreprise (BCE) vérifié au registre officiel, l'ancienneté de l'entreprise"
+      : "le numéro SIRET vérifié, l'ancienneté Sirene",
+    registreCoord: isBE
+      ? "numéro d'entreprise vérifié à la Banque-Carrefour des Entreprises (BCE)"
+      : "SIRET Sirene" + (vertical === "btp" ? ", certifications RGE croisées avec l'ADEME" : ""),
+    registreParen: isBE
+      ? " (numéro d'entreprise vérifié à la Banque-Carrefour des Entreprises)"
+      : (vertical === "btp" ? " (SIRET Sirene + certifications RGE/ADEME quand disponibles)" : ""),
+    // Certifications / primes énergie (BTP)
+    energieBullet: isBE
+      ? "Vérifiez les certifications requises (RGIE pour l'électricité, agréations métier) : elles conditionnent l'accès aux primes rénovation régionales (Prime Habitation en Wallonie, prime RENOLUTION à Bruxelles)."
+      : "Privilégiez les artisans certifiés RGE pour les travaux d'amélioration énergétique (éligibilité à MaPrimeRénov').",
+    certifsFaq: isBE ? "certifications (RGIE, agréations, responsabilité décennale)" : "certifications (RGE, Qualibat, décennale)",
+    // Services à domicile / aide à la personne : titres-services (Belgique) vs CESU (France)
+    titresServices: isBE ? "les titres-services" : "le CESU",
+    avantageFiscalPhrase: isBE
+      ? "Le paiement en titres-services donne droit à un avantage fiscal régional (déduction/réduction d'impôt selon la Région)."
+      : "Le paiement en CESU permet un crédit d'impôt de 50% (dans les plafonds en vigueur).",
+    // Monnaie / TVA
+    ttc: isBE ? "TVAC" : "TTC",
+    tvaNote: isBE
+      ? " En Belgique, la rénovation d'un logement de plus de 10 ans bénéficie d'une TVA réduite à 6% (au lieu de 21%)."
+      : "",
+  };
+
   // Contexte local injecte (data unique par dept = pas de duplicate content)
   const localContext = ctx.city
     ? vertical === "personne"
@@ -555,17 +589,17 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const choisirBullets =
     vertical === "btp"
       ? [
-          "Vérifiez le numéro SIRET et l'ancienneté de l'entreprise (un artisan installé depuis 5 ans ou plus a fait ses preuves).",
+          `Vérifiez le ${L.registreLabel} et l'ancienneté de l'entreprise (un artisan installé depuis 5 ans ou plus a fait ses preuves).`,
           "Demandez l'attestation d'assurance décennale et de responsabilité civile professionnelle, valides à la date du chantier.",
           "Consultez les avis clients sur plusieurs sources (Workwave, Google Maps, bouche-à-oreille local).",
-          "Privilégiez les artisans certifiés RGE pour les travaux d'amélioration énergétique (éligibilité à MaPrimeRénov').",
+          L.energieBullet,
           "Comparez au moins 3 devis détaillés et écrits avant de signer.",
           "Méfiez-vous des prix anormalement bas (signe de travail au noir ou de matériel bas de gamme).",
         ]
       : vertical === "domicile"
         ? [
             "Vérifiez le statut du professionnel (auto-entrepreneur, association, entreprise de services à la personne agréée).",
-            "Privilégiez les professionnels acceptant le CESU pour bénéficier du crédit d'impôt 50%.",
+            `Privilégiez les professionnels acceptant ${L.titresServices} pour bénéficier de l'avantage fiscal.`,
             "Consultez les avis clients et demandez des références à des particuliers déjà accompagnés.",
             "Définissez clairement le périmètre de la prestation (durée, tâches, fréquence) avant de commencer.",
             "Comparez plusieurs propositions sur la base du tarif horaire ET du planning de disponibilités.",
@@ -573,7 +607,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
           ]
         : [
             "Vérifiez la qualification et l'expérience de l'intervenant pour le type d'accompagnement souhaité.",
-            "Privilégiez les intervenants déclarés pour bénéficier du crédit d'impôt 50% via CESU.",
+            `Privilégiez les intervenants déclarés pour bénéficier de l'avantage fiscal via ${L.titresServices}.`,
             "Demandez à rencontrer la personne avant de débuter (essentiel pour la confiance avec la famille).",
             "Précisez vos attentes : fréquence, horaires, lieu, exigences spécifiques (allergies, méthodes…).",
             "Consultez les avis d'autres familles déjà accompagnées par cette personne.",
@@ -584,7 +618,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     h2: `Comment choisir le bon ${catLower} ${preposition} ${locationName} ?`,
     paragraphs: [
       `Plusieurs critères vous aident à identifier ${artInst} ${catLower} ${v.qualif} et de confiance ${preposition} ${locationName} :`,
-      `Sur Workwave, chaque fiche affiche le numéro SIRET vérifié, l'ancienneté Sirene, les certifications déclarées et les avis vérifiés des particuliers passés par la plateforme — autant d'éléments à comparer avant de contacter.`,
+      `Sur Workwave, chaque fiche affiche ${L.registreVerifPhrase}, les certifications déclarées et les avis vérifiés des particuliers passés par la plateforme — autant d'éléments à comparer avant de contacter.`,
     ],
     bullets: choisirBullets,
   };
@@ -595,8 +629,8 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     h2: `Tarifs d'un ${catLower} ${preposition} ${locationName}`,
     paragraphs: [
       sourcedPrice
-        ? `Voici les fourchettes de prix indicatives pour un ${catLower}, consolidées d'après des sources web récentes (${sourcedPrice.retrievedAt}) :`
-        : `Les tarifs ${preposition} ${locationName} se situent dans les fourchettes nationales standard pour la profession. Voici les ordres de prix indicatifs (hors devis personnalisé) :`,
+        ? `Voici les fourchettes de prix indicatives pour un ${catLower}${isBE ? " en Belgique (prix TVAC)" : ""}, consolidées d'après des sources web récentes (${sourcedPrice.retrievedAt}) :`
+        : `Les tarifs ${preposition} ${locationName} se situent dans les fourchettes ${isBE ? "belges" : "nationales"} standard pour la profession. Voici les ordres de prix indicatifs${isBE ? " (prix TVAC, hors devis personnalisé)" : " (hors devis personnalisé)"} :`,
     ],
     table: prices.map((p) => ({ label: p.label, value: p.range })),
     source: sourcedPrice?.sources?.[0]
@@ -605,8 +639,8 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   };
   prix.paragraphs.push(
     vertical === "btp"
-      ? `Ces prix sont des indications : ils varient selon l'accessibilité du chantier, la complexité technique, le type de matériel choisi et les majorations soir/week-end. Demandez systématiquement un devis détaillé et gratuit avant tout engagement. Sur Workwave, vous pouvez ${v.cta_phrase}.`
-      : `Ces tarifs sont indicatifs et varient selon le volume horaire, la fréquence et les contraintes spécifiques de votre situation. Le paiement en CESU permet un crédit d'impôt de 50% (dans les plafonds en vigueur). Sur Workwave, vous pouvez ${v.cta_phrase}.`
+      ? `Ces prix sont des indications : ils varient selon l'accessibilité du chantier, la complexité technique, le type de matériel choisi et les majorations soir/week-end.${L.tvaNote} Demandez systématiquement un devis détaillé et gratuit avant tout engagement. Sur Workwave, vous pouvez ${v.cta_phrase}.`
+      : `Ces tarifs sont indicatifs et varient selon le volume horaire, la fréquence et les contraintes spécifiques de votre situation. ${L.avantageFiscalPhrase} Sur Workwave, vous pouvez ${v.cta_phrase}.`
   );
 
   // ─── Section 5 : Urgence / Modalités (conditionnel selon vertical)
@@ -623,7 +657,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const workwave: SeoSection = {
     h2: `Trouver ${artInst} ${catLower} ${preposition} ${locationName} avec Workwave`,
     paragraphs: [
-      `Workwave est un annuaire gratuit pour les particuliers, sans création de compte. Nous référençons ${ctx.prosCount} ${v.proPlural} ${preposition} ${locationName}, avec leurs coordonnées vérifiées (SIRET Sirene${vertical === "btp" ? ", certifications RGE croisées avec l'ADEME" : ""}, avis clients post-prestation).`,
+      `Workwave est un annuaire gratuit pour les particuliers, sans création de compte. Nous référençons ${ctx.prosCount} ${v.proPlural} ${preposition} ${locationName}, avec leurs coordonnées vérifiées (${L.registreCoord}, avis clients post-prestation).`,
       `Vous pouvez soit contacter directement le ${v.proFormal} de votre choix, soit déposer votre besoin en 30 secondes pour ${v.cta_phrase}. Service 100% gratuit pour les particuliers, sans intermédiaire commercial.`,
     ],
   };
@@ -660,10 +694,10 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
       question: `Comment trouver ${artInst} ${catLower} de confiance ${preposition} ${locationName} ?`,
       answer:
         vertical === "btp"
-          ? `Vérifiez le numéro SIRET, l'ancienneté de l'entreprise, les certifications (RGE, Qualibat, décennale) et les avis clients. Sur Workwave, ces informations sont vérifiées et visibles directement sur chaque fiche pro. Comparez au moins 3 devis avant de choisir.`
+          ? `Vérifiez le ${L.registreLabel}, l'ancienneté de l'entreprise, les ${L.certifsFaq} et les avis clients. Sur Workwave, ces informations sont vérifiées et visibles directement sur chaque fiche pro. Comparez au moins 3 devis avant de choisir.`
           : vertical === "domicile"
-            ? `Vérifiez que le professionnel est déclaré (accepte le CESU = crédit d'impôt 50%), consultez ses avis clients et précisez clairement vos attentes avant de commencer. Sur Workwave, comparez plusieurs propositions sur tarif horaire + disponibilités.`
-            : `Privilégiez les intervenants déclarés (CESU = crédit d'impôt 50%), expérimentés sur le type d'accompagnement souhaité, et qui acceptent un premier rendez-vous de rencontre. Sur Workwave, vous pouvez consulter leurs profils, leurs spécialités et les avis d'autres familles.`,
+            ? `Vérifiez que le professionnel est déclaré (accepte ${L.titresServices}), consultez ses avis clients et précisez clairement vos attentes avant de commencer. Sur Workwave, comparez plusieurs propositions sur tarif horaire + disponibilités.`
+            : `Privilégiez les intervenants déclarés (${L.titresServices}), expérimentés sur le type d'accompagnement souhaité, et qui acceptent un premier rendez-vous de rencontre. Sur Workwave, vous pouvez consulter leurs profils, leurs spécialités et les avis d'autres familles.`,
     },
     vertical === "btp"
       ? {
@@ -673,23 +707,27 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
       : {
           question:
             vertical === "domicile"
-              ? `Le paiement en CESU est-il possible ${preposition} ${locationName} ?`
-              : `Comment fonctionne le crédit d'impôt sur les services d'aide à la personne ?`,
+              ? `${isBE ? "Les titres-services sont-ils acceptés" : "Le paiement en CESU est-il possible"} ${preposition} ${locationName} ?`
+              : `${isBE ? "Comment fonctionne l'avantage fiscal des titres-services ?" : "Comment fonctionne le crédit d'impôt sur les services d'aide à la personne ?"}`,
           answer:
             vertical === "domicile"
-              ? `Oui, la majorité des ${catPlural} ${preposition} ${locationName} acceptent le paiement en CESU (Chèque Emploi Service Universel). Cela ouvre droit à un crédit d'impôt de 50% sur les sommes versées, dans la limite des plafonds fiscaux en vigueur. Demandez systématiquement avant de commencer.`
-              : `Les services d'aide à la personne déclarés (CESU, entreprise agréée, association) ouvrent droit à un crédit d'impôt de 50% sur les sommes versées, dans la limite des plafonds en vigueur. Ce crédit est applicable que vous soyez imposable ou non. Vérifiez auprès de l'intervenant qu'il vous délivre les attestations fiscales.`,
+              ? (isBE
+                  ? `Oui, la majorité des ${catPlural} ${preposition} ${locationName} acceptent les titres-services. Ce système régional (Wallonie, Bruxelles) donne droit à un avantage fiscal sur les prestations d'aide à domicile. Demandez systématiquement avant de commencer.`
+                  : `Oui, la majorité des ${catPlural} ${preposition} ${locationName} acceptent le paiement en CESU (Chèque Emploi Service Universel). Cela ouvre droit à un crédit d'impôt de 50% sur les sommes versées, dans la limite des plafonds fiscaux en vigueur. Demandez systématiquement avant de commencer.`)
+              : (isBE
+                  ? `Les prestations d'aide à domicile payées en titres-services (Wallonie, Bruxelles) ouvrent droit à un avantage fiscal régional. Vérifiez auprès de l'intervenant qu'il accepte les titres-services et vous délivre les justificatifs.`
+                  : `Les services d'aide à la personne déclarés (CESU, entreprise agréée, association) ouvrent droit à un crédit d'impôt de 50% sur les sommes versées, dans la limite des plafonds en vigueur. Ce crédit est applicable que vous soyez imposable ou non. Vérifiez auprès de l'intervenant qu'il vous délivre les attestations fiscales.`),
         },
     {
       question: `Les devis (ou propositions) sont-ils gratuits ${preposition} ${locationName} ?`,
       answer:
         vertical === "btp"
-          ? `La grande majorité des artisans proposent un devis gratuit et sans engagement (obligation légale au-delà de 1 500 € TTC). Si un professionnel facture le devis, demandez-vous pourquoi. Sur Workwave, tous les devis sont 100% gratuits.`
+          ? `La grande majorité des artisans proposent un devis gratuit et sans engagement. Si un professionnel facture le devis, demandez-vous pourquoi. Sur Workwave, tous les devis sont 100% gratuits.`
           : `Oui, la plupart des ${catPlural} ${preposition} ${locationName} proposent un premier échange et une estimation gratuite, sans engagement. Sur Workwave, le service est 100% gratuit pour les particuliers — sans inscription, sans frais cachés.`,
     },
     {
       question: `Combien de ${catPlural} sont référencés ${preposition} ${locationName} sur Workwave ?`,
-      answer: `Workwave référence ${ctx.prosCount} ${catPlural} ${preposition} ${locationName} avec leurs coordonnées vérifiées${vertical === "btp" ? " (SIRET Sirene + certifications RGE/ADEME quand disponibles)" : ""}. Vous pouvez comparer leurs profils, voir les avis clients et ${v.cta_phrase}.`,
+      answer: `Workwave référence ${ctx.prosCount} ${catPlural} ${preposition} ${locationName} avec leurs coordonnées vérifiées${vertical === "btp" ? L.registreParen : ""}. Vous pouvez comparer leurs profils, voir les avis clients et ${v.cta_phrase}.`,
     },
     {
       question:

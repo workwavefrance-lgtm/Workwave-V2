@@ -73,7 +73,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locationName =
     resolved.type === "department"
       ? formatDepartmentLabel(resolved.department)
-      : resolved.city.name;
+      : resolved.city.department?.country === "BE"
+        ? `${resolved.city.name} (Belgique)`
+        : resolved.city.name;
 
   const preposition =
     resolved.type === "department"
@@ -186,7 +188,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const locationName =
     resolved.type === "department"
       ? formatDepartmentLabel(resolved.department)
-      : resolved.city.name;
+      : resolved.city.department?.country === "BE"
+        ? `${resolved.city.name} (Belgique)`
+        : resolved.city.name;
 
   const preposition =
     resolved.type === "department"
@@ -323,21 +327,19 @@ export default async function ListingPage({ params, searchParams }: Props) {
         url: proUrl,
       };
       if (pro.address && pro.city) {
+        // Pays + province de la PAGE (les pros listés sont tous de la zone ;
+        // pro.city n'embarque pas department ici → on prend celui de la page).
+        const pageDept =
+          resolved.type === "department" ? resolved.department : resolved.city.department;
+        const pageIsBE = pageDept?.country === "BE";
         business.address = {
           "@type": "PostalAddress",
           streetAddress: pro.address,
           addressLocality: pro.city.name,
           ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
-          // Pays de la PAGE (province belge → BE) : les pros listés sont tous
-          // de la zone, et pro.city n'embarque pas department.country ici.
-          addressCountry:
-            resolved.type === "department"
-              ? resolved.department.country === "BE"
-                ? "BE"
-                : "FR"
-              : resolved.city.department?.country === "BE"
-                ? "BE"
-                : "FR",
+          // addressRegion = province pour la Belgique (signal géo local BE).
+          ...(pageIsBE && pageDept?.name ? { addressRegion: pageDept.name } : {}),
+          addressCountry: pageIsBE ? "BE" : "FR",
         };
       }
       if (pro.phone) business.telephone = pro.phone;
