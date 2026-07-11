@@ -57,9 +57,14 @@ async function getIp(): Promise<string> {
 
 const deletionSchema = z.object({
   email: z.string().email("Adresse email invalide"),
+  // France : SIRET 14 chiffres. Belgique : numero BCE 10 chiffres (stocke
+  // dans pros.siret). La verification reste le match exact avec la fiche.
   siret: z
     .string()
-    .regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres"),
+    .regex(
+      /^(\d{14}|\d{10})$/,
+      "Numero invalide : SIRET (14 chiffres, France) ou numero d'entreprise BCE (10 chiffres, Belgique)"
+    ),
 });
 
 // ============================================

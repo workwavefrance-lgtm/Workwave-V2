@@ -139,9 +139,15 @@ async function notifyProOfClaimSuccess(params: {
 // dans son espace après) ; passwordConfirm retiré au profit de l'œil afficher.
 const claimSchema = z.object({
   email: z.string().email("Adresse email invalide"),
+  // France : SIRET 14 chiffres. Belgique : numéro d'entreprise BCE 10 chiffres
+  // (stocké dans pros.siret). La preuve de propriété reste identique : le
+  // numéro saisi doit matcher EXACTEMENT celui de la fiche.
   siret: z
     .string()
-    .regex(/^\d{14}$/, "Le SIRET doit contenir exactement 14 chiffres"),
+    .regex(
+      /^(\d{14}|\d{10})$/,
+      "Numéro invalide : SIRET (14 chiffres, France) ou numéro d'entreprise BCE (10 chiffres, Belgique)"
+    ),
   password: z
     .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")

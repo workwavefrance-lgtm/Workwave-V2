@@ -4,6 +4,10 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { isValidEmail, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { isValidBce } from "@/lib/utils/bce";
+// Codes postaux belges → code NIS de la commune (639 CP couvrant les 271
+// communes FR-BE ; inclut les CP secondaires des communes fusionnées de 1977).
+import bePostcodeNis from "@/scraping/data/be_postcode_nis.json";
 
 // Rate limit en mémoire : 8 créations / 15 min / IP (anti-spam fiches).
 const rateLimitMap = new Map<string, number[]>();
@@ -57,6 +61,7 @@ async function matchCityId(
     .from("departments")
     .select("id")
     .eq("code", deptCode)
+    .eq("country", "FR")
     .maybeSingle();
   if (!dept) return null;
   const { data: cities } = await sb
@@ -75,6 +80,35 @@ async function matchCityId(
   // rend la fiche invisible des listings et du broadcast).
   const byCp = rows.find((c) => c.postal_code === postalCode);
   return byCp?.id ?? null;
+}
+
+// Variante belge : 271 communes en base (country='BE'). Match par nom
+// normalisé d'abord, puis par code postal via la table CP→NIS (couvre les
+// CP secondaires : un pro à Tournai CP 7503 matche bien la commune Tournai).
+async function matchCityIdBE(
+  sb: ReturnType<typeof getServiceClient>,
+  commune: string | null,
+  postalCode: string | null
+): Promise<number | null> {
+  const { data: cities } = await sb
+    .from("cities")
+    .select("id, name, insee_code")
+    .eq("country", "BE");
+  if (!cities) return null;
+  const rows = cities as { id: number; name: string; insee_code: string | null }[];
+  if (commune) {
+    const target = normalizeName(commune);
+    const match = rows.find((c) => normalizeName(c.name) === target);
+    if (match) return match.id;
+  }
+  if (postalCode) {
+    const nis = (bePostcodeNis as Record<string, string>)[postalCode];
+    if (nis) {
+      const match = rows.find((c) => c.insee_code === nis);
+      if (match) return match.id;
+    }
+  }
+  return null;
 }
 
 export type CreateFicheState = { success: boolean; message?: string };
@@ -105,6 +139,7 @@ export async function createFiche(
   }
 
   // Extraction
+  const country = String(formData.get("country") || "FR") === "BE" ? "BE" : "FR";
   const siret = String(formData.get("siret") || "").replace(/\D/g, "");
   const name = String(formData.get("name") || "").trim().slice(0, 150);
   const categoryId = Number(formData.get("category_id") || 0);
@@ -116,14 +151,28 @@ export async function createFiche(
   const naf = String(formData.get("naf") || "").trim().slice(0, 10) || null;
   const foundingDate = String(formData.get("founding_date") || "").trim() || null;
 
-  // Validation
-  if (siret.length !== 14) return { success: false, message: "Le SIRET doit contenir 14 chiffres." };
+  // Validation — identifiant d'entreprise selon le pays :
+  // France = SIRET 14 chiffres, Belgique = numéro BCE 10 chiffres (checksum
+  // mod 97). Le numéro BCE est stocké dans pros.siret (varchar 14, UNIQUE) :
+  // aucune collision possible avec un SIRET (longueurs différentes).
+  if (country === "BE") {
+    if (siret.length !== 10)
+      return { success: false, message: "Le numéro d'entreprise (BCE) doit contenir 10 chiffres." };
+    if (!isValidBce(siret))
+      return { success: false, message: "Numéro d'entreprise (BCE) invalide. Vérifiez-le sur vos factures ou sur BCE Public Search." };
+  } else if (siret.length !== 14) {
+    return { success: false, message: "Le SIRET doit contenir 14 chiffres." };
+  }
   if (!name) return { success: false, message: "Le nom de l'entreprise est obligatoire." };
   if (!categoryId) return { success: false, message: "Choisissez votre métier." };
   if (!isValidEmail(email)) return { success: false, message: "Adresse email invalide." };
   if (phone.length < 6) return { success: false, message: "Numéro de téléphone invalide." };
-  if (!postalCode || !/^\d{5}$/.test(postalCode))
+  if (country === "BE") {
+    if (!postalCode || !/^\d{4}$/.test(postalCode))
+      return { success: false, message: "Code postal belge invalide (4 chiffres)." };
+  } else if (!postalCode || !/^\d{5}$/.test(postalCode)) {
     return { success: false, message: "Code postal invalide (5 chiffres)." };
+  }
   if (!commune)
     return { success: false, message: "Indiquez votre commune." };
 
@@ -156,7 +205,10 @@ export async function createFiche(
   }
 
   // Ville (best-effort : null si hors de notre couverture)
-  const cityId = await matchCityId(sb, commune, postalCode);
+  const cityId =
+    country === "BE"
+      ? await matchCityIdBE(sb, commune, postalCode)
+      : await matchCityId(sb, commune, postalCode);
 
   const foundingYear =
     foundingDate && /^\d{4}/.test(foundingDate)
@@ -166,7 +218,9 @@ export async function createFiche(
   const basePayload = {
     name,
     siret,
-    siren: siret.slice(0, 9),
+    // siren = 9 premiers chiffres du SIRET, notion FRANÇAISE uniquement.
+    // Pour un pro belge, tronquer le BCE donnerait une fausse donnée → NULL.
+    siren: country === "BE" ? null : siret.slice(0, 9),
     category_id: categoryId,
     address,
     city_id: cityId,

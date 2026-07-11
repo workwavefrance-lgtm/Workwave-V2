@@ -60,12 +60,14 @@ export async function lookupBySiret(
     };
   }
 
-  // Validation SIRET : 14 chiffres exactement, espaces tolerees
+  // Validation : SIRET francais (14 chiffres) OU numero d'entreprise belge
+  // BCE (10 chiffres) — les deux vivent dans pros.siret, longueurs disjointes.
   const raw = ((formData.get("siret") as string) || "").replace(/\D/g, "");
-  if (raw.length !== 14) {
+  if (raw.length !== 14 && raw.length !== 10) {
     return {
       success: false,
-      message: "Le SIRET doit contenir exactement 14 chiffres.",
+      message:
+        "Numero invalide : SIRET = 14 chiffres (France), numero d'entreprise BCE = 10 chiffres (Belgique).",
     };
   }
 
@@ -86,7 +88,7 @@ export async function lookupBySiret(
     return {
       success: false,
       message:
-        "Aucune fiche trouvée pour ce SIRET. Vérifiez le numéro ou créez un compte ci-dessous.",
+        "Aucune fiche trouvée pour ce numéro. Vérifiez-le ou créez votre fiche ci-dessous.",
     };
   }
 

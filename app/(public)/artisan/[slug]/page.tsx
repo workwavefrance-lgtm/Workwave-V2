@@ -207,7 +207,7 @@ export default async function ProPage({ params }: Props) {
       ...(pro.city?.department
         ? { addressRegion: pro.city.department.name }
         : {}),
-      addressCountry: "FR",
+      addressCountry: pro.city?.country === "BE" ? "BE" : "FR",
     },
     ...(pro.city?.latitude && pro.city?.longitude
       ? {
@@ -935,20 +935,40 @@ export default async function ProPage({ params }: Props) {
             {pro.siret && (
               <div>
                 <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-1">
-                  SIRET
+                  {pro.city?.country === "BE"
+                    ? "Numéro d'entreprise (BCE)"
+                    : "SIRET"}
                 </h4>
                 <p className="text-sm text-[var(--text-secondary)] font-mono">
                   {pro.siret}
                 </p>
+                {pro.city?.country === "BE" && (
+                  // Obligation licence BCE open data (art. 2.8) : indiquer la
+                  // source des données + attribution registre officiel.
+                  <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+                    Source :{" "}
+                    <a
+                      href={`https://kbopub.economie.fgov.be/kbopub/toonondernemingps.html?ondernemingsnummer=${pro.siret}&lang=fr`}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="underline hover:text-[var(--accent)]"
+                    >
+                      Banque-Carrefour des Entreprises
+                    </a>{" "}
+                    (SPF Économie)
+                  </p>
+                )}
               </div>
             )}
             {pro.city?.department && (
               <div>
                 <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-1">
-                  Département
+                  {pro.city?.country === "BE" ? "Province" : "Département"}
                 </h4>
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {pro.city.department.name} ({pro.city.department.code})
+                  {pro.city.department.country === "BE"
+                    ? `${pro.city.department.name} (Belgique)`
+                    : `${pro.city.department.name} (${pro.city.department.code})`}
                 </p>
               </div>
             )}

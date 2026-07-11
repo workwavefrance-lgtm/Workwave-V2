@@ -14,12 +14,17 @@ export const metadata: Metadata = {
 export default async function CreerFichePage({
   searchParams,
 }: {
-  searchParams: Promise<{ siret?: string }>;
+  searchParams: Promise<{ siret?: string; pays?: string }>;
 }) {
   const sp = await searchParams;
   const siretRaw = (sp.siret || "").replace(/\D/g, "").slice(0, 14);
+  // Pré-sélection du pays : ?pays=be (liens belges) ou numéro BCE 10 chiffres.
+  const initialCountry: "FR" | "BE" =
+    sp.pays === "be" || siretRaw.length === 10 ? "BE" : "FR";
 
-  // Pré-remplissage depuis le registre officiel (best-effort).
+  // Pré-remplissage depuis le registre officiel français (best-effort).
+  // Pas d'équivalent automatisé pour la Belgique (le webservice BCE est
+  // payant ; le scraping du site Public Search est interdit par ses CGU).
   const company =
     siretRaw.length === 14 ? await fetchCompanyBySiret(siretRaw) : null;
 
@@ -48,14 +53,19 @@ export default async function CreerFichePage({
             Créez votre fiche
           </h1>
           <p className="mt-3 text-[var(--text-secondary)] leading-relaxed">
-            Gratuite, sans abonnement, sans commission. Renseignez votre SIRET,
-            on récupère vos infos officielles, et vous recevez les demandes de
-            particuliers dans votre zone.
+            Gratuite, sans abonnement, sans commission. Artisans de France et
+            de Belgique : renseignez votre numéro d&apos;entreprise (SIRET ou
+            BCE) et recevez les demandes de particuliers dans votre zone.
           </p>
         </div>
 
         <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-6 sm:p-8 shadow-sm">
-          <CreerFicheForm categories={categories} prefill={prefill} siret={siretRaw} />
+          <CreerFicheForm
+            categories={categories}
+            prefill={prefill}
+            siret={siretRaw}
+            initialCountry={initialCountry}
+          />
         </div>
 
         <p className="text-center mt-6 text-sm text-[var(--text-tertiary)]">

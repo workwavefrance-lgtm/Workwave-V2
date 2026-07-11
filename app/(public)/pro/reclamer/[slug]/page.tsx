@@ -142,8 +142,13 @@ export default async function ClaimPage({ params }: Props) {
       })
     : null;
 
-  // SIRET masqué pour le placeholder du champ "Confirmez votre SIRET".
-  const maskedSiret = `${formatSiret(pro.siret).slice(0, -4)}••••`;
+  // Fiche belge : pros.siret contient un numéro BCE 10 chiffres (jamais 14).
+  const isBelgian = (pro.siret || "").replace(/\D/g, "").length === 10;
+
+  // Numéro masqué pour le placeholder du champ "Confirmez votre numéro".
+  const maskedSiret = isBelgian
+    ? `${pro.siret.slice(0, 4)}.${pro.siret.slice(4, 7)}.•••`
+    : `${formatSiret(pro.siret).slice(0, -4)}••••`;
 
   return (
     <main className="max-w-md mx-auto px-4 py-12">
@@ -239,7 +244,7 @@ export default async function ClaimPage({ params }: Props) {
       {/* Card formulaire : ombre portee + bordure plus marquee pour la faire
           "ressortir" de la page (hierarchie visuelle = etape logique). */}
       <div className="bg-[var(--bg-primary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8 shadow-lg shadow-[#FF5A36]/5 dark:shadow-black/30">
-        <ClaimForm slug={slug} maskedSiret={maskedSiret} />
+        <ClaimForm slug={slug} maskedSiret={maskedSiret} isBelgian={isBelgian} />
       </div>
     </main>
   );

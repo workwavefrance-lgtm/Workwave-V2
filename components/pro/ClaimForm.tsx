@@ -9,9 +9,19 @@ type Props = {
   // SIRET masqué (ex. "508 056 249 0••••") affiché en placeholder : le pro
   // "confirme" un numéro déjà montré plutôt que de le saisir à l'aveugle.
   maskedSiret: string;
+  // Fiche belge : le numéro est un BCE 10 chiffres (format 1016.514.072),
+  // pas un SIRET 14 chiffres. Adapte label, format et maxLength.
+  isBelgian?: boolean;
 };
 
 const initialState: ClaimFormState = { success: false };
+
+function formatBce(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 4)}.${digits.slice(4)}`;
+  return `${digits.slice(0, 4)}.${digits.slice(4, 7)}.${digits.slice(7)}`;
+}
 
 function formatSiret(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 14);
@@ -38,7 +48,7 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
-export default function ClaimForm({ slug, maskedSiret }: Props) {
+export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Props) {
   const [state, formAction, isPending] = useActionState(
     submitClaim,
     initialState
@@ -54,7 +64,7 @@ export default function ClaimForm({ slug, maskedSiret }: Props) {
 
   function handleSiretInput(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value.replace(/\D/g, "");
-    setSiret(formatSiret(raw));
+    setSiret(isBelgian ? formatBce(raw) : formatSiret(raw));
   }
 
   const inputBase =
@@ -82,7 +92,9 @@ export default function ClaimForm({ slug, maskedSiret }: Props) {
           htmlFor="siret"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          Confirmez votre SIRET
+          {isBelgian
+            ? "Confirmez votre numéro d'entreprise (BCE)"
+            : "Confirmez votre SIRET"}
         </label>
         <input
           id="siret"
@@ -93,7 +105,7 @@ export default function ClaimForm({ slug, maskedSiret }: Props) {
           inputMode="numeric"
           autoComplete="off"
           placeholder={maskedSiret}
-          maxLength={17}
+          maxLength={isBelgian ? 12 : 17}
           required
           className={`${inputBase} font-mono tracking-wide ${state.errors?.siret && !isPending ? inputError : inputNormal}`}
         />

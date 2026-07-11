@@ -31,9 +31,10 @@ export default function HeroSiretLookup() {
   const [siret, setSiret] = useState("");
 
   const digitsCount = siret.replace(/\D/g, "").length;
-  const isComplete = digitsCount === 14;
+  // France : SIRET 14 chiffres. Belgique : numero d'entreprise BCE 10 chiffres.
+  const isComplete = digitsCount === 14 || digitsCount === 10;
   const createHref = isComplete
-    ? `/pro/creer-fiche?siret=${siret.replace(/\D/g, "")}`
+    ? `/pro/creer-fiche?siret=${siret.replace(/\D/g, "")}${digitsCount === 10 ? "&pays=be" : ""}`
     : "/pro/creer-fiche";
 
   return (
@@ -45,7 +46,7 @@ export default function HeroSiretLookup() {
             Déjà référencé ? Retrouvez votre fiche
           </h3>
           <p className="text-sm text-[var(--text-secondary)]">
-            Tapez votre SIRET, on retrouve votre entreprise :
+            Tapez votre SIRET (France) ou votre n° BCE (Belgique), on retrouve votre entreprise :
           </p>
 
           <form action={formAction} className="space-y-2.5">
@@ -89,7 +90,7 @@ export default function HeroSiretLookup() {
                   name="siret"
                   inputMode="numeric"
                   autoComplete="off"
-                  placeholder="Votre SIRET (14 chiffres)"
+                  placeholder="SIRET ou n° d\u2019entreprise BCE"
                   value={siret}
                   maxLength={17}
                   onChange={(e) => setSiret(formatSiret(e.target.value))}
@@ -132,9 +133,9 @@ export default function HeroSiretLookup() {
             </div>
 
             <p className="text-xs text-[var(--text-tertiary)]">
-              {digitsCount > 0 && digitsCount < 14
-                ? `${digitsCount}/14 chiffres`
-                : "14 chiffres, visible sur tous vos documents officiels"}
+              {digitsCount > 0 && !isComplete
+                ? `${digitsCount} chiffres — SIRET : 14 (France) · BCE : 10 (Belgique)`
+                : "SIRET 14 chiffres (France) ou n\u00b0 BCE 10 chiffres (Belgique), visibles sur vos documents officiels"}
             </p>
           </form>
         </div>

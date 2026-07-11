@@ -23,7 +23,8 @@ export default function RetrouverFicheForm() {
   const [siret, setSiret] = useState("");
 
   const digitsCount = siret.replace(/\D/g, "").length;
-  const isComplete = digitsCount === 14;
+  // SIRET 14 chiffres (France) ou n\u00b0 BCE 10 chiffres (Belgique).
+  const isComplete = digitsCount === 14 || digitsCount === 10;
 
   return (
     <form action={formAction} className="space-y-5">
@@ -67,7 +68,7 @@ export default function RetrouverFicheForm() {
           className="w-full h-14 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] text-lg font-mono tracking-wide placeholder:text-[var(--text-tertiary)] placeholder:font-sans placeholder:text-base transition-all duration-250 outline-none border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
         />
         <p className="mt-2 text-xs text-[var(--text-tertiary)]">
-          14 chiffres, visible sur tous vos documents officiels ({digitsCount}/14)
+          SIRET : 14 chiffres (France) \u00b7 n\u00b0 BCE : 10 chiffres (Belgique) \u2014 saisis : {digitsCount}
         </p>
       </div>
 
