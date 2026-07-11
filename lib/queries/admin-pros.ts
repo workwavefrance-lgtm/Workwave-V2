@@ -110,9 +110,9 @@ export const getAdminPros = cache(
     // Etats produit. BTP (pay-per-lead, pas d'abo) : scraped / claimed.
     // AI (abonnement Premium) : en plus claimed_free / paying / trialing / canceled.
     if (state === "scraped") {
-      // Fiches scrapees Sirene ou Pages Jaunes, jamais reclamees
+      // Fiches issues d'un registre (Sirene, Pages Jaunes, BCE belge), jamais reclamees
       query = query
-        .in("source", ["sirene", "pagesjaunes"])
+        .in("source", ["sirene", "pagesjaunes", "bce"])
         .is("claimed_by_user_id", null);
     } else if (state === "claimed") {
       // Le pro a reclame sa fiche (compte cree), abonne ou non

@@ -345,7 +345,10 @@ export async function broadcastBtpProject(
       "id, email, name, paused_until, intervention_radius_km, city:cities!inner(latitude, longitude, department_id)"
     )
     .or(categoryOrFilter)
-    .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup"])
+    // Whitelist de TOUTES les sources legitimes (lecon 26/05) — 'bce' =
+    // registre belge (Belgique, 11/07). L'oublier = aucun pro belge ne
+    // recevrait jamais un lead.
+    .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup", "bce"])
     .eq("is_active", true)
     .is("deleted_at", null)
     .not("claimed_by_user_id", "is", null)
