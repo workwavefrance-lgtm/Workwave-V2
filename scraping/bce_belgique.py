@@ -413,7 +413,11 @@ def main():
             "phone": c.get("TEL"),
             "email": c.get("EMAIL"),
             "website": c.get("WEB"),
-            "naf_code": ent_first_code.get(ent),
+            # pros.naf_code = varchar(6). Les codes NACE-BEL 2025 "nationaux"
+            # font 7 chiffres (ex. 4391002) → on tronque a 6 pour tenir dans la
+            # colonne. Sans ca, ~17k fiches echouaient a l'insert du 11/07
+            # (value too long for type character varying(6)).
+            "naf_code": (ent_first_code.get(ent) or "")[:6] or None,
             "founding_date": founding_date,
             "founded_year": founded_year,
             "source": "bce",
