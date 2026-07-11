@@ -187,7 +187,7 @@ def main():
     print(f"Catégories à traiter : {len(categories)}")
 
     # Charger les villes pour le mapping insee_code → city_id
-    cities_result = supabase.table("cities").select("id, insee_code").execute()
+    cities_result = supabase.table("cities").select("id, insee_code").eq("country", "FR").execute()  # FR only : NIS belges chevauchent les INSEE
     city_map = {c["insee_code"]: c["id"] for c in cities_result.data if c["insee_code"]}
     print(f"Villes chargées pour le mapping : {len(city_map)}")
 

@@ -94,18 +94,24 @@ def upsert_departments():
 
 
 def load_all_slugs_and_insee():
-    """Charge tous les slugs + insee_codes existants (pagination 1000)."""
+    """Charge tous les slugs + insee_codes existants (pagination 1000).
+
+    slugs : TOUS pays confondus (l'anti-collision de slug doit voir les villes
+    belges, ex. mons-be). insee : FRANCE UNIQUEMENT — les codes NIS belges
+    (5 chiffres) chevauchent les INSEE francais (ex. 21004), sans le filtre
+    l'idempotence croirait qu'une commune francaise existe deja et la skipperait.
+    """
     slugs, insee = set(), set()
     offset = 0
     while True:
-        res = sb.table("cities").select("slug, insee_code").range(offset, offset + 999).execute()
+        res = sb.table("cities").select("slug, insee_code, country").range(offset, offset + 999).execute()
         rows = res.data or []
         if not rows:
             break
         for r in rows:
             if r.get("slug"):
                 slugs.add(r["slug"])
-            if r.get("insee_code"):
+            if r.get("insee_code") and (r.get("country") or "FR") == "FR":
                 insee.add(r["insee_code"])
         offset += len(rows)
         if len(rows) < 1000:

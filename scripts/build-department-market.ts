@@ -47,7 +47,7 @@ async function loadAll<T>(table: string, cols: string): Promise<T[]> {
   return all;
 }
 
-type City = { insee_code: string | null; department_id: number; population: number | null };
+type City = { insee_code: string | null; department_id: number; population: number | null; country?: string | null };
 type Dept = { id: number; code: string };
 type Commune = {
   insee_code: string;
@@ -85,7 +85,11 @@ async function main() {
   console.log("Chargement departments / cities / commune_data…");
   const [depts, cities, communes] = await Promise.all([
     loadAll<Dept>("departments", "id, code"),
-    loadAll<City>("cities", "insee_code, department_id, population"),
+    // country inclus : commune_data est 100 % francaise (DVF/FiLoSoFi) et les
+    // codes NIS belges chevauchent les INSEE (21004 = Cote-d'Or ET Bruxelles).
+    // Sans le filtre ci-dessous, les stats d'un village francais seraient
+    // agregees dans une province belge (et retirees de son vrai departement).
+    loadAll<City>("cities", "insee_code, department_id, population, country"),
     loadAll<Commune>(
       "commune_data",
       "insee_code, prix_m2_moyen, revenu_median, taux_vacance, logements_vacants, logements_prive_total, dvf_annee, filosofi_annee, lovac_annee"
@@ -98,6 +102,7 @@ async function main() {
   const cityByInsee = new Map<string, { deptCode: string; pop: number }>();
   for (const c of cities) {
     if (!c.insee_code) continue;
+    if ((c.country || "FR") !== "FR") continue; // BE : jamais joint a commune_data
     const code = deptCodeById.get(c.department_id);
     if (!code) continue;
     cityByInsee.set(c.insee_code, { deptCode: code, pop: c.population && c.population > 0 ? c.population : 1 });

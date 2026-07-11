@@ -257,8 +257,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
   // Enrichissement commune (data.gouv.fr : prix immo DVF, revenus, vacance,
   // densité) — uniquement pour les pages VILLE (pas dept), affiché dans
   // CityFactsBlock. Vraie donnée unique factuelle par commune = moat SEO.
+  // ⚠️ FRANCE UNIQUEMENT : commune_data est keyée par code INSEE français, et
+  // les codes NIS belges (5 chiffres) CHEVAUCHENT les plages INSEE (ex. 21004
+  // = commune de Côte-d'Or ET Bruxelles-ville). Sans ce garde, une page ville
+  // belge afficherait les prix immobiliers d'un village français.
   const communeData =
-    resolved.type === "city"
+    resolved.type === "city" && resolved.city.country !== "BE"
       ? await getCommuneData(resolved.city.insee_code)
       : null;
 

@@ -307,7 +307,11 @@ def main():
     city_map = {}
     offset = 0
     while True:
-        res = supabase.table("cities").select("id, insee_code").range(offset, offset + 999).execute()
+        # country="FR" OBLIGATOIRE : les codes NIS belges (5 chiffres) chevauchent
+        # les INSEE francais (ex. 21004 = commune de Cote-d'Or ET Bruxelles).
+        # Sans ce filtre, les 271 villes BE (ids les plus recents) ecraseraient
+        # les entrees FR du city_map -> pros francais rattaches a des communes belges.
+        res = supabase.table("cities").select("id, insee_code").eq("country", "FR").range(offset, offset + 999).execute()
         if not res.data:
             break
         for c in res.data:

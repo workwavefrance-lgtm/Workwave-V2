@@ -21,8 +21,8 @@ import type {
 // slug} + city.name + department.name).
 const PRO_SELECT: string =
   "*, category:categories(id, slug, name, vertical, parent_id), " +
-  "city:cities(id, department_id, name, slug, postal_code, insee_code, population, latitude, longitude, " +
-  "department:departments(id, code, name, region))";
+  "city:cities(id, department_id, name, slug, postal_code, insee_code, population, latitude, longitude, country, " +
+  "department:departments(id, code, name, region, country))";
 
 // Niveau CARD : listings /[metier]/[location] (pages 2+), pros similaires,
 // recherche, top-pros (page 1). UNIQUEMENT les champs consommés par
