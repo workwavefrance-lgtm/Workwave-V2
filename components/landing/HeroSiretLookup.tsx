@@ -46,7 +46,7 @@ export default function HeroSiretLookup() {
             Déjà référencé ? Retrouvez votre fiche
           </h3>
           <p className="text-sm text-[var(--text-secondary)]">
-            Tapez votre SIRET (France) ou votre n° BCE (Belgique), on retrouve votre entreprise :
+            Entrez votre numéro d&apos;entreprise, on retrouve votre fiche.
           </p>
 
           <form action={formAction} className="space-y-2.5">
@@ -90,7 +90,7 @@ export default function HeroSiretLookup() {
                   name="siret"
                   inputMode="numeric"
                   autoComplete="off"
-                  placeholder="SIRET ou n° d\u2019entreprise BCE"
+                  placeholder="N° SIRET ou BCE"
                   value={siret}
                   maxLength={17}
                   onChange={(e) => setSiret(formatSiret(e.target.value))}
@@ -134,8 +134,8 @@ export default function HeroSiretLookup() {
 
             <p className="text-xs text-[var(--text-tertiary)]">
               {digitsCount > 0 && !isComplete
-                ? `${digitsCount} chiffres — SIRET : 14 (France) · BCE : 10 (Belgique)`
-                : "SIRET 14 chiffres (France) ou n\u00b0 BCE 10 chiffres (Belgique), visibles sur vos documents officiels"}
+                ? `${digitsCount} chiffres saisis`
+                : "France : SIRET (14 chiffres) · Belgique : BCE (10 chiffres)"}
             </p>
           </form>
         </div>
@@ -155,7 +155,7 @@ export default function HeroSiretLookup() {
             Pas encore référencé ? Enregistrez-vous
           </h3>
           <p className="text-sm text-white/85">
-            2 minutes chrono avec votre SIRET — et c&apos;est gratuit à vie.
+            2 minutes chrono avec votre numéro d&apos;entreprise — gratuit à vie.
           </p>
           <ul className="space-y-1.5 text-sm font-medium">
             <li className="flex items-start gap-2">
