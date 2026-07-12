@@ -40,7 +40,7 @@ export async function POST(
   const { data, error: fetchErr } = await db
     .from("projects")
     .select(
-      "id, first_name, email, phone, description, urgency, budget, ai_qualification, suspicion_score, category:categories(name), city:cities(name, department:departments(name, code))"
+      "id, first_name, email, phone, description, urgency, budget, ai_qualification, suspicion_score, category:categories(name), city:cities(name, country, department:departments(name, code))"
     )
     .eq("id", projectId)
     .single();
@@ -53,6 +53,7 @@ export async function POST(
   const category = project.category as { name?: string } | null;
   const city = project.city as {
     name?: string;
+    country?: string;
     department?: { name?: string; code?: string } | { name?: string; code?: string }[] | null;
   } | null;
   const deptRel = city?.department;
@@ -71,6 +72,7 @@ export async function POST(
     categoryName: category?.name ?? "—",
     cityName: city?.name ?? "—",
     departmentName,
+    isBE: city?.country === "BE",
     description: (project.description as string) ?? "",
     urgency: (project.urgency as string) ?? "",
     budget: (project.budget as string) ?? "",

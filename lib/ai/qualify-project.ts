@@ -27,6 +27,8 @@ type QualifyInput = {
   description: string;
   urgency: string;
   budget: string;
+  /** Pays du projet pour le contexte marché ("France" par défaut, "Belgique" pour les villes BE). */
+  countryName?: string;
 };
 
 const URGENCY_LABELS: Record<string, string> = {
@@ -48,6 +50,7 @@ const BUDGET_LABELS: Record<string, string> = {
 export async function qualifyProject(
   input: QualifyInput
 ): Promise<AiQualification | null> {
+  const countryName = input.countryName || "France";
   try {
     const message = await getClient().messages.create({
       model: "claude-sonnet-4-6",
@@ -55,7 +58,7 @@ export async function qualifyProject(
       messages: [
         {
           role: "user",
-          content: `Tu es un assistant de qualification de projets pour Workwave, un annuaire de professionnels locaux en France.
+          content: `Tu es un assistant de qualification de projets pour Workwave, un annuaire de professionnels locaux en ${countryName}. Raisonne selon le marché de ${countryName} (prix, réglementation) pour évaluer la cohérence du budget.
 
 Un particulier vient de déposer un projet. Analyse-le et retourne un JSON structuré.
 

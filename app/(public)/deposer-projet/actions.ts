@@ -169,7 +169,7 @@ export async function submitProject(
 
   const { data: city } = await supabase
     .from("cities")
-    .select("name, department_id, department:departments(name, code)")
+    .select("name, department_id, country, department:departments(name, code)")
     .eq("id", data.cityId)
     .single();
 
@@ -183,6 +183,10 @@ export async function submitProject(
     };
   }
 
+  // Pays de la ville (BE vs FR) : contexte marché pour la qualif IA + libellé
+  // « Province »/« Département » dans le mail admin.
+  const isBE = (city as unknown as { country?: string }).country === "BE";
+
   // Qualification IA (non bloquante)
   const aiQualification = await qualifyProject({
     categoryName: category.name,
@@ -191,6 +195,7 @@ export async function submitProject(
     description: data.description,
     urgency: data.urgency,
     budget: data.budget,
+    countryName: isBE ? "Belgique" : "France",
   });
 
   // Insertion en base
@@ -274,6 +279,7 @@ export async function submitProject(
     categoryName: category.name,
     cityName: city.name,
     departmentName,
+    isBE,
     description: data.description,
     urgency: data.urgency,
     budget: data.budget,
