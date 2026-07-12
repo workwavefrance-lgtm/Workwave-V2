@@ -5,7 +5,7 @@ import AdminKPICard from "@/components/admin/data-display/AdminKPICard";
 import { useToast } from "@/components/admin/shell/AdminToast";
 import type { AdminKPIs, RecentActivity } from "@/lib/queries/admin-kpis";
 
-const REFRESH_INTERVAL = 30_000; // 30s
+const REFRESH_INTERVAL = 90_000; // 90s (était 30s : polling trop agressif = charge DB inutile)
 
 function delta(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0;
@@ -67,9 +67,20 @@ export default function OverviewClient({
     }
   }, [toast]);
 
+  // Polling PAUSÉ quand l'onglet n'est pas visible : un admin laissé ouvert en
+  // arrière-plan ne martèle plus la DB (leçon egress 11/06). Refresh immédiat au
+  // retour sur l'onglet. Réduit drastiquement la charge à l'origine des déconnexions.
   useEffect(() => {
-    const interval = setInterval(refresh, REFRESH_INTERVAL);
-    return () => clearInterval(interval);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => { if (!interval) interval = setInterval(refresh, REFRESH_INTERVAL); };
+    const stop = () => { if (interval) { clearInterval(interval); interval = null; } };
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else { refresh(); start(); }
+    };
+    if (!document.hidden) start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
   }, [refresh]);
 
   return (

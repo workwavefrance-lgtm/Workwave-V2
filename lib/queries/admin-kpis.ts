@@ -12,63 +12,38 @@ export type AdminKPIs = {
   conversionRateLastMonth: number;
 };
 
+const EMPTY_KPIS: AdminKPIs = {
+  activePros: 0, projectsThisMonth: 0, leadsSent: 0, conversionRate: 0,
+  activeProsLastMonth: 0, projectsLastMonth: 0, leadsSentLastMonth: 0, conversionRateLastMonth: 0,
+};
+
 export const getAdminKPIs = cache(async (): Promise<AdminKPIs> => {
   const db = getAdminServiceClient();
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
 
-  const [
-    { count: activePros },
-    { count: activeProsLastMonth },
-    { count: projectsThisMonth },
-    { count: projectsLastMonth },
-    { count: leadsSent },
-    { count: leadsSentLastMonth },
-    { count: leadsContacted },
-    { count: leadsContactedLastMonth },
-  ] = await Promise.all([
-    db.from("pros").select("*", { count: "exact", head: true })
-      .in("subscription_status", ["trialing", "active"]),
-    db.from("pros").select("*", { count: "exact", head: true })
-      .in("subscription_status", ["trialing", "active"])
-      .lt("created_at", startOfMonth),
-    db.from("projects").select("*", { count: "exact", head: true })
-      .gte("created_at", startOfMonth)
-      .neq("status", "deleted"),
-    db.from("projects").select("*", { count: "exact", head: true })
-      .gte("created_at", startOfLastMonth)
-      .lt("created_at", startOfMonth)
-      .neq("status", "deleted"),
-    db.from("project_leads").select("*", { count: "exact", head: true })
-      .gte("sent_at", startOfMonth),
-    db.from("project_leads").select("*", { count: "exact", head: true })
-      .gte("sent_at", startOfLastMonth)
-      .lt("sent_at", startOfMonth),
-    db.from("project_leads").select("*", { count: "exact", head: true })
-      .gte("sent_at", startOfMonth)
-      .eq("status", "contacted"),
-    db.from("project_leads").select("*", { count: "exact", head: true })
-      .gte("sent_at", startOfLastMonth)
-      .lt("sent_at", startOfMonth)
-      .eq("status", "contacted"),
-  ]);
+  // UNE seule fonction agrégée (migration 2026-07-13_admin_overview_rpc.sql) au lieu
+  // de 8 count exact dont 2 sur pros 2,4M rows — supprime la cause des déconnexions
+  // (leçon 28/04). activePros = pros RÉCLAMÉS (l'ancienne métrique « abonnés actifs »
+  // valait 0 : on est en pay-per-lead).
+  const { data, error } = await db.rpc("admin_overview_stats");
+  if (error || !data) {
+    console.error("[getAdminKPIs] RPC admin_overview_stats KO:", error?.message);
+    return EMPTY_KPIS;
+  }
+  const s = data as Record<string, number>;
 
-  const convRate = (leadsSent || 0) > 0
-    ? ((leadsContacted || 0) / (leadsSent || 1)) * 100
-    : 0;
-  const convRateLast = (leadsSentLastMonth || 0) > 0
-    ? ((leadsContactedLastMonth || 0) / (leadsSentLastMonth || 1)) * 100
-    : 0;
+  const convRate = (s.leadsSent || 0) > 0
+    ? ((s.leadsContacted || 0) / (s.leadsSent || 1)) * 100 : 0;
+  const convRateLast = (s.leadsSentLastMonth || 0) > 0
+    ? ((s.leadsContactedLastMonth || 0) / (s.leadsSentLastMonth || 1)) * 100 : 0;
 
   return {
-    activePros: activePros || 0,
-    projectsThisMonth: projectsThisMonth || 0,
-    leadsSent: leadsSent || 0,
+    activePros: s.claimedPros || 0,
+    projectsThisMonth: s.projectsThisMonth || 0,
+    leadsSent: s.leadsSent || 0,
     conversionRate: Math.round(convRate * 10) / 10,
-    activeProsLastMonth: activeProsLastMonth || 0,
-    projectsLastMonth: projectsLastMonth || 0,
-    leadsSentLastMonth: leadsSentLastMonth || 0,
+    activeProsLastMonth: s.claimedProsLastMonth || 0,
+    projectsLastMonth: s.projectsLastMonth || 0,
+    leadsSentLastMonth: s.leadsSentLastMonth || 0,
     conversionRateLastMonth: Math.round(convRateLast * 10) / 10,
   };
 });
