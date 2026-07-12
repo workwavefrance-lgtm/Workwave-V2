@@ -229,7 +229,7 @@ export default function CommandPalette() {
           flex-shrink: 0;
         }
         [cmdk-item][data-selected="true"] .cmd-icon {
-          background: rgba(16,185,129,0.12);
+          background: rgba(255,90,54,0.12);
           color: var(--admin-accent);
         }
         [cmdk-item] .cmd-label {

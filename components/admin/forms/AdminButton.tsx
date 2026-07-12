@@ -3,8 +3,8 @@
 const VARIANTS = {
   primary: {
     bg: "var(--admin-accent)",
-    hoverBg: "#059669",
-    text: "#FAFAFA",
+    hoverBg: "var(--admin-accent-hover)",
+    text: "#FFFFFF",
     border: "transparent",
   },
   secondary: {

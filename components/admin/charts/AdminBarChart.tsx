@@ -15,7 +15,7 @@ export default function AdminBarChartComponent({
   data,
   dataKey,
   xKey = "name",
-  color = "#10B981",
+  color = "#FF5A36",
   height = 280,
   formatter,
 }: {

@@ -33,9 +33,9 @@ export default function AdminKPICard({
           {icon && (
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: "rgba(16, 185, 129, 0.1)" }}
+              style={{ backgroundColor: "var(--admin-accent-soft)" }}
             >
-              <span style={{ color: "#10B981" }}>{icon}</span>
+              <span style={{ color: "var(--admin-accent)" }}>{icon}</span>
             </div>
           )}
           <span

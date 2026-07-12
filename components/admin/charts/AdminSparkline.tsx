@@ -4,7 +4,7 @@ import { ResponsiveContainer, AreaChart, Area } from "recharts";
 
 export default function AdminSparkline({
   data,
-  color = "#10B981",
+  color = "#FF5A36",
 }: {
   data: number[];
   color?: string;

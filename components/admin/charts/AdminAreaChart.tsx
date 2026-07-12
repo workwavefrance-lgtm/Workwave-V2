@@ -15,7 +15,7 @@ export default function AdminAreaChartComponent({
   data,
   dataKey,
   xKey = "date",
-  color = "#10B981",
+  color = "#FF5A36",
   ghostDataKey,
   ghostColor = "#404040",
   height = 280,
