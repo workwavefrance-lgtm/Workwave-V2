@@ -170,7 +170,11 @@ export async function submitClaim(
   // Validation Zod
   const raw = {
     email: (formData.get("email") as string)?.trim(),
-    siret: (formData.get("siret") as string)?.replace(/\s/g, ""),
+    // On retire TOUT non-chiffre : espaces du SIRET FR ("123 456…") ET points du
+    // BCE belge ("1016.514.072"). L'ancien /\s/ ne retirait que les espaces →
+    // le BCE avec points échouait au regex \d{10} = « Numéro invalide » (Nelson,
+    // N.C.O Design, bloqué en réclamation le 12/07).
+    siret: (formData.get("siret") as string)?.replace(/\D/g, ""),
     password: formData.get("password") as string,
   };
 
