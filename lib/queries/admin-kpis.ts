@@ -63,18 +63,25 @@ export type AdminTodo = {
 export const getAdminTodo = cache(async (): Promise<AdminTodo> => {
   const db = getAdminServiceClient();
   const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
-  const [suspects, failed, reviews, unlocks] = await Promise.all([
+  const [suspects, failed, reviews] = await Promise.all([
     db.from("projects").select("*", { count: "exact", head: true }).eq("status", "suspicious"),
     db.from("projects").select("*", { count: "exact", head: true })
       .is("admin_notified_at", null).neq("status", "deleted").gte("created_at", since),
     db.from("pro_reviews").select("*", { count: "exact", head: true })
       .eq("status", "pending").not("submitted_at", "is", null),
-    db.from("lead_unlocks").select("amount_cents").limit(2000),
   ]);
-  let cents = 0, paid = 0, free = 0;
-  for (const u of (unlocks.data || []) as { amount_cents: number | null }[]) {
-    if ((u.amount_cents || 0) > 0) { cents += u.amount_cents || 0; paid++; }
-    else free++;
+  // CA : pagination canonique (cap PostgREST 1000, leçon 30/04) pour rester cohérent
+  // avec la page Finance (getBtpFinances) au-delà de 1000 déblocages.
+  let cents = 0, paid = 0, free = 0, offset = 0;
+  while (true) {
+    const { data } = await db.from("lead_unlocks").select("amount_cents").range(offset, offset + 999);
+    const batch = (data || []) as { amount_cents: number | null }[];
+    if (batch.length === 0) break;
+    for (const u of batch) {
+      if ((u.amount_cents || 0) > 0) { cents += u.amount_cents || 0; paid++; }
+      else free++;
+    }
+    offset += batch.length;
   }
   return {
     suspectProjects: suspects.count || 0,
@@ -112,7 +119,7 @@ export const getRecentActivity = cache(async (): Promise<RecentActivity[]> => {
         id: p.id,
         type: "project",
         title: `Nouveau projet de ${p.first_name}`,
-        description: p.description?.slice(0, 80) + "..." || "",
+        description: p.description ? p.description.slice(0, 80) + "…" : "",
         created_at: p.created_at,
       });
     }
