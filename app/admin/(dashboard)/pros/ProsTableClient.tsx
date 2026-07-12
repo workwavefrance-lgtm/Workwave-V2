@@ -2,173 +2,42 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import AdminTable from "@/components/admin/data-display/AdminTable";
-import type { AdminColumn } from "@/components/admin/data-display/AdminTable";
+import Link from "next/link";
 import AdminTableSearch from "@/components/admin/data-display/AdminTableSearch";
 import AdminTablePagination from "@/components/admin/data-display/AdminTablePagination";
-import AdminBadge from "@/components/admin/data-display/AdminBadge";
 import CsvExportButton from "@/components/admin/export/CsvExportButton";
 import type { AdminProRow, AdminProsFilters } from "@/lib/queries/admin-pros";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
-// Statut d'abonnement : UNIQUEMENT pertinent pour les pros Workwave AI
-// (Premium 29,90 EUR/mois). En BTP = pay-per-lead, pas d'abonnement.
-const AI_SUB_BADGE: Record<
-  string,
-  { label: string; variant: "success" | "warning" | "danger" | "info" | "default" }
-> = {
-  active: { label: "Premium", variant: "success" },
-  trialing: { label: "Essai", variant: "info" },
-  past_due: { label: "Impayé", variant: "warning" },
-  canceled: { label: "Résilié", variant: "danger" },
-  none: { label: "Gratuit", variant: "default" },
-  free: { label: "Gratuit", variant: "default" },
-  suspended: { label: "Suspendu", variant: "danger" },
+const AI_SUB: Record<string, { label: string; color: string; bg: string }> = {
+  active: { label: "Premium", color: "var(--admin-success)", bg: "rgba(52,211,153,.14)" },
+  trialing: { label: "Essai", color: "#5EC8F0", bg: "rgba(94,200,240,.14)" },
+  past_due: { label: "Impayé", color: "var(--admin-warning)", bg: "rgba(251,191,36,.14)" },
+  canceled: { label: "Résilié", color: "var(--admin-danger)", bg: "rgba(251,110,91,.14)" },
+  none: { label: "Gratuit", color: "var(--admin-text-tertiary)", bg: "var(--admin-hover)" },
+  free: { label: "Gratuit", color: "var(--admin-text-tertiary)", bg: "var(--admin-hover)" },
 };
 
-// Tabs Vertical : separation visuelle BTP / AI
-const VERTICAL_TABS: { value: string; label: string }[] = [
-  { value: "all", label: "Tous" },
-  { value: "btp", label: "BTP" },
-  { value: "ai", label: "Workwave AI" },
+const VERTICAL_TABS = [
+  { value: "all", label: "Tous" }, { value: "btp", label: "BTP" }, { value: "ai", label: "Workwave AI" },
+];
+const STATE_TABS = [
+  { value: "all", label: "Tous" }, { value: "scraped", label: "Non réclamés" }, { value: "claimed", label: "Réclamés" },
+];
+const AI_STATE_TABS = [
+  { value: "all", label: "Tous" }, { value: "scraped", label: "Non réclamés" },
+  { value: "claimed_free", label: "Réclamés gratuits" }, { value: "paying", label: "Abonnés Premium" },
+  { value: "trialing", label: "Essai" }, { value: "canceled", label: "Résiliés" },
 ];
 
-// Etat metier — BTP : pas d'abonnement, juste reclame / non reclame.
-const STATE_TABS: { value: string; label: string; description: string }[] = [
-  { value: "all", label: "Tous", description: "Tous les pros" },
-  { value: "scraped", label: "Non réclamés", description: "Fiches scrapées Sirene/Pages Jaunes, jamais réclamées" },
-  { value: "claimed", label: "Réclamés", description: "Le pro a réclamé sa fiche (compte créé)" },
-];
-
-// Etat metier — Workwave AI : on distingue en plus les abonnes Premium.
-const AI_STATE_TABS: { value: string; label: string; description: string }[] = [
-  { value: "all", label: "Tous", description: "Tous les pros AI" },
-  { value: "scraped", label: "Non réclamés", description: "Fiches scrapées, jamais réclamées" },
-  { value: "claimed_free", label: "Réclamés gratuits", description: "Compte créé, plan gratuit" },
-  { value: "paying", label: "Abonnés Premium", description: "Abonnement Premium 29,90 €/mois actif" },
-  { value: "trialing", label: "Essai", description: "En essai gratuit" },
-  { value: "canceled", label: "Résiliés", description: "Abonnement annulé" },
-];
-
-const columns: AdminColumn<AdminProRow>[] = [
-  {
-    key: "name",
-    label: "Nom",
-    sortable: true,
-    render: (row) => (
-      <div>
-        <span className="font-medium">{row.name}</span>
-        {row.siret && (
-          <span
-            className="block text-[10px] font-mono mt-0.5"
-            style={{ color: "var(--admin-text-tertiary)" }}
-          >
-            {row.siret}
-          </span>
-        )}
-      </div>
-    ),
-  },
-  {
-    key: "category",
-    label: "Catégorie",
-    render: (row) => (
-      <span style={{ color: "var(--admin-text-secondary)" }}>
-        {row.category?.name || "—"}
-      </span>
-    ),
-  },
-  {
-    key: "city",
-    label: "Ville",
-    render: (row) => (
-      <span style={{ color: "var(--admin-text-secondary)" }}>
-        {row.city?.name || "—"}
-      </span>
-    ),
-  },
-  {
-    key: "claimed",
-    label: "État",
-    // BTP : Réclamé / Non réclamé. AI : statut d'abonnement (Premium/Essai/...).
-    render: (row) => {
-      if (!row.claimed_at) {
-        return (
-          <AdminBadge variant="default" dot>
-            Non réclamé
-          </AdminBadge>
-        );
-      }
-      const isAI = (AI_CATEGORY_IDS as readonly number[]).includes(row.category_id);
-      if (isAI) {
-        const s = AI_SUB_BADGE[row.subscription_status] || AI_SUB_BADGE.none;
-        return (
-          <AdminBadge variant={s.variant} dot>
-            {s.label}
-          </AdminBadge>
-        );
-      }
-      return (
-        <AdminBadge variant="success" dot>
-          Réclamé
-        </AdminBadge>
-      );
-    },
-  },
-  {
-    key: "profile_completion",
-    label: "Profil",
-    sortable: true,
-    className: "text-right",
-    render: (row) => (
-      <span className="tabular-nums">{row.profile_completion}%</span>
-    ),
-  },
-  {
-    key: "response_rate",
-    label: "Réponse",
-    sortable: true,
-    className: "text-right",
-    render: (row) => (
-      <span className="tabular-nums">
-        {row.response_rate !== null ? `${row.response_rate}%` : "—"}
-      </span>
-    ),
-  },
-  {
-    // Pro réclamé -> date de réclamation (quand il a pris sa fiche).
-    // Sinon -> date de création/scraping de la fiche. (cf. colonne "État")
-    // Clé "id" : en vue générale = ordre de scraping (id DESC ≈ date DESC,
-    // PK indexé instantané) ; en vue "Réclamés" le serveur mappe ce tri sur
-    // claimed_at DESC pour que les derniers arrivés soient en haut.
-    key: "id",
-    label: "Date",
-    sortable: true,
-    render: (row) => {
-      const d = row.claimed_at || row.created_at;
-      return (
-        <span
-          className="tabular-nums"
-          style={{ color: "var(--admin-text-tertiary)" }}
-          title={row.claimed_at ? "Date de réclamation" : "Date de création de la fiche"}
-        >
-          {new Date(d).toLocaleDateString("fr-FR", {
-            day: "2-digit",
-            month: "short",
-            year: "2-digit",
-          })}
-        </span>
-      );
-    },
-  },
-];
+function stateBadge(row: AdminProRow): { label: string; color: string; bg: string } {
+  if (!row.claimed_at) return { label: "Non réclamé", color: "var(--admin-text-tertiary)", bg: "var(--admin-hover)" };
+  if ((AI_CATEGORY_IDS as readonly number[]).includes(row.category_id)) return AI_SUB[row.subscription_status] || AI_SUB.none;
+  return { label: "Réclamé", color: "var(--admin-success)", bg: "rgba(52,211,153,.14)" };
+}
 
 export default function ProsTableClient({
-  initialData,
-  initialCount,
-  initialPage,
-  initialTotalPages,
-  filters,
+  initialData, initialCount, initialPage, initialTotalPages, filters,
 }: {
   initialData: AdminProRow[];
   initialCount: number;
@@ -179,151 +48,95 @@ export default function ProsTableClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const updateParams = useCallback(
-    (updates: Record<string, string>) => {
-      const params = new URLSearchParams(searchParams.toString());
-      for (const [k, v] of Object.entries(updates)) {
-        if (v && v !== "all" && v !== "") {
-          params.set(k, v);
-        } else {
-          params.delete(k);
-        }
-      }
-      // Reset page when filters change (unless updating page itself)
-      if (!("page" in updates)) params.delete("page");
-      router.push(`/admin/pros?${params.toString()}`);
-    },
-    [router, searchParams]
-  );
+  const updateParams = useCallback((updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [k, v] of Object.entries(updates)) {
+      if (v && v !== "all" && v !== "") params.set(k, v); else params.delete(k);
+    }
+    if (!("page" in updates)) params.delete("page");
+    router.push(`/admin/pros?${params.toString()}`);
+  }, [router, searchParams]);
 
   const activeVertical = filters.vertical || "all";
   const activeState = filters.state || "all";
-  // En vue AI : onglets avec les abonnés Premium. Sinon : réclamé / non réclamé.
   const stateTabs = activeVertical === "ai" ? AI_STATE_TABS : STATE_TABS;
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <h1
-          className="text-xl font-semibold"
-          style={{ color: "var(--admin-text)" }}
-        >
-          Professionnels
-        </h1>
-        <CsvExportButton
-          endpoint={`/api/admin/pros?${searchParams.toString()}&format=csv`}
-          filename="pros-export"
-        />
+    <div className="max-w-5xl mx-auto">
+      <div className="flex items-center justify-between gap-3 mb-1">
+        <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--admin-text)" }}>Pros</h1>
+        <CsvExportButton endpoint={`/api/admin/pros?${searchParams.toString()}&format=csv`} filename="pros-export" />
       </div>
-      <p
-        className="text-xs mb-5"
-        style={{ color: "var(--admin-text-secondary)" }}
-      >
-        {initialCount.toLocaleString("fr-FR")} professionnel
-        {initialCount > 1 ? "s" : ""}
+      <p className="text-xs mb-4" style={{ color: "var(--admin-text-tertiary)" }}>
+        {initialCount.toLocaleString("fr-FR")} professionnel{initialCount > 1 ? "s" : ""}
       </p>
 
-      {/* Tabs Vertical : separation BTP / AI en gros et visible */}
-      <div
-        className="flex gap-1 p-1 rounded-lg mb-4 w-fit"
-        style={{
-          backgroundColor: "var(--admin-card)",
-          border: "1px solid var(--admin-border)",
-        }}
-      >
-        {VERTICAL_TABS.map((tab) => {
-          const isActive = activeVertical === tab.value;
+      {/* Vertical BTP / AI */}
+      <div className="flex gap-1 p-1 rounded-xl mb-3 w-fit" style={{ background: "var(--admin-card)", border: "1px solid var(--admin-border)" }}>
+        {VERTICAL_TABS.map((t) => {
+          const on = activeVertical === t.value;
           return (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => updateParams({ vertical: tab.value, state: "all" })}
-              className="px-4 py-2 text-sm font-medium rounded-md transition-colors"
-              style={{
-                backgroundColor: isActive
-                  ? "var(--admin-bg)"
-                  : "transparent",
-                color: isActive
-                  ? "var(--admin-text)"
-                  : "var(--admin-text-secondary)",
-                boxShadow: isActive
-                  ? "0 1px 2px rgba(0,0,0,0.05)"
-                  : "none",
-              }}
-            >
-              {tab.label}
+            <button key={t.value} onClick={() => updateParams({ vertical: t.value, state: "all" })}
+              className="px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors"
+              style={{ background: on ? "var(--admin-accent)" : "transparent", color: on ? "#fff" : "var(--admin-text-secondary)" }}>
+              {t.label}
             </button>
           );
         })}
       </div>
 
-      {/* Tabs Etat metier : contextuels (AI = abonnement, BTP = reclame) */}
+      {/* État */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {stateTabs.map((tab) => {
-          const isActive = activeState === tab.value;
+        {stateTabs.map((t) => {
+          const on = activeState === t.value;
           return (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => updateParams({ state: tab.value })}
-              title={tab.description}
-              className="px-3 py-1.5 text-xs font-medium rounded-full transition-colors"
-              style={{
-                backgroundColor: isActive
-                  ? "var(--admin-accent)"
-                  : "var(--admin-card)",
-                color: isActive ? "#fff" : "var(--admin-text-secondary)",
-                border: `1px solid ${
-                  isActive ? "var(--admin-accent)" : "var(--admin-border)"
-                }`,
-              }}
-            >
-              {tab.label}
+            <button key={t.value} onClick={() => updateParams({ state: t.value })}
+              className="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors"
+              style={{ background: on ? "var(--admin-accent-soft)" : "var(--admin-card)", color: on ? "var(--admin-accent)" : "var(--admin-text-secondary)", border: `1px solid ${on ? "var(--admin-accent)" : "var(--admin-border)"}` }}>
+              {t.label}
             </button>
           );
         })}
       </div>
 
-      {/* Search (filtres avances optionnels supprimes : remplaces par les tabs ci-dessus) */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="w-full sm:w-80">
-          <AdminTableSearch
-            value={filters.search || ""}
-            onChange={(v) => updateParams({ search: v })}
-            placeholder="Nom, SIRET, email..."
-          />
-        </div>
+      <div className="w-full sm:w-80 mb-4">
+        <AdminTableSearch value={filters.search || ""} onChange={(v) => updateParams({ search: v })} placeholder="Nom, SIRET, email…" />
       </div>
 
-      {/* Table */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{
-          backgroundColor: "var(--admin-card)",
-          border: "1px solid var(--admin-border)",
-        }}
-      >
-        <AdminTable
-          columns={columns}
-          data={initialData}
-          sortKey={filters.sort}
-          sortDir={filters.order}
-          onSort={(key) => {
-            const newOrder =
-              filters.sort === key && filters.order === "asc" ? "desc" : "asc";
-            updateParams({ sort: key, order: newOrder });
-          }}
-          onRowClick={(row) => router.push(`/admin/pros/${row.id}`)}
-          emptyMessage="Aucun professionnel trouvé"
-        />
-        <div className="px-3 py-2">
-          <AdminTablePagination
-            page={initialPage}
-            totalPages={initialTotalPages}
-            total={initialCount}
-            onPageChange={(p) => updateParams({ page: String(p) })}
-          />
+      {initialData.length === 0 ? (
+        <div className="rounded-2xl px-4 py-14 text-center text-sm" style={{ background: "var(--admin-card)", border: "1px solid var(--admin-border)", color: "var(--admin-text-tertiary)" }}>
+          Aucun professionnel trouvé
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {initialData.map((row) => {
+            const b = stateBadge(row);
+            return (
+              <Link key={row.id} href={`/admin/pros/${row.id}`}
+                className="flex items-center gap-3 p-3.5 rounded-2xl transition-colors hover:brightness-125"
+                style={{ background: "var(--admin-card)", border: `1px solid ${row.deleted_at ? "var(--admin-danger)" : "var(--admin-border)"}` }}>
+                <div className="w-10 h-10 rounded-xl grid place-items-center text-sm font-bold shrink-0"
+                  style={{ background: "var(--admin-accent-soft)", color: "var(--admin-accent)" }}>
+                  {row.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[14px] font-bold truncate" style={{ color: "var(--admin-text)" }}>{row.name}</div>
+                  <div className="text-[11px] truncate" style={{ color: "var(--admin-text-tertiary)" }}>
+                    {row.category?.name || "—"} · {row.city?.name || "—"}{row.city?.department?.code ? ` (${row.city.department.code})` : ""}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: b.color, background: b.bg }}>{b.label}</span>
+                  {row.deleted_at && <span className="text-[9px]" style={{ color: "var(--admin-danger)" }}>supprimé</span>}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="mt-4">
+        <AdminTablePagination page={initialPage} totalPages={initialTotalPages} total={initialCount} onPageChange={(p) => updateParams({ page: String(p) })} />
       </div>
     </div>
   );

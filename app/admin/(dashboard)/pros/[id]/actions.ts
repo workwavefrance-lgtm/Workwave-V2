@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
+import { verifyAdmin } from "@/lib/admin/auth";
 
 /**
  * Server Actions admin pour éditer un profil pro (claimed ou non).
@@ -113,6 +114,78 @@ export async function updateProByAdmin(
   if (existing.slug) {
     revalidatePath(`/artisan/${existing.slug}`);
   }
+
+  return { ok: true };
+}
+
+/**
+ * Suppression RGPD d'une fiche (art. 17) depuis l'admin — remplace les scripts
+ * _rgpd-*.ts. Pattern « suppression complète » : soft-delete (is_active=false +
+ * deleted_at + do_not_contact + nullify PII) → la fiche publique retourne 404,
+ * Google désindexe. + blacklist de l'email du plaignant (ne plus jamais contacter).
+ * verifyAdmin() + audit admin_logs (durcissement Phase 1).
+ */
+export async function deleteProRgpd(input: {
+  proId: number;
+  blacklistEmail?: string;
+  reason?: string;
+}): Promise<UpdateProResult> {
+  const admin = await verifyAdmin();
+  if (!admin) return { ok: false, error: "Non autorisé" };
+
+  const sb = getAdminServiceClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: pro } = await (sb.from("pros") as any)
+    .select("slug, email, claimed_by_user_id")
+    .eq("id", input.proId)
+    .single();
+  if (!pro) return { ok: false, error: "Pro introuvable" };
+  if (pro.claimed_by_user_id) {
+    return {
+      ok: false,
+      error: "Fiche RÉCLAMÉE : gérer l'abonnement/remboursement avant toute suppression.",
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (sb.from("pros") as any)
+    .update({
+      deleted_at: new Date().toISOString(),
+      is_active: false,
+      do_not_contact: true,
+      phone: null,
+      email: null,
+      website: null,
+    })
+    .eq("id", input.proId);
+  if (error) {
+    console.error("[admin/pros] deleteProRgpd erreur :", error.message);
+    return { ok: false, error: error.message };
+  }
+
+  // Blacklist de l'email du plaignant (celui saisi, sinon l'email de la fiche).
+  const emailToBlacklist = (input.blacklistEmail || pro.email || "").trim().toLowerCase();
+  if (emailToBlacklist) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb.from("email_blacklist") as any).upsert(
+      { email: emailToBlacklist, reason: input.reason || "rgpd_deletion_admin" },
+      { onConflict: "email" }
+    );
+  }
+
+  // Audit
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (sb.from("admin_logs") as any).insert({
+    admin_id: admin.id,
+    action: "rgpd_delete_pro",
+    entity_type: "pro",
+    entity_id: input.proId,
+    details: { blacklistEmail: emailToBlacklist || null, reason: input.reason || null },
+  });
+
+  revalidatePath(`/admin/pros/${input.proId}`);
+  revalidatePath("/admin/pros");
+  if (pro.slug) revalidatePath(`/artisan/${pro.slug}`);
 
   return { ok: true };
 }

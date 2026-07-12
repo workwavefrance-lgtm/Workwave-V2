@@ -8,6 +8,7 @@ import AdminConfirmDialog from "@/components/admin/forms/AdminConfirmDialog";
 import { useAdmin } from "@/components/admin/shell/AdminProvider";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import EditProSection from "./EditProSection";
+import ProRgpdDelete from "./ProRgpdDelete";
 
 type ProData = {
   id: number;
@@ -322,6 +323,9 @@ export default function ProDetailClient({
               >
                 Voir fiche publique
               </AdminButton>
+              {!pro.claimed_at && (
+                <ProRgpdDelete proId={pro.id} proName={pro.name} proEmail={pro.email} />
+              )}
             </div>
           </div>
         </div>
