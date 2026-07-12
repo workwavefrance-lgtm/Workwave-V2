@@ -263,6 +263,11 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
   const pluralCategory = listing.plural;
   const citySlug = resolved.type === "city" ? resolved.city.slug : null;
+  // Pays de la page (BE vs FR) pour les mentions de registre (BCE vs Sirene).
+  const pageIsBE =
+    (resolved.type === "department"
+      ? resolved.department
+      : resolved.city.department)?.country === "BE";
 
   const allCategories = await getAllCategories();
   const relatedCategories = allCategories
@@ -713,6 +718,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
         <DuplicateNoticeBlock
           categoryName={category.name}
           locationName={locationName}
+          isBE={pageIsBE}
         />
       )}
 

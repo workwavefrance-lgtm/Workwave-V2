@@ -1,6 +1,8 @@
 type Props = {
   categoryName: string;
   locationName: string;
+  /** true pour une page belge → registre BCE au lieu du Sirene français. */
+  isBE?: boolean;
 };
 
 /**
@@ -17,6 +19,7 @@ type Props = {
 export default function DuplicateNoticeBlock({
   categoryName,
   locationName,
+  isBE = false,
 }: Props) {
   const subject = `Doublon de fiche à fusionner — ${categoryName} ${locationName}`;
   const mailto = `mailto:contact@workwave.fr?subject=${encodeURIComponent(subject)}`;
@@ -49,9 +52,9 @@ export default function DuplicateNoticeBlock({
               Vous voyez votre entreprise listée plusieurs fois ?
             </h3>
             <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-3">
-              Notre annuaire est issu du registre Sirene et de sources publiques.
-              Une même entreprise peut parfois apparaître en doublon (ancien
-              SIRET, établissement secondaire, etc.). Pour corriger :
+              {isBE
+                ? "Notre annuaire est issu de la Banque-Carrefour des Entreprises (BCE) et de sources publiques. Une même entreprise peut parfois apparaître en doublon (unité d'établissement, ancienne inscription, etc.). Pour corriger :"
+                : "Notre annuaire est issu du registre Sirene et de sources publiques. Une même entreprise peut parfois apparaître en doublon (ancien SIRET, établissement secondaire, etc.). Pour corriger :"}
             </p>
             <ol className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4 pl-5 list-decimal space-y-1">
               <li>

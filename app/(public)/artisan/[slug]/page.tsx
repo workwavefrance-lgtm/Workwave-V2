@@ -1062,8 +1062,11 @@ export default async function ProPage({ params }: Props) {
       {/* RGPD */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-xs text-[var(--text-tertiary)]">
         <p>
-          Les informations affichées proviennent de sources publiques (registre
-          Sirene).{" "}
+          Les informations affichées proviennent de sources publiques (
+          {pro.city?.country === "BE"
+            ? "Banque-Carrefour des Entreprises"
+            : "registre Sirene"}
+          ).{" "}
           <a
             href={`/artisan/${slug}/supprimer`}
             rel="nofollow"
