@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useAdmin } from "@/components/admin/shell/AdminProvider";
 import { useState, useRef, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import AdminMobileNav from "./AdminMobileNav";
 
 const BREADCRUMB_LABELS: Record<string, string> = {
@@ -10,8 +11,8 @@ const BREADCRUMB_LABELS: Record<string, string> = {
   pros: "Professionnels",
   projects: "Projets",
   leads: "Leads",
+  enquete: "Enquête",
   reviews: "Avis",
-  partnerships: "Partenariats",
   finances: "Finances",
   analytics: "Analytics",
   alerts: "Alertes",
@@ -45,13 +46,18 @@ export default function AdminHeader() {
   }));
 
   async function handleSignOut() {
-    const res = await fetch("/api/admin/auth/check");
-    if (res.ok) {
-      // Clear admin cookie and redirect
-      document.cookie = "admin_verified=; path=/; max-age=0";
-      router.push("/admin/login");
-      router.refresh();
+    // Vraie déconnexion : on invalide la session Supabase (l'ancien code effaçait
+    // juste le cookie admin_verified → la session restait valide, dangereux depuis
+    // un téléphone). Puis on purge les cookies admin et on renvoie au login.
+    try {
+      await createClient().auth.signOut();
+    } catch {
+      /* réseau coupé : on purge quand même les cookies ci-dessous */
     }
+    document.cookie = "admin_verified=; path=/; max-age=0";
+    document.cookie = "admin_impersonation=; path=/; max-age=0";
+    router.push("/admin/login");
+    router.refresh();
   }
 
   return (
