@@ -19,6 +19,10 @@ export type AdminProjectRow = {
   // Audit trail notification admin (migration 2026-05-23)
   admin_notified_at: string | null;
   admin_notification_error: string | null;
+  // Diffusion + prises (refonte 13/07) : broadcast_count = pros notifiés,
+  // unlockCount = pros qui ont pris le lead (débloqué les coordonnées).
+  broadcast_count: number | null;
+  unlockCount: number;
 };
 
 export type AdminProjectsFilters = {
@@ -46,7 +50,7 @@ export const getAdminProjects = cache(
     let query = db
       .from("projects")
       .select(
-        "id, first_name, email, phone, description, urgency, budget, status, suspicion_score, ai_qualification, created_at, admin_notified_at, admin_notification_error, category:categories(id, name), city:cities(id, name, department:departments(code))",
+        "id, first_name, email, phone, description, urgency, budget, status, suspicion_score, ai_qualification, created_at, admin_notified_at, admin_notification_error, broadcast_count, category:categories(id, name), city:cities(id, name, department:departments(code))",
         { count: "exact" }
       )
       .neq("status", "deleted");
@@ -71,8 +75,23 @@ export const getAdminProjects = cache(
 
     const { data, count } = await query;
 
+    // Nombre de prises (déblocages) par projet de la page — lead_unlocks est petit.
+    const rows = (data || []) as unknown as AdminProjectRow[];
+    const ids = rows.map((p) => p.id);
+    const unlockByProject = new Map<number, number>();
+    if (ids.length > 0) {
+      const { data: unlocks } = await db
+        .from("lead_unlocks")
+        .select("project_id")
+        .in("project_id", ids);
+      for (const u of (unlocks || []) as { project_id: number }[]) {
+        unlockByProject.set(u.project_id, (unlockByProject.get(u.project_id) || 0) + 1);
+      }
+    }
+    for (const p of rows) p.unlockCount = unlockByProject.get(p.id) || 0;
+
     return {
-      data: (data || []) as unknown as AdminProjectRow[],
+      data: rows,
       count: count || 0,
       page,
       pageSize,
