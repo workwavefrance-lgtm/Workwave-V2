@@ -127,6 +127,10 @@ export default function ProsTableClient({
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ color: b.color, background: b.bg }}>{b.label}</span>
+                  <span className="text-[10px] tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}
+                    title={row.claimed_at ? "Inscrit le" : "Fiche créée le"}>
+                    {new Date(row.claimed_at || row.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" })}
+                  </span>
                   {row.deleted_at && <span className="text-[9px]" style={{ color: "var(--admin-danger)" }}>supprimé</span>}
                 </div>
               </Link>
