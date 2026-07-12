@@ -9,6 +9,8 @@ import { getAdminServiceClient } from "@/lib/admin/service-client";
 export type BtpFinances = {
   totalRevenueEur: number;
   unlockCount: number;
+  paidCount: number;
+  freeCount: number;
   avgBasketEur: number;
   last30Eur: number;
   byMonth: { date: string; revenue: number }[];
@@ -43,14 +45,26 @@ const MONTHS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "a
 
 export const getBtpFinances = cache(async (): Promise<BtpFinances> => {
   const db = getAdminServiceClient();
-  const { data } = (await db
-    .from("lead_unlocks")
-    .select("id, amount_cents, paid_at, pro_id, project_id, pros(name)")
-    .order("paid_at", { ascending: false })) as { data: Row[] | null };
-  const rows = data || [];
+  // Pagination canonique (cap PostgREST 1000) — le CA total serait FAUX dès 1000
+  // déblocages sinon (leçon 30/04). Pattern rows.length===0 break, offset += réel.
+  const rows: Row[] = [];
+  let offset = 0;
+  while (true) {
+    const { data } = (await db
+      .from("lead_unlocks")
+      .select("id, amount_cents, paid_at, pro_id, project_id, pros(name)")
+      .order("paid_at", { ascending: false })
+      .range(offset, offset + 999)) as { data: Row[] | null };
+    const batch = data || [];
+    if (batch.length === 0) break;
+    rows.push(...batch);
+    offset += batch.length;
+  }
 
   const totalCents = rows.reduce((s, r) => s + (r.amount_cents || 0), 0);
   const unlockCount = rows.length;
+  let paidCount = 0, freeCount = 0;
+  for (const r of rows) { if ((r.amount_cents || 0) > 0) paidCount++; else freeCount++; }
 
   const since30 = new Date();
   since30.setDate(since30.getDate() - 30);
@@ -109,7 +123,9 @@ export const getBtpFinances = cache(async (): Promise<BtpFinances> => {
   return {
     totalRevenueEur: Math.round(totalCents) / 100,
     unlockCount,
-    avgBasketEur: unlockCount > 0 ? Math.round(totalCents / unlockCount) / 100 : 0,
+    paidCount,
+    freeCount,
+    avgBasketEur: paidCount > 0 ? Math.round(totalCents / paidCount) / 100 : 0,
     last30Eur: Math.round(last30Cents) / 100,
     byMonth: [...byMonthMap.entries()].map(([date, cents]) => ({ date, revenue: cents / 100 })),
     recent: rows.slice(0, 25).map((r) => ({

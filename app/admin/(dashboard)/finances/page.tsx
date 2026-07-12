@@ -1,25 +1,15 @@
-import { getFinanceKPIs, getMrrHistory } from "@/lib/stripe/admin-finances";
 import { getBtpFinances } from "@/lib/queries/admin-finances-btp";
-import FinancesClient from "./FinancesClient";
-import BtpFinanceSection from "./BtpFinanceSection";
+import FinanceView from "./FinanceView";
 
 export const metadata = {
   title: "Finances",
 };
 
+// Centré pay-per-lead (le vrai business). On ne fait PLUS les appels Stripe live
+// (getFinanceKPIs/getMrrHistory) : lents + bug de cursor MRR + 0 abonné IA. Les
+// fichiers Stripe (lib/stripe/admin-finances.ts, FinancesClient) restent pour
+// réactivation le jour où le vertical IA aura des abonnés.
 export default async function FinancesPage() {
-  const [kpis, mrrHistory, btp] = await Promise.all([
-    getFinanceKPIs(),
-    getMrrHistory(),
-    getBtpFinances(),
-  ]);
-
-  return (
-    <div className="p-6 space-y-10">
-      {/* BTP — pay-per-lead (CA réel via lead_unlocks) */}
-      <BtpFinanceSection data={btp} />
-      {/* IA — abonnements Premium (Stripe) */}
-      <FinancesClient kpis={kpis} mrrHistory={mrrHistory} />
-    </div>
-  );
+  const btp = await getBtpFinances();
+  return <FinanceView data={btp} />;
 }
