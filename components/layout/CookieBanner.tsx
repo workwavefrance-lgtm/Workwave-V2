@@ -42,14 +42,40 @@ export default function CookieBanner() {
     }
   }
 
+  function pushGoogleConsent(state: "granted" | "denied") {
+    // Met à jour Google Consent Mode (GA via GTM) sans attendre un reload.
+    // Le 'default' est à 'denied' (cf. app/layout.tsx) → GA ne dépose ses cookies
+    // qu'après ce 'update' en 'granted'. Réplique exacte de gtag('consent',...) :
+    // on pousse l'objet arguments dans dataLayer.
+    try {
+      const w = window as unknown as { dataLayer?: unknown[] };
+      w.dataLayer = w.dataLayer || [];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      function gtag(..._args: unknown[]) {
+        // eslint-disable-next-line prefer-rest-params
+        (w.dataLayer as unknown[]).push(arguments);
+      }
+      gtag("consent", "update", {
+        ad_storage: state,
+        analytics_storage: state,
+        ad_user_data: state,
+        ad_personalization: state,
+      });
+    } catch {
+      /* dataLayer absent : le consent default relira le cookie au prochain load */
+    }
+  }
+
   function accept() {
     setCookie(COOKIE_NAME, "accepted", COOKIE_MAX_AGE);
+    pushGoogleConsent("granted");
     pushUetConsent("granted");
     setVisible(false);
   }
 
   function refuse() {
     setCookie(COOKIE_NAME, "refused", COOKIE_MAX_AGE);
+    pushGoogleConsent("denied");
     pushUetConsent("denied");
     setVisible(false);
   }

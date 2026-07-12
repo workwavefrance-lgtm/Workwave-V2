@@ -66,9 +66,20 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Google Tag Manager */}
+        {/* Google Tag Manager + Consent Mode v2.
+            RGPD/CNIL : le consentement mesure/pub est REFUSÉ PAR DÉFAUT — GA (via
+            GTM) ne dépose AUCUN cookie tant que le visiteur n'a pas cliqué « OK »
+            dans le bandeau. On lit d'abord le cookie consent_analytics : un
+            visiteur déjà consentant repart en 'granted' sans flash. Le consent
+            'default' est poussé AVANT le loader GTM (même script = exécution
+            séquentielle garantie), pour que GTM voie l'état avant tout tag.
+            Mis à jour au clic par components/layout/CookieBanner.tsx. */}
         <Script id="gtm-script" strategy="afterInteractive">
-          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+var wwC=(document.cookie.match(/(?:^|; )consent_analytics=([^;]*)/)||[])[1];
+var wwG=wwC==='accepted'?'granted':'denied';
+gtag('consent','default',{ad_storage:wwG,analytics_storage:wwG,ad_user_data:wwG,ad_personalization:wwG,wait_for_update:500});
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
