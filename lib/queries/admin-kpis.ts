@@ -48,6 +48,44 @@ export const getAdminKPIs = cache(async (): Promise<AdminKPIs> => {
   };
 });
 
+export type AdminTodo = {
+  suspectProjects: number;
+  failedNotifs: number;
+  pendingReviews: number;
+  revenueEur: number;
+  paidUnlocks: number;
+  freeUnlocks: number;
+};
+
+// Données du cockpit Accueil : « à traiter » (ce qui demande une action) + CA
+// pay-per-lead. Counts sur tables PETITES (projects ~58, pro_reviews, lead_unlocks)
+// → count exact OK ici (JAMAIS sur pros). Le CA se somme en JS (peu de rows).
+export const getAdminTodo = cache(async (): Promise<AdminTodo> => {
+  const db = getAdminServiceClient();
+  const since = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const [suspects, failed, reviews, unlocks] = await Promise.all([
+    db.from("projects").select("*", { count: "exact", head: true }).eq("status", "suspicious"),
+    db.from("projects").select("*", { count: "exact", head: true })
+      .is("admin_notified_at", null).neq("status", "deleted").gte("created_at", since),
+    db.from("pro_reviews").select("*", { count: "exact", head: true })
+      .eq("status", "pending").not("submitted_at", "is", null),
+    db.from("lead_unlocks").select("amount_cents").limit(2000),
+  ]);
+  let cents = 0, paid = 0, free = 0;
+  for (const u of (unlocks.data || []) as { amount_cents: number | null }[]) {
+    if ((u.amount_cents || 0) > 0) { cents += u.amount_cents || 0; paid++; }
+    else free++;
+  }
+  return {
+    suspectProjects: suspects.count || 0,
+    failedNotifs: failed.count || 0,
+    pendingReviews: reviews.count || 0,
+    revenueEur: Math.round(cents) / 100,
+    paidUnlocks: paid,
+    freeUnlocks: free,
+  };
+});
+
 export type RecentActivity = {
   id: number;
   type: "project" | "claim" | "subscription";

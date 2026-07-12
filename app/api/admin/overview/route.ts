@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin/auth";
-import { getAdminKPIs, getRecentActivity, getSparklineData } from "@/lib/queries/admin-kpis";
+import { getAdminKPIs, getRecentActivity, getAdminTodo } from "@/lib/queries/admin-kpis";
 
 export const dynamic = "force-dynamic";
 
@@ -10,11 +10,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [kpis, activity, sparkline] = await Promise.all([
+  const [kpis, activity, todo] = await Promise.all([
     getAdminKPIs(),
     getRecentActivity(),
-    getSparklineData(),
+    getAdminTodo(),
   ]);
 
-  return NextResponse.json({ kpis, activity, sparkline });
+  return NextResponse.json({ kpis, activity, todo });
 }

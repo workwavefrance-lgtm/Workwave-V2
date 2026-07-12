@@ -1,14 +1,12 @@
-import { getAdminKPIs, getRecentActivity, getSparklineData } from "@/lib/queries/admin-kpis";
+import { getAdminKPIs, getRecentActivity, getAdminTodo } from "@/lib/queries/admin-kpis";
 import OverviewClient from "./OverviewClient";
 
 export default async function AdminOverviewPage() {
-  const [kpis, activity, sparkline] = await Promise.all([
+  const [kpis, activity, todo] = await Promise.all([
     getAdminKPIs(),
     getRecentActivity(),
-    getSparklineData(),
+    getAdminTodo(),
   ]);
 
-  return (
-    <OverviewClient kpis={kpis} activity={activity} sparkline={sparkline} />
-  );
+  return <OverviewClient kpis={kpis} activity={activity} todo={todo} />;
 }

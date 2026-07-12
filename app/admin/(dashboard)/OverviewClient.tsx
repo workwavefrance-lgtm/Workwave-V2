@@ -1,47 +1,50 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import AdminKPICard from "@/components/admin/data-display/AdminKPICard";
+import Link from "next/link";
+import { useAdmin } from "@/components/admin/shell/AdminProvider";
 import { useToast } from "@/components/admin/shell/AdminToast";
-import type { AdminKPIs, RecentActivity } from "@/lib/queries/admin-kpis";
+import type { AdminKPIs, RecentActivity, AdminTodo } from "@/lib/queries/admin-kpis";
 
-const REFRESH_INTERVAL = 90_000; // 90s (était 30s : polling trop agressif = charge DB inutile)
-
-function delta(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0;
-  return ((current - previous) / previous) * 100;
-}
+const REFRESH_INTERVAL = 90_000; // 90s + pause onglet masqué (voir useEffect)
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "à l'instant";
-  if (mins < 60) return `il y a ${mins}min`;
+  if (mins < 60) return `il y a ${mins} min`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `il y a ${hours}h`;
-  const days = Math.floor(hours / 24);
-  return `il y a ${days}j`;
+  if (hours < 24) return `il y a ${hours} h`;
+  return `il y a ${Math.floor(hours / 24)} j`;
 }
 
-const TYPE_ICONS: Record<string, { bg: string; color: string; label: string }> = {
-  project: { bg: "rgba(59, 130, 246, 0.1)", color: "#3B82F6", label: "Projet" },
-  claim: { bg: "rgba(16, 185, 129, 0.1)", color: "#10B981", label: "Réclamation" },
-  subscription: { bg: "rgba(245, 158, 11, 0.1)", color: "#F59E0B", label: "Abonnement" },
-};
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 6) return "Bonne nuit";
+  if (h < 18) return "Salut";
+  return "Bonsoir";
+}
+
+function firstName(email?: string): string {
+  if (!email) return "";
+  const p = email.split("@")[0].split(/[.\-_]/)[0];
+  return p ? p.charAt(0).toUpperCase() + p.slice(1) : "";
+}
 
 export default function OverviewClient({
   kpis: initialKpis,
   activity: initialActivity,
-  sparkline: initialSparkline,
+  todo: initialTodo,
 }: {
   kpis: AdminKPIs;
   activity: RecentActivity[];
-  sparkline: number[];
+  todo: AdminTodo;
 }) {
   const [kpis, setKpis] = useState(initialKpis);
   const [activity, setActivity] = useState(initialActivity);
-  const [sparkline, setSparkline] = useState(initialSparkline);
+  const [todo, setTodo] = useState(initialTodo);
   const lastProjectCount = useRef(initialKpis.projectsThisMonth);
+  const { admin } = useAdmin();
   const { toast } = useToast();
 
   const refresh = useCallback(async () => {
@@ -51,185 +54,150 @@ export default function OverviewClient({
       const data = await res.json();
       setKpis(data.kpis);
       setActivity(data.activity);
-      setSparkline(data.sparkline);
-
-      // Toast si nouveau projet détecté
+      if (data.todo) setTodo(data.todo);
       if (data.kpis.projectsThisMonth > lastProjectCount.current) {
-        const diff = data.kpis.projectsThisMonth - lastProjectCount.current;
-        toast(
-          `${diff} nouveau${diff > 1 ? "x" : ""} projet${diff > 1 ? "s" : ""} déposé${diff > 1 ? "s" : ""}`,
-          "info"
-        );
+        const d = data.kpis.projectsThisMonth - lastProjectCount.current;
+        toast(`${d} nouveau${d > 1 ? "x" : ""} projet${d > 1 ? "s" : ""} déposé${d > 1 ? "s" : ""}`, "info");
       }
       lastProjectCount.current = data.kpis.projectsThisMonth;
-    } catch {
-      // Silencieux en cas d'erreur réseau
-    }
+    } catch { /* réseau : silencieux */ }
   }, [toast]);
 
-  // Polling PAUSÉ quand l'onglet n'est pas visible : un admin laissé ouvert en
-  // arrière-plan ne martèle plus la DB (leçon egress 11/06). Refresh immédiat au
-  // retour sur l'onglet. Réduit drastiquement la charge à l'origine des déconnexions.
+  // Polling en pause quand l'onglet est masqué (ne martèle plus la DB).
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     const start = () => { if (!interval) interval = setInterval(refresh, REFRESH_INTERVAL); };
     const stop = () => { if (interval) { clearInterval(interval); interval = null; } };
-    const onVisibility = () => {
-      if (document.hidden) stop();
-      else { refresh(); start(); }
-    };
+    const onVis = () => { if (document.hidden) stop(); else { refresh(); start(); } };
     if (!document.hidden) start();
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => { stop(); document.removeEventListener("visibilitychange", onVisibility); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVis); };
   }, [refresh]);
 
+  const todoTotal = todo.suspectProjects + todo.failedNotifs + todo.pendingReviews;
+  const projDelta = kpis.projectsThisMonth - kpis.projectsLastMonth;
+  const prosDelta = kpis.activePros - kpis.activeProsLastMonth;
+
+  type Action = { key: string; icon: string; tone: string; title: string; sub: string; href: string; chip?: string };
+  const actions: Action[] = [];
+  if (todo.suspectProjects > 0) actions.push({
+    key: "suspect", icon: "⚠️", tone: "var(--admin-danger)",
+    title: `${todo.suspectProjects} projet${todo.suspectProjects > 1 ? "s" : ""} suspect${todo.suspectProjects > 1 ? "s" : ""}`,
+    sub: "à valider avant broadcast", href: "/admin/projects?status=suspicious", chip: String(todo.suspectProjects),
+  });
+  if (todo.failedNotifs > 0) actions.push({
+    key: "notif", icon: "✉️", tone: "var(--admin-warning)",
+    title: `${todo.failedNotifs} notif${todo.failedNotifs > 1 ? "s" : ""} admin échouée${todo.failedNotifs > 1 ? "s" : ""}`,
+    sub: "renvoyer depuis la fiche projet", href: "/admin/projects", chip: String(todo.failedNotifs),
+  });
+  if (todo.pendingReviews > 0) actions.push({
+    key: "reviews", icon: "⭐", tone: "var(--admin-accent)",
+    title: `${todo.pendingReviews} avis à modérer`, sub: "en attente de validation",
+    href: "/admin/reviews", chip: String(todo.pendingReviews),
+  });
+
+  const cardBase: React.CSSProperties = {
+    background: "var(--admin-card)", border: "1px solid var(--admin-border)", borderRadius: 16,
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1
-            className="text-xl font-semibold mb-1"
-            style={{ color: "var(--admin-text)" }}
-          >
-            Overview
-          </h1>
-          <p
-            className="text-xs"
-            style={{ color: "var(--admin-text-secondary)" }}
-          >
-            Vue d&apos;ensemble de la plateforme
-          </p>
+    <div className="max-w-5xl mx-auto">
+      {/* Greeting */}
+      <div className="mb-5">
+        <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--admin-text)" }}>
+          {greeting()} {firstName(admin?.email)} <span className="font-normal">👋</span>
+        </h1>
+        <p className="text-xs mt-1" style={{ color: "var(--admin-text-tertiary)" }}>
+          {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · mise à jour auto
+        </p>
+      </div>
+
+      {/* KPI row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="p-4 relative overflow-hidden" style={{
+          background: "linear-gradient(160deg, var(--admin-accent-soft), transparent)",
+          border: "1px solid var(--admin-accent)", borderRadius: 16,
+        }}>
+          <div className="text-[11px] font-medium" style={{ color: "var(--admin-text-secondary)" }}>À traiter</div>
+          <div className="text-3xl font-extrabold mt-1 tabular-nums" style={{ color: "var(--admin-accent)", letterSpacing: "-0.03em" }}>{todoTotal}</div>
+          <div className="text-[11px] mt-1" style={{ color: "var(--admin-text-tertiary)" }}>
+            {todoTotal === 0 ? "rien en attente" : "action" + (todoTotal > 1 ? "s" : "") + " requise" + (todoTotal > 1 ? "s" : "")}
+          </div>
         </div>
-        <div
-          className="flex items-center gap-1.5 text-[10px]"
-          style={{ color: "var(--admin-text-tertiary)" }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          Mise à jour auto 30s
+
+        <div className="p-4" style={cardBase}>
+          <div className="text-[11px] font-medium" style={{ color: "var(--admin-text-secondary)" }}>Projets · ce mois</div>
+          <div className="text-3xl font-extrabold mt-1 tabular-nums" style={{ color: "var(--admin-text)", letterSpacing: "-0.03em" }}>{kpis.projectsThisMonth}</div>
+          <div className="text-[11px] mt-1" style={{ color: projDelta >= 0 ? "var(--admin-success)" : "var(--admin-text-tertiary)" }}>
+            {projDelta >= 0 ? "+" : ""}{projDelta} vs mois préc.
+          </div>
+        </div>
+
+        <div className="p-4" style={cardBase}>
+          <div className="text-[11px] font-medium" style={{ color: "var(--admin-text-secondary)" }}>Pros réclamés</div>
+          <div className="text-3xl font-extrabold mt-1 tabular-nums" style={{ color: "var(--admin-text)", letterSpacing: "-0.03em" }}>{kpis.activePros}</div>
+          <div className="text-[11px] mt-1" style={{ color: prosDelta > 0 ? "var(--admin-success)" : "var(--admin-text-tertiary)" }}>
+            {prosDelta >= 0 ? "+" : ""}{prosDelta} ce mois
+          </div>
+        </div>
+
+        <div className="p-4" style={cardBase}>
+          <div className="text-[11px] font-medium" style={{ color: "var(--admin-text-secondary)" }}>CA pay-per-lead</div>
+          <div className="text-3xl font-extrabold mt-1 tabular-nums" style={{ color: "var(--admin-text)", letterSpacing: "-0.03em" }}>
+            {todo.revenueEur.toLocaleString("fr-FR", { minimumFractionDigits: 2 })}<span className="text-base" style={{ color: "var(--admin-text-secondary)" }}> €</span>
+          </div>
+          <div className="text-[11px] mt-1" style={{ color: "var(--admin-text-tertiary)" }}>
+            {todo.paidUnlocks} payé{todo.paidUnlocks > 1 ? "s" : ""} · {todo.freeUnlocks} offert{todo.freeUnlocks > 1 ? "s" : ""}
+          </div>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <AdminKPICard
-          title="Pros actifs"
-          value={kpis.activePros}
-          delta={delta(kpis.activePros, kpis.activeProsLastMonth)}
-          icon={
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-            </svg>
-          }
-        />
-        <AdminKPICard
-          title="Projets ce mois"
-          value={kpis.projectsThisMonth}
-          delta={delta(kpis.projectsThisMonth, kpis.projectsLastMonth)}
-          sparklineData={sparkline}
-          icon={
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-          }
-        />
-        <AdminKPICard
-          title="Leads envoyés"
-          value={kpis.leadsSent}
-          delta={delta(kpis.leadsSent, kpis.leadsSentLastMonth)}
-          icon={
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-            </svg>
-          }
-        />
-        <AdminKPICard
-          title="Taux conversion"
-          value={`${kpis.conversionRate}%`}
-          delta={kpis.conversionRate - kpis.conversionRateLastMonth}
-          deltaSuffix=" pts"
-          icon={
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-            </svg>
-          }
-        />
+      {/* À traiter */}
+      <div className="text-[11px] font-bold uppercase tracking-wider mb-2.5" style={{ color: "var(--admin-text-tertiary)" }}>À traiter</div>
+      <div className="flex flex-col gap-2 mb-7">
+        {actions.length === 0 ? (
+          <div className="flex items-center gap-3 p-4" style={cardBase}>
+            <div className="w-9 h-9 rounded-xl grid place-items-center text-base shrink-0" style={{ background: "rgba(52,211,153,.14)", color: "var(--admin-success)" }}>✓</div>
+            <div>
+              <div className="text-sm font-semibold" style={{ color: "var(--admin-text)" }}>Tout est à jour</div>
+              <div className="text-[11px]" style={{ color: "var(--admin-text-tertiary)" }}>aucun projet suspect, aucun avis en attente</div>
+            </div>
+          </div>
+        ) : actions.map((a) => (
+          <Link key={a.key} href={a.href} className="flex items-center gap-3 p-3.5 transition-colors hover:brightness-125" style={cardBase}>
+            <div className="w-9 h-9 rounded-xl grid place-items-center text-base shrink-0" style={{ background: "var(--admin-hover)" }}>{a.icon}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold truncate" style={{ color: "var(--admin-text)" }}>{a.title}</div>
+              <div className="text-[11px] truncate" style={{ color: "var(--admin-text-tertiary)" }}>{a.sub}</div>
+            </div>
+            {a.chip && <span className="text-[11px] font-bold px-2 py-1 rounded-full shrink-0" style={{ background: a.tone, color: "#0A0B0F" }}>{a.chip}</span>}
+          </Link>
+        ))}
       </div>
 
-      {/* Recent Activity */}
-      <div
-        className="rounded-xl"
-        style={{
-          backgroundColor: "var(--admin-card)",
-          border: "1px solid var(--admin-border)",
-        }}
-      >
-        <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--admin-border)" }}>
-          <h2
-            className="text-sm font-semibold"
-            style={{ color: "var(--admin-text)" }}
-          >
-            Activité récente
-          </h2>
-        </div>
-
+      {/* Derniers événements */}
+      <div className="text-[11px] font-bold uppercase tracking-wider mb-2.5" style={{ color: "var(--admin-text-tertiary)" }}>Activité récente</div>
+      <div style={cardBase} className="overflow-hidden">
         {activity.length === 0 ? (
-          <div className="px-4 py-12 text-center">
-            <p className="text-xs" style={{ color: "var(--admin-text-tertiary)" }}>
-              Aucune activité récente
-            </p>
-          </div>
-        ) : (
-          <div>
-            {activity.map((item) => {
-              const typeInfo = TYPE_ICONS[item.type] || TYPE_ICONS.project;
-              return (
-                <div
-                  key={`${item.type}-${item.id}`}
-                  className="flex items-start gap-3 px-4 py-3 transition-colors duration-150"
-                  style={{ borderBottom: "1px solid var(--admin-border)" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = "var(--admin-hover)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "transparent")
-                  }
-                >
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ backgroundColor: typeInfo.bg }}
-                  >
-                    <span
-                      className="text-[10px] font-semibold"
-                      style={{ color: typeInfo.color }}
-                    >
-                      {typeInfo.label.charAt(0)}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="text-xs font-medium truncate"
-                      style={{ color: "var(--admin-text)" }}
-                    >
-                      {item.title}
-                    </p>
-                    <p
-                      className="text-[11px] truncate mt-0.5"
-                      style={{ color: "var(--admin-text-tertiary)" }}
-                    >
-                      {item.description}
-                    </p>
-                  </div>
-                  <span
-                    className="text-[10px] shrink-0 tabular-nums"
-                    style={{ color: "var(--admin-text-tertiary)" }}
-                  >
-                    {timeAgo(item.created_at)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+          <div className="px-4 py-10 text-center text-xs" style={{ color: "var(--admin-text-tertiary)" }}>Aucune activité récente</div>
+        ) : activity.map((item) => (
+          <Link
+            key={`${item.type}-${item.id}`}
+            href={item.type === "project" ? `/admin/projects/${item.id}` : `/admin/pros/${item.id}`}
+            className="flex items-start gap-3 px-4 py-3 transition-colors hover:brightness-125"
+            style={{ borderBottom: "1px solid var(--admin-border)" }}
+          >
+            <div className="w-8 h-8 rounded-lg grid place-items-center shrink-0 mt-0.5 text-[13px]"
+              style={{ background: item.type === "claim" ? "rgba(52,211,153,.14)" : "var(--admin-accent-soft)", color: item.type === "claim" ? "var(--admin-success)" : "var(--admin-accent)" }}>
+              {item.type === "claim" ? "✓" : "▸"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate" style={{ color: "var(--admin-text)" }}>{item.title}</p>
+              <p className="text-[11px] truncate mt-0.5" style={{ color: "var(--admin-text-tertiary)" }}>{item.description}</p>
+            </div>
+            <span className="text-[10px] shrink-0 tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>{timeAgo(item.created_at)}</span>
+          </Link>
+        ))}
       </div>
     </div>
   );
