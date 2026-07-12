@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getAllCategories } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
 import { getTopCities } from "@/lib/queries/cities";
+import { getBeAlias, BE_ALIAS_SLUGS } from "@/lib/data/be-aliases";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
@@ -529,13 +530,33 @@ async function buildCategoryDeptUrls(): Promise<MetadataRoute.Sitemap> {
   const categories = allCategories.filter((c) =>
     ["btp", "domicile", "personne"].includes(c.vertical)
   );
-  return categories.flatMap((cat) =>
+  const urls: MetadataRoute.Sitemap = categories.flatMap((cat) =>
     departments.map((dept) => ({
       url: `${BASE_URL}/${cat.slug}/${generateDepartmentSlug(dept)}`,
       changeFrequency: "weekly" as const,
       priority: 0.9,
     }))
   );
+
+  // Alias belges (plafonneur=plaquiste, entreprise-de-chassis=menuisier) × provinces
+  // BE UNIQUEMENT. Ces alias ne sont PAS dans getAllCategories() → jamais émis côté
+  // FR par construction. La page /[alias]/[province-BE] réutilise les pros du parent
+  // (cf. be-aliases.ts + garde country==="BE" dans [metier]/[location]/page.tsx).
+  const beDepts = departments.filter((d) => d.country === "BE");
+  const parentSlugs = new Set(categories.map((c) => c.slug));
+  for (const aliasSlug of BE_ALIAS_SLUGS) {
+    const alias = getBeAlias(aliasSlug)!;
+    if (!parentSlugs.has(alias.parentSlug)) continue; // parent doit exister + être BTP
+    for (const dept of beDepts) {
+      urls.push({
+        url: `${BASE_URL}/${alias.urlSlug}/${generateDepartmentSlug(dept)}`,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      });
+    }
+  }
+
+  return urls;
 }
 
 // ============================================================================
@@ -592,6 +613,31 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: count >= 10 ? 0.8 : 0.7,
     });
+  }
+
+  // ── Alias belges × villes BE (>= 3 pros du parent) ──────────────────────────
+  // Réutilise countMap : le parent (plaquiste/menuisier) est déjà compté par ville.
+  // On n'émet QUE pour les villes BE — une URL alias sur une ville FR renverrait
+  // 404 via le garde country dans [metier]/[location]/page.tsx.
+  const beCityIds = new Set(
+    topCities.filter((c) => c.country === "BE").map((c) => c.id)
+  );
+  const parentIdBySlug = new Map(categories.map((c) => [c.slug, c.id]));
+  for (const aliasSlug of BE_ALIAS_SLUGS) {
+    const alias = getBeAlias(aliasSlug)!;
+    const parentId = parentIdBySlug.get(alias.parentSlug);
+    if (parentId === undefined) continue;
+    for (const cityId of beCityIds) {
+      const count = countMap.get(`${parentId}-${cityId}`) || 0;
+      if (count < 3) continue;
+      const citySlug = citySlugMap.get(cityId);
+      if (!citySlug) continue;
+      urls.push({
+        url: `${BASE_URL}/${alias.urlSlug}/${citySlug}`,
+        changeFrequency: "weekly" as const,
+        priority: count >= 10 ? 0.7 : 0.6,
+      });
+    }
   }
 
   // ── Zone Monaco (mise en relation transfrontalière) ─────────────────────────

@@ -54,6 +54,7 @@ import {
 } from "@/lib/utils/slugs";
 import { generateSeoContent } from "@/lib/seo/seo-sections";
 import { getBelgicisme } from "@/lib/data/belgicismes";
+import { getBeAlias } from "@/lib/data/be-aliases";
 
 const TOP_LIMIT = 10;
 
@@ -66,10 +67,29 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metier, location: locationSlug } = await params;
-  const category = await getCategoryBySlug(metier);
+  // Alias belge (plafonneur=plaquiste, entreprise-de-chassis=menuisier) : on
+  // résout la catégorie PARENTE mais on affiche le nom belge (voir be-aliases.ts).
+  const alias = getBeAlias(metier);
+  const parentCategory = await getCategoryBySlug(alias ? alias.parentSlug : metier);
   const resolved = await resolveLocation(locationSlug);
 
-  if (!category || !resolved) return {};
+  if (!parentCategory || !resolved) return {};
+
+  // Un alias belge n'est servi QUE sur une location belge (sinon on servirait
+  // les plaquistes français sous le nom « Plafonneur » = duplicate content FR).
+  if (alias) {
+    const locCountry =
+      resolved.type === "department"
+        ? resolved.department.country
+        : resolved.city.department?.country;
+    if (locCountry !== "BE") return {};
+  }
+
+  // Catégorie « d'affichage » : id + slug du parent (requêtes, prix, grammaire,
+  // guides inchangés), nom surchargé pour l'alias.
+  const category = alias
+    ? { ...parentCategory, name: alias.displayName }
+    : parentCategory;
 
   const locationName =
     resolved.type === "department"
@@ -108,12 +128,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const prosCount = result.count;
   const displayCount = Math.min(prosCount, TOP_LIMIT);
-  const listing = getCategoryListing(category.slug, category.name);
+  const baseListing = getCategoryListing(parentCategory.slug, parentCategory.name);
+  // Pour un alias belge, on affiche le pluriel/singulier/article belges tout en
+  // gardant la grammaire du parent (article accordé au genre du displayName).
+  const listing = alias
+    ? {
+        ...baseListing,
+        singular: alias.displayName.toLowerCase(),
+        plural: alias.displayPlural,
+        article: alias.article,
+      }
+    : baseListing;
   const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
   // Belgicisme (Belgique) : "couvreurs & toituriers", "plaquistes & plafonneurs"…
-  // pour capter la requête belge en plus du terme français standard.
-  const metaBelg =
-    (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
+  // pour capter la requête belge en plus du terme français standard. Pour un
+  // ALIAS, le nom belge est déjà le displayName → pas de suffixe (éviterait
+  // « plafonneurs & plafonneurs »).
+  const metaBelg = alias
+    ? null
+    : (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
       ? getBelgicisme(category.slug)
       : null;
   const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
@@ -180,18 +213,37 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
   const isFirstPage = page === 1;
 
-  const category = await getCategoryBySlug(metier);
-  if (!category) notFound();
+  // Alias belge (plafonneur=plaquiste, entreprise-de-chassis=menuisier) : catégorie
+  // PARENTE pour les requêtes/lookups, nom belge à l'affichage (cf. be-aliases.ts).
+  const alias = getBeAlias(metier);
+  const parentCategory = await getCategoryBySlug(alias ? alias.parentSlug : metier);
+  if (!parentCategory) notFound();
 
   // Anti-fuite vertical : AUCUNE catégorie tech sur une route BTP. Test du
   // VERTICAL (pas une liste d'ids) → couvre les 145 cat tech, pas seulement les
   // 14 d'AI_CATEGORY_IDS. Redirect 308 vers /ai/[slug] (preserve SEO + bon vertical).
-  if (category.vertical === "tech") {
-    permanentRedirect(`/ai/${category.slug}`);
+  if (parentCategory.vertical === "tech") {
+    permanentRedirect(`/ai/${parentCategory.slug}`);
   }
+
+  // Catégorie « d'affichage » : id + slug du parent (requêtes pros, prix,
+  // grammaire, guides inchangés), nom surchargé pour l'alias belge.
+  const category = alias
+    ? { ...parentCategory, name: alias.displayName }
+    : parentCategory;
 
   const resolved = await resolveLocation(locationSlug);
   if (!resolved) notFound();
+
+  // Garde-fou alias : servi UNIQUEMENT sur une location belge. /plafonneur/vienne-86
+  // (FR) → 404 (sinon on servirait les plaquistes français = duplicate content).
+  if (alias) {
+    const locCountry =
+      resolved.type === "department"
+        ? resolved.department.country
+        : resolved.city.department?.country;
+    if (locCountry !== "BE") notFound();
+  }
 
   const locationName =
     resolved.type === "department"
@@ -252,12 +304,23 @@ export default async function ListingPage({ params, searchParams }: Props) {
   }
 
   const displayCount = Math.min(totalProsCount, TOP_LIMIT);
-  const listing = getCategoryListing(category.slug, category.name);
+  const baseListing = getCategoryListing(parentCategory.slug, parentCategory.name);
+  // Alias belge : pluriel/singulier/article belges, grammaire du parent conservée.
+  const listing = alias
+    ? {
+        ...baseListing,
+        singular: alias.displayName.toLowerCase(),
+        plural: alias.displayPlural,
+        article: alias.article,
+      }
+    : baseListing;
   const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
   // Belgicisme (Belgique) : "couvreurs & toituriers", "plaquistes & plafonneurs"…
-  // pour capter la requête belge en plus du terme français standard.
-  const metaBelg =
-    (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
+  // pour capter la requête belge. Pour un ALIAS, le nom belge est déjà affiché →
+  // pas de suffixe (éviterait « plafonneurs & plafonneurs »).
+  const metaBelg = alias
+    ? null
+    : (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
       ? getBelgicisme(category.slug)
       : null;
   const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
