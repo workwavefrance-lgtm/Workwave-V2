@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ClaimForm from "@/components/pro/ClaimForm";
 import { BASE_URL } from "@/lib/constants";
+import { formatBce } from "@/lib/utils/bce";
 import { createClient } from "@supabase/supabase-js";
 
 type Props = {
@@ -197,7 +198,9 @@ export default async function ClaimPage({ params }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
           </svg>
           <span className="text-xs font-semibold text-green-700 dark:text-green-400">
-            Vérifié au registre Sirene
+            {isBelgian
+              ? "Vérifié à la Banque-Carrefour des Entreprises"
+              : "Vérifié au registre Sirene"}
           </span>
         </div>
 
@@ -210,7 +213,9 @@ export default async function ClaimPage({ params }: Props) {
           </p>
         )}
         <p className="text-xs font-mono text-[var(--text-tertiary)] mt-1.5">
-          SIRET {formatSiret(pro.siret)}
+          {isBelgian
+            ? `BCE ${formatBce(pro.siret)}`
+            : `SIRET ${formatSiret(pro.siret)}`}
         </p>
       </section>
 
