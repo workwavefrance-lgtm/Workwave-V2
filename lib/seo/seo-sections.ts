@@ -51,6 +51,15 @@ const DEPT_STATS: Record<string, DeptStats> = {
   "79": { pop_k: 375, logements_k: 219, ancien_pct: 51, res_principales_pct: 83 },
   "86": { pop_k: 442, logements_k: 256, ancien_pct: 47, res_principales_pct: 84 },
   "87": { pop_k: 373, logements_k: 232, ancien_pct: 50, res_principales_pct: 79 },
+  // ── Provinces belges (population réelle Statbel 2025 ; logements estimés,
+  // NON affichés pour BE — cf. localContext ci-dessous qui n'utilise que pop_k
+  // pour éviter d'inventer un % de logements anciens non sourcé). ──
+  WHT: { pop_k: 1347, logements_k: 586, ancien_pct: 0, res_principales_pct: 0 },
+  WLG: { pop_k: 1110, logements_k: 483, ancien_pct: 0, res_principales_pct: 0 },
+  WNA: { pop_k: 496, logements_k: 216, ancien_pct: 0, res_principales_pct: 0 },
+  WBR: { pop_k: 408, logements_k: 177, ancien_pct: 0, res_principales_pct: 0 },
+  WLX: { pop_k: 287, logements_k: 125, ancien_pct: 0, res_principales_pct: 0 },
+  BRU: { pop_k: 1256, logements_k: 598, ancien_pct: 0, res_principales_pct: 0 },
 };
 
 // ============================================================================
@@ -559,8 +568,18 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
       : "",
   };
 
-  // Contexte local injecte (data unique par dept = pas de duplicate content)
-  const localContext = ctx.city
+  // Contexte local injecte (data unique par dept = pas de duplicate content).
+  // Belgique : population REELLE (Statbel), sans logements/% ancien (non sourcés
+  // par province BE) → aucun chiffre inventé. Label géo correct (province /
+  // Région de Bruxelles-Capitale).
+  const beGeo = ctx.department.name === "Bruxelles-Capitale"
+    ? "la Région de Bruxelles-Capitale"
+    : `la province ${["Hainaut", "Brabant wallon", "Luxembourg belge"].includes(ctx.department.name) ? "du" : "de"} ${ctx.department.name.replace(" belge", "")}`;
+  const localContext = isBE
+    ? ctx.city
+      ? `${ctx.city.name} se situe dans ${beGeo} (Belgique), qui compte environ ${stats.pop_k} 000 habitants.`
+      : `${beGeo.charAt(0).toUpperCase() + beGeo.slice(1)} (Belgique) compte environ ${stats.pop_k} 000 habitants.`
+    : ctx.city
     ? vertical === "personne"
       ? `${ctx.city.name} fait partie de la ${ctx.department.name} (population du département : environ ${stats.pop_k} 000 habitants).`
       : `${ctx.city.name} fait partie de la ${ctx.department.name} (${stats.pop_k} 000 habitants, ${stats.logements_k} 000 logements${vertical === "btp" ? ` dont ${stats.ancien_pct}% construits avant 1975` : ""}).`
