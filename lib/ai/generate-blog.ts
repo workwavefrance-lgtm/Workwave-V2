@@ -55,7 +55,7 @@ export async function generateBlogArticle(
 
   const topicInstruction = TOPIC_PROMPTS[input.topicType] || TOPIC_PROMPTS.guide;
 
-  const prompt = `Tu es un redacteur expert pour Workwave, un annuaire de professionnels locaux en France.
+  const prompt = `Tu es un redacteur expert pour Workwave, un annuaire de professionnels locaux en France et en Belgique francophone.
 
 Tu rediges en francais correct, avec tous les accents.
 

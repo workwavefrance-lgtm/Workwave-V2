@@ -33,7 +33,7 @@ export async function generateSeoContent(input: SeoInput): Promise<SeoOutput> {
       ? `la ville de ${input.locationName} (${input.departmentName}, ${input.departmentCode}), qui compte environ ${input.population ? input.population.toLocaleString("fr-FR") : "quelques milliers d'"} habitants`
       : `le département ${input.locationName} (${input.departmentCode})`;
 
-  const prompt = `Tu es un rédacteur SEO expert pour Workwave, un annuaire de professionnels locaux en France.
+  const prompt = `Tu es un rédacteur SEO expert pour Workwave, un annuaire de professionnels locaux en France et en Belgique francophone.
 
 Tu rédiges en français correct, avec tous les accents (à, é, è, ê, ç, ù, etc.). Ne produis jamais de texte français sans accents, y compris dans les titres et sous-titres.
 

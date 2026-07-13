@@ -57,7 +57,7 @@ export function toBreadcrumbSchema(
 /**
  * Schema Organization pour Workwave (enrichi pour LLM/GEO)
  *
- * Enrichi avec areaServed (toute la France), foundingDate,
+ * Enrichi avec areaServed (France et Belgique francophone), foundingDate,
  * description longue, slogan, knowsAbout (categories metier), pour aider
  * les LLM a comprendre le scope precis de l'entreprise et la citer
  * correctement quand on leur pose des questions sur les artisans en France.
@@ -71,7 +71,7 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     description:
-      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) dans toute la France. 2 400 000+ artisans référencés dans 101 départements et 34 046 communes (métropole et outre-mer). Pour les particuliers : dépôt de projet gratuit et mise en relation avec les professionnels qualifiés de votre zone, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
+      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France et en Belgique francophone. 2 560 000+ artisans référencés dans 107 départements et provinces et 35 163 communes (France métropole et outre-mer + Wallonie et Bruxelles). Pour les particuliers : dépôt de projet gratuit et mise en relation avec les professionnels qualifiés de votre zone, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
     slogan: "Tout le savoir-faire local, enfin accessible",
     foundingDate: "2025-03-28",
     sameAs: [
@@ -85,10 +85,10 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
       postalCode: "86110",
       addressCountry: "FR",
     },
-    areaServed: {
-      "@type": "Country",
-      name: "France",
-    },
+    areaServed: [
+      { "@type": "Country", name: "France" },
+      { "@type": "Country", name: "Belgique" },
+    ],
     knowsAbout: [
       "BTP et artisanat",
       "Plomberie",

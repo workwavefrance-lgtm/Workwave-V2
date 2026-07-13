@@ -138,7 +138,7 @@ export default async function MetierProximityPage({ params }: Props) {
   const serviceJsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: `${category.name} en France`,
+    name: `${category.name} en France et en Belgique`,
     serviceType: category.name,
     description:
       category.description ||

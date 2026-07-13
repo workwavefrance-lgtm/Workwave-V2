@@ -112,8 +112,8 @@ export default function AProposPage() {
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
                 Workwave est une entreprise française indépendante, sans capital
-                étranger, née en Vienne. On référence aujourd&apos;hui plus de 2,4
-                millions d&apos;artisans dans toute la France.
+                étranger, née en Vienne. On référence aujourd&apos;hui plus de 2,5
+                millions d&apos;artisans en France et en Belgique francophone.
               </p>
             </div>
             <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-8">
@@ -124,7 +124,7 @@ export default function AProposPage() {
                 Une fiche gratuite pour tous les pros
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed text-sm">
-                Plus de 2,4 millions d&apos;artisans, dans toute la France,
+                Plus de 2,5 millions d&apos;artisans, en France et en Belgique francophone,
                 sont déjà référencés gratuitement. Vous réclamez la vôtre en 3
                 minutes pour la personnaliser, sans rien à payer.
               </p>

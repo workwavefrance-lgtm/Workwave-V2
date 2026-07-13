@@ -35,7 +35,7 @@ export async function generateGuideContent(
 ): Promise<GuideOutput> {
   const client = getClient();
 
-  const prompt = `Tu es un redacteur expert pour Workwave, un annuaire de professionnels locaux en France.
+  const prompt = `Tu es un redacteur expert pour Workwave, un annuaire de professionnels locaux en France et en Belgique francophone.
 
 Tu rediges en francais correct, avec tous les accents (a, e, e, e, c, u, etc.). Ne produis jamais de texte francais sans accents.
 

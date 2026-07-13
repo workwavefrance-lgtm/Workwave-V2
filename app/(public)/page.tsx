@@ -35,7 +35,7 @@ const homeFaqs = [
   {
     question: "Qu'est-ce que Workwave ?",
     answer:
-      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France. La plateforme référence plus de 2,4 millions de professionnels dans 34 046 communes et met en relation les particuliers avec des artisans locaux.",
+      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France et la Belgique francophone. La plateforme référence plus de 2,5 millions de professionnels dans 35 163 communes et met en relation les particuliers avec des artisans locaux.",
   },
   {
     question: "Workwave est-il gratuit pour les particuliers ?",
@@ -65,7 +65,7 @@ const homeFaqs = [
   {
     question: "Quelle zone géographique couvre Workwave ?",
     answer:
-      "Workwave couvre toute la France : les 101 départements, en métropole comme en outre-mer, soit plus de 34 000 communes référencées.",
+      "Workwave couvre toute la France et la Belgique francophone : les 101 départements français (métropole et outre-mer) et les 6 provinces belges (Wallonie et Bruxelles), soit plus de 35 000 communes référencées.",
   },
 ];
 
@@ -164,7 +164,7 @@ export default async function Home() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
             <div className="text-center">
               <CountUp
-                end={2439523}
+                end={2560292}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
@@ -177,7 +177,7 @@ export default async function Home() {
             />
             <div className="text-center">
               <CountUp
-                end={34046}
+                end={35163}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
@@ -190,11 +190,11 @@ export default async function Home() {
             />
             <div className="text-center">
               <CountUp
-                end={101}
+                end={107}
                 className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
               />
               <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                départements couverts
+                départements et provinces
               </span>
             </div>
           </div>
@@ -281,7 +281,7 @@ export default async function Home() {
               Votre fiche est peut-être déjà sur Workwave.
             </h2>
             <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
-              226&nbsp;000+ professionnels sont déjà référencés via le registre Sirene.
+              2,5&nbsp;millions+ de professionnels sont déjà référencés via les registres officiels SIRENE (France) et BCE (Belgique).
               Réclamez votre fiche gratuitement et sans engagement.
             </p>
           </div>
@@ -317,8 +317,8 @@ export default async function Home() {
                 </h3>
               </div>
               <p className="text-sm text-[var(--text-secondary)] mb-5 leading-relaxed">
-                Plombier, électricien, peintre, maçon, paysagiste… 226&nbsp;000 fiches
-                créées à partir du registre Sirene officiel.
+                Plombier, électricien, peintre, maçon, paysagiste… 2,5&nbsp;millions de fiches
+                créées à partir des registres officiels SIRENE (France) et BCE (Belgique).
               </p>
               <Link
                 href="/pro/retrouver-fiche"

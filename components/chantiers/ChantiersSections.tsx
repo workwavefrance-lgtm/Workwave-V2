@@ -17,9 +17,9 @@ export default function ChantiersSections({ contextLabel }: Props) {
       <section className="px-4 py-12 bg-[var(--bg-secondary)] border-y border-[var(--border-color)]">
         <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {[
-            { n: "2,4 M+", l: "artisans référencés" },
-            { n: "34 046", l: "communes couvertes" },
-            { n: "101", l: "départements" },
+            { n: "2,5 M+", l: "artisans référencés" },
+            { n: "35 163", l: "communes couvertes" },
+            { n: "107", l: "départements et provinces" },
             { n: "9,90 €", l: "le lead, tout compris" },
           ].map((s) => (
             <div key={s.l}>
