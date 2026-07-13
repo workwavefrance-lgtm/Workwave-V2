@@ -114,19 +114,61 @@ async function notifyProOfClaimSuccess(params: {
     const serviceClient = await getServiceClient();
     const { data: pro } = await serviceClient
       .from("pros")
-      .select("name")
+      .select(
+        "name, category_id, secondary_category_ids, intervention_radius_km, cities(latitude, longitude, department_id)"
+      )
       .eq("slug", params.slug)
       .single();
 
     if (!pro) return;
 
+    // Projets DÉJÀ disponibles dans la zone du pro (hook « X projets vous
+    // attendent déjà » dans le mail). Isolé dans son propre try/catch : si le
+    // calcul échoue, le mail de bienvenue part quand même, sans le bloc.
+    let availableProjects;
+    try {
+      const { getAvailableProjectsForPro } = await import(
+        "@/lib/queries/available-projects"
+      );
+      const city = Array.isArray(pro.cities) ? pro.cities[0] : pro.cities;
+      availableProjects = await getAvailableProjectsForPro(serviceClient, {
+        category_id: pro.category_id,
+        secondary_category_ids: pro.secondary_category_ids,
+        intervention_radius_km: pro.intervention_radius_km,
+        city: city ?? null,
+      });
+    } catch (e) {
+      console.error("getAvailableProjectsForPro error :", e);
+    }
+
     await sendClaimWelcomeEmail({
       email: params.claimEmail,
       proName: pro.name,
+      availableProjects,
     });
   } catch (err) {
     console.error("notifyProOfClaimSuccess error :", err);
   }
+}
+
+// Notifs claim (mail admin + mail pro) : awaitées pour GARANTIR l'envoi (leçon
+// 24/05 : une promesse détachée dans un Server Action est tuée au return ; le
+// mail pro fait des requêtes DB → 06/06 : await le business-critique), MAIS
+// bornées à 8 s par Promise.race : Resend n'a pas de timeout par défaut, un hang
+// provider ne doit JAMAIS geler l'auto-login + le redirect du claim. Les 2
+// fonctions notify* catchent déjà leurs erreurs → jamais de throw ici.
+async function sendClaimNotifications(params: {
+  slug: string;
+  claimEmail: string;
+  ip?: string;
+}) {
+  await Promise.race([
+    Promise.all([
+      notifyAdminOfClaimSuccess(params),
+      notifyProOfClaimSuccess({ slug: params.slug, claimEmail: params.claimEmail }),
+    ]),
+    new Promise((resolve) => setTimeout(resolve, 8000)),
+  ]);
 }
 
 // ============================================
@@ -483,17 +525,11 @@ export async function verifyClaim(
         metadata: { slug },
       });
 
-      // Notification admin (fire-and-forget)
-      notifyAdminOfClaimSuccess({
+      // Notifications admin + pro (awaitées, bornées 8s — cf. sendClaimNotifications)
+      await sendClaimNotifications({
         slug,
         claimEmail: attempt.email,
         ip: attempt.ip ?? undefined,
-      });
-
-      // Mail de bienvenue au pro (fire-and-forget)
-      notifyProOfClaimSuccess({
-        slug,
-        claimEmail: attempt.email,
       });
 
       // Connecter l'utilisateur côté serveur
@@ -558,20 +594,14 @@ export async function verifyClaim(
     metadata: { slug },
   });
 
-  // 5. Notification admin (fire-and-forget)
-  notifyAdminOfClaimSuccess({
+  // 5. Notifications admin + pro (awaitées, bornées 8s — cf. sendClaimNotifications)
+  await sendClaimNotifications({
     slug,
     claimEmail: attempt.email,
     ip: attempt.ip ?? undefined,
   });
 
-  // 6. Mail de bienvenue au pro (fire-and-forget)
-  notifyProOfClaimSuccess({
-    slug,
-    claimEmail: attempt.email,
-  });
-
-  // 7. Connecter l'utilisateur côté serveur (écrire les cookies de session)
+  // 6. Connecter l'utilisateur côté serveur (écrire les cookies de session)
   await signInAndSetCookies(attempt.email, attempt.temp_password);
 
   return { success: true, redirectUrl: "/pro/dashboard/fiche" };

@@ -1,5 +1,74 @@
 import { Resend } from "resend";
 import { buildGoogleReviewBlock } from "./google-review-block";
+import type { AvailableProjectsResult } from "@/lib/queries/available-projects";
+import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
+
+// Plafond d'affichage aligné sur PROJECTS_LIMIT du dashboard /pro/dashboard/leads
+// (le pro n'y voit que 50 projets à la fois) → on ne sur-promet pas dans le mail.
+const DISPLAY_CAP = 50;
+
+/**
+ * Bloc "X projets vous attendent déjà" — dynamique, affiché seulement si le pro
+ * a des projets disponibles dans sa zone au moment du claim. Fond noir + coral
+ * pour ressortir. ZÉRO PII : uniquement des champs structurés (métier · ville ·
+ * distance · délai) — jamais de texte libre / résumé (risque de fuite avant
+ * paiement, un résumé IA étant dérivé de la description brute du client).
+ */
+export function buildAvailableProjectsBlock(
+  baseUrl: string,
+  data: AvailableProjectsResult
+): string {
+  if (!data || data.count <= 0 || data.top.length === 0) return "";
+
+  const capped = data.count > DISPLAY_CAP;
+  const shownCount = capped ? `${DISPLAY_CAP}+` : `${data.count}`;
+  const plural = data.count > 1;
+  const heading = `${shownCount} projet${plural ? "s" : ""} vous attend${plural ? "ent" : ""} déjà dans votre zone`;
+
+  const items = data.top
+    .map((p) => {
+      const dist = p.distanceKm != null ? ` · à ${p.distanceKm} km` : "";
+      return `
+        <div style="background:#1A1A1A;border-radius:10px;padding:13px 15px;margin-bottom:8px;">
+          <p style="margin:0;font-size:14px;color:#FFFFFF;font-weight:600;line-height:1.35;">
+            ${p.metier}${p.city ? ` · ${p.city}` : ""}${dist}
+          </p>
+          ${p.urgencyLabel ? `<p style="margin:3px 0 0;font-size:12px;color:#9CA3AF;line-height:1.4;">Délai : ${p.urgencyLabel}</p>` : ""}
+        </div>`;
+    })
+    .join("");
+
+  const rest = data.count - data.top.length;
+  const others =
+    rest > 0
+      ? `<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;text-align:center;">… et ${capped ? "bien d'autres" : `${rest} autre${rest > 1 ? "s" : ""}`}.</p>`
+      : "";
+
+  const offer =
+    FREE_UNLOCK_COUNT <= 1
+      ? "Votre premier déblocage est offert."
+      : `Vos ${FREE_UNLOCK_COUNT} premiers déblocages sont offerts.`;
+
+  return `
+      <!-- Projets déjà disponibles (dynamique) -->
+      <div style="background:#0A0A0A;border-radius:14px;padding:22px 22px 20px;margin:24px 0;">
+        <p style="margin:0 0 4px;font-size:12px;color:#FF8A6B;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Bonne nouvelle</p>
+        <p style="margin:0 0 16px;font-size:19px;color:#FFFFFF;font-weight:700;line-height:1.3;">
+          ${heading}
+        </p>
+        ${items}
+        ${others}
+        <div style="text-align:center;margin-top:18px;">
+          <a href="${baseUrl}/pro/dashboard/leads"
+             style="display:inline-block;background:#FF5A36;color:#FFFFFF;text-decoration:none;padding:12px 30px;border-radius:9999px;font-size:14px;font-weight:600;letter-spacing:-0.01em;">
+            Voir les projets &rarr;
+          </a>
+        </div>
+        <p style="margin:14px 0 0;font-size:12px;color:#9CA3AF;text-align:center;line-height:1.5;">
+          🎁 ${offer}
+        </p>
+      </div>`;
+}
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -24,10 +93,15 @@ function getResendClient() {
 export async function sendClaimWelcomeEmail(params: {
   email: string;
   proName: string;
+  availableProjects?: AvailableProjectsResult;
 }): Promise<void> {
   const baseUrl = (
     process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr"
   ).replace(/\s+/g, "");
+
+  const availableBlock = params.availableProjects
+    ? buildAvailableProjectsBlock(baseUrl, params.availableProjects)
+    : "";
 
   const html = `
 <!DOCTYPE html>
@@ -53,7 +127,7 @@ export async function sendClaimWelcomeEmail(params: {
         Vous venez de réclamer la fiche <strong style="color:#0A0A0A;">${params.proName}</strong> sur Workwave.
         Votre fiche est désormais à vous, <strong>gratuite à vie</strong>, sans engagement et sans carte bancaire.
       </p>
-
+${availableBlock}
       <!-- Card modele pay-per-lead -->
       <div style="background:#FFF5F2;border:1px solid #FFD4C7;border-radius:12px;padding:20px;margin:24px 0;">
         <p style="margin:0 0 6px;font-size:12px;color:#FF5A36;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Fonctionnement</p>
