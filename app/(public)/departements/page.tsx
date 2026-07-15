@@ -15,7 +15,7 @@ import { toBreadcrumbSchema } from "@/lib/utils/schema";
 //
 // Cible : transmettre du link juice depuis cette page hub (haute autorite,
 // linkee par le footer + nav) vers 12 dept x 6 cat vedettes = 72 pages dept.
-export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO // 24h
+export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 const FEATURED_CATEGORIES: { slug: string; name: string }[] = [
   { slug: "plombier", name: "Plombier" },

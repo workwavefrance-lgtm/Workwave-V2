@@ -6,7 +6,7 @@ import { TJM_REFERENCE, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
-export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO // 24h
+export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 const CURRENT_YEAR = new Date().getFullYear();
 const MONTH_NAMES = [
   "janvier", "fevrier", "mars", "avril", "mai", "juin",

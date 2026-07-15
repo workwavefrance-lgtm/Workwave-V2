@@ -46,7 +46,7 @@ import {
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
  */
-export const revalidate = 604800; // 7j — données Sirene/prix quasi-statiques, cache long = 0 impact SEO + moins d'egress sous crawl
+export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 const LOCATION_SAISONNIERE_METIERS = new Set(["menage"]);
 

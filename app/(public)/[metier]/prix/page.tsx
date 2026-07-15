@@ -12,7 +12,7 @@ import { BASE_URL } from "@/lib/constants";
  * Segment statique "prix" prioritaire sur /[metier]/[location] (cf. /[metier]/guide).
  * 404 si pas de guide publié pour ce métier (pas de page vide).
  */
-export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
+export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 type Props = { params: Promise<{ metier: string }> };
 

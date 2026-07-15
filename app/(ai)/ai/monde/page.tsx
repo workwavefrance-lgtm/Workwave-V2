@@ -11,7 +11,7 @@ import { FR_CITIES } from "@/lib/data/intl-fr-cities";
  */
 
 const SITE_URL = "https://workwave.fr";
-export const revalidate = 604800; // 7j (13/06) : pic crawl Google 650k pages = +200% Vercel ; donnees Sirene statiques, 0 impact SEO
+export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 export const metadata: Metadata = {
   title: "Freelances dans le monde francophone — Workwave AI",
