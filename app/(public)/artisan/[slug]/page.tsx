@@ -150,9 +150,11 @@ export default async function ProPage({ params }: Props) {
   ];
 
   const isClaimed = !!pro.claimed_by_user_id;
-  // CTA de réclamation (fiche non réclamée) : angle "loss aversion" — les
-  // demandes déposées sur Workwave pour ce métier partent aux pros inscrits,
-  // pas à ce pro tant qu'il n'a pas réclamé. + lien vers la page d'acquisition
+  // CTA de réclamation (fiche non réclamée) : angle POSITIF (demande) plutôt
+  // que "loss aversion". La fiche est publique et vue à ~77% par des
+  // particuliers, donc on ne dit JAMAIS "ce pro ne reçoit rien" (ça sèmerait le
+  // doute chez le particulier sur l'utilité de contacter ce pro). On met en
+  // avant qu'il y a de la demande à recevoir. + lien vers la page d'acquisition
   // adaptée au vertical (chantiers pour le BTP, clients pour les services).
   const isServiceVertical =
     pro.category.vertical === "domicile" || pro.category.vertical === "personne";
@@ -162,9 +164,9 @@ export default async function ProPage({ params }: Props) {
   const claimArticle = getCategoryArticle(pro.category.name);
   const claimMetier = pro.category.name.toLowerCase();
   const claimCityPart = cityName ? ` à ${cityName}` : "";
-  // Phrase "perte" du bandeau construite en STRING (pas en JSX interpolé) :
-  // évite les espaces avalés aux frontières {expr}/saut-de-ligne (bug "Poitierspartent").
-  const claimLossText = `Les demandes des particuliers pour ${claimArticle} ${claimMetier}${claimCityPart} vont aux pros inscrits sur Workwave. Pas à vous, tant que vous n'avez pas réclamé votre fiche.`;
+  // Phrase du bandeau construite en STRING (pas en JSX interpolé) : évite les
+  // espaces avalés aux frontières {expr}/saut-de-ligne (bug "Poitierspartent").
+  const claimPitchText = `Des particuliers cherchent ${claimArticle} ${claimMetier}${claimCityPart} sur Workwave. Réclamez votre fiche (gratuit) pour recevoir leurs demandes directement.`;
   // FLOU DES COORDONNÉES : sur une fiche NON réclamée qui a au moins une
   // coordonnée, on masque le téléphone (à moitié), l'email et le site. Ça force
   // le particulier à déposer un projet (= lead capté par Workwave) et incite le
@@ -329,7 +331,7 @@ export default async function ProPage({ params }: Props) {
               <span className="font-semibold text-[var(--text-primary)]">
                 Vous êtes {pro.name} ?
               </span>{" "}
-              {claimLossText}{" "}
+              {claimPitchText}{" "}
               <Link
                 href={claimAcquisitionHref}
                 className="text-[var(--accent)] font-medium underline underline-offset-2 hover:text-[#E63E1A] transition-colors duration-250 whitespace-nowrap"
