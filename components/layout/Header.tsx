@@ -122,17 +122,13 @@ export default function Header() {
           >
             {isPro ? "Mon dashboard" : "Espace Pro"}
           </Link>
-          <Link
-            href="/recherche"
-            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
-          >
-            Trouver un pro
-          </Link>
-          {/* CTA "Déposer mon projet" : modal directe (pas de redirect) →
-              capture lead à zéro friction. Levier business critique. */}
+          {/* CTA "Déposer un projet" : modal directe (pas de redirect) →
+              capture lead à zéro friction. Levier business critique.
+              CTA PRINCIPAL du header (plein + agrandi). Le "Trouver un pro"
+              faisait doublon avec la recherche du hero → retiré le 16/07. */}
           <QuickProjectModalTrigger
             label="Déposer un projet"
-            className="border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-base font-semibold transition-all duration-250 hover:scale-[1.02]"
           />
         </div>
 

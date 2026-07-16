@@ -20,10 +20,12 @@ const BUDGET_LABELS: Record<string, string> = {
   gt15000: "> 15 000 €",
 };
 
+// Délai d'intervention souhaité par le client (formulé en "lead time" pour ne
+// pas être confondu avec la date de dépôt affichée en bas de carte).
 const URGENCY_LABELS: Record<string, string> = {
   today: "Urgent",
-  this_week: "Cette semaine",
-  this_month: "Ce mois-ci",
+  this_week: "Sous 1 semaine",
+  this_month: "Sous 1 mois",
   "3months": "Sous 3 mois",
   not_urgent: "Sans urgence",
   flexible: "Flexible",
@@ -101,7 +103,8 @@ export default function RecentProjectsSection({
                       </span>
                       {p.urgency && URGENCY_LABELS[p.urgency] && (
                         <span
-                          className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                          className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                          title="Délai souhaité par le client pour l'intervention"
                           style={
                             urgent
                               ? { backgroundColor: "var(--accent)", color: "#ffffff" }
@@ -111,6 +114,20 @@ export default function RecentProjectsSection({
                                 }
                           }
                         >
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            aria-hidden
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
                           {URGENCY_LABELS[p.urgency]}
                         </span>
                       )}
@@ -143,7 +160,9 @@ export default function RecentProjectsSection({
                       <span aria-hidden>·</span>
                     </>
                   )}
-                  <span>{relativeTime(p.createdAt)}</span>
+                  <span title="Date de dépôt de la demande">
+                    Déposé {relativeTime(p.createdAt)}
+                  </span>
                 </div>
               </Link>
             );
