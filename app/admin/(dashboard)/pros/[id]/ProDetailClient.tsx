@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AdminBadge from "@/components/admin/data-display/AdminBadge";
@@ -371,31 +372,52 @@ export default function ProDetailClient({
           </div>
         ) : (
           <div>
-            {unlocks.map((u) => (
-              <div
-                key={u.id}
-                className="flex items-center gap-3 px-4 py-2.5 text-xs"
-                style={{ borderBottom: "1px solid var(--admin-border)" }}
-              >
-                <span className="tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
-                  {new Date(u.paid_at).toLocaleDateString("fr-FR", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "2-digit",
-                  })}
-                </span>
-                <span className="flex-1 truncate">
-                  {u.project?.first_name || "—"} — {u.project?.description?.slice(0, 60) || ""}
-                </span>
-                <span className="tabular-nums font-medium">
-                  {(u.amount_cents / 100).toLocaleString("fr-FR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                  €
-                </span>
-              </div>
-            ))}
+            {unlocks.map((u) => {
+              const rowClass =
+                "flex items-center gap-3 px-4 py-2.5 text-xs" +
+                (u.project?.id ? " hover:bg-[var(--admin-hover)] transition-colors cursor-pointer" : "");
+              const rowStyle = { borderBottom: "1px solid var(--admin-border)" };
+              const inner = (
+                <>
+                  <span className="tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
+                    {new Date(u.paid_at).toLocaleDateString("fr-FR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "2-digit",
+                    })}
+                  </span>
+                  <span className="flex-1 truncate">
+                    {u.project ? (
+                      <>
+                        <span style={{ color: "var(--admin-accent)" }}>#{u.project.id}</span>{" "}
+                        {u.project.first_name || "—"} — {u.project.description?.slice(0, 60) || ""}
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </span>
+                  <span className="tabular-nums font-medium">
+                    {(u.amount_cents / 100).toLocaleString("fr-FR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    €
+                  </span>
+                  {u.project?.id && (
+                    <span aria-hidden style={{ color: "var(--admin-text-tertiary)" }}>&rsaquo;</span>
+                  )}
+                </>
+              );
+              return u.project?.id ? (
+                <Link key={u.id} href={`/admin/projects/${u.project.id}`} className={rowClass} style={rowStyle}>
+                  {inner}
+                </Link>
+              ) : (
+                <div key={u.id} className={rowClass} style={rowStyle}>
+                  {inner}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
