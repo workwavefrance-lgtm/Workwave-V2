@@ -1,24 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useDashboard } from "@/components/pro/dashboard/DashboardProvider";
-import { createClient } from "@/lib/supabase/client";
 
 export default function ParametresView() {
   const { user } = useDashboard();
-  const router = useRouter();
-  const [signingOut, setSigningOut] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [notifications, setNotifications] = useState(true);
-
-  async function handleSignOut() {
-    setSigningOut(true);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
-  }
 
   return (
     <div className="space-y-8">
@@ -77,13 +65,14 @@ export default function ParametresView() {
           <p className="text-sm font-medium text-[var(--text-primary)] mb-3">
             Session
           </p>
-          <button
-            onClick={handleSignOut}
-            disabled={signingOut}
-            className="border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-60"
+          {/* <a> NATIF volontaire, jamais <Link> : le prefetch de Next
+              déconnecterait le pro au chargement de la page (leçon 26/05). */}
+          <a
+            href="/api/auth/signout?redirect=/"
+            className="inline-block border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
           >
-            {signingOut ? "Déconnexion..." : "Se déconnecter"}
-          </button>
+            Se déconnecter
+          </a>
         </div>
       </div>
 

@@ -1,16 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useDashboard } from "./DashboardProvider";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { createClient } from "@/lib/supabase/client";
 
 export default function DashboardHeader() {
   const { pro, user } = useDashboard();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
   const initial = pro.name.charAt(0).toUpperCase();
 
   // Fermer le menu au clic extérieur
@@ -25,13 +22,6 @@ export default function DashboardHeader() {
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showMenu]);
-
-  async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
-  }
 
   return (
     <header className="h-16 border-b border-[var(--border-color)] bg-[var(--bg-primary)] px-6 flex items-center justify-between shrink-0">
@@ -87,15 +77,20 @@ export default function DashboardHeader() {
                 Voir ma fiche publique
               </a>
 
-              <button
-                onClick={handleSignOut}
+              {/* <a> NATIF volontaire, jamais <Link> : Next prefetch les Link,
+                  ce qui déconnecterait le pro au simple chargement de la page
+                  (leçon 26/05). La déconnexion passe par la route serveur, ce
+                  qui évite aussi d'embarquer le SDK Supabase (~50 Ko gz) dans
+                  le bundle de TOUTES les pages du dashboard. */}
+              <a
+                href="/api/auth/signout?redirect=/"
                 className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-[var(--bg-tertiary)] transition-colors duration-250"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                 </svg>
                 Se déconnecter
-              </button>
+              </a>
             </div>
           )}
         </div>
