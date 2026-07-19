@@ -23,6 +23,10 @@
  */
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import {
+  ingestInboundEmailAsTicket,
+  markTicketAdminNotified,
+} from "@/lib/support/tickets";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -50,8 +54,10 @@ export async function POST(req: Request) {
   const rawBody = await req.text();
 
   if (!secret) {
-    console.error("[resend-inbound] RESEND_WEBHOOK_SECRET manquant — non vérifiable, skip");
-    return NextResponse.json({ ok: false, error: "secret_missing" });
+    // Erreur de config : 500 pour que l'échec soit visible et rejoué une fois le
+    // secret ajouté (un 200 ferait considérer l'événement "livré" = perdu).
+    console.error("[resend-inbound] RESEND_WEBHOOK_SECRET manquant");
+    return NextResponse.json({ ok: false, error: "secret_missing" }, { status: 500 });
   }
 
   // 1. Vérification de la signature svix (Resend) — headers = en-têtes svix
@@ -81,16 +87,13 @@ export async function POST(req: Request) {
   if (/noreply@workwave\.fr|contact@workwave\.fr/i.test(event.data.from || "")) {
     return NextResponse.json({ ok: true, skipped: "self_sender" });
   }
-  if (!adminEmail) {
-    console.error("[resend-inbound] ADMIN_EMAIL manquant");
-    return NextResponse.json({ ok: false, error: "admin_email_missing" });
-  }
-
   // 3. Récupère le corps complet du mail reçu
   const { data: mail, error } = await resend.emails.receiving.get(emailId);
   if (error || !mail) {
+    // Échec transitoire (timeout/5xx Resend) -> 502 pour DÉCLENCHER le retry svix
+    // (sinon un 200 = "livré" = email perdu à jamais).
     console.error("[resend-inbound] receiving.get échec", error);
-    return NextResponse.json({ ok: false, error: "fetch_failed" });
+    return NextResponse.json({ ok: false, error: "fetch_failed" }, { status: 502 });
   }
 
   const from = mail.from || event.data.from || "(expéditeur inconnu)";
@@ -125,7 +128,32 @@ Objet : ${subject}${atts.length ? `\nPièces jointes : ${atts.map((a) => a.filen
 
 ${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
 
-  // 4. Transfert vers la boîte admin (reply-to = expéditeur d'origine)
+  // 4. Support maison : l'email devient un TICKET, AVANT le forward, pour ne pas
+  //    dépendre d'un seul canal. Best-effort (un échec ici ne casse rien) et
+  //    idempotent (email_id Resend) -> un éventuel rejeu svix ne duplique pas.
+  let ticketId: number | null = null;
+  try {
+    const ticket = await ingestInboundEmailAsTicket({
+      resendEmailId: emailId,
+      fromRaw: from,
+      subject,
+      text: mail.text ?? null,
+      html: mail.html ?? null,
+    });
+    if (ticket && !ticket.duplicate) ticketId = ticket.ticketId;
+  } catch (e) {
+    console.error("[resend-inbound] ingestion ticket échec:", (e as Error).message);
+  }
+
+  // 5. Transfert vers la boîte admin (le filet Gmail, reply-to = expéditeur).
+  if (!adminEmail) {
+    // Config manquante : 500 -> échec visible et rejoué (le ticket est déjà créé).
+    console.error("[resend-inbound] ADMIN_EMAIL manquant");
+    return NextResponse.json(
+      { ok: false, error: "admin_email_missing", ticketId },
+      { status: 500 }
+    );
+  }
   const sent = await resend.emails.send({
     from: "Workwave Inbox <noreply@workwave.fr>",
     to: adminEmail,
@@ -134,11 +162,24 @@ ${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
     html: headerHtml + bodyHtml,
     text: textPlain,
   });
-
   if (sent.error) {
+    // Échec transitoire -> 502 pour rejeu svix (le ticket est déjà créé, l'ingest
+    // est idempotent au rejeu). Sans 502, l'admin ne verrait jamais ce mail.
     console.error("[resend-inbound] forward send échec", sent.error);
-    return NextResponse.json({ ok: false, error: "forward_failed" });
+    return NextResponse.json(
+      { ok: false, error: "forward_failed", ticketId },
+      { status: 502 }
+    );
   }
 
-  return NextResponse.json({ ok: true, forwarded: emailId });
+  // 6. Forward réussi = notification admin -> on trace (audit-trail).
+  if (ticketId) {
+    try {
+      await markTicketAdminNotified(ticketId);
+    } catch {
+      /* best-effort */
+    }
+  }
+
+  return NextResponse.json({ ok: true, forwarded: emailId, ticketId });
 }

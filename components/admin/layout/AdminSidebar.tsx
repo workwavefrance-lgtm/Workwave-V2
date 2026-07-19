@@ -34,6 +34,15 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: "Support",
+    href: "/admin/support",
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 10.5h8M8 14h5m-9 6l3.5-3.5H18a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14z" />
+      </svg>
+    ),
+  },
+  {
     label: "Leads",
     href: "/admin/leads",
     icon: (
