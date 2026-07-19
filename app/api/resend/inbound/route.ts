@@ -26,7 +26,9 @@ import { Resend } from "resend";
 import {
   ingestInboundEmailAsTicket,
   markTicketAdminNotified,
+  updateTicketTriage,
 } from "@/lib/support/tickets";
+import { triageTicket } from "@/lib/support/triage";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -140,7 +142,23 @@ ${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
       text: mail.text ?? null,
       html: mail.html ?? null,
     });
-    if (ticket && !ticket.duplicate) ticketId = ticket.ticketId;
+    if (ticket && !ticket.duplicate) {
+      ticketId = ticket.ticketId;
+      // Tri IA (catégorie / urgence / flag légal) : UNIQUEMENT à la création
+      // d'un ticket, best-effort et borné en coût (Haiku, corps tronqué).
+      // Un échec ici n'a aucun effet sur le ticket ni sur le forward.
+      if (ticket.created) {
+        try {
+          const triage = await triageTicket({
+            subject,
+            body: mail.text || mail.html || "",
+          });
+          if (triage) await updateTicketTriage(ticket.ticketId, triage);
+        } catch (e) {
+          console.error("[resend-inbound] tri IA échec:", (e as Error).message);
+        }
+      }
+    }
   } catch (e) {
     console.error("[resend-inbound] ingestion ticket échec:", (e as Error).message);
   }

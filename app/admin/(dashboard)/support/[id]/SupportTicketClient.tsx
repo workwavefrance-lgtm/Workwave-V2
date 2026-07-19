@@ -49,6 +49,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState<"reply" | "note" | null>(null);
   const [statusBusy, setStatusBusy] = useState(false);
+  const [drafting, setDrafting] = useState(false);
 
   const statusMeta = STATUS_META[ticket.status as TicketStatus] || STATUS_META.open;
 
@@ -86,6 +87,25 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
       toast("Erreur réseau", "error");
     } finally {
       setBusy(null);
+    }
+  }
+
+  /** Demande un brouillon à l'IA et le place dans la zone de texte. N'envoie rien. */
+  async function generateDraft() {
+    setDrafting(true);
+    try {
+      const res = await fetch(`/api/admin/support/${ticket.id}/draft`, { method: "POST" });
+      const json = await res.json();
+      if (json.success && json.draft) {
+        setDraft(json.draft);
+        toast("Brouillon généré — relisez avant d'envoyer", "success");
+      } else {
+        toast(json.error || "Génération impossible", "error");
+      }
+    } catch {
+      toast("Erreur réseau", "error");
+    } finally {
+      setDrafting(false);
     }
   }
 
@@ -229,19 +249,28 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
             />
             <div className="flex flex-wrap items-center gap-2 mt-3">
               <AdminButton
+                variant="secondary"
+                size="sm"
+                loading={drafting}
+                disabled={drafting || busy !== null}
+                onClick={generateDraft}
+              >
+                Rédiger la réponse
+              </AdminButton>
+              <AdminButton
                 variant="primary"
                 size="sm"
                 loading={busy === "reply"}
-                disabled={busy !== null || !ticket.requester_email}
+                disabled={busy !== null || drafting || !ticket.requester_email}
                 onClick={() => sendMessage("reply")}
               >
                 Envoyer au client
               </AdminButton>
               <AdminButton
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 loading={busy === "note"}
-                disabled={busy !== null}
+                disabled={busy !== null || drafting}
                 onClick={() => sendMessage("note")}
               >
                 Note interne

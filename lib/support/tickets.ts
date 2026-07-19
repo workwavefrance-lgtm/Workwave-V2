@@ -285,3 +285,25 @@ export async function markTicketAdminNotified(ticketId: number): Promise<void> {
     .eq("id", ticketId)
     .is("admin_notified_at", null);
 }
+
+/**
+ * Applique le résultat du tri IA (catégorie / urgence / flag légal) à un ticket.
+ * Best-effort : un échec ne remet jamais en cause le ticket lui-même.
+ */
+export async function updateTicketTriage(
+  ticketId: number,
+  triage: { category: string; priority: "normal" | "urgent"; isLegal: boolean }
+): Promise<void> {
+  const sb = getServiceClient();
+  const { error } = await sb
+    .from("support_tickets")
+    .update({
+      category: triage.category,
+      priority: triage.priority,
+      is_legal: triage.isLegal,
+    })
+    .eq("id", ticketId);
+  if (error) {
+    console.error("[support] update tri échec :", error.message);
+  }
+}
