@@ -11,11 +11,13 @@ import {
   type ProfileFormState,
   type UploadState,
 } from "@/app/pro/dashboard/fiche/actions";
-import type { Category, Certification, PaymentMethod, OpeningHours } from "@/lib/types/database";
+import type { Certification, PaymentMethod, OpeningHours } from "@/lib/types/database";
+import type { CategoryOption } from "@/lib/queries/categories";
 
 type Props = {
-  categories: Category[];
-  profileCompletion: number;
+  // Liste allégée (id/name/vertical) : voir getCategoriesForPicker — la liste
+  // complète représentait 60-150 Ko de JSON envoyés au téléphone pour un menu.
+  categories: CategoryOption[];
 };
 
 const CERTIFICATIONS: Certification[] = [
@@ -173,8 +175,11 @@ const inputErrorClass =
 // Composant principal
 // ============================================
 
-export default function FicheEditor({ categories, profileCompletion }: Props) {
+export default function FicheEditor({ categories }: Props) {
   const { pro } = useDashboard();
+  // Lu depuis le contexte (déjà chargé par le layout) au lieu d'être passé en
+  // prop : évitait un SELECT * complet sur `pros` juste pour ce chiffre.
+  const profileCompletion = pro.profile_completion ?? 0;
 
   // Profile form state
   const [profileState, profileAction, profilePending] = useActionState(

@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
-import { getAllCategories } from "@/lib/queries/categories";
+import { getCategoriesForPicker } from "@/lib/queries/categories";
 import FicheEditor from "@/components/pro/dashboard/FicheEditor";
 
 export const metadata: Metadata = {
@@ -11,22 +8,13 @@ export const metadata: Metadata = {
 };
 
 export default async function FichePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/pro/connexion");
+  // PERF : cette page faisait auparavant getUser() + un SELECT * sur `pros`
+  // (79 colonnes) uniquement pour lire profile_completion, PUIS un SELECT * sur
+  // les 183 catégories (60-150 Ko sérialisés vers le téléphone pour un menu
+  // déroulant). Or l'auth ET la fiche sont déjà garanties par le middleware et
+  // le layout, qui place la fiche dans le contexte lu par FicheEditor.
+  // Il ne reste donc qu'UNE requête, allégée (~2 Ko).
+  const categories = await getCategoriesForPicker();
 
-  const [pro, categories] = await Promise.all([
-    getProByUserId(user.id),
-    getAllCategories(),
-  ]);
-  if (!pro) redirect("/pro/retrouver-fiche");
-
-  return (
-    <FicheEditor
-      categories={categories}
-      profileCompletion={pro.profile_completion}
-    />
-  );
+  return <FicheEditor categories={categories} />;
 }

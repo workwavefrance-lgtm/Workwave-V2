@@ -10,6 +10,32 @@ export async function getAllCategories(): Promise<Category[]> {
   return (data as Category[]) || [];
 }
 
+/** Champs strictement nécessaires à un sélecteur de catégorie. */
+export type CategoryOption = Pick<Category, "id" | "name" | "vertical">;
+
+/**
+ * Version LÉGÈRE de getAllCategories() pour les sélecteurs du dashboard pro.
+ *
+ * PERF : getAllCategories() fait un `SELECT *` sur les 183 catégories
+ * (description, seo_keywords, naf_codes…) et le tableau entier était sérialisé
+ * vers le téléphone du pro pour alimenter un simple menu déroulant — de l'ordre
+ * de 60 à 150 Ko de JSON inutile à télécharger ET à parser sur mobile.
+ * Ici : 3 champs, et uniquement les verticaux physiques (le dashboard BTP ne
+ * peut de toute façon pas proposer les ~145 catégories tech/AI). ~2 Ko.
+ *
+ * NB : on ne touche PAS getAllCategories(), utilisé par le sitemap, les pages
+ * publiques et l'admin.
+ */
+export async function getCategoriesForPicker(): Promise<CategoryOption[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("categories")
+    .select("id, name, vertical")
+    .in("vertical", ["btp", "domicile", "personne"])
+    .order("name");
+  return (data as CategoryOption[]) || [];
+}
+
 export async function getCategoryBySlug(
   slug: string
 ): Promise<Category | null> {
