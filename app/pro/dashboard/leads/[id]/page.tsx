@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
 import { getLeadById } from "@/lib/queries/leads";
+import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import LeadDetail from "@/components/pro/dashboard/LeadDetail";
 
@@ -17,14 +16,9 @@ export default async function LeadDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/pro/connexion");
-
-  const pro = await getProByUserId(user.id);
-  if (!pro) redirect("/pro");
+  // Mémoïsé par le layout : aucun aller-retour auth ni requête en plus.
+  const { pro } = await getDashboardContext();
+  if (!pro) redirect("/pro/connexion");
 
   const { id } = await params;
   const leadId = parseInt(id, 10);

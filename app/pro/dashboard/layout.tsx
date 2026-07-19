@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
-import { getBtpProByUserId, getAiProByUserId } from "@/lib/queries/pros";
+import { getAiProByUserId } from "@/lib/queries/pros";
+import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import DashboardProvider from "@/components/pro/dashboard/DashboardProvider";
 import Sidebar from "@/components/pro/dashboard/Sidebar";
 import BottomBar from "@/components/pro/dashboard/BottomBar";
@@ -13,19 +13,16 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Session + fiche BTP, mémoïsés pour toute la passe de rendu : les pages
+  // appellent le même helper sans repayer l'aller-retour auth ni la requête
+  // fiche (cf. lib/pro/dashboard-context.ts).
+  // Anti-fuite vertical : getBtpProByUserId filtre category_id NOT IN
+  // AI_CATEGORY_IDS. Symétrique au check côté AI. Audit 29/05/2026.
+  const { user, pro } = await getDashboardContext();
 
   if (!user) {
     redirect("/pro/connexion");
   }
-
-  // Anti-fuite vertical : on charge UNIQUEMENT la fiche BTP de cet user
-  // (getBtpProByUserId filtre category_id NOT IN AI_CATEGORY_IDS). Symetrique
-  // au check fait cote AI (app/(ai)/ai/dashboard/layout.tsx). Audit 29/05/2026.
-  const pro = await getBtpProByUserId(user.id);
 
   if (!pro) {
     // Si l'user a une fiche AI (freelance), on l'envoie sur SON dashboard
@@ -49,8 +46,21 @@ export default async function DashboardLayout({
     }
   }
 
+  // Le contexte est sérialisé dans le HTML envoyé au navigateur du pro. Les
+  // identifiants Stripe n'y ont rien à faire : ils ne sont lus que par des
+  // server actions (abonnement, déblocage), jamais par un composant client.
+  // On les neutralise donc avant de passer la fiche au contexte.
+  const proForClient = {
+    ...pro,
+    stripe_customer_id: null,
+    stripe_subscription_id: null,
+  };
+
   return (
-    <DashboardProvider pro={pro} user={{ id: user.id, email: user.email! }}>
+    <DashboardProvider
+      pro={proForClient}
+      user={{ id: user.id, email: user.email ?? "" }}
+    >
       {impersonationData && <ImpersonationBanner data={impersonationData} />}
       <div
         className="min-h-screen flex bg-[var(--bg-primary)]"

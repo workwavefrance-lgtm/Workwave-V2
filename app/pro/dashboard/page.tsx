@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
 import { getProDashboardData } from "@/lib/queries/leads";
+import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import DashboardHome from "@/components/pro/dashboard/DashboardHome";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
@@ -13,14 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardHomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/pro/connexion");
-
-  const pro = await getProByUserId(user.id);
-  if (!pro) redirect("/pro");
+  // Session + fiche déjà résolues par le layout : getDashboardContext est
+  // mémoïsé sur la passe de rendu, cet appel ne coûte donc NI aller-retour
+  // auth, NI requête supplémentaire (avant : getUser() + SELECT * en double).
+  const { user, pro } = await getDashboardContext();
+  if (!user || !pro) redirect("/pro/connexion");
 
   // Tracking dashboard visit (fire-and-forget)
   track(EVENTS.DASHBOARD_VISIT, {

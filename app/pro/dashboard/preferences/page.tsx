@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getProByUserId } from "@/lib/queries/pros";
 import { getLeadPreviewCount } from "@/lib/queries/leads";
+import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import PreferencesEditor from "@/components/pro/dashboard/PreferencesEditor";
 
 export const metadata: Metadata = {
@@ -11,14 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PreferencesPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/pro/connexion");
-
-  const pro = await getProByUserId(user.id);
-  if (!pro) redirect("/pro/retrouver-fiche");
+  // Mémoïsé par le layout : aucun aller-retour auth ni requête en plus.
+  const { pro } = await getDashboardContext();
+  if (!pro) redirect("/pro/connexion");
 
   // Aperçu basé sur TOUTES les catégories du pro (principale + secondaires) :
   // le pro reçoit les leads de l'ensemble de ses métiers (le broadcast diffuse

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { getBtpProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import { haversineKm } from "@/lib/utils/haversine";
 import { startBtpUnlock } from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
@@ -70,14 +69,10 @@ export default async function LeadsPage({
     : null;
   const errorMsg = sp.error ? PARAM_ERRORS[sp.error] || "Erreur. Réessayez." : "";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/pro/connexion");
-
-  const pro = await getBtpProByUserId(user.id);
-  if (!pro) redirect("/pro/retrouver-fiche");
+  // Mémoïsé par le layout (même getBtpProByUserId) : aucun aller-retour auth ni
+  // requête fiche en plus. La logique de sélection des leads est INCHANGÉE.
+  const { pro } = await getDashboardContext();
+  if (!pro) redirect("/pro/connexion");
 
   // Le pro doit avoir une ville renseignée pour qu'on connaisse sa zone.
   if (!pro.city) {
