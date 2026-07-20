@@ -9,6 +9,7 @@ Usage :
 """
 
 import argparse
+import hashlib
 import os
 import re
 import sys
@@ -51,6 +52,43 @@ def make_slug(name):
     slug = re.sub(r"[^a-z0-9]+", "-", slug)
     slug = slug.strip("-")
     return slug
+
+
+
+# ---------------------------------------------------------------------------
+# Liste d'exclusion RGPD
+# ---------------------------------------------------------------------------
+# Quand une personne obtient l'effacement de sa fiche (art. 17), supprimer la
+# ligne ne suffit pas : le prochain passage ici la RECREE a l'identique depuis
+# SIRENE, et la republie apres qu'elle a obtenu sa suppression. On consulte
+# donc une liste d'empreintes SHA-256 : on n'y stocke jamais le numero en
+# clair, seulement de quoi le reconnaitre s'il se represente.
+_SUPPRESSED_HASHES = None
+
+
+def hash_identifier(identifier):
+    """SHA-256 du numero normalise (chiffres uniquement)."""
+    digits = re.sub(r"\D", "", identifier or "")
+    if not digits:
+        return None
+    return hashlib.sha256(digits.encode("utf-8")).hexdigest()
+
+
+def load_suppression_list(supabase):
+    """Charge une fois les empreintes a exclure. En cas d'echec on ABANDONNE le
+    scrape : continuer risquerait de republier quelqu'un qui a demande a
+    disparaitre, ce qui est bien plus grave qu'un scrape reporte."""
+    global _SUPPRESSED_HASHES
+    if _SUPPRESSED_HASHES is not None:
+        return _SUPPRESSED_HASHES
+    try:
+        res = supabase.table("siret_suppression_list").select("identifier_hash").execute()
+        _SUPPRESSED_HASHES = {r["identifier_hash"] for r in (res.data or [])}
+        print(f"  Liste d'exclusion RGPD : {len(_SUPPRESSED_HASHES)} identifiant(s)")
+        return _SUPPRESSED_HASHES
+    except Exception as e:
+        print(f"  ERREUR : liste d'exclusion RGPD illisible ({e}). Scrape interrompu.")
+        sys.exit(1)
 
 
 def make_unique_slug(name, siret):
@@ -186,6 +224,11 @@ def scrape_departement(supabase, dept_code, categories, city_map):
                 for etab in etabs:
                     siret = etab.get("siret", "")
                     if not siret:
+                        continue
+
+                    # Effacement RGPD demande : on ne recree jamais cette fiche.
+                    h = hash_identifier(siret)
+                    if h and h in load_suppression_list(supabase):
                         continue
 
                     adresse = etab.get("adresseEtablissement", {})
