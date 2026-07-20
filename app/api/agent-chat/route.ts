@@ -24,6 +24,7 @@ import { notifyAdminOfChatTicket } from "@/lib/support/notify-chat-ticket";
 import { checkInboundRateLimit } from "@/lib/support/rate-limit";
 import { triageTicket } from "@/lib/support/triage";
 import { updateTicketTriage } from "@/lib/support/tickets";
+import { journaliserConversation } from "@/lib/support/lea-journal";
 
 /**
  * Récupère la clé Anthropic. En production Vercel, process.env est fiable.
@@ -187,6 +188,29 @@ export async function POST(req: NextRequest) {
       content: m.content.slice(0, 2000), // limite par message
     }));
 
+  /**
+   * Point de sortie UNIQUE : toute réponse passe par ici.
+   *
+   * La route a trois retours possibles (réponse directe, outil absent, clôture
+   * après ticket) ; journaliser à chaque endroit garantissait d'en oublier un
+   * au prochain changement. Le journal ne coûte rien sur une conversation
+   * ordinaire : la détection est locale et sort avant tout accès base.
+   */
+  const repondre = async (
+    reply: string,
+    extra?: { ticketId?: number | null; escalade?: boolean }
+  ) => {
+    await journaliserConversation({
+      conversationId,
+      messages: chatMessages,
+      reponseLea: reply,
+      pathname: pathnameOf(body.context),
+      ticketId: extra?.ticketId ?? null,
+      escalade: extra?.escalade,
+    });
+    return NextResponse.json({ reply });
+  };
+
   try {
     const completion = await getClient().messages.create({
       tools: [OUVRIR_TICKET],
@@ -202,12 +226,12 @@ export async function POST(req: NextRequest) {
 
     // ── Cas courant : Léa répond elle-même ─────────────────────────────────
     if (completion.stop_reason !== "tool_use") {
-      return NextResponse.json({ reply: firstText(completion) });
+      return repondre(firstText(completion));
     }
 
     const toolUse = completion.content.find((c) => c.type === "tool_use");
     if (!toolUse || toolUse.type !== "tool_use") {
-      return NextResponse.json({ reply: firstText(completion) });
+      return repondre(firstText(completion));
     }
 
     // ── Elle passe la main : on ouvre réellement le ticket ─────────────────
@@ -221,6 +245,8 @@ export async function POST(req: NextRequest) {
     // l'apprend et le dit au visiteur, au lieu d'annoncer un « c'est transmis »
     // qui laisserait la personne attendre une réponse qui ne viendra pas.
     let toolResult: string;
+    // Remonté jusqu'au journal pour relier la conversation à son ticket.
+    let ticketOuvert: number | null = null;
 
     if (!looksLikeEmail(email)) {
       toolResult =
@@ -248,6 +274,7 @@ export async function POST(req: NextRequest) {
             "ÉCHEC : la demande n'a pas pu être enregistrée. Dis-le franchement " +
             "au visiteur et invite-le à écrire à contact@workwave.fr.";
         } else {
+          ticketOuvert = ticket.ticketId;
           // Tri IA puis alerte admin, tous deux AWAITÉS : sur Vercel une
           // promesse détachée est tuée dès que la réponse part (leçon du
           // 06/06, un lead avait mis 4 jours à être diffusé).
@@ -301,7 +328,7 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    return NextResponse.json({ reply: firstText(follow) });
+    return repondre(firstText(follow), { ticketId: ticketOuvert, escalade: true });
   } catch (e) {
     console.error("[agent-chat] erreur Claude :", e);
     return NextResponse.json(
