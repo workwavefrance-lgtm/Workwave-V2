@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Reel projet — template Workwave</title>
+<style>
+  /* ============================================================
+     TEMPLATE REEL "NOUVEAU PROJET" — data-driven, 2 thèmes.
+     Données injectées via reel-projet-data.js (window.PROJECT).
+     Rendu déterministe : window.renderFrame(t) — cf. _render-reel-projet.mjs
+     Thème light : blanc / orange / noir — thème dark : noir / orange / blanc.
+     ============================================================ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden;
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+
+  /* ── Thèmes (tokens du site) ── */
+  body[data-theme="light"] {
+    --bg: #FFFFFF; --bg2: #FAFAFA; --text: #0A0A0A; --text2: #6B7280;
+    --border: #E5E7EB; --accent: #FF5A36; --on-accent: #FFFFFF;
+  }
+  body[data-theme="dark"] {
+    --bg: #0A0A0A; --bg2: #141414; --text: #FAFAFA; --text2: #9CA3AF;
+    --border: #2A2A2A; --accent: #FF5A36; --on-accent: #FFFFFF;
+  }
+  body { background: var(--bg); }
+  #stage { position: relative; width: 1080px; height: 1920px; background: var(--bg); overflow: hidden; }
+
+  /* Progress fine en haut (pro, pas story) */
+  #progress { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: transparent; z-index: 60; }
+  #progress b { display: block; height: 100%; background: var(--accent); transform-origin: left; transform: scaleX(0); }
+
+  /* Wordmark permanent */
+  #brand { position: absolute; top: 84px; left: 0; right: 0; text-align: center; z-index: 50;
+    font-size: 58px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  #brand i { color: var(--accent); font-style: normal; }
+
+  .scene { position: absolute; inset: 0; display: none; flex-direction: column;
+    align-items: center; justify-content: center; gap: 44px; padding: 240px 84px; text-align: center; }
+  .el { will-change: transform, opacity; }
+
+  .badge { display: inline-flex; align-items: center; gap: 16px; background: var(--accent); color: var(--on-accent);
+    font-size: 44px; font-weight: 800; letter-spacing: 0.06em; padding: 22px 46px; border-radius: 999px; }
+  .badge .dot { width: 20px; height: 20px; border-radius: 50%; background: var(--on-accent); }
+
+  h1.metier { font-size: 148px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.02;
+    color: var(--text); text-transform: uppercase; }
+  .lieu { font-size: 58px; font-weight: 600; color: var(--text2); }
+  .lieu strong { color: var(--text); font-weight: 700; }
+
+  /* Badge "gros budget" sur la scène d'annonce — affiché seulement si P.budgetHero.
+     Met en avant les leads à fort budget (ex. 15 000 € et +) dès le hook. */
+  .bb-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .bb-super { font-size: 50px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .bigbudget { display: inline-flex; align-items: center; gap: 18px; background: var(--accent); color: var(--on-accent);
+    font-size: 62px; font-weight: 800; letter-spacing: -0.01em; padding: 24px 54px; border-radius: 999px;
+    box-shadow: 0 18px 46px rgba(255, 90, 54, 0.34); }
+
+  /* Card détails */
+  .card { width: 100%; background: var(--bg2); border: 2px solid var(--border); border-radius: 40px;
+    padding: 64px 60px; text-align: left; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; padding: 26px 0; }
+  .row + .row { border-top: 1px solid var(--border); }
+  .row .k { font-size: 34px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); }
+  .row .v { font-size: 44px; font-weight: 700; color: var(--text); text-align: right; }
+  .desc { margin-top: 34px; border-left: 8px solid var(--accent); padding: 8px 0 8px 36px;
+    font-size: 42px; line-height: 1.45; color: var(--text); font-weight: 500; }
+
+  .stitle { font-size: 66px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+
+  /* Offre */
+  .gift { font-size: 170px; line-height: 1; }
+  .offer { font-size: 92px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; color: var(--text); }
+  .offer em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 46px; font-weight: 500; color: var(--text2); line-height: 1.4; }
+  .sub strong { color: var(--text); }
+
+  /* CTA */
+  .cta { display: inline-flex; align-items: center; gap: 22px; background: var(--accent); color: var(--on-accent);
+    font-size: 66px; font-weight: 800; padding: 38px 66px; border-radius: 999px; letter-spacing: -0.01em; }
+  .steps { font-size: 44px; font-weight: 600; color: var(--text2); }
+  .steps b { color: var(--text); }
+
+  /* ── Drapeau belge (affiché seulement si P.country === "BE") ── */
+  .beflag-stripes { flex: none; border-radius: 10px; overflow: hidden;
+    background: linear-gradient(90deg, #000 0 33.34%, #FDDA24 33.34% 66.67%, #EF3340 66.67% 100%); }
+  /* Bandeau persistant sous le wordmark — visible sur toutes les scènes */
+  #bepill { position: absolute; top: 178px; left: 0; right: 0; z-index: 50; display: none; justify-content: center; }
+  #bepill .chip { display: inline-flex; align-items: center; gap: 20px; background: var(--bg2);
+    border: 2px solid var(--border); border-radius: 999px; padding: 14px 36px 14px 18px;
+    font-size: 40px; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+  #bepill .beflag-stripes { width: 66px; height: 44px; box-shadow: 0 3px 10px rgba(0,0,0,.16); }
+  /* Grand drapeau héros dans la scène d'annonce */
+  .beflag-hero { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .beflag-hero .beflag-stripes { width: 300px; height: 200px; border-radius: 26px;
+    border: 3px solid var(--border); box-shadow: 0 20px 56px rgba(0,0,0,.22); }
+  .beflag-hero .cap { font-size: 46px; font-weight: 700; color: var(--text2); letter-spacing: 0.01em; }
+</style>
+</head>
+<body data-theme="light">
+<div id="stage">
+  <div id="progress"><b></b></div>
+  <div id="brand">Workwave<i>.</i></div>
+  <div id="bepill"><span class="chip"><span class="beflag-stripes"></span>Belgique</span></div>
+
+  <!-- S1 — annonce -->
+  <section class="scene" data-dur="3800">
+    <div class="el" data-anim="pop"><span class="badge"><span class="dot"></span>NOUVEAU PROJET</span></div>
+    <div class="el" data-d="350"><h1 class="metier" id="metier">Maçon</h1></div>
+    <div class="el" data-d="700"><p class="lieu">à <strong id="ville">Ville</strong> · <span id="dept">Département</span></p></div>
+    <div class="el beflag-hero" id="beflaghero" data-d="1050" style="display:none">
+      <span class="beflag-stripes"></span>
+      <span class="cap">Projet en Belgique</span>
+    </div>
+    <div class="el bb-wrap" id="budgetbadge" data-d="1250" data-anim="pop" style="display:none">
+      <span class="bb-super" id="budgetherolabel">Budget</span>
+      <span class="bigbudget"><span id="budgetheroval">—</span></span>
+    </div>
+  </section>
+
+  <!-- S2 — détails -->
+  <section class="scene" data-dur="5200">
+    <div class="el"><span class="stitle">Le projet</span></div>
+    <div class="el" data-d="400" style="width:100%">
+      <div class="card">
+        <div class="row"><span class="k">Budget</span><span class="v" id="budget">—</span></div>
+        <div class="row"><span class="k">Urgence</span><span class="v" id="urgence">—</span></div>
+        <div class="row"><span class="k">Zone</span><span class="v" id="zone">—</span></div>
+        <p class="desc" id="description">—</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- S3 — offre -->
+  <section class="scene" data-dur="3600">
+    <div class="el" data-anim="pop"><span class="gift">🎁</span></div>
+    <div class="el" data-d="350"><p class="offer">Vos 2 premiers leads<br><em>sont offerts.</em></p></div>
+    <div class="el" data-d="800"><p class="sub">Coordonnées du client débloquées <strong>gratuitement</strong>.<br>Sans abonnement, sans commission.</p></div>
+  </section>
+
+  <!-- S4 — CTA -->
+  <section class="scene" data-dur="3400">
+    <div class="el"><p class="offer" style="font-size:76px">Ce chantier vous intéresse&nbsp;?</p></div>
+    <div class="el" data-d="450" data-anim="pop"><span class="cta">workwave.fr/pro</span></div>
+    <div class="el" data-d="900"><p class="steps"><b>Inscription gratuite</b> · <span id="idlabel">SIRET</span> · 2 minutes</p></div>
+  </section>
+</div>
+
+<script src="reel-projet-data.js"></script>
+<script>
+  // ── Injection des données projet ──
+  const P = window.PROJECT || {};
+  document.body.dataset.theme = P.theme === "dark" ? "dark" : "light";
+  const set = (id, v) => { if (v) document.getElementById(id).textContent = v; };
+  set("metier", P.metier); set("ville", P.ville); set("dept", P.dept);
+  set("budget", P.budget); set("urgence", P.urgence); set("zone", P.zone || `${P.ville} (${P.deptCode || ""})`.replace(" ()", ""));
+  set("description", P.description);
+  // ── Belgique : bandeau persistant + drapeau héros (sinon rien = projets FR) ──
+  if (P.country === "BE") {
+    document.getElementById("bepill").style.display = "flex";
+    document.getElementById("beflaghero").style.display = "flex";
+    document.getElementById("idlabel").textContent = "N° BCE"; // les pros belges n'ont pas de SIRET
+  }
+  // Budget sur la scène d'ANNONCE (les 3 premières secondes).
+  //
+  // POURQUOI : c'est le montant qui arrête le scroll d'un artisan. Le voir
+  // seulement sur la carte détails (~5 s) est trop tard — la plupart des gens
+  // ont déjà passé leur chemin. Le libellé est paramétrable pour rester
+  // honnête : "Budget" par défaut, "Gros budget" réservé aux vrais gros leads.
+  if (P.budgetHero) {
+    document.getElementById("budgetbadge").style.display = "flex";
+    set("budgetheroval", P.budgetHero);
+    set("budgetherolabel", P.budgetHeroLabel || "Budget");
+  }
+  // Titre long → réduire la taille pour tenir sur 1080px
+  const h1 = document.getElementById("metier");
+  if ((P.metier || "").length > 10) h1.style.fontSize = "118px";
+  if ((P.metier || "").length > 14) h1.style.fontSize = "96px";
+
+  // ── Timeline déterministe ──
+  const scenes = [...document.querySelectorAll('.scene')];
+  let acc = 0; const starts = scenes.map(s => { const st = acc; acc += +s.dataset.dur; return st; });
+  window.TOTAL = acc;
+  const bar = document.querySelector('#progress b');
+  function eBack(p){ const c1=1.35, c3=c1+1; return 1 + c3*Math.pow(p-1,3) + c1*Math.pow(p-1,2); }
+
+  window.renderFrame = function(t){
+    bar.style.transform = 'scaleX(' + Math.max(0, Math.min(1, t / window.TOTAL)) + ')';
+    scenes.forEach((sc, i) => {
+      const st = starts[i], dur = +sc.dataset.dur, en = st + dur;
+      const active = t >= st && t < en;
+      sc.style.display = active ? 'flex' : 'none';
+      if (!active) return;
+      sc.querySelectorAll('.el').forEach(el => {
+        const d = +el.dataset.d || 0, anim = el.dataset.anim || 'up';
+        const lt = t - (st + d);
+        let op, tf;
+        if (anim === 'pop') {
+          const p = Math.max(0, Math.min(1, lt / 500)), e = lt < 0 ? 0 : eBack(p);
+          op = Math.max(0, Math.min(1, lt / 250)); tf = 'scale(' + (0.6 + 0.4 * e) + ')';
+        } else {
+          const p = Math.max(0, Math.min(1, lt / 550)), e = lt < 0 ? 0 : eBack(p);
+          op = Math.max(0, Math.min(1, lt / 300)); tf = 'translateY(' + ((1 - e) * 40) + 'px)';
+        }
+        el.style.opacity = op; el.style.transform = tf;
+      });
+    });
+  };
+  window.renderFrame(0);
+</script>
+</body>
+</html>
