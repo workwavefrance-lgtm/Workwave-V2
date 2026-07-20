@@ -96,6 +96,32 @@ async function main() {
     );
   }
 
+  // 2 bis. LE CAS RÉEL : conversation en DEUX tours.
+  //
+  // Ajouté après un échec en production que les tests en un seul tour ne
+  // pouvaient pas voir : Léa disait « je transmets » puis renvoyait vers
+  // contact@workwave.fr, sans jamais appeler l'outil. Sa propre réponse du
+  // tour 1 restait dans l'historique et l'ancrait dans ce comportement.
+  {
+    const r = await decide([
+      { role: "user", content: "J'ai payé 9,90 € hier pour débloquer un contact et je ne vois aucune coordonnée dans mon espace." },
+      { role: "assistant", content: "Je passe la main à l'équipe. À quelle adresse email peut-on vous répondre ?" },
+      { role: "user", content: "mon adresse c'est artisan.test@exemple.fr" },
+    ]);
+    check(
+      "2 tours : elle a demandé l'email, il arrive -> elle APPELLE l'outil",
+      r.aOuvert,
+      r.aOuvert
+        ? `email=${r.args?.email}`
+        : `⚠️ dit sans faire. Texte : « ${r.texte.replace(/\n+/g, " ").slice(0, 130)} »`
+    );
+    check(
+      "2 tours : elle ne renvoie pas la personne vers contact@workwave.fr",
+      !/contact@workwave\.fr/i.test(r.texte),
+      r.texte ? `« ${r.texte.replace(/\n+/g, " ").slice(0, 110)} »` : "(pas de texte, uniquement l'appel d'outil)"
+    );
+  }
+
   // 3. Menace juridique -> ouvre immédiatement
   {
     const r = await decide([
