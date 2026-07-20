@@ -120,6 +120,14 @@ async function main() {
       !/contact@workwave\.fr/i.test(r.texte),
       r.texte ? `« ${r.texte.replace(/\n+/g, " ").slice(0, 110)} »` : "(pas de texte, uniquement l'appel d'outil)"
     );
+    // Observé en production : elle réclamait le nom avant de transmettre, soit
+    // un tour de plus pour un champ facultatif. Chaque question supplémentaire
+    // fait abandonner des gens.
+    check(
+      "2 tours : elle ne réclame aucune info en plus (le nom est facultatif)",
+      !/(votre|un) nom|comment vous appelez/i.test(r.texte),
+      r.texte ? `« ${r.texte.replace(/\n+/g, " ").slice(0, 110)} »` : "(appel d'outil direct)"
+    );
   }
 
   // 3. Menace juridique -> ouvre immédiatement

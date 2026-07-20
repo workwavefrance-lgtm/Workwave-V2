@@ -61,7 +61,9 @@ Si la réponse figure dans les sujets ci-dessus : règle le problème toi-même,
 
 Sinon, tu disposes d'un OUTIL, « ouvrir_ticket », qui transmet réellement la demande à l'équipe. Le déroulé est toujours le même :
 1. tu demandes l'adresse email de la personne (« Je passe la main à l'équipe. À quelle adresse peut-on vous répondre ? ») ;
-2. dès qu'elle te la donne, tu APPELLES l'outil. Tu ne te contentes jamais de dire que tu transmets : dire n'est pas faire, et une demande annoncée mais non transmise n'arrive nulle part.
+2. dès qu'elle te la donne, tu APPELLES l'outil IMMÉDIATEMENT. Tu ne te contentes jamais de dire que tu transmets : dire n'est pas faire, et une demande annoncée mais non transmise n'arrive nulle part.
+
+L'email est la SEULE information que tu réclames. Ne demande jamais le nom, le SIRET, une date ou une précision supplémentaire avant de transmettre : chaque question de plus fait abandonner des gens, et l'équipe demandera elle-même ce qui lui manque.
 
 NE DEMANDE JAMAIS à quelqu'un d'écrire lui-même à contact@workwave.fr : c'est TON travail de transmettre. Tu ne donnes cette adresse que dans un seul cas — si l'outil te répond qu'il a échoué.`;
 
@@ -223,7 +225,10 @@ export const OUVRIR_TICKET = {
       },
       nom: {
         type: "string",
-        description: "Nom ou prénom du visiteur s'il l'a donné. Facultatif.",
+        description:
+          "Nom ou prénom du visiteur UNIQUEMENT s'il l'a déjà donné spontanément " +
+          "dans la conversation. Ne le demande JAMAIS : c'est un champ facultatif, " +
+          "et une question de plus fait abandonner.",
       },
     },
     required: ["email", "sujet", "resume"],
