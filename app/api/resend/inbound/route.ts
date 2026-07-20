@@ -87,17 +87,29 @@ export async function POST(req: Request) {
 
   const emailId = event.data.email_id;
 
-  // Anti-boucle : ne jamais re-transférer nos propres envois
-  if (/noreply@workwave\.fr|contact@workwave\.fr/i.test(event.data.from || "")) {
+  // Anti-boucle : ne jamais re-transférer ni transformer en ticket nos propres
+  // envois — NI les réponses de l'admin lui-même.
+  //
+  // POURQUOI ADMIN_EMAIL : le forward arrive dans la boîte Gmail de l'admin,
+  // qui y répond directement (c'est le mode d'emploi affiché dans le mail).
+  // Si cette réponse repasse par contact@workwave.fr — ce qui arrive dès que
+  // l'interlocuteur a une adresse @workwave.fr, ou sur un simple "répondre à
+  // tous" — elle crée un ticket où l'ADMIN figure comme demandeur, trié et
+  // priorisé par l'IA. Constaté en conditions réelles le 20/07/2026 : la
+  // réponse de l'admin a généré le ticket #25 "unlock / urgent".
+  const senderEmail = parseEmailFrom(event.data.from || "").email;
+  const adminEmailNormalized = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const isSelfSender =
+    /noreply@workwave\.fr|contact@workwave\.fr/i.test(event.data.from || "") ||
+    (adminEmailNormalized.length > 0 && senderEmail === adminEmailNormalized);
+  if (isSelfSender) {
     return NextResponse.json({ ok: true, skipped: "self_sender" });
   }
 
   // 2 bis. Limite de débit — AVANT le receiving.get, donc avant toute dépense
   // (appel Resend, requêtes de contexte, tri IA, forward). On répond 200 : un
   // 5xx ferait rejouer l'événement par svix en boucle et amplifierait le flot.
-  const rate = await checkInboundRateLimit(
-    parseEmailFrom(event.data.from || "").email
-  );
+  const rate = await checkInboundRateLimit(senderEmail);
   if (!rate.allowed) {
     console.error(`[resend-inbound] débit dépassé (${rate.reason}) — ${rate.detail}`);
     return NextResponse.json({ ok: true, skipped: "rate_limited", reason: rate.reason });

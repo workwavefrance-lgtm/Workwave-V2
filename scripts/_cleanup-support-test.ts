@@ -72,7 +72,27 @@ async function main() {
     console.log("❌ des données de test subsistent");
     process.exit(1);
   }
-  console.log("✅ base propre");
+  console.log("✅ plus aucune donnée de test");
+
+  // Ne JAMAIS afficher "base propre" sur la seule foi des tickets de test : il
+  // peut rester des tickets d'une autre origine — y compris de VRAIS clients.
+  // On les liste sans y toucher (constaté le 20/07 : la réponse de l'admin
+  // depuis sa boîte Gmail avait créé un ticket, invisible avec l'ancien log).
+  if ((restTickets ?? 0) > 0) {
+    const { data: others } = await sb
+      .from("support_tickets")
+      .select("id, requester_email, subject, created_at")
+      .order("id");
+    console.log(`\n⚠️  ${restTickets} ticket(s) d'une AUTRE origine — non touchés :`);
+    for (const o of (others || []) as {
+      id: number;
+      requester_email: string;
+      subject: string;
+    }[]) {
+      console.log(`   #${o.id} <${o.requester_email}> — "${o.subject}"`);
+    }
+    console.log("   → vérifiez qu'aucun n'est un vrai client avant de supprimer.");
+  }
 }
 
 main().catch((e) => {
