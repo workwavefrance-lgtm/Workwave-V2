@@ -29,6 +29,10 @@ export type AgentContext =
       locationSlug: string;
     }
   | { type: "home" }
+  // Réclamation de fiche en cours. Contexte ajouté le 20/07/2026 avec le
+  // support de niveau 1 : c'est la page où se pose le motif de contact numéro
+  // 1 (« je n'ai pas reçu le code »), Léa doit y arriver en le sachant.
+  | { type: "claim"; proName: string | null; step: "form" | "verification" }
   | { type: "other"; pathname: string };
 
 function getServiceClient() {
@@ -53,6 +57,26 @@ export async function POST(req: NextRequest) {
   }
 
   // Fiche pro : /artisan/[slug]
+  // Réclamation de fiche : /pro/reclamer/[slug] et .../verification
+  const claimMatch = pathname.match(/^\/pro\/reclamer\/([^/?#]+)(\/verification)?\/?$/);
+  if (claimMatch) {
+    const slug = claimMatch[1];
+    const step = claimMatch[2] ? "verification" : "form";
+    const sb = getServiceClient();
+    const { data } = await sb
+      .from("pros")
+      .select("name")
+      .eq("slug", slug)
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .maybeSingle();
+    return NextResponse.json<AgentContext>({
+      type: "claim",
+      proName: (data as { name: string } | null)?.name ?? null,
+      step,
+    });
+  }
+
   const proMatch = pathname.match(/^\/artisan\/([^/?#]+)\/?$/);
   if (proMatch) {
     const slug = proMatch[1];
