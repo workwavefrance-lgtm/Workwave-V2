@@ -83,19 +83,32 @@ export async function generateDraftReply(
   input: DraftReplyInput
 ): Promise<string | null> {
   try {
-    // Fil de conversation : on inclut les notes internes (contexte pour l'IA)
-    // mais on les étiquette clairement pour qu'elles ne soient jamais recopiées.
+    // Fil de conversation : les NOTES INTERNES sont EXCLUES, pas étiquetées.
+    //
+    // POURQUOI : une note interne peut contenir tout ce qu'un admin écrit hors
+    // du regard du client (« ce pro ment sur son RGE », le téléphone d'un
+    // particulier, une consigne juridique). La version précédente les envoyait
+    // au modèle avec la mention « ne jamais recopier au client » — c'est une
+    // consigne en français, pas un filtre : le corps d'un email entrant est du
+    // texte hostile potentiel, et une injection bien tournée peut retourner une
+    // consigne. Ce qu'on ne transmet pas ne peut pas fuiter.
+    //
+    // Le rôle de l'auteur est réécrit en libellé neutre plutôt que d'être
+    // interpolé brut : un client ne peut pas fabriquer un faux tour « SUPPORT »
+    // dans le fil pour influencer le brouillon.
+    const ROLE_LABEL: Record<string, string> = {
+      client: "CLIENT",
+      pro: "CLIENT",
+      agent: "SUPPORT",
+      ai: "SUPPORT",
+      system: "SYSTEME",
+    };
     const thread = input.messages
+      .filter((m) => !m.is_internal)
       .slice(-12)
       .map((m) => {
-        const who =
-          m.author_role === "client"
-            ? "CLIENT"
-            : m.author_role === "agent"
-              ? "SUPPORT"
-              : m.author_role.toUpperCase();
-        const tag = m.is_internal ? " (NOTE INTERNE — ne jamais recopier au client)" : "";
-        return `[${who}${tag}]\n${m.body.slice(0, 1500)}`;
+        const who = ROLE_LABEL[m.author_role] ?? "CLIENT";
+        return `[${who}]\n${m.body.slice(0, 1500)}`;
       })
       .join("\n\n---\n\n");
 

@@ -115,12 +115,22 @@ export async function getAdminTicketById(id: number): Promise<AdminTicketDetail 
   if (!ticketRow) return null;
   const ticket = ticketRow as unknown as SupportTicket;
 
+  // Fil borné, chargé du PLUS RÉCENT au plus ancien puis remis à l'endroit.
+  //
+  // POURQUOI l'ordre décroissant : PostgREST plafonne une réponse à 1000 lignes.
+  // Un SELECT ascendant sans limite sur un fil très long renverrait donc les
+  // 1000 messages les plus ANCIENS — l'admin ne verrait jamais le dernier
+  // message du client, sans le moindre message d'erreur. En chargeant à
+  // l'envers avec une limite explicite, on a toujours les plus récents, qui
+  // sont les seuls qui comptent pour répondre.
+  const MAX_THREAD = 200;
   const { data: messageRows } = await db
     .from("support_messages")
     .select("*")
     .eq("ticket_id", id)
-    .order("created_at", { ascending: true });
-  const messages = (messageRows || []) as unknown as SupportMessage[];
+    .order("created_at", { ascending: false })
+    .limit(MAX_THREAD);
+  const messages = ((messageRows || []) as unknown as SupportMessage[]).reverse();
 
   // Contexte pro
   let pro: TicketProContext = null;

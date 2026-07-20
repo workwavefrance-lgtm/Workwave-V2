@@ -26,8 +26,10 @@ import { Resend } from "resend";
 import {
   ingestInboundEmailAsTicket,
   markTicketAdminNotified,
+  parseEmailFrom,
   updateTicketTriage,
 } from "@/lib/support/tickets";
+import { checkInboundRateLimit } from "@/lib/support/rate-limit";
 import { triageTicket } from "@/lib/support/triage";
 
 export const dynamic = "force-dynamic";
@@ -89,6 +91,18 @@ export async function POST(req: Request) {
   if (/noreply@workwave\.fr|contact@workwave\.fr/i.test(event.data.from || "")) {
     return NextResponse.json({ ok: true, skipped: "self_sender" });
   }
+
+  // 2 bis. Limite de débit — AVANT le receiving.get, donc avant toute dépense
+  // (appel Resend, requêtes de contexte, tri IA, forward). On répond 200 : un
+  // 5xx ferait rejouer l'événement par svix en boucle et amplifierait le flot.
+  const rate = await checkInboundRateLimit(
+    parseEmailFrom(event.data.from || "").email
+  );
+  if (!rate.allowed) {
+    console.error(`[resend-inbound] débit dépassé (${rate.reason}) — ${rate.detail}`);
+    return NextResponse.json({ ok: true, skipped: "rate_limited", reason: rate.reason });
+  }
+
   // 3. Récupère le corps complet du mail reçu
   const { data: mail, error } = await resend.emails.receiving.get(emailId);
   if (error || !mail) {
@@ -142,7 +156,12 @@ ${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
       text: mail.text ?? null,
       html: mail.html ?? null,
     });
-    if (ticket && !ticket.duplicate) {
+    if (ticket) {
+      // On retient l'id DÈS QU'un ticket existe, même sur un doublon : si un
+      // premier essai a créé le ticket puis échoué au forward, le rejeu svix
+      // repasse ici en "duplicate" et c'est CE passage-là qui réussit l'envoi.
+      // Ne pas l'assigner laisserait admin_notified_at vide à vie, donc un
+      // ticket signalé "jamais notifié" alors que l'admin a bien reçu le mail.
       ticketId = ticket.ticketId;
       // Tri IA (catégorie / urgence / flag légal) : UNIQUEMENT à la création
       // d'un ticket, best-effort et borné en coût (Haiku, corps tronqué).

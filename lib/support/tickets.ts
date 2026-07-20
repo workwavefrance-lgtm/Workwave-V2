@@ -99,17 +99,36 @@ async function resolveContext(
   let proId: number | null = null;
   let projectId: number | null = null;
   try {
-    // Pro : on préfère une fiche réclamée (compte réel) mais on accepte toute
-    // fiche active portant cet email. nullsFirst:false => claimed d'abord.
-    const { data: pro } = await sb
+    // Pro : on n'établit le lien QUE s'il est certain.
+    //
+    // POURQUOI : `pros.email` n'est PAS unique. Sur un échantillon de 28 137
+    // fiches actives avec email (audit 20/07), 9 137 — soit 32 % — partagent
+    // leur adresse avec au moins une autre fiche (jusqu'à 30 fiches sur une
+    // seule adresse : e-mails de groupe type @equans.com, ou adresses de
+    // service client aspirées par erreur lors de l'enrichissement Apify).
+    // Prendre "la première" rattacherait à un pro sur trois l'entreprise d'un
+    // TIERS : nom, ville et nombre de leads achetés s'afficheraient dans la
+    // fiche du ticket, partiraient dans le prompt du brouillon IA, et
+    // pourraient être envoyés par mail au mauvais destinataire (le motif exact
+    // de la plainte RGPD MIROITERIE MELUSINE, mais par email cette fois).
+    //
+    // Règle : une seule fiche candidate -> lien sûr. Plusieurs fiches -> on ne
+    // départage que si une seule est réclamée (compte réel, donc l'entreprise
+    // s'est identifiée elle-même). Sinon pro_id reste null et l'admin tranche.
+    const { data: pros } = await sb
       .from("pros")
       .select("id, claimed_by_user_id")
       .eq("email", email)
       .is("deleted_at", null)
-      .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
-      .limit(1)
-      .maybeSingle();
-    if (pro) proId = (pro as { id: number }).id;
+      .limit(5);
+    const candidates = (pros || []) as { id: number; claimed_by_user_id: string | null }[];
+    if (candidates.length === 1) {
+      proId = candidates[0].id;
+    } else if (candidates.length > 1) {
+      const claimed = candidates.filter((p) => p.claimed_by_user_id !== null);
+      if (claimed.length === 1) proId = claimed[0].id;
+      // sinon : ambigu -> on laisse null plutôt que d'afficher un tiers.
+    }
   } catch {
     /* best-effort */
   }
@@ -158,11 +177,23 @@ export async function ingestInboundEmailAsTicket(
   const { email, name } = parseEmailFrom(input.fromRaw);
   const nowIso = new Date().toISOString();
 
-  const body =
+  // Bornes de taille : un email entrant est une donnée NON MAÎTRISÉE. Un HTML
+  // de plusieurs Mo (signature avec images en base64, mail généré) serait sinon
+  // passé aux 11 regex globales de crudeStripHtml, stocké tel quel, puis
+  // rechargé intégralement à chaque ouverture du ticket — le mécanisme exact
+  // qui avait déjà mis l'egress Supabase à 188 % en juin.
+  const MAX_HTML_CHARS = 200_000;
+  const MAX_BODY_CHARS = 20_000;
+  const rawBody =
     (input.text && input.text.trim()) ||
-    (input.html && crudeStripHtml(input.html)) ||
+    (input.html && crudeStripHtml(input.html.slice(0, MAX_HTML_CHARS))) ||
     "(corps vide)";
-  const subject = (input.subject || "").trim() || null;
+  const body =
+    rawBody.length > MAX_BODY_CHARS
+      ? rawBody.slice(0, MAX_BODY_CHARS) + "\n\n[…] (message tronqué par Workwave)"
+      : rawBody;
+  // Le sujet alimente un index trigram et l'affichage : on le borne aussi.
+  const subject = ((input.subject || "").trim() || null)?.slice(0, 500) || null;
 
   // 1) Idempotence : cet email a-t-il déjà été ingéré ?
   {
@@ -240,10 +271,38 @@ export async function ingestInboundEmailAsTicket(
   });
   if (msgErr) {
     if (created) {
-      await sb.from("support_tickets").delete().eq("id", ticket.id);
+      // On ne supprime le ticket QUE s'il est réellement vide.
+      //
+      // POURQUOI : la FK support_messages.ticket_id est ON DELETE CASCADE. Si
+      // deux webhooks concurrents ont créé deux tickets pour le même
+      // expéditeur, un second email a pu être rattaché à CE ticket entre notre
+      // INSERT et notre rollback. Le supprimer à l'aveugle détruirait alors un
+      // vrai email client, définitivement, sans la moindre trace — la fonction
+      // renvoyant "duplicate: true" comme si tout allait bien.
+      const { data: siblings } = await sb
+        .from("support_messages")
+        .select("id")
+        .eq("ticket_id", ticket.id)
+        .limit(1);
+      if (!siblings || siblings.length === 0) {
+        await sb.from("support_tickets").delete().eq("id", ticket.id);
+      } else {
+        console.error(
+          `[support] rollback annulé : le ticket #${ticket.id} contient déjà un message`
+        );
+      }
     }
     if ((msgErr as { code?: string }).code === "23505") {
-      return { ticketId: ticket.id, created: false, reopened: false, duplicate: true };
+      // Cet email existe déjà en base (inséré par l'invocation concurrente) :
+      // on retourne le ticket qui le porte VRAIMENT, pas celui qu'on vient
+      // peut-être de supprimer.
+      const { data: owner } = await sb
+        .from("support_messages")
+        .select("ticket_id")
+        .eq("email_message_id", input.resendEmailId)
+        .maybeSingle();
+      const ownerId = (owner as { ticket_id: number } | null)?.ticket_id ?? ticket.id;
+      return { ticketId: ownerId, created: false, reopened: false, duplicate: true };
     }
     console.error("[support] insert message échec:", msgErr.message);
     return null;
