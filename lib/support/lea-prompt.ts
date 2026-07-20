@@ -174,3 +174,50 @@ Aide-le selon sa demande. Si pertinent, propose [Décrire un projet](/deposer-pr
 Ne ré-écris pas le message d'accueil. Réponds directement.`;
   }
 }
+
+/**
+ * L'unique outil de Léa : passer la main à l'équipe.
+ *
+ * Tool use natif plutôt qu'un marqueur à repérer dans son texte : l'appel est
+ * structuré, donc déterministe et testable, là où un « si la réponse contient
+ * TICKET: » se déclencherait au premier client qui écrit ce mot.
+ *
+ * `email` est OBLIGATOIRE. Sans lui le ticket serait une impasse : la route de
+ * réponse de l'admin refuse d'envoyer sans destinataire, donc personne ne
+ * pourrait jamais répondre à la personne. Le modèle ne peut pas ouvrir un
+ * ticket anonyme, même s'il le voulait.
+ */
+export const OUVRIR_TICKET = {
+  name: "ouvrir_ticket",
+  description:
+    "Transmet la demande du visiteur à l'équipe support humaine de Workwave. " +
+    "À utiliser UNIQUEMENT quand tu ne peux pas résoudre toi-même : sujet hors " +
+    "de tes connaissances, dossier précis que tu ne peux pas consulter (paiement, " +
+    "déblocage, fiche), litige, mention de la CNIL ou d'un avocat, ou demande " +
+    "explicite de parler à un humain. Avant d'appeler cet outil, tu DOIS avoir " +
+    "demandé son adresse email au visiteur et l'avoir obtenue.",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      email: {
+        type: "string",
+        description: "Adresse email du visiteur, telle qu'il l'a écrite. Obligatoire.",
+      },
+      sujet: {
+        type: "string",
+        description: "Objet court du ticket (max 120 caractères), factuel.",
+      },
+      resume: {
+        type: "string",
+        description:
+          "La demande reformulée clairement, à la première personne du visiteur, " +
+          "en 1 à 3 phrases. C'est ce que l'équipe lira en premier.",
+      },
+      nom: {
+        type: "string",
+        description: "Nom ou prénom du visiteur s'il l'a donné. Facultatif.",
+      },
+    },
+    required: ["email", "sujet", "resume"],
+  },
+};

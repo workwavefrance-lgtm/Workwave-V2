@@ -91,7 +91,7 @@ function crudeStripHtml(html: string): string {
 }
 
 /** Résout (best-effort) le pro et le projet liés à un email, pour le contexte. */
-async function resolveContext(
+export async function resolveContext(
   sb: SupabaseClient,
   email: string | null
 ): Promise<{ proId: number | null; projectId: number | null }> {

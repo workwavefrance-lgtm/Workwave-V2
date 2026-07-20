@@ -29,6 +29,33 @@ import { getCategoryArticle } from "@/lib/utils/category-grammar";
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const STORAGE_MESSAGES = "workwave_agent_messages";
+const STORAGE_CONVERSATION = "workwave_agent_conversation";
+
+/**
+ * Identifiant stable de la conversation en cours, gardé le temps de l'onglet.
+ *
+ * Il sert de clé d'idempotence quand Léa ouvre un ticket : sans lui, un
+ * double-clic ou une reprise réseau créerait deux tickets pour la même
+ * demande. `randomUUID` n'existe pas sur les navigateurs anciens ni hors
+ * contexte sécurisé, d'où le repli.
+ */
+function getConversationId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const existing = sessionStorage.getItem(STORAGE_CONVERSATION);
+    if (existing) return existing;
+    const id =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `c-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    sessionStorage.setItem(STORAGE_CONVERSATION, id);
+    return id;
+  } catch {
+    // sessionStorage indisponible (navigation privée stricte) : on dégrade sans
+    // casser le chat. L'idempotence est perdue, pas la conversation.
+    return `c-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+}
 const STORAGE_AUTO_OPENED = "workwave_agent_auto_opened";
 const COOKIE_CONSENT_NAME = "consent_analytics";
 
@@ -426,6 +453,7 @@ export default function CommercialAgent() {
         body: JSON.stringify({
           messages: nextMessages,
           context: context ?? { type: "other", pathname: pathname || "/" },
+          conversationId: getConversationId(),
         }),
       });
       const data = await res.json();
