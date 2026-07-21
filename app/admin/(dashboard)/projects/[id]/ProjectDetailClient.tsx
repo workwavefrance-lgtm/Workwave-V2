@@ -256,13 +256,19 @@ export default function ProjectDetailClient({
             const broadcastCount = project.broadcast_count as number | null;
             const broadcastedAt = project.broadcasted_at as string | null;
             const isAi = project.vertical === "tech";
-            const paidCount = leads.filter((l) => l.paid).length;
+            // "payé" = déblocage RÉELLEMENT encaissé (montant > 0). Un déblocage
+            // offert (un des 2 gratuits, amount = 0) ne doit compter ni dans le
+            // nombre de payés, ni dans le chiffre d'affaires.
+            const paidLeads = leads.filter((l) => l.paid && (l.paidAmountEur ?? 0) > 0);
+            const paidCount = paidLeads.length;
+            const revenueEur = paidLeads.reduce((s, l) => s + (l.paidAmountEur ?? 0), 0);
+            const freeCount = leads.filter((l) => l.paid && (l.paidAmountEur ?? 0) === 0).length;
             return (
               <Card
                 title={
                   isAi
                     ? `Broadcast (${broadcastCount ?? 0} freelances) — ${leads.length} contact${leads.length > 1 ? "s" : ""}`
-                    : `Routing — ${leads.length} destinataire${leads.length > 1 ? "s" : ""}${paidCount > 0 ? ` · ${paidCount} payé${paidCount > 1 ? "s" : ""}` : ""}`
+                    : `Routing — ${leads.length} destinataire${leads.length > 1 ? "s" : ""}${paidCount > 0 ? ` · ${paidCount} payé${paidCount > 1 ? "s" : ""}` : ""}${freeCount > 0 ? ` · ${freeCount} offert${freeCount > 1 ? "s" : ""}` : ""}`
                 }
               >
                 {!isAi && broadcastedAt && (
@@ -271,7 +277,10 @@ export default function ProjectDetailClient({
                     {new Date(broadcastedAt).toLocaleString("fr-FR", {
                       day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
                     })}
-                    {paidCount > 0 ? ` — ${paidCount} a${paidCount > 1 ? "/ont" : ""} débloqué (${(paidCount * 9.9).toFixed(2).replace(".", ",")} €)` : ""}.
+                    {paidCount > 0
+                      ? ` — ${paidCount} a${paidCount > 1 ? "/ont" : ""} payé (${revenueEur.toFixed(2).replace(".", ",")} €)`
+                      : ""}
+                    {freeCount > 0 ? ` — ${freeCount} déblocage${freeCount > 1 ? "s" : ""} offert${freeCount > 1 ? "s" : ""}` : ""}.
                   </p>
                 )}
                 {isAi && broadcastedAt && (
@@ -324,7 +333,17 @@ export default function ProjectDetailClient({
                         })}
                       </span>
                       {lead.paid ? (
-                        <AdminBadge variant="success">Payé 9,90 €</AdminBadge>
+                        // Un déblocage peut être OFFERT (un des 2 gratuits) : dans
+                        // ce cas amountEur = 0. Afficher "Payé 9,90 €" en dur
+                        // faisait croire à un encaissement inexistant, en
+                        // contradiction avec le badge "Offert" plus bas.
+                        (lead.paidAmountEur ?? 0) > 0 ? (
+                          <AdminBadge variant="success">
+                            Payé {(lead.paidAmountEur ?? 0).toFixed(2).replace(".", ",")} €
+                          </AdminBadge>
+                        ) : (
+                          <AdminBadge variant="warning">Offert</AdminBadge>
+                        )
                       ) : (
                         <AdminBadge variant={s.variant}>{s.label}</AdminBadge>
                       )}
