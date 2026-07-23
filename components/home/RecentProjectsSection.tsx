@@ -134,7 +134,13 @@ export default function RecentProjectsSection({
                     </div>
                     <p className="text-sm text-[var(--text-secondary)] mt-1 truncate">
                       {p.cityName}
-                      {p.deptCode ? ` (${p.deptCode})` : ""}
+                      {/* Code postal plutôt que n° de département : un artisan situe
+                          « Villars (42390) » immédiatement, « Villars (42) » non. */}
+                      {p.postalCode
+                        ? ` (${p.postalCode})`
+                        : p.deptCode
+                          ? ` (${p.deptCode})`
+                          : ""}
                     </p>
                   </div>
                 </div>

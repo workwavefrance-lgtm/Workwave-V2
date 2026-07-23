@@ -23,6 +23,9 @@ export type PublicProject = {
   categorySlug: string;
   cityName: string;
   deptCode: string;
+  /** Code postal de la commune — plus précis que le n° de département
+   *  (« Villars (42390) » lève l'ambiguïté : il existe 4 Villars en France). */
+  postalCode: string;
   budget: string | null;
   urgency: string | null;
   createdAt: string;
@@ -50,7 +53,7 @@ export async function getRecentProjectsForHome(
   const { data, error } = await sb
     .from("projects")
     .select(
-      "id, budget, urgency, created_at, ai_qualification, category:categories(name, slug), city:cities(name, department:departments(code))"
+      "id, budget, urgency, created_at, ai_qualification, category:categories(name, slug), city:cities(name, postal_code, department:departments(code))"
     )
     .in("status", ["new", "routed"])
     .in("vertical", ["btp", "domicile", "personne"])
@@ -68,6 +71,7 @@ export async function getRecentProjectsForHome(
       categorySlug: (p.category?.slug as string) || "",
       cityName: (p.city?.name as string) || "",
       deptCode: (p.city?.department?.code as string) || "",
+      postalCode: (p.city?.postal_code as string) || "",
       budget: p.budget && p.budget !== "unknown" ? (p.budget as string) : null,
       urgency: (p.urgency as string) || null,
       createdAt: p.created_at as string,

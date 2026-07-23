@@ -223,9 +223,32 @@ export default function ProjectDetailClient({
                 label="Catégorie"
                 value={(project.category as { name?: string } | null)?.name}
               />
+              {/* Ville AVEC code postal + département : un nom de commune seul
+                  est ambigu (« Villars » existe en Loire, Dordogne, Var,
+                  Vaucluse…). Les deux champs sont déjà chargés par la requête
+                  (city:cities(*, department:departments(*))), il ne manquait
+                  que l'affichage. */}
               <InfoRow
                 label="Ville"
-                value={(project.city as { name?: string } | null)?.name}
+                value={(() => {
+                  const c = project.city as
+                    | { name?: string; postal_code?: string | null }
+                    | null;
+                  if (!c?.name) return undefined;
+                  return c.postal_code ? `${c.name} (${c.postal_code})` : c.name;
+                })()}
+              />
+              <InfoRow
+                label="Département"
+                value={(() => {
+                  const d = (
+                    project.city as
+                      | { department?: { name?: string; code?: string } | null }
+                      | null
+                  )?.department;
+                  if (!d?.name) return undefined;
+                  return d.code ? `${d.name} (${d.code})` : d.name;
+                })()}
               />
               <InfoRow label="Urgence" value={project.urgency as string} />
               <InfoRow label="Budget" value={project.budget as string} />
