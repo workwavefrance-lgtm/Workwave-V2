@@ -17,6 +17,8 @@ import {
   departmentCountryName,
 } from "@/lib/utils/slugs";
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
+import { METIER_STATS, COVERAGE } from "@/lib/data/metier-stats";
+import { METIER_CONTENT } from "@/lib/data/metier-content";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 
@@ -135,6 +137,38 @@ function DeposerCta({
   );
 }
 
+/** Liste de sources cliquables (affichées par nom de domaine) + date de relevé. */
+function Sources({ urls, retrievedAt }: { urls?: string[]; retrievedAt?: string }) {
+  if (!urls?.length) return null;
+  return (
+    <p className="text-xs text-[var(--text-tertiary)] mt-4">
+      Sources :{" "}
+      {urls.map((src, i) => {
+        let host = src;
+        try {
+          host = new URL(src).hostname.replace(/^www\./, "");
+        } catch {
+          /* garde src brut si URL invalide */
+        }
+        return (
+          <span key={i}>
+            {i > 0 && ", "}
+            <a
+              href={src}
+              target="_blank"
+              rel="nofollow noopener noreferrer"
+              className="underline hover:no-underline"
+            >
+              {host}
+            </a>
+          </span>
+        );
+      })}
+      {retrievedAt ? ` · relevé ${retrievedAt}` : ""}
+    </p>
+  );
+}
+
 export default async function MetierProximityPage({ params }: Props) {
   const { metier } = await params;
   const category = await getCategoryBySlug(metier);
@@ -190,6 +224,14 @@ export default async function MetierProximityPage({ params }: Props) {
   // des métiers seulement → le bloc se cache proprement si absent (pas de trou).
   const priceEntry = SOURCED_PRICES[category.slug];
 
+  // Contenu UNIQUE par métier :
+  //  - stats RÉELLES depuis notre base (dataset propriétaire, inimitable)
+  //  - éditorial SOURCÉ (ce que fait le métier, certifs, choix, facteurs prix)
+  // Tout est conditionnel : une page reste propre si une donnée manque.
+  const proCount = METIER_STATS[category.slug] || 0;
+  const showStats = proCount >= 100; // pas de « 0 pro » sur les métiers non scrapés
+  const content = METIER_CONTENT[category.slug];
+
   // Breadcrumb
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
@@ -232,6 +274,12 @@ export default async function MetierProximityPage({ params }: Props) {
       answer: `Chaque fiche pro affiche le SIRET officiel, l'année de création, les certifications (RGE, Qualibat, assurance décennale) et les moyens de paiement acceptés. Vous pouvez tout vérifier sur le registre Sirene avant de prendre contact.`,
     },
   ];
+
+  // Questions sourcées, spécifiques au métier → enrichissent l'accordéon ET le
+  // schema FAQPage (contenu unique, jamais dupliqué d'une page à l'autre).
+  if (content?.faq?.length) {
+    faqs.push(...content.faq.map((f) => ({ question: f.q, answer: f.a })));
+  }
 
   // Schema.org Service
   const serviceJsonLd = {
@@ -307,6 +355,57 @@ export default async function MetierProximityPage({ params }: Props) {
           </div>
         </section>
 
+        {/* Chiffres RÉELS de notre base — donnée unique qu'aucun concurrent n'a.
+            Caché si le métier n'a pas assez de pros (pas de « 0 » qui ferait tache). */}
+        {showStats && (
+          <section className="mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                {
+                  value: proCount.toLocaleString("fr-FR"),
+                  label: `${lower}s référencés en France et en Belgique`,
+                },
+                {
+                  value: COVERAGE.communes.toLocaleString("fr-FR"),
+                  label: "communes couvertes",
+                },
+                {
+                  value: COVERAGE.departments.toLocaleString("fr-FR"),
+                  label: "départements & provinces",
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-6"
+                >
+                  <div className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--accent)]">
+                    {stat.value}
+                  </div>
+                  <div className="mt-1 text-sm text-[var(--text-secondary)]">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-[var(--text-tertiary)]">
+              Fiches issues des registres officiels des entreprises (Sirene en
+              France, BCE en Belgique). Dernière mise à jour {COVERAGE.retrievedAt}.
+            </p>
+          </section>
+        )}
+
+        {/* Éditorial SOURCÉ : ce que fait réellement le métier (unique par page). */}
+        {content?.intro && (
+          <section className="mb-16 max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
+              Le métier de {lower} : ce qu&apos;il faut savoir
+            </h2>
+            <p className="text-[var(--text-secondary)] leading-relaxed">
+              {content.intro}
+            </p>
+          </section>
+        )}
+
         {/* Prix sourcés (uniquement si dispo pour ce métier) */}
         {priceEntry && (
           <section className="mb-16 max-w-3xl">
@@ -370,6 +469,71 @@ export default async function MetierProximityPage({ params }: Props) {
                 {priceEntry.retrievedAt ? ` · relevé ${priceEntry.retrievedAt}` : ""}
               </p>
             )}
+          </section>
+        )}
+
+        {/* Ce qui fait varier le prix (éditorial sourcé, spécifique au métier) */}
+        {content?.facteursPrix?.length ? (
+          <section className="mb-16 max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
+              Ce qui fait varier le prix d&apos;un {lower}
+            </h2>
+            <ul className="space-y-3">
+              {content.facteursPrix.map((f, i) => (
+                <li
+                  key={i}
+                  className="flex gap-3 text-[var(--text-secondary)] leading-relaxed"
+                >
+                  <span className="text-[var(--accent)] font-bold shrink-0" aria-hidden>
+                    —
+                  </span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {/* Comment bien choisir + certifications RÉELLES à vérifier (sourcé) */}
+        {content && (content.choisir.length > 0 || content.certifications.length > 0) && (
+          <section className="mb-16 max-w-3xl">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-6">
+              Comment bien choisir votre {lower}
+            </h2>
+
+            {content.certifications.length > 0 && (
+              <div className="mb-8">
+                <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+                  Certifications et labels à vérifier
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {content.certifications.map((c, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1.5 rounded-full text-sm bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {content.choisir.length > 0 && (
+              <ul className="space-y-4">
+                {content.choisir.map((c, i) => (
+                  <li key={i} className="flex gap-3 text-[var(--text-secondary)] leading-relaxed">
+                    <span
+                      className="mt-2 h-1.5 w-1.5 rounded-full bg-[var(--accent)] shrink-0"
+                      aria-hidden
+                    />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Sources urls={content.sources} retrievedAt={content.retrievedAt} />
           </section>
         )}
 
