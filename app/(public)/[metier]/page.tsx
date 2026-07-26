@@ -90,9 +90,27 @@ function DeposerCta({
             →
           </span>
         </Link>
-        <p className="mt-3 text-sm text-[var(--text-tertiary)]">
-          Recevez plusieurs devis sans démarcher · sans inscription · sans engagement
+
+        {/* Réassurance : lever le doute juste avant le clic (points vrais). */}
+        <p className="mt-4 text-sm text-[var(--text-secondary)] max-w-xl leading-relaxed">
+          Décrivez votre besoin en 2 minutes. Les {lower}s qualifiés de votre
+          zone vous recontactent avec leur devis — vous comparez, vous choisissez,
+          sans aucune obligation.
         </p>
+        <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-[var(--text-tertiary)]">
+          {[
+            "100% gratuit",
+            "Artisans vérifiés au registre officiel",
+            "Sans inscription, sans engagement",
+          ].map((item) => (
+            <li key={item} className="inline-flex items-center gap-1.5">
+              <span className="text-[var(--accent)] font-bold" aria-hidden>
+                ✓
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
