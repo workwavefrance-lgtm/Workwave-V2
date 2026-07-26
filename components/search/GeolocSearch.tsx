@@ -15,6 +15,13 @@ type Props = {
   metierSlug: string;
   metierName: string;
   cities: CityForGeoloc[];
+  /**
+   * compact = version discrète : le but de la page est de faire DÉPOSER un
+   * projet (monétisable), pas d'envoyer l'internaute appeler un pro en direct.
+   * En compact, le bouton géoloc devient un petit lien secondaire (pas un gros
+   * bouton coral qui volerait la vedette au CTA « Déposer votre projet »).
+   */
+  compact?: boolean;
 };
 
 const EARTH_RADIUS_KM = 6371;
@@ -50,7 +57,12 @@ function findNearestCity(
   return { city: best, distanceKm: bestDist };
 }
 
-export default function GeolocSearch({ metierSlug, metierName, cities }: Props) {
+export default function GeolocSearch({
+  metierSlug,
+  metierName,
+  cities,
+  compact = false,
+}: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,6 +129,59 @@ export default function GeolocSearch({ metierSlug, metierName, cities }: Props) 
         `Aucune ville trouvée pour « ${manualQuery} ». Essayez l'orthographe complète (ex. Poitiers, Châtellerault).`
       );
     }
+  }
+
+  // Version DISCRÈTE : petit lien secondaire (le CTA « Déposer votre projet »
+  // doit rester le seul gros bouton coral de la page).
+  if (compact) {
+    return (
+      <div className="w-full max-w-xl">
+        <form onSubmit={handleManualSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={manualQuery}
+            onChange={(e) => {
+              setManualQuery(e.target.value);
+              setError(null);
+            }}
+            placeholder="Votre ville (ex. Poitiers)"
+            className="flex-1 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none focus:border-[var(--accent)] transition-colors duration-200"
+            autoComplete="off"
+          />
+          <button
+            type="submit"
+            className="shrink-0 bg-[var(--card-bg)] border border-[var(--border-color)] hover:border-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent)] px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-250"
+          >
+            Voir
+          </button>
+        </form>
+        <button
+          onClick={handleGeoloc}
+          disabled={loading}
+          className="mt-2 inline-flex items-center gap-1.5 text-sm text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors duration-200 disabled:opacity-50 disabled:cursor-wait"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-4 h-4"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          {loading ? "Localisation…" : "me géolocaliser"}
+        </button>
+        {error && (
+          <p className="mt-3 text-sm text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-xl px-4 py-3">
+            {error}
+          </p>
+        )}
+      </div>
+    );
   }
 
   return (
