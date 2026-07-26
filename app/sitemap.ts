@@ -505,8 +505,23 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // Les 52 pages RACINE métier /[metier] (BTP/domicile/personne). Pages hub
+  // riches (chiffres réels + éditorial sourcé + prix), ciblant « métier autour
+  // de moi ». Étaient ABSENTES du sitemap (indexées uniquement via liens
+  // internes → pos 8-12). On les ajoute en priorité haute pour prioriser leur
+  // re-crawl. Anti-fuite : on exclut le vertical tech (roots sur /ai/*).
+  const categoryRoots = (await getAllCategories()).filter((c) =>
+    ["btp", "domicile", "personne"].includes(c.vertical)
+  );
+  const categoryRootUrls: MetadataRoute.Sitemap = categoryRoots.map((c) => ({
+    url: `${BASE_URL}/${c.slug}`,
+    changeFrequency: "weekly" as const,
+    priority: 0.95,
+  }));
+
   return [
     ...staticUrls,
+    ...categoryRootUrls,
     ...chantiersUrls,
     ...clientsUrls,
     ...pilierVilleUrls,

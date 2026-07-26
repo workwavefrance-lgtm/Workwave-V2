@@ -39,7 +39,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // fort). PAS de « | Workwave » ici : le layout l'ajoute déjà via
   // title.template (sinon on l'avait 2 fois).
   const title = `${category.name} autour de moi — devis gratuits près de chez vous`;
-  const description = `Un ${lower} autour de moi ? Géolocalisez-vous ou choisissez votre ville pour voir les ${lower}s disponibles à proximité. Prix indicatifs, devis gratuits, service 100% gratuit.`;
+  // Meta ≤ ~155c (au-delà Google tronque). On part du nom du métier (évite le
+  // pluriel bancal « garde animauxs ») + la requête exacte en tête.
+  const description = `${category.name} autour de moi ? Recevez des devis gratuits près de chez vous. Prix indicatifs, service 100% gratuit, sans engagement.`;
 
   return {
     title,
