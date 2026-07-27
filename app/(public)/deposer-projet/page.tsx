@@ -41,7 +41,12 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
         </p>
         {/* Repères de confiance (tous vrais) — lever le doute dès l'arrivée. */}
         <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-[var(--text-secondary)]">
-          {["100% gratuit", "Sans engagement", "Coordonnées protégées"].map(
+          {[
+            "100% gratuit",
+            "Sans engagement",
+            "Artisans vérifiés au registre officiel",
+            "Coordonnées protégées",
+          ].map(
             (item) => (
               <li key={item} className="inline-flex items-center gap-1.5">
                 <span className="text-[var(--accent)] font-bold" aria-hidden>
