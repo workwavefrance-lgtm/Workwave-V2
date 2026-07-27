@@ -200,6 +200,14 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  href="/barometre-penurie-artisans"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Les déserts d&apos;artisans
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/a-propos"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >

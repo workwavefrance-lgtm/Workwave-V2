@@ -4,6 +4,7 @@ const PAGES = [
   { path: "/barometre-artisans", label: "Densité par département" },
   { path: "/barometre-prix-artisans", label: "Prix des artisans" },
   { path: "/barometre-metiers-artisans", label: "Métiers les plus répandus" },
+  { path: "/barometre-penurie-artisans", label: "Les déserts d'artisans" },
 ];
 
 /** Interconnexion des pages de l'Observatoire Workwave (cluster SEO). */
