@@ -3,6 +3,9 @@ import Link from "next/link";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
 import FranceChoropleth, { type ChoroDatum } from "@/components/barometre/FranceChoropleth";
+import ProximityLinks from "@/components/barometre/ProximityLinks";
+import ObservatoireNav from "@/components/barometre/ObservatoireNav";
+import { getAllCategories } from "@/lib/queries/categories";
 import { BAROMETRE_ARTISANS, BAROMETRE_META } from "@/lib/data/barometre-artisans";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
@@ -28,7 +31,10 @@ function slugify(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-export default function BarometreArtisansPage() {
+export default async function BarometreArtisansPage() {
+  const proximityCats = (await getAllCategories())
+    .filter((c) => ["btp", "domicile", "personne"].includes(c.vertical))
+    .map((c) => ({ slug: c.slug, name: c.name }));
   const rows = BAROMETRE_ARTISANS;
   const top = rows[0];
   const bottom = rows[rows.length - 1];
@@ -333,6 +339,11 @@ export default function BarometreArtisansPage() {
             <li>Relevé : {BAROMETRE_META.generatedAt}. Réutilisation libre avec lien vers cette page.</li>
           </ul>
         </section>
+
+        {/* Proximité (maillage interne vers les pages métier) */}
+        <ProximityLinks categories={proximityCats} />
+
+        <ObservatoireNav current={PATH} />
 
         {/* CTA */}
         <section className="rounded-2xl border border-[var(--card-border)] p-8 text-center">
