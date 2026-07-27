@@ -454,10 +454,53 @@ export default function ProjectForm({
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
           Vos coordonnées
         </label>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">
-          Pour que les artisans puissent vous contacter directement. Workwave
-          ne vous spammera pas.
+        <p className="text-sm text-[var(--text-secondary)] mb-5">
+          Pour que le bon artisan puisse vous envoyer son devis. Dernière étape,
+          c&apos;est presque fini.
         </p>
+
+        {/* Réassurance données — pile au moment où l'utilisateur hésite à
+            laisser email + téléphone. Tous les points sont VRAIS :
+            - coordonnées derrière un paywall pro (9,90€ à l'unlock), jamais
+              publiques ni vendues (cf. broadcast-btp-project.ts) ;
+            - aucun démarchage Workwave ;
+            - suppression via le lien du mail de confirmation (deletion_token,
+              cf. deposer-projet/actions.ts + sendProjectConfirmation). */}
+        <div className="mb-6 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 text-[var(--accent)] shrink-0"
+              aria-hidden
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">
+              Vos données sont protégées
+            </span>
+          </div>
+          <ul className="space-y-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+            {[
+              "Vos coordonnées ne sont visibles que par un artisan qui souhaite réellement traiter votre demande — jamais affichées publiquement, jamais vendues.",
+              "Aucun démarchage de Workwave : ni publicité, ni newsletter.",
+              "Vous pouvez supprimer votre demande à tout moment (lien dans votre email de confirmation).",
+            ].map((item) => (
+              <li key={item} className="flex gap-2">
+                <span className="text-[var(--accent)] font-bold shrink-0" aria-hidden>
+                  ✓
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div className="space-y-5">
           <div>

@@ -7,9 +7,9 @@ import {
 import { getCityBySlug } from "@/lib/queries/cities";
 
 export const metadata: Metadata = {
-  title: "Deposer un projet - Devis gratuits en Vienne",
+  title: "Déposer un projet — Devis gratuits d'artisans près de chez vous",
   description:
-    "Decrivez votre projet de travaux gratuitement et recevez des devis de professionnels qualifies dans la Vienne.",
+    "Décrivez votre projet de travaux gratuitement et recevez des devis d'artisans qualifiés près de chez vous, partout en France et en Belgique. 100% gratuit, sans engagement.",
   alternates: { canonical: "https://workwave.fr/deposer-projet" },
 };
 
@@ -36,9 +36,22 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
           Décrivez votre projet
         </h1>
         <p className="text-[var(--text-secondary)] text-lg max-w-lg mx-auto">
-          Gratuit et sans engagement. Un professionnel adapté vous contactera
-          rapidement.
+          Un professionnel adapté vous contactera rapidement. Vous comparez,
+          vous choisissez.
         </p>
+        {/* Repères de confiance (tous vrais) — lever le doute dès l'arrivée. */}
+        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-[var(--text-secondary)]">
+          {["100% gratuit", "Sans engagement", "Coordonnées protégées"].map(
+            (item) => (
+              <li key={item} className="inline-flex items-center gap-1.5">
+                <span className="text-[var(--accent)] font-bold" aria-hidden>
+                  ✓
+                </span>
+                {item}
+              </li>
+            )
+          )}
+        </ul>
       </div>
 
       <ProjectForm
