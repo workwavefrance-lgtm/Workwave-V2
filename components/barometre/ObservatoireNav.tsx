@@ -5,6 +5,7 @@ const PAGES = [
   { path: "/barometre-prix-artisans", label: "Prix des artisans" },
   { path: "/barometre-metiers-artisans", label: "Métiers les plus répandus" },
   { path: "/barometre-penurie-artisans", label: "Les déserts d'artisans" },
+  { path: "/barometre-artisans-belgique", label: "Belgique francophone 🇧🇪" },
 ];
 
 /** Interconnexion des pages de l'Observatoire Workwave (cluster SEO). */
