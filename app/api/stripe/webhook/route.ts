@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripeServer } from "@/lib/stripe/server";
 import { sendPaymentFailedEmail } from "@/lib/email/send-payment-failed";
+import { sendPaidUnlockAlert } from "@/lib/email/send-paid-unlock-alert";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
@@ -115,6 +116,38 @@ async function handleBtpLeadUnlock(session: Stripe.Checkout.Session) {
       amountCents: session.amount_total || 990,
     },
   });
+
+  // Notif admin (leçon 28/04 : tout événement business critique = notif admin
+  // dans le même flux). Best-effort strict : un échec d'email ne casse JAMAIS
+  // le webhook — l'unlock est déjà inséré, l'idempotence protège les replays.
+  try {
+    const { data: pro } = await supabase
+      .from("pros")
+      .select("name")
+      .eq("id", proId)
+      .single();
+    const { data: proj } = await supabase
+      .from("projects")
+      .select("cities(name), categories(name)")
+      .eq("id", projectId)
+      .single();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pj = proj as any;
+    const city = Array.isArray(pj?.cities) ? pj.cities[0]?.name : pj?.cities?.name;
+    const category = Array.isArray(pj?.categories)
+      ? pj.categories[0]?.name
+      : pj?.categories?.name;
+    await sendPaidUnlockAlert({
+      proId,
+      proName: pro?.name || `#${proId}`,
+      projectId,
+      amountCents: session.amount_total || 990,
+      city: city ?? null,
+      category: category ?? null,
+    });
+  } catch (e) {
+    console.error("[handleBtpLeadUnlock] admin alert failed:", e);
+  }
 
   console.log(
     `[handleBtpLeadUnlock] OK — pro ${proId} a unlock le projet ${projectId} (${(session.amount_total || 990) / 100}€)`
