@@ -44,8 +44,14 @@ export type VerticalBundle = {
   byCity: Breakdown[]; // top villes demandées
 };
 
+/** Période demandée : nombre de jours glissants, ou "today" (jour calendaire en cours). */
+export type PeriodInput = number | "today";
+
 export type AdminAnalytics = VerticalSplit<VerticalBundle> & {
   periodDays: number;
+  granularity: "hour" | "day" | "month";
+  periodLabel: string;
+  comparisonLabel: string;
   generatedAt: string;
 };
 
@@ -107,6 +113,60 @@ async function loadPaged<T>(
 }
 
 // ============================================================
+// Fenêtres temporelles (période courante vs comparaison)
+// ============================================================
+
+type WindowSpec = {
+  sinceCurrent: Date;
+  currentEnd: Date;
+  sincePrev: Date;
+  prevEnd: Date;
+  loadSince: Date;
+  granularity: "hour" | "day" | "month";
+  periodDays: number;
+  periodLabel: string;
+  comparisonLabel: string;
+};
+
+const DAY_MS = 864e5;
+
+/** Construit les bornes de la fenêtre courante + la fenêtre de comparaison. */
+function windowFor(period: PeriodInput): WindowSpec {
+  const now = new Date();
+  if (period === "today") {
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0); // aujourd'hui à minuit
+    const elapsedMs = now.getTime() - start.getTime();
+    const prevStart = new Date(start.getTime() - DAY_MS); // hier à minuit
+    return {
+      sinceCurrent: start,
+      currentEnd: now,
+      sincePrev: prevStart,
+      prevEnd: new Date(prevStart.getTime() + elapsedMs), // hier, même tranche horaire
+      loadSince: prevStart,
+      granularity: "hour",
+      periodDays: 0,
+      periodLabel: "Aujourd'hui",
+      comparisonLabel: "vs hier à la même heure",
+    };
+  }
+  const days = period;
+  const sinceCurrent = new Date(now.getTime() - days * DAY_MS);
+  const sincePrev = new Date(now.getTime() - 2 * days * DAY_MS);
+  return {
+    sinceCurrent,
+    currentEnd: now,
+    sincePrev,
+    prevEnd: sinceCurrent, // périodes contiguës
+    loadSince: sincePrev,
+    granularity: days > 120 ? "month" : "day",
+    periodDays: days,
+    periodLabel: days >= 365 ? "12 derniers mois" : `${days} derniers jours`,
+    comparisonLabel: days >= 365 ? "vs 12 mois précédents" : `vs ${days} jours précédents`,
+  };
+}
+
+// ============================================================
 // Buckets temporels (axe continu, pas de trous)
 // ============================================================
 
@@ -115,43 +175,49 @@ type Buckets = {
   keyOf: (d: Date) => string;
 };
 
-function makeBuckets(days: number, sinceCurrent: Date): Buckets {
-  const monthly = days > 120; // 12 mois → buckets mensuels
-  const end = new Date();
-  if (monthly) {
-    const keys: { key: string; label: string }[] = [];
-    const cur = new Date(sinceCurrent.getFullYear(), sinceCurrent.getMonth(), 1);
+const p2 = (n: number) => String(n).padStart(2, "0");
+const dayKey = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+const monthKey = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}`;
+const hourKey = (d: Date) => `${dayKey(d)}-${p2(d.getHours())}`;
+
+function makeBuckets(spec: WindowSpec): Buckets {
+  const keys: { key: string; label: string }[] = [];
+
+  if (spec.granularity === "hour") {
+    const cur = new Date(spec.sinceCurrent);
+    const stop = new Date(spec.currentEnd);
+    while (cur <= stop) {
+      keys.push({ key: hourKey(cur), label: `${p2(cur.getHours())}h` });
+      cur.setHours(cur.getHours() + 1);
+    }
+    return { keys, keyOf: hourKey };
+  }
+
+  if (spec.granularity === "month") {
+    const cur = new Date(spec.sinceCurrent.getFullYear(), spec.sinceCurrent.getMonth(), 1);
+    const end = new Date();
     while (cur <= end) {
-      const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}`;
       keys.push({
-        key,
+        key: monthKey(cur),
         label: cur.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }),
       });
       cur.setMonth(cur.getMonth() + 1);
     }
-    return {
-      keys,
-      keyOf: (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-    };
+    return { keys, keyOf: monthKey };
   }
-  const keys: { key: string; label: string }[] = [];
-  const cur = new Date(sinceCurrent);
+
+  const cur = new Date(spec.sinceCurrent);
   cur.setHours(0, 0, 0, 0);
   const stop = new Date();
   stop.setHours(0, 0, 0, 0);
   while (cur <= stop) {
-    const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
     keys.push({
-      key,
+      key: dayKey(cur),
       label: cur.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
     });
     cur.setDate(cur.getDate() + 1);
   }
-  return {
-    keys,
-    keyOf: (d) =>
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
-  };
+  return { keys, keyOf: dayKey };
 }
 
 // ============================================================
@@ -337,33 +403,29 @@ function computeBundle(
 // Chargement + classification + partition période
 // ============================================================
 
-type ClassifiedEvent = { ev: RawEvent; v: Vertical; inCurrent: boolean };
-type ClassifiedUnlock = { u: RawUnlock; v: Vertical; inCurrent: boolean };
+type ClassifiedEvent = { ev: RawEvent; v: Vertical; inCurrent: boolean; inPrevious: boolean };
+type ClassifiedUnlock = { u: RawUnlock; v: Vertical; inCurrent: boolean; inPrevious: boolean };
 
-async function loadAndClassify(days: number): Promise<{
+async function loadAndClassify(spec: WindowSpec): Promise<{
   events: ClassifiedEvent[];
   unlocks: ClassifiedUnlock[];
-  sinceCurrent: Date;
 }> {
   const db = getAdminServiceClient();
-  const now = Date.now();
-  const sinceCurrent = new Date(now - days * 864e5);
-  const sincePrev = new Date(now - 2 * days * 864e5);
-  const sincePrevIso = sincePrev.toISOString();
+  const loadSinceIso = spec.loadSince.toISOString();
 
-  // Charge 2× la fenêtre (période courante + précédente) pour les deltas
+  // Charge la fenêtre courante + la fenêtre de comparaison (pour les deltas)
   const [events, unlocks] = await Promise.all([
     loadPaged<RawEvent>(
       "events",
       "event_name, created_at, project_id, pro_id, metadata",
       "created_at",
-      sincePrevIso
+      loadSinceIso
     ),
     loadPaged<RawUnlock>(
       "lead_unlocks",
       "project_id, pro_id, amount_cents, paid_at, created_at",
       "paid_at",
-      sincePrevIso
+      loadSinceIso
     ),
   ]);
 
@@ -418,19 +480,30 @@ async function loadAndClassify(days: number): Promise<{
     return isAi(raw) ? "ai" : "btp";
   };
 
-  const scMs = sinceCurrent.getTime();
-  const classifiedEvents: ClassifiedEvent[] = events.map((ev) => ({
-    ev,
-    v: vertOf(ev.project_id, ev.pro_id, ev.metadata?.vertical),
-    inCurrent: new Date(ev.created_at).getTime() >= scMs,
-  }));
-  const classifiedUnlocks: ClassifiedUnlock[] = unlocks.map((u) => ({
-    u,
-    v: vertOf(u.project_id, u.pro_id),
-    inCurrent: new Date(u.paid_at || u.created_at || 0).getTime() >= scMs,
-  }));
+  const scMs = spec.sinceCurrent.getTime();
+  const ceMs = spec.currentEnd.getTime();
+  const spMs = spec.sincePrev.getTime();
+  const peMs = spec.prevEnd.getTime();
+  const classifiedEvents: ClassifiedEvent[] = events.map((ev) => {
+    const t = new Date(ev.created_at).getTime();
+    return {
+      ev,
+      v: vertOf(ev.project_id, ev.pro_id, ev.metadata?.vertical),
+      inCurrent: t >= scMs && t <= ceMs,
+      inPrevious: t >= spMs && t < peMs,
+    };
+  });
+  const classifiedUnlocks: ClassifiedUnlock[] = unlocks.map((u) => {
+    const t = new Date(u.paid_at || u.created_at || 0).getTime();
+    return {
+      u,
+      v: vertOf(u.project_id, u.pro_id),
+      inCurrent: t >= scMs && t <= ceMs,
+      inPrevious: t >= spMs && t < peMs,
+    };
+  });
 
-  return { events: classifiedEvents, unlocks: classifiedUnlocks, sinceCurrent };
+  return { events: classifiedEvents, unlocks: classifiedUnlocks };
 }
 
 // ============================================================
@@ -438,25 +511,31 @@ async function loadAndClassify(days: number): Promise<{
 // ============================================================
 
 /** Tout l'analytics admin, séparé BTP / IA, avec comparaison période précédente. */
-export const getAdminAnalytics = cache(async (days: number = 30): Promise<AdminAnalytics> => {
-  const { events, unlocks, sinceCurrent } = await loadAndClassify(days);
-  const buckets = makeBuckets(days, sinceCurrent);
+export const getAdminAnalytics = cache(
+  async (period: PeriodInput = 30): Promise<AdminAnalytics> => {
+    const spec = windowFor(period);
+    const { events, unlocks } = await loadAndClassify(spec);
+    const buckets = makeBuckets(spec);
 
-  const bundleFor = (v: Vertical | "all"): VerticalBundle => {
-    const evAll = v === "all" ? events : events.filter((c) => c.v === v);
-    const uAll = v === "all" ? unlocks : unlocks.filter((c) => c.v === v);
-    const evCur = evAll.filter((c) => c.inCurrent).map((c) => c.ev);
-    const evPrev = evAll.filter((c) => !c.inCurrent).map((c) => c.ev);
-    const uCur = uAll.filter((c) => c.inCurrent).map((c) => c.u);
-    const uPrev = uAll.filter((c) => !c.inCurrent).map((c) => c.u);
-    return computeBundle(evCur, evPrev, uCur, uPrev, buckets);
-  };
+    const bundleFor = (v: Vertical | "all"): VerticalBundle => {
+      const evAll = v === "all" ? events : events.filter((c) => c.v === v);
+      const uAll = v === "all" ? unlocks : unlocks.filter((c) => c.v === v);
+      const evCur = evAll.filter((c) => c.inCurrent).map((c) => c.ev);
+      const evPrev = evAll.filter((c) => c.inPrevious).map((c) => c.ev);
+      const uCur = uAll.filter((c) => c.inCurrent).map((c) => c.u);
+      const uPrev = uAll.filter((c) => c.inPrevious).map((c) => c.u);
+      return computeBundle(evCur, evPrev, uCur, uPrev, buckets);
+    };
 
-  return {
-    all: bundleFor("all"),
-    btp: bundleFor("btp"),
-    ai: bundleFor("ai"),
-    periodDays: days,
-    generatedAt: new Date().toISOString(),
-  };
-});
+    return {
+      all: bundleFor("all"),
+      btp: bundleFor("btp"),
+      ai: bundleFor("ai"),
+      periodDays: spec.periodDays,
+      granularity: spec.granularity,
+      periodLabel: spec.periodLabel,
+      comparisonLabel: spec.comparisonLabel,
+      generatedAt: new Date().toISOString(),
+    };
+  }
+);

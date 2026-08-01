@@ -18,6 +18,6 @@ export async function GET(request: NextRequest) {
   }
 
   const period = (request.nextUrl.searchParams.get("period") || "30d") as DatePeriod;
-  const analytics = await getAdminAnalytics(periodToDays(period));
+  const analytics = await getAdminAnalytics(period === "today" ? "today" : periodToDays(period));
   return NextResponse.json(analytics);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import AdminDatePicker from "@/components/admin/forms/AdminDatePicker";
+import AdminDatePicker, { PERIODS_WITH_TODAY } from "@/components/admin/forms/AdminDatePicker";
 import AdminAreaChart from "@/components/admin/charts/AdminAreaChart";
 import AdminKPICard from "@/components/admin/data-display/AdminKPICard";
 import type { DatePeriod } from "@/lib/types/admin";
@@ -225,7 +225,6 @@ export default function AnalyticsClient({
 
   const b: VerticalBundle = analytics[tab];
   const k = b.kpis;
-  const days = analytics.periodDays;
 
   // dérivations d'affichage (deltas)
   const formRateCur = rate(k.projectsSubmitted.current, k.formStarted.current);
@@ -242,10 +241,10 @@ export default function AnalyticsClient({
             Analytics
           </h1>
           <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-            {b.totalEvents.toLocaleString("fr-FR")} événements · {days} derniers jours · vs {days} jours précédents
+            {b.totalEvents.toLocaleString("fr-FR")} événements · {analytics.periodLabel} · {analytics.comparisonLabel}
           </p>
         </div>
-        <AdminDatePicker value={period} onChange={handlePeriodChange} />
+        <AdminDatePicker value={period} onChange={handlePeriodChange} periods={PERIODS_WITH_TODAY} />
       </div>
 
       {/* Tabs vertical */}
@@ -358,7 +357,7 @@ export default function AnalyticsClient({
 
         {/* Activité + réclamations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <Card title="Activité par jour" subtitle="Tous événements confondus">
+          <Card title={analytics.granularity === "hour" ? "Activité par heure" : "Activité par jour"} subtitle="Tous événements confondus">
             {b.eventsByDay.every((d) => d.count === 0) ? (
               <Empty message="Aucun événement sur la période" />
             ) : (

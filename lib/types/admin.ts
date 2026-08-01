@@ -150,4 +150,4 @@ export type TableSort = {
   direction: SortDirection;
 };
 
-export type DatePeriod = "7d" | "30d" | "90d" | "12m" | "all";
+export type DatePeriod = "today" | "7d" | "30d" | "90d" | "12m" | "all";
