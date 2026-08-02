@@ -214,7 +214,7 @@ function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: 
 
   const introText =
     kind === "j1"
-      ? "Ce projet est arrivé hier dans votre tableau de bord et personne ne l'a encore pris. Le particulier attend toujours des devis — c'est le bon moment pour vous positionner."
+      ? "Personne n'a encore pris ce projet et le particulier attend toujours ses devis. Vous êtes donc encore parmi les premiers à pouvoir vous positionner — tout est dans votre tableau de bord."
       : kind === "j3"
         ? "Ce projet est toujours en ligne et cherche un professionnel. Si vous souhaitez le traiter, c'est encore le moment — tout est dans votre dashboard."
         : "Un particulier de votre zone vient de publier une demande qui correspond à votre savoir-faire. Connectez-vous à votre dashboard pour la consulter.";
