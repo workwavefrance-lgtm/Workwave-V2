@@ -183,7 +183,8 @@ function humanUrgency(value: string | null): string | null {
   return m[value] ?? value;
 }
 
-function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: string | null): string {
+/** Exporte pour permettre de PREVISUALISER un email sans l'envoyer (scripts/_preview-mail.ts). */
+export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: string | null): string {
   const previewDesc =
     input.projectDescription.length > 220
       ? input.projectDescription.slice(0, 220).trim() + "..."
