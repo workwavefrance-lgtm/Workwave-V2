@@ -1,0 +1,13 @@
+# Allege le contexte envoye au moteur Docker (build plus rapide, image plus legere).
+node_modules
+.next
+.git
+.env*
+marketing/*.mp4
+marketing/frames-projet
+marketing/frames
+Workwave
+scraping/__pycache__
+*.log
+.DS_Store
+.vercel
