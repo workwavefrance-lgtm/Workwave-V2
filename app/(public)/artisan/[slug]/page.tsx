@@ -30,6 +30,15 @@ import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 export const revalidate = 2592000; // 30j (15/06) : egress Supabase 313% sous crawl ; donnees Sirene statiques. La fiche revalide a la reclamation/edition (revalidatePath) + un deploiement reset le cache, donc 0 risque de fraicheur. // 7j (13/06)
 
+// Sans generateStaticParams, Next.js classe la route en RENDU DYNAMIQUE :
+// `revalidate` est ignore et la page est recalculee a CHAQUE visite. La liste
+// vide = on ne prebuild rien au build, mais la route bascule en ISR (1re visite
+// -> generee ET mise en cache). HTML identique : aucun impact SEO.
+export function generateStaticParams() {
+  return [];
+}
+
+
 type Props = {
   params: Promise<{ slug: string }>;
 };

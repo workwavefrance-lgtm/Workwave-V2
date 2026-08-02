@@ -45,6 +45,15 @@ import {
  */
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
+// Sans generateStaticParams, Next.js classe la route en RENDU DYNAMIQUE :
+// `revalidate` est ignore et la page est recalculee a CHAQUE visite. La liste
+// vide = on ne prebuild rien au build, mais la route bascule en ISR (1re visite
+// -> generee ET mise en cache). HTML identique : aucun impact SEO.
+export function generateStaticParams() {
+  return [];
+}
+
+
 // Whitelist + labels DUPLIQUÉS depuis app/(public)/[metier]/urgence/page.tsx :
 // un page.tsx Next.js ne peut pas exporter de constantes arbitraires (seuls
 // default / generateMetadata / segments config sont autorisés). Garder en
