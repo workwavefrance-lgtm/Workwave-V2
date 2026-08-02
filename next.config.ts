@@ -6,6 +6,27 @@ const nextConfig: NextConfig = {
   // latence machine→Supabase × nombreux round-trips). 180s laisse la marge
   // sans masquer un vrai problème. Vercel build largement sous cette limite.
   staticPageGenerationTimeout: 180,
+  // Compression deleguee au proxy (Caddy/Traefik de Coolify), qui sait faire du
+  // brotli — ~25 % plus efficace que le gzip de Next. Sur Vercel c'etait deja
+  // le cas (leur edge compressait en brotli) ; sans ce reglage, la migration
+  // aurait fait grossir les pages de 21 a 29 % a telecharger.
+  compress: false,
+  // Vercel ajoutait cet en-tete automatiquement ; il n'est ecrit nulle part dans
+  // le code, donc il disparaitrait a la bascule. Il force les navigateurs a
+  // n'utiliser QUE HTTPS sur le domaine (protection contre l'interception).
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

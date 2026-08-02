@@ -15,7 +15,12 @@ export const maxDuration = 300;
 const BATCH = 200;
 
 export async function GET(req: NextRequest) {
-  if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+  // On verifie que le secret EXISTE avant de comparer : sans ce garde, une
+  // variable manquante ferait comparer a la chaine "Bearer undefined", qu'un
+  // tiers peut envoyer -> declenchement d'un envoi de masse (jusqu'a 400 mails
+  // de relance a de vrais utilisateurs). Meme garde que /api/cron/healthcheck.
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || req.headers.get("authorization") !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const sb = createClient(
