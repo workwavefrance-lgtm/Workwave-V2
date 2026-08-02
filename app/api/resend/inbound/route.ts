@@ -35,7 +35,17 @@ import { triageTicket } from "@/lib/support/triage";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialisation PARESSEUSE (au 1er appel), pas au chargement du module.
+// `new Resend(undefined)` leve une exception ; au chargement du module cela
+// cassait `next build` entier ("Failed to collect page data for
+// /api/resend/inbound") des que la cle n'etait pas fournie a l'etape de build.
+// Une route ne doit jamais faire echouer une construction a cause d'un secret
+// d'execution : on differe donc la creation du client jusqu'a la requete.
+let resendClient: Resend | null = null;
+function getResend(): Resend {
+  if (!resendClient) resendClient = new Resend(process.env.RESEND_API_KEY);
+  return resendClient;
+}
 
 function esc(s: string): string {
   return (s || "")
@@ -67,7 +77,7 @@ export async function POST(req: Request) {
   // 1. Vérification de la signature svix (Resend) — headers = en-têtes svix
   let event;
   try {
-    event = resend.webhooks.verify({
+    event = getResend().webhooks.verify({
       payload: rawBody,
       headers: {
         id: req.headers.get("svix-id") || "",
@@ -116,7 +126,7 @@ export async function POST(req: Request) {
   }
 
   // 3. Récupère le corps complet du mail reçu
-  const { data: mail, error } = await resend.emails.receiving.get(emailId);
+  const { data: mail, error } = await getResend().emails.receiving.get(emailId);
   if (error || !mail) {
     // Échec transitoire (timeout/5xx Resend) -> 502 pour DÉCLENCHER le retry svix
     // (sinon un 200 = "livré" = email perdu à jamais).
@@ -203,7 +213,7 @@ ${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
       { status: 500 }
     );
   }
-  const sent = await resend.emails.send({
+  const sent = await getResend().emails.send({
     from: "Workwave Inbox <noreply@workwave.fr>",
     to: adminEmail,
     replyTo: from,
