@@ -15,7 +15,10 @@
  * L'email reste interne (audit RGPD, jamais public).
  */
 import { randomBytes } from "crypto";
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { sendReviewThanks } from "@/lib/email/send-review-thanks";
 import { sendReviewModerationAlert } from "@/lib/email/send-review-moderation-alert";
@@ -213,7 +216,7 @@ export async function getPublishedReviewsForPro(
   proId: number,
   limit = 20
 ): Promise<ProReview[]> {
-  const sb = await createClient();
+  const sb = createPublicClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (sb.from("pro_reviews") as any)
     .select("*")

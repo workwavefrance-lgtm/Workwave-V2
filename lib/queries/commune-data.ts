@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 
 /**
  * Enrichissement commune via data.gouv.fr (table commune_data, keyée insee_code).
@@ -32,7 +35,7 @@ export async function getCommuneData(
   inseeCode: string | null | undefined
 ): Promise<CommuneData | null> {
   if (!inseeCode) return null;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("commune_data")
     .select(COLS)

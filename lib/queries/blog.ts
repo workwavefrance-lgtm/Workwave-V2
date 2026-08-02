@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 
 export type BlogPost = {
@@ -21,7 +24,7 @@ export async function getPublishedPosts(
   page: number = 1,
   pageSize: number = DEFAULT_PAGE_SIZE
 ): Promise<{ data: BlogPost[]; count: number; totalPages: number }> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -45,7 +48,7 @@ export async function getPublishedPosts(
 export async function getBlogPostBySlug(
   slug: string
 ): Promise<BlogPost | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("blog_posts")
     .select("*")

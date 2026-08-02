@@ -1,8 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import type { City, CityWithDepartment } from "@/lib/types/database";
 
 export async function getTopCities(limit: number = 20): Promise<City[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("cities")
     .select("*")
@@ -15,7 +18,7 @@ export async function getCitiesByDepartment(
   departmentId: number,
   limit?: number
 ): Promise<City[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   // 16/06 : ajout d'un `limit` optionnel. La racine métier /[metier] appelait
   // ça sur 101 départements (= ~34 000 communes chargées toutes colonnes) pour
   // n'en afficher que 10/dept → timeout (healthcheck KO) + gros egress sous le
@@ -33,7 +36,7 @@ export async function getCitiesByDepartment(
 // Count global des communes (pour les stats "X villes couvertes") sans charger
 // les lignes — estimated + head:true = quasi 0 egress.
 export async function getTotalCitiesCount(): Promise<number> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { count } = await supabase
     .from("cities")
     .select("id", { count: "estimated", head: true });
@@ -43,7 +46,7 @@ export async function getTotalCitiesCount(): Promise<number> {
 export async function getCityBySlug(
   slug: string
 ): Promise<CityWithDepartment | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("cities")
     .select("*, department:departments(*)")
@@ -58,7 +61,7 @@ export async function getNearbyCities(
   cityId: number,
   limit: number = 8
 ): Promise<City[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Récupérer la ville de référence
   const { data: city } = await supabase
@@ -139,14 +142,14 @@ export async function getAggregatedCityIds(city: {
   // 1. Zone transfrontalière (Monaco) — enfants par slug explicite
   const zoneSlugs = BORDER_ZONE_CHILD_SLUGS[city.slug];
   if (zoneSlugs) {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase.from("cities").select("id").in("slug", zoneSlugs);
     const ids = (data || []).map((c: { id: number }) => c.id);
     return ids.length > 0 ? ids : null;
   }
   // 2. Métropole à arrondissements (Marseille/Lyon/Paris)
   if (!isMetroParentInsee(city.insee_code)) return null;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("cities")
     .select("id")

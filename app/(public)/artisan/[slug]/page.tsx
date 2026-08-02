@@ -7,7 +7,9 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
 import { getPublishedReviewsForPro } from "@/lib/queries/reviews";
 import { getNearbyCities } from "@/lib/queries/cities";
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule la
+// fiche en rendu DYNAMIQUE (cache CDN inactif -> regeneree a chaque visite).
+import { createPublicClient } from "@/lib/supabase/public-client";
 import ProCard from "@/components/pro/ProCard";
 import ProReviewsBlock from "@/components/pro/ProReviewsBlock";
 import ProjectCTABlock from "@/components/listing/ProjectCTABlock";
@@ -116,7 +118,7 @@ export default async function ProPage({ params }: Props) {
   // en parallèle (les cat. secondaires permettent à la fiche d'apparaître sur
   // plusieurs listings /[metier]/[ville] et boostent le maillage interne SEO).
   const secondaryIds = (pro.secondary_category_ids || []) as number[];
-  const supabaseForCats = await createClient();
+  const supabaseForCats = createPublicClient();
   const [similarPros, nearbyCities, reviews, secondaryCategoriesRes] = await Promise.all([
     pro.city ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
     pro.city ? getNearbyCities(pro.city.id, 5) : Promise.resolve([]),

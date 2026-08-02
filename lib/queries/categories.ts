@@ -1,8 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Category } from "@/lib/types/database";
 
 export async function getAllCategories(): Promise<Category[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("categories")
     .select("*")
@@ -27,7 +30,7 @@ export type CategoryOption = Pick<Category, "id" | "name" | "vertical">;
  * publiques et l'admin.
  */
 export async function getCategoriesForPicker(): Promise<CategoryOption[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("categories")
     .select("id, name, vertical")
@@ -39,7 +42,7 @@ export async function getCategoriesForPicker(): Promise<CategoryOption[]> {
 export async function getCategoryBySlug(
   slug: string
 ): Promise<Category | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("categories")
     .select("*")
@@ -53,7 +56,7 @@ export async function getPopularCategoriesInCity(
   excludeCategoryId: number,
   limit: number = 6
 ): Promise<{ category: Category; count: number }[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Compter les pros par categorie dans cette ville
   const { data: pros } = await supabase
@@ -97,7 +100,7 @@ export async function getPopularCategoriesInCity(
 export async function getCategoriesByVertical(
   vertical: string
 ): Promise<Category[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("categories")
     .select("*")

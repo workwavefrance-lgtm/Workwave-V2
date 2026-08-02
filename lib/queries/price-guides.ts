@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 
 export type PriceRange = { label: string; low: number | null; high: number | null; unit: string };
 export type DevisExample = { label: string; total: string; detail?: string };
@@ -34,7 +37,7 @@ const COLS =
 
 /** Guide prestation par slug (publié). */
 export async function getPriceGuideBySlug(slug: string): Promise<PriceGuide | null> {
-  const sb = await createClient();
+  const sb = createPublicClient();
   const { data } = await sb
     .from("price_guides")
     .select(COLS)
@@ -47,7 +50,7 @@ export async function getPriceGuideBySlug(slug: string): Promise<PriceGuide | nu
 
 /** Guide PRIX national d'un métier (publié). */
 export async function getMetierPriceGuide(metierSlug: string): Promise<PriceGuide | null> {
-  const sb = await createClient();
+  const sb = createPublicClient();
   const { data } = await sb
     .from("price_guides")
     .select(COLS)
@@ -60,7 +63,7 @@ export async function getMetierPriceGuide(metierSlug: string): Promise<PriceGuid
 
 /** Prestations publiées d'un métier (maillage + hub). */
 export async function getPriceGuidesByMetier(metierSlug: string, limit = 24): Promise<PriceGuide[]> {
-  const sb = await createClient();
+  const sb = createPublicClient();
   const { data } = await sb
     .from("price_guides")
     .select(COLS)
@@ -75,7 +78,7 @@ export async function getPriceGuidesByMetier(metierSlug: string, limit = 24): Pr
 /** Guides connexes par slugs (maillage). */
 export async function getPriceGuidesBySlugs(slugs: string[]): Promise<PriceGuide[]> {
   if (!slugs.length) return [];
-  const sb = await createClient();
+  const sb = createPublicClient();
   const { data } = await sb
     .from("price_guides")
     .select("slug, h1, title, metier_slug")
@@ -88,7 +91,7 @@ export async function getPriceGuidesBySlugs(slugs: string[]): Promise<PriceGuide
 export async function getAllPublishedPriceGuides(): Promise<
   Pick<PriceGuide, "slug" | "scope" | "metier_slug" | "univers" | "h1" | "volume_est" | "updated_at">[]
 > {
-  const sb = await createClient();
+  const sb = createPublicClient();
   const out: Pick<PriceGuide, "slug" | "scope" | "metier_slug" | "univers" | "h1" | "volume_est" | "updated_at">[] = [];
   let offset = 0;
   const PAGE = 1000;

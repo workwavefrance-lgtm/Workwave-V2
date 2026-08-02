@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import type {
   PaginatedResult,
@@ -81,7 +84,7 @@ export async function getProsByCategoryAndCityIds(
   if (cityIds.length === 0) {
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
   }
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const query = supabase
     .from("pros")
     .select(PRO_SELECT_CARD, { count: "exact" })
@@ -98,7 +101,7 @@ export async function getProsByCategoryAndDepartment(
   departmentId: number,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
 ): Promise<PaginatedResult<ProCardData>> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   // Récupérer les city_ids du département
   const { data: cities } = await supabase
@@ -120,7 +123,7 @@ export async function countProsByCategoryAndCityIds(
   cityIds: number[]
 ): Promise<number> {
   if (cityIds.length === 0) return 0;
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { count } = await supabase
     .from("pros")
     .select("id", { count: "exact", head: true })
@@ -142,7 +145,7 @@ export async function getProMiniCardsByCategoryAndCityIds(
   limit: number = 3
 ): Promise<{ id: number; slug: string; name: string }[]> {
   if (cityIds.length === 0) return [];
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("pros")
     .select("id, slug, name")
@@ -161,7 +164,7 @@ export async function getProsByCategoryAndCity(
   cityId: number,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
 ): Promise<PaginatedResult<ProCardData>> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const query = supabase
     .from("pros")
     .select(PRO_SELECT_CARD, { count: "exact" })
@@ -176,7 +179,7 @@ export async function getProsByCategoryAndCity(
 export async function getProBySlug(
   slug: string
 ): Promise<ProWithRelations | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("pros")
     .select(PRO_SELECT)
@@ -191,7 +194,7 @@ export async function getProBySlug(
 export async function getProByUserId(
   userId: string
 ): Promise<ProWithRelations | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("pros")
     .select(PRO_SELECT)
@@ -218,7 +221,7 @@ const AI_CATEGORY_IDS_QUERY = AI_CATEGORY_IDS as unknown as number[];
 export async function getAiProByUserId(
   userId: string
 ): Promise<ProWithRelations | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("pros")
     .select(PRO_SELECT)
@@ -240,7 +243,7 @@ export async function getAiProByUserId(
 export async function getBtpProByUserId(
   userId: string
 ): Promise<ProWithRelations | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("pros")
     .select(PRO_SELECT)
@@ -261,7 +264,7 @@ export async function getSimilarPros(
   excludeSlug: string,
   limit: number = 5
 ): Promise<ProCardData[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("pros")
     .select(PRO_SELECT_CARD)
@@ -279,7 +282,7 @@ export async function searchPros(
   query: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
 ): Promise<PaginatedResult<ProCardData>> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const q = supabase
     .from("pros")
     .select(PRO_SELECT_CARD, { count: "exact" })

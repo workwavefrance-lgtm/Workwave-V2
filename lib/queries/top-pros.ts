@@ -17,7 +17,10 @@
  * sont enrichis) : la base score utilise profile_completion + certifs
  * + claimed + photos + anciennete (toujours dispos).
  */
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Pro, ProCardData } from "@/lib/types/database";
 import { PRO_SELECT_CARD } from "@/lib/queries/pros";
 
@@ -180,7 +183,7 @@ export async function getTopProsByCategoryAndCityIds(
   limit = 10
 ): Promise<{ tops: ProCardData[]; total: number }> {
   if (cityIds.length === 0) return { tops: [], total: 0 };
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, count } = await supabase
     .from("pros")
@@ -213,7 +216,7 @@ export async function getTopProsByCategoryAndCity(
   cityId: number,
   limit = 10
 ): Promise<{ tops: ProCardData[]; total: number }> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data, count } = await supabase
     .from("pros")
@@ -247,7 +250,7 @@ export async function getTopProsByCategoryAndDepartment(
   departmentId: number,
   limit = 10
 ): Promise<{ tops: ProCardData[]; total: number }> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: cities } = await supabase
     .from("cities")

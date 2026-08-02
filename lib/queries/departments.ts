@@ -1,9 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Department } from "@/lib/types/database";
 import { generateDepartmentSlug, parseDepartmentSlug } from "@/lib/utils/slugs";
 
 export async function getAllDepartments(): Promise<Department[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("departments")
     .select("*")
@@ -17,7 +20,7 @@ export async function getDepartmentBySlug(
   const parsed = parseDepartmentSlug(slug);
   if (!parsed) return null;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   // parsed.code est en minuscules (ex. "2a"). La BDD stocke les codes Corse en
   // majuscules ("2A"/"2B"). toUpperCase() : numérique inchangé ("86"->"86"),
   // Corse re-majusculée pour matcher.

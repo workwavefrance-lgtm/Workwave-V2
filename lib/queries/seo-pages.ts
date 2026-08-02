@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+// Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
+// TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
+// Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { createPublicClient } from "@/lib/supabase/public-client";
 
 export type FaqItem = { question: string; answer: string };
 
@@ -21,7 +24,7 @@ export async function getSeoContent(
   locationId: number,
   locationType: "city" | "department"
 ): Promise<SeoPage | null> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const query = supabase
     .from("seo_pages")
