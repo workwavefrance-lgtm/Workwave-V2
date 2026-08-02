@@ -99,12 +99,17 @@ export async function getMatchCategoryIds(
 async function markProjectDone(
   sb: ReturnType<typeof getServiceClient>,
   projectId: number,
-  isRelance: boolean,
+  relanceKind: "j1" | "j3" | null,
   sentCount: number
 ): Promise<void> {
-  const update = isRelance
-    ? { relance_sent_at: new Date().toISOString() }
-    : { broadcast_count: sentCount, broadcasted_at: new Date().toISOString() };
+  // Chaque relance ecrit dans SA colonne : sinon la relance J+1 remplirait
+  // relance_sent_at et empecherait definitivement la relance J+3 de partir.
+  const update =
+    relanceKind === "j1"
+      ? { relance_j1_sent_at: new Date().toISOString() }
+      : relanceKind === "j3"
+        ? { relance_sent_at: new Date().toISOString() }
+        : { broadcast_count: sentCount, broadcasted_at: new Date().toISOString() };
   await sb.from("projects").update(update).eq("id", projectId);
 }
 
@@ -132,6 +137,14 @@ export type BroadcastBtpInput = {
   isSuspicious: boolean;
   /** Mode relance J+3 : texte d'email plus doux + marque relance_sent_at au lieu de broadcasted_at (ne touche pas au compteur d'origine). */
   isRelance?: boolean;
+  /**
+   * Type de relance. Chaque relance a SA propre colonne d'idempotence, sinon la
+   * 1re bloquerait la 2e :
+   *   "j1" -> relance_j1_sent_at — 24 h apres, "un projet vous attend"
+   *   "j3" -> relance_sent_at    — 3 jours apres, "toujours disponible"
+   * Non fourni + isRelance=true => "j3" (comportement historique preserve).
+   */
+  relanceKind?: "j1" | "j3";
 };
 
 export type BroadcastBtpResult = {
@@ -181,15 +194,30 @@ function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: 
     ? `${input.projectCityName}${postalCode ? ` (${postalCode})` : ""}`
     : postalCode || null;
 
-  // Mode relance J+3 : texte plus doux ("toujours disponible"), même mise en page.
-  const isRelance = input.isRelance === true;
-  const tagLabel = isRelance ? "RAPPEL PROJET" : "NOUVEAU PROJET";
-  const headline = isRelance
-    ? `Toujours disponible : projet ${input.projectCategoryName}${input.projectCityName ? ` à ${input.projectCityName}` : ""}`
-    : `Nouveau projet ${input.projectCategoryName}${input.projectCityName ? ` à ${input.projectCityName}` : ""}`;
-  const introText = isRelance
-    ? "Ce projet est toujours en ligne et cherche un professionnel. Si vous souhaitez le traiter, c'est encore le moment — tout est dans votre dashboard."
-    : "Un particulier de votre zone vient de publier une demande qui correspond à votre savoir-faire. Connectez-vous à votre dashboard pour la consulter.";
+  // 3 variantes de texte, même mise en page :
+  //   J0  -> annonce du projet
+  //   J+1 -> rappel à chaud (le particulier attend encore une réponse)
+  //   J+3 -> rappel doux (le projet est toujours sans preneur)
+  const isRelance = input.isRelance === true || input.relanceKind != null;
+  const kind: "j1" | "j3" | null = input.relanceKind ?? (isRelance ? "j3" : null);
+  const lieu = input.projectCityName ? ` à ${input.projectCityName}` : "";
+
+  const tagLabel =
+    kind === "j1" ? "PROJET EN ATTENTE" : kind === "j3" ? "RAPPEL PROJET" : "NOUVEAU PROJET";
+
+  const headline =
+    kind === "j1"
+      ? `Un projet ${input.projectCategoryName}${lieu} vous attend`
+      : kind === "j3"
+        ? `Toujours disponible : projet ${input.projectCategoryName}${lieu}`
+        : `Nouveau projet ${input.projectCategoryName}${lieu}`;
+
+  const introText =
+    kind === "j1"
+      ? "Ce projet est arrivé hier dans votre tableau de bord et personne ne l'a encore pris. Le particulier attend toujours des devis — c'est le bon moment pour vous positionner."
+      : kind === "j3"
+        ? "Ce projet est toujours en ligne et cherche un professionnel. Si vous souhaitez le traiter, c'est encore le moment — tout est dans votre dashboard."
+        : "Un particulier de votre zone vient de publier une demande qui correspond à votre savoir-faire. Connectez-vous à votre dashboard pour la consulter.";
 
   const suspiciousBanner = input.isSuspicious
     ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
@@ -273,9 +301,17 @@ export async function broadcastBtpProject(
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr")
     .replace(/\s+/g, "")
     .replace(/\/+$/, "");
-  const subject = input.isRelance
-    ? `Rappel : projet ${input.projectCategoryName}${input.projectCityName ? ` a ${input.projectCityName}` : ""} toujours disponible — Workwave`
-    : `Nouveau projet ${input.projectCategoryName}${input.projectCityName ? ` a ${input.projectCityName}` : ""} — Workwave`;
+  // Type de relance, calcule une seule fois pour l'objet du mail ET la colonne
+  // d'idempotence ecrite en fin de traitement (markProjectDone).
+  const kind: "j1" | "j3" | null =
+    input.relanceKind ?? (input.isRelance === true ? "j3" : null);
+  const lieuSujet = input.projectCityName ? ` a ${input.projectCityName}` : "";
+  const subject =
+    kind === "j1"
+      ? `Un projet ${input.projectCategoryName}${lieuSujet} vous attend — Workwave`
+      : kind === "j3"
+        ? `Rappel : projet ${input.projectCategoryName}${lieuSujet} toujours disponible — Workwave`
+        : `Nouveau projet ${input.projectCategoryName}${lieuSujet} — Workwave`;
 
   const sb = getServiceClient();
   const nowIso = new Date().toISOString();
@@ -373,7 +409,7 @@ export async function broadcastBtpProject(
     }
     const deptCityIds = (deptCities || []).map((c: { id: number }) => c.id);
     if (deptCityIds.length === 0) {
-      await markProjectDone(sb, input.projectId, input.isRelance ?? false, 0);
+      await markProjectDone(sb, input.projectId, kind, 0);
       return { totalTargets: 0, sent: 0, failed: 0, errors: ["no_cities_in_department"] };
     }
     queryBuilder = queryBuilder.in("city_id", deptCityIds);
@@ -383,7 +419,7 @@ export async function broadcastBtpProject(
 
   if (queryError) {
     console.error("[broadcastBtpProject] query error:", queryError);
-    await markProjectDone(sb, input.projectId, input.isRelance ?? false, 0);
+    await markProjectDone(sb, input.projectId, kind, 0);
     return { totalTargets: 0, sent: 0, failed: 0, errors: [queryError.message] };
   }
 
@@ -425,7 +461,7 @@ export async function broadcastBtpProject(
     // 0 plombiers eligibles dans le departement (cas concret : projet #42
     // Laurent dans le 86, aucun plombier reclame). Track quand meme pour ne
     // pas laisser broadcasted_at=null indefiniment et pouvoir auditer.
-    await markProjectDone(sb, input.projectId, input.isRelance ?? false, 0);
+    await markProjectDone(sb, input.projectId, kind, 0);
     return { totalTargets: 0, sent: 0, failed: 0, errors: [] };
   }
 
@@ -453,7 +489,7 @@ export async function broadcastBtpProject(
   }
 
   // 4) Track le broadcast (ou la relance) en BDD
-  await markProjectDone(sb, input.projectId, input.isRelance ?? false, sent);
+  await markProjectDone(sb, input.projectId, kind, sent);
 
   // 5) Trace QUI a reçu le projet (project_leads, status "sent") pour les stats
   //    admin "à qui c'est envoyé". N'insère que les pros pas déjà tracés (pas

@@ -1,25 +1,31 @@
 /**
- * Cron quotidien : relance "projet toujours disponible" à J+3.
+ * Cron quotidien : DEUX relances aux pros sur un projet toujours sans preneur.
  *
- * But : un projet BTP publié il y a ~3 jours et toujours en ligne mérite un
- * petit rappel gentil aux pros de sa catégorie (principale + secondaires) dans
- * leur zone — le particulier attend toujours, et un pro a peut-être loupé le
- * 1er mail.
+ *   J0    broadcast initial          -> broadcasted_at
+ *   J+1   "un projet vous attend"    -> relance_j1_sent_at   (ajoute le 02/08/2026)
+ *   J+3   "toujours disponible"      -> relance_sent_at
+ *
+ * Pourquoi deux : un pro qui ne clique pas le jour meme oublie. La relance a
+ * 24 h le rattrape quand le particulier attend encore ses devis — c'est la que
+ * se declenchent les deblocages a 9,90 EUR. Celle a J+3 est un dernier rappel.
  *
  * Simple + fiable :
- *   - Réutilise broadcastBtpProject({ isRelance: true }) → MÊME ciblage exact
- *     (catégorie + rayon Haversine + pro inscrit + pas en pause), juste un
- *     texte d'email plus doux. Zéro duplication de logique.
- *   - relance_sent_at garantit UNE SEULE relance par projet (idempotent).
- *   - Fenêtre [J-14 ; J-3] : on relance les projets de 3 à 14 jours (au-delà,
- *     "toujours dispo" n'a plus de sens). Robuste si le cron saute un jour.
+ *   - Reutilise broadcastBtpProject({ relanceKind }) -> MEME ciblage exact
+ *     (categorie + rayon Haversine + pro inscrit + pas en pause), seul le texte
+ *     de l'email change. Zero duplication de logique.
+ *   - Une COLONNE PAR RELANCE : un pro ne peut jamais recevoir deux fois le
+ *     meme message, et la relance J+1 ne bloque pas la J+3.
+ *   - Fenetres bornees, donc robuste si le cron saute un jour :
+ *       J+1 : broadcasted_at dans [J-3 ; J-1]
+ *       J+3 : broadcasted_at dans [J-14 ; J-3]
+ *     Elles ne se chevauchent pas : un projet passe par les deux, jamais deux
+ *     fois par la meme.
  *
- * Sélection : vertical='btp', status != 'deleted', broadcast_count > 0
- *   (= a bien été diffusé ; les jamais-diffusés sont gérés par broadcast-rescue),
- *   relance_sent_at IS NULL, broadcasted_at dans [J-14 ; J-3].
+ * Selection commune : vertical='btp', status != 'deleted', broadcast_count > 0
+ *   (= a bien ete diffuse ; les jamais-diffuses sont geres par broadcast-rescue).
  *
- * Auth : Bearer CRON_SECRET (Vercel cron natif).
- * Test : GET ...?dry=1  → liste ce qui SERAIT relancé, sans rien envoyer.
+ * Auth : Bearer CRON_SECRET.
+ * Test : GET ...?dry=1  -> liste ce qui SERAIT relance, sans rien envoyer.
  */
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
@@ -47,26 +53,47 @@ export async function GET(req: Request) {
   const dryRun = new URL(req.url).searchParams.get("dry") === "1";
   const sb = getServiceClient();
   const now = Date.now();
-  const threeDaysAgo = new Date(now - 3 * 86400e3).toISOString();
-  const fourteenDaysAgo = new Date(now - 14 * 86400e3).toISOString();
+  const SELECT =
+    "id, description, category_id, city_id, budget, urgency, suspicion_score, broadcasted_at, broadcast_count";
 
-  // 2. Projets à relancer
-  const { data: projects, error } = await sb
-    .from("projects")
-    .select("id, description, category_id, city_id, budget, urgency, suspicion_score, broadcasted_at, broadcast_count")
-    .eq("vertical", "btp")
-    .neq("status", "deleted")
-    .gt("broadcast_count", 0)
-    .is("relance_sent_at", null)
-    .lte("broadcasted_at", threeDaysAgo)
-    .gte("broadcasted_at", fourteenDaysAgo)
-    .order("broadcasted_at", { ascending: true })
-    .limit(MAX_PER_RUN);
+  const iso = (jours: number) => new Date(now - jours * 86400e3).toISOString();
 
-  if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  // 2. Deux fenetres DISJOINTES : un projet passe par J+1 puis par J+3,
+  //    jamais deux fois par la meme (colonne d'idempotence dediee).
+  const fenetres = [
+    { kind: "j1" as const, colonne: "relance_j1_sent_at", plusRecentQue: iso(3), plusAncienQue: iso(1) },
+    { kind: "j3" as const, colonne: "relance_sent_at", plusRecentQue: iso(14), plusAncienQue: iso(3) },
+  ];
+
+  type Cible = {
+    id: number; description: string | null; category_id: number; city_id: number;
+    budget: string | null; urgency: string | null; suspicion_score: number | null;
+    broadcasted_at: string | null; broadcast_count: number | null;
+    kind: "j1" | "j3";
+  };
+  const cibles: Cible[] = [];
+
+  for (const f of fenetres) {
+    const { data, error } = await sb
+      .from("projects")
+      .select(SELECT)
+      .eq("vertical", "btp")
+      .neq("status", "deleted")
+      .gt("broadcast_count", 0)
+      .is(f.colonne, null)
+      .lte("broadcasted_at", f.plusAncienQue)
+      .gte("broadcasted_at", f.plusRecentQue)
+      .order("broadcasted_at", { ascending: true })
+      .limit(MAX_PER_RUN);
+    if (error) {
+      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    }
+    for (const p of (data || []) as Omit<Cible, "kind">[]) cibles.push({ ...p, kind: f.kind });
   }
-  if (!projects?.length) {
+
+  const projects = cibles.slice(0, MAX_PER_RUN);
+
+  if (!projects.length) {
     return NextResponse.json({ ok: true, message: "Aucun projet à relancer", relanced: 0, dryRun });
   }
 
@@ -76,8 +103,13 @@ export async function GET(req: Request) {
       ok: true,
       dryRun: true,
       wouldRelance: projects.length,
+      parRelance: {
+        j1: projects.filter((p) => p.kind === "j1").length,
+        j3: projects.filter((p) => p.kind === "j3").length,
+      },
       projects: projects.map((p) => ({
         id: p.id,
+        relance: p.kind,
         category_id: p.category_id,
         city_id: p.city_id,
         broadcasted_at: p.broadcasted_at,
@@ -87,7 +119,7 @@ export async function GET(req: Request) {
   }
 
   // 3. Relance un par un (réutilise le broadcast existant en mode relance)
-  const results: Array<{ id: number; sent: number; total: number; error?: string }> = [];
+  const results: Array<{ id: number; kind?: "j1" | "j3"; sent: number; total: number; error?: string }> = [];
   for (const p of projects) {
     try {
       const [{ data: cat }, { data: cit }] = await Promise.all([
@@ -110,9 +142,9 @@ export async function GET(req: Request) {
         projectCityId: cit.id,
         projectDepartmentId: cit.department_id,
         isSuspicious: (p.suspicion_score ?? 0) >= 50,
-        isRelance: true,
+        relanceKind: p.kind,
       });
-      results.push({ id: p.id, sent: r.sent, total: r.totalTargets });
+      results.push({ id: p.id, kind: p.kind, sent: r.sent, total: r.totalTargets });
     } catch (e) {
       results.push({ id: p.id, sent: 0, total: 0, error: (e as Error).message });
     }
