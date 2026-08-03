@@ -4,12 +4,23 @@ type PaginationProps = {
   currentPage: number;
   totalPages: number;
   baseUrl: string;
+  /**
+   * Genere `/base/page/2` au lieu de `/base?page=2`.
+   *
+   * POURQUOI : lire un parametre d'URL rend la route DYNAMIQUE dans Next.js
+   * (page recalculee a chaque visite, `revalidate` ignore). En mettant le
+   * numero dans le chemin, la page redevient cachable. Reserve aux listings
+   * BTP ; par defaut on garde `?page=` pour ne rien changer ailleurs
+   * (admin, blog, recherche, AI... 14 usages).
+   */
+  usePathPagination?: boolean;
 };
 
 export default function Pagination({
   currentPage,
   totalPages,
   baseUrl,
+  usePathPagination = false,
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
@@ -28,6 +39,7 @@ export default function Pagination({
 
   function pageUrl(page: number) {
     if (page === 1) return baseUrl;
+    if (usePathPagination) return `${baseUrl}/page/${page}`;
     const separator = baseUrl.includes("?") ? "&" : "?";
     return `${baseUrl}${separator}page=${page}`;
   }

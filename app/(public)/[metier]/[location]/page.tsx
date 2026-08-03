@@ -62,8 +62,14 @@ export const revalidate = 2592000; // 30j (15/06) : egress Supabase 313% sous cr
 
 type Props = {
   params: Promise<{ metier: string; location: string }>;
-  searchParams: Promise<{ page?: string }>;
 };
+
+// Sans generateStaticParams, Next.js classe la route en RENDU DYNAMIQUE et
+// ignore `revalidate`. Liste vide = on ne prebuild rien, mais la route bascule
+// en ISR : 1re visite -> generee ET mise en cache.
+export function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metier, location: locationSlug } = await params;
@@ -207,10 +213,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ListingPage({ params, searchParams }: Props) {
-  const { metier, location: locationSlug } = await params;
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
+/**
+ * Rendu du listing, partage entre la page 1 (`/[metier]/[location]`) et les
+ * pages suivantes (`/[metier]/[location]/page/[n]`).
+ *
+ * POURQUOI cette separation : lire `searchParams` (l'ancien `?page=2`) rendait
+ * TOUTE la route dynamique — donc recalculee a chaque visite. Sous le crawl de
+ * Google (~27 000 pages/h le 03/08), ces pages montaient a 8-20 s et Googlebot
+ * commencait a lever le pied. En passant le numero de page par l'URL, les deux
+ * routes deviennent cachables. Aucun risque SEO : la pagination n'est ni dans
+ * le sitemap, ni indexee (canonical toujours vers la page 1).
+ */
+export async function renderListing(
+  metier: string,
+  locationSlug: string,
+  page: number
+) {
   const isFirstPage = page === 1;
 
   // Alias belge (plafonneur=plaquiste, entreprise-de-chassis=menuisier) : catégorie
@@ -649,6 +667,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
             currentPage={page}
             totalPages={paginatedResult.totalPages}
             baseUrl={baseUrl}
+            usePathPagination
           />
         </>
       ) : (
@@ -798,4 +817,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
       )}
     </main>
   );
+}
+
+export default async function ListingPage({ params }: Props) {
+  const { metier, location: locationSlug } = await params;
+  return renderListing(metier, locationSlug, 1);
 }
