@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -84,16 +85,31 @@ export async function middleware(request: NextRequest) {
       return supabaseResponse;
     }
 
-    // Vérifier dans la table admins via l'API route interne
+    // Verification DIRECTE dans la table admins.
+    //
+    // AVANT : le middleware appelait /api/admin/auth/check par un fetch sur
+    // `request.url`, donc sur l'URL PUBLIQUE. Sur Vercel, l'edge court-circuitait
+    // ce trajet. Sur un serveur unique, la requete sortait sur Internet (DNS +
+    // TLS + proxy) pour revenir au MEME processus Node — deja charge par le
+    // crawl. Resultat le 03/08 : la connexion admin restait bloquee sur
+    // "Connexion...". Ici on interroge la base directement : plus aucun
+    // aller-retour reseau.
+    //
+    // Cle de service obligatoire : la table `admins` a RLS active SANS policy,
+    // donc invisible au client anon (c'etait la raison d'etre de l'API route).
     try {
-      const checkUrl = new URL("/api/admin/auth/check", request.url);
-      const checkResponse = await fetch(checkUrl.toString(), {
-        headers: {
-          cookie: request.headers.get("cookie") || "",
-        },
-      });
+      const service = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      );
+      const { data: adminRow } = await service
+        .from("admins")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      if (!checkResponse.ok) {
+      if (!adminRow) {
         const url = request.nextUrl.clone();
         url.pathname = "/admin/login";
         url.searchParams.set("error", "unauthorized");
