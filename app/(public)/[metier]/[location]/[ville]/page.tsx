@@ -32,8 +32,13 @@ const TOP_LIMIT = 10;
 
 type Props = {
   params: Promise<{ metier: string; location: string; ville: string }>;
-  searchParams: Promise<{ page?: string }>;
 };
+
+// Sans generateStaticParams, Next.js classe la route en RENDU DYNAMIQUE et
+// ignore `revalidate`. Liste vide = rien de prebuild, mais bascule en ISR.
+export function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metier, location, ville } = await params;
@@ -99,11 +104,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function SpecialtyCityPage({ params, searchParams }: Props) {
-  const { metier, location, ville } = await params;
+/**
+ * Rendu partage entre la page 1 (`/[metier]/[specialite]/[ville]`) et les pages
+ * suivantes (`.../page/[n]`). Meme raison que pour le listing principal : lire
+ * `searchParams` rendait la route dynamique, donc recalculee a chaque visite.
+ */
+export async function renderSpecialtyCity(
+  metier: string,
+  location: string,
+  ville: string,
+  page: number
+) {
   const specialite = location;
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, parseInt(pageParam || "1", 10) || 1);
   const isFirstPage = page === 1;
 
   if (!isValidSpecialty(metier, specialite)) notFound();
@@ -366,6 +378,7 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
             ))}
           </div>
           <Pagination
+            usePathPagination
             currentPage={page}
             totalPages={paginatedResult.totalPages}
             baseUrl={baseUrl}
@@ -412,4 +425,9 @@ export default async function SpecialtyCityPage({ params, searchParams }: Props)
       )}
     </main>
   );
+}
+
+export default async function SpecialtyCityPage({ params }: Props) {
+  const { metier, location, ville } = await params;
+  return renderSpecialtyCity(metier, location, ville, 1);
 }
