@@ -477,7 +477,7 @@ export default async function AiDashboardProjetsPage({
                     <p className="text-[11px] text-[var(--ai-text-tertiary)] mt-2">
                       {freeRemaining > 0
                         ? "Offre de lancement · Aucun paiement demandé."
-                        : "Paiement unique, sans abonnement. Vous voyez le projet avant de payer."}
+                        : "Paiement unique, sans abonnement. Vous lisez le descriptif avant de payer."}
                     </p>
                   </form>
                 </div>

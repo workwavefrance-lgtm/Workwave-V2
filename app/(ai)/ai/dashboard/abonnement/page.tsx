@@ -83,7 +83,8 @@ export default async function AiDashboardFacturationPage() {
         <p className="text-base text-[var(--ai-text-secondary)] leading-relaxed">
           Pas d&apos;abonnement, pas d&apos;engagement. Vous payez{" "}
           <strong className="text-[var(--ai-text)]">9,90 € seulement pour débloquer</strong>{" "}
-          un projet qui vous intéresse — et vous voyez le projet avant de payer.
+          les coordonnées d&apos;un projet qui vous intéresse — et vous lisez le
+          descriptif avant de payer.
         </p>
       </div>
 

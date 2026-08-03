@@ -79,9 +79,9 @@ const valueProps = [
       "Un tarif unique, clair, affiché. Pas de crédits à acheter d'avance, pas de grille opaque selon la zone ou le métier. Vous savez exactement ce que vous payez.",
   },
   {
-    title: "Vous voyez le projet avant de payer",
+    title: "Vous lisez le descriptif avant de payer",
     description:
-      "Description, budget, ville, délai : vous consultez chaque demande gratuitement et ne déboursez les 9,90 € que si vous décidez de débloquer les coordonnées. Jamais de lead acheté à l'aveugle.",
+      "Descriptif, budget, ville, délai : vous consultez chaque demande gratuitement et ne déboursez les 9,90 € que si vous décidez de débloquer les coordonnées du client. Jamais de lead acheté à l'aveugle.",
   },
   {
     title: "0 % de commission sur vos devis",

@@ -27,7 +27,7 @@ const PROCESS = [
   {
     n: "03",
     title: "Vous choisissez, vous repondez directement",
-    desc: "Pas de selection imposee : c'est vous qui filtrez et decidez. Vous voyez le projet complet avant de payer. Si ce projet vous interesse, vous le debloquez pour 9,90 € et contactez le client directement. Devis, contrat, paiement : 100% libre. Aucune commission.",
+    desc: "Pas de selection imposee : c'est vous qui filtrez et decidez. Vous lisez le descriptif avant de payer (besoin, budget, delai). Si ce projet vous interesse, vous le debloquez pour 9,90 € et vous obtenez les coordonnees du client. Devis, contrat, paiement : 100% libre. Aucune commission.",
   },
 ];
 
@@ -61,7 +61,7 @@ const FAQ = [
   },
   {
     q: "Vais-je voir TOUS les projets ou juste ceux qui matchent ?",
-    a: "TOUS. A chaque projet publie sur Workwave AI dans votre vertical (tech, marketing, finance, juridique, RH, design, creatif), tous les freelances inscrits du vertical recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Pas de selection imposee : vous voyez le projet complet avant de decider si vous le debloquez.",
+    a: "TOUS. A chaque projet publie sur Workwave AI dans votre vertical (tech, marketing, finance, juridique, RH, design, creatif), tous les freelances inscrits du vertical recoivent un email. C'est vous qui filtrez ensuite par categorie, budget ou stack dans le dashboard. Pas de selection imposee : vous lisez le descriptif, le budget et le delai avant de decider si vous debloquez les coordonnees.",
   },
   {
     q: "Combien de projets vais-je recevoir ?",

@@ -59,3 +59,6 @@ scraping/*.log
 
 # Coffre Obsidian "Workwave" (base de connaissances) — perso, pas du code à déployer
 /Workwave/
+
+# Frames intermediaires des reels (regenerables via scripts/render-reel-*.mjs)
+marketing/frames-*/

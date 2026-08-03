@@ -61,9 +61,9 @@ export const CHANTIERS_COMPARISON: {
     workwave: "0 % — vous gardez tout",
   },
   {
-    feature: "Vous voyez le projet avant de payer",
+    feature: "Vous lisez le descriptif avant de payer",
     others: "Souvent non (lead acheté à l'aveugle)",
-    workwave: "Oui — détail visible avant",
+    workwave: "Oui — descriptif, ville, budget, délai",
   },
   {
     feature: "Commercial à rappeler",

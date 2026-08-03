@@ -60,9 +60,9 @@ export const CLIENTS_COMPARISON: {
     workwave: "0 % — vous gardez tout",
   },
   {
-    feature: "Vous voyez le client avant de payer",
+    feature: "Vous lisez le descriptif avant de payer",
     others: "Souvent non (contact acheté à l'aveugle)",
-    workwave: "Oui — détail visible avant",
+    workwave: "Oui — descriptif, ville, budget, délai",
   },
   {
     feature: "Commercial à rappeler",

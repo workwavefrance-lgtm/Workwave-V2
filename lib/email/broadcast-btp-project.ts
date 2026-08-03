@@ -365,7 +365,7 @@ export async function broadcastBtpProject(
   // ses catégories secondaires figure dans l'ensemble ciblé.
   // + les pros GÉNÉRALISTES (multiservice / petit-bricolage) reçoivent TOUS les
   // projets BTP de leur zone (homme toutes mains = tous corps de métier). Sans
-  // risque : pay-per-lead, le pro voit le projet avant de payer et filtre lui-même.
+  // risque : pay-per-lead, le pro lit le descriptif avant de payer et filtre lui-même.
   const matchCategoryIds = await getMatchCategoryIds(sb, input.projectCategoryId);
   const generalistIds = await getGeneralistCategoryIds(sb);
   const targetCategoryIds = [...new Set([...matchCategoryIds, ...generalistIds])];

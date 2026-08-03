@@ -28,7 +28,7 @@ const FAQ_PRICING: FaqItem[] = [
   },
   {
     q: "Pourquoi 9,90€ par projet et pas un abonnement ?",
-    a: "Ce modele est plus juste pour vous : vous ne payez que quand vous voyez un projet qui correspond vraiment a votre profil. Chez Codeur.com, vous achetez des credits a l'unite sans voir le projet en avance. Chez Malt, vous payez 12€/mois de Premium + 10% de commission sur chaque mission. Ici : 9,90€, projet vu avant paiement, 0% de commission. Le ROI est positif des le 1er contrat conclu.",
+    a: "Ce modele est plus juste pour vous : vous ne payez que quand un projet correspond vraiment a votre profil. Chez Codeur.com, vous achetez des credits a l'unite sans voir le projet en avance. Chez Malt, vous payez 12€/mois de Premium + 10% de commission sur chaque mission. Ici : 9,90€, descriptif lu avant paiement, 0% de commission. Le ROI est positif des le 1er contrat conclu.",
   },
   {
     q: "Y a-t-il un engagement ou un abonnement cache ?",

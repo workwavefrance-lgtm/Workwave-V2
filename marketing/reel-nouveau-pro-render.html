@@ -69,10 +69,15 @@
     align-items: center; justify-content: center; gap: 46px; padding: 250px 84px; text-align: center; }
   .el { will-change: transform, opacity; }
 
-  .badge { display: inline-flex; align-items: center; gap: 16px; background: var(--accent); color: var(--on-accent);
-    font-size: 44px; font-weight: 800; letter-spacing: 0.06em; padding: 22px 46px; border-radius: 999px;
+  /* Badge d'ouverture — DOIT etre impossible a confondre avec celui du reel
+     "nouveau projet" (pastille coral tres arrondie + point + mot "NOUVEAU ...").
+     Dans le feed, "NOUVEAU PRO" se lit comme le debut de "NOUVEAU PROJET" et les
+     deux formats deviennent indiscernables au scroll. On change donc les DEUX
+     signaux : le mot ("BIENVENUE", aucune collision possible) et la silhouette
+     (etiquette a coins moderes, pas de point, lettrage plus espace). */
+  .badge { display: inline-flex; align-items: center; background: var(--accent); color: var(--on-accent);
+    font-size: 46px; font-weight: 800; letter-spacing: 0.22em; padding: 24px 52px 24px 60px; border-radius: 22px;
     box-shadow: 0 16px 40px rgba(255, 90, 54, 0.30); }
-  .badge .dot { width: 20px; height: 20px; border-radius: 50%; background: var(--on-accent); }
 
   h1.metier { font-size: 148px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.02;
     color: var(--text); text-transform: uppercase; }
@@ -107,11 +112,19 @@
   .duo .box .what span { color: var(--text2); font-weight: 500; }
   .duo .box .url { margin-top: 18px; font-size: 36px; font-weight: 800; color: var(--accent); letter-spacing: -0.01em; }
 
-  /* Arguments pros — liste à puces coral, rythmée. */
+  /* Arguments pros — liste à puces coral, rythmée.
+     ⚠️ PIÈGE FLEXBOX : le <li> est un conteneur flex, donc CHAQUE élément
+     inline qu'il contient (<b>, <em>…) devient un ITEM et reçoit le `gap`
+     de part et d'autre — en plus de l'espace typographique normal. Résultat :
+     "le projet  avant  de payer" avec des trous.
+     → Le texte est donc enfermé dans UN seul <span> (= un seul item flex) :
+     à l'intérieur, la mise en page redevient inline et les espaces sont
+     corrects. Le `gap` ne sépare plus que la puce et le texte. */
   .args { display: flex; flex-direction: column; gap: 24px; width: 100%; }
   .args li { list-style: none; display: flex; align-items: center; gap: 26px;
     font-size: 46px; font-weight: 600; color: var(--text); text-align: left; }
   .args li s { flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); }
+  .args li span { text-decoration: none; }
   .args li b { color: var(--text); font-weight: 800; }
 
   /* CTA */
@@ -134,16 +147,26 @@
   <div id="brand">Workwave<i>.fr</i></div>
   <div id="confetti"></div>
 
-  <!-- S1 — l'annonce (angle A) -->
-  <section class="scene" data-dur="3800">
-    <div class="el" data-anim="pop"><span class="badge"><span class="dot"></span>NOUVEAU PRO</span></div>
+  <!-- S1 — l'annonce (angle A)
+       Ordre voulu : le SENS avant le lieu. "vient de rejoindre Workwave.fr"
+       arrive des 700 ms pour que quelqu'un qui scrolle comprenne tout de suite
+       qu'il s'agit d'une arrivee, et non d'un chantier a prendre.
+
+       BUDGET DE DUREE : 14 s MAXIMUM pour le reel entier (regle Willy). Les 5
+       scenes doivent donc totaliser 14000 ms — si tu ajoutes du temps ici, tu
+       dois en retirer ailleurs. Repartition : 3200 + 2900 + 2100 + 3200 + 2600.
+       Regle de lecture : une scene doit durer au moins ~1 s de plus que
+       (delai du dernier element + 550 ms d'animation), sinon le texte
+       disparait avant d'avoir ete lu. -->
+  <section class="scene" data-dur="3200">
+    <div class="el" data-anim="pop"><span class="badge">BIENVENUE</span></div>
     <div class="el" data-d="350"><h1 class="metier" id="metier">Couvreur</h1></div>
-    <div class="el" data-d="700"><p class="lieu">à <strong id="ville">Ville</strong> · <span id="dept">Département</span></p></div>
-    <div class="el" data-d="1100"><p class="rejoint">vient de rejoindre <em>Workwave.fr</em></p></div>
+    <div class="el" data-d="700"><p class="rejoint">vient de rejoindre <em>Workwave.fr</em></p></div>
+    <div class="el" data-d="1050"><p class="lieu">à <strong id="ville">Ville</strong> · <span id="dept">Département</span></p></div>
   </section>
 
   <!-- S2 — le territoire couvert (angle C) -->
-  <section class="scene" data-dur="3800">
+  <section class="scene" data-dur="2900">
     <div class="el radar" data-anim="pop">
       <span class="ring"></span><span class="ring"></span><span class="ring"></span>
       <span class="pin"><b></b></span>
@@ -153,26 +176,30 @@
   </section>
 
   <!-- S3 — le remerciement -->
-  <section class="scene" data-dur="2800">
+  <section class="scene" data-dur="2100">
     <div class="el" data-anim="pop"><p class="merci">Merci de<br>votre <em>confiance</em>.</p></div>
-    <div class="el" data-d="600"><p class="sub">Chaque pro qui nous rejoint rend le réseau<br><strong>plus utile pour tout le monde</strong>.</p></div>
+    <div class="el" data-d="450"><p class="sub">Chaque pro qui nous rejoint rend le réseau<br><strong>plus utile pour tout le monde</strong>.</p></div>
   </section>
 
-  <!-- S4 — l'appel aux pros -->
-  <section class="scene" data-dur="3600">
+  <!-- S4 — l'appel aux pros (la scene la plus dense a lire : 4 arguments) -->
+  <section class="scene" data-dur="3200">
     <div class="el"><p class="big">Artisan&nbsp;?<br><em>Rejoignez-les.</em></p></div>
     <div class="el" data-d="400" style="width:100%">
       <ul class="args">
-        <li><s></s><b>0 €</b> d'abonnement, 0 commission</li>
-        <li><s></s><b>9,90 €</b> le contact client, c'est tout</li>
-        <li><s></s>Vous voyez le projet <b>avant</b> de payer</li>
-        <li><s></s>Vos <b>2 premiers contacts offerts</b></li>
+        <li><s></s><span><b>0 €</b> d'abonnement, 0 commission</span></li>
+        <li><s></s><span><b>9,90 €</b> le contact client, c'est tout</span></li>
+        <!-- Formulation EXACTE : avant paiement le pro voit le descriptif, la ville,
+             le budget et le delai — PAS les coordonnees (c'est ca les 9,90 €).
+             Ne JAMAIS ecrire "vous voyez le projet" : ca laisse croire qu'on a tout,
+             y compris le contact. Surpromesse = argument commercial trompeur. -->
+        <li><s></s><span>Vous lisez le <b>descriptif</b> avant de payer</span></li>
+        <li><s></s><span>Vos <b>2 premiers contacts offerts</b></span></li>
       </ul>
     </div>
   </section>
 
   <!-- S5 — CTA double public : chaque public repart avec SON adresse. -->
-  <section class="scene" data-dur="3400">
+  <section class="scene" data-dur="2600">
     <div class="el" style="width:100%">
       <div class="duo">
         <div class="box">
