@@ -77,8 +77,7 @@ type CheckResult = {
   error?: string;
 };
 
-async function checkOne(r: RouteCheck): Promise<CheckResult> {
-  const t0 = Date.now();
+async function tenter(r: RouteCheck, t0: number): Promise<CheckResult> {
   try {
     const res = await fetch(r.url, {
       method: "GET",
@@ -97,6 +96,37 @@ async function checkOne(r: RouteCheck): Promise<CheckResult> {
       error: (e as Error).message,
     };
   }
+}
+
+/**
+ * Un echec isole ne prouve rien : il faut DEUX echecs d'affilee pour alerter.
+ *
+ * Pourquoi : les 22 routes partent en parallele (Promise.all plus bas), donc le
+ * serveur encaisse 22 regenerations ISR simultanees et devient momentanement tres
+ * lent — au point de depasser les 20 s. Mesure du 03/08/2026 sur les deux routes
+ * qui alertaient : 15,2 s au 1er appel, puis 0,65 s au second. La page allait
+ * parfaitement bien ; c'est le healthcheck qui se mettait a genoux tout seul.
+ *
+ * Le 2e essai retombe sur un cache desormais chaud. S'il echoue AUSSI, c'est une
+ * vraie panne et l'alerte part. On ne masque donc rien : on supprime seulement le
+ * bruit qui, a force, ferait ignorer les vraies alertes.
+ */
+async function checkOne(r: RouteCheck): Promise<CheckResult> {
+  const t0 = Date.now();
+  const premier = await tenter(r, t0);
+  if (premier.ok) return premier;
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  const second = await tenter(r, Date.now());
+  if (second.ok) return second;
+
+  // Les deux essais ont echoue : on remonte le second, en gardant trace du 1er.
+  return {
+    ...second,
+    error: second.error
+      ? `${second.error} (2 essais)`
+      : `2 essais en echec (1er : ${premier.actual || premier.error || "?"})`,
+  };
 }
 
 function buildAlertHtml(failures: CheckResult[], allResults: CheckResult[]): string {
@@ -157,8 +187,21 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // 2. CHECK en parallèle (toutes les routes en même temps)
-  const results = await Promise.all(ROUTES.map(checkOne));
+  // 2. CHECK EN SÉQUENTIEL, une route après l'autre.
+  //
+  // Surtout PAS en parallèle : le cron tourne SUR le VPS et interroge ce même VPS.
+  // Lancer les 22 routes d'un coup, c'est lui demander 22 régénérations ISR
+  // simultanées — il s'étrangle et le healthcheck se met en échec tout seul.
+  // Constaté le 04/08/2026 à 02h01 : 431 s pour 22 routes et 6 fausses alertes,
+  // alors que les 6 URL répondaient en 0,4 à 3,5 s quand on les testait une par une.
+  // C'est pire la nuit, quand elaguer-cache.sh vient de vider une partie du cache.
+  //
+  // Un cron n'est pas pressé : 22 routes à la suite prennent une trentaine de
+  // secondes et ne dérangent personne.
+  const results: CheckResult[] = [];
+  for (const route of ROUTES) {
+    results.push(await checkOne(route));
+  }
   const failures = results.filter((r) => !r.ok);
   const criticalFailures = failures.filter((f) => f.critical);
 
