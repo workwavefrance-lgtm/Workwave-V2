@@ -152,9 +152,22 @@ def query_sirene(naf_code, dept_code, cursor=None):
         f"AND codePostalEtablissement:[{cp_min} TO {cp_max}]"
     )
 
-    params = {"q": q, "nombre": PAGE_SIZE}
-    if cursor:
-        params["curseur"] = cursor
+    # 🔴 `curseur` OBLIGATOIRE DES LE 1er APPEL, avec la valeur "*".
+    #
+    # L'API Sirene n'active la pagination par curseur QUE si le parametre est
+    # present. Sans lui, elle renvoie les 1000 premiers resultats ET AUCUN
+    # `curseurSuivant` -> la boucle d'appel s'arretait apres une seule page.
+    #
+    # Consequence mesuree le 04/08/2026 (NAF 43.21A, codes postaux 13000-13999) :
+    #   sans curseur  -> total=12299, curseurSuivant=None, 1000 recus
+    #   avec curseur=* -> total=12299, curseurSuivant='AoEu...', 1000 recus puis suite
+    # La base ne contenait que 1061 electriciens pour les Bouches-du-Rhone, soit
+    # 91 % de manquants. Meme plafond sur CHAQUE metier x departement depuis le
+    # debut : les zones rurales passaient (moins de 1000 pros), les zones denses
+    # etaient tronquees — Paris, Marseille, Lyon, Lille, Bordeaux.
+    #
+    # Ne JAMAIS retirer ce "*" : c'est lui qui declenche la pagination.
+    params = {"q": q, "nombre": PAGE_SIZE, "curseur": cursor or "*"}
 
     headers = {
         "X-INSEE-Api-Key-Integration": INSEE_API_KEY,
