@@ -45,7 +45,15 @@ FROM node:22-slim AS runner
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates wget \
     && rm -rf /var/lib/apt/lists/*
-ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
+# --max-old-space-size : PLAFOND MEMOIRE DU SERVEUR.
+# Sans plafond, Node laisse sa memoire grossir jusqu'a ce que le noyau tue le
+# processus (code de sortie 137). Le conteneur redemarre, regrossit, se refait
+# tuer : c'est la boucle de 30 redemarrages constatee le 07/08/2026.
+# Avec un plafond, Node fait le menage AVANT d'atteindre la limite au lieu de
+# se faire abattre. 4 Go = large pour servir des pages, et laisse de la marge
+# a la machine. Le build, lui, garde 8 Go (etape builder plus haut).
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0 \
+    NODE_OPTIONS=--max-old-space-size=4096
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
@@ -58,4 +66,17 @@ COPY --from=builder /app/next.config.ts ./next.config.ts
 RUN mkdir -p /app/.next/cache
 
 EXPOSE 3000
+
+# CONTROLE DE SANTE. Sans lui, Coolify affiche "No health check configured" et
+# Traefik envoie des visiteurs au conteneur MEME pendant son demarrage et MEME
+# quand il agonise — chaque redemarrage produisait donc des erreurs cote client.
+#
+# start-period=40s : Next.js met une trentaine de secondes a etre pret ; pendant
+# ce delai les echecs ne comptent pas, sinon le conteneur serait declare mort
+# avant meme d'avoir demarre.
+# 3 echecs d'affilee (90 s) avant de le declarer malade : on ne reagit pas a un
+# simple hoquet.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
+
 CMD ["npm", "run", "start"]
