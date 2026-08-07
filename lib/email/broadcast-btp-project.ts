@@ -102,6 +102,28 @@ async function markProjectDone(
   relanceKind: "j1" | "j3" | null,
   sentCount: number
 ): Promise<void> {
+  // ── DIFFUSION INITIALE SANS AUCUN ENVOI : ON NE MARQUE PAS ────────────────
+  // Ecrire broadcasted_at alors que zero pro a ete touche condamnait le projet :
+  //   - broadcast-rescue selectionne `broadcasted_at IS NULL`  -> plus rattrape
+  //   - relance-projets  selectionne `broadcast_count > 0`     -> plus relance
+  // Le projet sortait des DEUX filets et devenait invisible a vie.
+  //
+  // Mesure du 07/08/2026 : 53 projets BTP sur 108 dans cet etat. La cause n'est
+  // pas un echec d'envoi mais l'absence de pro eligible (36 pros ont reclame
+  // leur fiche en tout) — sauf que c'est justement le cas qu'il faut garder
+  // ouvert : le jour ou un pro de la zone reclame sa fiche, le projet doit
+  // repartir. 7 des projets bloques auraient un preneur aujourd'hui.
+  // Meme raisonnement si Resend tombe (deja vu 12 jours en mai 2026) : le lead
+  // doit rester rattrapable, pas etre classe.
+  //
+  // Aucun risque d'envoi perime : broadcast-rescue ne regarde que les projets
+  // de moins de 7 jours (`created_at >= NOW() - 7 days`). Passe ce delai le
+  // projet cesse d'etre repropose, il reste simplement non marque.
+  //
+  // Les RELANCES (j1/j3) continuent d'ecrire leur colonne quoi qu'il arrive :
+  // sans ca, le cron de relance les rejouerait en boucle a chaque passage.
+  if (relanceKind === null && sentCount === 0) return;
+
   // Chaque relance ecrit dans SA colonne : sinon la relance J+1 remplirait
   // relance_sent_at et empecherait definitivement la relance J+3 de partir.
   const update =
@@ -459,9 +481,11 @@ export async function broadcastBtpProject(
   );
 
   if (targets.length === 0) {
-    // 0 plombiers eligibles dans le departement (cas concret : projet #42
-    // Laurent dans le 86, aucun plombier reclame). Track quand meme pour ne
-    // pas laisser broadcasted_at=null indefiniment et pouvoir auditer.
+    // 0 pro eligible dans la zone (cas concret : projet #42 a Cenac, aucun
+    // pro de la categorie ayant reclame sa fiche a portee). On appelle quand
+    // meme markProjectDone : il ne marquera RIEN pour une diffusion initiale
+    // a 0 envoi (cf. sa doc), ce qui laisse le projet rattrapable pendant 7
+    // jours au cas ou un pro de la zone reclame sa fiche entre-temps.
     await markProjectDone(sb, input.projectId, kind, 0);
     return { totalTargets: 0, sent: 0, failed: 0, errors: [] };
   }
