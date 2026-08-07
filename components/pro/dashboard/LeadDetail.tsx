@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDateFR } from "@/lib/utils/date";
 import { markLeadContacted, markLeadNotRelevant } from "@/app/pro/dashboard/leads/[id]/actions";
+import { startBtpUnlock } from "@/app/pro/dashboard/leads/actions";
 import type { LeadWithProject } from "@/lib/queries/leads";
 
 const URGENCY_LABELS: Record<string, string> = {
@@ -42,7 +43,22 @@ const STATUS_BADGES: Record<string, { label: string; className: string }> = {
   },
 };
 
-export default function LeadDetail({ lead }: { lead: LeadWithProject }) {
+export default function LeadDetail({
+  lead,
+  unlocked,
+  freeRemaining,
+}: {
+  lead: LeadWithProject;
+  /**
+   * Le pro a-t-il payé (ou consommé un offert) pour CE projet ? Calculé côté
+   * serveur dans page.tsx : quand c'est faux, les coordonnées ont déjà été
+   * retirées de `lead` avant d'arriver ici. Ce booléen ne sert donc qu'à
+   * choisir ce qu'on affiche — il n'est pas la barrière de sécurité.
+   */
+  unlocked: boolean;
+  /** Déblocages offerts restants (offre de lancement), pour le libellé du bouton. */
+  freeRemaining: number;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const project = lead.project;
@@ -233,6 +249,54 @@ export default function LeadDetail({ lead }: { lead: LeadWithProject }) {
               Coordonnées du client
             </h2>
             <div className="space-y-4">
+              {!unlocked && (
+                <div className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-tertiary)] p-5">
+                  <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">
+                    Coordonnées verrouillées
+                  </p>
+                  <p className="text-xs text-[var(--text-secondary)] mb-4">
+                    Vous avez lu le descriptif du chantier. Débloquez le contact
+                    pour obtenir le prénom, l&apos;email et le téléphone.
+                  </p>
+                  <form action={startBtpUnlock}>
+                    <input type="hidden" name="projectId" value={project.id} />
+                    <label className="flex items-start gap-2 mb-3 cursor-pointer text-[11px] text-[var(--text-tertiary)]">
+                      <input
+                        type="checkbox"
+                        name="cgvAccepted"
+                        value="1"
+                        required
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-[var(--accent)]"
+                      />
+                      <span>
+                        J&apos;accepte les{" "}
+                        <a
+                          href="/cgv"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[var(--accent)] hover:underline"
+                        >
+                          conditions générales de vente
+                        </a>
+                      </span>
+                    </label>
+                    <button
+                      type="submit"
+                      className="inline-flex w-full items-center justify-center h-11 px-5 text-sm font-semibold rounded-xl bg-[var(--accent)] hover:opacity-90 text-white transition-opacity duration-200"
+                    >
+                      {freeRemaining > 0
+                        ? `Débloquer gratuitement (${freeRemaining} offert${freeRemaining > 1 ? "s" : ""})`
+                        : "Débloquer le contact — 9,90 €"}
+                    </button>
+                  </form>
+                  <p className="text-[11px] text-[var(--text-tertiary)] mt-3">
+                    Paiement unique. Aucun abonnement, aucune commission.
+                  </p>
+                </div>
+              )}
+
+              {unlocked && (
+                <>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center shrink-0">
                   <svg
@@ -312,6 +376,8 @@ export default function LeadDetail({ lead }: { lead: LeadWithProject }) {
                   </a>
                 </div>
               </div>
+                </>
+              )}
 
               {project.city && (
                 <div className="flex items-center gap-3">
