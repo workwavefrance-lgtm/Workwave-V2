@@ -7,7 +7,7 @@
  *
  * Logique :
  * 1. SELECT projects WHERE broadcast_count = 0 AND status != 'deleted'
- *    AND created_at > NOW() - 7 days
+ *    AND created_at > NOW() - 14 days
  * 2. Pour chaque projet : appelle broadcastBtpProject() ou broadcastTechProject()
  *    selon le vertical.
  * 3. Log les résultats par projet.
@@ -37,7 +37,10 @@ export async function GET(req: Request) {
   }
 
   const sb = getServiceClient();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400e3).toISOString();
+  // 14 jours : un chantier reste d'actualite bien plus longtemps qu'une semaine,
+  // et c'est la fenetre pendant laquelle un pro qui reclame sa fiche doit encore
+  // recevoir par mail les projets restes sans preneur dans sa zone.
+  const fenetreDebut = new Date(Date.now() - 14 * 86400e3).toISOString();
 
   // 2. Projets en attente
   const { data: projects, error } = await sb
@@ -45,7 +48,7 @@ export async function GET(req: Request) {
     .select("id, first_name, description, category_id, city_id, budget, urgency, status, vertical, suspicion_score, created_at")
     .neq("status", "deleted")
     .is("broadcasted_at", null)
-    .gte("created_at", sevenDaysAgo)
+    .gte("created_at", fenetreDebut)
     .order("created_at", { ascending: false });
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

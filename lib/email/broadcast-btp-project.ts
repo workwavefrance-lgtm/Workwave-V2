@@ -117,7 +117,7 @@ async function markProjectDone(
   // doit rester rattrapable, pas etre classe.
   //
   // Aucun risque d'envoi perime : broadcast-rescue ne regarde que les projets
-  // de moins de 7 jours (`created_at >= NOW() - 7 days`). Passe ce delai le
+  // de moins de 14 jours (`created_at >= NOW() - 14 days`). Passe ce delai le
   // projet cesse d'etre repropose, il reste simplement non marque.
   //
   // Les RELANCES (j1/j3) continuent d'ecrire leur colonne quoi qu'il arrive :
