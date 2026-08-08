@@ -46,6 +46,52 @@ Pas de "done" sans preuve concrète.
   - **Commits** : `git status` après commit pour confirmer + `git log --oneline -3`
   - **Push** : confirmation du push réussi vers `origin/main`
 
+### Règle 5 — Écrire ce qu'on vient de faire, à chaque fois
+La mémoire du projet se met à jour **dans le même mouvement que le travail**, jamais « plus tard ».
+
+- **Après CHAQUE changement notable** (correctif, sprint, décision, incident, chiffre mesuré, découverte) : écrire dans `Workwave/log.md` **et** mettre à jour `Workwave/etat.md`. Si le changement invalide une affirmation de `CLAUDE.md`, corriger `CLAUDE.md` dans la foulée.
+- **Ce n'est pas une tâche de fin de session.** Une session peut être interrompue, un accès peut sauter, un contexte peut être résumé — ce qui n'est pas écrit est perdu.
+- **Avant de conclure quoi que ce soit, LIRE d'abord** `Workwave/` et la mémoire. Écrire sans lire produit des doublons ; lire sans écrire produit des oublis. Les deux sens comptent.
+- **Un chiffre écrit doit être daté et mesuré.** « ~2,5 M de pros (08/08/2026) », pas « beaucoup de pros ».
+- Ordre des sources en cas de contradiction : **wiki `Workwave/` > section 0 ter de ce fichier > sections 1 à 11 (historiques)**.
+
+Raison : le 08/08/2026, j'ai affirmé deux choses fausses coup sur coup — un « problème de conversion » bâti sur le compte de TEST de Willy, et « 53 leads morts » alors que `Workwave/funnel.md` l'interdit noir sur blanc depuis le 24/06. Dans les deux cas l'information existait déjà et n'avait pas été lue. Ce qui épuise Willy, ce n'est pas le bug — c'est de devoir réexpliquer ce qu'il a déjà expliqué.
+
+---
+
+## 0 ter. ÉTAT RÉEL — à lire AVANT les sections 1 à 11 (mesuré le 08/08/2026)
+
+> 🔴 **Les sections 1 à 11 de ce fichier sont HISTORIQUES.** Elles décrivent le projet tel qu'il était pensé début 2026 et contiennent des affirmations aujourd'hui **FAUSSES** (abonnement 39 €/mois, Vienne 86, 20 330 pros, hébergement Vercel, routing aux 3 meilleurs pros…). Elles sont conservées pour l'historique du raisonnement produit, **PAS comme description du présent**.
+>
+> **En cas de contradiction : ce bloc et le wiki `Workwave/` font foi.** Le wiki est la source vivante — le lire avant de conclure quoi que ce soit (cf. la règle du 08/08 en fin de « Leçons apprises »).
+
+**Modèle économique LIVE — pay-per-lead, PAS d'abonnement**
+Le particulier dépose un projet gratuitement. Le projet est diffusé **par email à TOUS les pros éligibles** de la zone (distance Haversine vs leur rayon d'intervention) — pas aux « 3 meilleurs ». Le pro lit le **descriptif** du chantier, puis paie **9,90 € une fois** pour obtenir les coordonnées du particulier (`lead_unlocks`). **Ses 2 premiers déblocages sont offerts.** Zéro abonnement, zéro commission.
+⚠️ `lib/routing/route-project.ts` (ancien modèle « 39 €/mois + routing top-3 ») est du **CODE MORT**, jamais appelé. Ne jamais décrire le produit avec.
+
+**Chiffres au 08/08/2026** (mesurés, pas estimés de tête)
+
+| | |
+|---|---|
+| pros actifs en base | ~2 560 000 |
+| pros ayant **réclamé** leur fiche | **52** ← le vrai goulot |
+| départements | 107 |
+| communes | 35 163 |
+| catégories | 197 (25 BTP + 15 domicile + 12 personne + 145 tech) |
+| projets BTP déposés | 109 |
+| déblocages payants | **1** — et c'est le compte de TEST de Willy |
+| **revenu externe réel** | **0 €** |
+| pages indexées (GSC) | ~567 000 |
+
+**Le goulot est le REACH, pas le contenu ni le SEO.** ~2,5 M de fiches mais 52 pros réclamés : la plupart des projets ne trouvent aucun pro payable dans leur zone. Cf. `Workwave/funnel.md`.
+
+**Infrastructure — VPS, plus Vercel**
+Hébergement : **VPS Hostinger** (`72.60.130.5`, Ubuntu 24.04, 31 Go RAM, 387 Go disque) piloté par **Coolify** (`:8000`), Traefik en frontal, déploiement par image Docker (`Dockerfile` à la racine). Accès : `ssh -i ~/.ssh/workwave_vps root@72.60.130.5`.
+Les crons ne sont plus ceux de Vercel : ils tournent sur le VPS (`crontab -l`, scripts dans `/opt/workwave/`). Supabase et Resend sont inchangés. **Toute leçon de ce fichier qui parle de « Vercel » pour l'hébergement, les logs, les crons ou la facturation est PÉRIMÉE** — sauf celles qui décrivent le comportement de Next.js lui-même, qui restent valables.
+
+**Périmètre**
+BTP + services à domicile + aide à la personne sur `workwave.fr`, **France entière + Belgique francophone** (plus « Vienne 86 » depuis longtemps). Le vertical freelance tech vit sur `/ai/*` du même site, même modèle 9,90 €. `workwaveai.co` est **en pause** (301 vers workwave.fr).
+
 ---
 
 ## 0 bis. Leçons apprises (enrichir à chaque erreur détectée — Règle 3)
@@ -220,13 +266,23 @@ Section vivante. Avant chaque nouveau sprint, relire pour ne PAS reproduire les 
   - **Verifie non exploite** : la page ecrit `opened_at` a chaque chargement → `0/105` leads avec `opened_at` rempli = jamais visitee. Le seul lead `contacted` (id 8, pro 4393, projet 47) avait bien un `lead_unlocks` a `amount_cents=990`. Chance, pas conception.
   - **Le filtrage doit se faire COTE SERVEUR, dans le `page.tsx`**, pas dans le composant client : masquer a l'affichage laisserait les valeurs dans la payload RSC envoyee au navigateur (lisible dans l'onglet reseau). Pattern applique : lire `lead_unlocks (pro_id, project_id)` → si absent, reconstruire l'objet projet sans `first_name`/`email`/`phone` + substituer `cleaned_description` quand `has_contact_in_description`, puis passer un booleen `unlocked` au composant pour choisir l'affichage (bouton de deblocage a la place des coordonnees). Le booleen n'est PAS la barriere — la barriere est la suppression des champs.
   - **REGLE A VIE** : a chaque fois qu'une donnee est protegee par un controle (paiement, abonnement, role, proprietaire), **grep TOUTES les routes qui lisent cette donnee** et verifier que chacune porte le meme controle. Checklist : `grep -rn "<table_protegee>" app lib` puis, pour chaque route trouvee qui SERT la donnee, confirmer la presence du garde. Idealement, centraliser : une seule fonction `getLeadForPro(leadId, proId)` qui applique le verrou, jamais un `getLeadById` brut reutilisable sans garde. Corollaire : tout `select("*")` joint sur une table contenant des PII, servi via `service_role` (donc sans RLS), est une fuite en puissance — lister les colonnes explicitement.
+- **08/08/2026 — 🔴 RÈGLE OBLIGATOIRE (imposée par Willy) : LIRE LA MÉMOIRE ET LE WIKI **AVANT** DE PARLER, jamais après** : deux fois dans la même journée j'ai présenté une analyse construite sur une information que la mémoire ou le wiki contenaient déjà, et qui l'invalidait entièrement.
+  - **Cas 1 — le compte de test.** J'ai annoncé « 18 paiements commencés puis abandonnés, dont 11 par le même pro qui essaie et renonce » comme LE problème de conversion à traiter. **ATSAF (`pro_id = 4393`) est le compte de test de Willy**, il me l'avait déjà dit. Les 11 « abandons » étaient ses propres essais, et le « seul paiement abouti de l'histoire du site » était son test de bout en bout — donc le **revenu externe réel reste 0 €**. `pro_id = 99999` est également un test. Après exclusion : les vrais abandons sont ceux des `pro_id` 1432477, 3421341, 4047.
+  - **Cas 2 — le broadcast.** J'ai annoncé « 53 leads morts, invisibles à vie ». `Workwave/funnel.md` l'interdit **explicitement et en encadré depuis le 24/06** : « NE JAMAIS dire "il faut re-broadcaster sinon il ne verra pas le lead" → FAUX ». Le dashboard pro est un feed PULL qui interroge `projects` en direct.
+  - **Ce qui épuise Willy, ce n'est pas le bug — c'est de devoir réexpliquer ce qu'il a déjà expliqué.**
+  - **PROCÉDURE, dans cet ordre, sans exception :**
+    1. **Avant toute analyse de données** (revenus, entonnoir, comptes, projets, pros) : lister les entités qui apparaissent (`pro_id`, `project_id`, emails) et vérifier en mémoire si l'une est un **compte de test**, un cas déjà traité, ou une décision déjà prise.
+    2. **Avant de conclure à une absence** (« il n'y a pas de X », « ça ne marche pas », « personne ne voit Y ») : lire `Workwave/` — c'est écrit au démarrage de chaque session et c'est exactement sa raison d'être.
+    3. **Un chiffre tiré de la base n'est PAS un fait métier.** Savoir ce que représentent les lignes avant de raisonner dessus : un `pro_id` peut être un test, un doublon, une suppression RGPD.
+    4. En cas d'oubli constaté : corriger le chiffre immédiatement, sans s'étendre, et repartir sur la bonne base.
+  - Corollaire de la règle du 02/08 (« jamais de métrique non mesurée ») : **une donnée mesurée mais mal interprétée est aussi fausse qu'une donnée inventée.**
 - *(à enrichir au fil des sessions)*
 
 ---
 
 ## 1. Vision du projet
 
-Workwave est une plateforme qui met en relation les particuliers avec des professionnels locaux dans trois verticaux complémentaires : BTP et artisanat, services à domicile, et aide à la personne. Zone de lancement : département de la Vienne (86), puis extension progressive au Poitou-Charentes (Deux-Sèvres 79, Charente 16, Charente-Maritime 17), puis le reste de la Nouvelle-Aquitaine.
+Workwave est une plateforme qui met en relation les particuliers avec des professionnels locaux dans trois verticaux complémentaires : BTP et artisanat, services à domicile, et aide à la personne. ~~Zone de lancement : département de la Vienne (86), puis extension progressive au Poitou-Charentes, puis la Nouvelle-Aquitaine.~~ **PÉRIMÉ (08/08/2026)** : le site couvre la France entière + la Belgique francophone — 107 départements, 35 163 communes. Cf. section 0 ter.
 
 Le positionnement est double. D'abord un annuaire SEO massif qui capte du trafic organique grâce à des pages locales générées automatiquement. Ensuite une plateforme de mise en relation où les particuliers déposent un projet et où l'IA route automatiquement la demande vers les professionnels pertinents.
 
@@ -240,7 +296,7 @@ Modèle freemium hybride.
 
 Les professionnels sont tous listés gratuitement dans l'annuaire, qu'ils soient clients ou non. Les fiches de base sont créées automatiquement via scraping des données publiques (API Sirene, Pages Jaunes). Chaque professionnel peut réclamer sa fiche gratuitement pour la compléter, ajouter des photos, modifier la description.
 
-Pour recevoir les leads des projets déposés par les particuliers, le professionnel doit souscrire à un abonnement à 39 euros par mois. Cet abonnement donne accès au routing automatique des projets dans ses catégories et sa zone.
+~~Pour recevoir les leads, le professionnel doit souscrire à un abonnement à 39 euros par mois.~~ 🔴 **FAUX DEPUIS MAI 2026.** Le modèle live est le **pay-per-lead : 9,90 € par déblocage de coordonnées, sans abonnement, 2 premiers offerts**. Tous les pros réclamés reçoivent TOUS les projets de leur zone par email ; ils ne paient que pour obtenir les coordonnées. Cf. section 0 ter et `Workwave/funnel.md`.
 
 Upsells possibles à ajouter plus tard : badge Pro Vérifié, mise en avant premium dans les listings, pack photo professionnel, etc.
 
@@ -252,7 +308,7 @@ Framework frontend et backend : Next.js 14 ou supérieur, avec App Router et Ser
 
 Base de données et authentification : Supabase (PostgreSQL managé, auth intégrée, stockage de fichiers). Plan gratuit suffisant au début.
 
-Hébergement : Vercel. Déploiement automatique à chaque push sur la branche main.
+~~Hébergement : Vercel.~~ **PÉRIMÉ (02/08/2026)** : le site tourne sur un **VPS Hostinger piloté par Coolify** (Docker + Traefik). Le déploiement n'est PAS automatique au push — il faut cliquer « Redeploy » dans Coolify. Cf. section 0 ter.
 
 Paiements : Stripe, avec Stripe Checkout pour les abonnements récurrents.
 
@@ -443,7 +499,7 @@ Ce qu'on ne fait jamais :
 ## 9. État d'avancement
 
 Sprint 0 — Setup : terminé.
-Sprint 1 — Base de données et scraping : terminé (20 330 pros, 265 villes, 35 catégories, Vienne 86).
+Sprint 1 — Base de données et scraping : terminé (20 330 pros, 265 villes, 35 catégories, Vienne 86). **Chiffres de l'époque — au 08/08/2026 : ~2 560 000 pros, 35 163 communes, 197 catégories, 107 départements.**
 Sprint 2 — Pages annuaire publiques : terminé.
 Sprint 2.5 — Polish UX premium : terminé (mode clair/sombre, design premium).
 Sprint 3 — Génération SEO programmatique : terminé (588 pages générées, coût 12 dollars).
@@ -644,6 +700,12 @@ Objectif : transformer l'annuaire fonctionnel du Sprint 2 en une expérience pre
 Livrable : une application qui donne immédiatement le sentiment "wow, c'est pas comme les autres" dès l'arrivée sur la page d'accueil. Un visiteur doit pouvoir dire "on dirait Qonto ou Linear" en regardant le site.
 
 ## 11 quater. Sprint 5 — Comptes pros, réclamation, abonnements Stripe, dashboard pro
+
+> 🔴 **SECTION HISTORIQUE — décrit l'ANCIEN modèle (abonnement 39 €/mois + routing aux 3 meilleurs pros).**
+> Ce modèle n'a jamais été mis en service tel quel : le live est le **pay-per-lead 9,90 €** (cf. section 0 ter).
+> Ce qui reste VRAI ici : le parcours de réclamation de fiche (SIRET + code email), la structure du dashboard pro, et les cas tordus RGPD.
+> Ce qui est FAUX : les 39 €/mois, l'essai gratuit 14 jours, le score composite de routing, l'envoi « aux 3 meilleurs ».
+> `lib/routing/route-project.ts` existe encore mais n'est **jamais appelé** — c'est du code mort. Ne jamais s'en servir pour décrire le produit (leçon du 07/06 : une affirmation marketing tirée de code mort = erreur factuelle live + risque de publicité trompeuse).
 
 Ce sprint est le plus important du projet. Il transforme Workwave d'annuaire passif en plateforme qui génère des revenus. Toutes les règles ci-dessous ont été décidées en amont et doivent être respectées strictement par Claude Code.
 
