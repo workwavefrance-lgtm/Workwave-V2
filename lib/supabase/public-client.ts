@@ -17,18 +17,45 @@ import { createClient } from "@supabase/supabase-js";
 // Securite : on utilise la cle anon (lecture seule sur les tables avec
 // RLS public). Aucune donnee sensible n'est exposee.
 
-export function createPublicClient() {
+// UNE SEULE INSTANCE, partagee par tout le serveur.
+//
+// Avant le 08/08/2026 cette fonction fabriquait un client NEUF a chaque appel.
+// Il y a 57 appels repartis dans 21 fichiers (11 rien que dans les requetes
+// pros) : une seule page en declenche donc plusieurs. Sous le crawl de Google
+// (~670 pages/min), cela faisait des milliers de clients par minute.
+//
+// Or `createClient` n'est pas un objet leger : il instancie un client Postgrest,
+// un client Auth, un client Realtime (avec ses minuteries de reconnexion), un
+// client Storage et un client Functions. Rien ne les ferme. Mesure du 08/08 :
+// l'application grossissait de ~120 Mo/min et saturait son tas en ~2 h.
+//
+// Partager l'instance est sans risque ICI, et c'est deja ce que fait
+// `getAdminServiceClient` avec une cle bien plus sensible : ce client utilise
+// la cle anon (identique pour tout le monde) et ne porte AUCUN etat par
+// utilisateur — `persistSession: false` le garantit. C'est meme la raison
+// d'etre de ce fichier : ne pas toucher a la session.
+// `build()` existe pour que TypeScript garde le type EXACT retourne par
+// createClient. Annoter la variable avec `ReturnType<typeof createClient>`
+// ferait perdre les generiques et typerait toutes les tables en `never`.
+function build() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
-        // On force la non-persistance : ce client est instancie par
-        // requete cote serveur, il n'a aucune raison de stocker un token.
+        // Aucun token stocke : ce client ne represente aucun utilisateur,
+        // ce qui est precisement ce qui permet de le partager.
         persistSession: false,
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
     }
   );
+}
+
+let publicClient: ReturnType<typeof build> | null = null;
+
+export function createPublicClient() {
+  if (!publicClient) publicClient = build();
+  return publicClient;
 }

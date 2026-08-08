@@ -159,10 +159,27 @@ export async function getLeadsForPro(
   };
 }
 
-export async function getLeadById(
+/**
+ * Récupère un lead POUR UN PRO, coordonnées incluses UNIQUEMENT s'il a payé.
+ *
+ * Le verrou est ICI, pas dans la page. C'est volontaire : avant le 08/08/2026
+ * cette fonction renvoyait le projet complet (`projects(*)`, donc email et
+ * téléphone) et laissait à l'appelant le soin de vérifier `lead_unlocks`. La
+ * liste le faisait, la page de détail non — et 100 leads sur 105 livraient un
+ * email jamais payé à qui tapait l'URL.
+ *
+ * Une vérification qu'on peut oublier finit par être oubliée. Il n'existe donc
+ * plus qu'UN SEUL chemin pour lire un lead, et il porte le verrou. Un futur
+ * appelant ne PEUT PAS obtenir les coordonnées sans déblocage, même en le
+ * voulant : elles ne sortent pas de cette fonction.
+ *
+ * Retourne aussi `unlocked` pour que l'affichage sache quoi montrer — mais ce
+ * booléen n'est qu'un indice d'affichage, jamais la barrière.
+ */
+export async function getLeadForPro(
   leadId: number,
   proId: number
-): Promise<LeadWithProject | null> {
+): Promise<{ lead: LeadWithProject; unlocked: boolean } | null> {
   // Service client pour bypass RLS sur la table projects (pas de SELECT policy)
   const supabase = getAdminServiceClient();
   const { data } = await supabase
@@ -172,7 +189,43 @@ export async function getLeadById(
     .eq("pro_id", proId)
     .single();
 
-  return (data as unknown as LeadWithProject) || null;
+  const lead = (data as unknown as LeadWithProject) || null;
+  if (!lead?.project) return null;
+
+  // Projet retiré par le particulier : plus rien ne sort, jamais.
+  if (lead.project.status === "deleted") return null;
+
+  const { data: unlock } = await supabase
+    .from("lead_unlocks")
+    .select("id")
+    .eq("pro_id", proId)
+    .eq("project_id", lead.project.id)
+    .maybeSingle();
+
+  if (unlock) return { lead, unlocked: true };
+
+  // Pas payé : les coordonnées ne quittent pas cette fonction. Chaînes vides
+  // (le type Project les déclare non-nullables) + description nettoyée, comme
+  // sur la liste — un particulier laisse parfois son numéro dans le texte libre.
+  const p = lead.project as typeof lead.project & {
+    cleaned_description: string | null;
+    has_contact_in_description: boolean | null;
+  };
+  return {
+    lead: {
+      ...lead,
+      project: {
+        ...lead.project,
+        first_name: "",
+        email: "",
+        phone: "",
+        description: p.has_contact_in_description
+          ? p.cleaned_description || ""
+          : lead.project.description,
+      },
+    },
+    unlocked: false,
+  };
 }
 
 /**

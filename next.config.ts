@@ -1,24 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Cache de pages EN MEMOIRE desactive (0) — le cache disque prend le relais.
-  //
-  // Mesure du 08/08/2026, relevé minute par minute pendant 2 h sur le VPS :
-  // next-server passe de 1 953 Mo a 16 554 Mo, soit +124 Mo/min (7,25 Go/h), et
-  // ne rend de la memoire que 3 minutes sur 118. A ce rythme il atteint le
-  // plafond V8 (8 Go de tas) en ~2 h, V8 abandonne
-  // (`Ineffective mark-compacts near heap limit`) et le conteneur redemarre —
-  // 5 fois dans la nuit du 07 au 08/08.
-  //
-  // Le chiffre designe le coupable : Googlebot crawle ~40 000 pages/h, soit
-  // ~670/min ; a ~150 Ko de HTML par page cela fait ~100 Mo/min, contre 124
-  // mesures. Autrement dit chaque page rendue reste en memoire.
-  //
-  // Ce cache est de toute facon inutile ici : avec 2,5 M de pages, la meme page
-  // n'est quasiment jamais redemandee avant d'etre evincee. Le cache DISQUE
-  // (.next/cache, monte en volume) continue de servir normalement, donc aucune
-  // page n'est regeneree plus souvent qu'avant. Reversible en une ligne.
-  cacheMaxMemorySize: 0,
+  // NOTE (08/08/2026) : j'ai d'abord mis `cacheMaxMemorySize: 0` en pensant que
+  // le cache de pages en memoire causait la fuite (+124 Mo/min). MESURE APRES
+  // DEPLOIEMENT : +118, +112, +126 Mo/min — strictement identique. L'hypothese
+  // etait FAUSSE, le reglage a donc ete retire (il n'apportait rien et rendait
+  // les temps de reponse plus irreguliers).
+  // La vraie cause etait `createPublicClient()`, qui fabriquait un client
+  // Supabase neuf a chaque appel (57 appels dans 21 fichiers) — cf. le
+  // commentaire de lib/supabase/public-client.ts.
   // Les sous-sitemaps (1.78M pros, 369k pages cat×ville) peuvent dépasser le
   // timeout par défaut de 60s/page statique au build (surtout en local :
   // latence machine→Supabase × nombreux round-trips). 180s laisse la marge
