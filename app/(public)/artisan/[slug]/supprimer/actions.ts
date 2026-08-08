@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createHash, randomInt } from "crypto";
 import { sendVerificationCode } from "@/lib/email/send-verification-code";
@@ -288,11 +289,43 @@ export async function verifyDeletion(
     return { success: false, message: "Fiche introuvable" };
   }
 
-  // 1. Soft-delete
+  // 1. Soft-delete COMPLET.
+  //
+  // Avant le 08/08/2026 cette etape n'ecrivait QUE `deleted_at`. Constate sur la
+  // demande de MOSES UTUKA (07/08 23:35) : 8 h plus tard sa fiche repondait
+  // toujours 200 et il restait contactable en prospection. Trois manques :
+  //   - `is_active` restait true  -> la fiche continuait de compter comme active
+  //   - `do_not_contact` restait false -> il pouvait recevoir un mail de
+  //     prospection APRES avoir demande sa suppression (art. 21 RGPD)
+  //   - les coordonnees restaient en base
+  // C'est le "pattern suppression complete" deja documente dans CLAUDE.md
+  // (cas Freddy DURAND) : il n'etait applique que par script, jamais par le
+  // parcours libre-service que les pros utilisent reellement.
   await serviceClient
     .from("pros")
-    .update({ deleted_at: new Date().toISOString() })
+    .update({
+      deleted_at: new Date().toISOString(),
+      is_active: false,
+      do_not_contact: true,
+      email: null,
+      phone: null,
+      website: null,
+    })
     .eq("id", pro.id);
+
+  // 1 bis. Blacklist de l'email du demandeur : sans ca, il reste dans les
+  // listes de prospection tant qu'il figure sur une AUTRE fiche (32 % des
+  // fiches partagent leur email — cf. memoire `pros-email-non-unique`).
+  try {
+    await serviceClient
+      .from("email_blacklist")
+      .upsert(
+        { email: attempt.email, reason: "Suppression de fiche (RGPD, libre-service)" },
+        { onConflict: "email" }
+      );
+  } catch (err) {
+    console.error("Erreur blacklist email suppression fiche:", err);
+  }
 
   // 2. Résilier l'abonnement Stripe si actif
   if (
@@ -338,6 +371,23 @@ export async function verifyDeletion(
     });
   } catch (err) {
     console.error("Erreur envoi alerte admin suppression fiche:", err);
+  }
+
+  // 5. PURGE DU CACHE — sans ca, la suppression n'existe pas pour le visiteur.
+  //
+  // La fiche `/artisan/[slug]` est en cache ISR 7 jours. Le 08/08/2026, la fiche
+  // de MOSES UTUKA repondait encore 200 huit heures apres sa demande, alors que
+  // `deleted_at` etait bien en base : c'est le cache qui servait l'ancienne page.
+  // Il a fallu appeler /api/revalidate-sitemap a la main pour qu'elle passe 404.
+  // Une suppression RGPD non purgee reste donc en ligne jusqu'a une semaine.
+  //
+  // On revalide aussi le sitemap : la fiche doit cesser d'y etre listee, sinon
+  // Google continue de la reclamer.
+  try {
+    revalidatePath(`/artisan/${slug}`);
+    revalidatePath("/sitemap/[__metadata_id__]", "page");
+  } catch (err) {
+    console.error("Erreur purge cache suppression fiche:", err);
   }
 
   return { success: true };
