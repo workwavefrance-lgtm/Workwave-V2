@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { submitProject, type FormState } from "@/app/(public)/deposer-projet/actions";
 import CityAutocomplete from "@/components/project/CityAutocomplete";
 import { trackClient } from "@/lib/analytics/client-track";
@@ -101,6 +101,41 @@ export default function ProjectForm({
   // Step 3 : description (pour preserver aussi)
   const [description, setDescription] = useState("");
 
+  // Couverture affichee a l'etape 2 : « 997 maçons référencés en Vienne ».
+  // Chargee UNIQUEMENT quand metier ET ville sont connus, donc jamais au
+  // chargement de la page — un appel de plus a l'arrivee ralentirait tout le
+  // monde pour un encart que personne ne verrait encore.
+  const [couverture, setCouverture] = useState<{
+    count: number;
+    departement: string | null;
+  } | null>(null);
+
+  const categoryLabel =
+    categories.find((c) => c.id === categoryId)?.name ?? "professionnels";
+
+  useEffect(() => {
+    if (!categoryId || !cityId) {
+      setCouverture(null);
+      return;
+    }
+    // `annule` : si la personne change de ville pendant le chargement, la
+    // reponse de l'ancienne requete ne doit pas ecraser la nouvelle.
+    let annule = false;
+    fetch(`/api/couverture?categoryId=${categoryId}&cityId=${cityId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!annule && d && typeof d.count === "number") {
+          setCouverture({ count: d.count, departement: d.departement ?? null });
+        }
+      })
+      // Silencieux a dessein : c'est un encart de reassurance, pas une etape
+      // du parcours. S'il ne charge pas, le formulaire fonctionne a l'identique.
+      .catch(() => {});
+    return () => {
+      annule = true;
+    };
+  }, [categoryId, cityId]);
+
   // Fix UX validations :
   // - touched: per-field state (passe a true au onBlur)
   // - hasAttemptedSubmit: passe a true au clic du bouton "Envoyer"
@@ -140,21 +175,35 @@ export default function ProjectForm({
     setDismissedErrors(new Set());
   };
 
-  // Tracking : start + abandon
-  const isDirty = useRef(false);
-  const submitted = useRef(false);
 
+  // ── SUIVI DE L'ENTONNOIR — cinq nombres, rien de plus ────────────────────
+  //
+  // Ce qu'on veut savoir : sur les gens qui ouvrent le formulaire, combien
+  // atteignent chaque etape. Cinq nombres (etapes 1 a 4 + envoye), une
+  // soustraction entre chaque, et on voit ou ca coupe. C'est tout.
+  //
+  // Deux defauts corriges le 08/08/2026 :
+  //
+  // 1. L'ETAPE 1 N'ETAIT JAMAIS ENREGISTREE. `next()` ne tire qu'au clic sur
+  //    « Continuer », donc on ne mesurait que les etapes 2, 3 et 4. Le premier
+  //    trou — ceux qui ouvrent et ne choisissent meme pas un metier — etait
+  //    invisible. On la tire donc a l'ouverture, comme les autres.
+  //
+  // 2. L'ABANDON VIA `beforeunload` MENTAIT. Les navigateurs modernes ignorent
+  //    cet evenement la plupart du temps, surtout sur mobile : 3 abandons
+  //    enregistres pour ~189 reels sur 30 jours. Un signal faux est pire que
+  //    pas de signal — il donne l'illusion de mesurer. Supprime.
+  //    L'abandon se DEDUIT : (etape N) - (etape N+1).
   useEffect(() => {
     trackClient(EVENTS.PROJECT_FORM_STARTED);
-
-    function handleBeforeUnload() {
-      if (isDirty.current && !submitted.current) {
-        trackClient(EVENTS.PROJECT_FORM_ABANDONED);
-      }
-    }
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    // L'etape de depart n'est pas toujours la 1re : integre dans une page
+    // metier/ville, le formulaire demarre deja rempli (etape 2 ou 3). On
+    // enregistre donc l'etape REELLE, sinon l'entonnoir compterait des gens
+    // a une etape qu'ils n'ont jamais vue.
+    trackClient(EVENTS.PROJECT_STEP_REACHED, {
+      step: initialStep + 1,
+      name: STEPS[initialStep],
+    });
   }, []);
 
   // Validation client minimale pour permettre "Continuer".
@@ -170,9 +219,6 @@ export default function ProjectForm({
     if (canProceed()) {
       const target = Math.min(step + 1, STEPS.length - 1);
       setStep(target);
-      isDirty.current = true;
-      // Tracking par étape : on saura ainsi OÙ, précisément, les ~92 %
-      // d'abandons se produisent (Ville ? Projet ? Contact ?).
       trackClient(EVENTS.PROJECT_STEP_REACHED, {
         step: target + 1,
         name: STEPS[target],
@@ -205,9 +251,6 @@ export default function ProjectForm({
   return (
     <form
       action={formAction}
-      onChange={() => {
-        isDirty.current = true;
-      }}
       onSubmit={() => {
         // Safari fix : declencher handleAttemptSubmit ici (onSubmit) plutot
         // que dans le onClick du bouton. Sur Safari iOS, un setState dans
@@ -215,7 +258,6 @@ export default function ProjectForm({
         // arrive avant que Safari traite l'event submit. En faisant le state
         // update dans onSubmit, React garantit que le submit est deja en cours
         // avant le re-render. Marche identiquement sur Chrome.
-        submitted.current = true;
         setHasAttemptedSubmit(true);
         setDismissedErrors(new Set());
         // Enhanced Conversions Microsoft Ads : on stocke email + phone dans
@@ -334,6 +376,35 @@ export default function ProjectForm({
           defaultCity={defaultCity}
         />
         <input type="hidden" name="cityId" value={cityId ?? ""} />
+
+        {/* Confirmation de couverture — le seul moment du formulaire où le site
+            répond à la personne au lieu de lui demander quelque chose. Elle
+            vient de donner sa ville : on lui prouve qu'on couvre chez elle,
+            avec un chiffre vrai tiré de la base.
+            « référencés » et pas « disponibles » : ce sont les entreprises du
+            registre officiel, pas une promesse de réponse. */}
+        {couverture && couverture.count > 0 && (
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-4 py-3 text-sm text-[var(--text-primary)]">
+            <span className="text-[var(--accent)] font-bold leading-5" aria-hidden>
+              ✓
+            </span>
+            {/* Formulation volontairement « <Métier> — N professionnels » :
+                accorder le nom de métier au pluriel est impossible proprement
+                sur les 197 catégories (« Débarras » et « Garde d'enfants »
+                sont déjà pluriels, « Ménage » donnerait « 997 ménages », qui
+                ne veut rien dire). « professionnels » est juste partout. */}
+            <span>
+              <strong>
+                {categoryLabel} — {couverture.count.toLocaleString("fr-FR")}{" "}
+                professionnels référencés
+              </strong>
+              {couverture.departement ? ` en ${couverture.departement}` : ""}.
+              <span className="block text-[var(--text-secondary)]">
+                Votre demande partira à ceux qui interviennent dans votre secteur.
+              </span>
+            </span>
+          </p>
+        )}
       </div>
 
       {/* ============================================================ */}
@@ -411,39 +482,43 @@ export default function ProjectForm({
             )}
           </fieldset>
 
-          <div>
-            <label
-              htmlFor="budget"
-              className="block text-sm font-medium text-[var(--text-primary)] mb-2"
-            >
+          {/* Budget en pastilles, comme l'urgence juste au-dessus.
+              Avant : un menu déroulant — trois gestes (ouvrir, faire défiler,
+              choisir) là où l'urgence n'en demande qu'un, et un rythme cassé au
+              milieu de la même étape. « Je ne sais pas » est mis en avant comme
+              une réponse normale : c'est le cas le plus fréquent, et le
+              présenter comme un choix légitime évite qu'on renonce ici. */}
+          <fieldset>
+            <legend className="block text-sm font-medium text-[var(--text-primary)] mb-2">
               Budget estimé
-            </label>
-            <select
-              id="budget"
-              name="budget"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-              className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] transition-all duration-250 outline-none appearance-none cursor-pointer ${
-                state.errors?.budget
-                  ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
-                  : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
-              }`}
-            >
-              <option value="" disabled>
-                Sélectionnez un budget...
-              </option>
+            </legend>
+            <p className="text-[13px] text-[var(--text-secondary)] mb-3">
+              Une fourchette suffit. Ça aide l&apos;artisan à vous proposer
+              quelque chose de réaliste.
+            </p>
+            <div className="flex flex-wrap gap-2">
               {BUDGET_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
+                <label key={opt.value} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="budget"
+                    value={opt.value}
+                    checked={budget === opt.value}
+                    onChange={(e) => setBudget(e.target.value)}
+                    className="peer sr-only"
+                  />
+                  <span className="inline-block px-4 py-2.5 rounded-full text-sm font-medium border border-[var(--border-color)] text-[var(--text-secondary)] bg-[var(--bg-primary)] transition-all duration-250 peer-checked:bg-[var(--accent)] peer-checked:text-white peer-checked:border-[var(--accent)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--accent)]/40 hover:border-[var(--text-tertiary)]">
+                    {opt.label}
+                  </span>
+                </label>
               ))}
-            </select>
+            </div>
             {state.errors?.budget && (
               <p className="mt-1.5 text-sm text-red-500">
                 {state.errors.budget}
               </p>
             )}
-          </div>
+          </fieldset>
         </div>
       </div>
 
@@ -486,20 +561,18 @@ export default function ProjectForm({
               Vos données sont protégées
             </span>
           </div>
-          <ul className="space-y-2 text-sm text-[var(--text-secondary)] leading-relaxed">
-            {[
-              "Vos coordonnées ne sont visibles que par un artisan qui souhaite réellement traiter votre demande — jamais affichées publiquement, jamais vendues.",
-              "Aucun démarchage de Workwave : ni publicité, ni newsletter.",
-              "Vous pouvez supprimer votre demande à tout moment (lien dans votre email de confirmation).",
-            ].map((item) => (
-              <li key={item} className="flex gap-2">
-                <span className="text-[var(--accent)] font-bold shrink-0" aria-hidden>
-                  ✓
-                </span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Deux lignes, pas six. L'encadre disait trois fois la meme chose :
+              a l'endroit ou la personne hesite le plus, un mur de texte se
+              saute au lieu de se lire. */}
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            Vos coordonnées ne sont visibles que par un artisan qui décide de
+            traiter votre demande. Jamais affichées sur le site, jamais
+            revendues, et Workwave ne s&apos;en sert jamais pour vous démarcher.
+          </p>
+          <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+            Vous pouvez supprimer votre demande quand vous voulez — le lien est
+            dans l&apos;email de confirmation.
+          </p>
         </div>
 
         <div className="space-y-5">
@@ -568,10 +641,17 @@ export default function ProjectForm({
           <div>
             <label
               htmlFor="phone"
-              className="block text-sm font-medium text-[var(--text-primary)] mb-2"
+              className="block text-sm font-medium text-[var(--text-primary)] mb-1"
             >
               Téléphone
             </label>
+            {/* La raison, a l'endroit exact ou la personne hesite. Un champ
+                telephone sans justification est le point de blocage classique
+                d'un formulaire de mise en relation : on repond a la question
+                avant qu'elle soit posee. */}
+            <p className="text-[13px] text-[var(--text-secondary)] mb-2">
+              La plupart des artisans rappellent plutôt que d&apos;écrire.
+            </p>
             <input
               id="phone"
               name="phone"
@@ -647,8 +727,16 @@ export default function ProjectForm({
           vides. N'apparaît qu'à l'étape Contact tant que ce n'est pas valide. */}
       {isLast && !contactValid && (
         <p className="text-sm text-[var(--text-tertiary)]">
-          Renseignez votre prénom, votre email et votre téléphone, puis cochez la
-          case pour envoyer votre demande.
+          Il manque&nbsp;:{" "}
+          {[
+            firstName.trim().length < 2 ? "votre prénom" : null,
+            !EMAIL_RE.test(email.trim()) ? "votre email" : null,
+            !PHONE_RE.test(phone.trim()) ? "votre téléphone" : null,
+            !consent ? "votre accord (case à cocher)" : null,
+          ]
+            .filter(Boolean)
+            .join(", ")}
+          .
         </p>
       )}
 

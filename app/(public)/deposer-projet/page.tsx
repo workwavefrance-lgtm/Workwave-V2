@@ -39,23 +39,46 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
           Un professionnel adapté vous contactera rapidement. Vous comparez,
           vous choisissez.
         </p>
-        {/* Repères de confiance (tous vrais) — lever le doute dès l'arrivée. */}
-        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-[var(--text-secondary)]">
+        {/* Repères de confiance (tous vrais, tous vérifiables).
+            Avant le 08/08/2026 : une ligne grise en 14px, au même niveau visuel
+            qu'une note de bas de page — invisible au moment où le doute se joue.
+            Et « Coordonnées protégées » ne veut rien dire pour quelqu'un qui
+            n'est pas du métier : chaque promesse porte donc sa traduction en
+            français courant. */}
+        <ul className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-left">
           {[
-            "100% gratuit",
-            "Sans engagement",
-            "Artisans vérifiés au registre officiel",
-            "Coordonnées protégées",
-          ].map(
-            (item) => (
-              <li key={item} className="inline-flex items-center gap-1.5">
-                <span className="text-[var(--accent)] font-bold" aria-hidden>
+            {
+              titre: "Gratuit",
+              detail: "Vous ne payez rien, ni maintenant ni plus tard.",
+            },
+            {
+              titre: "Sans engagement",
+              detail: "Vous choisissez, ou vous ne choisissez personne.",
+            },
+            {
+              titre: "Artisans vérifiés",
+              detail: "SIRET contrôlé au registre officiel des entreprises.",
+            },
+            {
+              titre: "Numéro protégé",
+              detail: "Jamais affiché sur le site, jamais revendu.",
+            },
+          ].map(({ titre, detail }) => (
+            <li
+              key={titre}
+              className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4"
+            >
+              <p className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+                <span className="text-[var(--accent)]" aria-hidden>
                   ✓
                 </span>
-                {item}
-              </li>
-            )
-          )}
+                {titre}
+              </p>
+              <p className="mt-1 text-[13px] leading-snug text-[var(--text-secondary)]">
+                {detail}
+              </p>
+            </li>
+          ))}
         </ul>
       </div>
 

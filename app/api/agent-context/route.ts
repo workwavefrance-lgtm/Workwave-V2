@@ -33,6 +33,12 @@ export type AgentContext =
   // support de niveau 1 : c'est la page où se pose le motif de contact numéro
   // 1 (« je n'ai pas reçu le code »), Léa doit y arriver en le sachant.
   | { type: "claim"; proName: string | null; step: "form" | "verification" }
+  // Depot de projet EN COURS. Contexte ajoute le 08/08/2026 : c'est l'ecran ou
+  // se joue tout le revenu, et Lea y arrivait SANS contexte — sa consigne
+  // generique etait donc de proposer au visiteur d'aller deposer un projet,
+  // sur la page ou il etait deja en train d'en deposer un. Mesure du jour :
+  // 244 formulaires commences pour 55 envoyes sur 30 jours (77 % d'abandon).
+  | { type: "deposer" }
   | { type: "other"; pathname: string };
 
 function getServiceClient() {
@@ -54,6 +60,11 @@ export async function POST(req: NextRequest) {
   // Home
   if (pathname === "/" || pathname === "") {
     return NextResponse.json<AgentContext>({ type: "home" });
+  }
+
+  // Depot de projet (le formulaire lui-meme, pas la page de confirmation)
+  if (/^\/deposer-projet\/?$/.test(pathname)) {
+    return NextResponse.json<AgentContext>({ type: "deposer" });
   }
 
   // Fiche pro : /artisan/[slug]
