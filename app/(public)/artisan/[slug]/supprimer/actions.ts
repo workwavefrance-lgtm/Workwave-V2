@@ -301,7 +301,7 @@ export async function verifyDeletion(
   // C'est le "pattern suppression complete" deja documente dans CLAUDE.md
   // (cas Freddy DURAND) : il n'etait applique que par script, jamais par le
   // parcours libre-service que les pros utilisent reellement.
-  await serviceClient
+  const { error: deleteError } = await serviceClient
     .from("pros")
     .update({
       deleted_at: new Date().toISOString(),
@@ -312,6 +312,19 @@ export async function verifyDeletion(
       website: null,
     })
     .eq("id", pro.id);
+
+  // Une mutation Supabase qui echoue renvoie { error } SANS lever d'exception.
+  // Sans ce controle, on annoncait la suppression au pro ET a l'admin alors que
+  // la fiche etait toujours en ligne — le pire des cas en RGPD : la personne
+  // croit sa demande traitee et ne relance pas. On s'arrete net.
+  if (deleteError) {
+    console.error("[verifyDeletion] soft-delete KO:", deleteError.message);
+    return {
+      success: false,
+      message:
+        "La suppression n'a pas pu être enregistrée. Écrivez-nous à contact@workwave.fr en mentionnant votre SIRET, nous la traiterons manuellement sous 48h ouvrées.",
+    };
+  }
 
   // 1 bis. Blacklist de l'email du demandeur : sans ca, il reste dans les
   // listes de prospection tant qu'il figure sur une AUTRE fiche (32 % des

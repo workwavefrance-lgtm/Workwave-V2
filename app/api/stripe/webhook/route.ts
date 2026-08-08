@@ -6,6 +6,24 @@ import { sendPaidUnlockAlert } from "@/lib/email/send-paid-unlock-alert";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
+/**
+ * Erreur qui doit faire REESSAYER Stripe.
+ *
+ * Par defaut ce webhook renvoie 200 sur toute erreur de traitement, pour ne pas
+ * declencher de tempete de reprises sur un bug applicatif. C'est le bon choix
+ * pour la plupart des evenements — mais PAS quand de l'argent a ete encaisse et
+ * que la contrepartie n'a pas ete livree. Dans ce cas precis on veut que Stripe
+ * revienne (il reessaie avec un delai croissant pendant 3 jours), parce que le
+ * traitement est idempotent : un doublon est deja rattrape par la contrainte
+ * UNIQUE (project_id, pro_id) -> code 23505 -> succes silencieux.
+ */
+class StripeRetryableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "StripeRetryableError";
+  }
+}
+
 // Supabase service client (pas de cookies dans un webhook)
 async function getServiceClient() {
   const { createClient } = await import("@supabase/supabase-js");
@@ -99,12 +117,23 @@ async function handleBtpLeadUnlock(session: Stripe.Checkout.Session) {
       );
       return;
     }
-    // Autre erreur : log mais on continue (mieux vaut crier dans les logs)
-    console.error(
-      `[handleBtpLeadUnlock] INSERT lead_unlocks failed (${insertError.code}):`,
-      insertError.message
+    // ── ARGENT ENCAISSE, CONTREPARTIE NON LIVREE ──────────────────────────
+    // Avant le 08/08/2026 : `console.error` puis `return`. La fonction sortait
+    // NORMALEMENT, donc le catch de l'appelant n'etait jamais atteint, l'event
+    // etait marque `processed_at` (= "traite avec succes") et Stripe recevait
+    // 200. Resultat : le pro a paye 9,90 EUR, la ligne lead_unlocks n'existe
+    // pas, ses coordonnees restent verrouillees, Stripe ne reessaie jamais, et
+    // la base affirme que tout s'est bien passe. Personne n'est au courant.
+    //
+    // On leve donc une erreur "a reessayer" : l'appelant renverra 500, Stripe
+    // rejouera l'evenement (delai croissant, jusqu'a 3 jours) et le traitement
+    // est idempotent (23505 ci-dessus). En parallele l'admin est prevenu tout
+    // de suite, pour pouvoir debloquer a la main sans attendre.
+    throw new StripeRetryableError(
+      `INSERT lead_unlocks echoue (${insertError.code}: ${insertError.message}) — ` +
+        `pro ${proId}, projet ${projectId}, paiement ${paymentIntentId}, ` +
+        `${(session.amount_total || 990) / 100} EUR encaisses SANS deblocage`
     );
-    return;
   }
 
   // Tracking analytics (fire-and-forget)
@@ -473,14 +502,44 @@ export async function POST(req: Request) {
     }
   } catch (err) {
     console.error(`Erreur traitement webhook ${event.type}:`, err);
-    // Mark l'event comme failed dans la table d'idempotence (pour monitoring)
+    const message = err instanceof Error ? err.message : "unknown";
+    // Mark l'event comme failed dans la table d'idempotence (pour monitoring).
+    // `processed_at` reste NULL : l'event n'est PAS considéré comme traité.
     await supabase
       .from("stripe_webhook_events")
-      .update({
-        processing_error: err instanceof Error ? err.message.slice(0, 500) : "unknown",
-      })
+      .update({ processing_error: message.slice(0, 500) })
       .eq("stripe_event_id", event.id);
-    // On retourne quand même 200 pour éviter les retries Stripe
+
+    // Cas "argent encaissé sans contrepartie" : on prévient l'admin tout de
+    // suite (il peut débloquer à la main) ET on renvoie 500 pour que Stripe
+    // rejoue l'événement. Le traitement est idempotent, un rejeu est sans
+    // risque. Pour toute autre erreur on conserve le 200 historique, qui
+    // évite les tempêtes de reprises sur un bug applicatif.
+    if (err instanceof StripeRetryableError) {
+      try {
+        const { Resend } = await import("resend");
+        await new Resend(process.env.RESEND_API_KEY).emails.send({
+          from: "Workwave <contact@workwave.fr>",
+          to: process.env.ADMIN_EMAIL || "workwave.france@gmail.com",
+          subject: "[Workwave] PAIEMENT ENCAISSE SANS DEBLOCAGE — action requise",
+          html: `<div style="font-family:sans-serif;max-width:560px;padding:24px">
+            <h2 style="color:#0A0A0A">Un pro a payé, le déblocage n'a pas été enregistré</h2>
+            <p>L'écriture dans <code>lead_unlocks</code> a échoué. Stripe va rejouer
+            l'événement automatiquement, mais vérifie que le pro obtient bien ses
+            coordonnées — sinon débloque-le à la main.</p>
+            <p><strong>Événement Stripe :</strong> ${event.id}</p>
+            <p><strong>Détail :</strong> ${message}</p>
+          </div>`,
+        });
+      } catch (mailErr) {
+        console.error("[webhook] alerte admin paiement non livré KO:", mailErr);
+      }
+      return NextResponse.json(
+        { received: false, error: "unlock_not_persisted" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ received: true, error: "processing_error" });
   }
 

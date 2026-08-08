@@ -51,12 +51,24 @@ export async function sendVerificationCode(
 </body>
 </html>`;
 
-  await getResendClient().emails.send({
+  // Le SDK Resend ne LEVE PAS d'exception quand l'envoi est refusé : il renvoie
+  // { data: null, error: {...} }. Ignorer ce champ rend un échec d'envoi
+  // strictement indiscernable d'un succès — c'est ce qui a fait qu'un pro n'a
+  // jamais reçu son code (Fabien, 14/06) sans la moindre trace côté serveur,
+  // et qu'on a cherché la panne du mauvais côté pendant des heures.
+  // On remonte donc l'erreur à l'appelant, qui la trace dans claim_attempts
+  // (`error_reason`) et peut afficher un vrai message à l'utilisateur.
+  const { error } = await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: "Votre code de vérification — Workwave",
     html,
   });
+
+  if (error) {
+    console.error("[sendVerificationCode] Resend a refusé l'envoi:", error);
+    throw new Error(`resend_send_failed: ${error.message || error.name}`);
+  }
 }
 
 export async function sendClaimAlreadyClaimedAlert(
