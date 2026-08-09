@@ -6,6 +6,7 @@ import { qualifyTechProject } from "@/lib/ai/qualify-tech-project";
 import { broadcastTechProject } from "@/lib/email/broadcast-tech-project";
 import { sendAiProjectNotification } from "@/lib/email/send-ai-project-notification";
 import { isValidEmail } from "@/lib/ai/helpers";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // Max length defensifs (cote serveur, en miroir des maxLength HTML)
 const MAX_TITLE = 200;
@@ -63,12 +64,6 @@ const TIMELINE_LABELS: Record<string, string> = {
   flexible: "Flexible",
 };
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function submitTechProject(formData: FormData): Promise<void> {
   // Locale (FR par defaut) : pilote les redirections vers /ai/deposer (FR)

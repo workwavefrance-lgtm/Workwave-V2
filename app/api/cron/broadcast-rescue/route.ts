@@ -18,15 +18,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { broadcastBtpProject } from "@/lib/email/broadcast-btp-project";
 import { broadcastTechProject } from "@/lib/email/broadcast-tech-project";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const maxDuration = 300;
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function GET(req: Request) {
   // 1. AUTH

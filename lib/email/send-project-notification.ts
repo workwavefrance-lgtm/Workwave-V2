@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -15,15 +16,6 @@ function getResendClient() {
 // bypasse. Tracking obligatoire pour ne plus avoir de "perte
 // silencieuse" sur les notifs (cf. projets #18 et #19 non recus).
 let _sb: SupabaseClient | null = null;
-function getServiceClient(): SupabaseClient {
-  if (!_sb) {
-    _sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-  }
-  return _sb;
-}
 
 /**
  * Audit trail : note en base le resultat de l'envoi (succes ou

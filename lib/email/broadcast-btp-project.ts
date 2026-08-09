@@ -40,6 +40,7 @@ import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { haversineKm } from "@/lib/utils/haversine";
 import { getGeneralistCategoryIds } from "@/lib/matching/generalist";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 let _resend: Resend | null = null;
 function getResendClient(): Resend {
@@ -47,12 +48,6 @@ function getResendClient(): Resend {
   return _resend;
 }
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /**
  * Clusters de metiers "reellement le meme artisan" → un lead dans l'un doit

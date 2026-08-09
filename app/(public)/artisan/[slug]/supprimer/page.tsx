@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import { createClient } from "@supabase/supabase-js";
 import DeletionRequestForm from "./DeletionRequestForm";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const metadata: Metadata = {
   title: "Supprimer ma fiche — Workwave",
   robots: { index: false, follow: false },
 };
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export default async function ProDeletionPage({
   params,

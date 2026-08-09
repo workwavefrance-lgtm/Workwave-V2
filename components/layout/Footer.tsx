@@ -45,7 +45,7 @@ export default async function Footer() {
         {/* Logo */}
         <div className="mb-12">
           <Link href="/" className="text-2xl font-bold tracking-tight">
-            Workwave
+            Workwave.fr
           </Link>
           <p className="text-sm text-zinc-400 mt-2 max-w-md">
             Trouvez les meilleurs professionnels près de chez vous. Annuaire
@@ -235,7 +235,7 @@ export default async function Footer() {
                   href="/feedback"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
-                  Améliorer Workwave
+                  Améliorer Workwave.fr
                 </Link>
               </li>
               <li>
@@ -278,7 +278,7 @@ export default async function Footer() {
 
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-zinc-800 text-xs text-zinc-400 text-center">
-          &copy; {new Date().getFullYear()} Workwave. Tous droits réservés.
+          &copy; {new Date().getFullYear()} Workwave.fr. Tous droits réservés.
         </div>
       </div>
     </footer>

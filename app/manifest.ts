@@ -4,8 +4,8 @@ import type { MetadataRoute } from "next";
 // Les icônes pointent sur les fichiers générés (app/icon.png, app/apple-icon.png).
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Workwave — Trouvez un professionnel de confiance",
-    short_name: "Workwave",
+    name: "Workwave.fr — Trouvez un professionnel de confiance",
+    short_name: "Workwave.fr",
     description:
       "Annuaire et mise en relation avec des professionnels de confiance : BTP, services à domicile, freelances tech.",
     start_url: "/",

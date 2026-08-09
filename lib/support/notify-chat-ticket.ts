@@ -12,6 +12,7 @@
  */
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 function esc(s: string): string {
   return s
@@ -40,10 +41,7 @@ export type ChatTicketAlert = {
 export async function notifyAdminOfChatTicket(
   alert: ChatTicketAlert
 ): Promise<boolean> {
-  const sb = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const sb = getServiceClient();
 
   const trace = async (error: string | null) => {
     await sb

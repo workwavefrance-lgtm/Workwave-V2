@@ -16,6 +16,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { sendFeedbackAlert } from "@/lib/email/send-feedback-alert";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 function readApiKeyFromDotenvLocal(): string | null {
   if (process.env.NODE_ENV === "production") return null;
@@ -84,10 +85,7 @@ let _fallbackDay = "";
 
 async function checkDailyBudget(): Promise<boolean> {
   try {
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const sb = getServiceClient();
     const { data, error } = await sb.rpc("increment_daily_counter", {
       counter_name: "feedback_chat",
     });
@@ -224,10 +222,7 @@ export async function POST(req: NextRequest) {
       // Archive best-effort (table peut ne pas exister tant que la migration
       // n'est pas appliquée — l'email admin garantit qu'aucun retour n'est perdu).
       try {
-        const sb = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const sb = getServiceClient();
         const { error } = await sb.from("platform_feedback").insert({
           user_kind: userKind,
           email,

@@ -70,7 +70,7 @@ export default function Header() {
           href="/"
           className="text-xl font-bold tracking-tight text-[var(--text-primary)]"
         >
-          Workwave
+          Workwave.fr
         </Link>
 
         {/* Nav desktop */}

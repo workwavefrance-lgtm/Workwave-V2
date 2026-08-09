@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 /**
  * Limite de débit de l'ingestion des emails entrants.
@@ -40,12 +41,6 @@ export type RateLimitVerdict = {
   detail: string;
 };
 
-function getServiceClient(): SupabaseClient {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function checkInboundRateLimit(
   senderEmail: string | null

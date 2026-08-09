@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import { createClient } from "@supabase/supabase-js";
 import DeletionVerifyForm from "./DeletionVerifyForm";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const metadata: Metadata = {
   title: "Vérification — Suppression de fiche — Workwave",
   robots: { index: false, follow: false },
 };
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /**
  * Obfusque un email pour affichage public.

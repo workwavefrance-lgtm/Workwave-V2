@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createBtpUnlockCheckoutSession } from "@/lib/stripe/create-btp-unlock-checkout";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { getServiceClient } from "@/lib/supabase/service-client";
 import {
   getFreeUnlocksRemaining,
   grantFreeUnlock,
@@ -12,12 +13,6 @@ import {
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
-function getServiceClient() {
-  return createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /**
  * Sprint 13 — Demarrer le checkout one-time pour debloquer un lead BTP.

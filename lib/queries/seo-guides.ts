@@ -1,6 +1,7 @@
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public-client";
 
 export type SeoGuide = {
@@ -16,7 +17,11 @@ export type SeoGuide = {
   updated_at: string;
 };
 
-export async function getGuideBySlug(
+// Regroupe les appels identiques d'un meme rendu (`generateMetadata` puis la
+// page). Sans cela, chaque affichage ferait DEUX fois la meme requete : Next
+// regroupait au niveau de la reponse HTTP, en la dedoublant, ce qui retenait la
+// memoire — cf. lib/supabase/fetch-supabase.ts.
+export const getGuideBySlug = cache(async function getGuideBySlug(
   slug: string
 ): Promise<SeoGuide | null> {
   const supabase = createPublicClient();
@@ -26,7 +31,7 @@ export async function getGuideBySlug(
     .eq("slug", slug)
     .single();
   return data as SeoGuide | null;
-}
+})
 
 export async function getAllGuides(): Promise<SeoGuide[]> {
   const supabase = createPublicClient();

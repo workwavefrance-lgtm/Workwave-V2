@@ -17,15 +17,10 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 const AI_CATEGORY_IDS_QUERY = AI_CATEGORY_IDS as unknown as number[];
 
-function getServiceClient(): SupabaseClient {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 // Mapping category_slug -> category_id (categories Workwave AI : tech 43-48 + business/creatif 79-87).
 // IDs verifies via scripts/_check-cat-mapping.ts (source unique de verite : table BDD categories).

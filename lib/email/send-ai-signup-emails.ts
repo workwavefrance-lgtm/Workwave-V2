@@ -8,6 +8,7 @@
 import { Resend } from "resend";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Locale } from "@/lib/i18n/config";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 let _resend: Resend | null = null;
 function getResendClient() {
@@ -16,15 +17,6 @@ function getResendClient() {
 }
 
 let _sb: SupabaseClient | null = null;
-function getServiceClient() {
-  if (!_sb) {
-    _sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-  }
-  return _sb;
-}
 
 export type SignupData = {
   signupId: number;

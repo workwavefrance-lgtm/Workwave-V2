@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 /**
  * Maillage interne fiche pro → guides de prix du métier (530 guides sourcés
@@ -14,10 +14,12 @@ export default async function ProGuidesLinks({
   metierSlug: string;
   metierName: string;
 }) {
-  const sb = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  // Client PARTAGE. Avant le 09/08 ce composant fabriquait un client neuf a
+  // chaque rendu — donc sur CHAQUE fiche pro, la route la plus crawlee du site.
+  // Chaque client lancait une minuterie de 30 s jamais arretee, ce qui le rendait
+  // impossible a liberer : ~8,7 Ko retenus definitivement par fiche affichee.
+  // Cf. lib/supabase/service-client.ts.
+  const sb = getServiceClient();
   const { data: guides } = await sb
     .from("price_guides")
     .select("slug, h1, scope")

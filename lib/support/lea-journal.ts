@@ -18,6 +18,7 @@
  * chaque réponse, et serait lui-même imprévisible.
  */
 import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export type LeaFlag =
   | "juridique"
@@ -143,10 +144,7 @@ export async function journaliserConversation(input: {
       .join("\n\n")
       .slice(0, MAX_TRANSCRIPT);
 
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const sb = getServiceClient();
 
     // Une ligne par conversation, mise à jour au fil de l'échange : on garde le
     // fil complet et les motifs cumulés, sans créer une ligne par message.

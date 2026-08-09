@@ -5,16 +5,14 @@ import ClaimForm from "@/components/pro/ClaimForm";
 import { BASE_URL } from "@/lib/constants";
 import { formatBce } from "@/lib/utils/bce";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 async function getProForClaim(slug: string) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = getServiceClient();
 
   // On charge un peu plus de champs (adresse, ville, date de creation Sirene)
   // pour pouvoir afficher au pro "Nous avons ces infos sur votre entreprise"

@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendFeedbackRequest } from "@/lib/email/send-feedback-request";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const maxDuration = 300;
 const BATCH = 200;
@@ -23,10 +24,7 @@ export async function GET(req: NextRequest) {
   if (!cronSecret || req.headers.get("authorization") !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const sb = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const sb = getServiceClient();
   const from = new Date(Date.now() - 5 * 86400_000).toISOString();
   const to = new Date(Date.now() - 3 * 86400_000).toISOString();
   let sentParticuliers = 0;

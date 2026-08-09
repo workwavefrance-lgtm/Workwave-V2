@@ -2,6 +2,7 @@
 
 import { verifyResetToken } from "@/lib/utils/reset-token";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export type ResetPasswordState = {
   success: boolean;
@@ -9,12 +10,6 @@ export type ResetPasswordState = {
   errors?: Record<string, string>;
 };
 
-async function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function resetPassword(
   _prevState: ResetPasswordState,

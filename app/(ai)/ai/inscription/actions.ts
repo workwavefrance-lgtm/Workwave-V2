@@ -10,6 +10,7 @@ import {
 import { activateAiSignup } from "@/lib/ai/auth/activate-signup";
 import { isValidEmail } from "@/lib/ai/helpers";
 import { localizeAiPath, type Locale } from "@/lib/i18n/config";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // Max length defensifs (cote serveur)
 const MAX_NAME = 100;
@@ -74,12 +75,6 @@ const CATEGORY_NAME_MAP: Record<string, string> = {
   "design-creation": "Design & Creation",
 };
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function submitInscription(formData: FormData): Promise<void> {
   // EN ou FR : pilote toutes les redirections (champ cache name="locale" pose

@@ -11,13 +11,8 @@
 import { createHash } from "crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { resolveContext, type SupportTicket } from "./tickets";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
-function getServiceClient(): SupabaseClient {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /** Validation d'email volontairement simple : on écarte les saisies absurdes,
  *  on ne cherche pas à valider la RFC (un email valide mais inexistant passera

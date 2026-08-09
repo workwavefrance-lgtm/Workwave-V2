@@ -1,6 +1,7 @@
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public-client";
 
 export type PriceRange = { label: string; low: number | null; high: number | null; unit: string };
@@ -49,7 +50,11 @@ export async function getPriceGuideBySlug(slug: string): Promise<PriceGuide | nu
 }
 
 /** Guide PRIX national d'un métier (publié). */
-export async function getMetierPriceGuide(metierSlug: string): Promise<PriceGuide | null> {
+// Regroupe les appels identiques d'un meme rendu (`generateMetadata` puis la
+// page). Sans cela, chaque affichage ferait DEUX fois la meme requete : Next
+// regroupait au niveau de la reponse HTTP, en la dedoublant, ce qui retenait la
+// memoire — cf. lib/supabase/fetch-supabase.ts.
+export const getMetierPriceGuide = cache(async function getMetierPriceGuide(metierSlug: string): Promise<PriceGuide | null> {
   const sb = createPublicClient();
   const { data } = await sb
     .from("price_guides")
@@ -59,7 +64,7 @@ export async function getMetierPriceGuide(metierSlug: string): Promise<PriceGuid
     .eq("status", "published")
     .maybeSingle();
   return (data as PriceGuide) ?? null;
-}
+})
 
 /** Prestations publiées d'un métier (maillage + hub). */
 export async function getPriceGuidesByMetier(metierSlug: string, limit = 24): Promise<PriceGuide[]> {

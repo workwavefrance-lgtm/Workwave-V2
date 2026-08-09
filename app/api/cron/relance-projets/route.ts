@@ -30,17 +30,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { broadcastBtpProject } from "@/lib/email/broadcast-btp-project";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const maxDuration = 300;
 
 const MAX_PER_RUN = 100; // garde-fou anti-flood (au cas où un gros backlog)
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function GET(req: Request) {
   // 1. AUTH (le mode dry reste protégé : on ne veut pas exposer la liste des projets)

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import VerificationForm from "@/components/pro/VerificationForm";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -27,10 +28,7 @@ async function getAttemptEmail(attemptId: string): Promise<string | null> {
   if (!Number.isFinite(id)) return null;
   try {
     const { createClient } = await import("@supabase/supabase-js");
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const sb = getServiceClient();
     const { data } = await sb
       .from("claim_attempts")
       .select("email")

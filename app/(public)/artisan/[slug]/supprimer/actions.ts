@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createHash, randomInt } from "crypto";
 import { sendVerificationCode } from "@/lib/email/send-verification-code";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // ============================================
 // Types
@@ -35,13 +36,6 @@ function generateCode(): string {
   return randomInt(100000, 999999).toString();
 }
 
-async function getServiceClient() {
-  const { createClient } = await import("@supabase/supabase-js");
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 async function getIp(): Promise<string> {
   const headersList = await headers();

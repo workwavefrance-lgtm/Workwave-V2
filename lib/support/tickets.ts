@@ -16,6 +16,7 @@
  *     création du ticket.
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export type SupportTicketStatus = "open" | "pending" | "resolved" | "closed";
 export type SupportTicketSource = "email" | "chat" | "form" | "admin";
@@ -55,12 +56,6 @@ export type SupportMessage = {
   created_at: string;
 };
 
-function getServiceClient(): SupabaseClient {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 /** Extrait { email, name } d'un "Prénom Nom <email@x.com>" ou "email@x.com". */
 export function parseEmailFrom(raw: string): { email: string | null; name: string | null } {

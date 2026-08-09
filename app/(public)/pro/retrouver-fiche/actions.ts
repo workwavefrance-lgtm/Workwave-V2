@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // Rate limit en memoire : 15 lookups / 5 min / IP. Generaux mais anti-scrape.
 // En prod sur Vercel, chaque serverless est independant ; pour vraie protection
@@ -71,10 +72,7 @@ export async function lookupBySiret(
     };
   }
 
-  const sb = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const sb = getServiceClient();
 
   const { data: pro } = await sb
     .from("pros")

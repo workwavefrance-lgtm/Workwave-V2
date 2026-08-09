@@ -5,6 +5,7 @@ import { sendPaymentFailedEmail } from "@/lib/email/send-payment-failed";
 import { sendPaidUnlockAlert } from "@/lib/email/send-paid-unlock-alert";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 /**
  * Erreur qui doit faire REESSAYER Stripe.
@@ -25,13 +26,6 @@ class StripeRetryableError extends Error {
 }
 
 // Supabase service client (pas de cookies dans un webhook)
-async function getServiceClient() {
-  const { createClient } = await import("@supabase/supabase-js");
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 // Déterminer le plan + le produit (BTP ou AI) à partir du price ID
 // Workwave BTP Pro     : STRIPE_PRICE_{MONTHLY,ANNUAL}_ID (39€/mois, 390€/an)

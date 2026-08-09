@@ -24,16 +24,11 @@ function getResendClient(): Resend {
   return _resend;
 }
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 // 14 categories acceptees Workwave AI (tech + business/creatif). On broadcast
 // les projets a TOUS les freelances dans ces categories, sans distinction.
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { getServiceClient } from "@/lib/supabase/service-client";
 const CHUNK_SIZE = 50;
 const CHUNK_DELAY_MS = 1000;
 

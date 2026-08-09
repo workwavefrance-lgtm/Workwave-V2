@@ -4,6 +4,7 @@ import { getLeadsReceivedLast30Days } from "@/lib/queries/leads";
 import { sendLeadNotificationEmail } from "@/lib/email/send-lead-notification";
 import { getResponseRatePenalty } from "@/lib/routing/response-rate";
 import type { ProjectBudget } from "@/lib/types/database";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // ============================================
 // Types internes
@@ -52,12 +53,6 @@ type ScoredPro = EligiblePro & {
 // Helpers
 // ============================================
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 function budgetToNumeric(budget: ProjectBudget): number {
   const mapping: Record<ProjectBudget, number> = {

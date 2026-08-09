@@ -19,6 +19,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const maxDuration = 300;
 
@@ -27,12 +28,6 @@ const PROS_PER_SITEMAP = 45000;
 const SITEMAP_LIMIT = 50000;
 const UA = "Workwave-SitemapAudit/1.0 (+contact@workwave.fr)";
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 // Retry 3× : un seul fetch qui timeout pendant le pic de crawl Google
 // (base surchargée → le sous-sitemap qui fait une RPC dépasse le timeout)

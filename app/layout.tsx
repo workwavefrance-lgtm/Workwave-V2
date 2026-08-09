@@ -20,27 +20,27 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://workwave.fr"),
   title: {
-    default: "Workwave — Trouvez un artisan & recevez des devis gratuits",
-    template: "%s | Workwave",
+    default: "Workwave.fr — Trouvez un artisan & recevez des devis gratuits",
+    template: "%s | Workwave.fr",
   },
   description:
     "Décrivez votre projet et recevez gratuitement des devis d'artisans de confiance près de chez vous : plombier, électricien, peintre et plus de 50 métiers, partout en France et en Belgique francophone. Sans engagement.",
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Workwave",
-    title: "Workwave — Trouvez un artisan & recevez des devis gratuits",
+    siteName: "Workwave.fr",
+    title: "Workwave.fr — Trouvez un artisan & recevez des devis gratuits",
     description:
       "Décrivez votre projet, recevez des devis gratuits d'artisans près de chez vous. BTP, services à domicile, aide à la personne — partout en France et en Belgique francophone, sans engagement.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workwave — Trouvez un artisan & recevez des devis gratuits",
+    title: "Workwave.fr — Trouvez un artisan & recevez des devis gratuits",
     description:
       "Décrivez votre projet, recevez des devis gratuits d'artisans près de chez vous. Partout en France et en Belgique francophone, sans engagement.",
   },
   // Nom affiché si le site est ajouté à l'écran d'accueil iOS.
-  appleWebApp: { title: "Workwave" },
+  appleWebApp: { title: "Workwave.fr" },
 };
 
 // themeColor = couleur de la barre d'adresse mobile : on suit le fond réel du

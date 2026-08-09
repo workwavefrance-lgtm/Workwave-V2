@@ -32,6 +32,7 @@
  * audit). On dissocie juste claimed_by_user_id = null.
  */
 
+import { getServiceClient } from "@/lib/supabase/service-client";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
@@ -40,12 +41,6 @@ import Stripe from "stripe";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
-function getServiceClient() {
-  return createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 function getStripeClient(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;

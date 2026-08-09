@@ -8,6 +8,7 @@ import { isValidBce } from "@/lib/utils/bce";
 // Codes postaux belges → code NIS de la commune (639 CP couvrant les 271
 // communes FR-BE ; inclut les CP secondaires des communes fusionnées de 1977).
 import bePostcodeNis from "@/scraping/data/be_postcode_nis.json";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // Rate limit en mémoire : 8 créations / 15 min / IP (anti-spam fiches).
 const rateLimitMap = new Map<string, number[]>();
@@ -43,12 +44,6 @@ function normalizeName(x: string): string {
   return stripAccents(x.toLowerCase()).replace(/[^a-z0-9]/g, "");
 }
 
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 async function matchCityId(
   sb: ReturnType<typeof getServiceClient>,

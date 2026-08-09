@@ -1,17 +1,12 @@
 "use server";
 
+import { getServiceClient } from "@/lib/supabase/service-client";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { localizeAiPath, type Locale } from "@/lib/i18n/config";
 
-function getServiceClient() {
-  return createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 export async function updateAiPreferences(formData: FormData): Promise<void> {
   // Locale-aware redirects (champ cache name="locale" pose par la page EN ;

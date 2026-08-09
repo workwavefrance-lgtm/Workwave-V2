@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 // Endpoint public : retourne les derniers pros qui ont reclame leur fiche.
 // Donnees retournees uniquement publiques (nom commercial + categorie +
@@ -29,10 +30,7 @@ function pickName(
 
 export async function GET() {
   // Service role pour bypass RLS sur cette query publique read-only.
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = getServiceClient();
 
   const { data, error } = await supabase
     .from("pros")

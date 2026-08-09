@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -52,7 +53,11 @@ function getFirstName(fullName: string): string {
   return tokens[0] || titled;
 }
 
-async function fetchPro(slug: string) {
+// Regroupe les appels identiques d'un meme rendu (`generateMetadata` puis la
+// page). Sans cela, chaque affichage ferait DEUX fois la meme requete : Next
+// regroupait au niveau de la reponse HTTP, en la dedoublant, ce qui retenait la
+// memoire — cf. lib/supabase/fetch-supabase.ts.
+const fetchPro = cache(async function fetchPro(slug: string) {
   const sb = createPublicClient();
   const { data, error } = await sb
     .from("pros")
@@ -67,7 +72,7 @@ async function fetchPro(slug: string) {
 
   if (error || !data) return null;
   return data;
-}
+})
 
 // ─── Metadata ──────────────────────────────────────────────────────────────
 export async function generateMetadata({ params }: FreelancePageProps): Promise<Metadata> {
