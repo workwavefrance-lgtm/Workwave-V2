@@ -1,3 +1,4 @@
+import { cache } from "react";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
@@ -5,16 +6,26 @@ import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Department } from "@/lib/types/database";
 import { generateDepartmentSlug, parseDepartmentSlug } from "@/lib/utils/slugs";
 
-export async function getAllDepartments(): Promise<Department[]> {
+// Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
+// (`generateMetadata` et la page appellent souvent la meme requete). Next le
+// faisait deja, mais en dedoublant la REPONSE HTTP et en gardant la branche non
+// lue jusqu'au ramasse-miettes : 512 Mo retenus en production le 09/08/2026.
+// Cf. lib/supabase/fetch-supabase.ts. Regrouper le RESULTAT ne coute rien.
+export const getAllDepartments = cache(async function getAllDepartments(): Promise<Department[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("departments")
     .select("*")
     .order("code");
   return (data as Department[]) || [];
-}
+})
 
-export async function getDepartmentBySlug(
+// Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
+// (`generateMetadata` et la page appellent souvent la meme requete). Next le
+// faisait deja, mais en dedoublant la REPONSE HTTP et en gardant la branche non
+// lue jusqu'au ramasse-miettes : 512 Mo retenus en production le 09/08/2026.
+// Cf. lib/supabase/fetch-supabase.ts. Regrouper le RESULTAT ne coute rien.
+export const getDepartmentBySlug = cache(async function getDepartmentBySlug(
   slug: string
 ): Promise<Department | null> {
   const parsed = parseDepartmentSlug(slug);
@@ -42,4 +53,4 @@ export async function getDepartmentBySlug(
   if (slug !== generateDepartmentSlug(dept)) return null;
 
   return dept;
-}
+})

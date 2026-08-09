@@ -1,3 +1,4 @@
+import { cache } from "react";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
@@ -19,7 +20,9 @@ export type SeoPage = {
   generated_at: string;
 };
 
-export async function getSeoContent(
+// Regroupe les appels identiques dans le rendu d'une meme page (`generateMetadata`
+// et la page). Cf. lib/supabase/fetch-supabase.ts.
+export const getSeoContent = cache(async function getSeoContent(
   categoryId: number,
   locationId: number,
   locationType: "city" | "department"
@@ -39,4 +42,4 @@ export async function getSeoContent(
 
   const { data } = await query.limit(1).single();
   return data as SeoPage | null;
-}
+})

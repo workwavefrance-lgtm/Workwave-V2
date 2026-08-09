@@ -1,6 +1,8 @@
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { cache } from "react";
+import { getCityIdsByDepartment } from "@/lib/queries/cities";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import type {
@@ -104,11 +106,7 @@ export async function getProsByCategoryAndDepartment(
   const supabase = createPublicClient();
 
   // Récupérer les city_ids du département
-  const { data: cities } = await supabase
-    .from("cities")
-    .select("id")
-    .eq("department_id", departmentId);
-  const cityIds = (cities || []).map((c: { id: number }) => c.id);
+  const cityIds = await getCityIdsByDepartment(departmentId);
 
   return getProsByCategoryAndCityIds(categoryId, cityIds, { page, pageSize });
 }
@@ -176,7 +174,17 @@ export async function getProsByCategoryAndCity(
   return paginatedQuery(query, page, pageSize);
 }
 
-export async function getProBySlug(
+// `cache` de React regroupe les appels IDENTIQUES faits pendant le rendu d'une
+// meme page. Ici c'est essentiel : `generateMetadata` et la page appellent tous
+// les deux `getProBySlug(slug)` — mesure du 09/08/2026 sur une fiche pro, 8
+// requetes Supabase dont exactement 1 doublon, et c'est celle-ci.
+//
+// Next faisait deja ce regroupement, mais au niveau de la REPONSE HTTP, en la
+// dedoublant (`tee()`) et en gardant la branche non lue jusqu'au passage du
+// ramasse-miettes — 512 Mo retenus en production (cf. lib/supabase/fetch-supabase.ts).
+// Le regroupement au niveau du RESULTAT est strictement meilleur : la 2e demande
+// ne declenche aucune requete du tout, et n'alloue rien.
+export const getProBySlug = cache(async function getProBySlug(
   slug: string
 ): Promise<ProWithRelations | null> {
   const supabase = createPublicClient();
@@ -189,7 +197,7 @@ export async function getProBySlug(
     .single();
 
   return data as ProWithRelations | null;
-}
+});
 
 export async function getProByUserId(
   userId: string

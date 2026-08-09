@@ -1,17 +1,23 @@
+import { cache } from "react";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
 import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Category } from "@/lib/types/database";
 
-export async function getAllCategories(): Promise<Category[]> {
+// Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
+// (`generateMetadata` et la page appellent souvent la meme requete). Next le
+// faisait deja, mais en dedoublant la REPONSE HTTP et en gardant la branche non
+// lue jusqu'au ramasse-miettes : 512 Mo retenus en production le 09/08/2026.
+// Cf. lib/supabase/fetch-supabase.ts. Regrouper le RESULTAT ne coute rien.
+export const getAllCategories = cache(async function getAllCategories(): Promise<Category[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("categories")
     .select("*")
     .order("name");
   return (data as Category[]) || [];
-}
+})
 
 /** Champs strictement nécessaires à un sélecteur de catégorie. */
 export type CategoryOption = Pick<Category, "id" | "name" | "vertical">;
@@ -39,7 +45,12 @@ export async function getCategoriesForPicker(): Promise<CategoryOption[]> {
   return (data as CategoryOption[]) || [];
 }
 
-export async function getCategoryBySlug(
+// Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
+// (`generateMetadata` et la page appellent souvent la meme requete). Next le
+// faisait deja, mais en dedoublant la REPONSE HTTP et en gardant la branche non
+// lue jusqu'au ramasse-miettes : 512 Mo retenus en production le 09/08/2026.
+// Cf. lib/supabase/fetch-supabase.ts. Regrouper le RESULTAT ne coute rien.
+export const getCategoryBySlug = cache(async function getCategoryBySlug(
   slug: string
 ): Promise<Category | null> {
   const supabase = createPublicClient();
@@ -49,7 +60,7 @@ export async function getCategoryBySlug(
     .eq("slug", slug)
     .single();
   return data as Category | null;
-}
+})
 
 export async function getPopularCategoriesInCity(
   cityId: number,

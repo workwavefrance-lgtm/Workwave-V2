@@ -1,4 +1,7 @@
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { getAllCategories } from "./categories";
+import { getAllDepartments } from "./departments";
 import type { Category, City, Department } from "@/lib/types/database";
 
 // Queries Supabase PUBLIQUES (sans cookies) pour les Server Components
@@ -10,14 +13,20 @@ import type { Category, City, Department } from "@/lib/types/database";
 // dynamic toute page (et tout layout !) qui les utilise => cache CDN
 // inactif, TTFB 0.4s a chaque visite.
 //
-// Ces queries sont identiques en resultat mais utilisent un client sans
-// cookies => les pages qui les consomment peuvent etre prerendered en
-// static / ISR par Vercel Edge.
+// 09/08/2026 : cette raison d'etre a DISPARU. Depuis le 02/08, categories.ts et
+// cities.ts utilisent eux aussi `createPublicClient` (sans cookies). Les
+// fonctions ci-dessous etaient donc devenues des copies mot pour mot, et le pied
+// de page + la page emettaient DEUX requetes Supabase identiques a chaque rendu.
+// Elles delèguent desormais aux modules canoniques, qui regroupent les appels
+// via `cache` de React. Les noms sont conserves : ~40 fichiers les importent.
 //
 // Ne PAS utiliser ces fonctions dans des pages qui dependent de la
 // session utilisateur (dashboard pro, admin, claim flow, etc.).
 
-export async function getCategoriesByVerticalPublic(
+// Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
+export const getCategoriesByVerticalPublic = cache(async function getCategoriesByVerticalPublic(
   vertical: string
 ): Promise<Category[]> {
   const supabase = createPublicClient();
@@ -27,9 +36,12 @@ export async function getCategoriesByVerticalPublic(
     .eq("vertical", vertical)
     .order("name");
   return (data as Category[]) || [];
-}
+})
 
-export async function getTopCitiesPublic(
+// Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
+export const getTopCitiesPublic = cache(async function getTopCitiesPublic(
   limit: number = 20
 ): Promise<City[]> {
   const supabase = createPublicClient();
@@ -39,23 +51,22 @@ export async function getTopCitiesPublic(
     .order("population", { ascending: false, nullsFirst: false })
     .limit(limit);
   return (data as City[]) || [];
-}
+})
 
-export async function getAllCategoriesPublic(): Promise<Category[]> {
-  const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("categories")
-    .select("*")
-    .order("name");
-  return (data as Category[]) || [];
-}
+// Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
+export const getAllCategoriesPublic = getAllCategories;
 
 // Lookup CIBLÉ par slug (clé de cache distincte par slug) — utilisé par les
 // pages /trouver-des-{chantiers,clients}/[slug]. Avantage vs getAllCategoriesPublic :
 // une catégorie nouvellement créée est résolue immédiatement, sans dépendre de
 // l'expiration du cache de la requête "toutes les catégories" (bug Vague 3 :
 // multiservice & co restaient en notFound car la liste complète était périmée).
-export async function getCategoryBySlugPublic(
+// Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
+export const getCategoryBySlugPublic = cache(async function getCategoryBySlugPublic(
   slug: string
 ): Promise<Category | null> {
   const supabase = createPublicClient();
@@ -66,13 +77,9 @@ export async function getCategoryBySlugPublic(
     .limit(1)
     .maybeSingle();
   return (data as Category) || null;
-}
+})
 
-export async function getAllDepartmentsPublic(): Promise<Department[]> {
-  const supabase = createPublicClient();
-  const { data } = await supabase
-    .from("departments")
-    .select("*")
-    .order("code");
-  return (data as Department[]) || [];
-}
+// Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
+export const getAllDepartmentsPublic = getAllDepartments;

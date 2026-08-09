@@ -1,3 +1,4 @@
+import { cache } from "react";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
@@ -43,7 +44,12 @@ export async function getTotalCitiesCount(): Promise<number> {
   return count || 0;
 }
 
-export async function getCityBySlug(
+// Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
+// (`generateMetadata` et la page appellent souvent la meme requete). Next le
+// faisait deja, mais en dedoublant la REPONSE HTTP et en gardant la branche non
+// lue jusqu'au ramasse-miettes : 512 Mo retenus en production le 09/08/2026.
+// Cf. lib/supabase/fetch-supabase.ts. Regrouper le RESULTAT ne coute rien.
+export const getCityBySlug = cache(async function getCityBySlug(
   slug: string
 ): Promise<CityWithDepartment | null> {
   const supabase = createPublicClient();
@@ -55,7 +61,7 @@ export async function getCityBySlug(
     .limit(1)
     .single();
   return data as CityWithDepartment | null;
-}
+})
 
 export async function getNearbyCities(
   cityId: number,
@@ -132,7 +138,12 @@ export function isBorderZoneSlug(slug: string | null | undefined): boolean {
  * Retourne les city_id à AGRÉGER pour une "ville parent", ou `null` quand la
  * ville n'agrège rien (cas normal : 1 ville = 1 city_id, aucune query en plus).
  */
-export async function getAggregatedCityIds(city: {
+// Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
+// (`generateMetadata` et la page appellent souvent la meme requete). Next le
+// faisait deja, mais en dedoublant la REPONSE HTTP et en gardant la branche non
+// lue jusqu'au ramasse-miettes : 512 Mo retenus en production le 09/08/2026.
+// Cf. lib/supabase/fetch-supabase.ts. Regrouper le RESULTAT ne coute rien.
+export const getAggregatedCityIds = cache(async function getAggregatedCityIds(city: {
   id: number;
   slug: string;
   insee_code: string | null;
@@ -157,4 +168,19 @@ export async function getAggregatedCityIds(city: {
     .ilike("name", `${city.name} %Arrondissement`);
   const ids = (data || []).map((c: { id: number }) => c.id);
   return [city.id, ...ids];
-}
+})
+
+// Les city_id d'un departement. Deux fonctions differentes en avaient besoin
+// (`getProsByCategoryAndDepartment` et `getTopProsByCategoryAndDepartment`), et
+// chacune refaisait la requete -> deux fois la meme sur chaque page listing.
+// `cache` de React la fait une seule fois par rendu de page.
+export const getCityIdsByDepartment = cache(async function getCityIdsByDepartment(
+  departmentId: number
+): Promise<number[]> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("cities")
+    .select("id")
+    .eq("department_id", departmentId);
+  return (data || []).map((c: { id: number }) => c.id);
+});

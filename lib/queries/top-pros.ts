@@ -20,6 +20,7 @@
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
+import { getCityIdsByDepartment } from "@/lib/queries/cities";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Pro, ProCardData } from "@/lib/types/database";
 import { PRO_SELECT_CARD } from "@/lib/queries/pros";
@@ -252,11 +253,7 @@ export async function getTopProsByCategoryAndDepartment(
 ): Promise<{ tops: ProCardData[]; total: number }> {
   const supabase = createPublicClient();
 
-  const { data: cities } = await supabase
-    .from("cities")
-    .select("id")
-    .eq("department_id", departmentId);
-  const cityIds = (cities || []).map((c: { id: number }) => c.id);
+  const cityIds = await getCityIdsByDepartment(departmentId);
 
   return getTopProsByCategoryAndCityIds(categoryId, cityIds, limit);
 }

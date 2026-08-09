@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { fetchSupabase } from "./fetch-supabase";
 
 // Client Supabase pour les Server Components qui ne dependent PAS de la
 // session utilisateur (pages publiques cachees, sitemaps, RSS, etc.).
@@ -49,6 +50,10 @@ function build() {
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
+      // Empeche Next.js de dedoubler le corps de chaque reponse — la branche
+      // non lue n'etait liberee que par le ramasse-miettes, d'ou 512 Mo
+      // retenus sur un processus d'une heure. Cf. lib/supabase/fetch-supabase.ts.
+      global: { fetch: fetchSupabase },
     }
   );
 }

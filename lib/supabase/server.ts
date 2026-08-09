@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { fetchSupabase } from "./fetch-supabase";
 
 export async function createClient() {
   const cookieStore = await cookies();
@@ -8,6 +9,9 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      // Cf. lib/supabase/fetch-supabase.ts : empeche Next de dedoubler le corps
+      // de chaque reponse (branche non lue retenue jusqu'au ramasse-miettes).
+      global: { fetch: fetchSupabase },
       cookies: {
         getAll() {
           return cookieStore.getAll();
