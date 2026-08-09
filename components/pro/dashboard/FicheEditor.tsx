@@ -811,12 +811,36 @@ export default function FicheEditor({ categories }: Props) {
 
           {/* 6. Services */}
           <Accordion title="Services proposés">
-            <Field label="Catégorie principale">
-              <input
-                value={pro.category.name}
-                disabled
-                className={`${inputClass} opacity-60 cursor-not-allowed`}
-              />
+            {/* Metier principal MODIFIABLE depuis le 08/08/2026.
+                Il etait affiche grise, donc un pro mal classe au scraping
+                n'avait AUCUN moyen de se corriger — son seul recours etait
+                d'ecrire a l'equipe. Cas reel : Aicha SANGARE, classee « Garde
+                animaux » alors qu'elle fait de l'accompagnement sante, a
+                ecrit deux fois puis demande la suppression de sa fiche.
+                Sur 2,5 M de fiches issues d'un scraping ou les codes NAF sont
+                ambigus (cf. les lecons du 18/04), le mauvais metier est
+                frequent : c'est donc un blocage systemique, pas un cas isole.
+                Le backend acceptait deja `category_id` — il ne manquait que ce
+                menu. */}
+            <Field label="Métier principal">
+              <select
+                name="category_id"
+                defaultValue={pro.category_id}
+                className={inputClass}
+              >
+                {categories
+                  .filter((c) => !primaryVertical || c.vertical === primaryVertical)
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+              </select>
+              <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
+                C&apos;est ce métier qui détermine les projets que vous recevez.
+                Si aucun ne correspond vraiment au vôtre, écrivez-nous à
+                contact@workwave.fr.
+              </p>
             </Field>
 
             <div>

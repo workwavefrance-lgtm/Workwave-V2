@@ -94,6 +94,20 @@ const profileSchema = z.object({
   rge_number: z.string().optional().default(""),
   certifications: z.array(z.string()).optional().default([]),
   payment_methods: z.array(z.string()).optional().default([]),
+  // Metier PRINCIPAL, modifiable par le pro lui-meme.
+  //
+  // Pourquoi c'est indispensable : les codes d'activite INSEE sont ambigus. Le
+  // 96.09Z « autres services personnels » couvre aussi bien la garde d'animaux
+  // que le tatouage ou les services domestiques ; le 8121Z melange menage et
+  // nettoyage professionnel ; le 4334Z melange peintre et vitrier. Le classement
+  // automatique se trompe donc regulierement, et le pro etait le seul a pouvoir
+  // corriger — sans en avoir les moyens.
+  //
+  // Cas reel du 04/08/2026 : une pro classee « garde animaux » par deduction du
+  // 96.09Z, qui avait ajoute « multiservice » en categorie SECONDAIRE faute de
+  // pouvoir toucher a la principale. Sa fiche continuait d'afficher un metier
+  // qui n'etait pas le sien.
+  category_id: z.coerce.number().int().positive().optional(),
   secondary_category_ids: z.array(z.coerce.number()).optional().default([]),
   hourly_rate: z.union([z.coerce.number().min(0), z.literal(0), z.nan()]).optional(),
   travel_fee: z.union([z.coerce.number().min(0), z.literal(0), z.nan()]).optional(),
@@ -136,10 +150,15 @@ export async function updateProProfile(
     rge_number: formData.get("rge_number") || "",
     certifications: formData.getAll("certifications").map(String),
     payment_methods: formData.getAll("payment_methods").map(String),
+    category_id: formData.get("category_id")
+      ? Number(formData.get("category_id"))
+      : undefined,
+    // On exclut le metier principal des secondaires — en prenant celui que le pro
+    // vient de CHOISIR, pas l'ancien : sinon il resterait en doublon dans la liste.
     secondary_category_ids: formData
       .getAll("secondary_category_ids")
       .map(Number)
-      .filter((id) => id !== pro.category_id),
+      .filter((id) => id !== Number(formData.get("category_id") || pro.category_id)),
     hourly_rate: formData.get("hourly_rate")
       ? Number(formData.get("hourly_rate"))
       : undefined,
@@ -216,6 +235,35 @@ export async function updateProProfile(
   updateData.profile_completion = calculateProfileCompletion(merged);
 
   const supabase = await createClient();
+
+  // Metier principal : on ne fait confiance a rien de ce qui vient du formulaire.
+  // On verifie que la categorie existe VRAIMENT en base avant de l'ecrire — un
+  // identifiant fantaisiste rendrait la fiche invisible partout, elle
+  // n'apparaitrait plus dans aucun listing. Au moindre doute, on garde l'actuelle.
+  // Changement de metier principal.
+  //
+  // Le VERTICAL est verrouille cote serveur : un pro BTP ne peut basculer que
+  // vers un autre metier BTP/domicile/personne, jamais vers une categorie tech
+  // (/ai/*), qui a son propre dashboard, son propre routage et sa propre
+  // facturation. Le menu du dashboard filtre deja par vertical, mais un menu
+  // n'est pas une barriere : la requete peut etre forgee. C'est la lecon du
+  // 07/08 — un controle pose sur l'interface doit l'etre sur le serveur.
+  if (data.category_id && data.category_id !== pro.category_id) {
+    const { data: cible } = await supabase
+      .from("categories")
+      .select("id, vertical")
+      .eq("id", data.category_id)
+      .maybeSingle();
+    const { data: actuelle } = await supabase
+      .from("categories")
+      .select("vertical")
+      .eq("id", pro.category_id)
+      .maybeSingle();
+    if (cible && actuelle && cible.vertical === actuelle.vertical) {
+      updateData.category_id = data.category_id;
+    }
+  }
+
   const { error } = await supabase
     .from("pros")
     .update(updateData)
