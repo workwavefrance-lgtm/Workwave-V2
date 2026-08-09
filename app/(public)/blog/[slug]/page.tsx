@@ -49,6 +49,58 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/**
+ * Appel a l'action glisse au milieu de l'article.
+ *
+ * Trois formulations differentes, choisies selon la position : on ne repete
+ * jamais le meme message. La premiere propose, la deuxieme rassure sur le
+ * prix, la troisieme leve l'objection de l'engagement. Discret par
+ * construction (fond leger, pas de gros bouton plein ecran) : au milieu d'une
+ * lecture, un encart trop voyant est percu comme une interruption.
+ */
+function AppelDansArticle({ rang, tag }: { rang: number; tag?: string }) {
+  // Elision obligatoire : « de aide administrative » ne se dit pas. Les tags
+  // couvrent 197 metiers, dont « aide aux seniors », « electricien »,
+  // « accompagnement handicap » — le cas voyelle est frequent, pas marginal.
+  const metier = tag ? tag.toLowerCase() : null;
+  const de = metier && /^[aeiouyàâéèêëîïôöûü]/.test(metier) ? `d'${metier}` : `de ${metier}`;
+  const variantes = [
+    {
+      titre: metier ? `Un projet ${de} chez vous ?` : "Un projet de ce type chez vous ?",
+      texte: "Décrivez-le en 2 minutes. Des artisans de votre secteur vous répondent.",
+      bouton: "Décrire mon projet",
+    },
+    {
+      titre: "Combien ça coûte chez vous ?",
+      texte:
+        "Les prix varient selon la région et l'accès au chantier. Le plus sûr reste de comparer plusieurs devis réels.",
+      bouton: "Recevoir des devis gratuits",
+    },
+    {
+      titre: "Vous n'êtes engagé à rien",
+      texte:
+        "Vous recevez des propositions, vous comparez, et vous choisissez — ou vous ne choisissez personne.",
+      bouton: "Demander des devis",
+    },
+  ];
+  const v = variantes[rang % variantes.length];
+  return (
+    <aside className="my-10 rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-6">
+      <p className="text-base font-semibold text-[var(--text-primary)]">{v.titre}</p>
+      <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{v.texte}</p>
+      <Link
+        href="/deposer-projet"
+        className="mt-4 inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+      >
+        {v.bouton}
+      </Link>
+      <p className="mt-2.5 text-xs text-[var(--text-tertiary)]">
+        Gratuit &middot; sans engagement &middot; artisans vérifiés au registre officiel
+      </p>
+    </aside>
+  );
+}
+
 export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
@@ -116,7 +168,36 @@ export default async function BlogArticlePage({ params }: Props) {
         </div>
       </div>
 
-      <SeoContent content={post.content} />
+      {/* ── L'ARTICLE, ENTRECOUPE D'APPELS A L'ACTION ────────────────────────
+          Avant : un seul bouton tout en bas. La plupart des lecteurs ne
+          descendent jamais jusque-la — l'article travaille pour rien.
+
+          TROIS inseres, pas cinq, et surtout PAS le meme bouton repete : cinq
+          fois « Deposer un projet » se lit comme une publicite et fait
+          decrocher. Chacun arrive apres une section qui vient d'apporter
+          quelque chose au lecteur, et dit autre chose que le precedent. */}
+      {(() => {
+        // Decoupe aux titres de niveau 2, en gardant le titre avec sa section.
+        const sections = post.content.split(/\n(?=## )/);
+        // Un appel toutes les 2 sections, 3 au maximum, et jamais dans le
+        // dernier tiers : le bouton final s'en charge deja.
+        const positions = new Set<number>();
+        for (let i = 2; i < sections.length - 1 && positions.size < 3; i += 2) {
+          positions.add(i);
+        }
+        return (
+          <div className="mt-16 pt-10 border-t border-[var(--border-color)]">
+            {sections.map((bloc, i) => (
+              <div key={i}>
+                <SeoContent content={bloc} nu />
+                {positions.has(i + 1) && (
+                  <AppelDansArticle rang={[...positions].indexOf(i + 1)} tag={post.tags?.[0]} />
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* CTA */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-center">

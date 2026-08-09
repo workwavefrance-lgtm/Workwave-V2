@@ -1,4 +1,11 @@
 type SeoContentProps = {
+  /**
+   * Rend le contenu SANS le trait de separation ni la marge du haut.
+   * Sert a decouper un article en plusieurs morceaux pour glisser un appel a
+   * l'action entre deux sections : sans ca, chaque morceau afficherait son
+   * propre trait horizontal et l'article ressemblerait a une suite de blocs.
+   */
+  nu?: boolean;
   content: string;
 };
 
@@ -190,11 +197,11 @@ function parseMarkdown(md: string): string {
   return sanitize(output.join("\n"));
 }
 
-export default function SeoContent({ content }: SeoContentProps) {
+export default function SeoContent({ content, nu }: SeoContentProps) {
   const html = parseMarkdown(content);
 
   return (
-    <section className="mt-16 pt-10 border-t border-[var(--border-color)]">
+    <section className={nu ? "" : "mt-16 pt-10 border-t border-[var(--border-color)]"}>
       <div
         className="max-w-3xl prose-custom"
         dangerouslySetInnerHTML={{ __html: html }}
