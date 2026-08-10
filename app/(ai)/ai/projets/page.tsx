@@ -1,3 +1,4 @@
+import { getServiceClient } from "@/lib/supabase/service-client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
@@ -43,10 +44,7 @@ function timeAgo(iso: string): string {
 }
 
 export default async function AiProjetsPublicPage() {
-  const service = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const service = getServiceClient();
 
   // Projets tech actifs, NON suspicious (on ne met pas en avant les flaggés).
   // Champs SUR uniquement : categorie + budget + urgence + date.

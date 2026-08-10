@@ -1,3 +1,4 @@
+import { getServiceClient } from "@/lib/supabase/service-client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -23,10 +24,7 @@ export default async function AiDashboardPage() {
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
   // Stats reelles : compte leads 30 derniers jours
-  const service = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const service = getServiceClient();
   // Fix react-hooks/purity : on calcule la date via new Date() (impure mais autorisee
   // dans un Server Component async — le linter cible Date.now() specifiquement).
   const now = new Date();

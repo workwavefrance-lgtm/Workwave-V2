@@ -3,18 +3,15 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getServiceClient } from "@/lib/supabase/service-client";
 import { getProByUserId } from "@/lib/queries/pros";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
-/** Client admin (service role) pour les opérations storage qui bypass les RLS */
-function createAdminClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
+/** Client admin (service role) pour les opérations storage qui bypass les RLS.
+ *  Partage : un client neuf par appel lancerait une minuterie jamais arretee
+ *  (cf. lib/supabase/service-client.ts). */
+const createAdminClient = getServiceClient;
 
 // ============================================
 // Helpers

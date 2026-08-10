@@ -1,3 +1,4 @@
+import { getServiceClient } from "@/lib/supabase/service-client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -71,10 +72,7 @@ export default async function AiEnDashboardProjetsPage({
 
   const isPremium = isAiPremium(pro);
 
-  const service = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const service = getServiceClient();
 
   // Load all Workwave AI categories (14 verticals) for the filters
   const { data: categoriesRaw } = await service

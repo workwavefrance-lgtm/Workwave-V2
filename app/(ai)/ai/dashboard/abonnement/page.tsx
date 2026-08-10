@@ -1,3 +1,4 @@
+import { getServiceClient } from "@/lib/supabase/service-client";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -51,10 +52,7 @@ export default async function AiDashboardFacturationPage() {
   const pro = await getAiProByUserId(user.id);
   if (!pro || !AI_CATEGORY_IDS.includes(pro.category_id)) return null;
 
-  const service = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const service = getServiceClient();
 
   const { data: unlocksRaw } = await service
     .from("lead_unlocks")

@@ -1,5 +1,6 @@
 "use server";
 
+import { getServiceClient } from "@/lib/supabase/service-client";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -201,10 +202,7 @@ export async function submitProject(
   // Insertion en base
   // On utilise le service_role key pour bypass RLS sur l'insert + select
   const { createClient: createServiceClient } = await import("@supabase/supabase-js");
-  const serviceClient = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const serviceClient = getServiceClient();
 
   // Dédup anti double-soumission : si un projet identique (même email + ville +
   // métier + description) a été déposé dans les 5 dernières minutes, on NE

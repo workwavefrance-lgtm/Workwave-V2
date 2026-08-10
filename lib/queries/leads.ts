@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
+import { getServiceClient } from "@/lib/supabase/service-client";
 import { haversineKm } from "@/lib/utils/haversine";
 import type {
   ProjectLead,
@@ -297,13 +298,7 @@ export async function getLeadsReceivedLast30Days(
   const result = new Map<number, number>();
   if (proIds.length === 0) return result;
 
-  const { createClient: createServiceClient } = await import(
-    "@supabase/supabase-js"
-  );
-  const supabase = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = getServiceClient();
 
   const thirtyDaysAgo = new Date(
     Date.now() - 30 * 24 * 60 * 60 * 1000
