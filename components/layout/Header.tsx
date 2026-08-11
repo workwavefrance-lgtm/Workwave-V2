@@ -74,7 +74,7 @@ export default function Header() {
         </Link>
 
         {/* Nav desktop */}
-        <nav className="hidden md:flex items-center gap-8 text-sm">
+        <nav className="hidden lg:flex items-center gap-8 text-sm">
           <Link
             href="/"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
@@ -114,7 +114,7 @@ export default function Header() {
         </nav>
 
         {/* Actions desktop */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
           <Link
             href={isPro ? "/pro/dashboard" : "/pro/connexion"}
@@ -127,13 +127,17 @@ export default function Header() {
               CTA PRINCIPAL du header (plein + agrandi). Le "Trouver un pro"
               faisait doublon avec la recherche du hero → retiré le 16/07. */}
           <QuickProjectModalTrigger
-            label="Déposer un projet"
-            className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-base font-semibold transition-all duration-250 hover:scale-[1.02]"
+            label="Déposer un projet — gratuit"
+            // whitespace-nowrap : sans lui, "— gratuit" fait passer le bouton
+            // sur 3 lignes (96 px de haut) des que la barre est serree, autour
+            // de 800 px de large, et il chevauche la navigation. Mesure du
+            // 11/08/2026 avant correction.
+            className="whitespace-nowrap bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-5 py-3 rounded-full text-sm lg:text-base font-semibold transition-all duration-250 hover:scale-[1.02]"
           />
         </div>
 
         {/* Mobile: CTA Déposer + ThemeToggle + Hamburger */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex lg:hidden items-center gap-2">
           {/* CTA modal visible AVANT le hamburger pour ne pas être caché.
               Compact : "Déposer" suffit (le titre du H1 dans la modal complète). */}
           <QuickProjectModalTrigger
@@ -174,7 +178,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <nav className="md:hidden border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-4 pb-6 pt-4 space-y-1">
+        <nav className="lg:hidden border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-4 pb-6 pt-4 space-y-1">
           <Link
             href="/"
             onClick={() => setMenuOpen(false)}

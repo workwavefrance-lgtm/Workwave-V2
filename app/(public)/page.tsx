@@ -115,13 +115,27 @@ export default async function Home() {
       {/* Hero */}
       <section className="py-24 sm:py-32 lg:py-40 px-4">
         <div className="max-w-4xl mx-auto text-center">
+          {/* La PREUVE avant la promesse (11/08/2026).
+              Avant : "Trouvez le bon artisan près de chez vous." — une phrase
+              que TOUS les concurrents ecrivent. Le seul chiffre qui nous
+              distingue (2,5 M de fiches contre 58 216 chez Travaux.com, soit
+              43x) etait relegue sous la barre de recherche, dans un compteur
+              anime que la moitie des visiteurs ne voit jamais.
+              Il passe donc en premier mot du H1.
+              La 2e ligne garde "celui qu'il vous faut, pres de chez vous" :
+              2,5 millions peut sonner "base de donnees" plutot que "on
+              s'occupe de vous" — cette ligne ramene le chiffre a une personne.
+              Mots-cles de referencement conserves : "artisan" et
+              "pres de chez vous" (intention locale). */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.1] mb-6">
-            Trouvez le bon artisan
-            <br />
-            près de chez vous
+            2 560 292 artisans référencés
             {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
                 = le point est rendu serveur-side, LCP intact. */}
             <span className="text-[var(--accent)] animate-accent-pulse">.</span>
+            <br />
+            <span className="block mt-2 text-2xl sm:text-3xl lg:text-5xl font-bold text-[var(--text-secondary)]">
+              Trouvez gratuitement celui qu&apos;il vous faut, près de chez vous.
+            </span>
           </h1>
           {/* Slide-in du sous-titre, leger delai pour qu'il arrive apres
               que le H1 soit visible. Le sous-titre n'est pas le LCP. */}
@@ -129,10 +143,15 @@ export default async function Home() {
             className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
             style={{ animationDelay: "120ms" }}
           >
-            Tout le savoir-faire local, enfin accessible. Décrivez votre projet
-            et recevez des devis gratuits d&apos;artisans près de chez vous.
+            Décrivez votre projet, des artisans près de chez vous vous
+            recontacteront gratuitement.
           </p>
-          <SearchForm categories={allCategories} />
+          {/* La barre du HAUT mene au DEPOT, pas au listing (decision Willy,
+              11/08/2026) : on veut faire entrer les gens dans l'entonnoir, pas
+              les envoyer consulter des fiches. Metier + ville sont repris tels
+              quels, et le formulaire saute directement a "decrivez votre
+              projet". Celle qui mene aux fiches est plus bas dans la page. */}
+          <SearchForm categories={allCategories} destination="depot" />
           {/* Réassurance QUALITÉ — uniquement des signaux VRAIS (pub honnête + RGPD) :
               SIRET vérifiable au registre officiel (annuaire-entreprises.data.gouv.fr),
               données publiques SIRENE, gratuité réelle. PAS de "décennale validée"
@@ -162,44 +181,13 @@ export default async function Home() {
               </li>
             ))}
           </ul>
-          {/* Bande de stats : preuve de couverture immédiate (chiffres coral animés). */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-8 sm:gap-x-14">
-            <div className="text-center">
-              <CountUp
-                end={2560292}
-                className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
-              />
-              <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                professionnels référencés
-              </span>
-            </div>
-            <div
-              className="hidden sm:block h-14 w-px bg-[var(--card-border)]"
-              aria-hidden="true"
-            />
-            <div className="text-center">
-              <CountUp
-                end={35163}
-                className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
-              />
-              <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                communes couvertes
-              </span>
-            </div>
-            <div
-              className="hidden sm:block h-14 w-px bg-[var(--card-border)]"
-              aria-hidden="true"
-            />
-            <div className="text-center">
-              <CountUp
-                end={107}
-                className="block text-4xl sm:text-6xl font-extrabold tracking-tight leading-none text-[var(--accent)] tabular-nums"
-              />
-              <span className="mt-2 block text-sm sm:text-base text-[var(--text-secondary)]">
-                départements et provinces
-              </span>
-            </div>
-          </div>
+          {/* Bande de compteurs SUPPRIMEE le 11/08/2026.
+              Le chiffre 2 560 292 est passe dans le H1 le meme jour : le
+              repeter 400 px plus bas, en enorme et en coral, avec le meme
+              libelle "professionnels referencés", faisait lire deux fois la
+              meme information et repoussait le bouton d'action sous la ligne
+              de flottaison. Les deux autres chiffres (35 163 communes,
+              107 departements) restent visibles sur /departements et /pro. */}
           {/* CTA principal du hero : déposer un projet (gratuit), juste sous le
               bandeau de stats — emplacement validé par Willy (le "rond"). */}
           <div className="mt-12">
@@ -244,6 +232,23 @@ export default async function Home() {
         {vertical.title === "BTP et artisanat" && <ProCtaSection />}
         </Fragment>
       ))}
+
+      {/* Barre de recherche "consultation", APRES les trois univers de metiers.
+          Celle du haut fait entrer dans l'entonnoir ; celle-ci est pour qui
+          veut d'abord regarder les fiches avant de se decider. Deux intentions
+          differentes, deux emplacements — au lieu d'une seule barre qui doit
+          servir les deux et n'en sert bien aucune. */}
+      <section className="py-16 px-4 border-t border-[var(--border-color)]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-3">
+            Vous préférez regarder d&apos;abord ?
+          </h2>
+          <p className="text-[var(--text-secondary)] mb-8">
+            Consultez les professionnels référencés près de chez vous.
+          </p>
+          <SearchForm categories={allCategories} destination="listing" />
+        </div>
+      </section>
 
       {/* Top villes */}
       <section className="py-16 px-4 bg-[var(--bg-secondary)] border-t border-[var(--border-color)]">

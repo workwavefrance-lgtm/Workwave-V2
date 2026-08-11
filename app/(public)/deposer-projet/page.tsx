@@ -14,11 +14,11 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ categorie?: string; ville?: string }>;
+  searchParams: Promise<{ categorie?: string; ville?: string; besoin?: string }>;
 };
 
 export default async function DeposerProjetPage({ searchParams }: Props) {
-  const { categorie, ville } = await searchParams;
+  const { categorie, ville, besoin } = await searchParams;
 
   // Pré-remplissage depuis les liens des pages listings (/[metier]/[location])
   const [categories, prefilledCategory, prefilledCity] = await Promise.all([
@@ -89,6 +89,10 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
           vertical: c.vertical,
         }))}
         defaultCategoryId={prefilledCategory?.id}
+        // Ce que l'utilisateur avait tape dans la recherche de l'accueil quand
+        // aucun metier ne correspondait. Borne a 500 caracteres : ce champ vient
+        // d'une URL, donc de l'exterieur.
+        defaultDescription={besoin ? besoin.slice(0, 500) : undefined}
         defaultCity={
           prefilledCity
             ? { id: prefilledCity.id, name: prefilledCity.name }

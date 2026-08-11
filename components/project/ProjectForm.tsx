@@ -17,6 +17,10 @@ type Props = {
   /** Pré-remplissage depuis query params (ex: depuis page listing / fiche pro) */
   defaultCategoryId?: number;
   defaultCity?: { id: number; name: string } | null;
+  /** Texte deja saisi par l'utilisateur dans la barre de recherche de l'accueil
+   *  quand aucun metier ne correspondait ("fuite d'eau", "refaire ma salle de
+   *  bain"...). On le reporte ici pour qu'il n'ait pas a le retaper. */
+  defaultDescription?: string;
 };
 
 const VERTICAL_LABELS: Record<string, string> = {
@@ -73,6 +77,7 @@ export default function ProjectForm({
   categories,
   defaultCategoryId,
   defaultCity,
+  defaultDescription,
 }: Props) {
   const [state, formAction, isPending] = useActionState(
     submitProject,
@@ -99,7 +104,7 @@ export default function ProjectForm({
   const [phone, setPhone] = useState("");
   const [consent, setConsent] = useState(false);
   // Step 3 : description (pour preserver aussi)
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(defaultDescription ?? "");
 
   // Couverture affichee a l'etape 2 : « 997 maçons référencés en Vienne ».
   // Chargee UNIQUEMENT quand metier ET ville sont connus, donc jamais au

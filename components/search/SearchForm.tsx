@@ -17,6 +17,16 @@ type Category = { slug: string; name: string; vertical: string };
 
 type SearchFormProps = {
   categories: Category[];
+  /** Ou mene le bouton "Rechercher" (decision Willy, 11/08/2026).
+   *  - "depot"   : vers le formulaire de depot, metier et ville deja remplis.
+   *                C'est la barre du HAUT de l'accueil : elle sert a ENTRER
+   *                dans l'entonnoir, pas a naviguer. Le formulaire saute
+   *                directement a l'etape "decrivez votre projet" quand les
+   *                deux sont connus (cf. initialStep dans ProjectForm).
+   *  - "listing" : comportement historique, vers /[metier]/[ville]. C'est la
+   *                barre placee PLUS BAS dans la page, et celle de /recherche,
+   *                pour qui veut consulter les fiches avant de se decider. */
+  destination?: "depot" | "listing";
 };
 
 // Libellés + ordre d'affichage des univers (le `<select>` à plat était illisible
@@ -37,7 +47,10 @@ function normalize(s: string): string {
     .replace(/[̀-ͯ]/g, "");
 }
 
-export default function SearchForm({ categories }: SearchFormProps) {
+export default function SearchForm({
+  categories,
+  destination = "listing",
+}: SearchFormProps) {
   const router = useRouter();
 
   // --- Métier (combobox searchable groupé) ---
@@ -146,14 +159,37 @@ export default function SearchForm({ categories }: SearchFormProps) {
     e.preventDefault();
     // Métier : slug sélectionné, sinon 1er résultat filtré si l'utilisateur a tapé.
     const slug = metierSlug || (metierQuery.trim() ? flatFiltered[0]?.slug : "");
+    // Aucun metier ne correspond a ce que l'utilisateur a ecrit ("fuite d'eau",
+    // "refaire ma salle de bain"...). Avant le 11/08/2026 il ne se passait
+    // RIEN : il cliquait, la page ne bougeait pas. C'est ce cul-de-sac qui
+    // empechait d'ecrire "Quel est votre projet ?" dans le champ.
+    // Desormais on l'emmene deposer son projet, avec son texte deja repris —
+    // il a decrit son besoin, on ne le lui fait pas retaper.
+    if (!slug && metierQuery.trim()) {
+      const ville = selectedCity?.slug || (suggestions.length > 0 ? suggestions[0].slug : "");
+      const params = new URLSearchParams({ besoin: metierQuery.trim() });
+      if (ville) params.set("ville", ville);
+      router.push(`/deposer-projet?${params.toString()}`);
+      return;
+    }
     if (!slug) {
       setShowMetier(true);
       return;
     }
-    if (selectedCity) {
-      router.push(`/${slug}/${selectedCity.slug}`);
-    } else if (cityQuery.trim() && suggestions.length > 0) {
-      router.push(`/${slug}/${suggestions[0].slug}`);
+    const villeSlug =
+      selectedCity?.slug ||
+      (cityQuery.trim() && suggestions.length > 0 ? suggestions[0].slug : "");
+
+    if (destination === "depot") {
+      // On emmene directement deposer le projet, metier (et ville si connue)
+      // deja renseignes. L'utilisateur ne re-saisit rien.
+      const params = new URLSearchParams({ categorie: slug });
+      if (villeSlug) params.set("ville", villeSlug);
+      router.push(`/deposer-projet?${params.toString()}`);
+      return;
+    }
+    if (villeSlug) {
+      router.push(`/${slug}/${villeSlug}`);
     } else {
       router.push(`/${slug}`);
     }
@@ -188,7 +224,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
             setShowMetier(true);
           }}
           onFocus={() => setShowMetier(true)}
-          placeholder="Quel métier ?"
+          placeholder="Quel est votre projet ?"
           className="flex-1 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
           autoComplete="off"
         />
