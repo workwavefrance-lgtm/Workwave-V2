@@ -333,8 +333,8 @@ export default function ProjectForm({
               <span className="text-[var(--text-primary)] font-medium">
                 &laquo;&nbsp;{defaultDescription}&nbsp;&raquo;
               </span>
-              {defaultCity ? ` a ${defaultCity.name}` : ""}. Nous l&apos;avons
-              gardee — indiquez juste le metier concerne.
+              {defaultCity ? ` à ${defaultCity.name}` : ""}. Nous l&apos;avons
+              gardée — indiquez juste le métier concerné.
             </p>
           </div>
         )}
