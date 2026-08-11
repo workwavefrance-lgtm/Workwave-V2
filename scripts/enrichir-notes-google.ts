@@ -164,20 +164,35 @@ function appelPlaces(textQuery: string) {
     else if (Object.keys(extra).length > 0) ecrits++;
   }
 
-  // PAGINATION PAR CURSEUR, ET SURTOUT PAS `.limit(aTraiter)`.
+  // PAGES DE 1 000, SANS TRI NI CURSEUR.
   //
-  // PostgREST plafonne toute requete a 1 000 lignes (reglage "Max Rows"). Un
-  // `.limit(3000)` est donc ramene a 1 000 EN SILENCE, sans erreur : le lot du
-  // 11/08 a traite exactement 1 000 fiches (141 + 42 + 777 + 40 rejets HTTP)
-  // au lieu des 3 000 demandees. Un total parfaitement rond est toujours une
-  // troncature, jamais une donnee reelle.
+  // Deux pieges evites ici, chacun mesure.
   //
-  // C'est la sixieme fois que ce plafond mord ce projet (sitemap 30/04,
-  // match-rge 09/05, RPC sitemap 08/06, API Sirene 04/08...). D'ou le squelette
-  // canonique : pages de 1 000, curseur sur `id`, arret quand la page est VIDE
-  // — jamais sur `rows.length < PAGE`.
+  // 1) NE PAS ECRIRE `.limit(aTraiter)`. PostgREST plafonne toute requete a
+  //    1 000 lignes (reglage "Max Rows") : un `.limit(3000)` est ramene a
+  //    1 000 EN SILENCE, sans erreur. Le lot du 11/08 a traite exactement
+  //    1 000 fiches au lieu des 3 000 demandees. Un total parfaitement rond
+  //    est toujours une troncature, jamais une donnee reelle. C'est la
+  //    sixieme fois que ce plafond mord ce projet.
+  //
+  // 2) NE PAS PAGINER PAR CURSEUR SUR `id` NON PLUS. C'etait ma premiere
+  //    correction, et elle faisait planter le lot en cours de route sur
+  //    "canceling statement due to statement timeout". Mesure du 11/08 sur
+  //    la table pros (2,5 M de lignes) :
+  //        `id > N ORDER BY id LIMIT 1000`   8 100 ms, et timeout des que N
+  //                                          traverse une zone deja enrichie
+  //        `LIMIT 1000` sans tri              124 a 167 ms
+  //    Soit ~60x plus rapide. Le tri force Postgres a balayer dans l'ordre des
+  //    id des centaines de milliers de fiches deja traitees pour en trouver
+  //    1 000 encore candidates ; sans tri, il s'arrete des qu'il en a assez.
+  //
+  // Ce qui fait avancer la boucle, c'est le MARQUAGE : toute fiche traitee
+  // recoit `google_enriched_at`, donc elle sort de la selection. Aucun curseur
+  // n'est necessaire. Le `Set` ci-dessous est le garde-fou du cas ou rien n'est
+  // marque (simulation, ou erreurs HTTP volontairement non marquees) : sans
+  // lui, la meme page reviendrait indefiniment.
   const PAGE = 1000;
-  let dernierId = 0;
+  const vues = new Set<number>();
   let appelsFaits = 0;
 
   boucle: while (appelsFaits < aTraiter) {
@@ -188,25 +203,31 @@ function appelPlaces(textQuery: string) {
       .is("deleted_at", null)
       .is("google_enriched_at", null)
       .or("phone.not.is.null,website.not.is.null")
-      .gt("id", dernierId)
-      .order("id")
       .limit(PAGE);
     if (error) {
       console.error("ERREUR lecture :", error.message);
       process.exit(1);
     }
-    const lot = (data || []) as unknown as Pro[];
-    if (lot.length === 0) break;
+    const lot = ((data || []) as unknown as Pro[]).filter((p) => !vues.has(p.id));
+    if (lot.length === 0) {
+      if (!APPLIQUER) console.log("\n  (simulation : rien n'est marque en base, on s'arrete apres une page)");
+      break;
+    }
 
     for (const p of lot) {
-    dernierId = p.id;
+    vues.add(p.id);
     if (appelsFaits >= aTraiter) break boucle;
     // Sans telephone ET sans domaine exploitable, la requete partirait VIDE :
     // Google repond HTTP 400 et le compteur est consomme pour rien. Certaines
     // fiches ont un `website` present mais inexploitable (URL malformee), d'ou
     // le controle sur le domaine extrait et non sur la simple presence du champ.
+    // Ni telephone, ni domaine extractible du site : cette fiche ne pourra
+    // JAMAIS etre identifiee par cette methode (la requete partirait vide et
+    // Google repondrait 400). On la marque quand meme, sans depenser d'appel,
+    // pour qu'elle sorte definitivement de la file — sinon elle revient a
+    // chaque page et finit par la remplir entierement.
     const requete = p.phone || domaine(p.website);
-    if (!requete) { sansCle++; continue; }
+    if (!requete) { sansCle++; await marquer(p.id); continue; }
 
     // ON CHERCHE PAR LE NUMERO, PAS PAR LE NOM.
     // Mesure du 11/08/2026 sur deux echantillons de 20 fiches :
