@@ -224,7 +224,14 @@ export default function SearchForm({
             setShowMetier(true);
           }}
           onFocus={() => setShowMetier(true)}
-          placeholder="Quel est votre projet ?"
+          // Un placeholder qui pose une question laisse le visiteur sans savoir ce
+          // qu'on attend : un metier ? un probleme ? une phrase ? Un EXEMPLE
+          // repond en une seconde. Les trois exemples sont choisis pour montrer
+          // les trois formes acceptees : un metier ("plombier"), un probleme
+          // ("fuite d'eau"), une phrase entiere ("refaire ma salle de bain").
+          // Les points de suspension disent "et tout ce que vous voulez" —
+          // sans eux, le visiteur croit devoir choisir dans la liste.
+          placeholder="Ex. : plombier, fuite d'eau, refaire ma salle de bain…"
           className="flex-1 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
           autoComplete="off"
         />

@@ -62,3 +62,4 @@ scraping/*.log
 
 # Frames intermediaires des reels (regenerables via scripts/render-reel-*.mjs)
 marketing/frames-*/
+.google-places-quota.json
