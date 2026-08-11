@@ -98,7 +98,11 @@ export async function getAvailableProjectsForPro(
     )
     .eq("vertical", "btp")
     .in("category_id", Array.from(categoryIds))
-    .neq("status", "deleted")
+    // Un projet "closed" est un chantier que l'admin a clos (trop ancien, ou
+    // resolu ailleurs) : il ne doit plus etre propose ni relance. Les leads DEJA
+    // PAYES restent visibles pour le pro (cf. lib/queries/leads.ts, volontairement
+    // non filtre : on ne retire jamais ce qui a ete achete).
+    .not("status", "in", "(deleted,closed)")
     .order("created_at", { ascending: false })
     .limit(300);
 

@@ -41,7 +41,7 @@ export async function GET(req: Request) {
   const { data: projects, error } = await sb
     .from("projects")
     .select("id, first_name, description, category_id, city_id, budget, urgency, status, vertical, suspicion_score, created_at")
-    .neq("status", "deleted")
+    .not("status", "in", "(deleted,closed)")
     .is("broadcasted_at", null)
     .gte("created_at", fenetreDebut)
     .order("created_at", { ascending: false });

@@ -73,7 +73,7 @@ export async function GET(req: Request) {
       .from("projects")
       .select(SELECT)
       .eq("vertical", "btp")
-      .neq("status", "deleted")
+      .not("status", "in", "(deleted,closed)")
       .gt("broadcast_count", 0)
       .is(f.colonne, null)
       .lte("broadcasted_at", f.plusAncienQue)

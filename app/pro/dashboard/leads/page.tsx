@@ -127,6 +127,18 @@ export default async function LeadsPage({
   }
   const leadCategoryIds = Array.from(proCategoryIds);
 
+  // Les projets que CE pro a deja debloques. Charges AVANT la liste, parce
+  // qu'ils echappent au masquage des projets clos : un lead debloque reste
+  // accessible pour toujours, meme si l'admin ferme le chantier ensuite. On ne
+  // retire jamais a un pro ce qu'il a obtenu — c'est vrai des 2 deblocages
+  // offerts comme des payants.
+  const { data: tousUnlocks } = await service
+    .from("lead_unlocks")
+    .select("project_id, paid_at")
+    .eq("pro_id", pro.id);
+  const unlockedMap = new Map<number, string>();
+  (tousUnlocks || []).forEach((u) => unlockedMap.set(u.project_id, u.paid_at));
+
   // La table projects est petite : on charge les projets des métiers du pro,
   // puis on filtre par distance Haversine côté JS (même logique que le broadcast).
   const { data: projectsRaw } = await service
@@ -142,6 +154,9 @@ export default async function LeadsPage({
 
   const projects: ProjectRow[] = ((projectsRaw || []) as unknown as ProjectRow[])
     .filter((p) => {
+      // Chantier clos par l'admin (trop ancien) : on ne le PROPOSE plus, mais on
+      // le laisse au pro qui l'a deja debloque.
+      if (p.status === "closed" && !unlockedMap.has(p.id)) return false;
       const c = Array.isArray(p.cities) ? p.cities[0] : p.cities;
       const cLat = c?.latitude ?? null;
       const cLng = c?.longitude ?? null;
@@ -152,18 +167,6 @@ export default async function LeadsPage({
       return proDeptId != null && (c?.department_id ?? null) === proDeptId;
     })
     .slice(0, PROJECTS_LIMIT);
-
-  // Charger les unlocks existants du pro pour savoir lesquels sont deja debloqués
-  const projectIds = projects.map((p) => p.id);
-  const { data: unlocksRaw } = projectIds.length
-    ? await service
-        .from("lead_unlocks")
-        .select("project_id, paid_at")
-        .eq("pro_id", pro.id)
-        .in("project_id", projectIds)
-    : { data: [] as { project_id: number; paid_at: string }[] };
-  const unlockedMap = new Map<number, string>();
-  (unlocksRaw || []).forEach((u) => unlockedMap.set(u.project_id, u.paid_at));
 
   // Offre de lancement : les 2 premiers déblocages sont offerts.
   // On ne compte que les déblocages GRATUITS (amount_cents=0) — un unlock payé

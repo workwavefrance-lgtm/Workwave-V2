@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     .from("projects")
     .select("id, email")
     .is("feedback_request_sent_at", null)
-    .neq("status", "deleted")
+    .not("status", "in", "(deleted,closed)")
     .gte("created_at", from)
     .lte("created_at", to)
     .limit(BATCH);
