@@ -321,6 +321,23 @@ export default function ProjectForm({
       {/* ÉTAPE 1 — Métier                                              */}
       {/* ============================================================ */}
       <div className={step === 0 ? "" : "hidden"}>
+        {/* Rappel de ce que l'utilisateur vient d'ecrire dans la barre de
+            recherche de l'accueil. Sans ce rappel il arrive ici devant une
+            liste vide et croit que sa saisie a ete perdue — c'est ce que Willy
+            a constate en testant le 11/08/2026. Le texte etait bien conserve
+            (il repart a l'etape 3), mais invisible : donc perdu pour lui. */}
+        {defaultDescription && (
+          <div className="mb-6 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Votre demande&nbsp;:{" "}
+              <span className="text-[var(--text-primary)] font-medium">
+                &laquo;&nbsp;{defaultDescription}&nbsp;&raquo;
+              </span>
+              {defaultCity ? ` a ${defaultCity.name}` : ""}. Nous l&apos;avons
+              gardee — indiquez juste le metier concerne.
+            </p>
+          </div>
+        )}
         <label
           htmlFor="categoryId"
           className="block text-base font-medium text-[var(--text-primary)] mb-3"

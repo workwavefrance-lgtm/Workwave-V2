@@ -1,6 +1,7 @@
 export const revalidate = 3600; // 1h
 
 import Link from "next/link";
+import Image from "next/image";
 import { Fragment } from "react";
 import ProCtaSection from "@/components/home/ProCtaSection";
 import SearchForm from "@/components/search/SearchForm";
@@ -201,6 +202,28 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Photo — le site est entierement typographique et sombre : aucun visage,
+          aucun chantier. Un particulier qui cherche un artisan doit voir du
+          travail reel. Photo fournie par Willy le 11/08/2026, convertie de
+          4,8 Mo PNG a 139 Ko WebP / 106 Ko AVIF (-97 %).
+          Cadre : arrondi 3xl + bordure discrete, coherent avec les cards du
+          site. Pas de texte en surimpression : la photo parle seule. */}
+      <section className="px-4 pb-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative overflow-hidden rounded-3xl border border-[var(--card-border)]">
+            <Image
+              src="/photos/macon-mur-brique.webp"
+              alt="Maçon montant un mur en briques sur un chantier"
+              width={1600}
+              height={1068}
+              priority={false}
+              sizes="(max-width: 1152px) 100vw, 1152px"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Projets déposés récemment — double CTA (particulier dépose / pro reçoit).
           Modulable : 1→10 vrais projets anonymisés, se masque si 0. */}
       <RecentProjectsSection projects={recentProjects} />
@@ -247,6 +270,16 @@ export default async function Home() {
             Consultez les professionnels référencés près de chez vous.
           </p>
           <SearchForm categories={allCategories} destination="listing" />
+          <div className="mt-12 overflow-hidden rounded-3xl border border-[var(--card-border)]">
+            <Image
+              src="/photos/macon-chantier.webp"
+              alt="Artisan maçon au travail sur un chantier de construction"
+              width={1600}
+              height={1056}
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="w-full h-auto object-cover"
+            />
+          </div>
         </div>
       </section>
 
