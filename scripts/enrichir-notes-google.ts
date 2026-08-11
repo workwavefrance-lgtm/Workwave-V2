@@ -140,7 +140,14 @@ type Pro = {
 
   let trouves = 0, ecrits = 0, refuses = 0, sansResultat = 0;
 
+  let sansCle = 0;
   for (const p of (data || []) as unknown as Pro[]) {
+    // Sans telephone ET sans domaine exploitable, la requete partirait VIDE :
+    // Google repond HTTP 400 et le compteur est consomme pour rien. Certaines
+    // fiches ont un `website` present mais inexploitable (URL malformee), d'ou
+    // le controle sur le domaine extrait et non sur la simple presence du champ.
+    const requete = p.phone || domaine(p.website);
+    if (!requete) { sansCle++; continue; }
     const ville = p.cities?.name || "";
     const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
       method: "POST",
@@ -166,7 +173,7 @@ type Pro = {
         // "O'la vache". La recherche par nom est justement celle qu'on a
         // rejetee — la reintroduire en secours revient a la reintroduire tout
         // court. Une fiche sans telephone ni site n'est pas traitee, point.
-        textQuery: p.phone || domaine(p.website),
+        textQuery: requete,
         languageCode: "fr",
         maxResultCount: 3,
       }),
@@ -246,6 +253,7 @@ type Pro = {
   }
 
   console.log(`\n  identifies avec certitude : ${trouves}`);
+  if (sansCle) console.log(`  ignorees (ni telephone ni domaine exploitable) : ${sansCle} — aucun appel consomme`);
   console.log(`  refuses (ni tel ni domaine identique) : ${refuses}`);
   console.log(`  absents de Google : ${sansResultat}`);
   if (APPLIQUER) console.log(`  ecrits en base : ${ecrits}`);
