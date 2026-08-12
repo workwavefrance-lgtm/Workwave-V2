@@ -4,16 +4,17 @@ Ce fichier est lu automatiquement par Claude Code à chaque session. Il contient
 
 ---
 
-## 00. STYLE — s'applique à TOUT, y compris aux plans
+## 00. STYLE : s'applique à TOUT, y compris aux plans
 
 `~/.claude/CLAUDE.md` définit **comment je raisonne et comment j'écris**. Ce fichier-ci définit **quoi faire**. En cas de friction sur la FORME, le fichier global l'emporte, sans exception.
 
 Les plans de la Règle 1 restent **obligatoires**. Ils se rédigent dans ce style : attaque directe sur les fichiers et les étapes, zéro préambule, zéro reformulation de la demande, zéro remplissage, actions exécutables avec l'ordre et le critère de réussite, niveau de confiance sur ce qui est incertain. Un plan qui commence par « Je vais analyser votre demande » enfreint le fichier global.
 
 Rappel des points que j'enfreins le plus (mesuré sur la session du 11-12/08) :
-- le schéma « X, pas Y » et les définitions par contraste — **interdits**, affirmer directement ;
+- le schéma « X, pas Y » et les définitions par contraste : **interdits**, affirmer directement ;
 - le niveau de confiance absent quand j'avance une cause probable (attribution des 91,55 € : affirmée sans chiffrer ma certitude) ;
-- la flatterie et l'auto-flagellation, qui sont deux formes du même remplissage.
+- la flatterie et l'auto-flagellation, qui sont deux formes du même remplissage ;
+- le **tiret cadratin** « — » et le demi-cadratin « – » : **bannis à 100 %**, partout, y compris dans le code, les emails et les documents produits. Virgule, deux-points, parenthèse ou point à la place.
 
 ---
 
