@@ -31,12 +31,37 @@
  * sont des notes et des horaires sur des fiches qu'on sait identifier.
  *
  * ------------------------------------------------------------------------
- * GARDE-FOU FACTURATION
+ * 🔴 FACTURATION — LIRE AVANT DE TOUCHER AU PLAFOND OU AU FIELD MASK
  * ------------------------------------------------------------------------
- * Google facture des le 5 001e appel du mois (17 $ les 1 000). Le compteur est
- * persiste sur disque et remis a zero au changement de mois. Le script REFUSE
- * de depasser, meme si on le relance dix fois. Willy n'a pas de budget : il ne
- * doit pas pouvoir se reveiller avec une facture.
+ * Le 11/08/2026 ce script a coute 91,55 € en une journee, alors que j'avais
+ * ecrit ici "5 000 appels gratuits". C'ETAIT FAUX. Facture reelle constatee
+ * dans la console Google Cloud, et confirmee par le calcul.
+ *
+ * Places API (New) facture par SKU, et le SKU est determine par le FIELD MASK.
+ * Le tarif applique est celui du champ le PLUS CHER demande :
+ *
+ *     Text Search Essentials   10 000 appels gratuits/mois   puis  2,83 $/1000
+ *     Text Search Pro           5 000 appels gratuits/mois   puis 32,00 $/1000
+ *     Text Search Enterprise    1 000 appels gratuits/mois   puis 35,00 $/1000
+ *
+ * `rating` et `userRatingCount` — c'est-a-dire EXACTEMENT ce qu'on vient
+ * chercher — sont des champs Enterprise. Il n'existe donc pas de version
+ * economique de cette tache : 1 000 appels gratuits par mois, puis 3,5 centimes
+ * l'appel.
+ *
+ * Verification par le montant : 4 205 appels - 1 000 gratuits = 3 205 facturables
+ * a 35 $/1000 = 112 $ ~ 96 € — la facture affichait 91,55 € (une partie des
+ * appels du jour n'y figurait pas encore). L'hypothese "palier Pro a 5 000
+ * gratuits" donnerait 0 €, elle est donc exclue par la facture elle-meme.
+ *
+ * CE QUE CA VEUT DIRE POUR LA SUITE : enrichir les ~28 000 fiches restantes
+ * couterait ~990 $. A budget zero, c'est NON. Ce script n'a de sens que sur des
+ * fiches choisies une par une (un pro qu'on va demarcher, une fiche reclamee),
+ * jamais en masse.
+ *
+ * Le plafond ci-dessous est donc le VRAI palier gratuit, 1 000. Ne pas le
+ * remonter "pour aller plus vite" : chaque appel au-dela est de l'argent reel
+ * pris a quelqu'un qui n'en a pas.
  *
  * ------------------------------------------------------------------------
  * USAGE
@@ -59,9 +84,12 @@ if (!CLE) {
 const APPLIQUER = process.argv.includes("--appliquer");
 const NB = Number(process.argv[process.argv.indexOf("--nb") + 1]) || 20;
 
-// Palier gratuit "Place Details Pro" : 5 000 appels par mois. On s'arrete a
-// 4 800 pour garder une marge (un appel de test, un retry...).
-const QUOTA_MENSUEL = 4800;
+// VRAI palier gratuit du SKU "Text Search Enterprise" (le seul qui donne
+// `rating` et `userRatingCount`) : 1 000 appels par mois, puis 35 $/1000.
+// On s'arrete a 950 pour garder une marge (essai, nouvelle tentative...).
+// J'avais mis 4 800 ici en croyant le palier a 5 000 : 91,55 € de facture le
+// 11/08/2026. Ce nombre ne se remonte pas.
+const QUOTA_MENSUEL = 950;
 const COMPTEUR = path.resolve(process.cwd(), ".google-places-quota.json");
 
 const sb = createClient(
