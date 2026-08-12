@@ -107,11 +107,11 @@ async function checkDailyBudget(): Promise<boolean> {
 function isAllowedOrigin(req: NextRequest): boolean {
   const origin = req.headers.get("origin") || req.headers.get("referer") || "";
   if (!origin) return true; // certains navigateurs strippent — ne pas casser les vrais users
-  return (
-    origin.includes("workwave.fr") ||
-    origin.includes("localhost") ||
-    origin.includes("vercel.app")
-  );
+  // `vercel.app` retire le 12/08/2026 : le compte Vercel est supprime, le site
+  // tourne sur le VPS. La regle laissait passer N'IMPORTE QUEL sous-domaine
+  // vercel.app, donc n'importe qui pouvant deployer chez Vercel — sur une route
+  // qui consomme des credits Anthropic.
+  return origin.includes("workwave.fr") || origin.includes("localhost");
 }
 
 const SAV_PROMPT = `Tu es l'agent d'écoute de Workwave (workwave.fr), plateforme de mise en relation entre particuliers et artisans en France. Ta mission : recueillir le retour de l'utilisateur pour améliorer la plateforme. Tu parles à la première personne, comme un humain de l'équipe — chaleureux, direct, reconnaissant.

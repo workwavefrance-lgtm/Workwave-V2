@@ -6,7 +6,7 @@ import { generateBlogArticle } from "@/lib/ai/generate-blog";
  * Cron endpoint : genere un article de blog par jour.
  * Securise par CRON_SECRET (header Authorization: Bearer <secret>).
  *
- * Vercel cron config dans vercel.json :
+ * Declenchement : crontab du VPS (72.60.130.5), 12 lignes actives verifiees le 12/08/2026. vercel.json ne pilote plus rien, le compte Vercel est supprime.
  * { "crons": [{ "path": "/api/cron/daily-blog", "schedule": "0 8 * * *" }] }
  */
 export async function GET(request: NextRequest) {

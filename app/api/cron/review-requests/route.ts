@@ -18,7 +18,7 @@
  * la journee → meilleur taux de soumission).
  *
  * Auth : Bearer ${CRON_SECRET}. Vercel ajoute automatiquement le
- * header pour les crons configures dans vercel.json.
+ * header pour les crons declenches par le crontab du VPS (72.60.130.5).
  */
 import { NextResponse } from "next/server";
 import { getAdminServiceClient } from "@/lib/admin/service-client";

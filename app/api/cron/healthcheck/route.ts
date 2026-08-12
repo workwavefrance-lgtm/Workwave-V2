@@ -15,7 +15,7 @@
  *
  * Auth : Bearer CRON_SECRET (Vercel cron set automatiquement le header).
  *
- * Endpoint : /api/cron/healthcheck (configuré dans vercel.json `crons`).
+ * Endpoint : /api/cron/healthcheck, appele par le crontab du VPS (72.60.130.5).
  */
 import { NextResponse } from "next/server";
 import { Resend } from "resend";

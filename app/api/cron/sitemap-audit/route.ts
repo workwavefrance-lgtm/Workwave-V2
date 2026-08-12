@@ -13,7 +13,7 @@
  *  3. /sitemap/4.xml (/ai) non vide ?
  *  4. Aucun sous-sitemap clé > 50 000 URLs (limite spec) ?
  *
- * Auth : Bearer CRON_SECRET. Endpoint : /api/cron/sitemap-audit (vercel.json).
+ * Auth : Bearer CRON_SECRET. Endpoint : /api/cron/sitemap-audit, appele par le crontab du VPS (72.60.130.5).
  */
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
