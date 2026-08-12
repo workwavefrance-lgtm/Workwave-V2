@@ -195,6 +195,15 @@ export default async function ProPage({ params }: Props) {
     .split(" ");
   const phoneTeaserVisible = phoneGroups.slice(0, 3).join(" ");
   const phoneTeaserMasked = phoneGroups.slice(3).join(" ");
+  // Email "à moitié flouté", même principe que le téléphone : quelques
+  // caractères visibles, le reste flouté. Assez pour prouver qu'on a l'adresse,
+  // pas assez pour l'utiliser sans réclamer la fiche (pro) ou déposer un projet
+  // (particulier). Le domaine est masqué pour ne pas laisser deviner l'adresse.
+  const emailStr = pro.email || "";
+  const emailAt = emailStr.indexOf("@");
+  const emailTeaserVisible =
+    emailAt > 2 ? emailStr.slice(0, 3) : emailStr.slice(0, Math.max(1, emailAt));
+  const emailTeaserMasked = emailStr.slice(emailTeaserVisible.length);
   // Contenu SEO/AEO unique par fiche (À propos + FAQ sourcés, zéro invention).
   const proContent = buildProContent(pro);
   const openingHours = pro.opening_hours as OpeningHours | null;
@@ -355,7 +364,7 @@ export default async function ProPage({ params }: Props) {
               rel="nofollow"
               className="inline-flex items-center justify-center gap-1.5 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250 hover:scale-[1.02] shrink-0 self-start sm:self-auto whitespace-nowrap"
             >
-              Réclamer ma fiche — gratuit
+              Réclamer ma fiche, gratuit
               <svg
                 className="w-3.5 h-3.5"
                 fill="none"
@@ -463,7 +472,7 @@ export default async function ProPage({ params }: Props) {
               {blurCoords
                 ? `Pour être mis en relation avec ${claimArticle} ${claimMetier}${claimCityPart}, décrivez votre projet : c'est gratuit, rapide et sans engagement. Nous transmettons votre demande aux pros disponibles dans votre zone.`
                 : pro.phone
-                ? `Contactez ${pro.name} directement au ${pro.phone}. Pour comparer plusieurs devis, décrivez votre projet — nous le transmettons aux artisans qualifiés de votre zone.`
+                ? `Contactez ${pro.name} directement au ${pro.phone}. Pour comparer plusieurs devis, décrivez votre projet, nous le transmettons aux artisans qualifiés de votre zone.`
                 : `Décrivez votre projet, nous le transmettons aux artisans qualifiés de votre zone. Gratuit, sans engagement.`}
             </p>
 
@@ -674,8 +683,20 @@ export default async function ProPage({ params }: Props) {
                     {"●● ●● ●● ●● ●●"}
                   </p>
                 )}
-                <p className="text-xs text-[var(--text-tertiary)] mt-1 mb-3">
-                  Numéro masqué — déposez votre projet pour être recontacté.
+                {pro.email && (
+                  <p className="text-[var(--text-primary)] text-sm font-medium mt-2 break-all">
+                    {emailTeaserVisible}
+                    <span
+                      className="blur-[5px] select-none"
+                      aria-hidden="true"
+                    >
+                      {emailTeaserMasked}
+                    </span>
+                  </p>
+                )}
+                <p className="text-xs text-[var(--text-tertiary)] mt-2 mb-3">
+                  Coordonnées masquées : déposez votre projet pour être
+                  recontacté.
                 </p>
                 <Link
                   href={`/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`}
@@ -827,7 +848,7 @@ export default async function ProPage({ params }: Props) {
                         {label}
                       </span>
                       <span className={day.open ? "text-[var(--text-primary)] font-medium" : "text-[var(--text-tertiary)]"}>
-                        {day.open ? `${day.from} — ${day.to}` : "Fermé"}
+                        {day.open ? `${day.from} à ${day.to}` : "Fermé"}
                       </span>
                     </div>
                   );
