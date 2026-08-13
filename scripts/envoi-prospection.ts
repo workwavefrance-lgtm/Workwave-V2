@@ -165,13 +165,83 @@ function modeleB(c: Cible) {
   return { sujet, html };
 }
 
-(async () => {
-  const toutes = JSON.parse(fs.readFileSync("/tmp/rge/eligibles-envoi.json", "utf8")) as Cible[];
+const hav = (a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) => {
+  const R = 6371, r = Math.PI / 180;
+  const dLat = (b.latitude - a.latitude) * r, dLon = (b.longitude - a.longitude) * r;
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.latitude * r) * Math.cos(b.latitude * r) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+};
+const EMAIL_OK = /^[^\s@,;]+@[^\s@,;]+\.[a-z]{2,}$/i;
 
-  // 1. regle de fraicheur
-  const fraiches = toutes.filter((c) => c.jours <= MAX_JOURS);
-  console.log(`eligibles       : ${toutes.length}`);
-  console.log(`chantier <= ${MAX_JOURS} j : ${fraiches.length}`);
+/**
+ * Calcule les destinataires DEPUIS LA BASE, sans aucun fichier local.
+ *
+ * Le 13/08, le script dependait d'un JSON dans /tmp : le redemarrage du Mac a
+ * vide /tmp et le passage quotidien a plante. Un envoi automatique ne doit
+ * dependre de rien d'autre que de la base.
+ */
+async function calculerCibles(): Promise<Cible[]> {
+  const limite = new Date(Date.now() - MAX_JOURS * 86400e3).toISOString();
+  const { data: pj, error } = await sb
+    .from("projects")
+    .select("id, category_id, urgency, created_at, categories(name), cities(name, postal_code, latitude, longitude)")
+    .eq("vertical", "btp")
+    .not("status", "in", "(closed,deleted)")
+    .gte("created_at", limite);
+  if (error) { console.error("ERREUR projets:", error.message); process.exit(1); }
+  const projets = (pj || []) as unknown as {
+    id: number; category_id: number; urgency: string; created_at: string;
+    categories: { name: string } | null;
+    cities: { name: string; postal_code: string; latitude: number; longitude: number } | null;
+  }[];
+
+  const cibles: Cible[] = [];
+  const compteurEmail = new Map<string, number>();
+  const vus = new Set<number>();
+
+  for (const p of projets) {
+    const cv = p.cities;
+    if (!cv?.latitude) continue;
+    const { data: c } = await sb
+      .from("pros")
+      .select("id, name, slug, email, cities!inner(name, latitude, longitude), categories(name)")
+      .eq("category_id", p.category_id)
+      .eq("is_active", true).is("deleted_at", null)
+      .is("claimed_by_user_id", null)
+      .neq("do_not_contact", true).neq("email_bounced", true)
+      .not("email", "is", null)
+      .gte("cities.latitude", cv.latitude - 0.5).lte("cities.latitude", cv.latitude + 0.5)
+      .gte("cities.longitude", cv.longitude - 0.7).lte("cities.longitude", cv.longitude + 0.7)
+      .limit(1000);
+    for (const x of (c || []) as unknown as {
+      id: number; name: string; slug: string; email: string;
+      cities: { name: string; latitude: number; longitude: number };
+      categories: { name: string } | null;
+    }[]) {
+      const mail = (x.email || "").trim().toLowerCase();
+      if (!mail || !EMAIL_OK.test(mail)) continue;
+      compteurEmail.set(mail, (compteurEmail.get(mail) || 0) + 1);
+      if (vus.has(x.id)) continue;
+      const d = hav(cv, x.cities);
+      if (d > 40) continue;
+      vus.add(x.id);
+      cibles.push({
+        pro_id: x.id, nom: x.name, slug: x.slug, email: mail,
+        metier: x.categories?.name || "", ville: x.cities.name,
+        projet_id: p.id, projet_ville: cv.name, projet_cp: cv.postal_code,
+        projet_metier: p.categories?.name || "", km: Math.round(d), urgence: p.urgency,
+        jours: Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400e3),
+      });
+    }
+  }
+  // adresses partagees par plusieurs entreprises : jamais de mail nominatif
+  const mutualisees = new Set([...compteurEmail.entries()].filter(([, n]) => n > 1).map(([e]) => e));
+  return cibles.filter((c) => !mutualisees.has(c.email));
+}
+
+(async () => {
+  const fraiches = await calculerCibles();
+  console.log(`chantiers <= ${MAX_JOURS} j, pros joignables a <= 40 km : ${fraiches.length}`);
 
   // 2. exclure les pros DEJA contactes (pagination : la table events grossit)
   const deja = new Set<number>();
