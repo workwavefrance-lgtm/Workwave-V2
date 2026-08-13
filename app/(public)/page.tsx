@@ -160,6 +160,11 @@ export default async function Home() {
               les envoyer consulter des fiches. Metier + ville sont repris tels
               quels, et le formulaire saute directement a "decrivez votre
               projet". Celle qui mene aux fiches est plus bas dans la page. */}
+          {/* CADRE DE MISE EN VALEUR de la zone de recherche (13/08).
+              La barre + les badges de confiance forment UN bloc encadre.
+              V1 = bordure coral + halo fixe / V2 = + animate-halo-respire
+              (3 cycles puis arret) / V3 = bordure neutre + ombre, sans coral. */}
+          <div className="rounded-3xl border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] bg-[var(--bg-secondary)] p-5 sm:p-7 animate-halo-respire">
           <SearchForm categories={allCategories} destination="depot" />
           {/* Réassurance QUALITÉ — uniquement des signaux VRAIS (pub honnête + RGPD) :
               SIRET vérifiable au registre officiel (annuaire-entreprises.data.gouv.fr),
@@ -190,6 +195,7 @@ export default async function Home() {
               </li>
             ))}
           </ul>
+          </div>
           {/* Bande de compteurs SUPPRIMEE le 11/08/2026.
               Le chiffre 2 560 292 est passe dans le H1 le meme jour : le
               repeter 400 px plus bas, en enorme et en coral, avec le meme

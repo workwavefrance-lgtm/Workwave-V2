@@ -144,10 +144,28 @@ body {
   animation: slide-in-up 600ms ease-out backwards;
 }
 
+/* Halo qui respire autour du cadre de recherche (option V2, 13/08).
+   3 cycles puis arret (pas de boucle infinie : une animation permanente
+   autour d'un formulaire lasse et distrait de la saisie). `forwards` fige
+   le halo sur son etat final discret. */
+@keyframes halo-respire {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(255, 90, 54, 0.06);
+  }
+  50% {
+    box-shadow: 0 0 0 9px rgba(255, 90, 54, 0.13);
+  }
+}
+
+.animate-halo-respire {
+  animation: halo-respire 3.2s ease-in-out 3 forwards;
+}
+
 /* Respect de l'accessibilite : si l'utilisateur a active "Reduire les
    animations" dans son OS, on coupe nos animations decoratives. */
 @media (prefers-reduced-motion: reduce) {
   .animate-accent-pulse,
+  .animate-halo-respire,
   .animate-slide-in-up {
     animation: none;
   }

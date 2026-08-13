@@ -1,0 +1,84 @@
+<title>Mise en valeur de la barre de recherche</title>
+<style>
+  :root{--bg:#0A0A0A;--card:#161616;--carte2:#1A1A1A;--p:#FAFAFA;--s:#9CA3AF;--a:#FF6B4A;--bord:#27272A}
+  body{background:#0d0d0d;color:var(--p);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:0;padding:28px 16px;line-height:1.5}
+  .wrap{max-width:1240px;margin:0 auto}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
+  .intro{color:var(--s);font-size:14px;margin:0 0 24px;max-width:720px}
+  .grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
+  .col h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--s);font-weight:800;margin:0 0 4px}
+  .col p.note{font-size:13px;color:var(--s);margin:0 0 12px;min-height:56px}
+  .scene{background:var(--bg);border:1px solid var(--bord);border-radius:18px;padding:34px 18px}
+
+  /* structure commune du bloc recherche */
+  .zone{border-radius:20px;padding:22px 16px}
+  .champ{display:flex;align-items:center;gap:10px;color:var(--s);font-size:14px;border:1px solid var(--bord);background:var(--card);border-radius:14px;height:48px;padding:0 16px;margin-bottom:10px}
+  .btn{display:flex;align-items:center;justify-content:center;background:#fff;color:#0A0A0A;font-weight:700;border-radius:999px;height:50px;font-size:15px}
+  .badges{display:flex;flex-direction:column;gap:8px;margin-top:16px;font-size:13.5px;color:var(--s)}
+  .badges span::before{content:"✓";color:var(--a);font-weight:800;margin-right:8px}
+  .cta{display:flex;align-items:center;justify-content:center;background:var(--a);color:#fff;font-weight:700;border-radius:999px;height:52px;font-size:15px;margin-top:18px}
+
+  /* V1 : cadre coral fixe, halo doux */
+  .v1{border:1px solid rgba(255,107,74,.45);background:var(--carte2);box-shadow:0 0 0 4px rgba(255,107,74,.07),0 12px 40px rgba(0,0,0,.5)}
+
+  /* V2 : respiration lente du halo */
+  @keyframes respire{0%,100%{box-shadow:0 0 0 3px rgba(255,107,74,.06)}50%{box-shadow:0 0 0 9px rgba(255,107,74,.13)}}
+  .v2{border:1px solid rgba(255,107,74,.4);background:var(--carte2);animation:respire 3.2s ease-in-out infinite}
+
+  /* V3 : contraste seul, sans coral */
+  .v3{border:1px solid #34343a;background:var(--carte2);box-shadow:0 16px 48px rgba(0,0,0,.55)}
+
+  .etq{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#B24800;background:#FFF4E8;border:1px solid #FFD9B8;border-radius:999px;padding:3px 10px;margin-top:12px}
+</style>
+
+<div class="wrap">
+<h1>La zone de recherche dans un cadre</h1>
+<p class="intro">Trois options, rendues sur le fond noir du site. Les badges de confiance entrent dans le cadre pour former UN bloc. Rien n'est appliqué.</p>
+
+<div class="grille">
+
+<div class="col">
+  <h2>V1 : cadre coral, halo fixe</h2>
+  <p class="note">Bordure coral discrète + halo constant. Met en valeur sans bouger : zéro distraction, zéro coût de rendu.</p>
+  <div class="scene">
+    <div class="zone v1">
+      <div class="champ">🔍&nbsp; Ex. : plombier, fuite d'eau…</div>
+      <div class="champ">📍&nbsp; Ville, département ou région</div>
+      <div class="btn">Rechercher</div>
+      <div class="badges"><span>SIRET vérifié au registre officiel</span><span>Données publiques officielles</span><span>100 % gratuit, sans engagement</span></div>
+    </div>
+    <div class="cta">Déposer mon projet (gratuit)</div>
+  </div>
+</div>
+
+<div class="col">
+  <h2>V2 : halo qui respire</h2>
+  <p class="note">Même cadre, mais le halo gonfle et se retire sur 3 secondes. Attire l'œil en continu. Risque : l'animation permanente peut lasser.</p>
+  <div class="scene">
+    <div class="zone v2">
+      <div class="champ">🔍&nbsp; Ex. : plombier, fuite d'eau…</div>
+      <div class="champ">📍&nbsp; Ville, département ou région</div>
+      <div class="btn">Rechercher</div>
+      <div class="badges"><span>SIRET vérifié au registre officiel</span><span>Données publiques officielles</span><span>100 % gratuit, sans engagement</span></div>
+    </div>
+    <div class="cta">Déposer mon projet (gratuit)</div>
+  </div>
+  <span class="etq">recommandée avec arrêt après 3 cycles</span>
+</div>
+
+<div class="col">
+  <h2>V3 : contraste seul</h2>
+  <p class="note">Fond éclairci et ombre portée, aucun coral. Le cadre existe mais la couleur d'accent reste réservée aux boutons. La plus sobre.</p>
+  <div class="scene">
+    <div class="zone v3">
+      <div class="champ">🔍&nbsp; Ex. : plombier, fuite d'eau…</div>
+      <div class="champ">📍&nbsp; Ville, département ou région</div>
+      <div class="btn">Rechercher</div>
+      <div class="badges"><span>SIRET vérifié au registre officiel</span><span>Données publiques officielles</span><span>100 % gratuit, sans engagement</span></div>
+    </div>
+    <div class="cta">Déposer mon projet (gratuit)</div>
+  </div>
+</div>
+
+</div>
+</div>
