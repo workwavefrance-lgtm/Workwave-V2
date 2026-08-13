@@ -115,7 +115,12 @@ export default async function Home() {
 
       {/* Hero */}
       <section className="py-24 sm:py-32 lg:py-40 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+        {/* Le conteneur s'elargit avec l'ecran au lieu de rester bloque a
+            896 px. Sans ces paliers, un ecran 2560 affichait 65 % de vide
+            lateral (mesure du 13/08). Le bloc d'action, lui, reste borne a
+            max-w-3xl : une barre de recherche de 1200 px de large serait
+            absurde a viser a la souris. */}
+        <div className="w-[min(92vw,1440px)] mx-auto text-center">
           {/* La PREUVE avant la promesse (11/08/2026).
               Avant : "Trouvez le bon artisan près de chez vous." — une phrase
               que TOUS les concurrents ecrivent. Le seul chiffre qui nous
@@ -135,11 +140,21 @@ export default async function Home() {
               Trouvez gratuitement un artisan, pres de chez vous." Le H1 grille
               donc le meme contenu qu'avant, seule la 2e ligne a change de
               formulation ("celui qu'il vous faut" -> "un artisan"). */}
-          <h1 className="flex flex-col tracking-tight leading-[1.1] mb-6">
-            <span className="order-2 mt-3 text-2xl sm:text-3xl lg:text-[44px] font-extrabold text-[var(--text-secondary)]">
+          {/* TYPOGRAPHIE FLUIDE (13/08). Avant : `lg:text-6xl` figeait le titre
+              a 60 px DES 1024 px et pour toujours. Mesure sur le site :
+                  ecran 1280 -> 30 % de vide lateral
+                  ecran 1920 -> 53 %
+                  ecran 2560 -> 65 %
+              ...avec un titre identique a 60 px dans les quatre cas.
+              `clamp(min, fluide, max)` fait suivre la taille a la largeur de
+              l'ecran EN CONTINU, sans palier : 30 px sur petit mobile, 84 px
+              sur tres grand ecran. Les bornes evitent les deux exces (illisible
+              en dessous, demesure au-dela). */}
+          <h1 className="flex flex-col tracking-tight leading-[1.08] mb-6">
+            <span className="order-2 mt-3 font-extrabold text-[var(--text-secondary)] text-[clamp(1.5rem,2.7vw,3.5rem)]">
               2 560 292 artisans référencés
             </span>
-            <span className="order-1 text-3xl sm:text-4xl lg:text-6xl font-extrabold text-[var(--text-primary)]">
+            <span className="order-1 font-extrabold text-[var(--text-primary)] text-[clamp(1.875rem,4.6vw,6rem)]">
               Trouvez gratuitement un artisan, près de chez vous
               {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
                   = le point est rendu serveur-side, LCP intact. */}
