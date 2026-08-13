@@ -29,7 +29,17 @@ ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_UET_TAG_ID
 ARG SUPABASE_SERVICE_ROLE_KEY
-ARG NODE_OPTIONS=--max-old-space-size=8192
+# PLAFOND MEMOIRE DU BUILD, PAR PROCESSUS (pas au total).
+# Next lance 7 generateurs de pages en parallele ("Generating static pages
+# using 7 workers"). A 8192 Mo chacun, le build peut reclamer 56 Go alors que
+# le VPS n'en a que ~23 de libres : le noyau en tue un et le build meurt sur
+# "exit code 255" sans message.
+# Constate le 13/08/2026 (et deja le 10/08) : Docker journalise un evenement
+# OOM sur le conteneur de build a la seconde exacte de la mort, phase
+# "Generating static pages (295/394)" -- celle qui charge les sitemaps.
+# A 3072 Mo : 7 x 3 = 21 Go au pire, ca tient. Le build complet passe avec
+# 6 Go au TOTAL en local, donc 3 Go par processus est large.
+ARG NODE_OPTIONS=--max-old-space-size=3072
 ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL \
     NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
     NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY \
