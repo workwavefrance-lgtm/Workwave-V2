@@ -127,7 +127,7 @@ export default function Header() {
               CTA PRINCIPAL du header (plein + agrandi). Le "Trouver un pro"
               faisait doublon avec la recherche du hero → retiré le 16/07. */}
           <QuickProjectModalTrigger
-            label="Déposer un projet — gratuit"
+            label="Déposer un projet (gratuit)"
             // whitespace-nowrap : sans lui, "— gratuit" fait passer le bouton
             // sur 3 lignes (96 px de haut) des que la barre est serree, autour
             // de 800 px de large, et il chevauche la navigation. Mesure du

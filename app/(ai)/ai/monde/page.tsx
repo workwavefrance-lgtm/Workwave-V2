@@ -69,7 +69,7 @@ export default function MondeLandingPage() {
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3">
             <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Déposer un projet — gratuit
+              Déposer un projet (gratuit)
             </Link>
             <Link href="/ai/inscription" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Je suis freelance — créer mon profil

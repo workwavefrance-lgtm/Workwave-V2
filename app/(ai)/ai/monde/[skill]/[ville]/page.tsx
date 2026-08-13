@@ -157,7 +157,7 @@ export default async function MondeSkillCityPage({
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Déposer un projet — gratuit
+              Déposer un projet (gratuit)
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Voir les freelances
@@ -232,7 +232,7 @@ export default async function MondeSkillCityPage({
           <p className="mt-5 text-[16px] text-white/60 max-w-xl mx-auto">Déposez votre projet gratuitement et soyez mis en relation en 24h. 0 commission.</p>
           <div className="mt-8">
             <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Déposer un projet — gratuit
+              Déposer un projet (gratuit)
             </Link>
           </div>
         </div>

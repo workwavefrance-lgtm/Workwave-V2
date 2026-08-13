@@ -128,14 +128,22 @@ export default async function Home() {
               s'occupe de vous" — cette ligne ramene le chiffre a une personne.
               Mots-cles de referencement conserves : "artisan" et
               "pres de chez vous" (intention locale). */}
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.1] mb-6">
-            2 560 292 artisans référencés
-            {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
-                = le point est rendu serveur-side, LCP intact. */}
-            <span className="text-[var(--accent)] animate-accent-pulse">.</span>
-            <br />
-            <span className="block mt-2 text-2xl sm:text-3xl lg:text-5xl font-bold text-[var(--text-secondary)]">
-              Trouvez gratuitement celui qu&apos;il vous faut, près de chez vous.
+          {/* 13/08 (decision Willy) : la PROMESSE s'affiche en premier, le
+              chiffre en appui dessous, tailles rapprochees (60px vs 44px).
+              L'inversion est PUREMENT VISUELLE (flex + order) : l'ordre du DOM
+              ne bouge pas, Google lit toujours "2 560 292 artisans références.
+              Trouvez gratuitement un artisan, pres de chez vous." Le H1 grille
+              donc le meme contenu qu'avant, seule la 2e ligne a change de
+              formulation ("celui qu'il vous faut" -> "un artisan"). */}
+          <h1 className="flex flex-col tracking-tight leading-[1.1] mb-6">
+            <span className="order-2 mt-3 text-2xl sm:text-3xl lg:text-[44px] font-extrabold text-[var(--text-secondary)]">
+              2 560 292 artisans référencés
+            </span>
+            <span className="order-1 text-3xl sm:text-4xl lg:text-6xl font-extrabold text-[var(--text-primary)]">
+              Trouvez gratuitement un artisan, près de chez vous
+              {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
+                  = le point est rendu serveur-side, LCP intact. */}
+              <span className="text-[var(--accent)] animate-accent-pulse">.</span>
             </span>
           </h1>
           {/* Slide-in du sous-titre, leger delai pour qu'il arrive apres
@@ -196,7 +204,7 @@ export default async function Home() {
               href="/deposer-projet"
               className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--accent)] text-white text-base font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
             >
-              Déposer mon projet — gratuit
+              Déposer mon projet (gratuit)
             </Link>
           </div>
         </div>

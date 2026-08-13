@@ -357,7 +357,7 @@ export default async function BarometreArtisansPage() {
             href="/deposer-projet"
             className="inline-flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-8 py-4 rounded-full transition-all duration-250 hover:-translate-y-0.5"
           >
-            Déposer mon projet — gratuit <span aria-hidden>→</span>
+            Déposer mon projet (gratuit) <span aria-hidden>→</span>
           </Link>
         </section>
       </div>

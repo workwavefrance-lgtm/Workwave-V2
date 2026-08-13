@@ -98,7 +98,7 @@ function DeposerCta({
           href={href}
           className="group inline-flex w-full sm:w-auto items-center justify-center gap-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-bold text-lg sm:text-xl px-10 sm:px-14 py-5 sm:py-6 rounded-full transition-all duration-250 hover:-translate-y-0.5 shadow-md"
         >
-          Déposer votre projet — gratuit
+          Déposer votre projet (gratuit)
           <span aria-hidden className="transition-transform duration-250 group-hover:translate-x-1">
             →
           </span>
