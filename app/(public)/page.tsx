@@ -146,26 +146,36 @@ export default async function Home() {
               <span className="text-[var(--accent)] animate-accent-pulse">.</span>
             </span>
           </h1>
-          {/* Slide-in du sous-titre, leger delai pour qu'il arrive apres
-              que le H1 soit visible. Le sous-titre n'est pas le LCP. */}
-          <p
-            className="text-lg sm:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-in-up"
-            style={{ animationDelay: "120ms" }}
-          >
-            Décrivez votre projet, des artisans près de chez vous vous
-            recontacteront gratuitement.
-          </p>
-          {/* La barre du HAUT mene au DEPOT, pas au listing (decision Willy,
-              11/08/2026) : on veut faire entrer les gens dans l'entonnoir, pas
-              les envoyer consulter des fiches. Metier + ville sont repris tels
-              quels, et le formulaire saute directement a "decrivez votre
-              projet". Celle qui mene aux fiches est plus bas dans la page. */}
-          {/* CADRE DE MISE EN VALEUR de la zone de recherche (13/08).
-              La barre + les badges de confiance forment UN bloc encadre.
-              V1 = bordure coral + halo fixe / V2 = + animate-halo-respire
-              (3 cycles puis arret) / V3 = bordure neutre + ombre, sans coral. */}
-          <div className="rounded-3xl border border-[color-mix(in_srgb,var(--accent)_40%,transparent)] bg-[var(--bg-secondary)] p-5 sm:p-7 animate-halo-respire">
-          <SearchForm categories={allCategories} destination="depot" />
+          {/* BLOC D'ACTION (13/08, choix Willy sur 4 demos capturees du site).
+              Un seul objet contient tout le parcours : la promesse, la
+              recherche, la reassurance, et le depot de projet.
+
+              Trois choix, chacun corrigeant un defaut constate en capture :
+              1. FOND TEINTE, PAS DE BORDURE. Avant : une bordure coral autour
+                 de la barre de recherche, qui a DEJA sa propre carte bordee.
+                 Cadre dans un cadre, illisible. Le fond teinte laisse la carte
+                 blanche ressortir.
+              2. LA PROMESSE EN TITRE DU BLOC. Elle etait en petit gris
+                 au-dessus du cadre et se perdait. C'est elle qui dit ce que
+                 fait le site, elle passe en gras noir, "gratuitement" en coral.
+              3. LE BOUTON DE DEPOT DEDANS. Il flottait seul plus bas, sans
+                 lien visuel avec la recherche. Les deux chemins (chercher
+                 soi-meme / decrire son projet) sont maintenant dans le meme
+                 objet.
+
+              La barre du HAUT mene au DEPOT, pas au listing (decision Willy,
+              11/08) : on fait ENTRER dans l'entonnoir. Celle qui mene aux
+              fiches est plus bas dans la page.
+
+              `animate-halo-respire` : halo qui respire 3 cycles puis s'arrete,
+              coupe par prefers-reduced-motion. */}
+          <div className="max-w-3xl mx-auto rounded-3xl bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-secondary))] p-6 sm:p-9 animate-halo-respire">
+            <p className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-snug mb-6 max-w-xl mx-auto">
+              Décrivez votre projet, des artisans près de chez vous vous
+              recontacteront{" "}
+              <span className="text-[var(--accent)]">gratuitement</span>.
+            </p>
+            <SearchForm categories={allCategories} destination="depot" />
           {/* Réassurance QUALITÉ — uniquement des signaux VRAIS (pub honnête + RGPD) :
               SIRET vérifiable au registre officiel (annuaire-entreprises.data.gouv.fr),
               données publiques SIRENE, gratuité réelle. PAS de "décennale validée"
@@ -195,6 +205,14 @@ export default async function Home() {
               </li>
             ))}
           </ul>
+          <div className="mt-6">
+            <Link
+              href="/deposer-projet"
+              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--accent)] text-white text-base font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
+            >
+              Déposer mon projet (gratuit)
+            </Link>
+          </div>
           </div>
           {/* Bande de compteurs SUPPRIMEE le 11/08/2026.
               Le chiffre 2 560 292 est passe dans le H1 le meme jour : le
@@ -205,14 +223,6 @@ export default async function Home() {
               107 departements) restent visibles sur /departements et /pro. */}
           {/* CTA principal du hero : déposer un projet (gratuit), juste sous le
               bandeau de stats — emplacement validé par Willy (le "rond"). */}
-          <div className="mt-12">
-            <Link
-              href="/deposer-projet"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--accent)] text-white text-base font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
-            >
-              Déposer mon projet (gratuit)
-            </Link>
-          </div>
         </div>
       </section>
 
