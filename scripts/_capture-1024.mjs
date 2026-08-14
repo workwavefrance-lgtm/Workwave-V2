@@ -1,0 +1,11 @@
+import puppeteer from "puppeteer-core";
+const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const b = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--no-sandbox","--hide-scrollbars"] });
+const p = await b.newPage();
+await p.setViewport({ width: 1024, height: 900, deviceScaleFactor: 2 });
+await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+await p.goto("http://localhost:3000/", { waitUntil: "networkidle0", timeout: 90000 });
+await new Promise(r => setTimeout(r, 1500));
+await p.screenshot({ path: process.argv[2], clip: { x: 0, y: 60, width: 1024, height: 780 } });
+await b.close();
+console.log("capture 1024 :", process.argv[2]);

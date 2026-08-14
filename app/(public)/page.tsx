@@ -114,13 +114,42 @@ export default async function Home() {
       <JsonLd data={getOrganizationSchema(BASE_URL)} />
 
       {/* Hero */}
-      <section className="py-24 sm:py-32 lg:py-40 px-4">
+      {/* HERO EN DEUX COLONNES (13/08, maquette Willy).
+          Texte + bloc d'action a GAUCHE, photo de chantier a DROITE, fondue
+          dans le fond par un degrade. En dessous de lg, la photo passe en
+          fond tres attenue derriere le texte : sur un telephone, une colonne
+          image volerait la moitie de l'ecran a la barre de recherche. */}
+      <section className="relative overflow-hidden -mt-[72px] pt-[calc(72px+3rem)] pb-16 sm:pb-20 lg:pb-24 px-4">
+        {/* MOSAIQUE DE METIERS, colonne droite (13/08, maquette Willy).
+            Elle remonte DERRIERE le header (marge negative de 72 px, la
+            hauteur du header) : celui-ci est transparent tant qu'on n'a pas
+            defile, donc l'image occupe tout le haut de l'ecran.
+
+            Le degrade `mask-image` efface le bord gauche ET le bas : l'image
+            se FOND dans le blanc au lieu d'etre une photo collee avec un bord
+            net. C'est ce qui fait tenir l'ensemble.
+
+            Sur mobile elle passe en fond tres attenue derriere le texte : une
+            colonne image volerait la moitie de l'ecran a la barre de recherche.
+
+            `priority` : elle est dans le premier ecran, candidate LCP. */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-full xl:w-[58%] opacity-[0.12] xl:opacity-100">
+          <Image
+            src="/photos/hero-metiers.webp"
+            alt=""
+            aria-hidden="true"
+            fill
+            priority
+            sizes="(max-width: 1280px) 100vw, 58vw"
+            className="object-cover object-center [mask-image:linear-gradient(to_right,transparent,black_30%),linear-gradient(to_bottom,black_78%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]"
+          />
+        </div>
         {/* Le conteneur s'elargit avec l'ecran au lieu de rester bloque a
             896 px. Sans ces paliers, un ecran 2560 affichait 65 % de vide
             lateral (mesure du 13/08). Le bloc d'action, lui, reste borne a
             max-w-3xl : une barre de recherche de 1200 px de large serait
             absurde a viser a la souris. */}
-        <div className="w-[min(92vw,1440px)] mx-auto text-center">
+        <div className="relative w-[min(92vw,1440px)] mx-auto xl:mx-0 xl:ml-[max(2rem,calc((100vw-1440px)/2))] xl:max-w-[46%] text-center xl:text-left">
           {/* La PREUVE avant la promesse (11/08/2026).
               Avant : "Trouvez le bon artisan près de chez vous." — une phrase
               que TOUS les concurrents ecrivent. Le seul chiffre qui nous
@@ -150,11 +179,11 @@ export default async function Home() {
               l'ecran EN CONTINU, sans palier : 30 px sur petit mobile, 84 px
               sur tres grand ecran. Les bornes evitent les deux exces (illisible
               en dessous, demesure au-dela). */}
-          <h1 className="flex flex-col tracking-tight leading-[1.08] mb-6">
-            <span className="order-2 mt-3 font-extrabold text-[var(--text-secondary)] text-[clamp(1.5rem,2.7vw,3.5rem)]">
+          <h1 className="flex flex-col items-center xl:items-start tracking-tight leading-[1.08] mb-6">
+            <span className="order-2 mt-3 font-extrabold text-[var(--text-secondary)] text-[clamp(1.5rem,2vw,2.5rem)]">
               2 560 292 artisans référencés
             </span>
-            <span className="order-1 font-extrabold text-[var(--text-primary)] text-[clamp(1.875rem,4.6vw,6rem)]">
+            <span className="order-1 font-extrabold text-[var(--text-primary)] text-[clamp(1.875rem,3.6vw,4.25rem)]">
               Trouvez gratuitement un artisan, près de chez vous
               {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
                   = le point est rendu serveur-side, LCP intact. */}
@@ -184,8 +213,8 @@ export default async function Home() {
 
               `animate-halo-respire` : halo qui respire 3 cycles puis s'arrete,
               coupe par prefers-reduced-motion. */}
-          <div className="max-w-3xl mx-auto rounded-3xl bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-secondary))] p-6 sm:p-9 animate-halo-respire">
-            <p className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] leading-snug mb-6 max-w-xl mx-auto">
+          <div className="max-w-3xl mx-auto xl:mx-0 rounded-3xl bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-secondary))] p-6 sm:p-8 animate-halo-respire">
+            <p className="text-lg sm:text-xl font-bold text-[var(--text-primary)] leading-snug mb-6 max-w-xl mx-auto xl:mx-0">
               Décrivez votre projet, des artisans près de chez vous vous
               recontacteront{" "}
               <span className="text-[var(--accent)]">gratuitement</span>.
@@ -229,6 +258,37 @@ export default async function Home() {
             </Link>
           </div>
           </div>
+          {/* Barre de reassurance (maquette Willy). Trois signaux VRAIS et
+              verifiables, aucun chiffre invente : le SIRET est controlable au
+              registre officiel, les donnees viennent de Sirene, et le nombre
+              de projets n'est PAS affiche puisqu'on ne peut pas encore
+              l'annoncer honnetement. */}
+          <div className="relative mt-10 inline-flex flex-col sm:flex-row items-center gap-y-3 sm:gap-x-7 rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] shadow-sm px-6 py-4 text-sm text-[var(--text-secondary)]">
+            <span className="inline-flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true">
+                <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Gratuit pour les particuliers
+            </span>
+            <span className="hidden sm:block w-px h-5 bg-[var(--card-border)]" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true">
+                <rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M8 10V7a4 4 0 118 0v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              Sécurisé et confidentiel
+            </span>
+            <span className="hidden sm:block w-px h-5 bg-[var(--card-border)]" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true">
+                <path d="M3 20v-1a5 5 0 015-5h3a5 5 0 015 5v1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <circle cx="9.5" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M17 14a4 4 0 014 4v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              Sans création de compte
+            </span>
+          </div>
           {/* Bande de compteurs SUPPRIMEE le 11/08/2026.
               Le chiffre 2 560 292 est passe dans le H1 le meme jour : le
               repeter 400 px plus bas, en enorme et en coral, avec le meme
@@ -241,28 +301,9 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Photo — le site est entierement typographique et sombre : aucun visage,
-          aucun chantier. Un particulier qui cherche un artisan doit voir du
-          travail reel. Photo fournie par Willy le 11/08/2026, convertie de
-          4,8 Mo PNG a 139 Ko WebP / 106 Ko AVIF (-97 %).
-          Cadre : arrondi 3xl + bordure discrete, coherent avec les cards du
-          site. Pas de texte en surimpression : la photo parle seule. */}
-      <section className="px-4 pb-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl border border-[var(--card-border)]">
-            <Image
-              src="/photos/macon-mur-brique.webp"
-              alt="Maçon montant un mur en briques sur un chantier"
-              width={1600}
-              height={1068}
-              priority={false}
-              sizes="(max-width: 1152px) 100vw, 1152px"
-              className="w-full h-auto object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
+      {/* Section photo isolee SUPPRIMEE le 13/08 : la mosaique de metiers du
+          hero joue desormais ce role, et beaucoup mieux. Une photo unique de
+          macon en pleine largeur au milieu de la page faisait doublon. */}
       {/* Projets déposés récemment — double CTA (particulier dépose / pro reçoit).
           Modulable : 1→10 vrais projets anonymisés, se masque si 0. */}
       <RecentProjectsSection projects={recentProjects} />

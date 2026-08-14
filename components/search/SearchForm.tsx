@@ -201,7 +201,7 @@ export default function SearchForm({
       className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-2xl mx-auto bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-full p-2 shadow-sm hover:shadow-md transition-shadow duration-250"
     >
       {/* Sélecteur métier — combobox searchable groupé */}
-      <div ref={metierRef} className="flex-1 relative flex items-center gap-3 pl-4">
+      <div ref={metierRef} className="flex-1 min-w-0 relative flex items-center gap-3 pl-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -232,7 +232,7 @@ export default function SearchForm({
           // Les points de suspension disent "et tout ce que vous voulez" —
           // sans eux, le visiteur croit devoir choisir dans la liste.
           placeholder="Ex. : plombier, fuite d'eau, refaire ma salle de bain…"
-          className="flex-1 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
+          className="flex-1 min-w-0 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
           autoComplete="off"
         />
 
@@ -274,7 +274,7 @@ export default function SearchForm({
       <div className="hidden sm:block w-px bg-[var(--border-color)]" />
 
       {/* Autocomplete ville */}
-      <div ref={cityRef} className="flex-1 relative flex items-center pl-4 sm:pl-2">
+      <div ref={cityRef} className="flex-1 min-w-0 relative flex items-center pl-4 sm:pl-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -298,7 +298,7 @@ export default function SearchForm({
           }}
           onFocus={() => setShowSuggestions(true)}
           placeholder="Ville, département ou région"
-          className="flex-1 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
+          className="flex-1 min-w-0 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
           autoComplete="off"
         />
         {isLoading && (
