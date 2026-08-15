@@ -161,11 +161,41 @@ body {
   animation: halo-respire 3.2s ease-in-out 3 forwards;
 }
 
+/* Exemples qui defilent dans le champ de recherche (15/08, choix Willy).
+   Les mots montent comme les chiffres d'un compteur, avec une PAUSE sur
+   chacun : un defilement continu serait illisible.
+
+   Pourquoi c'est utile et pas seulement joli : le champ accepte aussi bien
+   un metier ("plombier") qu'un probleme ("fuite d'eau") ou une phrase
+   entiere ("refaire ma salle de bain"). Un placeholder fixe ne montre qu'une
+   de ces formes ; en les faisant defiler, le visiteur comprend en trois
+   secondes qu'il peut ecrire ce qu'il veut.
+
+   100 % CSS, aucune ligne de JavaScript : la propriete `transform` est
+   animee par la carte graphique, sans recalcul de mise en page. Cout sur la
+   vitesse du site : nul.
+
+   La derniere ligne REPETE la premiere, sinon la boucle "saute" visiblement
+   au moment de revenir au debut. */
+@keyframes defile-exemples {
+  0%,   15% { transform: translateY(0); }
+  20%,  35% { transform: translateY(-1.5em); }
+  40%,  55% { transform: translateY(-3em); }
+  60%,  75% { transform: translateY(-4.5em); }
+  80%,  95% { transform: translateY(-6em); }
+  100%      { transform: translateY(-7.5em); }
+}
+
+.animate-defile-exemples {
+  animation: defile-exemples 14s cubic-bezier(0.7, 0, 0.3, 1) infinite;
+}
+
 /* Respect de l'accessibilite : si l'utilisateur a active "Reduire les
    animations" dans son OS, on coupe nos animations decoratives. */
 @media (prefers-reduced-motion: reduce) {
   .animate-accent-pulse,
   .animate-halo-respire,
+  .animate-defile-exemples,
   .animate-slide-in-up {
     animation: none;
   }

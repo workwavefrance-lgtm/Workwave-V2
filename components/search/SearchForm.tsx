@@ -195,6 +195,11 @@ export default function SearchForm({
     }
   }
 
+  // Les exemples ne defilent que si le champ est VIDE et SANS focus.
+  // Des que le visiteur clique dedans ou tape une lettre, le calque
+  // disparait : il ne peut donc jamais se superposer a sa saisie.
+  const exemplesVisibles = !metierQuery && !showMetier;
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -232,9 +237,50 @@ export default function SearchForm({
           // Les points de suspension disent "et tout ce que vous voulez" —
           // sans eux, le visiteur croit devoir choisir dans la liste.
           placeholder="Ex. : plombier, fuite d'eau, refaire ma salle de bain…"
-          className="flex-1 min-w-0 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)]"
+          className={`flex-1 min-w-0 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)] ${
+            exemplesVisibles ? "placeholder:text-transparent" : ""
+          }`}
           autoComplete="off"
         />
+
+        {/* EXEMPLES QUI DEFILENT (15/08, choix Willy).
+            On ne peut pas animer l'attribut `placeholder` d'un input : on
+            superpose donc un calque par-dessus, et on rend le vrai
+            placeholder transparent pendant ce temps.
+
+            CONCU POUR NE JAMAIS GENER LA SAISIE :
+             - `pointer-events-none` : le calque ne capte aucun clic, taper
+               dans le champ fonctionne exactement comme avant ;
+             - `aria-hidden` : les lecteurs d'ecran lisent le vrai
+               placeholder, jamais le calque ;
+             - il disparait des que le champ contient du texte OU recoit le
+               focus, donc il ne peut pas se superposer a ce que tape le
+               visiteur ;
+             - le vrai placeholder reste ecrit dans le HTML : si le CSS ne
+               charge pas, le visiteur voit le texte normal au lieu de rien.
+            Aucune ligne de JavaScript n'anime quoi que ce soit : c'est la
+            classe CSS `animate-defile-exemples` qui fait tout le travail. */}
+        {exemplesVisibles && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-[2.75rem] top-1/2 -translate-y-1/2 h-[1.5em] overflow-hidden text-sm text-[var(--text-tertiary)] select-none"
+          >
+            <span className="flex flex-col animate-defile-exemples">
+              {[
+                "Ex. : plombier",
+                "Ex. : électricien",
+                "Ex. : fuite d'eau",
+                "Ex. : refaire ma salle de bain",
+                "Ex. : couvreur",
+                "Ex. : plombier",
+              ].map((mot, i) => (
+                <span key={i} className="h-[1.5em] leading-[1.5em] whitespace-nowrap">
+                  {mot}
+                </span>
+              ))}
+            </span>
+          </span>
+        )}
 
         {showMetier && metierGroups.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl shadow-lg z-50 max-h-[min(70vh,24rem)] overflow-y-auto py-1">
