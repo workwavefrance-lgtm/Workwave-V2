@@ -201,7 +201,16 @@ function humanUrgency(value: string | null): string | null {
 }
 
 /** Exporte pour permettre de PREVISUALISER un email sans l'envoyer (scripts/_preview-mail.ts). */
-export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: string | null): string {
+/**
+ * @param freeRemaining Deblocages OFFERTS restants pour ce destinataire.
+ *   Quand il est fourni, le mail annonce la gratuite avec le VRAI compteur du
+ *   pro. Laisse a `undefined`, le mail n'en parle pas du tout : c'etait le
+ *   comportement jusqu'au 15/08/2026, et c'etait un defaut. Le mail annoncait
+ *   9,90 EUR sans jamais dire que les deux premiers sont offerts. Mesure du
+ *   15/08 : sur 42 pros ayant un compte, 37 n'avaient jamais rien debloque.
+ *   Ils voyaient un cout, jamais la gratuite.
+ */
+export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: string | null, freeRemaining?: number): string {
   const previewDesc =
     input.projectDescription.length > 220
       ? input.projectDescription.slice(0, 220).trim() + "..."
@@ -268,15 +277,24 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
       </table>
     </div>
 
+    ${
+      freeRemaining && freeRemaining > 0
+        ? `<div style="background:#FFF4E8;border:1px solid #FFD9B8;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
+        <p style="font-size:13px;color:#B24800;margin:0;font-weight:700;">
+          ${freeRemaining === 1 ? "Il vous reste 1 d&eacute;blocage offert" : `Vos ${freeRemaining} premiers d&eacute;blocages sont offerts`} : ce projet ne vous co&ucirc;te rien.
+        </p>
+      </div>`
+        : ""
+    }
     <a href="${baseUrl}/pro/dashboard/leads" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 12px 0;">
-      Voir le projet &rarr;
+      ${freeRemaining && freeRemaining > 0 ? "Voir le projet (offert) &rarr;" : "Voir le projet &rarr;"}
     </a>
     <p style="font-size:12px;color:#525252;line-height:1.6;margin:0 0 24px 0;">
       Pas le temps maintenant&nbsp;? Vous retrouverez ce projet &agrave; tout moment dans votre <a href="${baseUrl}/pro/dashboard/leads" style="color:#FF6803;font-weight:600;text-decoration:none;">dashboard, onglet &laquo;&nbsp;Leads&nbsp;&raquo;</a>&nbsp;&mdash; rien ne se perd.
     </p>
 
     <p style="font-size:12px;color:#525252;line-height:1.6;margin:24px 0 0 0;">
-      <strong>Comment ca marche ?</strong> Acces gratuit a tous les projets de votre zone. Pour debloquer les coordonnees d'un particulier (telephone + email) et le contacter directement : ${UNLOCK_PRICE_EUR_TTC}&euro; TTC par projet. Sans engagement, sans abonnement, sans commission.
+      <strong>Comment ca marche ?</strong> Acces gratuit a tous les projets de votre zone. Pour debloquer les coordonnees d'un particulier (telephone + email) et le contacter directement : ${UNLOCK_PRICE_EUR_TTC}&euro; TTC par projet, <strong>et vos 2 premiers deblocages sont offerts</strong>. Sans engagement, sans abonnement, sans commission.
     </p>
     <p style="font-size:12px;color:#999;line-height:1.6;margin:8px 0 0 0;">
       Pour ne plus recevoir ces notifications, mettez votre fiche en pause depuis votre <a href="${baseUrl}/pro/dashboard/preferences" style="color:#999;">dashboard</a>.
@@ -350,7 +368,19 @@ export async function broadcastBtpProject(
   }
 
   // Email construit ici (apres le fetch ville) pour inclure le code postal.
-  const html = buildEmailHtml(input, baseUrl, projectPostalCode);
+  // Le HTML depend desormais du nombre de deblocages OFFERTS restants du
+  // destinataire. On ne construit pas 1 HTML par pro (inutile) mais UN PAR
+  // VALEUR possible : 2, 1 ou 0. Trois rendus au maximum, quelle que soit la
+  // taille de la diffusion.
+  const htmlParRestants = new Map<number, string>();
+  const htmlPour = (restants: number): string => {
+    let h = htmlParRestants.get(restants);
+    if (!h) {
+      h = buildEmailHtml(input, baseUrl, projectPostalCode, restants);
+      htmlParRestants.set(restants, h);
+    }
+    return h;
+  };
 
   // 2) Selection des pros BTP eligibles (categorie + claimed + actif).
   //    On NE filtre PAS par city_id en SQL : la bbox naive serait plafonnee
@@ -485,6 +515,24 @@ export async function broadcastBtpProject(
     return { totalTargets: 0, sent: 0, failed: 0, errors: [] };
   }
 
+  // Compteurs de deblocages OFFERTS deja consommes, pour TOUS les
+  // destinataires en UNE seule requete. Sans ca, il faudrait une requete par
+  // pro : ici la diffusion peut toucher des centaines de personnes.
+  const FREE_UNLOCK_COUNT = 2;
+  const gratuitsUtilises = new Map<number, number>();
+  {
+    const { data: u } = await sb
+      .from("lead_unlocks")
+      .select("pro_id")
+      .eq("amount_cents", 0)
+      .in("pro_id", targets.map((t) => t.id));
+    ((u || []) as { pro_id: number }[]).forEach((x) =>
+      gratuitsUtilises.set(x.pro_id, (gratuitsUtilises.get(x.pro_id) || 0) + 1)
+    );
+  }
+  const restantsDe = (proId: number) =>
+    Math.max(0, FREE_UNLOCK_COUNT - (gratuitsUtilises.get(proId) || 0));
+
   // 3) Envoi en chunks de 50 (respect rate limit Resend ~10 req/s)
   let sent = 0;
   let failed = 0;
@@ -493,7 +541,7 @@ export async function broadcastBtpProject(
   for (let i = 0; i < targets.length; i += CHUNK_SIZE) {
     const chunk = targets.slice(i, i + CHUNK_SIZE);
     const results = await Promise.all(
-      chunk.map((t) => sendOne(t.email, subject, html))
+      chunk.map((t) => sendOne(t.email, subject, htmlPour(restantsDe(t.id))))
     );
     for (const r of results) {
       if (r.ok) {
