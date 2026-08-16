@@ -133,14 +133,19 @@ export default async function Home() {
             colonne image volerait la moitie de l'ecran a la barre de recherche.
 
             `priority` : elle est dans le premier ecran, candidate LCP. */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-full xl:w-[58%] opacity-[0.12] xl:opacity-100">
+        {/* 16/08 : la photo recule de 58 % a 46 % pour rendre sa place au
+            message. Elle reste entiere et lisible (5 metiers visibles), elle
+            n'occupe simplement plus la moitie de l'ecran. `sizes` suit la
+            largeur reelle, sinon le navigateur telecharge une image
+            surdimensionnee pour rien. */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-full xl:w-[46%] opacity-[0.12] xl:opacity-100">
           <Image
             src="/photos/hero-metiers.webp"
             alt=""
             aria-hidden="true"
             fill
             priority
-            sizes="(max-width: 1280px) 100vw, 58vw"
+            sizes="(max-width: 1280px) 100vw, 46vw"
             className="object-cover object-center [mask-image:linear-gradient(to_right,transparent,black_30%),linear-gradient(to_bottom,black_78%,transparent)] [mask-composite:intersect] [-webkit-mask-composite:source-in]"
           />
         </div>
@@ -149,7 +154,14 @@ export default async function Home() {
             lateral (mesure du 13/08). Le bloc d'action, lui, reste borne a
             max-w-3xl : une barre de recherche de 1200 px de large serait
             absurde a viser a la souris. */}
-        <div className="relative w-[min(92vw,1440px)] mx-auto xl:mx-0 xl:ml-[max(2rem,calc((100vw-1440px)/2))] xl:max-w-[46%] text-center xl:text-left">
+        {/* 16/08 (choix Willy sur 4 largeurs capturees du site) : la colonne
+            passe de 46 % a 60 %. MESURE qui a declenche le changement : le
+            cadre d'action a un plafond de 768 px mais n'en faisait que 721,
+            parce que la COLONNE etait plus etroite que le cadre qu'elle
+            contient. Le cadre n'atteignait donc jamais sa taille prevue.
+            Effet visible : le titre passe de 3 lignes a 2, donc la phrase se
+            lit d'un seul coup d'oeil au lieu d'etre coupee sur "vous." seul. */}
+        <div className="relative w-[min(92vw,1440px)] mx-auto xl:mx-0 xl:ml-[max(2rem,calc((100vw-1440px)/2))] xl:max-w-[60%] text-center xl:text-left">
           {/* La PREUVE avant la promesse (11/08/2026).
               Avant : "Trouvez le bon artisan près de chez vous." — une phrase
               que TOUS les concurrents ecrivent. Le seul chiffre qui nous
@@ -213,7 +225,11 @@ export default async function Home() {
 
               `animate-halo-respire` : halo qui respire 3 cycles puis s'arrete,
               coupe par prefers-reduced-motion. */}
-          <div className="max-w-3xl mx-auto xl:mx-0 rounded-3xl bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-secondary))] p-6 sm:p-8 animate-halo-respire">
+          {/* Plafond 768 px (max-w-3xl) -> 880 px. Il reste un PLAFOND et non
+              un pourcentage : au-dela, une barre de recherche de plus de
+              900 px devient penible a viser a la souris. Mesure a 2560 px :
+              le cadre se stabilise bien a 880 et ne suit pas l'ecran. */}
+          <div className="max-w-[880px] mx-auto xl:mx-0 rounded-3xl bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-secondary))] p-6 sm:p-8 animate-halo-respire">
             <p className="text-lg sm:text-xl font-bold text-[var(--text-primary)] leading-snug mb-6 max-w-xl mx-auto xl:mx-0">
               Décrivez votre projet, des artisans près de chez vous vous
               recontacteront{" "}
