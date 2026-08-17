@@ -22,6 +22,7 @@ import { getCategoryArticle } from "@/lib/utils/category-grammar";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import { formatEffectifRange, formatFoundingYear, formatAgeYears } from "@/lib/utils/sirene";
+import { libelleNaf } from "@/lib/data/naf-labels";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
 // l'URL canonique est /ai/freelance/[slug] (design Workwave AI). Évite le
@@ -532,7 +533,12 @@ export default async function ProPage({ params }: Props) {
               majeur pour les particuliers : c'est ce qu'ils regardent en
               premier (anciennete + taille). Affiche uniquement si on a
               au moins une des deux infos. */}
-          {(pro.founded_year || pro.founding_date || pro.effectif_range) && (
+          {/* 17/08/2026 : `libelleNaf` conditionne l'affichage du bloc au meme
+              titre que l'annee de creation. `formatEffectifRange` ne renvoie
+              plus rien pour le code "NN" (92 % des fiches), donc la carte
+              "Taille de l'equipe" disparait quand la donnee manque au lieu
+              d'afficher "Effectif inconnu" a l'identique partout. */}
+          {(pro.founded_year || pro.founding_date || pro.effectif_range || libelleNaf(pro.naf_code)) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(pro.founded_year || pro.founding_date) && (() => {
                 // founded_year (édité par le pro) prime sur founding_date Sirene.
@@ -579,6 +585,28 @@ export default async function ProPage({ params }: Props) {
                     <p className="text-sm font-semibold text-[var(--text-primary)]">
                       {formatEffectifRange(pro.effectif_range)}
                       <span className="text-[var(--text-tertiary)] font-normal text-xs"> · INSEE</span>
+                    </p>
+                  </div>
+                </div>
+              )}
+              {/* ACTIVITE DECLAREE AU REGISTRE (17/08/2026).
+                  Le code d'activite est en base sur 2 050 350 fiches et
+                  n'etait affiche nulle part. C'est la donnee gratuite qui
+                  distingue le mieux deux entreprises voisines : deux macons
+                  de la meme ville peuvent etre l'un en "maconnerie generale
+                  et gros oeuvre", l'autre en "travaux de charpente". */}
+              {libelleNaf(pro.naf_code) && (
+                <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
+                    <svg className="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">Activité déclarée</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      {libelleNaf(pro.naf_code)}
+                      <span className="text-[var(--text-tertiary)] font-normal text-xs"> · code {pro.naf_code}</span>
                     </p>
                   </div>
                 </div>

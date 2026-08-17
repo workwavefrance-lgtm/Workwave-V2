@@ -5,8 +5,15 @@
 
 // Codes officiels INSEE pour la tranche d'effectif salarie
 // https://www.insee.fr/fr/information/2114043
+// 17/08/2026 : le code "NN" (effectif non renseigne) N'EST PLUS ici.
+// Il concerne 92 % des fiches, et affichait "Effectif inconnu" a l'identique
+// sur 2,3 millions de pages. C'est du texte dupliqué qui n'apprend rien au
+// lecteur et qui aggrave le probleme d'indexation mesure ce jour-la
+// (218 870 pages en "exploree, actuellement non indexee"). Absent de la
+// table, `formatEffectifRange` renvoie null et le bloc entier disparait,
+// y compris dans les donnees structurees ou `numberOfEmployees` valait
+// "Effectif inconnu".
 const EFFECTIF_LABELS: Record<string, string> = {
-  NN: "Effectif inconnu",
   "00": "0 salarié",
   "01": "1 ou 2 salariés",
   "02": "3 à 5 salariés",
