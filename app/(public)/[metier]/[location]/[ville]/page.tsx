@@ -66,14 +66,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const currentYear = new Date().getFullYear();
 
   // Title plus court adapté à la sous-spécialité (sans « | Devis gratuit | Workwave ») :
-  // "Top 10 entreprises de ménage spécialisées en repassage à Poitiers — 2026"
+  // "Top 10 entreprises de ménage spécialisées en repassage à Poitiers · 2026"
   let title: string;
   if (prosCount === 0) {
     title = `${category.name} ${specialty.shortLabel} à ${city.name}`;
   } else if (prosCount === 1) {
-    title = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${specialty.shortLabel} à ${city.name} — ${currentYear}`;
+    title = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${specialty.shortLabel} à ${city.name} · ${currentYear}`;
   } else {
-    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} — ${currentYear}`;
+    title = `Top ${displayCount} ${pluralCategory} ${specialty.shortLabel} à ${city.name} · ${currentYear}`;
   }
 
   const description =
@@ -284,7 +284,7 @@ export async function renderSpecialtyCity(
   // H1 SOBRE style Travaux.com (le clickbait reste dans le title pour le CTR SERP).
   const h1Title = isFirstPage
     ? `${category.name} ${specialty.shortLabel} à ${cityLabel}`
-    : `${category.name} ${specialty.shortLabel} à ${cityLabel} — page ${page}`;
+    : `${category.name} ${specialty.shortLabel} à ${cityLabel} · page ${page}`;
 
   const subTitle =
     totalProsCount === 1

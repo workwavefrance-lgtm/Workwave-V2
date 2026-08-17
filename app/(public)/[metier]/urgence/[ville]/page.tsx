@@ -29,7 +29,7 @@ import {
 
 /**
  * Déclinaison PAR VILLE de la page pilier urgence : /[metier]/urgence/[ville]
- * (ex. /serrurier/urgence/paris — « serrurier urgence paris » ≈ 1 300 vol/mois).
+ * (ex. /serrurier/urgence/paris : « serrurier urgence paris » ≈ 1 300 vol/mois).
  *
  * Page d'ACTION locale (le pilier /[metier]/urgence reste la référence
  * éditoriale complète) : prix sourcés nationaux + bloc local UNIQUE (les 3
@@ -37,7 +37,7 @@ import {
  *
  * GARDE ANTI-THIN STRICT : ville introuvable OU < 3 pros actifs du métier
  * dans la ville → notFound(). Le count est fait en head:true (zéro row
- * transférée — crise egress 11/06/2026).
+ * transférée, crise egress 11/06/2026).
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
  * ⚠️ Le segment doit s'appeler [ville] : Next.js impose le MÊME nom de
@@ -71,7 +71,7 @@ const HERO_ART: Record<string, (props: { className?: string }) => React.JSX.Elem
 };
 
 // Grandes villes du maillage (toutes vérifiées >= 3 pros actifs pour les 2
-// métiers de la whitelist au 11/06/2026 — serrurier : Paris 128, Marseille 27,
+// métiers de la whitelist au 11/06/2026, serrurier : Paris 128, Marseille 27,
 // Lyon 13, Toulouse 14, Bordeaux 11, Nantes 6).
 const GRANDES_VILLES = [
   { slug: "paris", name: "Paris" },
@@ -86,7 +86,7 @@ type FaqItem = { question: string; answer: string };
 
 /**
  * Copy spécifique au métier. Tous les chiffres viennent de `content`
- * (urgence-content.ts, sourcé) — zéro chiffre inventé, zéro promesse de délai.
+ * (urgence-content.ts, sourcé) : zéro chiffre inventé, zéro promesse de délai.
  */
 type VilleUrgenceConfig = {
   metaDescription: (cityName: string, count: number, content: UrgenceContent) => string;
@@ -214,7 +214,7 @@ export default async function MetierUrgenceVillePage({ params }: Props) {
     { label: city.name },
   ];
 
-  // FAQ locale (4 Q) — réponses dérivées UNIQUEMENT du contenu sourcé.
+  // FAQ locale (4 Q) : réponses dérivées UNIQUEMENT du contenu sourcé.
   const faqs: FaqItem[] = [
     config.faqQ1(city.name, year, content),
     {
@@ -257,7 +257,7 @@ export default async function MetierUrgenceVillePage({ params }: Props) {
         {labels.plural} SIRET vérifiés
       </h1>
 
-      {/* Intro courte LOCALISÉE (3 phrases) — illustration en regard */}
+      {/* Intro courte LOCALISÉE (3 phrases), illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
@@ -276,11 +276,11 @@ export default async function MetierUrgenceVillePage({ params }: Props) {
         <HeroArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — le visiteur en urgence veut une action immédiate */}
+      {/* CTA héro : le visiteur en urgence veut une action immédiate */}
       <HeroCta
         href={deposerHref}
         label={`Trouver un ${labels.singular.toLowerCase()} vérifié à ${city.name}`}
-        note={`Gratuit, sans engagement — votre demande est visible par les ${labels.plural} SIRET vérifiés de votre zone, qui vous recontactent directement.`}
+        note={`Gratuit, sans engagement : votre demande est visible par les ${labels.plural} SIRET vérifiés de votre zone, qui vous recontactent directement.`}
       />
 
       {/* ─── Bloc local UNIQUE : les 3 premiers pros de la ville ─── */}
@@ -334,7 +334,7 @@ export default async function MetierUrgenceVillePage({ params }: Props) {
         />
       </section>
 
-      {/* ─── Arnaques — version COMPACTE (le guide complet = le pilier) ─── */}
+      {/* ─── Arnaques : version COMPACTE (le guide complet = le pilier) ─── */}
       <section className="mb-12">
         <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
           Les arnaques au dépannage les plus courantes
@@ -359,7 +359,7 @@ export default async function MetierUrgenceVillePage({ params }: Props) {
       {/* ─── FAQ locale (UI + schema FAQPage injecté plus haut) ─── */}
       <FaqAccordion
         faqs={faqs}
-        title={`Questions fréquentes — ${labels.singular.toLowerCase()} en urgence à ${city.name}`}
+        title={`Questions fréquentes · ${labels.singular.toLowerCase()} en urgence à ${city.name}`}
       />
 
       {/* ─── Maillage interne ─── */}

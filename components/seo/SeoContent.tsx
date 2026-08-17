@@ -50,7 +50,7 @@ function parseMarkdown(md: string): string {
   while (i < lines.length) {
     const trimmed = lines[i].trim();
 
-    // Empty line — skip
+    // Empty line, skip
     if (trimmed === "") {
       i++;
       continue;
@@ -172,7 +172,7 @@ function parseMarkdown(md: string): string {
       continue;
     }
 
-    // Paragraph — collect consecutive non-special lines
+    // Paragraph : collect consecutive non-special lines
     const paraLines: string[] = [];
     while (
       i < lines.length &&

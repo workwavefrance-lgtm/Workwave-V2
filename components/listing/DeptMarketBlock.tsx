@@ -89,7 +89,7 @@ export default function DeptMarketBlock({
         <p className="mt-2 text-[11px] text-[var(--text-tertiary)]">
           Données agrégées sur {market.nb_communes.toLocaleString("fr-FR")} communes du
           département. Sources : DVF (valeurs foncières), INSEE FiLoSoFi (revenus),
-          LOVAC (logements vacants) — data.gouv.fr, Licence Ouverte.
+          LOVAC (logements vacants) · data.gouv.fr, Licence Ouverte.
         </p>
       </div>
     </section>

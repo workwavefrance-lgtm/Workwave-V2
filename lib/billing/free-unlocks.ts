@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { sendFreeUnlockAlert } from "@/lib/email/send-free-unlock-alert";
 
 /**
- * Offre de lancement — les N premiers déblocages de lead sont OFFERTS.
+ * Offre de lancement : les N premiers déblocages de lead sont OFFERTS.
  *
  * Implémentation SANS migration : un déblocage offert est une row lead_unlocks
  * normale avec `amount_cents = 0` et un `stripe_payment_intent_id` marqueur
@@ -17,7 +17,7 @@ export const FREE_UNLOCK_COUNT = 2;
 /**
  * Nombre de déblocages offerts restants pour un pro (0 quand l'offre est consommée).
  * On ne compte QUE les déblocages gratuits (amount_cents = 0) : un pro qui a déjà
- * PAYÉ un lead garde ses 2 crédits offerts intacts (sinon le compteur "X/2" ment —
+ * PAYÉ un lead garde ses 2 crédits offerts intacts (sinon le compteur "X/2" ment,
  * cas réel ATSAF 06/07 : 1 unlock payé + 1er offert affichait "2/2 consommé").
  */
 export async function getFreeUnlocksRemaining(
@@ -37,7 +37,7 @@ export async function getFreeUnlocksRemaining(
 
 /**
  * Débloque un projet GRATUITEMENT (offre 2 premiers leads).
- * Retourne "granted" (ok), "already" (déjà débloqué — idempotent) ou "error".
+ * Retourne "granted" (ok), "already" (déjà débloqué, idempotent) ou "error".
  * L'alerte admin est envoyée en best-effort (tracée en console si échec),
  * mais TOUJOURS awaitée (leçon 24/05 : pas de promise détachée en Server Action).
  */

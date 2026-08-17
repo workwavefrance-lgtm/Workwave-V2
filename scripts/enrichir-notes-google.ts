@@ -1,6 +1,6 @@
 /**
  * Enrichit les fiches pros avec leur NOTE GOOGLE, leur NOMBRE D'AVIS et leurs
- * HORAIRES — uniquement quand l'identite de l'entreprise est CERTAINE.
+ * HORAIRES, uniquement quand l'identite de l'entreprise est CERTAINE.
  *
  * ------------------------------------------------------------------------
  * POURQUOI CE SCRIPT PLUTOT QUE `enrich-pros-google-places.ts`
@@ -16,7 +16,7 @@
  * Un prenom ne distingue personne, "services" non plus, et deux entreprises
  * concurrentes partagent souvent une adresse en zone d'activite. C'est le meme
  * mecanisme qui, via Apify en mai 2026, avait colle le telephone d'une personne
- * sur l'entreprise d'une autre — 857 fiches touchees, une plainte RGPD.
+ * sur l'entreprise d'une autre : 857 fiches touchees, une plainte RGPD.
  *
  * ------------------------------------------------------------------------
  * LA CLE FIABLE
@@ -27,11 +27,11 @@
  * binaire, pas approximative. Aucun faux positif possible.
  *
  * Consequence : on ne traite que les 34 774 fiches qui ont deja un telephone
- * ou un site web. Ce ne sont PAS de nouvelles coordonnees qu'on cherche — ce
+ * ou un site web. Ce ne sont PAS de nouvelles coordonnees qu'on cherche : ce
  * sont des notes et des horaires sur des fiches qu'on sait identifier.
  *
  * ------------------------------------------------------------------------
- * 🔴 FACTURATION — LIRE AVANT DE TOUCHER AU PLAFOND OU AU FIELD MASK
+ * 🔴 FACTURATION : LIRE AVANT DE TOUCHER AU PLAFOND OU AU FIELD MASK
  * ------------------------------------------------------------------------
  * Le 11/08/2026 ce script a coute 91,55 € en une journee, alors que j'avais
  * ecrit ici "5 000 appels gratuits". C'ETAIT FAUX. Facture reelle constatee
@@ -44,13 +44,13 @@
  *     Text Search Pro           5 000 appels gratuits/mois   puis 32,00 $/1000
  *     Text Search Enterprise    1 000 appels gratuits/mois   puis 35,00 $/1000
  *
- * `rating` et `userRatingCount` — c'est-a-dire EXACTEMENT ce qu'on vient
- * chercher — sont des champs Enterprise. Il n'existe donc pas de version
+ * `rating` et `userRatingCount`, c'est-a-dire EXACTEMENT ce qu'on vient
+ * chercher, sont des champs Enterprise. Il n'existe donc pas de version
  * economique de cette tache : 1 000 appels gratuits par mois, puis 3,5 centimes
  * l'appel.
  *
  * Verification par le montant : 4 205 appels - 1 000 gratuits = 3 205 facturables
- * a 35 $/1000 = 112 $ ~ 96 € — la facture affichait 91,55 € (une partie des
+ * a 35 $/1000 = 112 $ ~ 96 € : la facture affichait 91,55 € (une partie des
  * appels du jour n'y figurait pas encore). L'hypothese "palier Pro a 5 000
  * gratuits" donnerait 0 €, elle est donc exclue par la facture elle-meme.
  *
@@ -160,18 +160,18 @@ function appelPlaces(textQuery: string) {
 
   console.log(`Mois ${mois} : ${appels} appels deja consommes, ${restants} restants sur ${QUOTA_MENSUEL} gratuits`);
   if (restants <= 0) {
-    console.log("Quota gratuit du mois epuise. On s'arrete — aucun appel facture.");
+    console.log("Quota gratuit du mois epuise. On s'arrete, aucun appel facture.");
     return;
   }
   const aTraiter = Math.min(NB, restants);
-  console.log(`${APPLIQUER ? "ECRITURE EN BASE" : "SIMULATION (aucune ecriture)"} — ${aTraiter} fiches\n`);
+  console.log(`${APPLIQUER ? "ECRITURE EN BASE" : "SIMULATION (aucune ecriture)"} · ${aTraiter} fiches\n`);
 
   let trouves = 0, ecrits = 0, refuses = 0, sansResultat = 0, sansCle = 0, erreurs = 0;
 
   /**
    * Marque la fiche comme TENTEE, quel que soit le resultat.
    *
-   * POURQUOI MARQUER AUSSI LES ECHECS — mesure du lot du 11/08/2026 :
+   * POURQUOI MARQUER AUSSI LES ECHECS : mesure du lot du 11/08/2026 :
    * sur 1 000 fiches, 777 sont inconnues de Google. Sans marquage, la requete
    * de selection (`google_enriched_at IS NULL`) les represente a CHAQUE
    * lancement : le quota gratuit se viderait indefiniment sur les memes fiches,
@@ -252,7 +252,7 @@ function appelPlaces(textQuery: string) {
     // Ni telephone, ni domaine extractible du site : cette fiche ne pourra
     // JAMAIS etre identifiee par cette methode (la requete partirait vide et
     // Google repondrait 400). On la marque quand meme, sans depenser d'appel,
-    // pour qu'elle sorte definitivement de la file — sinon elle revient a
+    // pour qu'elle sorte definitivement de la file, sinon elle revient a
     // chaque page et finit par la remplir entierement.
     const requete = p.phone || domaine(p.website);
     if (!requete) { sansCle++; await marquer(p.id); continue; }
@@ -269,8 +269,8 @@ function appelPlaces(textQuery: string) {
     //
     // JAMAIS de repli sur le nom. Le 11/08 j'avais laisse un
     // `|| \`${p.name} ${ville}\`` : "Kevin VACHE" a matche le restaurant
-    // "O'la vache". La recherche par nom est precisement celle qu'on a rejetee
-    // — la remettre en secours revient a la remettre tout court. Une fiche sans
+    // "O'la vache". La recherche par nom est precisement celle qu'on a rejetee.
+    // La remettre en secours revient a la remettre tout court. Une fiche sans
     // telephone ni site n'est pas traitee, point.
     //
     // LE FORMAT DU NUMERO NE SE TOUCHE PAS. Mesure du 11/08 sur 8 fiches deja
@@ -333,7 +333,7 @@ function appelPlaces(textQuery: string) {
     // fiche "BRICODAB" et celui d'un E.Leclerc sur "ESTELLE LECLERC". Le
     // rapprochement est alors techniquement juste et le resultat absurde.
     // Un artisan n'est ni un hypermarche, ni un restaurant, ni une enseigne de
-    // bricolage — et il n'a pas 8 000 avis.
+    // bricolage, et il n'a pas 8 000 avis.
     const TYPES_INTERDITS = /supermarket|hypermarket|grocery|store|restaurant|cafe|bar|hotel|bank|pharmacy|gas_station|school|hospital|shopping/i;
     const typeSuspect = TYPES_INTERDITS.test(g.primaryType || "");
     const tropDAvis = (g.userRatingCount ?? 0) > 300;
@@ -341,7 +341,7 @@ function appelPlaces(textQuery: string) {
       refuses++;
       await marquer(p.id);
       console.log(
-        `  ✗ ${p.name.slice(0, 32).padEnd(34)} REFUSE — ${
+        `  ✗ ${p.name.slice(0, 32).padEnd(34)} REFUSE : ${
           typeSuspect ? `type "${g.primaryType}"` : `${g.userRatingCount} avis, invraisemblable pour un artisan`
         } (donnee de depart probablement fausse)`
       );
@@ -354,7 +354,7 @@ function appelPlaces(textQuery: string) {
     const horaires = g.regularOpeningHours?.weekdayDescriptions ?? null;
 
     console.log(
-      `  ✓ ${p.name.slice(0, 32).padEnd(34)} ${String(note ?? "—").padStart(4)}/5` +
+      `  ✓ ${p.name.slice(0, 32).padEnd(34)} ${String(note ?? "-").padStart(4)}/5` +
       ` ${String(nbAvis ?? 0).padStart(5)} avis  ${horaires ? "horaires" : "        "}  (${parQuoi})`
     );
 
@@ -370,7 +370,7 @@ function appelPlaces(textQuery: string) {
   }
 
   console.log(`\n  identifies avec certitude : ${trouves}`);
-  if (sansCle) console.log(`  ignorees (ni telephone ni domaine exploitable) : ${sansCle} — aucun appel consomme`);
+  if (sansCle) console.log(`  ignorees (ni telephone ni domaine exploitable) : ${sansCle}, aucun appel consomme`);
   console.log(`  refuses (ni tel ni domaine identique) : ${refuses}`);
   console.log(`  absents de Google : ${sansResultat}`);
   if (erreurs) console.log(`  erreurs HTTP (fiche non marquee, sera retentee) : ${erreurs}`);

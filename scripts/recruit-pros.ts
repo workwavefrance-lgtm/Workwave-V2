@@ -1,5 +1,5 @@
 /**
- * RECRUTEMENT PROS NON RÉCLAMÉS — par projet, via Brevo (email + SMS).
+ * RECRUTEMENT PROS NON RÉCLAMÉS · par projet, via Brevo (email + SMS).
  *
  * Quand un projet est déposé, on contacte les pros NON réclamés du même métier
  * (principal OU secondaire) + même département pour les inciter à réclamer leur
@@ -13,7 +13,7 @@
  *     /transactionalSMS/sms, sender "Workwave".
  *
  * ⚠️ SMS : nécessite des CRÉDITS SMS + un SENDER "Workwave" enregistré dans
- *    Brevo (sinon l'API renvoie une erreur — c'est attendu tant que non setup).
+ *    Brevo (sinon l'API renvoie une erreur : c'est attendu tant que non setup).
  *    Le STOP légal France est géré par Brevo à la config du sender.
  *
  * USAGE :
@@ -226,7 +226,7 @@ async function main() {
     process.exit(1);
   }
   console.log(
-    `\n=== RECRUTEMENT PROS — projet #${PROJECT_ID} — canal=${CHANNEL} — ${
+    `\n=== RECRUTEMENT PROS · projet #${PROJECT_ID} · canal=${CHANNEL} · ${
       DRY_RUN ? "DRY-RUN" : TEST_MODE ? "TEST" : "EXECUTE"
     } ===\n`
   );
@@ -338,7 +338,7 @@ async function main() {
     console.log("[DRY-RUN] Aucun envoi. Aperçus :\n");
     if (CHANNEL !== "sms" && emailTargets[0]) {
       console.log("EMAIL exemple →", emailTargets[0].email, `(${emailTargets[0].name})`);
-      console.log(`  Objet : Une demande de ${metier.toLowerCase()} à ${ville} — réclamez votre fiche Workwave`);
+      console.log(`  Objet : Une demande de ${metier.toLowerCase()} à ${ville} · réclamez votre fiche Workwave`);
       console.log(`  CTA   : ${BASE_URL}/pro/reclamer/${emailTargets[0].slug}`);
     }
     if (CHANNEL !== "email" && smsTargets[0]) {
@@ -370,7 +370,7 @@ async function main() {
         sender: { email: SENDER_EMAIL, name: SENDER_NAME },
         to: [{ email: ADMIN_TEST_EMAIL }],
         replyTo: { email: REPLY_TO, name: SENDER_NAME },
-        subject: `[TEST] Une demande de ${metier.toLowerCase()} à ${ville} — réclamez votre fiche`,
+        subject: `[TEST] Une demande de ${metier.toLowerCase()} à ${ville} · réclamez votre fiche`,
         htmlContent: html,
         headers: { "X-Mailin-Track-Click": "0", "X-Mailin-Track-Open": "0" },
       });
@@ -419,7 +419,7 @@ async function main() {
               sender: { email: SENDER_EMAIL, name: SENDER_NAME },
               to: [{ email: t.email, name: t.name || undefined }],
               replyTo: { email: REPLY_TO, name: SENDER_NAME },
-              subject: `Une demande de ${metier.toLowerCase()} à ${ville} — réclamez votre fiche Workwave`,
+              subject: `Une demande de ${metier.toLowerCase()} à ${ville} · réclamez votre fiche Workwave`,
               htmlContent: buildEmail({
                 proId: t.id,
                 proName: t.name,

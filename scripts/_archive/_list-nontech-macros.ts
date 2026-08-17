@@ -40,7 +40,7 @@ async function main() {
         `   ✓ ${slug.padEnd(28)} | id=${data.id} | vertical=${data.vertical} | parent=${data.parent_category_id || "-"} | ${count} pros`
       );
     } else {
-      console.log(`   ✗ ${slug.padEnd(28)} | MANQUANTE — a creer en BDD`);
+      console.log(`   ✗ ${slug.padEnd(28)} | MANQUANTE : a creer en BDD`);
     }
   }
   console.log("");

@@ -102,7 +102,7 @@ export default function FinancesClient({
         setTxHasMore(json.hasMore ?? false);
       }
     } catch {
-      // silently fail — Stripe may not be configured
+      // silently fail: Stripe may not be configured
     } finally {
       setTxLoading(false);
     }
@@ -131,10 +131,10 @@ export default function FinancesClient({
             className="text-base font-semibold mb-0.5"
             style={{ color: "var(--admin-text)" }}
           >
-            IA — Abonnements Premium
+            IA · Abonnements Premium
           </h2>
           <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-            Abonnements Stripe (29,90 €/mois) — freelances Premium
+            Abonnements Stripe (29,90 €/mois) · freelances Premium
           </p>
         </div>
 
@@ -156,7 +156,7 @@ export default function FinancesClient({
         </a>
       </div>
 
-      {/* KPI cards — 5 columns on desktop, 2 on tablet, 1 on mobile */}
+      {/* KPI cards: 5 columns on desktop, 2 on tablet, 1 on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <AdminKPICard
           title="MRR"
@@ -247,7 +247,7 @@ export default function FinancesClient({
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
             </svg>
             <p className="text-xs" style={{ color: "var(--admin-text-tertiary)" }}>
-              Aucune donnée disponible — Stripe non configuré
+              Aucune donnée disponible : Stripe non configuré
             </p>
           </div>
         )}
@@ -293,7 +293,7 @@ export default function FinancesClient({
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
             </svg>
             <p className="text-xs" style={{ color: "var(--admin-text-tertiary)" }}>
-              Aucune transaction — Stripe non configuré ou aucune facture
+              Aucune transaction : Stripe non configuré ou aucune facture
             </p>
           </div>
         ) : (
@@ -347,7 +347,7 @@ export default function FinancesClient({
                       >
                         {tx.customer_email ?? (
                           <span style={{ color: "var(--admin-text-tertiary)" }}>
-                            —
+                            -
                           </span>
                         )}
                       </td>

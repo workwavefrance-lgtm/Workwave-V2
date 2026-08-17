@@ -31,7 +31,7 @@ async function main() {
     cityName: "Dienné",
     departmentName: "Vienne (86)",
     description:
-      "EMAIL DE TEST — vérification de l'ajout du département dans le brief admin. À ignorer.",
+      "EMAIL DE TEST : vérification de l'ajout du département dans le brief admin. À ignorer.",
     urgency: "today",
     budget: "unknown",
     aiQualification: null,

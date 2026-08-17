@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 
 /**
- * Icône par métier (slug catégorie) — affichée dans les cards de projets.
+ * Icône par métier (slug catégorie), affichée dans les cards de projets.
  * Fallback = Wrench (service générique). Slugs vérifiés en base le 24/06/2026.
  */
 const CATEGORY_ICONS: Record<string, LucideIcon> = {

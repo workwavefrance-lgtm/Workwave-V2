@@ -13,7 +13,7 @@
  *   C. Fallback ultime : juste "[metier] à [ville]"
  *
  * On evite TOUT appel LLM en live : heuristique pure, instantanee,
- * gratuite. Cf. plan 24/05/2026 — l'enrichissement IA en batch sera
+ * gratuite. Cf. plan 24/05/2026 : l'enrichissement IA en batch sera
  * un sprint distinct si necessaire (6 pros sur 226k ont une description
  * actuellement, donc les cas A sont rares).
  */
@@ -111,7 +111,7 @@ function buildStructuredFallback(pro: ProCardData): string {
 
   // RGE officiel ADEME
   if (pro.rge_certified) {
-    parts.push("— RGE certifié ADEME");
+    parts.push("· RGE certifié ADEME");
   }
 
   return parts.join(" ") + ".";
@@ -141,10 +141,10 @@ export function buildProSummary(pro: ProCardData): string {
  * texte courts selon les certifications/labels du pro.
  *
  * Priorite d'affichage (top-down) :
- *   1. Avis Workwave (★ X.X (N avis Workwave)) — preuve la plus forte
- *   2. Avis Google (★ X.X (N avis)) — alternative si pas Workwave
- *   3. RGE certifié — signal de qualite
- *   4. Profil vérifié — claimed
+ *   1. Avis Workwave (★ X.X (N avis Workwave)) : preuve la plus forte
+ *   2. Avis Google (★ X.X (N avis)) : alternative si pas Workwave
+ *   3. RGE certifié : signal de qualite
+ *   4. Profil vérifié : claimed
  *   5. Certif notable
  *   6. Anciennete (10+ ans)
  *

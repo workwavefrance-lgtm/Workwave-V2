@@ -41,4 +41,4 @@ for (let i = 0; i < nFrames; i++) {
   if (i % 60 === 0) console.log(`  ${i}/${nFrames}`);
 }
 await browser.close();
-console.log(`OK — ${nFrames} frames dans ${OUT}`);
+console.log(`OK · ${nFrames} frames dans ${OUT}`);

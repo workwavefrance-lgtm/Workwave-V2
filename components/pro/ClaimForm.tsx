@@ -86,7 +86,7 @@ export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Prop
         </div>
       )}
 
-      {/* SIRET — reframé "confirmez" : on l'affiche masqué au-dessus, le pro le recopie */}
+      {/* SIRET reframé "confirmez" : on l'affiche masqué au-dessus, le pro le recopie */}
       <div>
         <label
           htmlFor="siret"
@@ -110,7 +110,7 @@ export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Prop
           className={`${inputBase} font-mono tracking-wide ${state.errors?.siret && !isPending ? inputError : inputNormal}`}
         />
         <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
-          On l&apos;affiche au-dessus — recopiez-le, c&apos;est votre preuve d&apos;identité.
+          On l&apos;affiche au-dessus : recopiez-le, c&apos;est votre preuve d&apos;identité.
         </p>
         {state.errors?.siret && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.siret}</p>
@@ -145,7 +145,7 @@ export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Prop
         </p>
       </div>
 
-      {/* Mot de passe — un seul champ + œil */}
+      {/* Mot de passe : un seul champ + œil */}
       <div>
         <label
           htmlFor="password"

@@ -29,7 +29,7 @@ import {
 
 /**
  * Déclinaison PAR VILLE de la page pilier pose de climatisation :
- * /[metier]/installation/[ville] (climaticien only — ex.
+ * /[metier]/installation/[ville] (climaticien only, ex.
  * /climaticien/installation/marseille, requête SERP cible
  * « installateur climatisation marseille »).
  *
@@ -39,12 +39,12 @@ import {
  * locale.
  *
  * ⚠️ VOCABULAIRE : dans tout le texte visible, dire "installateur(s) de
- * climatisation" — jamais "climaticien" seul (langage de recherche réel ;
+ * climatisation", jamais "climaticien" seul (langage de recherche réel ;
  * le slug technique reste /climaticien).
  *
  * GARDE ANTI-THIN STRICT : ville introuvable OU < 3 pros actifs du métier
  * dans la ville → notFound(). Le count est fait en head:true (zéro row
- * transférée — crise egress 11/06/2026).
+ * transférée : crise egress 11/06/2026).
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
  * ⚠️ Le segment doit s'appeler [ville] : Next.js impose le MÊME nom de
@@ -67,7 +67,7 @@ export function generateStaticParams() {
 const INSTALLATION_METIERS = new Set(["climaticien"]);
 
 // Grandes villes du maillage (toutes vérifiées >= 3 installateurs actifs au
-// 11/06/2026 — Paris 105, Marseille 64, Toulouse 31, Nice 29, Montpellier 25,
+// 11/06/2026 : Paris 105, Marseille 64, Toulouse 31, Nice 29, Montpellier 25,
 // Lyon 22, arrondissements agrégés).
 const GRANDES_VILLES = [
   { slug: "marseille", name: "Marseille" },
@@ -159,7 +159,7 @@ export default async function ClimInstallationVillePage({ params }: Props) {
     { label: city.name },
   ];
 
-  // FAQ locale (4 Q) — réponses dérivées UNIQUEMENT du contenu sourcé.
+  // FAQ locale (4 Q) : réponses dérivées UNIQUEMENT du contenu sourcé.
   const faqs: FaqItem[] = [
     {
       question: `Quel prix pour poser une clim à ${city.name} ?`,
@@ -173,7 +173,7 @@ export default async function ClimInstallationVillePage({ params }: Props) {
     {
       question: "Quelles aides pour une climatisation réversible ?",
       answer:
-        "Prudence sur ce point : la climatisation réversible air-air n'est pas éligible à MaPrimeRénov' en tant que telle. Les aides citées par les sources consultées portent surtout sur la TVA réduite — 10 % sur la main-d'œuvre, sous conditions de recours à un professionnel qualifié — et, selon les cas, sur d'autres dispositifs distincts. Méfiez-vous des discours commerciaux promettant une clim « éligible à toutes les aides ».",
+        "Prudence sur ce point : la climatisation réversible air-air n'est pas éligible à MaPrimeRénov' en tant que telle. Les aides citées par les sources consultées portent surtout sur la TVA réduite (10 % sur la main-d'œuvre, sous conditions de recours à un professionnel qualifié) et, selon les cas, sur d'autres dispositifs distincts. Méfiez-vous des discours commerciaux promettant une clim « éligible à toutes les aides ».",
     },
     {
       question: `Comment choisir son installateur de climatisation à ${city.name} ?`,
@@ -206,7 +206,7 @@ export default async function ClimInstallationVillePage({ params }: Props) {
         {`Pose de clim à ${city.name} : prix réels et ${count} installateurs de climatisation vérifiés`}
       </h1>
 
-      {/* Intro courte LOCALISÉE (3 phrases) — illustration en regard */}
+      {/* Intro courte LOCALISÉE (3 phrases), illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
@@ -220,11 +220,11 @@ export default async function ClimInstallationVillePage({ params }: Props) {
         <AcUnitArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — au-dessus de la ligne de flottaison */}
+      {/* CTA héro : au-dessus de la ligne de flottaison */}
       <HeroCta
         href={deposerHref}
         label={`Trouver un installateur vérifié à ${city.name}`}
-        note="Gratuit, sans engagement — votre demande est visible par les installateurs de climatisation SIRET vérifiés de votre zone, qui vous recontactent directement."
+        note="Gratuit, sans engagement : votre demande est visible par les installateurs de climatisation SIRET vérifiés de votre zone, qui vous recontactent directement."
       />
 
       {/* ─── Bloc local UNIQUE : les 3 premiers pros de la ville ─── */}
@@ -275,7 +275,7 @@ export default async function ClimInstallationVillePage({ params }: Props) {
         />
       </section>
 
-      {/* ─── Arnaques — version COMPACTE (le guide complet = le pilier) ─── */}
+      {/* ─── Arnaques : version COMPACTE (le guide complet = le pilier) ─── */}
       <section className="mb-12">
         <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
           Les arnaques à la pose de climatisation les plus courantes
@@ -302,7 +302,7 @@ export default async function ClimInstallationVillePage({ params }: Props) {
       {/* ─── FAQ locale (UI + schema FAQPage injecté plus haut) ─── */}
       <FaqAccordion
         faqs={faqs}
-        title={`Questions fréquentes — pose de climatisation à ${city.name}`}
+        title={`Questions fréquentes · pose de climatisation à ${city.name}`}
       />
 
       {/* ─── Maillage interne ─── */}

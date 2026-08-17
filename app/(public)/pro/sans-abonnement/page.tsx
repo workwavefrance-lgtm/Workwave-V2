@@ -8,13 +8,13 @@ import { toBreadcrumbSchema, getFaqSchema } from "@/lib/utils/schema";
 const BASE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
-  title: "Recevez des chantiers sans abonnement — Pay-per-lead 9,90 €",
+  title: "Recevez des chantiers sans abonnement · Pay-per-lead 9,90 €",
   description:
     "Marre des abonnements mensuels et des leads vendus à 10 artisans ? Workwave : fiche gratuite, pas d'abonnement, 9,90 € TTC par lead que vous voulez contacter. Comparatif des plateformes.",
   alternates: { canonical: `${BASE_URL}/pro/sans-abonnement` },
   openGraph: {
     type: "website",
-    title: "Recevez des chantiers sans abonnement — Workwave",
+    title: "Recevez des chantiers sans abonnement · Workwave",
     description:
       "Fiche gratuite, pas d'abonnement, 9,90 € TTC par lead. Le comparatif des plateformes de mise en relation pour artisans.",
     url: `${BASE_URL}/pro/sans-abonnement`,
@@ -30,7 +30,7 @@ const faqs = [
   {
     question: "Workwave a-t-il un abonnement mensuel pour les pros ?",
     answer:
-      "Non. La fiche professionnelle est gratuite à vie et l'inscription ne demande aucune carte bancaire. Vous recevez automatiquement les projets de votre zone par email. Vous payez uniquement 9,90 € TTC pour débloquer les coordonnées d'un client que vous souhaitez contacter — paiement unique par projet, sans aucun abonnement.",
+      "Non. La fiche professionnelle est gratuite à vie et l'inscription ne demande aucune carte bancaire. Vous recevez automatiquement les projets de votre zone par email. Vous payez uniquement 9,90 € TTC pour débloquer les coordonnées d'un client que vous souhaitez contacter : paiement unique par projet, sans aucun abonnement.",
   },
   {
     question: "Quelle différence avec les plateformes à abonnement ?",
@@ -102,7 +102,7 @@ export default function SansAbonnementPage() {
         </div>
       </section>
 
-      {/* Les modèles du marché — table comparative factuelle sourcée */}
+      {/* Les modèles du marché : table comparative factuelle sourcée */}
       <section className="px-4 py-16 sm:py-20">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-4 tracking-tight">
@@ -141,7 +141,7 @@ export default function SansAbonnementPage() {
                     </td>
                     <td className="py-4 pr-4 text-[var(--text-secondary)]">{c.model}</td>
                     <td className="py-4 pr-4 text-[var(--text-secondary)]">{c.price_text}</td>
-                    <td className="py-4 text-[var(--text-secondary)]">{c.commitment ?? "—"}</td>
+                    <td className="py-4 text-[var(--text-secondary)]">{c.commitment ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -150,14 +150,14 @@ export default function SansAbonnementPage() {
           <p className="text-xs text-[var(--text-tertiary)] mt-4 leading-relaxed">
             Données concurrents indicatives, issues de sources publiques tierces
             constatées en {fmtMonth(competitors[0]?.retrievedAt || "2026-06-07")},
-            susceptibles d&apos;évoluer — vérifiez les conditions à jour sur le
+            susceptibles d&apos;évoluer. Vérifiez les conditions à jour sur le
             site de chaque plateforme. Comparatif objectif (art. L121-8 du Code de
             la consommation).
           </p>
         </div>
       </section>
 
-      {/* Comparatifs détaillés — cartes vers les pages alternatives */}
+      {/* Comparatifs détaillés : cartes vers les pages alternatives */}
       <section className="px-4 py-16 sm:py-20 bg-[var(--bg-secondary)]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-3 tracking-tight text-center">

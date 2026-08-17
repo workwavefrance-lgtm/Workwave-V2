@@ -57,7 +57,7 @@ async function pingUrl(client: any, url: string): Promise<{ ok: boolean; error?:
 async function main() {
   const urls = await buildUrls();
   if (DRY) {
-    console.log("=== DRY RUN — guides des prix à pinger ===\n");
+    console.log("=== DRY RUN · guides des prix à pinger ===\n");
     urls.forEach((u, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${u.replace(BASE, "")}`));
     console.log(`\nTotal : ${urls.length}`);
     return;

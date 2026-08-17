@@ -45,7 +45,7 @@ const MONTHS_FR = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "a
 
 export const getBtpFinances = cache(async (): Promise<BtpFinances> => {
   const db = getAdminServiceClient();
-  // Pagination canonique (cap PostgREST 1000) — le CA total serait FAUX dès 1000
+  // Pagination canonique (cap PostgREST 1000) : le CA total serait FAUX dès 1000
   // déblocages sinon (leçon 30/04). Pattern rows.length===0 break, offset += réel.
   const rows: Row[] = [];
   let offset = 0;

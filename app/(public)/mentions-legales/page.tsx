@@ -20,9 +20,9 @@ const SECTIONS: LegalSection[] = [
           "SIREN : 985 169 473 (immatriculée au RNE le 16/06/2026)",
           "Code APE : 62.02A",
           "Siège : 3 rue des Rosiers, 86110 Craon (Vienne)",
-          "TVA non applicable — article 293 B du CGI (franchise en base de TVA)",
+          "TVA non applicable : article 293 B du CGI (franchise en base de TVA)",
           "Directeur de la publication : Willy Gauvrit",
-          "Email : contact@workwave.fr — Site web : workwave.fr",
+          "Email : contact@workwave.fr · Site web : workwave.fr",
         ],
       },
     ],
@@ -30,25 +30,25 @@ const SECTIONS: LegalSection[] = [
   {
     title: "Hébergement",
     blocks: [
-      { p: "Le site est hébergé par **Vercel Inc.**, 440 N Baxter St, Coppell, TX 75019, États-Unis — [vercel.com](https://vercel.com)." },
+      { p: "Le site est hébergé par **Vercel Inc.**, 440 N Baxter St, Coppell, TX 75019, États-Unis ([vercel.com](https://vercel.com))." },
     ],
   },
   {
     title: "Données personnelles et RGPD",
     blocks: [
       { p: "Les informations affichées sur les fiches professionnelles proviennent de sources publiques (registre Sirene de l'INSEE). Conformément au RGPD, tout professionnel peut demander la suppression de sa fiche via le lien prévu à cet effet en bas de chaque fiche." },
-      { p: "**Responsable du traitement :** l'éditeur identifié ci-dessus (Workwave — Willy Gauvrit, entrepreneur individuel). Contact : contact@workwave.fr" },
+      { p: "**Responsable du traitement :** l'éditeur identifié ci-dessus (Workwave : Willy Gauvrit, entrepreneur individuel). Contact : contact@workwave.fr" },
       { p: "**Bases légales :** intérêt légitime (article 6.1.f du RGPD) pour le référencement des professionnels à partir de données publiques ; exécution du contrat et mesures précontractuelles (article 6.1.b du RGPD) pour la mise en relation demandée par le particulier qui dépose un projet." },
       { p: "**Durée de conservation :** les données des professionnels sont conservées pendant 3 ans à compter du dernier contact ; les données des projets déposés par les particuliers sont conservées 2 ans après la clôture du projet. Toute personne peut demander la suppression anticipée de ses données." },
       { p: "**Sous-traitants et prestataires :**" },
       {
         ul: [
-          "**Vercel Inc.** (hébergement du site, États-Unis) — transfert encadré par les clauses contractuelles types (CCT).",
+          "**Vercel Inc.** (hébergement du site, États-Unis) : transfert encadré par les clauses contractuelles types (CCT).",
           "**Supabase** (hébergement de la base de données, région Union européenne).",
-          "**Stripe Payments Europe, Ltd** (paiement en ligne des déblocages, Dublin, Irlande) — ne communique jamais les données bancaires complètes à l'éditeur. [Politique de confidentialité Stripe](https://stripe.com/fr/privacy).",
+          "**Stripe Payments Europe, Ltd** (paiement en ligne des déblocages, Dublin, Irlande) : ne communique jamais les données bancaires complètes à l'éditeur. [Politique de confidentialité Stripe](https://stripe.com/fr/privacy).",
           "**Brevo (Sendinblue SAS)** (emails de prospection, 106 boulevard Haussmann, 75008 Paris). [Politique de confidentialité Brevo](https://www.brevo.com/fr/legal/privacypolicy/).",
-          "**Resend, Inc.** (emails transactionnels : codes de vérification, notifications de projet et de lead, États-Unis) — transfert encadré par les CCT.",
-          "**Anthropic, PBC** (qualification par intelligence artificielle des descriptions de projet, États-Unis) — transfert encadré par les CCT.",
+          "**Resend, Inc.** (emails transactionnels : codes de vérification, notifications de projet et de lead, États-Unis) : transfert encadré par les CCT.",
+          "**Anthropic, PBC** (qualification par intelligence artificielle des descriptions de projet, États-Unis) : transfert encadré par les CCT.",
         ],
       },
       { p: "**Transferts hors Union européenne :** certains prestataires (Vercel, Resend, Anthropic) sont établis aux États-Unis. Ces transferts sont encadrés par des garanties appropriées au sens des articles 44 et suivants du RGPD, notamment les clauses contractuelles types adoptées par la Commission européenne. Une copie de ces garanties est disponible sur demande à contact@workwave.fr." },
@@ -61,8 +61,8 @@ const SECTIONS: LegalSection[] = [
       { p: "Le site utilise des cookies et traceurs. Les cookies strictement nécessaires au fonctionnement du site ne requièrent pas de consentement. Les traceurs non essentiels ne sont déposés qu'après votre **consentement**, recueilli via le bandeau de gestion des cookies :" },
       {
         ul: [
-          "**Mesure d'audience — Google Analytics** (via Google Tag Manager) : statistiques de fréquentation du site.",
-          "**Publicité — Microsoft Advertising (pixel UET)** : mesure de la performance des campagnes publicitaires.",
+          "**Mesure d'audience · Google Analytics** (via Google Tag Manager) : statistiques de fréquentation du site.",
+          "**Publicité · Microsoft Advertising (pixel UET)** : mesure de la performance des campagnes publicitaires.",
         ],
       },
       { p: "Vous pouvez à tout moment retirer votre consentement et modifier vos préférences via le lien de gestion des cookies présent sur le site." },

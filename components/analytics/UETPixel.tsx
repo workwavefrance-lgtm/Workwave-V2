@@ -23,7 +23,7 @@ import { useEffect } from "react";
  * (cookie `consent_analytics`, cf. components/layout/CookieBanner.tsx).
  * Default = denied tant que l'utilisateur n'a pas cliqué Accepter ; la bannière
  * pousse "consent update" en direct. Sans signal granted, Microsoft n'attribue
- * AUCUNE conversion aux clics (beacons en asc=D) — découvert le 12/06/2026.
+ * AUCUNE conversion aux clics (beacons en asc=D), découvert le 12/06/2026.
  */
 type UETQueue = unknown[] & { push: (event: unknown) => void };
 declare global {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type ProjectCtaBannerProps = {
-  /** Slug de la catégorie (ex: "plombier") — utilisé pour pré-remplir le form */
+  /** Slug de la catégorie (ex: "plombier") : utilisé pour pré-remplir le form */
   categorySlug: string;
   /** Nom lisible de la catégorie (ex: "Plombier") */
   categoryName: string;

@@ -12,7 +12,7 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Tous les freelances tech — IA, dev, cloud, data, design | Workwave AI",
+    "Tous les freelances tech · IA, dev, cloud, data, design | Workwave AI",
   description:
     "Annuaire complet des freelances tech francais et europeens : developpement web (React, Next.js), IA (LLM, RAG), cloud (AWS, GCP), DevOps, no-code (Bubble, Make), data analytics, design produit. Publiez votre projet, alertez 500+ freelances tech FR en temps reel, sans commission.",
   alternates: { canonical: `${SITE_URL}/ai/freelances` },
@@ -21,12 +21,12 @@ export const metadata: Metadata = {
 const TECH_VERTICAL = "tech";
 
 // ─────────────────────────────────────────────────────────────────────
-// FAQ freelances hub — 5 questions strategiques
+// FAQ freelances hub : 5 questions strategiques
 // ─────────────────────────────────────────────────────────────────────
 const FAQ_FREELANCES_HUB: FaqItem[] = [
   {
     q: "Comment choisir la bonne categorie pour mon projet ?",
-    a: "Selectionnez la categorie dont le freelance ideal aura la specialite principale. Pour un projet hybride (ex : app web React + integration IA), choisissez la categorie dominante (ici Developpement Web). Notre IA qualifie la demande et la diffuse a toute la communaute des freelances tech — ceux d'autres categories pertinentes verront le projet aussi grace au filtre dashboard. Si vous hesitez, deposez votre projet via /ai/deposer, l'IA classifie automatiquement.",
+    a: "Selectionnez la categorie dont le freelance ideal aura la specialite principale. Pour un projet hybride (ex : app web React + integration IA), choisissez la categorie dominante (ici Developpement Web). Notre IA qualifie la demande et la diffuse a toute la communaute des freelances tech : ceux d'autres categories pertinentes verront le projet aussi grace au filtre dashboard. Si vous hesitez, deposez votre projet via /ai/deposer, l'IA classifie automatiquement.",
   },
   {
     q: "Un meme freelance peut-il avoir plusieurs categories ?",
@@ -38,11 +38,11 @@ const FAQ_FREELANCES_HUB: FaqItem[] = [
   },
   {
     q: "Quelle est la difference entre Workwave AI et un site comme Malt ?",
-    a: "Sur Workwave AI, vous publiez votre projet et notre IA diffuse en temps reel a toute la communaute des freelances tech inscrits — ceux qui correspondent a votre besoin vous contactent directement. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). L'inscription du freelance est gratuite ; il debloque pour 9,90 € seulement les projets qui l'interessent (apres les avoir vus), au lieu de payer un abonnement ou une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
+    a: "Sur Workwave AI, vous publiez votre projet et notre IA diffuse en temps reel a toute la communaute des freelances tech inscrits : ceux qui correspondent a votre besoin vous contactent directement. Sur Malt, vous parcourez vous-meme des listes de centaines de profils. Workwave ne prend aucune commission sur la mission (vs 10% chez Malt jusqu'a 5K€). L'inscription du freelance est gratuite ; il debloque pour 9,90 € seulement les projets qui l'interessent (apres les avoir vus), au lieu de payer un abonnement ou une commission variable. Resultat : prix plus bas pour vous et pour le freelance.",
   },
   {
     q: "Les freelances sont-ils verifies (KYC, certification) ?",
-    a: "Tous les freelances de notre annuaire sont enregistres a l'INSEE avec un SIRET valide (verifie via API Sirene). Pour ceux qui ont reclame leur fiche (env. 5% de la base), nous verifions l'email professionnel + le SIRET avant validation. Pour les fiches non-reclamees (donnees publiques Sirene), l'info est factuelle mais le freelance ne s'est pas exprime — la mention 'fiche non-reclamee' est explicite. Pour la KYC poussee (carte d'identite, contrat), c'est au client de demander au freelance avant la mission.",
+    a: "Tous les freelances de notre annuaire sont enregistres a l'INSEE avec un SIRET valide (verifie via API Sirene). Pour ceux qui ont reclame leur fiche (env. 5% de la base), nous verifions l'email professionnel + le SIRET avant validation. Pour les fiches non-reclamees (donnees publiques Sirene), l'info est factuelle mais le freelance ne s'est pas exprime : la mention 'fiche non-reclamee' est explicite. Pour la KYC poussee (carte d'identite, contrat), c'est au client de demander au freelance avant la mission.",
   },
 ];
 
@@ -121,7 +121,7 @@ export default async function FreelancesHubPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1/2 — HERO
+          SECTION 1/2 · HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-[var(--ai-border-subtle)]">
         <Watermark text="FREELANCES" position="bottom" />
@@ -147,7 +147,7 @@ export default async function FreelancesHubPage() {
                 {totalCount > 0
                   ? `Notre base compte ${totalCount.toLocaleString("fr-FR")} freelances tech actifs en France et Europe, repartis sur 6 categories.`
                   : "Notre base regroupe des freelances tech actifs en France et Europe, repartis sur 6 categories."}{" "}
-                Choisissez la categorie qui correspond a votre besoin ou deposez directement votre projet — on s&apos;occupe de la selection.
+                Choisissez la categorie qui correspond a votre besoin ou deposez directement votre projet : on s&apos;occupe de la selection.
               </p>
             </div>
 
@@ -181,7 +181,7 @@ export default async function FreelancesHubPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2/2 — CATEGORIES GRID
+          SECTION 2/2 · CATEGORIES GRID
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
@@ -286,7 +286,7 @@ export default async function FreelancesHubPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3/3 — FAQ Freelances Hub (FAQPage schema)
+          SECTION 3/3 · FAQ Freelances Hub (FAQPage schema)
           ═══════════════════════════════════════════════════════════════ */}
       <AiFaqSection
         id="faq"

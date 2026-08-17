@@ -46,7 +46,7 @@ export async function sendReviewModerationAlert(params: {
 
     <div style="padding:28px 32px;">
       <p style="margin:0 0 12px;font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">
-        Modération requise — Workwave
+        Modération requise · Workwave
       </p>
 
       <h1 style="margin:0 0 16px;color:#0A0A0A;font-size:20px;font-weight:700;letter-spacing:-0.01em;line-height:1.3;">
@@ -77,7 +77,7 @@ export async function sendReviewModerationAlert(params: {
       </div>
       ` : `
       <p style="margin:0 0 24px;color:#9CA3AF;font-size:13px;font-style:italic;">
-        (Aucun commentaire — note uniquement)
+        (Aucun commentaire, note uniquement)
       </p>
       `}
 
@@ -116,7 +116,7 @@ Modérer ici : ${adminUrl}
     const result = await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
-      subject: `[Mod] Avis ${params.rating}/5 à valider — ${params.proName}`,
+      subject: `[Mod] Avis ${params.rating}/5 à valider · ${params.proName}`,
       html,
       text,
     });

@@ -1,5 +1,5 @@
 /**
- * Dictionnaire ANGLAIS — chrome partage Workwave AI (header, footer, labels
+ * Dictionnaire ANGLAIS : chrome partage Workwave AI (header, footer, labels
  * communs). Les corps de page specifiques (home, etc.) sont ecrits en anglais
  * natif directement dans les pages ; ce dictionnaire ne couvre que ce qui est
  * REELLEMENT partage entre plusieurs surfaces (nav, footer, switcher, chips).
@@ -18,7 +18,7 @@ export const en = {
     menu: "Menu",
     openMenu: "Open menu",
     closeMenu: "Close menu",
-    homeAria: "Workwave AI — Home",
+    homeAria: "Workwave AI · Home",
     primaryNavAria: "Main navigation",
     mobileNavAria: "Mobile menu",
   },
@@ -30,7 +30,7 @@ export const en = {
   },
   footer: {
     tagline:
-      "The freelance platform connecting clients with vetted freelancers in tech, AI, data, design, marketing and more — across Europe, the Gulf and beyond.",
+      "The freelance platform connecting clients with vetted freelancers in tech, AI, data, design, marketing and more, across Europe, the Gulf and beyond.",
     clients: "Clients",
     freelances: "Freelances",
     company: "Workwave",

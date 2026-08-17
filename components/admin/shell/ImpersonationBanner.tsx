@@ -76,7 +76,7 @@ export default function ImpersonationBanner({
           />
         </svg>
         <span className="text-xs font-semibold">
-          Mode admin — Connecté en tant que {data.proName}
+          Mode admin · Connecté en tant que {data.proName}
         </span>
         <span className="text-xs font-mono opacity-80 tabular-nums">
           {elapsed}

@@ -93,19 +93,19 @@ export default async function SkillCountryPage({
       q: `How much does it cost to hire a freelance ${skill.nounSingular} in ${country.name}?`,
       a: tjm
         ? `Senior freelance ${skill.noun} typically charge around ${formatTjmRange(tjm.senior.min, tjm.senior.max, "en", "USD")} as an indicative global benchmark (USD). Local rates in ${country.name} may differ by seniority, stack and scope. You agree the rate directly with the freelancer; Workwave takes 0% commission.`
-        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer — Workwave takes 0% commission, so pricing stays transparent.`,
+        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer: Workwave takes 0% commission, so pricing stays transparent.`,
     },
     {
       q: `Do freelance ${skill.noun} in ${country.name} work remotely?`,
-      a: `Most do. The majority of freelance ${skill.noun} work fully remote, so you can hire the best fit anywhere in ${country.name} — or beyond — and brief them in your own timezone.`,
+      a: `Most do. The majority of freelance ${skill.noun} work fully remote, so you can hire the best fit anywhere in ${country.name} (or beyond) and brief them in your own timezone.`,
     },
     {
       q: `How do I hire a freelance ${skill.nounSingular} in ${country.name} on Workwave?`,
-      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching ${skill.noun}, who reach out to you directly. You compare, choose and work together — no middleman, no commission.`,
+      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching ${skill.noun}, who reach out to you directly. You compare, choose and work together: no middleman, no commission.`,
     },
     {
       q: `Is it free for clients?`,
-      a: `Yes. Posting a project, being contacted by ${skill.noun} and hiring them is 100% free. Workwave never takes a commission — freelancers fund the platform through an optional subscription.`,
+      a: `Yes. Posting a project, being contacted by ${skill.noun} and hiring them is 100% free. Workwave never takes a commission: freelancers fund the platform through an optional subscription.`,
     },
   ];
 
@@ -156,18 +156,18 @@ export default async function SkillCountryPage({
             <p className="mb-4 text-[15px] sm:text-[16px] text-[var(--ai-text-secondary)]">
               <span className="font-semibold text-[var(--ai-text)]">{homage.phrase}</span>
               {homage.roman ? <span className="text-[var(--ai-text-tertiary)]"> ({homage.roman})</span> : null}
-              <span className="text-[var(--ai-text-tertiary)]"> — {homage.lang} for &ldquo;{homage.translation}&rdquo;</span>
+              <span className="text-[var(--ai-text-tertiary)]"> · {homage.lang} for &ldquo;{homage.translation}&rdquo;</span>
             </p>
           )}
           <h1 className="font-black text-[var(--ai-text)] max-w-3xl" style={{ fontSize: "clamp(34px, 6vw, 68px)", lineHeight: 0.97, letterSpacing: "-0.04em" }}>
             Hire {skill.noun} in {country.name}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            Find vetted freelance {skill.noun} across {country.name}. Post your project for free — our AI alerts matching freelancers and they contact you directly. 0% commission.
+            Find vetted freelance {skill.noun} across {country.name}. Post your project for free: our AI alerts matching freelancers and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Browse freelances
@@ -176,7 +176,7 @@ export default async function SkillCountryPage({
         </div>
       </section>
 
-      {/* MARKET — paragraphe sourcé pays (si présent). */}
+      {/* MARKET : paragraphe sourcé pays (si présent). */}
       {sourced && (
         <section className="border-t border-[var(--ai-border-subtle)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
@@ -229,7 +229,7 @@ export default async function SkillCountryPage({
               {skill.label} day rates in {country.name}
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-10 max-w-2xl">
-              Indicative global freelance day rates by seniority (USD benchmark). Local rates in {country.name} may differ — for planning only.
+              Indicative global freelance day rates by seniority (USD benchmark). Local rates in {country.name} may differ (for planning only).
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {tiers.map((t) => {
@@ -248,7 +248,7 @@ export default async function SkillCountryPage({
         </section>
       )}
 
-      {/* HOURLY RATE (sourcé par PAYS, USD) — ancre géographique affichée pour
+      {/* HOURLY RATE (sourcé par PAYS, USD) : ancre géographique affichée pour
           TOUS les skills (pas seulement ceux avec TJM jour). Indicatif + sourcé ;
           masqué si le pays n'a pas de tarif sourcé/plausible. */}
       {hasRate && (
@@ -261,13 +261,13 @@ export default async function SkillCountryPage({
               How much do freelance {skill.noun} charge in {country.name}?
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-8 max-w-2xl">
-              Indicative hourly rate for an experienced freelancer based in {country.name} (USD). Rates vary by skill, seniority and project — you agree the final rate directly with the freelancer, with 0% commission.
+              Indicative hourly rate for an experienced freelancer based in {country.name} (USD). Rates vary by skill, seniority and project: you agree the final rate directly with the freelancer, with 0% commission.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg)] p-6">
                 <p className="text-[12px] font-semibold tracking-wide uppercase text-[var(--ai-text-tertiary)]">Senior · hourly</p>
                 <p className="mt-2 text-[22px] sm:text-[26px] font-black text-[var(--ai-accent)] tracking-tight">
-                  ${countryRate!.seniorHourlyMinUsd}–${countryRate!.seniorHourlyMaxUsd}/hr
+                  ${countryRate!.seniorHourlyMinUsd}-${countryRate!.seniorHourlyMaxUsd}/hr
                 </p>
               </div>
               {countryRate!.level && (
@@ -343,7 +343,7 @@ export default async function SkillCountryPage({
           </p>
           <div className="mt-8">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
           </div>
         </div>

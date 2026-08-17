@@ -4,7 +4,7 @@ import DeletionVerifyForm from "./DeletionVerifyForm";
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const metadata: Metadata = {
-  title: "Vérification — Suppression de fiche — Workwave",
+  title: "Vérification · Suppression de fiche · Workwave",
   robots: { index: false, follow: false },
 };
 

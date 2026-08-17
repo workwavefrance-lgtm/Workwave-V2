@@ -1,7 +1,7 @@
 import { processUnsubscribe } from "./actions";
 
 export const metadata = {
-  title: "Désinscription — Workwave",
+  title: "Désinscription · Workwave",
   robots: "noindex, nofollow",
 };
 

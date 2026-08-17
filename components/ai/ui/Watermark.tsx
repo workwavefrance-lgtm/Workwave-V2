@@ -1,5 +1,5 @@
 /**
- * Watermark — texte geant en fond d'une section (style Pixel Rise).
+ * Watermark · texte geant en fond d'une section (style Pixel Rise).
  *
  * Utilise dans les heros pour creer une signature visuelle. Position
  * absolue, opacite tres basse via --ai-text-watermark.

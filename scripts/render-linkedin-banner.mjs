@@ -32,4 +32,4 @@ await page.evaluate(async () => {
 });
 await page.screenshot({ path: OUT, clip: { x: 0, y: 0, width: W, height: H } });
 await browser.close();
-console.log(`OK — ${W}x${H} @2x → ${OUT}`);
+console.log(`OK · ${W}x${H} @2x → ${OUT}`);

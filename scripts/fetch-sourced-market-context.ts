@@ -100,7 +100,7 @@ async function main() {
     .select("code, name, region")
     .in("code", NEW_DEPT_CODES);
   const depts = (deptsRaw || []) as Array<{ code: string; name: string; region: string }>;
-  console.log(`Contexte marché sourcé — ${depts.length} dépts${DRY ? " (DRY, 1 dépt)" : ""}\n`);
+  console.log(`Contexte marché sourcé · ${depts.length} dépts${DRY ? " (DRY, 1 dépt)" : ""}\n`);
 
   const out: Record<string, Entry> = {};
   let total = 0;

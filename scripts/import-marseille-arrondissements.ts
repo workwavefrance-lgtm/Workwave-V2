@@ -124,7 +124,7 @@ async function main() {
   }
   console.log(`\nGarde-fou pros réclamés (claimed) sans ville dans le lot : ${claimedTotal}`);
   if (claimedTotal > 0) {
-    console.log("  ⚠️ Des pros réclamés seraient concernés — ils seront EXCLUS du rattachement (claimed_by_user_id IS NULL).");
+    console.log("  ⚠️ Des pros réclamés seraient concernés : ils seront EXCLUS du rattachement (claimed_by_user_id IS NULL).");
   }
 
   // 6. rattachement par code postal

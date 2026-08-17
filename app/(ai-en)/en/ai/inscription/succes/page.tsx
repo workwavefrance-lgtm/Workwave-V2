@@ -13,7 +13,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
  */
 
 export const metadata: Metadata = {
-  title: "Account created — Workwave AI",
+  title: "Account created · Workwave AI",
   description:
     "Your Workwave AI freelancer account is live. Sign in to your dashboard to see every tech project in real time.",
   robots: { index: false, follow: false },

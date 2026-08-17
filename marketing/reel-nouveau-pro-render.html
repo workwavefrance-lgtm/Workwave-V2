@@ -2,22 +2,22 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Reel nouveau pro — template Workwave</title>
+<title>Reel nouveau pro · template Workwave</title>
 <style>
   /* ============================================================
-     TEMPLATE REEL "NOUVEAU PRO" — remerciement + mise en avant.
+     TEMPLATE REEL "NOUVEAU PRO" : remerciement + mise en avant.
      Données injectées via reel-nouveau-pro-data.js (window.PRO).
 
      DIFFERENCE avec le reel "nouveau projet" : mêmes couleurs de marque,
      mais un visuel VIVANT (halos qui dérivent, confettis à l'annonce,
      radar qui pulse sur la ville). C'est un reel de célébration, pas
-     une annonce de chantier — le mouvement porte le message.
+     une annonce de chantier : le mouvement porte le message.
 
      RÈGLE ABSOLUE : JAMAIS le nom du pro. Métier + ville uniquement.
      Le pro n'a pas demandé à être exposé ; on met en avant sa VILLE
      et son MÉTIER, jamais son identité.
 
-     Rendu déterministe : window.renderFrame(t) — TOUTE animation est
+     Rendu déterministe : window.renderFrame(t), TOUTE animation est
      calculée depuis t (les animations CSS ne survivent pas au rendu
      frame-par-frame headless).
      ============================================================ */
@@ -25,7 +25,7 @@
   html, body { width: 1080px; height: 1920px; overflow: hidden;
     font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
 
-  /* ── Thèmes (tokens du site — identiques au reel projet) ── */
+  /* ── Thèmes (tokens du site, identiques au reel projet) ── */
   body[data-theme="light"] {
     --bg: #FFFFFF; --bg2: #FAFAFA; --text: #0A0A0A; --text2: #6B7280;
     --border: #E5E7EB; --accent: #FF5A36; --on-accent: #FFFFFF;
@@ -60,7 +60,7 @@
     font-size: 58px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
   #brand i { color: var(--accent); font-style: normal; }
 
-  /* Confettis d'annonce — burst unique au tout début (célébration). */
+  /* Confettis d'annonce : burst unique au tout début (célébration). */
   #confetti { position: absolute; inset: 0; z-index: 40; pointer-events: none; }
   #confetti i { position: absolute; top: 620px; left: 540px; display: block;
     width: 20px; height: 30px; border-radius: 5px; will-change: transform, opacity; }
@@ -69,7 +69,7 @@
     align-items: center; justify-content: center; gap: 46px; padding: 250px 84px; text-align: center; }
   .el { will-change: transform, opacity; }
 
-  /* Badge d'ouverture — DOIT etre impossible a confondre avec celui du reel
+  /* Badge d'ouverture : DOIT etre impossible a confondre avec celui du reel
      "nouveau projet" (pastille coral tres arrondie + point + mot "NOUVEAU ...").
      Dans le feed, "NOUVEAU PRO" se lit comme le debut de "NOUVEAU PROJET" et les
      deux formats deviennent indiscernables au scroll. On change donc les DEUX
@@ -83,7 +83,11 @@
     color: var(--text); text-transform: uppercase; }
   .lieu { font-size: 58px; font-weight: 600; color: var(--text2); }
   .lieu strong { color: var(--text); font-weight: 700; }
-  .rejoint { font-size: 52px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  /* Volontairement gros : c'est LA phrase qui porte le message du reel. Elle tient
+     sur deux lignes, et c'est assume : « Workwave.fr » passe en dessous, en coral,
+     ce qui la met en valeur au lieu de la noyer. */
+  .rejoint { font-size: 72px; font-weight: 800; color: var(--text); line-height: 1.18;
+    letter-spacing: -0.02em; }
   .rejoint em { font-style: normal; color: var(--accent); }
 
   /* ── RADAR : la ville couverte ──────────────────────────────
@@ -102,7 +106,7 @@
   .sub { font-size: 46px; font-weight: 500; color: var(--text2); line-height: 1.42; }
   .sub strong { color: var(--text); font-weight: 700; }
 
-  /* Carte "pour qui" — deux publics, deux blocs lisibles d'un coup d'œil. */
+  /* Carte "pour qui" : deux publics, deux blocs lisibles d'un coup d'œil. */
   .duo { display: flex; flex-direction: column; gap: 26px; width: 100%; }
   .duo .box { background: var(--bg2); border: 2px solid var(--border); border-radius: 36px;
     padding: 44px 48px; text-align: left; }
@@ -112,10 +116,10 @@
   .duo .box .what span { color: var(--text2); font-weight: 500; }
   .duo .box .url { margin-top: 18px; font-size: 36px; font-weight: 800; color: var(--accent); letter-spacing: -0.01em; }
 
-  /* Arguments pros — liste à puces coral, rythmée.
+  /* Arguments pros : liste à puces coral, rythmée.
      ⚠️ PIÈGE FLEXBOX : le <li> est un conteneur flex, donc CHAQUE élément
      inline qu'il contient (<b>, <em>…) devient un ITEM et reçoit le `gap`
-     de part et d'autre — en plus de l'espace typographique normal. Résultat :
+     de part et d'autre, en plus de l'espace typographique normal. Résultat :
      "le projet  avant  de payer" avec des trous.
      → Le texte est donc enfermé dans UN seul <span> (= un seul item flex) :
      à l'intérieur, la mise en page redevient inline et les espaces sont
@@ -138,6 +142,17 @@
 
   .merci { font-size: 116px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); line-height: 1.06; }
   .merci em { font-style: normal; color: var(--accent); }
+
+  /* ── Drapeau belge (affiche seulement si P.country === "BE") ──
+     Meme traitement que le reel projet, pour que les deux formats parlent la
+     meme langue visuelle quand le pro ou le chantier est en Belgique. */
+  .beflag-stripes { flex: none; border-radius: 10px; overflow: hidden;
+    background: linear-gradient(90deg, #000 0 33.34%, #FDDA24 33.34% 66.67%, #EF3340 66.67% 100%); }
+  #bepill { position: absolute; top: 178px; left: 0; right: 0; z-index: 50; display: none; justify-content: center; }
+  #bepill .chip { display: inline-flex; align-items: center; gap: 20px; background: var(--bg2);
+    border: 2px solid var(--border); border-radius: 999px; padding: 14px 36px 14px 18px;
+    font-size: 40px; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+  #bepill .beflag-stripes { width: 66px; height: 44px; box-shadow: 0 3px 10px rgba(0,0,0,.16); }
 </style>
 </head>
 <body data-theme="light">
@@ -145,15 +160,16 @@
   <div id="bg"><div id="dots"></div><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
   <div id="progress"><b></b></div>
   <div id="brand">Workwave<i>.fr</i></div>
+  <div id="bepill"><span class="chip"><span class="beflag-stripes"></span>Belgique</span></div>
   <div id="confetti"></div>
 
-  <!-- S1 — l'annonce (angle A)
+  <!-- S1 · l'annonce (angle A)
        Ordre voulu : le SENS avant le lieu. "vient de rejoindre Workwave.fr"
        arrive des 700 ms pour que quelqu'un qui scrolle comprenne tout de suite
        qu'il s'agit d'une arrivee, et non d'un chantier a prendre.
 
        BUDGET DE DUREE : 14 s MAXIMUM pour le reel entier (regle Willy). Les 5
-       scenes doivent donc totaliser 14000 ms — si tu ajoutes du temps ici, tu
+       scenes doivent donc totaliser 14000 ms : si tu ajoutes du temps ici, tu
        dois en retirer ailleurs. Repartition : 3200 + 2900 + 2100 + 3200 + 2600.
        Regle de lecture : une scene doit durer au moins ~1 s de plus que
        (delai du dernier element + 550 ms d'animation), sinon le texte
@@ -161,11 +177,15 @@
   <section class="scene" data-dur="3200">
     <div class="el" data-anim="pop"><span class="badge">BIENVENUE</span></div>
     <div class="el" data-d="350"><h1 class="metier" id="metier">Couvreur</h1></div>
-    <div class="el" data-d="700"><p class="rejoint">vient de rejoindre <em>Workwave.fr</em></p></div>
+    <!-- Formulation voulue par Willy : la phrase doit se suffire a elle-meme.
+         « vient de rejoindre » supposait qu'on ait lu le metier juste au-dessus ;
+         « un nouveau pro a rejoint Workwave.fr » se comprend seule, y compris
+         par quelqu'un qui tombe dessus en plein milieu du defilement. -->
+    <div class="el" data-d="700"><p class="rejoint">un nouveau pro a rejoint <em>Workwave.fr</em></p></div>
     <div class="el" data-d="1050"><p class="lieu">à <strong id="ville">Ville</strong> · <span id="dept">Département</span></p></div>
   </section>
 
-  <!-- S2 — le territoire couvert (angle C) -->
+  <!-- S2 · le territoire couvert (angle C) -->
   <section class="scene" data-dur="2900">
     <div class="el radar" data-anim="pop">
       <span class="ring"></span><span class="ring"></span><span class="ring"></span>
@@ -175,21 +195,21 @@
     <div class="el" data-d="900"><p class="sub" id="phrase-secteur">Il intervient dans votre secteur.</p></div>
   </section>
 
-  <!-- S3 — le remerciement -->
+  <!-- S3 · le remerciement -->
   <section class="scene" data-dur="2100">
     <div class="el" data-anim="pop"><p class="merci">Merci de<br>votre <em>confiance</em>.</p></div>
     <div class="el" data-d="450"><p class="sub">Chaque pro qui nous rejoint rend le réseau<br><strong>plus utile pour tout le monde</strong>.</p></div>
   </section>
 
-  <!-- S4 — l'appel aux pros (la scene la plus dense a lire : 4 arguments) -->
+  <!-- S4 · l'appel aux pros (la scene la plus dense a lire : 4 arguments) -->
   <section class="scene" data-dur="3200">
-    <div class="el"><p class="big">Artisan&nbsp;?<br><em>Rejoignez-les.</em></p></div>
+    <div class="el"><p class="big"><span id="appel">Artisan&nbsp;?</span><br><em>Rejoignez-les.</em></p></div>
     <div class="el" data-d="400" style="width:100%">
       <ul class="args">
         <li><s></s><span><b>0 €</b> d'abonnement, 0 commission</span></li>
         <li><s></s><span><b>9,90 €</b> le contact client, c'est tout</span></li>
         <!-- Formulation EXACTE : avant paiement le pro voit le descriptif, la ville,
-             le budget et le delai — PAS les coordonnees (c'est ca les 9,90 €).
+             le budget et le delai, PAS les coordonnees (c'est ca les 9,90 €).
              Ne JAMAIS ecrire "vous voyez le projet" : ca laisse croire qu'on a tout,
              y compris le contact. Surpromesse = argument commercial trompeur. -->
         <li><s></s><span>Vous lisez le <b>descriptif</b> avant de payer</span></li>
@@ -198,7 +218,7 @@
     </div>
   </section>
 
-  <!-- S5 — CTA double public : chaque public repart avec SON adresse. -->
+  <!-- S5 · CTA double public : chaque public repart avec SON adresse. -->
   <section class="scene" data-dur="2600">
     <div class="el" style="width:100%">
       <div class="duo">
@@ -208,14 +228,14 @@
           <div class="url">workwave.fr</div>
         </div>
         <div class="box">
-          <div class="who">Vous êtes artisan</div>
+          <div class="who" id="who-pro">Vous êtes artisan</div>
           <div class="what">Créez votre fiche <span>gratuitement, en 2 minutes</span></div>
           <div class="url">workwave.fr/pro</div>
         </div>
       </div>
     </div>
     <div class="el" data-d="500" data-anim="pop"><span class="cta">workwave.fr</span></div>
-    <div class="el" data-d="900"><p class="steps">Lien en bio · <b>SIRET</b> · 2 minutes</p></div>
+    <div class="el" data-d="900"><p class="steps">Lien en bio · <b id="idlabel">SIRET</b> · 2 minutes</p></div>
   </section>
 </div>
 
@@ -239,6 +259,17 @@
     P.secteur || "Disponible pour les chantiers du secteur.";
   document.getElementById("cta-particulier").innerHTML =
     "Trouvez " + unMetier + " <span>près de chez vous</span>";
+
+  // "Artisan ?" ne convient pas a tous les metiers (menage, garde d'animaux,
+  // soutien scolaire...). Le libelle de l'appel vient donc du JSON.
+  if (P.appel) document.getElementById("appel").innerHTML = P.appel;
+  if (P.vousEtes) document.getElementById("who-pro").textContent = P.vousEtes;
+
+  // Belgique : bandeau persistant + les pros belges n'ont pas de SIRET.
+  if (P.country === "BE") {
+    document.getElementById("bepill").style.display = "flex";
+    document.getElementById("idlabel").textContent = "N° BCE";
+  }
 
   // Titre long → réduire pour tenir sur 1080px
   const h1 = document.getElementById("metier");

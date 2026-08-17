@@ -39,7 +39,7 @@ const APPLIQUER = process.argv.includes("--appliquer");
     const s = propre(siret);
     if (s) rge.set(s, { tel: propre(tel), mail: propre(mail), web: propre(web) });
   }
-  console.log(`${APPLIQUER ? "ECRITURE" : "SIMULATION"} — RGE : ${rge.size} SIRET charges`);
+  console.log(`${APPLIQUER ? "ECRITURE" : "SIMULATION"} · RGE : ${rge.size} SIRET charges`);
 
   const sirets = [...rge.keys()];
   let majTel = 0, majMail = 0, majWeb = 0, fichesTouchees = 0, erreurs = 0;

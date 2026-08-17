@@ -3,7 +3,7 @@
  *
  * POURQUOI : à l'étape 2 du formulaire, la personne choisit sa ville et il ne
  * se passe rien. C'est le moment exact où elle se demande si ce site couvre
- * vraiment chez elle — et on a la réponse en base.
+ * vraiment chez elle, et on a la réponse en base.
  *
  * POURQUOI LE DÉPARTEMENT ET PAS LA VILLE : mesuré le 08/08/2026, le chiffre
  * par ville tombe à zéro sur les petites communes (0 plombier à Civray) alors
@@ -14,8 +14,8 @@
  * CE QU'ON DIT ET CE QU'ON NE DIT PAS : ces artisans sont RÉFÉRENCÉS (issus du
  * registre officiel), pas « prêts à répondre ». Seuls ceux qui ont réclamé leur
  * fiche reçoivent les demandes. Le mot « référencés » est donc le seul honnête
- * — cf. la leçon du 07/06 sur les affirmations tirées d'un comportement qui
- * n'est pas celui du code.
+ * (cf. la leçon du 07/06 sur les affirmations tirées d'un comportement qui
+ * n'est pas celui du code).
  */
 import { NextResponse } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public-client";

@@ -76,7 +76,7 @@ async function main() {
   for (const p of rows) {
     const city = pickName(p.cities);
     const cat = pickName(p.categories);
-    const line = `  [${p.id}] ${p.name?.padEnd(35).slice(0, 35)} | ${cat ?? "—"} | ${city ?? "—"} | claimed_at=${p.claimed_at?.slice(0, 19)}`;
+    const line = `  [${p.id}] ${p.name?.padEnd(35).slice(0, 35)} | ${cat ?? "-"} | ${city ?? "-"} | claimed_at=${p.claimed_at?.slice(0, 19)}`;
 
     if (!EXECUTE) {
       console.log(line + "  [DRY-RUN]");
@@ -91,7 +91,7 @@ async function main() {
         proSiret: p.siret,
         proCity: city,
         proCategory: cat,
-        claimEmail: p.email ?? "—",
+        claimEmail: p.email ?? "-",
       });
       console.log(line + "  ✅ envoye");
     } catch (e) {

@@ -17,7 +17,7 @@ export default async function AdminTicketPage({
   //
   // POURQUOI : chaque notification contient un lien direct vers le ticket, et
   // ces emails survivent au ticket (supprimé, purgé, nettoyé). En cliquant un
-  // vieux lien on tombait sur le 404 brut de Next — écran noir, « This page
+  // vieux lien on tombait sur le 404 brut de Next : écran noir, « This page
   // could not be found » en anglais, aucune sortie. Ici on reste dans l'admin,
   // on explique, et on propose le retour à la boîte de réception.
   if (!detail) {

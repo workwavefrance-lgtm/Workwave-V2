@@ -1,10 +1,10 @@
 /**
- * POST /api/feedback-chat — agent IA SAV / écoute produit.
+ * POST /api/feedback-chat : agent IA SAV / écoute produit.
  *
  * Deux actions dans la même route :
  *  - { action: "chat", messages }  → réponse de l'agent (Haiku 4.5, court, humain).
  *  - { action: "save", messages, userKind?, email? } → résumé + catégorie via
- *    Haiku (JSON strict), email admin (CHEMIN CRITIQUE, awaité — leçon 24/05),
+ *    Haiku (JSON strict), email admin (CHEMIN CRITIQUE, awaité, leçon 24/05),
  *    archive best-effort dans platform_feedback (le code tolère l'absence de
  *    la table tant que la migration 2026-06-12_platform_feedback.sql n'est
  *    pas appliquée : l'email admin suffit à ne rien perdre).
@@ -106,15 +106,15 @@ async function checkDailyBudget(): Promise<boolean> {
 
 function isAllowedOrigin(req: NextRequest): boolean {
   const origin = req.headers.get("origin") || req.headers.get("referer") || "";
-  if (!origin) return true; // certains navigateurs strippent — ne pas casser les vrais users
+  if (!origin) return true; // certains navigateurs strippent, ne pas casser les vrais users
   // `vercel.app` retire le 12/08/2026 : le compte Vercel est supprime, le site
   // tourne sur le VPS. La regle laissait passer N'IMPORTE QUEL sous-domaine
-  // vercel.app, donc n'importe qui pouvant deployer chez Vercel — sur une route
+  // vercel.app, donc n'importe qui pouvant deployer chez Vercel, sur une route
   // qui consomme des credits Anthropic.
   return origin.includes("workwave.fr") || origin.includes("localhost");
 }
 
-const SAV_PROMPT = `Tu es l'agent d'écoute de Workwave (workwave.fr), plateforme de mise en relation entre particuliers et artisans en France. Ta mission : recueillir le retour de l'utilisateur pour améliorer la plateforme. Tu parles à la première personne, comme un humain de l'équipe — chaleureux, direct, reconnaissant.
+const SAV_PROMPT = `Tu es l'agent d'écoute de Workwave (workwave.fr), plateforme de mise en relation entre particuliers et artisans en France. Ta mission : recueillir le retour de l'utilisateur pour améliorer la plateforme. Tu parles à la première personne, comme un humain de l'équipe : chaleureux, direct, reconnaissant.
 
 CE QUE TU CHERCHES À RECUEILLIR (dans la conversation, naturellement, UNE question à la fois) :
 1. Ce qui lui a plu ou déplu dans son expérience (dépôt de projet, réclamation de fiche, navigation...)
@@ -125,7 +125,7 @@ RÈGLES STRICTES :
 - Réponses TRÈS COURTES (max 2-3 phrases), UNE seule question à la fois
 - JAMAIS d'emoji, vouvoiement
 - Remercie sincèrement : chaque retour aide vraiment la plateforme à s'améliorer
-- Ne promets JAMAIS de délai ni qu'une fonctionnalité sera développée — dis que le retour est transmis directement à l'équipe
+- Ne promets JAMAIS de délai ni qu'une fonctionnalité sera développée : dis que le retour est transmis directement à l'équipe
 - Après 3-5 échanges, quand tu as l'essentiel, invite l'utilisateur à cliquer sur le bouton « Envoyer mon retour » sous la conversation
 - Question de facturation, litige avec un artisan, demande RGPD → oriente vers contact@workwave.fr (réponse sous 48h ouvrées)
 - Si l'utilisateur demande qui tu es : tu es l'assistant de l'équipe Workwave dédié aux retours utilisateurs`;
@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
         .map((m) => `${m.role === "user" ? "Utilisateur" : "Agent"} : ${m.content}`)
         .join("\n");
       let parsed: { category?: string; summary?: string; user_kind?: string } = {};
-      // Résumé IA seulement si le budget quotidien le permet — sinon le retour
+      // Résumé IA seulement si le budget quotidien le permet, sinon le retour
       // part quand même (brut) : on ne perd JAMAIS un feedback pour une question de coût.
       if (await checkDailyBudget()) {
         try {
@@ -220,7 +220,7 @@ export async function POST(req: NextRequest) {
       await sendFeedbackAlert({ category, summary, userKind, email, transcript: messages });
 
       // Archive best-effort (table peut ne pas exister tant que la migration
-      // n'est pas appliquée — l'email admin garantit qu'aucun retour n'est perdu).
+      // n'est pas appliquée : l'email admin garantit qu'aucun retour n'est perdu).
       try {
         const sb = getServiceClient();
         const { error } = await sb.from("platform_feedback").insert({
@@ -251,14 +251,14 @@ export async function POST(req: NextRequest) {
   if (userTurns > MAX_USER_TURNS) {
     return NextResponse.json({
       reply:
-        "Merci pour tous ces détails ! J'ai tout noté — cliquez sur « Envoyer mon retour à l'équipe » juste en dessous pour que ça nous parvienne.",
+        "Merci pour tous ces détails ! J'ai tout noté. Cliquez sur « Envoyer mon retour à l'équipe » juste en dessous pour que ça nous parvienne.",
     });
   }
   // Plafond budgétaire quotidien : mode dégradé (formulaire) au-delà.
   if (!(await checkDailyBudget())) {
     return NextResponse.json({
       reply:
-        "Merci de votre visite ! Notre assistant fait une pause aujourd'hui — écrivez directement votre retour (idée, bug, avis) dans le champ ci-dessous puis cliquez « Envoyer mon retour à l'équipe » : il sera lu par l'équipe, c'est promis.",
+        "Merci de votre visite ! Notre assistant fait une pause aujourd'hui. Écrivez directement votre retour (idée, bug, avis) dans le champ ci-dessous puis cliquez « Envoyer mon retour à l'équipe » : il sera lu par l'équipe, c'est promis.",
       degraded: true,
     });
   }

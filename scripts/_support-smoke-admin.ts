@@ -28,7 +28,7 @@ async function main() {
   const ing = await ingestInboundEmailAsTicket({
     resendEmailId: fakeId,
     fromRaw: "Testeur Admin <smoke-admin@example.invalid>",
-    subject: "Smoke admin — jointures",
+    subject: "Smoke admin · jointures",
     text: "Test des requêtes admin.",
     html: null,
   });
@@ -54,7 +54,7 @@ async function main() {
     failures++;
   }
 
-  // 2) Recherche (assainissement + .or ilike) — avec des caractères pièges
+  // 2) Recherche (assainissement + .or ilike), avec des caractères pièges
   try {
     const search = await getAdminTickets({ status: "all", search: "smoke-admin (test)" });
     console.log(`✅ recherche avec caractères pièges "( )" : ${search.data.length} résultat(s), pas de crash`);
@@ -96,7 +96,7 @@ async function main() {
     console.log(`\n❌ ${failures} échec(s).`);
     process.exit(1);
   }
-  console.log("\n✅ COUCHE ADMIN OK — requêtes et jointures valides.");
+  console.log("\n✅ COUCHE ADMIN OK : requêtes et jointures valides.");
 }
 
 main().catch((e) => {

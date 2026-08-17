@@ -14,7 +14,7 @@ import {
 } from "@/lib/matching/generalist";
 
 export const metadata: Metadata = {
-  title: "Leads reçus — Workwave Pro",
+  title: "Leads reçus · Workwave Pro",
   description:
     "Tous les projets de vos métiers dans votre rayon d'intervention. Débloquez les coordonnées pour 9,90€ TTC par projet.",
   robots: { index: false, follow: false },
@@ -102,7 +102,7 @@ export default async function LeadsPage({
 
   // Zone du pro = son RAYON d'intervention (distance Haversine), pas son seul
   // département. Doit matcher EXACTEMENT le broadcast qui lui envoie les mails
-  // (lib/email/broadcast-btp-project.ts) — sinon il reçoit un lead inter-dépt
+  // (lib/email/broadcast-btp-project.ts), sinon il reçoit un lead inter-dépt
   // (ex. maçon Vienne 86, rayon 200 km → lead Charente 16) qu'il ne retrouve
   // pas ici → impossible à débloquer = revenu perdu (bug 15/06).
   const proLat = pro.city.latitude ?? null;
@@ -130,7 +130,7 @@ export default async function LeadsPage({
   // Les projets que CE pro a deja debloques. Charges AVANT la liste, parce
   // qu'ils echappent au masquage des projets clos : un lead debloque reste
   // accessible pour toujours, meme si l'admin ferme le chantier ensuite. On ne
-  // retire jamais a un pro ce qu'il a obtenu — c'est vrai des 2 deblocages
+  // retire jamais a un pro ce qu'il a obtenu : c'est vrai des 2 deblocages
   // offerts comme des payants.
   const { data: tousUnlocks } = await service
     .from("lead_unlocks")
@@ -169,7 +169,7 @@ export default async function LeadsPage({
     .slice(0, PROJECTS_LIMIT);
 
   // Offre de lancement : les 2 premiers déblocages sont offerts.
-  // On ne compte que les déblocages GRATUITS (amount_cents=0) — un unlock payé
+  // On ne compte que les déblocages GRATUITS (amount_cents=0) : un unlock payé
   // ne consomme pas l'offre.
   const { count: freeUsed } = await service
     .from("lead_unlocks")
@@ -337,7 +337,7 @@ export default async function LeadsPage({
                   </span>
                   <span>·</span>
                   <span>
-                    Délai : {URGENCY_LABELS[p.urgency || ""] || p.urgency || "—"}
+                    Délai : {URGENCY_LABELS[p.urgency || ""] || p.urgency || "-"}
                   </span>
                   <span>·</span>
                   <span>

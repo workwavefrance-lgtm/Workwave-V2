@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "secret_missing" }, { status: 500 });
   }
 
-  // 1. Vérification de la signature svix (Resend) — headers = en-têtes svix
+  // 1. Vérification de la signature svix (Resend) : headers = en-têtes svix
   let event;
   try {
     event = getResend().webhooks.verify({
@@ -98,13 +98,13 @@ export async function POST(req: Request) {
   const emailId = event.data.email_id;
 
   // Anti-boucle : ne jamais re-transférer ni transformer en ticket nos propres
-  // envois — NI les réponses de l'admin lui-même.
+  // envois, NI les réponses de l'admin lui-même.
   //
   // POURQUOI ADMIN_EMAIL : le forward arrive dans la boîte Gmail de l'admin,
   // qui y répond directement (c'est le mode d'emploi affiché dans le mail).
-  // Si cette réponse repasse par contact@workwave.fr — ce qui arrive dès que
+  // Si cette réponse repasse par contact@workwave.fr (ce qui arrive dès que
   // l'interlocuteur a une adresse @workwave.fr, ou sur un simple "répondre à
-  // tous" — elle crée un ticket où l'ADMIN figure comme demandeur, trié et
+  // tous"), elle crée un ticket où l'ADMIN figure comme demandeur, trié et
   // priorisé par l'IA. Constaté en conditions réelles le 20/07/2026 : la
   // réponse de l'admin a généré le ticket #25 "unlock / urgent".
   const senderEmail = parseEmailFrom(event.data.from || "").email;
@@ -116,12 +116,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, skipped: "self_sender" });
   }
 
-  // 2 bis. Limite de débit — AVANT le receiving.get, donc avant toute dépense
+  // 2 bis. Limite de débit, AVANT le receiving.get, donc avant toute dépense
   // (appel Resend, requêtes de contexte, tri IA, forward). On répond 200 : un
   // 5xx ferait rejouer l'événement par svix en boucle et amplifierait le flot.
   const rate = await checkInboundRateLimit(senderEmail);
   if (!rate.allowed) {
-    console.error(`[resend-inbound] débit dépassé (${rate.reason}) — ${rate.detail}`);
+    console.error(`[resend-inbound] débit dépassé (${rate.reason}) : ${rate.detail}`);
     return NextResponse.json({ ok: true, skipped: "rate_limited", reason: rate.reason });
   }
 
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
   const attLine = atts.length
     ? `<b>Pièces jointes :</b> ${atts
         .map((a) => esc(a.filename || "pièce jointe"))
-        .join(", ")} <span style="color:#9CA3AF">(non re-jointes — visibles dans Resend)</span><br>`
+        .join(", ")} <span style="color:#9CA3AF">(non re-jointes, visibles dans Resend)</span><br>`
     : "";
 
   const headerHtml = `
@@ -164,7 +164,7 @@ Objet : ${subject}${atts.length ? `\nPièces jointes : ${atts.map((a) => a.filen
 (Réponds directement : ta réponse part vers l'expéditeur d'origine.)
 ----------------------------------------
 
-${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
+${mail.text || "(corps en HTML uniquement, voir la version HTML)"}`;
 
   // 4. Support maison : l'email devient un TICKET, AVANT le forward, pour ne pas
   //    dépendre d'un seul canal. Best-effort (un échec ici ne casse rien) et
@@ -217,7 +217,7 @@ ${mail.text || "(corps en HTML uniquement — voir la version HTML)"}`;
     from: "Workwave Inbox <noreply@workwave.fr>",
     to: adminEmail,
     replyTo: from,
-    subject: `📩 ${subject} — via contact@workwave.fr`,
+    subject: `📩 ${subject} · via contact@workwave.fr`,
     html: headerHtml + bodyHtml,
     text: textPlain,
   });

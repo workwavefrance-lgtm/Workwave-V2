@@ -7,7 +7,7 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Pour les freelances — Recevez 100% des projets en temps reel | Workwave AI",
+    "Pour les freelances · Recevez 100% des projets en temps reel | Workwave AI",
   description:
     "Inscrivez-vous gratuitement (tech, marketing, finance, juridique, RH, design, creation, audiovisuel) et recevez en temps reel TOUS les projets publies sur Workwave AI. Voyez chaque projet avant de payer. Debloquez uniquement ceux qui vous interessent pour 9,90 €, sans abonnement, sans commission. Alternative a Malt, Codeur, Freelancer.com.",
   alternates: { canonical: `${SITE_URL}/ai/pour-les-freelances` },
@@ -93,7 +93,7 @@ export default function PourLesFreelancesPage() {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Workwave — Deblocage de projet (freelance)",
+    name: "Workwave · Deblocage de projet (freelance)",
     serviceType: "Plateforme de matching projets freelance multi-verticale",
     provider: {
       "@type": "Organization",
@@ -143,7 +143,7 @@ export default function PourLesFreelancesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1 — HERO
+          SECTION 1 · HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
         <Watermark text="FREELANCERS" position="bottom" />
@@ -175,12 +175,12 @@ export default function PourLesFreelancesPage() {
               après l&apos;avoir lu. Sans abonnement, sans commission, sans engagement.
             </p>
 
-            {/* CTA bar composite — meme pattern que /ai (landing) */}
+            {/* CTA bar composite : meme pattern que /ai (landing) */}
             <Link
               href="/ai/inscription"
               className="group flex flex-col sm:flex-row items-stretch bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-xl overflow-hidden hover:border-[var(--ai-text)] hover:-translate-y-0.5 transition-all duration-200 max-w-2xl"
               style={{ boxShadow: "var(--ai-shadow-md)" }}
-              aria-label="S'inscrire gratuitement comme freelance — formulaire en 4 etapes"
+              aria-label="S'inscrire gratuitement comme freelance · formulaire en 4 etapes"
             >
               {/* Hint text (left) */}
               <div className="flex-1 flex items-center gap-3 px-5 py-5 sm:py-4 min-w-0">
@@ -194,7 +194,7 @@ export default function PourLesFreelancesPage() {
                   <div className="bg-[var(--ai-accent)] rounded-[1px]" />
                 </div>
                 <span className="text-[14px] sm:text-[15px] text-[var(--ai-text-secondary)] truncate">
-                  Profil gratuit en 4 étapes — 5 minutes
+                  Profil gratuit en 4 étapes · 5 minutes
                 </span>
               </div>
 
@@ -246,7 +246,7 @@ export default function PourLesFreelancesPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2 — PROCESS
+          SECTION 2 · PROCESS
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
@@ -293,7 +293,7 @@ export default function PourLesFreelancesPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3 — VS CONCURRENCE
+          SECTION 3 · VS CONCURRENCE
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
@@ -345,7 +345,7 @@ export default function PourLesFreelancesPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4 — FAQ + CTA
+          SECTION 4 · FAQ + CTA
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">

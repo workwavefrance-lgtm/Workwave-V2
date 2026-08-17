@@ -191,7 +191,7 @@ const claimSchema = z.object({
 });
 
 // ============================================
-// submitClaim — Vérification SIRET + envoi code
+// submitClaim : Vérification SIRET + envoi code
 // ============================================
 
 export async function submitClaim(
@@ -358,7 +358,7 @@ export async function submitClaim(
 }
 
 // ============================================
-// verifyClaim — Vérification code + création compte avec mot de passe
+// verifyClaim : Vérification code + création compte avec mot de passe
 // ============================================
 
 export async function verifyClaim(
@@ -459,7 +459,7 @@ export async function verifyClaim(
     };
   }
 
-  // Code correct — créer le compte avec mot de passe et connecter
+  // Code correct : créer le compte avec mot de passe et connecter
 
   if (!attempt.temp_password) {
     return { success: false, message: "Erreur interne. Veuillez recommencer le processus." };
@@ -519,7 +519,7 @@ export async function verifyClaim(
         metadata: { slug },
       });
 
-      // Notifications admin + pro (awaitées, bornées 8s — cf. sendClaimNotifications)
+      // Notifications admin + pro (awaitées, bornées 8s, cf. sendClaimNotifications)
       await sendClaimNotifications({
         slug,
         claimEmail: attempt.email,
@@ -588,7 +588,7 @@ export async function verifyClaim(
     metadata: { slug },
   });
 
-  // 5. Notifications admin + pro (awaitées, bornées 8s — cf. sendClaimNotifications)
+  // 5. Notifications admin + pro (awaitées, bornées 8s, cf. sendClaimNotifications)
   await sendClaimNotifications({
     slug,
     claimEmail: attempt.email,

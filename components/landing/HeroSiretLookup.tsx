@@ -16,12 +16,12 @@ function formatSiret(value: string): string {
 }
 
 /**
- * Hero CTA de la landing /pro — layout "2 cartes" (variante B validée 08/07) :
+ * Hero CTA de la landing /pro, layout "2 cartes" (variante B validée 08/07) :
  * - carte gauche : retrouver sa fiche par SIRET (Server Action lookupBySiret,
  *   rate-limit + honeypot + redirect côté serveur, logique inchangée) ;
  * - séparateur « ou » (vertical desktop, horizontal mobile) ;
  * - carte droite CORAL : inscription hors-base (/pro/creer-fiche) mise en
- *   avant — c'est le parcours des pros démarchés qui n'ont pas de fiche.
+ *   avant : c'est le parcours des pros démarchés qui n'ont pas de fiche.
  */
 export default function HeroSiretLookup() {
   const [state, formAction, isPending] = useActionState(
@@ -155,7 +155,7 @@ export default function HeroSiretLookup() {
             Pas encore référencé ? Enregistrez-vous
           </h3>
           <p className="text-sm text-white/85">
-            2 minutes chrono avec votre numéro d&apos;entreprise — gratuit à vie.
+            2 minutes chrono avec votre numéro d&apos;entreprise, gratuit à vie.
           </p>
           <ul className="space-y-1.5 text-sm font-medium">
             <li className="flex items-start gap-2">

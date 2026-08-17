@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 /**
  * Métiers "généralistes" (homme toutes mains) : un pro inscrit sous une de ces
  * catégories peut réaliser presque tous les petits corps de métier. Il DOIT donc
- * recevoir tous les projets BTP de sa zone — pas seulement ceux étiquetés
+ * recevoir tous les projets BTP de sa zone, pas seulement ceux étiquetés
  * "multiservice" (qui sont rarissimes, la plupart des clients choisissent un
  * métier précis).
  *
@@ -11,7 +11,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * projet AVANT de payer → recevoir plus large = seulement du reach en plus,
  * il ignore ce qu'il ne veut pas faire.
  *
- * Slugs résolus → ids au runtime (JAMAIS d'id en dur — leçon CATEGORY_ID_MAP 26/05).
+ * Slugs résolus → ids au runtime (JAMAIS d'id en dur, leçon CATEGORY_ID_MAP 26/05).
  */
 export const GENERALIST_SLUGS = ["multiservice", "petit-bricolage"] as const;
 

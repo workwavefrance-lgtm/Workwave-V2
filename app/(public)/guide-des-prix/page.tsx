@@ -10,7 +10,7 @@ import { BASE_URL } from "@/lib/constants";
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 export const metadata: Metadata = {
-  title: "Guides des prix travaux 2026 : tarifs artisans par métier — Workwave",
+  title: "Guides des prix travaux 2026 : tarifs artisans par métier · Workwave",
   description:
     "Tous les prix des travaux en 2026 : tarifs et fourchettes par métier et prestation. Données indicatives sourcées. Déposez votre projet gratuitement pour être mis en relation avec des artisans près de chez vous.",
   alternates: { canonical: `${BASE_URL}/guide-des-prix` },

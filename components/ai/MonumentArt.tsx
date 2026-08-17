@@ -1,11 +1,11 @@
 import type { CSSProperties, ReactNode } from "react";
 
 /**
- * MonumentArt — line-art minimaliste de skylines / monuments pour Workwave AI
+ * MonumentArt : line-art minimaliste de skylines / monuments pour Workwave AI
  * international.
  *
  * Cahier des charges (valide Willy) :
- *   - Trait fin, silhouette epuree (PAS de photo generique — interdit charte §8 bis).
+ *   - Trait fin, silhouette epuree (PAS de photo generique : interdit charte §8 bis).
  *   - Couleur via `currentColor` : on peint en accent coral OU en filigrane noir
  *     selon le contexte (juste `className="text-[var(--ai-accent)]/20"` etc.).
  *   - SVG inline => leger, zero requete reseau, zero CLS (ratio fige par viewBox).
@@ -14,7 +14,7 @@ import type { CSSProperties, ReactNode } from "react";
  * Server-component safe (aucun hook). Decoratif par defaut (aria-hidden).
  *
  * Les proprietes stroke/fill sont posees sur le <svg> racine et HERITEES par
- * tous les paths/circles enfants (proprietes SVG heritables) — donc un seul
+ * tous les paths/circles enfants (proprietes SVG heritables), donc un seul
  * point de controle, pas d'attribut par element.
  */
 
@@ -100,7 +100,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Dubai — Burj Khalifa + tours voisines.
+  // Dubai : Burj Khalifa + tours voisines.
   dubai: {
     viewBox: "0 0 200 280",
     content: (
@@ -113,7 +113,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // London — Big Ben (Elizabeth Tower) + aile du Parlement.
+  // London : Big Ben (Elizabeth Tower) + aile du Parlement.
   london: {
     viewBox: "0 0 200 280",
     content: (
@@ -131,7 +131,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Paris — Tour Eiffel.
+  // Paris : Tour Eiffel.
   paris: {
     viewBox: "0 0 200 300",
     content: (
@@ -146,7 +146,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Berlin — Porte de Brandebourg.
+  // Berlin : Porte de Brandebourg.
   berlin: {
     viewBox: "0 0 240 200",
     content: (
@@ -165,7 +165,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Riyadh — Kingdom Centre (ouverture en arche).
+  // Riyadh : Kingdom Centre (ouverture en arche).
   riyadh: {
     viewBox: "0 0 200 300",
     content: (
@@ -179,7 +179,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Amsterdam — maisons de canal a pignons.
+  // Amsterdam : maisons de canal a pignons.
   amsterdam: {
     viewBox: "0 0 240 180",
     content: (
@@ -193,7 +193,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // San Francisco — Golden Gate Bridge (2 pylones + cable suspendu + tablier).
+  // San Francisco : Golden Gate Bridge (2 pylones + cable suspendu + tablier).
   "golden-gate": {
     viewBox: "0 0 340 200",
     content: (
@@ -225,7 +225,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // New York — Statue de la Liberte (couronne + torche levee + robe + socle).
+  // New York : Statue de la Liberte (couronne + torche levee + robe + socle).
   "statue-liberty": {
     viewBox: "0 0 200 300",
     content: (
@@ -251,7 +251,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Seattle — Space Needle (tripode + soucoupe + antenne).
+  // Seattle : Space Needle (tripode + soucoupe + antenne).
   "space-needle": {
     viewBox: "0 0 200 300",
     content: (
@@ -271,7 +271,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Washington D.C. — Capitole (dome + colonnade).
+  // Washington D.C. : Capitole (dome + colonnade).
   "us-capitol": {
     viewBox: "0 0 280 200",
     content: (
@@ -297,7 +297,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Monaco — Casino de Monte-Carlo (facade Belle Epoque : deux tours a coupole
+  // Monaco, Casino de Monte-Carlo (facade Belle Epoque : deux tours a coupole
   // encadrant un pavillon central a dome, arcades cintrees). Hommage a la
   // principaute (Charles Garnier, 1879).
   monaco: {
@@ -331,8 +331,8 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // ─── Vague mondiale — line-art épuré, évocateur (décoratif, 10% opacité). ──
-  // Tokyo — Tour de Tokyo (treillis rouge, base large, antenne).
+  // ─── Vague mondiale : line-art épuré, évocateur (décoratif, 10% opacité). ──
+  // Tokyo : Tour de Tokyo (treillis rouge, base large, antenne).
   tokyo: {
     viewBox: "0 0 200 300",
     content: (
@@ -348,7 +348,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Shanghai — Tour de la Perle d'Orient (colonne + deux sphères).
+  // Shanghai : Tour de la Perle d'Orient (colonne + deux sphères).
   shanghai: {
     viewBox: "0 0 200 300",
     content: (
@@ -366,7 +366,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Singapour — Marina Bay Sands (3 piliers + pont-bateau au sommet).
+  // Singapour : Marina Bay Sands (3 piliers + pont-bateau au sommet).
   singapore: {
     viewBox: "0 0 280 220",
     content: (
@@ -382,7 +382,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Kuala Lumpur — Tours Petronas (jumelles effilées + skybridge).
+  // Kuala Lumpur : Tours Petronas (jumelles effilées + skybridge).
   "kuala-lumpur": {
     viewBox: "0 0 240 300",
     content: (
@@ -397,7 +397,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Taipei — Taipei 101 (tronc + 8 segments évasés type pagode + flèche).
+  // Taipei : Taipei 101 (tronc + 8 segments évasés type pagode + flèche).
   taipei: {
     viewBox: "0 0 200 300",
     content: (
@@ -412,7 +412,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Séoul — Tour N Seoul (mât sur colline triangulaire).
+  // Séoul : Tour N Seoul (mât sur colline triangulaire).
   seoul: {
     viewBox: "0 0 240 240",
     content: (
@@ -427,7 +427,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Mumbai — Gateway of India (grande arche centrale + arches latérales).
+  // Mumbai : Gateway of India (grande arche centrale + arches latérales).
   mumbai: {
     viewBox: "0 0 280 220",
     content: (
@@ -443,7 +443,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Bangkok — flèche de temple (prang à étages effilés).
+  // Bangkok : flèche de temple (prang à étages effilés).
   bangkok: {
     viewBox: "0 0 200 300",
     content: (
@@ -458,7 +458,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Sydney — Opéra (voiles imbriquées).
+  // Sydney : Opéra (voiles imbriquées).
   sydney: {
     viewBox: "0 0 320 200",
     content: (
@@ -472,7 +472,7 @@ const MONUMENTS: Record<MonumentName, Monument> = {
       </>
     ),
   },
-  // Rio — Christ Rédempteur (figure bras écartés sur mont triangulaire).
+  // Rio : Christ Rédempteur (figure bras écartés sur mont triangulaire).
   rio: {
     viewBox: "0 0 240 280",
     content: (

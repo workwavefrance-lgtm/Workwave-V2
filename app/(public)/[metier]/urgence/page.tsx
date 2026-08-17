@@ -30,7 +30,7 @@ import {
  * /[metier]/prix et /[metier]/guide).
  *
  * Angle éditorial : transparence anti-arnaque. Tous les chiffres viennent
- * de lib/data/urgence-content.ts (sourcé via Perplexity, sources citées) —
+ * de lib/data/urgence-content.ts (sourcé via Perplexity, sources citées) :
  * zéro chiffre inventé, zéro promesse de délai, zéro prix d'appel.
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
@@ -46,7 +46,7 @@ export function generateStaticParams() {
 }
 
 
-// Whitelist des métiers couverts — extensible (plombier, électricien...).
+// Whitelist des métiers couverts, extensible (plombier, électricien...).
 const URGENCE_METIERS = new Set(["serrurier", "chauffagiste"]);
 
 const METIER_LABELS: Record<string, { singular: string; plural: string }> = {
@@ -107,7 +107,7 @@ const URGENCE_CONFIG: Record<string, UrgenceConfig> = {
         {
           question: "Un serrurier peut-il intervenir sans devis ?",
           answer:
-            "Non dans la plupart des cas. L'arrêté du 24 janvier 2017 impose, pour les prestations de dépannage à domicile, une information préalable du consommateur et un devis écrit au-delà de 150 € TTC — certaines sources résument cette exigence comme un contrat écrit dès le premier euro. Refusez toute intervention sans validation préalable du prix total et des éventuelles pièces à remplacer.",
+            "Non dans la plupart des cas. L'arrêté du 24 janvier 2017 impose, pour les prestations de dépannage à domicile, une information préalable du consommateur et un devis écrit au-delà de 150 € TTC. Certaines sources résument cette exigence comme un contrat écrit dès le premier euro. Refusez toute intervention sans validation préalable du prix total et des éventuelles pièces à remplacer.",
         },
         {
           question: "Quelles majorations la nuit et le week-end ?",
@@ -122,7 +122,7 @@ const URGENCE_CONFIG: Record<string, UrgenceConfig> = {
         {
           question: "Mon assurance habitation couvre-t-elle l'ouverture de porte ?",
           answer:
-            "Cela dépend de votre contrat : certaines garanties d'assurance habitation prennent en charge tout ou partie de l'ouverture de porte ou du remplacement de serrure après effraction. Avant d'avancer les frais, contactez votre assureur pour vérifier ce que couvre votre contrat — certains imposent de passer par leur réseau de dépanneurs agréés.",
+            "Cela dépend de votre contrat : certaines garanties d'assurance habitation prennent en charge tout ou partie de l'ouverture de porte ou du remplacement de serrure après effraction. Avant d'avancer les frais, contactez votre assureur pour vérifier ce que couvre votre contrat. Certains imposent de passer par leur réseau de dépanneurs agréés.",
         },
       ];
     },
@@ -159,7 +159,7 @@ const URGENCE_CONFIG: Record<string, UrgenceConfig> = {
         },
         {
           question: "Quel est le tarif horaire d'un chauffagiste ?",
-          answer: `Les tarifs horaires constatés en ${year} vont de ${fmtEur(horaire.low)} € à ${fmtEur(horaire.high)} €. Avant tout déplacement, demandez le prix exact et vérifiez s'il inclut le déplacement, le diagnostic, la main-d'œuvre et la TVA — ces postes doivent apparaître séparément sur le devis et la facture.`,
+          answer: `Les tarifs horaires constatés en ${year} vont de ${fmtEur(horaire.low)} € à ${fmtEur(horaire.high)} €. Avant tout déplacement, demandez le prix exact et vérifiez s'il inclut le déplacement, le diagnostic, la main-d'œuvre et la TVA. Ces postes doivent apparaître séparément sur le devis et la facture.`,
         },
         {
           question: "Combien coûte un dépannage de chaudière en urgence ?",
@@ -237,7 +237,7 @@ export default async function MetierUrgencePage({ params }: Props) {
     { label: "Urgence" },
   ];
 
-  // FAQ — réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
+  // FAQ : réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
   const faqs = config.faqs(year, content);
 
   const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
@@ -271,7 +271,7 @@ export default async function MetierUrgencePage({ params }: Props) {
         {config.h1}
       </h1>
 
-      {/* Intro factuelle — ton calme et protecteur, illustration en regard */}
+      {/* Intro factuelle : ton calme et protecteur, illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>{config.intro(year, content)}</p>
@@ -279,15 +279,15 @@ export default async function MetierUrgencePage({ params }: Props) {
         <HeroArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — au-dessus de la ligne de flottaison : le visiteur en
+      {/* CTA héro, au-dessus de la ligne de flottaison : le visiteur en
           urgence veut une action immédiate, pas 2000 mots. */}
       <HeroCta
         href={`/deposer-projet?categorie=${metier}`}
         label={`Trouver un ${labels.singular.toLowerCase()} vérifié`}
-        note={`Gratuit, sans engagement — votre demande est visible par les ${labels.plural} SIRET vérifiés de votre zone, qui vous recontactent directement.`}
+        note={`Gratuit, sans engagement : votre demande est visible par les ${labels.plural} SIRET vérifiés de votre zone, qui vous recontactent directement.`}
       />
 
-      {/* ─── Tableau des prix réels — LA section différenciante ─── */}
+      {/* ─── Tableau des prix réels · LA section différenciante ─── */}
       <section className="mb-12">
         <PriceRangesCard
           heading={`Prix constatés ${year}`}
@@ -299,7 +299,7 @@ export default async function MetierUrgencePage({ params }: Props) {
         {/* Callout majorations nuit / week-end */}
         <InfoCallout title={config.calloutTitle} text={content.majorations} />
 
-        {/* CTA contextuel — pic de confiance : le visiteur vient de voir des
+        {/* CTA contextuel, pic de confiance : le visiteur vient de voir des
             prix honnêtes, c'est le moment où il bascule. */}
         <PostPriceCta
           href={`/deposer-projet?categorie=${metier}`}
@@ -319,7 +319,7 @@ export default async function MetierUrgencePage({ params }: Props) {
         </p>
         <ScamWarningsList warnings={content.scamWarnings} />
 
-        {/* CTA contextuel — pic émotionnel : après la liste des arnaques, on
+        {/* CTA contextuel, pic émotionnel : après la liste des arnaques, on
             propose la voie sûre. */}
         <PostScamCta
           href={`/deposer-projet?categorie=${metier}`}
@@ -355,7 +355,7 @@ export default async function MetierUrgencePage({ params }: Props) {
       <FinalCtaSection
         href={`/deposer-projet?categorie=${metier}`}
         title={`Besoin d'un ${labels.singular.toLowerCase()} de confiance ?`}
-        text={`Décrivez votre problème, recevez des devis de ${labels.plural} SIRET vérifiés près de chez vous — gratuit, sans commission.`}
+        text={`Décrivez votre problème, recevez des devis de ${labels.plural} SIRET vérifiés près de chez vous, gratuit, sans commission.`}
         buttonLabel="Décrire mon problème gratuitement"
         footnote="Gratuit · sans engagement · projet visible par les pros de votre zone"
       />
@@ -363,7 +363,7 @@ export default async function MetierUrgencePage({ params }: Props) {
       {/* ─── FAQ (UI + schema FAQPage injecté plus haut) ─── */}
       <FaqAccordion
         faqs={faqs}
-        title={`Questions fréquentes — ${labels.singular.toLowerCase()} en urgence`}
+        title={`Questions fréquentes · ${labels.singular.toLowerCase()} en urgence`}
       />
 
       {/* ─── Maillage interne ─── */}

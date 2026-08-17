@@ -215,7 +215,7 @@ export async function submitInscription(formData: FormData): Promise<void> {
     plan: "free",
   };
 
-  // Send emails (await for reliability — lesson 24/05)
+  // Send emails (await for reliability, lesson 24/05)
   await sendAiSignupAdminNotification(data);
   await sendAiSignupWelcome(data, locale);
 

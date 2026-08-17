@@ -21,7 +21,7 @@ const mode = isLive ? "🔴 LIVE" : "🟢 TEST";
 const stripe = new Stripe(stripeKey, { typescript: true });
 
 async function main() {
-  console.log(`\n=== Creation Workwave BTP Lead Unlock — mode ${mode} ===\n`);
+  console.log(`\n=== Creation Workwave BTP Lead Unlock · mode ${mode} ===\n`);
 
   // 1) Idempotence
   const products = await stripe.products.list({ limit: 100, active: true });
@@ -66,7 +66,7 @@ async function main() {
     currency: "eur",
     unit_amount: 990, // 9,90 EUR TTC (8,25 HT)
     metadata: { vertical: "btp", product: "btp_lead_unlock" },
-    nickname: "Workwave BTP Lead Unlock — 9,90 EUR TTC",
+    nickname: "Workwave BTP Lead Unlock · 9,90 EUR TTC",
     // PAS de recurring -> automatique en one-time
   });
   console.log(`   ✓ Price : ${price.id} (${(price.unit_amount || 0) / 100} EUR)`);

@@ -1,5 +1,5 @@
 /**
- * Phase 1a — Tarifs freelance par PAYS, SOURCÉS (Perplexity sonar), pour les
+ * Phase 1a : tarifs freelance par PAYS, SOURCÉS (Perplexity sonar), pour les
  * hubs pricing skill×pays de workwaveai.co (/en/ai/[skill]/country/[country]).
  *
  * On source UNE fourchette de référence par pays (day rate USD d'un freelance
@@ -8,7 +8,7 @@
  * prix indicatif crédible PAR pays (un senior à Bangalore ≠ à Zurich).
  *
  * ⚠️ ZÉRO chiffre inventé : si Perplexity ne peut pas sourcer, on garde null.
- * ⚠️ 100 % AI/tech — ne touche RIEN du BTP.
+ * ⚠️ 100 % AI/tech : ne touche RIEN du BTP.
  *
  * Sortie : lib/data/ai-country-rates.ts (keyé par slug = slugifyCountry(name),
  * cohérent avec lib/data/intl-countries.ts). Coût : ~58 requêtes ≈ $0.35.
@@ -38,7 +38,7 @@ function slugifyCountry(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
-// Pays présents dans INTL_CITIES (USA inclus ici pour complétude — utile au hub
+// Pays présents dans INTL_CITIES (USA inclus ici pour complétude, utile au hub
 // national/états ; les autres alimentent /en/ai/[skill]/country/[country]).
 const COUNTRIES = [
   "United States", "India", "Japan", "China", "United Arab Emirates", "Saudi Arabia",
@@ -68,7 +68,7 @@ function buildPrompt(country: string): string {
     `In ${year}, what is a realistic freelance HOURLY RATE in USD PER HOUR for an experienced/SENIOR ` +
     `software or digital freelancer (developer, designer, marketer) based in ${country}? ` +
     `Use the standard international metric: USD per HOUR (as published on Upwork/Toptal rate data, ` +
-    `freelance market reports, developer rate surveys). NOT a daily rate — an HOURLY rate. ` +
+    `freelance market reports, developer rate surveys). NOT a daily rate, an HOURLY rate. ` +
     `Answer ONLY in strict JSON: {"seniorHourlyMinUsd": <number or null>, "seniorHourlyMaxUsd": <number or null>, ` +
     `"level": "budget|mid|high|premium", "note": "<one factual sentence on the local freelance HOURLY rate level vs the global market>"}. ` +
     `Realistic sanity check: senior rates range roughly $15-40/h in low-cost markets, $40-90/h in mid markets, ` +
@@ -108,7 +108,7 @@ async function fetchOne(country: string): Promise<Entry> {
 }
 
 async function main() {
-  console.log(`Tarifs freelance par pays — ${COUNTRIES.length} pays (Perplexity)${DRY ? " [DRY: 3 pays]" : ""}\n`);
+  console.log(`Tarifs freelance par pays · ${COUNTRIES.length} pays (Perplexity)${DRY ? " [DRY: 3 pays]" : ""}\n`);
   const list = DRY ? COUNTRIES.slice(0, 3) : COUNTRIES;
   const out: Record<string, Entry> = {};
   for (const c of list) {

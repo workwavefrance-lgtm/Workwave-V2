@@ -82,7 +82,7 @@ export async function markProjectAsContacted(formData: FormData): Promise<void> 
   }
 
   // 4) Verifier que le projet existe ET est Workwave AI (tech) ET pas soft-deleted
-  // NB: la table `projects` n'a PAS de colonne `deleted_at` — le soft-delete
+  // NB: la table `projects` n'a PAS de colonne `deleted_at` : le soft-delete
   // se fait via `status='deleted'`.
   const { data: project } = await service
     .from("projects")
@@ -151,7 +151,7 @@ export async function startTechUnlock(formData: FormData): Promise<void> {
     redirect("/ai/dashboard/projets?error=invalid_project");
   }
 
-  // CGV obligatoire (case cochée — garde-fou anti-contournement JS/requête forgée)
+  // CGV obligatoire (case cochée, garde-fou anti-contournement JS/requête forgée)
   if (!formData.get("cgvAccepted")) {
     redirect("/ai/dashboard/projets?error=cgv_required");
   }
@@ -194,7 +194,7 @@ export async function startTechUnlock(formData: FormData): Promise<void> {
     .maybeSingle();
   if (existing) redirect(`/ai/dashboard/projets?already_unlocked=${projectId}`);
 
-  // 4 bis) OFFRE DE LANCEMENT — les 2 premiers déblocages sont OFFERTS.
+  // 4 bis) OFFRE DE LANCEMENT : les 2 premiers déblocages sont OFFERTS.
   const freeRemaining = await getFreeUnlocksRemaining(service, pro.id);
   if (freeRemaining > 0) {
     const granted = await grantFreeUnlock(service, {

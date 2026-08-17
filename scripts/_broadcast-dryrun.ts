@@ -1,5 +1,5 @@
 /**
- * SIMULATEUR DE BROADCAST (dry-run) — ne touche à RIEN, n'envoie AUCUN email.
+ * SIMULATEUR DE BROADCAST (dry-run) : ne touche à RIEN, n'envoie AUCUN email.
  *
  *   npx tsx scripts/_broadcast-dryrun.ts <slug-categorie> <nom-ville>
  *   ex: npx tsx scripts/_broadcast-dryrun.ts carreleur Marseille
@@ -119,7 +119,7 @@ async function main() {
       v.latitude != null && v.longitude != null && t.city?.latitude != null && t.city?.longitude != null
         ? Math.round(haversineKm(t.city.latitude, t.city.longitude, v.latitude, v.longitude))
         : null;
-    console.log(`  ⚠️  #${t.id} ${t.name} (${t.city?.name ?? "?"}) — ${d ?? "?"} km, rayon ${t.intervention_radius_km ?? DEFAULT_RADIUS_KM} km`);
+    console.log(`  ⚠️  #${t.id} ${t.name} (${t.city?.name ?? "?"}) · ${d ?? "?"} km, rayon ${t.intervention_radius_km ?? DEFAULT_RADIUS_KM} km`);
   }
 
   if (targets.length === 0) {

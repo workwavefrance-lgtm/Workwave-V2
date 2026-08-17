@@ -32,7 +32,7 @@ export async function sendLeadNotificationEmail({
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
   const urgencyLabels: Record<string, string> = {
-    today: "Urgent — aujourd'hui",
+    today: "Urgent · aujourd'hui",
     this_week: "Cette semaine",
     this_month: "Ce mois-ci",
     not_urgent: "Pas urgent",
@@ -40,9 +40,9 @@ export async function sendLeadNotificationEmail({
 
   const budgetLabels: Record<string, string> = {
     lt500: "Moins de 500 \u20AC",
-    "500_2000": "500 \u20AC \u2014 2 000 \u20AC",
-    "2000_5000": "2 000 \u20AC \u2014 5 000 \u20AC",
-    "5000_15000": "5 000 \u20AC \u2014 15 000 \u20AC",
+    "500_2000": "500 \u20AC \u00E0 2 000 \u20AC",
+    "2000_5000": "2 000 \u20AC \u00E0 5 000 \u20AC",
+    "5000_15000": "5 000 \u20AC \u00E0 15 000 \u20AC",
     gt15000: "Plus de 15 000 \u20AC",
     unknown: "Non pr\u00E9cis\u00E9",
   };
@@ -50,7 +50,7 @@ export async function sendLeadNotificationEmail({
   await resend.emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
-    subject: `[Workwave] Nouveau projet — ${categoryName} à ${cityName}`,
+    subject: `[Workwave] Nouveau projet · ${categoryName} à ${cityName}`,
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="font-size: 20px; font-weight: 700; color: #0A0A0A; margin-bottom: 16px;">

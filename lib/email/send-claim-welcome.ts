@@ -8,10 +8,10 @@ import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
 const DISPLAY_CAP = 50;
 
 /**
- * Bloc "X projets vous attendent déjà" — dynamique, affiché seulement si le pro
+ * Bloc "X projets vous attendent déjà", dynamique, affiché seulement si le pro
  * a des projets disponibles dans sa zone au moment du claim. Fond noir + coral
  * pour ressortir. ZÉRO PII : uniquement des champs structurés (métier · ville ·
- * distance · délai) — jamais de texte libre / résumé (risque de fuite avant
+ * distance · délai), jamais de texte libre / résumé (risque de fuite avant
  * paiement, un résumé IA étant dérivé de la description brute du client).
  */
 export function buildAvailableProjectsBlock(
@@ -258,7 +258,7 @@ ${buildGoogleReviewBlock({ audience: "pro" })}
     <!-- Footer -->
     <div style="padding:18px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
       <p style="margin:0 0 4px;color:#9CA3AF;font-size:12px;line-height:1.6;">
-        Workwave — Annuaire gratuit des professionnels en France
+        Workwave · Annuaire gratuit des professionnels en France
       </p>
       <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.6;">
         Vous recevez cet email parce que vous venez de réclamer une fiche pro sur Workwave.
@@ -272,7 +272,7 @@ ${buildGoogleReviewBlock({ audience: "pro" })}
   await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: params.email,
-    subject: `Bienvenue sur Workwave Pro — votre fiche ${params.proName} est active`,
+    subject: `Bienvenue sur Workwave Pro · votre fiche ${params.proName} est active`,
     html,
   });
 }

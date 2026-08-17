@@ -21,7 +21,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metier, location, ville, n } = await params;
-  // Canonical vers la page 1 — comportement identique a l'ancien ?page=N.
+  // Canonical vers la page 1, comportement identique a l'ancien ?page=N.
   return {
     alternates: { canonical: `${BASE_URL}/${metier}/${location}/${ville}` },
     title: `Page ${n}`,

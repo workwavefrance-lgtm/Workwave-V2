@@ -2,7 +2,7 @@
  * TJM (Tarif Journalier Moyen) de reference par skill tech, France 2026.
  *
  * SOURCE : compilation publique de 3 sources concordantes :
- *   1. Blog du Moderateur — "Freelance tech : taux journaliers moyens
+ *   1. Blog du Moderateur, "Freelance tech : taux journaliers moyens
  *      par metier 2026" (publie janvier 2026)
  *      https://www.blogdumoderateur.com/freelance-tech-taux-journaliers-moyens-metier-2026/
  *   2. Free-Work TJM tracker (mise a jour mensuelle, ~7000 missions analysees)

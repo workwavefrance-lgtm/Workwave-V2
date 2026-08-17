@@ -222,7 +222,7 @@ async function main() {
   if (catRemain === 0 && proRemain === 0) {
     console.log("\n✅ Cleanup terminé avec succès.");
   } else {
-    console.log("\n⚠ Cleanup partiel — investiguer.");
+    console.log("\n⚠ Cleanup partiel : investiguer.");
   }
 }
 

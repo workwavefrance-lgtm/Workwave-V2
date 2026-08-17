@@ -31,7 +31,7 @@ export async function generateOnboardingPdf(
   const footer = "Workwave \u00B7 3 rue des Rosiers, 86110 Craon";
 
   // ============================================
-  // Page 1 — Couverture
+  // Page 1 · Couverture
   // ============================================
   const page1 = doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
 
@@ -98,7 +98,7 @@ export async function generateOnboardingPdf(
   });
 
   // ============================================
-  // Page 2 — Reclamer en 3 etapes
+  // Page 2 · Reclamer en 3 etapes
   // ============================================
   const page2 = doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
 
@@ -197,7 +197,7 @@ export async function generateOnboardingPdf(
   });
 
   // ============================================
-  // Page 3 — Comparatif gratuit vs Pro
+  // Page 3 · Comparatif gratuit vs Pro
   // ============================================
   const page3 = doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
 

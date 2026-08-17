@@ -166,7 +166,7 @@ export async function getLeadsForPro(
  * Le verrou est ICI, pas dans la page. C'est volontaire : avant le 08/08/2026
  * cette fonction renvoyait le projet complet (`projects(*)`, donc email et
  * téléphone) et laissait à l'appelant le soin de vérifier `lead_unlocks`. La
- * liste le faisait, la page de détail non — et 100 leads sur 105 livraient un
+ * liste le faisait, la page de détail non, et 100 leads sur 105 livraient un
  * email jamais payé à qui tapait l'URL.
  *
  * Une vérification qu'on peut oublier finit par être oubliée. Il n'existe donc
@@ -174,7 +174,7 @@ export async function getLeadsForPro(
  * appelant ne PEUT PAS obtenir les coordonnées sans déblocage, même en le
  * voulant : elles ne sortent pas de cette fonction.
  *
- * Retourne aussi `unlocked` pour que l'affichage sache quoi montrer — mais ce
+ * Retourne aussi `unlocked` pour que l'affichage sache quoi montrer, mais ce
  * booléen n'est qu'un indice d'affichage, jamais la barrière.
  */
 export async function getLeadForPro(
@@ -207,7 +207,7 @@ export async function getLeadForPro(
 
   // Pas payé : les coordonnées ne quittent pas cette fonction. Chaînes vides
   // (le type Project les déclare non-nullables) + description nettoyée, comme
-  // sur la liste — un particulier laisse parfois son numéro dans le texte libre.
+  // sur la liste, un particulier laisse parfois son numéro dans le texte libre.
   const p = lead.project as typeof lead.project & {
     cleaned_description: string | null;
     has_contact_in_description: boolean | null;
@@ -259,7 +259,7 @@ export async function getLeadPreviewCount(
     1
   ).toISOString();
 
-  // Zone = RAYON d'intervention (Haversine), pas le seul département — cohérent
+  // Zone = RAYON d'intervention (Haversine), pas le seul département, cohérent
   // avec le broadcast + la page Leads. La table projects est petite : on charge
   // les projets des métiers du pro sur le mois puis on filtre par distance.
   const { data: rows } = await supabase
@@ -320,7 +320,7 @@ export async function getLeadsReceivedLast30Days(
 }
 
 // ============================================
-// Accueil dashboard BTP — modèle pay-per-lead (dynamique)
+// Accueil dashboard BTP : modèle pay-per-lead (dynamique)
 // ============================================
 
 export type RecentProjectForPro = {
@@ -342,8 +342,8 @@ export type ProDashboardData = {
 /**
  * Données de l'accueil dashboard BTP en modèle pay-per-lead.
  * DYNAMIQUE : compte les PROJETS matchant les catégories du pro (principale +
- * secondaires) dans son RAYON d'intervention (distance Haversine) — comme la
- * page Leads et le broadcast — au lieu de la table `project_leads` (morte en
+ * secondaires) dans son RAYON d'intervention (distance Haversine), comme la
+ * page Leads et le broadcast, au lieu de la table `project_leads` (morte en
  * pay-per-lead). + lead_unlocks. Fallback département si coords manquantes.
  */
 export async function getProDashboardData(args: {

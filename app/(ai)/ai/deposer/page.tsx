@@ -6,7 +6,7 @@ import SubmitButton from "@/components/ai/SubmitButton";
 import { submitTechProject } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Deposer un projet tech — Workwave AI",
+  title: "Deposer un projet tech · Workwave AI",
   description:
     "Publiez votre projet tech en 4 etapes. On alerte en temps reel toute la communaute des freelances tech FR. Reponse en moins de 24h, gratuit, sans engagement.",
 };
@@ -22,8 +22,8 @@ const CATEGORIES = [
 
 const BUDGETS = [
   { value: "lt5k", label: "< 5K€", desc: "Mission courte ou MVP" },
-  { value: "5k-15k", label: "5 — 15K€", desc: "Projet de taille moyenne" },
-  { value: "15k-50k", label: "15 — 50K€", desc: "Build complet" },
+  { value: "5k-15k", label: "5 - 15K€", desc: "Projet de taille moyenne" },
+  { value: "15k-50k", label: "15 - 50K€", desc: "Build complet" },
   { value: "gt50k", label: "> 50K€", desc: "Long terme ou equipe" },
   { value: "tbd", label: "A definir", desc: "On en discute" },
 ];
@@ -103,7 +103,7 @@ export default async function DeposerPage({
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed">
               4 etapes, 60 secondes. On alerte en temps reel toute la
-              communaute des freelances tech FR — les profils interesses
+              communaute des freelances tech FR : les profils interesses
               vous contactent directement. Gratuit, sans engagement, aucune commission.
             </p>
           </div>
@@ -118,7 +118,7 @@ export default async function DeposerPage({
         className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20"
       >
         <div className="max-w-3xl space-y-12 sm:space-y-16">
-          {/* ───────── Step 01 — Categorie ───────── */}
+          {/* ───────── Step 01 · Categorie ───────── */}
           <div>
             <SectionLabel index={1} total={4} label="Categorie" />
             <h2
@@ -171,7 +171,7 @@ export default async function DeposerPage({
             </div>
           </div>
 
-          {/* ───────── Step 02 — Votre projet ───────── */}
+          {/* ───────── Step 02 · Votre projet ───────── */}
           <div>
             <SectionLabel index={2} total={4} label="Votre projet" />
             <h2
@@ -260,7 +260,7 @@ export default async function DeposerPage({
             </div>
           </div>
 
-          {/* ───────── Step 03 — Budget & delai ───────── */}
+          {/* ───────── Step 03 · Budget & delai ───────── */}
           <div>
             <SectionLabel index={3} total={4} label="Budget" />
             <h2
@@ -360,14 +360,14 @@ export default async function DeposerPage({
                   <span className="font-semibold text-[var(--ai-text)]">
                     Remote OK
                   </span>{" "}
-                  — j&apos;accepte les freelances en remote total (recommande
+                  : j&apos;accepte les freelances en remote total (recommande
                   pour elargir le matching).
                 </span>
               </label>
             </div>
           </div>
 
-          {/* ───────── Step 04 — Contact ───────── */}
+          {/* ───────── Step 04 · Contact ───────── */}
           <div>
             <SectionLabel index={4} total={4} label="Vous" />
             <h2

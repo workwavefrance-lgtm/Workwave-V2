@@ -114,23 +114,23 @@ export default function EnqueteClient({ responses }: { responses: ProSurveyRespo
   const columns: AdminColumn<ProSurveyResponse>[] = [
     { key: "created_at", label: "Date", sortable: true, render: (r) => <span className="tabular-nums whitespace-nowrap">{fmtDate(r.created_at)}</span> },
     { key: "metier", label: "Métier", render: (r) => <span className="font-medium whitespace-nowrap">{r.metier}</span> },
-    { key: "taille", label: "Taille", render: (r) => r.taille || "—" },
-    { key: "departement", label: "Dépt", render: (r) => r.departement || "—" },
-    { key: "taches", label: "Tâches chronophages", render: (r) => <span className="block max-w-[260px]">{(r.taches_chrono || []).join(" · ") || "—"}</span> },
-    { key: "heures", label: "Heures admin", render: (r) => <span className="whitespace-nowrap">{r.heures_admin || "—"}</span> },
-    { key: "outils", label: "Outils", render: (r) => <span className="whitespace-nowrap">{r.outils_actuels || "—"}{r.outils_detail ? ` (${r.outils_detail})` : ""}</span> },
-    { key: "corvee", label: "Corvée à supprimer", render: (r) => <span className="block max-w-[280px] truncate" title={r.corvee_libre || ""}>{r.corvee_libre || "—"}</span> },
-    { key: "outils_essayes", label: "Outils essayés", render: (r) => <span className="block max-w-[280px] truncate" title={r.outils_essayes || ""}>{r.outils_essayes || "—"}</span> },
+    { key: "taille", label: "Taille", render: (r) => r.taille || "-" },
+    { key: "departement", label: "Dépt", render: (r) => r.departement || "-" },
+    { key: "taches", label: "Tâches chronophages", render: (r) => <span className="block max-w-[260px]">{(r.taches_chrono || []).join(" · ") || "-"}</span> },
+    { key: "heures", label: "Heures admin", render: (r) => <span className="whitespace-nowrap">{r.heures_admin || "-"}</span> },
+    { key: "outils", label: "Outils", render: (r) => <span className="whitespace-nowrap">{r.outils_actuels || "-"}{r.outils_detail ? ` (${r.outils_detail})` : ""}</span> },
+    { key: "corvee", label: "Corvée à supprimer", render: (r) => <span className="block max-w-[280px] truncate" title={r.corvee_libre || ""}>{r.corvee_libre || "-"}</span> },
+    { key: "outils_essayes", label: "Outils essayés", render: (r) => <span className="block max-w-[280px] truncate" title={r.outils_essayes || ""}>{r.outils_essayes || "-"}</span> },
     {
       key: "contact", label: "Contact",
       render: (r) =>
         r.contact && r.contact.trim() ? (
           <span className="whitespace-nowrap">
-            <AdminBadge variant="success" dot>{r.prenom || "—"}</AdminBadge>{" "}
+            <AdminBadge variant="success" dot>{r.prenom || "-"}</AdminBadge>{" "}
             <span style={{ color: "var(--admin-text-secondary)" }}>{r.contact}</span>
           </span>
         ) : (
-          <span style={{ color: "var(--admin-text-tertiary)" }}>—</span>
+          <span style={{ color: "var(--admin-text-tertiary)" }}>-</span>
         ),
     },
   ];
@@ -141,7 +141,7 @@ export default function EnqueteClient({ responses }: { responses: ProSurveyRespo
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold" style={{ color: "var(--admin-text)" }}>Enquête pros</h1>
-          <p className="text-xs mt-0.5" style={{ color: "var(--admin-text-tertiary)" }}>Sondage de découverte — douleurs et liste à rappeler</p>
+          <p className="text-xs mt-0.5" style={{ color: "var(--admin-text-tertiary)" }}>Sondage de découverte · douleurs et liste à rappeler</p>
         </div>
         <CsvExportButton endpoint="/api/admin/enquete/export" filename="enquete-pros.csv" />
       </div>
@@ -151,7 +151,7 @@ export default function EnqueteClient({ responses }: { responses: ProSurveyRespo
         <Stat label="Réponses" value={total} />
         <Stat label="Avec un contact (à rappeler)" value={avecContact} />
         <Stat label="Métiers représentés" value={metiers.length} />
-        <Stat label="Taux de contact" value={total ? Math.round((avecContact / total) * 100) + "%" : "—"} />
+        <Stat label="Taux de contact" value={total ? Math.round((avecContact / total) * 100) + "%" : "-"} />
       </div>
 
       {/* Graphiques */}
@@ -224,15 +224,15 @@ export default function EnqueteClient({ responses }: { responses: ProSurveyRespo
               <Field label="Département" value={selected.departement} />
               <Field label="Tâches chronophages" value={(selected.taches_chrono || []).join(" · ")} />
               <Field label="Heures d'admin / semaine" value={selected.heures_admin} />
-              <Field label="Outils actuels" value={[selected.outils_actuels, selected.outils_detail].filter(Boolean).join(" — ")} />
+              <Field label="Outils actuels" value={[selected.outils_actuels, selected.outils_detail].filter(Boolean).join(" · ")} />
               <Field label="Corvée à supprimer" value={selected.corvee_libre} multiline />
               <Field label="Outils essayés / abandonnés" value={selected.outils_essayes} multiline />
               <Field
                 label="Contact"
                 value={
                   selected.contact
-                    ? `${selected.prenom || ""}${selected.prenom ? " — " : ""}${selected.contact}${selected.consent ? "  ·  consentement ✓" : ""}`
-                    : "—"
+                    ? `${selected.prenom || ""}${selected.prenom ? " · " : ""}${selected.contact}${selected.consent ? "  ·  consentement ✓" : ""}`
+                    : "-"
                 }
               />
             </div>
@@ -248,7 +248,7 @@ function Field({ label, value, multiline }: { label: string; value: string | nul
     <div>
       <p className="text-[11px] font-medium uppercase tracking-wider mb-1" style={{ color: "var(--admin-text-tertiary)" }}>{label}</p>
       <p className="text-sm" style={{ color: "var(--admin-text)", whiteSpace: multiline ? "pre-wrap" : "normal" }}>
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : "-"}
       </p>
     </div>
   );

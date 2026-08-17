@@ -75,7 +75,7 @@ export const getAdminProjects = cache(
 
     const { data, count } = await query;
 
-    // Nombre de prises (déblocages) par projet de la page — lead_unlocks est petit.
+    // Nombre de prises (déblocages) par projet de la page : lead_unlocks est petit.
     const rows = (data || []) as unknown as AdminProjectRow[];
     const ids = rows.map((p) => p.id);
     const unlockByProject = new Map<number, number>();
@@ -119,7 +119,7 @@ export const getAdminProjectById = cache(async (id: number) => {
     .eq("project_id", id)
     .order("sent_at", { ascending: false });
 
-  // Qui a DÉBLOQUÉ ce projet — INDÉPENDAMMENT du broadcast. Un pro peut prendre
+  // Qui a DÉBLOQUÉ ce projet, INDÉPENDAMMENT du broadcast. Un pro peut prendre
   // un lead qu'il a trouvé dans son feed dashboard (pull) même si le broadcast
   // (push) ne l'a jamais ciblé (broadcast_count peut être 0). C'est le cas d'un
   // pro généraliste (multiservice) ou d'un pro inscrit APRÈS la diffusion.

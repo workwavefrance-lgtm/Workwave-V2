@@ -2,7 +2,7 @@
  * Audit des redirects Phase D : verifier que `/[metier]/[ville]` pour des
  * villes SANS pros redirige bien en 308 vers `/[metier]/[dept]`.
  *
- * Pourquoi : GSC affiche 12 593 "Page avec redirection" — on veut confirmer
+ * Pourquoi : GSC affiche 12 593 "Page avec redirection" : on veut confirmer
  * que ce sont nos 308 volontaires (Phase D, leçon 30/04 dans CLAUDE.md) et
  * pas des redirects en boucle ou cassés.
  *

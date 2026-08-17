@@ -9,7 +9,7 @@ import { getUsaGuide, usaGuideSlugs, USA_GUIDES } from "@/lib/data/freelance-usa
 /**
  * Guide "freelance aux USA" par topic : /en/ai/freelance-usa/[topic].
  *
- * Contenu 100% SOURCÉ (lib/data/freelance-usa.ts — IRS / SBA / USCIS).
+ * Contenu 100% SOURCÉ (lib/data/freelance-usa.ts · IRS / SBA / USCIS).
  * Disclaimer "not legal/tax advice" affiché. Indexable (SEO), ISR 24h.
  * generateStaticParams sur les topics qui ont un guide.
  */
@@ -115,7 +115,7 @@ export default async function FreelanceUsaTopicPage({
       {/* Disclaimer légal / fiscal */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="rounded-xl border border-[var(--ai-border)] bg-[var(--ai-bg-subtle)] p-4 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
-          <strong className="text-[var(--ai-text)]">General information, not legal or tax advice.</strong> Rules and thresholds change — last reviewed {guide.lastReviewed}. Always confirm the current requirements with the official sources listed at the bottom, and consult a licensed professional for your situation.
+          <strong className="text-[var(--ai-text)]">General information, not legal or tax advice.</strong> Rules and thresholds change: last reviewed {guide.lastReviewed}. Always confirm the current requirements with the official sources listed at the bottom, and consult a licensed professional for your situation.
         </div>
       </div>
 
@@ -165,7 +165,7 @@ export default async function FreelanceUsaTopicPage({
         {/* CTA Workwave */}
         <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] p-7 my-10">
           <h2 className="text-[19px] font-bold text-[var(--ai-text)]">Find clients on Workwave AI.</h2>
-          <p className="mt-2 text-[14px] text-[var(--ai-text-secondary)]">Once you&apos;re set up, create a free profile and get matched with projects — AI, development, data, design and more, with 0% commission.</p>
+          <p className="mt-2 text-[14px] text-[var(--ai-text-secondary)]">Once you&apos;re set up, create a free profile and get matched with projects: AI, development, data, design and more, with 0% commission.</p>
           <div className="mt-5 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/inscription" className="inline-flex items-center justify-center h-11 px-6 text-[14px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">Create your free profile</Link>
             <Link href="/en/ai" className="inline-flex items-center justify-center h-11 px-6 text-[14px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">Explore Workwave AI</Link>

@@ -108,7 +108,7 @@ export async function sendReviewThanks(params: {
 
     <div style="background:#FAFAFA;padding:18px 32px;border-top:1px solid #F1F1F3;text-align:center;">
       <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.5;">
-        Workwave — Mise en relation gratuite entre particuliers et artisans en Nouvelle-Aquitaine.<br>
+        Workwave · Mise en relation gratuite entre particuliers et artisans en Nouvelle-Aquitaine.<br>
         <a href="mailto:contact@workwave.fr" style="color:#9CA3AF;text-decoration:underline;">contact@workwave.fr</a>
       </p>
     </div>
@@ -130,7 +130,7 @@ ${params.published
 
 Merci de votre contribution. Votre retour aide d'autres particuliers à choisir le bon artisan.
 
-— L'équipe Workwave
+L'équipe Workwave
 contact@workwave.fr
   `.trim();
 

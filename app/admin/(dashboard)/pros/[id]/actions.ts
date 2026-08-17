@@ -39,7 +39,7 @@ export async function updateProByAdmin(
 
   const sb = getAdminServiceClient();
 
-  // Construction du payload — on n'inclut que les champs fournis (pas de réécriture)
+  // Construction du payload : on n'inclut que les champs fournis (pas de réécriture)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const payload: any = { updated_at: new Date().toISOString() };
 
@@ -119,7 +119,7 @@ export async function updateProByAdmin(
 }
 
 /**
- * Suppression RGPD d'une fiche (art. 17) depuis l'admin — remplace les scripts
+ * Suppression RGPD d'une fiche (art. 17) depuis l'admin, remplace les scripts
  * _rgpd-*.ts. Pattern « suppression complète » : soft-delete (is_active=false +
  * deleted_at + do_not_contact + nullify PII) → la fiche publique retourne 404,
  * Google désindexe. + blacklist de l'email du plaignant (ne plus jamais contacter).

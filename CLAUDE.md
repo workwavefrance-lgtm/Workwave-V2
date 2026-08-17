@@ -10,7 +10,7 @@ Ce fichier est lu automatiquement par Claude Code à chaque session. Il contient
 
 Les plans de la Règle 1 restent **obligatoires**. Ils se rédigent dans ce style : attaque directe sur les fichiers et les étapes, zéro préambule, zéro reformulation de la demande, zéro remplissage, actions exécutables avec l'ordre et le critère de réussite, niveau de confiance sur ce qui est incertain. Un plan qui commence par « Je vais analyser votre demande » enfreint le fichier global.
 
-Rappel des points que j'enfreins le plus (mesuré sur la session du 11-12/08) :
+Rappel des points que j'enfreins le plus (mesuré sur la session des 11 et 12/08) :
 - le schéma « X, pas Y » et les définitions par contraste : **interdits**, affirmer directement ;
 - le niveau de confiance absent quand j'avance une cause probable (attribution des 91,55 € : affirmée sans chiffrer ma certitude) ;
 - la flatterie et l'auto-flagellation, qui sont deux formes du même remplissage ;

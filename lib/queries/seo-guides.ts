@@ -20,7 +20,7 @@ export type SeoGuide = {
 // Regroupe les appels identiques d'un meme rendu (`generateMetadata` puis la
 // page). Sans cela, chaque affichage ferait DEUX fois la meme requete : Next
 // regroupait au niveau de la reponse HTTP, en la dedoublant, ce qui retenait la
-// memoire — cf. lib/supabase/fetch-supabase.ts.
+// memoire, cf. lib/supabase/fetch-supabase.ts.
 export const getGuideBySlug = cache(async function getGuideBySlug(
   slug: string
 ): Promise<SeoGuide | null> {

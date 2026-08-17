@@ -6,7 +6,7 @@ function eur(n: number): string {
 }
 
 /**
- * Espace Finance — centré sur le vrai business : pay-per-lead 9,90 € (lead_unlocks).
+ * Espace Finance, centré sur le vrai business : pay-per-lead 9,90 € (lead_unlocks).
  * Les abonnements IA Stripe (0 abonné, vertical en pause) sont relégués à une note.
  */
 export default function FinanceView({ data }: { data: BtpFinances }) {
@@ -106,7 +106,7 @@ export default function FinanceView({ data }: { data: BtpFinances }) {
         <div className="w-9 h-9 rounded-xl grid place-items-center shrink-0" style={{ background: "var(--admin-hover)", color: "var(--admin-text-tertiary)" }}>💤</div>
         <div className="flex-1">
           <div className="text-sm font-semibold" style={{ color: "var(--admin-text)" }}>Abonnements IA</div>
-          <div className="text-[11px]" style={{ color: "var(--admin-text-tertiary)" }}>vertical freelance en pay-per-lead lui aussi — pas d&apos;abonnement actif</div>
+          <div className="text-[11px]" style={{ color: "var(--admin-text-tertiary)" }}>vertical freelance en pay-per-lead lui aussi, pas d&apos;abonnement actif</div>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: {
-    default: "Admin — Workwave",
+    default: "Admin · Workwave",
     template: "%s | Admin Workwave",
   },
   robots: { index: false, follow: false },
@@ -34,7 +34,7 @@ export default async function AdminLayout({
       className="admin-shell dark h-screen flex overflow-hidden"
       style={
         {
-          // Palette « Nova » — dark futuriste, accent coral marque (#FF5A36),
+          // Palette « Nova » : dark futuriste, accent coral marque (#FF5A36),
           // unifiée (fini les 3 oranges + les restes verts). Refonte 13/07.
           "--admin-bg": "#08090C",
           "--admin-card": "#14161B",

@@ -2,7 +2,7 @@
  * Ferme les projets deposes AVANT une date donnee.
  *
  * POURQUOI : les projets de mai-juin restaient proposes aux pros dans leur
- * dashboard — des chantiers morts depuis des semaines. Un pro qui debloque un
+ * dashboard : des chantiers morts depuis des semaines. Un pro qui debloque un
  * lead de deux mois paie 9,90 € pour rien, et perd confiance.
  *
  * CE QUE "closed" CHANGE (depuis le commit qui accompagne ce script) :
@@ -45,7 +45,7 @@ const sb = createClient(
     console.log(`  #${String(p.id).padStart(3)}  ${p.created_at.slice(0, 10)}  ${p.status}  ${p.vertical}`));
 
   if (!APPLIQUER) {
-    console.log("\n(simulation — relancer avec --appliquer pour ecrire)");
+    console.log("\n(simulation : relancer avec --appliquer pour ecrire)");
     return;
   }
   if (cibles.length === 0) { console.log("\nrien a faire."); return; }

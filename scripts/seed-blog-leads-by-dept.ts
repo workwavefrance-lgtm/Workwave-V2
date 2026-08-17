@@ -132,7 +132,7 @@ const DEPT_CONTEXTS: Record<string, DeptContext> = {
     example_city: "Pau",
     example_panier: 2700,
     closing:
-      "Les artisans en Pyrénées-Atlantiques évoluent dans un marché à plusieurs vitesses : très concurrentiel sur la côte basque (prix élevés mais clientèle exigeante), plus accessible sur le Béarn. Adapter sa stratégie d'acquisition aux spécificités locales — bilingue espagnol/basque pour la côte, par exemple — peut faire la différence.",
+      "Les artisans en Pyrénées-Atlantiques évoluent dans un marché à plusieurs vitesses : très concurrentiel sur la côte basque (prix élevés mais clientèle exigeante), plus accessible sur le Béarn. Adapter sa stratégie d'acquisition aux spécificités locales (bilingue espagnol/basque pour la côte, par exemple) peut faire la différence.",
   },
   "79": {
     intro:
@@ -186,7 +186,7 @@ function buildIntroGenerale(deptName: string, variant: number): string {
   if (variant === 0) {
     return `Pour un artisan ou une TPE du BTP, la question n'est donc pas tant l'existence d'une demande que sa capture. Sur un marché fragmenté où chaque chantier se joue souvent à la rapidité de réponse et à la qualité du premier contact, la stratégie d'acquisition de leads devient un avantage concurrentiel décisif. Ce guide passe en revue les 6 canaux principaux disponibles aujourd'hui pour un artisan en ${deptName}, compare honnêtement les plateformes de mise en relation, et propose une méthodologie de calcul du retour sur investissement.`;
   } else if (variant === 1) {
-    return `Trouver des clients ne dépend plus uniquement du bouche-à-oreille pour les artisans en ${deptName}. La digitalisation du marché BTP — recherches Google locales, plateformes de mise en relation, profils professionnels en ligne — a multiplié les points de contact possibles entre un particulier ayant un projet et un professionnel disponible. Ce guide analyse les 6 leviers d'acquisition principaux et présente un comparatif objectif des plateformes accessibles en 2026.`;
+    return `Trouver des clients ne dépend plus uniquement du bouche-à-oreille pour les artisans en ${deptName}. La digitalisation du marché BTP (recherches Google locales, plateformes de mise en relation, profils professionnels en ligne) a multiplié les points de contact possibles entre un particulier ayant un projet et un professionnel disponible. Ce guide analyse les 6 leviers d'acquisition principaux et présente un comparatif objectif des plateformes accessibles en 2026.`;
   } else {
     return `La concurrence entre artisans en ${deptName}, notamment sur les marchés porteurs comme la rénovation énergétique ou l'amélioration de l'habitat, rend la captation de leads particulièrement stratégique. Les canaux d'acquisition se sont multipliés ces dernières années, avec des modèles économiques très différents (forfait fixe vs lead payant unitaire). Ce guide propose une grille de lecture neutre pour choisir les canaux les plus adaptés à son profil d'artisan.`;
   }
@@ -303,7 +303,7 @@ ${buildComparatifTable(deptName)}
 
 **Travaux.com** reste pertinent pour les artisans positionnés sur des chantiers de plus grande envergure (rénovation lourde, construction neuve) où le panier moyen justifie un investissement plateforme plus important.
 
-**Workwave** est positionné pour les artisans implantés en Nouvelle-Aquitaine — donc parfaitement adapté pour ${deptName} — qui privilégient un coût d'abonnement prévisible plutôt que des leads payants à l'unité. Le modèle 39 €/mois sans engagement avec essai gratuit 14 jours permet de tester le service sans risque. Le routage automatique à 3 artisans qualifiés par projet (distance + équité + ancienneté) limite la dilution comparée aux plateformes nationales à 5 pros.
+**Workwave** est positionné pour les artisans implantés en Nouvelle-Aquitaine (donc parfaitement adapté pour ${deptName}) qui privilégient un coût d'abonnement prévisible plutôt que des leads payants à l'unité. Le modèle 39 €/mois sans engagement avec essai gratuit 14 jours permet de tester le service sans risque. Le routage automatique à 3 artisans qualifiés par projet (distance + équité + ancienneté) limite la dilution comparée aux plateformes nationales à 5 pros.
 
 **Pages Jaunes Pro** reste un acteur historique pour la visibilité passive mais ne propose pas de routing automatique de leads. À considérer en complément d'autres canaux plutôt qu'en levier principal.
 

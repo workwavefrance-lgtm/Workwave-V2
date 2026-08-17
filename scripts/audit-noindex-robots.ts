@@ -21,6 +21,7 @@ const STRICT = process.argv.includes("--strict");
 // =====================================================================
 const NOINDEX_ALLOWED_PATTERNS = [
   /\/admin(\/|$)/,
+  // BTP : auth, dashboard, réclamation, mot de passe
   /\/pro\/dashboard(\/|$)/,
   /\/pro\/reclamer(\/|$)/,
   /\/pro\/connexion$/,
@@ -28,9 +29,18 @@ const NOINDEX_ALLOWED_PATTERNS = [
   /\/pro\/reinitialiser-mot-de-passe/,
   /\/auth(\/|$)/,
   /\/test(\/|$)/,
+  // RGPD (suppression) + désinscription + notation par token
   /\/artisan\/.*\/supprimer/,
   /\/deposer-projet\/supprimer/,
-  /\/unsubscribe(-all)?(\/|$)/,
+  /\/unsubscribe/, // unsubscribe, unsubscribe-all, unsubscribe-review
+  /\/avis\//, // page de notation via token (/avis/[token])
+  // Vertical IA (FR + EN) : SEULEMENT auth / dashboard / succès.
+  // Les pages stratégiques /ai/[skill], /ai/[skill]/[ville], /ai/freelance/[slug]
+  // NE sont PAS ici → un noindex dessus serait toujours signalé.
+  /\/(en\/)?ai\/connexion(\/|$)/,
+  /\/(en\/)?ai\/inscription(\/|$)/,
+  /\/(en\/)?ai\/dashboard(\/|$)/,
+  /\/(en\/)?ai\/deposer\/succes/,
 ];
 
 // =====================================================================
@@ -115,11 +125,19 @@ function auditNoindex() {
           // OK, attendu
           return;
         }
+        // Noindex CONDITIONNEL de type "entité introuvable" : un
+        // `if (!data) return { robots: { index: false } }` est légitime (fallback
+        // 404), la page reste indexable quand l'entité existe. On ne signale que
+        // les noindex NON gardés par un check d'existence dans les lignes au-dessus.
+        const ctx = lines.slice(Math.max(0, i - 10), i + 1).join("\n");
+        if (/\bif\s*\(\s*![\w.]|\bnotFound\s*\(|!data\b|!pro\b|!cat\b|!resolved\b|!r\b/.test(ctx)) {
+          return;
+        }
         issues.push({
           level: "ERROR",
           file: file.replace(projectRoot + "/", ""),
           line: i + 1,
-          message: `Noindex trouvé sur route publique "${route}" — INTERDIT par CLAUDE.md (leçon 27/04/2026). Si volontaire, retirer le noindex et utiliser un redirect 308 ou une priority sitemap réduite à la place.`,
+          message: `Noindex trouvé sur route publique "${route}" : INTERDIT par CLAUDE.md (leçon 27/04/2026). Si volontaire, retirer le noindex et utiliser un redirect 308 ou une priority sitemap réduite à la place.`,
         });
       }
     });
@@ -158,7 +176,7 @@ function auditRobots() {
         level: "ERROR",
         file: "app/robots.ts",
         line: lineIdx + 1,
-        message: `Disallow "${pattern}" dans robots.ts — non autorisé par CLAUDE.md (leçon 27/04/2026). Liste autorisée : ${ROBOTS_DISALLOW_ALLOWED.join(", ")}. Si nécessité réelle, demander validation Willy + count URLs impactées.`,
+        message: `Disallow "${pattern}" dans robots.ts : non autorisé par CLAUDE.md (leçon 27/04/2026). Liste autorisée : ${ROBOTS_DISALLOW_ALLOWED.join(", ")}. Si nécessité réelle, demander validation Willy + count URLs impactées.`,
       });
     }
   }

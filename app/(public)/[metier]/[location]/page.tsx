@@ -158,22 +158,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
 
   // Title plus court, optimise CTR SERP (sans « | Devis gratuit | Workwave »).
-  // "Top 10 entreprises de ménage les mieux notées à Poitiers — 2026"
+  // "Top 10 entreprises de ménage les mieux notées à Poitiers · 2026"
   // Si peu de pros, on adapte le nombre.
   let dynamicTitle: string;
   if (prosCount === 0) {
     dynamicTitle = `${category.name} ${preposition} ${locationName}`;
   } else if (prosCount === 1) {
-    dynamicTitle = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${preposition} ${locationName} — ${currentYear}`;
+    dynamicTitle = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${preposition} ${locationName} · ${currentYear}`;
   } else {
-    dynamicTitle = `Top ${displayCount} ${listing.plural}${belgPlural} les mieux ${listing.notes} ${preposition} ${locationName} — ${currentYear}`;
+    dynamicTitle = `Top ${displayCount} ${listing.plural}${belgPlural} les mieux ${listing.notes} ${preposition} ${locationName} · ${currentYear}`;
   }
 
   // PRIORITE au nouveau title (sprint 25/05/2026).
-  // L'ancien seo.title du sprint 3 est en format "X à Y — N pros"
+  // L'ancien seo.title du sprint 3 est en format "X à Y · N pros"
   // qui n'est PAS optimise CTR. On force le nouveau format meme sur les
   // 588 pages avec seo_pages rempli. `absolute` pour ne PAS suffixer
-  // « | Workwave » (template du root layout) — titre court = meilleur CTR.
+  // « | Workwave » (template du root layout) : titre court = meilleur CTR.
   const title = dynamicTitle;
 
   // Meta description enrichie : case un MAXIMUM de secondaires naturels
@@ -218,7 +218,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * pages suivantes (`/[metier]/[location]/page/[n]`).
  *
  * POURQUOI cette separation : lire `searchParams` (l'ancien `?page=2`) rendait
- * TOUTE la route dynamique — donc recalculee a chaque visite. Sous le crawl de
+ * TOUTE la route dynamique, donc recalculee a chaque visite. Sous le crawl de
  * Google (~27 000 pages/h le 03/08), ces pages montaient a 8-20 s et Googlebot
  * commencait a lever le pied. En passant le numero de page par l'URL, les deux
  * routes deviennent cachables. Aucun risque SEO : la pagination n'est ni dans
@@ -360,7 +360,7 @@ export async function renderListing(
   const popularProjects = await getPriceGuidesByMetier(category.slug, 12);
 
   // Enrichissement commune (data.gouv.fr : prix immo DVF, revenus, vacance,
-  // densité) — uniquement pour les pages VILLE (pas dept), affiché dans
+  // densité), uniquement pour les pages VILLE (pas dept), affiché dans
   // CityFactsBlock. Vraie donnée unique factuelle par commune = moat SEO.
   // ⚠️ FRANCE UNIQUEMENT : commune_data est keyée par code INSEE français, et
   // les codes NIS belges (5 chiffres) CHEVAUCHENT les plages INSEE (ex. 21004
@@ -395,7 +395,7 @@ export async function renderListing(
     ]);
   } else {
     const [deptCities, depts] = await Promise.all([
-      getCitiesByDepartment(resolved.department.id, 15), // n'affiche que 10 (slice) — limite l'egress
+      getCitiesByDepartment(resolved.department.id, 15), // n'affiche que 10 (slice) : limite l'egress
       getAllDepartmentsPublic(),
     ]);
     nearbyCities = deptCities.slice(0, 10);
@@ -491,7 +491,7 @@ export async function renderListing(
     ? totalProsCount === 0
       ? `${category.name} ${preposition} ${locationName}`
       : `Trouver ${listing.article} ${listing.singular} ${preposition} ${locationName}`
-    : `Tous les ${pluralCategory} ${preposition} ${locationName} — page ${page}`;
+    : `Tous les ${pluralCategory} ${preposition} ${locationName} · page ${page}`;
 
   // Sous-titre (count d'artisans + signal sélection objective)
   const subTitle =

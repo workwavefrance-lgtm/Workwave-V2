@@ -15,19 +15,19 @@ UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, l
 
 PAGES=(
   "/|Accueil"
-  "/plombier/vienne-86|Listing departement"
+  "/plombier/vienne-86|Listing dept"
   "/macon/poitiers|Listing ville"
   "/artisan/marcel-simand-00041|Fiche artisan"
-  "/guide-des-prix/prix-pose-carrelage|Guide de prix"
-  "/deposer-projet|Depot de projet"
+  "/guide-des-prix/prix-pose-carrelage|Guide prix"
+  "/deposer-projet|Depot projet"
 )
 
 echo ""
 echo "  MESURE DE VITESSE — $BASE"
 echo "  $(date '+%d/%m/%Y %H:%M')  ·  mediane sur $RUNS appels par page"
 echo ""
-printf "  %-24s %10s %10s %8s %s\n" "PAGE" "TTFB" "TOTAL" "CODE" "CACHE"
-printf "  %s\n" "------------------------------------------------------------------"
+printf "  %-16s %8s %8s %6s\n" "PAGE" "TTFB" "TOTAL" "CACHE"
+printf "  %s\n" "----------------------------------------"
 
 for entry in "${PAGES[@]}"; do
   path="${entry%%|*}"; label="${entry##*|}"
@@ -47,7 +47,7 @@ a=[float(x) for x in '''$ttfbs'''.split()]
 b=[float(x) for x in '''$totals'''.split()]
 print(f'{s.median(a)*1000:.0f} {s.median(b)*1000:.0f}')")
 
-  printf "  %-24s %8s ms %8s ms %8s %s\n" "$label" "$med_ttfb" "$med_total" "$code" "$cache"
+  printf "  %-16s %5s ms %5s ms %6s\n" "$label" "$med_ttfb" "$med_total" "$cache"
 done
 
 echo ""

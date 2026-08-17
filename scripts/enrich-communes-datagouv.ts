@@ -150,7 +150,7 @@ async function equipements() {
 }
 
 async function main() {
-  console.log(`Enrichissement data.gouv.fr — source=${SRC}${DRY ? " (DRY-RUN)" : ""}\n`);
+  console.log(`Enrichissement data.gouv.fr · source=${SRC}${DRY ? " (DRY-RUN)" : ""}\n`);
   const map: Record<string, () => Promise<void>> = { dvf, revenus, logements, equipements };
   const todo = SRC === "all" ? Object.keys(map) : [SRC];
   for (const s of todo) {

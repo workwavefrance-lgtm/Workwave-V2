@@ -119,7 +119,7 @@ async function main() {
     : onlySlugs
       ? DN_CITIES.filter((c) => onlySlugs.has(c.slug))
       : DN_CITIES;
-  console.log(`Perplexity fetch — ${list.length} villes DN${DRY ? " [DRY: 3 villes]" : ""}\n`);
+  console.log(`Perplexity fetch · ${list.length} villes DN${DRY ? " [DRY: 3 villes]" : ""}\n`);
   const out: Record<string, CityQueryData> = {};
   for (const c of list) {
     const e = await fetchOne(c);
@@ -134,7 +134,7 @@ async function main() {
     await new Promise((r) => setTimeout(r, 1100));
   }
   if (DRY) {
-    console.log("\n[DRY] OK — re-lance sans --dry-run pour les 25 villes (~$0.15).");
+    console.log("\n[DRY] OK : re-lance sans --dry-run pour les 25 villes (~$0.15).");
     return;
   }
 

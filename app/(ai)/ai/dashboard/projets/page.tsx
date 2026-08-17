@@ -9,7 +9,7 @@ import { markProjectAsContacted, startTechUnlock } from "./actions";
 import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
 
 export const metadata: Metadata = {
-  title: "Tous les projets — Dashboard Workwave AI",
+  title: "Tous les projets · Dashboard Workwave AI",
   description: "Tous les projets publies sur Workwave AI, en temps reel (tech, marketing, finance, juridique, RH, design, creation, audiovisuel).",
   robots: { index: false, follow: false },
 };
@@ -34,7 +34,7 @@ const PROJECTS_LIMIT = 50;
 
 /**
  * Masque les coordonnées (email + téléphone FR) d'un texte tant que le projet
- * n'est pas débloqué — défense RGPD : aucune PII dans le HTML d'un projet locké.
+ * n'est pas débloqué. Défense RGPD : aucune PII dans le HTML d'un projet locké.
  */
 function scrubPii(text: string): string {
   return text
@@ -103,8 +103,8 @@ export default async function AiDashboardProjetsPage({
   // Charger tous les projets Workwave AI actifs (Phase 11 broadcast model :
   // tous les freelances voient TOUS les projets, plus de project_leads filter).
   // Note : on inclut les projets "suspicious" (l'IA flag mais on les montre
-  // quand meme avec une card "ATTENTION" — cf. decision user 26/05).
-  // NB: la table `projects` n'a PAS de colonne `deleted_at` — le soft-delete
+  // quand meme avec une card "ATTENTION", cf. decision user 26/05).
+  // NB: la table `projects` n'a PAS de colonne `deleted_at` : le soft-delete
   // se fait via `status='deleted'` (cf. /deposer-projet/supprimer). Le seul
   // filtre necessaire est donc .neq("status", "deleted").
   let projectsQuery = service
@@ -177,7 +177,7 @@ export default async function AiDashboardProjetsPage({
   );
 
   // Offre de lancement : les 2 premiers déblocages sont offerts.
-  // On ne compte que les déblocages GRATUITS (amount_cents=0) — un unlock payé
+  // On ne compte que les déblocages GRATUITS (amount_cents=0) : un unlock payé
   // ne consomme pas l'offre.
   const { count: freeUsed } = await service
     .from("lead_unlocks")
@@ -246,7 +246,7 @@ export default async function AiDashboardProjetsPage({
           role="status"
         >
           <p className="text-sm font-medium">
-            Vous aviez déjà débloqué ce projet — coordonnées visibles ci-dessous.
+            Vous aviez déjà débloqué ce projet : coordonnées visibles ci-dessous.
           </p>
         </div>
       )}
@@ -291,8 +291,8 @@ export default async function AiDashboardProjetsPage({
           savoir-faire pour ne voir que ceux qui vous intéressent.{" "}
           <strong className="text-[var(--ai-text)]">
             {freeRemaining > 0
-              ? `🎁 Vos ${freeRemaining} prochain${freeRemaining > 1 ? "s" : ""} déblocage${freeRemaining > 1 ? "s sont offerts" : " est offert"} (offre de lancement), puis 9,90 € par projet — sans abonnement.`
-              : "Débloquez les coordonnées d'un projet pour 9,90 € — sans abonnement."}
+              ? `🎁 Vos ${freeRemaining} prochain${freeRemaining > 1 ? "s" : ""} déblocage${freeRemaining > 1 ? "s sont offerts" : " est offert"} (offre de lancement), puis 9,90 € par projet, sans abonnement.`
+              : "Débloquez les coordonnées d'un projet pour 9,90 €, sans abonnement."}
           </strong>
         </p>
       </div>
@@ -470,7 +470,7 @@ export default async function AiDashboardProjetsPage({
                     >
                       {freeRemaining > 0
                         ? `🎁 Débloquer gratuitement (${freeRemaining}/${FREE_UNLOCK_COUNT} offert${freeRemaining > 1 ? "s" : ""})`
-                        : "Débloquer ce projet — 9,90 €"}
+                        : "Débloquer ce projet · 9,90 €"}
                     </button>
                     <p className="text-[11px] text-[var(--ai-text-tertiary)] mt-2">
                       {freeRemaining > 0

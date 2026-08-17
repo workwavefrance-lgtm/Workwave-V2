@@ -109,7 +109,7 @@ async function main() {
   const urls = await buildPriorityUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs qui seraient pingees ===\n");
+    console.log("=== DRY RUN · URLs qui seraient pingees ===\n");
     urls.forEach((u, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${u}`));
     console.log(`\nTotal : ${urls.length} URLs.\n`);
     return;

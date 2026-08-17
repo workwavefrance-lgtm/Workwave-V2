@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
 export const metadata: Metadata = {
-  title: "Projet envoye — Workwave AI",
+  title: "Projet envoye · Workwave AI",
   description:
     "Votre projet a ete recu. Diffusion en temps reel a toute la communaute des freelances tech. Reponse en moins de 24h.",
   robots: { index: false, follow: false },

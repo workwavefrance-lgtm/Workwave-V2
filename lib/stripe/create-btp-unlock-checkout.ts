@@ -2,7 +2,7 @@
  * Helper Workwave BTP : creer une Stripe Checkout Session one-time pour
  * debloquer les coordonnees d'UN lead specifique.
  *
- * Modele : 9,90 EUR TTC par lead. Pas d'abonnement (sprint 13 — switch
+ * Modele : 9,90 EUR TTC par lead. Pas d'abonnement (sprint 13 : switch
  * complet du subscription mensuel au pay-per-lead).
  *
  * Idempotence cote Stripe :
@@ -26,7 +26,7 @@ export type BtpUnlockCheckoutInput = {
   existingCustomerId?: string | null;
   successUrl: string;
   cancelUrl: string;
-  /** Vertical du pro/projet — "btp" (defaut) ou "tech" (freelance AI). Sert au
+  /** Vertical du pro/projet : "btp" (defaut) ou "tech" (freelance AI). Sert au
    *  metadata client Stripe + description. Le prix (9,90 €) et le routing
    *  webhook (product="btp_lead_unlock" → lead_unlocks) sont communs aux deux. */
   vertical?: "btp" | "tech";
@@ -122,7 +122,7 @@ export async function createBtpUnlockCheckoutSession(
           vertical: "btp",
           product: "btp_lead_unlock",
         },
-        description: `Workwave — Deblocage lead #${input.projectId}`,
+        description: `Workwave · Deblocage lead #${input.projectId}`,
       },
       success_url: input.successUrl,
       cancel_url: input.cancelUrl,

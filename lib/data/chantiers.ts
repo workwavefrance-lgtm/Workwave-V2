@@ -47,8 +47,8 @@ export const CHANTIERS_COMPARISON: {
 }[] = [
   {
     feature: "Prix",
-    others: "Abonnement 100–250 €/mois ou 1–90 €/contact (opaque)",
-    workwave: "9,90 € le lead — affiché, fixe",
+    others: "Abonnement 100-250 €/mois ou 1-90 €/contact (opaque)",
+    workwave: "9,90 € le lead · affiché, fixe",
   },
   {
     feature: "Engagement",
@@ -58,17 +58,17 @@ export const CHANTIERS_COMPARISON: {
   {
     feature: "Commission sur vos chantiers",
     others: "Jusqu'à 5 % du montant du chantier",
-    workwave: "0 % — vous gardez tout",
+    workwave: "0 % · vous gardez tout",
   },
   {
     feature: "Vous lisez le descriptif avant de payer",
     others: "Souvent non (lead acheté à l'aveugle)",
-    workwave: "Oui — descriptif, ville, budget, délai",
+    workwave: "Oui · descriptif, ville, budget, délai",
   },
   {
     feature: "Commercial à rappeler",
     others: "Oui (prix sur devis)",
-    workwave: "Non — tout en ligne",
+    workwave: "Non · tout en ligne",
   },
 ];
 
@@ -92,7 +92,7 @@ export function getChantiersServiceSchema(opts?: {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: opts?.name ?? "Apport de chantiers pour artisans — Workwave",
+    name: opts?.name ?? "Apport de chantiers pour artisans · Workwave",
     serviceType: "Mise en relation artisans / particuliers",
     provider: { "@type": "Organization", name: "Workwave", url: BASE_URL },
     areaServed: opts?.areaServed ?? "France",

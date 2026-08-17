@@ -78,7 +78,7 @@ export default function CityFactsBlock({
       marketSentence = `Avec ses ${popStr} habitants repartis dans environ ${homesStr} logements, ${cityName} est une ${marketLabel} de la ${deptName} (${deptCode}). Les ${lcCategory}s y trouvent une clientele de proximite stable, avec une demande reguliere pour l'entretien et les petits travaux du quotidien.`;
       break;
     case "medium":
-      marketSentence = `${cityName}, ${marketLabel} de ${popStr} habitants en ${deptName}, represente un marche significatif pour les ${lcCategory}s. La commune compte environ ${homesStr} logements, ce qui constitue un volume important de chantiers potentiels — renovation, depannage et travaux d'amelioration energetique.`;
+      marketSentence = `${cityName}, ${marketLabel} de ${popStr} habitants en ${deptName}, represente un marche significatif pour les ${lcCategory}s. La commune compte environ ${homesStr} logements, ce qui constitue un volume important de chantiers potentiels : renovation, depannage et travaux d'amelioration energetique.`;
       break;
     case "large":
       marketSentence = `${cityName} est une ${marketLabel} de ${popStr} habitants, l'une des principales villes de la ${deptName}. Avec environ ${homesStr} logements, le marche local pour les ${lcCategory}s est dense et concurrentiel, avec une forte demande sur la renovation, l'efficacite energetique et la mise aux normes.`;
@@ -143,7 +143,7 @@ export default function CityFactsBlock({
         </p>
       )}
 
-      {/* Marché immobilier & local — VRAIES données data.gouv.fr (DVF prix immo,
+      {/* Marché immobilier & local : VRAIES données data.gouv.fr (DVF prix immo,
           FiLoSoFi revenus, LOVAC vacance, densité). Affiché uniquement si la
           commune a des données exploitables (sinon rien = pas de bloc vide).
           Contenu factuel UNIQUE par commune = moat SEO. */}
@@ -166,7 +166,7 @@ export default function CityFactsBlock({
         if (communeData.revenu_median != null)
           bits.push(`le revenu médian des habitants est de ${eur(communeData.revenu_median)} par an`);
         if (communeData.taux_vacance != null && communeData.taux_vacance >= 8)
-          bits.push(`${communeData.taux_vacance.toLocaleString("fr-FR")} % des logements privés sont vacants — un parc à rénover qui génère de la demande pour les ${lcCategory}s`);
+          bits.push(`${communeData.taux_vacance.toLocaleString("fr-FR")} % des logements privés sont vacants, un parc à rénover qui génère de la demande pour les ${lcCategory}s`);
         else if (communeData.taux_vacance != null)
           bits.push(`le taux de logements vacants y est de ${communeData.taux_vacance.toLocaleString("fr-FR")} %`);
 
@@ -194,7 +194,7 @@ export default function CityFactsBlock({
               </p>
             )}
             <p className="mt-2 text-[11px] text-[var(--text-tertiary)]">
-              Sources : DVF (valeurs foncières), INSEE FiLoSoFi (revenus), LOVAC (logements vacants) — data.gouv.fr, Licence Ouverte.
+              Sources : DVF (valeurs foncières), INSEE FiLoSoFi (revenus), LOVAC (logements vacants) · data.gouv.fr, Licence Ouverte.
             </p>
           </div>
         );

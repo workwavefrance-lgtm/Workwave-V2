@@ -29,7 +29,7 @@ const supabase = createClient(
 );
 
 // Departements des 4 nouvelles regions (Bretagne, Pays de la Loire, Occitanie,
-// PACA). La Nouvelle-Aquitaine (12 depts, dont Vienne) est deja generee — skip
+// PACA). La Nouvelle-Aquitaine (12 depts, dont Vienne) est deja generee, skip
 // auto via existingSlugs si jamais on les remet ici.
 const TARGET_DEPT_CODES = [
   // Bretagne
@@ -104,7 +104,7 @@ async function main() {
   // 1. Charger categories
   // IMPORTANT : ne garder que les verticaux BTP/domicile/personne (38 cat).
   // Les 145 cat "tech" (Workwave AI / international) vivent sur /ai et /en/ai,
-  // PAS sur les pages BTP /[metier]/[dept] — il ne faut surtout pas générer
+  // PAS sur les pages BTP /[metier]/[dept] : il ne faut surtout pas générer
   // de contenu dépt pour elles (junk + coût ×5).
   const { data: catsRaw } = await supabase
     .from("categories")

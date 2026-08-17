@@ -7,7 +7,7 @@
  * Le ping force Google à (re)crawler vite (24-72h) au lieu d'attendre le sitemap.
  *
  * Même logique d'URLs que app/sitemap.ts (chantiersUrls + clientsUrls).
- * Quota Google : 200/jour — on est à ~80, large.
+ * Quota Google : 200/jour (on est à ~80, large).
  *
  * Pré-requis : `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/indexing,https://www.googleapis.com/auth/cloud-platform`
  *
@@ -79,7 +79,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
   const urls = await buildUrls();
-  console.log(`\n=== PING ACQUISITION — ${urls.length} URLs ${DRY_RUN ? "(DRY-RUN)" : ""} ===\n`);
+  console.log(`\n=== PING ACQUISITION · ${urls.length} URLs ${DRY_RUN ? "(DRY-RUN)" : ""} ===\n`);
 
   if (DRY_RUN) {
     urls.forEach((u, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${u}`));

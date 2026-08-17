@@ -3,7 +3,7 @@ import Link from "next/link";
 import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
-  title: "Connexion Espace Pro — Workwave",
+  title: "Connexion Espace Pro · Workwave",
   robots: { index: false, follow: false },
 };
 

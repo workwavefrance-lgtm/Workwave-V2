@@ -15,12 +15,12 @@ const SITE_URL = "https://www.workwaveai.co";
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 export const metadata: Metadata = {
-  title: "Freelance visa & permit guides — Gulf & Middle East",
+  title: "Freelance visa & permit guides · Gulf & Middle East",
   description:
     "How to freelance legally in the Gulf: permits, costs and how to apply in the UAE, Saudi Arabia, Qatar and more. Practical guides for digital freelancers, with official sources.",
   alternates: aiAlternatesEnOnly("/en/ai/freelance-visa"),
   openGraph: {
-    title: "Freelance visa & permit guides — Gulf",
+    title: "Freelance visa & permit guides · Gulf",
     description: "Permits, costs and how to apply to freelance in the Gulf. Sourced guides.",
     url: `${SITE_URL}/en/ai/freelance-visa`,
     siteName: "Workwave AI",
@@ -37,15 +37,15 @@ export default function FreelanceVisaHubPage() {
   const faq: FaqItem[] = [
     {
       q: "Do I need a permit to freelance in the Gulf?",
-      a: "In most Gulf countries, to invoice clients legally as a resident you need a freelance permit or licence (rather than working on a standard employment visa). The exact rules, costs and eligibility differ by country — see each country guide. If you work fully remotely from abroad for Gulf clients, requirements differ again.",
+      a: "In most Gulf countries, to invoice clients legally as a resident you need a freelance permit or licence (rather than working on a standard employment visa). The exact rules, costs and eligibility differ by country. See each country guide. If you work fully remotely from abroad for Gulf clients, requirements differ again.",
     },
     {
       q: "Which Gulf country is easiest for freelancers?",
-      a: "The UAE is widely regarded as the most freelancer-friendly thanks to dedicated freelance permits across several free zones. Each country has its own framework — check the individual guides for current, sourced details.",
+      a: "The UAE is widely regarded as the most freelancer-friendly thanks to dedicated freelance permits across several free zones. Each country has its own framework, check the individual guides for current, sourced details.",
     },
     {
       q: "Is it free to use Workwave AI as a freelancer?",
-      a: "Yes — creating a profile and getting matched with projects is free. An optional subscription lets you reply to projects. Workwave takes 0% commission on what you earn.",
+      a: "Yes, creating a profile and getting matched with projects is free. An optional subscription lets you reply to projects. Workwave takes 0% commission on what you earn.",
     },
   ];
 
@@ -75,7 +75,7 @@ export default function FreelanceVisaHubPage() {
             Freelance visas in the Gulf
           </h1>
           <p className="mt-5 text-[16px] sm:text-[17px] leading-relaxed text-[var(--ai-text-secondary)]">
-            Thinking of freelancing in the Gulf? Each guide covers the permit you need, what it costs, who can apply and the steps — with official sources. General information, not legal advice.
+            Thinking of freelancing in the Gulf? Each guide covers the permit you need, what it costs, who can apply and the steps, with official sources. General information, not legal advice.
           </p>
         </div>
       </section>

@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 // WhatsApp...) n'affichait aucun visuel (le fichier OG racine n'est pas hérité
 // par /pro, et le metadata openGraph de la page ne définissait pas d'images).
 export const runtime = "edge";
-export const alt = "Workwave Pro — Recevez des chantiers près de chez vous";
+export const alt = "Workwave Pro · Recevez des chantiers près de chez vous";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

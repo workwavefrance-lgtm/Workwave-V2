@@ -1,6 +1,6 @@
-// Contenu sourcé via Perplexity API (recherche web + citations) — généré le 2026-06-10.
+// Contenu sourcé via Perplexity API (recherche web + citations), généré le 2026-06-10.
 // Régénérer : npx tsx scripts/fetch-urgence-content.ts
-// RÈGLE : zéro chiffre inventé — tout chiffre affiché vient des sources listées.
+// RÈGLE : zéro chiffre inventé. Tout chiffre affiché vient des sources listées.
 
 export type UrgenceContent = {
   priceRanges: { label: string; low: number; high: number }[];

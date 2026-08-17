@@ -35,7 +35,7 @@ export async function getCitiesByDepartment(
 }
 
 // Count global des communes (pour les stats "X villes couvertes") sans charger
-// les lignes — estimated + head:true = quasi 0 egress.
+// les lignes : estimated + head:true = quasi 0 egress.
 export async function getTotalCitiesCount(): Promise<number> {
   const supabase = createPublicClient();
   const { count } = await supabase
@@ -150,7 +150,7 @@ export const getAggregatedCityIds = cache(async function getAggregatedCityIds(ci
   department_id: number;
   name: string;
 }): Promise<number[] | null> {
-  // 1. Zone transfrontalière (Monaco) — enfants par slug explicite
+  // 1. Zone transfrontalière (Monaco) : enfants par slug explicite
   const zoneSlugs = BORDER_ZONE_CHILD_SLUGS[city.slug];
   if (zoneSlugs) {
     const supabase = createPublicClient();

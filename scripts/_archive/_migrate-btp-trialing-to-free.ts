@@ -1,5 +1,5 @@
 /**
- * Sprint 13 — Migration BTP du modele subscription au pay-per-lead.
+ * Sprint 13 : Migration BTP du modele subscription au pay-per-lead.
  *
  * Les 5 pros actuellement en `subscription_status='trialing'` cote BTP
  * sont passes en `subscription_status='none'` (le subscription_product

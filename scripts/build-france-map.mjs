@@ -52,7 +52,7 @@ for (const f of feats) {
 
 const out =
   `// Tracés SVG des 96 départements métropolitains (GeoJSON simplifié france-geojson, ODbL).\n` +
-  `// Généré par scripts/build-france-map.mjs — NE PAS éditer à la main.\n\n` +
+  `// Généré par scripts/build-france-map.mjs. NE PAS éditer à la main.\n\n` +
   `export const FRANCE_MAP_VIEWBOX = "0 0 ${W} ${H}";\n` +
   `export const FRANCE_DEPT_PATHS: Record<string, string> = ${JSON.stringify(paths)};\n`;
 const dest = path.resolve(process.cwd(), "lib/data/france-departements-paths.ts");

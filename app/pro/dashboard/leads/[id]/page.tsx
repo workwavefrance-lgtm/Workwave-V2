@@ -8,7 +8,7 @@ import { getFreeUnlocksRemaining } from "@/lib/billing/free-unlocks";
 import LeadDetail from "@/components/pro/dashboard/LeadDetail";
 
 export const metadata: Metadata = {
-  title: "Détail du lead — Workwave Pro",
+  title: "Détail du lead · Workwave Pro",
   robots: { index: false, follow: false },
 };
 
@@ -26,7 +26,7 @@ export default async function LeadDetailPage({
 
   // getLeadForPro porte le verrou payant : si ce pro n'a pas débloqué ce
   // projet, les coordonnées ne sortent tout simplement pas de la requête.
-  // Cette page ne décide RIEN sur la sécurité — elle affiche. C'est voulu :
+  // Cette page ne décide RIEN sur la sécurité. Elle affiche. C'est voulu :
   // une vérification qu'une page peut oublier finit par être oubliée (c'est
   // exactement ce qui est arrivé ici avant le 08/08/2026).
   const result = !isNaN(leadId) ? await getLeadForPro(leadId, pro.id) : null;

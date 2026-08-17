@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // une sidebar SIRET/dept/cat, des pros similaires + villes voisines en liens
   // internes. C'est largement au-dessus du seuil thin content de Google.
   // NB : les fiches sans contenu enrichi gardent une priority sitemap dégradée
-  // (0.3 vs 0.5/0.8) — voir app/sitemap.ts.
+  // (0.3 vs 0.5/0.8), voir app/sitemap.ts.
   return {
     title: `${pro.name} - ${pro.category.name} à ${cityName}`,
     description: desc,
@@ -338,7 +338,7 @@ export default async function ProPage({ params }: Props) {
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Banniere de reclamation TOP — version fine (Levier D, mai 2026).
+      {/* Banniere de reclamation TOP : version fine (Levier D, mai 2026).
           Reduite vs version originelle (gros bloc orange dominant) pour
           ne pas ecraser la fiche aux yeux des particuliers (77% du trafic
           SEO arrive sur /artisan/[slug] via recherches navigationnelles).
@@ -431,7 +431,7 @@ export default async function ProPage({ params }: Props) {
                     {cat.name}
                   </Link>
                 ))}
-                {/* Badge RGE certifie — source officielle ADEME, plus credible
+                {/* Badge RGE certifie : source officielle ADEME, plus credible
                     que le champ certifications user-input. Affiche tel quel
                     quand pro.rge_certified=true (sync via match-rge-pros.ts). */}
                 {pro.rge_certified && (
@@ -510,7 +510,7 @@ export default async function ProPage({ params }: Props) {
             if (!text) return null;
             return (
               <div className="relative rounded-2xl bg-[var(--bg-secondary)] border border-[var(--card-border)] p-6 sm:p-7 overflow-hidden">
-                {/* accent coral signature à gauche — met en valeur la voix du pro */}
+                {/* accent coral signature à gauche : met en valeur la voix du pro */}
                 <span className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent)]" aria-hidden="true" />
                 <div className="flex items-center gap-2 mb-3">
                   <svg className="w-4 h-4 text-[var(--accent)] shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -586,7 +586,7 @@ export default async function ProPage({ params }: Props) {
             </div>
           )}
 
-          {/* Section RGE officielle ADEME — affichee uniquement si rge_certified.
+          {/* Section RGE officielle ADEME : affichee uniquement si rge_certified.
               Sync auto via scripts/match-rge-pros.ts depuis le dataset officiel
               data.ademe.fr. Plus credible que le champ certifications user-input
               parce que la source est gouvernementale et qu'on filtre les qualifs
@@ -656,7 +656,7 @@ export default async function ProPage({ params }: Props) {
               </p>
             </div>
 
-            {/* Coordonnées : floutées si la fiche n'est PAS réclamée — le
+            {/* Coordonnées : floutées si la fiche n'est PAS réclamée. Le
                 particulier doit déposer un projet pour être mis en relation
                 (= lead capté), et le pro est incité à réclamer sa fiche pour
                 récupérer ses clients. Affichées normalement si réclamée. */}
@@ -759,7 +759,7 @@ export default async function ProPage({ params }: Props) {
           </div>
 
           {/* Bloc SEO unique sur l'entreprise (À propos + FAQ + FAQPage schema) :
-              sort la fiche du « squelette » — contenu factuel Sirene + prix sourcés,
+              sort la fiche du « squelette » : contenu factuel Sirene + prix sourcés,
               centré sur CETTE entreprise (anti-duplicate listings), zéro invention. */}
           {proContent && (
             <ProSeoSections content={proContent} proName={pro.name} />
@@ -927,7 +927,7 @@ export default async function ProPage({ params }: Props) {
           />
         </div>
 
-        {/* Colonne droite — Sidebar sticky */}
+        {/* Colonne droite · Sidebar sticky */}
         <div className="lg:sticky lg:top-[96px] lg:self-start space-y-6">
           {/* CTA sidebar : appeler le pro si phone defini, sinon orienter
               vers le depot de projet pre-rempli (categorie + ville).

@@ -7,7 +7,7 @@ import {
 import { getCityBySlug } from "@/lib/queries/cities";
 
 export const metadata: Metadata = {
-  title: "Déposer un projet — Devis gratuits d'artisans près de chez vous",
+  title: "Déposer un projet · Devis gratuits d'artisans près de chez vous",
   description:
     "Décrivez votre projet de travaux gratuitement et recevez des devis d'artisans qualifiés près de chez vous, partout en France et en Belgique. 100% gratuit, sans engagement.",
   alternates: { canonical: "https://workwave.fr/deposer-projet" },
@@ -41,7 +41,7 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
         </p>
         {/* Repères de confiance (tous vrais, tous vérifiables).
             Avant le 08/08/2026 : une ligne grise en 14px, au même niveau visuel
-            qu'une note de bas de page — invisible au moment où le doute se joue.
+            qu'une note de bas de page, invisible au moment où le doute se joue.
             Et « Coordonnées protégées » ne veut rien dire pour quelqu'un qui
             n'est pas du métier : chaque promesse porte donc sa traduction en
             français courant. */}

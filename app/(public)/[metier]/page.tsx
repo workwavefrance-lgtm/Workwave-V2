@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // dans la GSC, positions 8-12). On la met en tête du title (Google la pèse
   // fort). PAS de « | Workwave » ici : le layout l'ajoute déjà via
   // title.template (sinon on l'avait 2 fois).
-  const title = `${category.name} autour de moi — devis gratuits près de chez vous`;
+  const title = `${category.name} autour de moi · devis gratuits près de chez vous`;
   // Meta ≤ ~155c (au-delà Google tronque). On part du nom du métier (évite le
   // pluriel bancal « garde animauxs ») + la requête exacte en tête.
   const description = `${category.name} autour de moi ? Recevez des devis gratuits près de chez vous. Prix indicatifs, service 100% gratuit, sans engagement.`;
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Bandeau « Déposer votre projet » — la conversion monétisable de Workwave.
+ * Bandeau « Déposer votre projet » : la conversion monétisable de Workwave.
  *
  * Répété tout au long de la page (page longue → une dizaine de rappels, choix
  * Willy 26/07). Pousse vers le tunnel de dépôt PLUTÔT que vers « appeler un
@@ -107,7 +107,7 @@ function DeposerCta({
         {/* Réassurance : lever le doute juste avant le clic (points vrais). */}
         <p className="mt-4 text-sm text-[var(--text-secondary)] max-w-xl leading-relaxed">
           Décrivez votre besoin en 2 minutes. Les {lower}s qualifiés de votre
-          zone vous recontactent avec leur devis — vous comparez, vous choisissez,
+          zone vous recontactent avec leur devis : vous comparez, vous choisissez,
           sans aucune obligation.
         </p>
         <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-[var(--text-tertiary)]">
@@ -134,7 +134,7 @@ function DeposerCta({
           Un projet de {lower} ?
         </p>
         <p className="text-sm text-[var(--text-secondary)]">
-          Décrivez-le en 2 minutes, recevez plusieurs devis gratuits — sans
+          Décrivez-le en 2 minutes, recevez plusieurs devis gratuits, sans
           appeler les artisans un par un.
         </p>
       </div>
@@ -188,7 +188,7 @@ export default async function MetierProximityPage({ params }: Props) {
   // Anti-fuite vertical : AUCUNE catégorie tech ne doit s'afficher sur une route
   // BTP. On teste le VERTICAL (pas une liste d'ids) → couvre les 145 catégories
   // tech, pas seulement les 14 d'AI_CATEGORY_IDS (sinon les 131 sous-catégories
-  // tech orphelines — react, python, prompt-engineering, ux-designer… — fuyaient
+  // tech orphelines (react, python, prompt-engineering, ux-designer…) fuyaient
   // sur /[slug]/[ville] côté BTP). Redirect 308 vers /ai/[slug] (bon vertical).
   if (category.vertical === "tech") {
     permanentRedirect(`/ai/${category.slug}`);
@@ -263,7 +263,7 @@ export default async function MetierProximityPage({ params }: Props) {
             answer: `À titre indicatif : ${priceEntry.ranges
               .slice(0, 4)
               .map((r) => `${r.label.toLowerCase()} ${r.range}`)
-              .join(", ")}. Ces fourchettes varient selon les travaux, la région et l'urgence — seul un devis personnalisé donne un tarif précis. Déposez votre projet pour recevoir plusieurs devis gratuits et comparer.`,
+              .join(", ")}. Ces fourchettes varient selon les travaux, la région et l'urgence : seul un devis personnalisé donne un tarif précis. Déposez votre projet pour recevoir plusieurs devis gratuits et comparer.`,
           },
         ]
       : [
@@ -278,7 +278,7 @@ export default async function MetierProximityPage({ params }: Props) {
     },
     {
       question: `Workwave est-il vraiment gratuit pour les particuliers ?`,
-      answer: `100% gratuit, toujours. Aucune carte bancaire demandée, aucun frais caché. Les ${lower}s reçoivent gratuitement vos demandes de devis et paient seulement 9,90 € pour débloquer les coordonnées d'un client qui les intéresse — sans abonnement ni commission.`,
+      answer: `100% gratuit, toujours. Aucune carte bancaire demandée, aucun frais caché. Les ${lower}s reçoivent gratuitement vos demandes de devis et paient seulement 9,90 € pour débloquer les coordonnées d'un client qui les intéresse, sans abonnement ni commission.`,
     },
     {
       question: `Comment vérifier qu'un ${lower} est sérieux ?`,
@@ -336,7 +336,7 @@ export default async function MetierProximityPage({ params }: Props) {
       <div className="max-w-6xl mx-auto px-4 py-12">
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Hero proximity — CTA dépôt en PRINCIPAL, géoloc en secondaire */}
+        {/* Hero proximity : CTA dépôt en PRINCIPAL, géoloc en secondaire */}
         <section className="mb-16">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--text-primary)] mb-4 leading-[1.1]">
             Trouvez votre {lower}{" "}
@@ -346,7 +346,7 @@ export default async function MetierProximityPage({ params }: Props) {
             {totalCities > 0
               ? `${totalCities} villes couvertes`
               : "Service gratuit"}{" "}
-            — devis gratuits, intervention rapide, sans intermédiaire commercial.
+            : devis gratuits, intervention rapide, sans intermédiaire commercial.
           </p>
 
           {/* CTA principal : déposer un projet */}
@@ -366,7 +366,7 @@ export default async function MetierProximityPage({ params }: Props) {
           </div>
         </section>
 
-        {/* Chiffres RÉELS de notre base — donnée unique qu'aucun concurrent n'a.
+        {/* Chiffres RÉELS de notre base : donnée unique qu'aucun concurrent n'a.
             Caché si le métier n'a pas assez de pros (pas de « 0 » qui ferait tache). */}
         {showStats && (
           <section className="mb-16">
@@ -496,7 +496,7 @@ export default async function MetierProximityPage({ params }: Props) {
                   className="flex gap-3 text-[var(--text-secondary)] leading-relaxed"
                 >
                   <span className="text-[var(--accent)] font-bold shrink-0" aria-hidden>
-                    —
+                    -
                   </span>
                   <span>{f}</span>
                 </li>
@@ -610,7 +610,7 @@ export default async function MetierProximityPage({ params }: Props) {
         {deptsWithCities.map(({ dept, cities }) => (
           <section key={dept.id} className="mb-16">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-6">
-              {category.name} dans les principales villes — {dept.name} (
+              {category.name} dans les principales villes · {dept.name} (
               {dept.code})
             </h2>
             <div className="flex flex-wrap gap-3">

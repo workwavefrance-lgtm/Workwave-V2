@@ -2,7 +2,7 @@
  * Métadonnées pays pour les guides Workwave AI (visa/permis freelance, etc.).
  *
  * Le CONTENU factuel (permis, coûts, règles) vit dans lib/data/freelance-visa.ts
- * et est SOURCÉ (recherche web) — jamais inventé. Ce fichier ne contient que des
+ * et est SOURCÉ (recherche web), jamais inventé. Ce fichier ne contient que des
  * métadonnées neutres (nom, monument, devise).
  *
  * Phase visa wave 1 = Golfe. Extensible ensuite (Europe, etc.).
@@ -37,7 +37,7 @@ export function getCountry(slug: string): IntlCountry | null {
 }
 
 // ════════════════════════════════════════════════════════════════════════
-// HUBS PAYS & CONTINENT (vague mondiale) — DÉRIVÉS de INTL_CITIES (source de
+// HUBS PAYS & CONTINENT (vague mondiale) : DÉRIVÉS de INTL_CITIES (source de
 // vérité unique). Les US sont exclus : ils ont déjà des hubs d'état dédiés.
 // Sert les routes /en/ai/country/[country] et /en/ai/continent/[continent].
 // ════════════════════════════════════════════════════════════════════════

@@ -128,7 +128,7 @@ export default function Header() {
               faisait doublon avec la recherche du hero → retiré le 16/07. */}
           <QuickProjectModalTrigger
             label="Déposer un projet (gratuit)"
-            // whitespace-nowrap : sans lui, "— gratuit" fait passer le bouton
+            // whitespace-nowrap : sans lui, "(gratuit)" fait passer le bouton
             // sur 3 lignes (96 px de haut) des que la barre est serree, autour
             // de 800 px de large, et il chevauche la navigation. Mesure du
             // 11/08/2026 avant correction.

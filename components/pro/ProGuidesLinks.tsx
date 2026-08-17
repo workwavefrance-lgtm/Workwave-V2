@@ -15,7 +15,7 @@ export default async function ProGuidesLinks({
   metierName: string;
 }) {
   // Client PARTAGE. Avant le 09/08 ce composant fabriquait un client neuf a
-  // chaque rendu — donc sur CHAQUE fiche pro, la route la plus crawlee du site.
+  // chaque rendu, donc sur CHAQUE fiche pro, la route la plus crawlee du site.
   // Chaque client lancait une minuterie de 30 s jamais arretee, ce qui le rendait
   // impossible a liberer : ~8,7 Ko retenus definitivement par fiche affichee.
   // Cf. lib/supabase/service-client.ts.

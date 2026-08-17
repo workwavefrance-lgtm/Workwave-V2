@@ -3,7 +3,7 @@ import Link from "next/link";
 type Cat = { slug: string; name: string };
 
 /**
- * Bloc « Trouvez un artisan près de chez vous » — maillage interne des pages
+ * Bloc « Trouvez un artisan près de chez vous » : maillage interne des pages
  * baromètre (observatoire) vers les pages racine métier /[metier] qui ciblent
  * « métier autour de moi ». Transmet l'autorité du linkbait aux pages qui
  * convertissent, et renforce l'angle proximité pour Google.

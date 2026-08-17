@@ -126,7 +126,7 @@ ${reviewUrl}
 
 Confidentiel : seul votre prénom et la première lettre de votre nom seront affichés.
 
-—
+---
 
 Récapitulatif
 - Artisan contacté : ${params.proName}${proCityLabel}
@@ -138,7 +138,7 @@ Un problème ? Écrivez-nous à contact@workwave.fr.
 
 Pour ne plus recevoir de demandes d'avis : ${unsubUrl}
 
-— L'équipe Workwave
+- L'équipe Workwave
   `.trim();
 
   try {

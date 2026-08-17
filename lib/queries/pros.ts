@@ -15,8 +15,8 @@ import type {
 // Google massif sur 1,8M pages) : 2 niveaux de select au lieu d'un seul fat
 // "*, categories(*), cities(*, departments(*))" partout. ──
 //
-// Niveau FICHE/DASHBOARD : `*` sur pros (trop de consommateurs — fiche
-// /artisan, dashboards BTP/AI — pour risquer d'oublier un champ), mais joins
+// Niveau FICHE/DASHBOARD : `*` sur pros (trop de consommateurs (fiche
+// /artisan, dashboards BTP/AI) pour risquer d'oublier un champ), mais joins
 // amincis : on ne tire plus categories.description / seo_keywords / naf_codes
 // / popularity ni cities.equipments_count / bpe_synced_at, que AUCUN
 // consommateur de ces requêtes ne lit (vérifié par grep 11/06/2026 : les
@@ -42,7 +42,7 @@ export const PRO_SELECT_CARD: string =
   "has_decennale, has_rc_pro, photos, profile_completion, " +
   "category:categories(id, slug, name, vertical), city:cities(id, name, slug)";
 
-// NB : le param `query` est volontairement non-générique — le type-parser de
+// NB : le param `query` est volontairement non-générique : le type-parser de
 // supabase-js ne sait pas parser les longs selects concaténés (TS2589) et le
 // résultat est de toute façon casté en ProCardData[] au retour.
 async function paginatedQuery(
@@ -133,7 +133,7 @@ export async function countProsByCategoryAndCityIds(
 }
 
 /**
- * Mini-cartes pros (nom + slug uniquement) — select minimal pour l'egress
+ * Mini-cartes pros (nom + slug uniquement) : select minimal pour l'egress
  * (~60 octets/row vs ~1,1 Ko en PRO_SELECT_CARD). Même tri que les listings
  * (claimed d'abord, puis nom).
  */
@@ -176,12 +176,12 @@ export async function getProsByCategoryAndCity(
 
 // `cache` de React regroupe les appels IDENTIQUES faits pendant le rendu d'une
 // meme page. Ici c'est essentiel : `generateMetadata` et la page appellent tous
-// les deux `getProBySlug(slug)` — mesure du 09/08/2026 sur une fiche pro, 8
+// les deux `getProBySlug(slug)` : mesure du 09/08/2026 sur une fiche pro, 8
 // requetes Supabase dont exactement 1 doublon, et c'est celle-ci.
 //
 // Next faisait deja ce regroupement, mais au niveau de la REPONSE HTTP, en la
 // dedoublant (`tee()`) et en gardant la branche non lue jusqu'au passage du
-// ramasse-miettes — 512 Mo retenus en production (cf. lib/supabase/fetch-supabase.ts).
+// ramasse-miettes : 512 Mo retenus en production (cf. lib/supabase/fetch-supabase.ts).
 // Le regroupement au niveau du RESULTAT est strictement meilleur : la 2e demande
 // ne declenche aucune requete du tout, et n'alloue rien.
 export const getProBySlug = cache(async function getProBySlug(

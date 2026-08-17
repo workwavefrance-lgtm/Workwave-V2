@@ -7,7 +7,7 @@
  *
  * POURQUOI un module partagé : deux listes de faits séparées divergent
  * toujours. Le jour où les CGV changent (le prix, la garantie, le nombre de
- * déblocages offerts), on corrigerait l'une et pas l'autre — et un des deux
+ * déblocages offerts), on corrigerait l'une et pas l'autre, et un des deux
  * canaux se mettrait à affirmer quelque chose de faux à un client, avec la
  * signature de Workwave. Un seul endroit à mettre à jour, deux canaux corrects.
  *
@@ -17,7 +17,7 @@
 
 /**
  * FAITS VÉRIFIÉS. Aucune IA ne doit affirmer quoi que ce soit en dehors de
- * cette liste — c'est la règle qui remplace « fais au mieux » par « n'invente
+ * cette liste : c'est la règle qui remplace « fais au mieux » par « n'invente
  * pas ».
  */
 export const WORKWAVE_FACTS = `FAITS VÉRIFIÉS SUR WORKWAVE (ne rien affirmer en dehors de cette liste) :
@@ -42,7 +42,7 @@ REMBOURSEMENT (règle stricte)
 RÉCLAMATION DE FICHE / CONNEXION PRO
 - Le pro réclame sa fiche avec son SIRET (14 chiffres, France) ou son numéro d'entreprise BCE (10 chiffres, Belgique).
 - Un code à 6 chiffres est envoyé par email, valable 15 minutes, 3 essais maximum.
-- Code non reçu : vérifier les spams (expéditeur contact@workwave.fr), et il est possible de recommencer avec une autre adresse email (par exemple Gmail) — c'est le SIRET qui valide la fiche, pas l'adresse email.
+- Code non reçu : vérifier les spams (expéditeur contact@workwave.fr), et il est possible de recommencer avec une autre adresse email (par exemple Gmail) : c'est le SIRET qui valide la fiche, pas l'adresse email.
 - Un pro absent de l'annuaire peut créer sa fiche lui-même à partir de son SIRET.
 
 DONNÉES PERSONNELLES / RGPD
@@ -65,7 +65,7 @@ export const WORKWAVE_LINKS = `LIENS VALIDES (ne jamais en inventer d'autres) :
 - Mentions légales : /mentions-legales`;
 
 /**
- * CONFIDENTIALITÉ — contrainte explicite et non négociable du fondateur.
+ * CONFIDENTIALITÉ · contrainte explicite et non négociable du fondateur.
  *
  * Deux couches distinctes, souvent confondues :
  *   1. ne jamais réciter les données personnelles figurant dans les documents
@@ -98,8 +98,8 @@ export const CONFIDENTIALITY_RULES = `CONFIDENTIALITÉ (règles absolues, aucune
  */
 export const SUPPORT_TOPICS = `CE QUE TU SAIS RÉSOUDRE TOI-MÊME (réponses vérifiées) :
 
-RÉCLAMATION DE FICHE — c'est le motif de contact numéro 1
-- « Je n'ai pas reçu le code » : le code est valable 15 minutes et part de contact@workwave.fr. Faire vérifier les spams. SURTOUT : proposer de recommencer avec une autre adresse, par exemple une adresse Gmail — c'est le SIRET qui prouve la propriété de la fiche, PAS l'adresse email. C'est la solution qui débloque la quasi-totalité des cas (boîtes professionnelles chez OVH ou Orange qui filtrent).
+RÉCLAMATION DE FICHE · c'est le motif de contact numéro 1
+- « Je n'ai pas reçu le code » : le code est valable 15 minutes et part de contact@workwave.fr. Faire vérifier les spams. SURTOUT : proposer de recommencer avec une autre adresse, par exemple une adresse Gmail : c'est le SIRET qui prouve la propriété de la fiche, PAS l'adresse email. C'est la solution qui débloque la quasi-totalité des cas (boîtes professionnelles chez OVH ou Orange qui filtrent).
 - « Code refusé / trop de tentatives » : 3 essais maximum, ensuite il faut recommencer le processus après 1 heure.
 - « Mon numéro est refusé » : SIRET à 14 chiffres en France, numéro d'entreprise BCE à 10 chiffres en Belgique. Les espaces et les points sont acceptés, ils sont retirés automatiquement. Le numéro saisi doit correspondre exactement à celui de la fiche.
 - « Je ne trouve pas ma fiche » : la chercher sur /pro/retrouver-fiche. Si elle n'existe vraiment pas, la créer sur /pro/creer-fiche à partir du SIRET.
@@ -109,11 +109,11 @@ LES 9,90 €
 - « Les 2 premiers sont vraiment offerts ? » : oui.
 - « Qu'est-ce que j'obtiens pour 9,90 € ? » : avant de payer, le pro voit déjà le besoin, la ville, le budget et le délai. Le paiement débloque les coordonnées du particulier (prénom, email, téléphone).
 
-JE NE REÇOIS AUCUN PROJET — les 5 points que le pro peut vérifier seul
+JE NE REÇOIS AUCUN PROJET · les 5 points que le pro peut vérifier seul
 1. sa fiche est bien réclamée (sinon il ne reçoit rien) ;
 2. son adresse email est renseignée dans sa fiche ;
 3. sa réception n'est pas en pause dans /pro/dashboard/preferences ;
-4. son rayon d'intervention couvre la zone : il est réglable de 5 à 200 km dans /pro/dashboard/preferences — c'est la cause la plus fréquente ;
+4. son rayon d'intervention couvre la zone : il est réglable de 5 à 200 km dans /pro/dashboard/preferences : c'est la cause la plus fréquente ;
 5. sa catégorie correspond au type de chantier demandé.
 
 CÔTÉ PARTICULIER
@@ -134,8 +134,8 @@ export const ESCALATION_RULES = `QUAND TU DOIS PASSER LA MAIN À L'ÉQUIPE (ouvr
 - La question ne figure pas dans la liste ci-dessus.
 - Le sujet touche à un dossier précis que tu ne peux pas consulter : un paiement, un déblocage, une fiche particulière, une suppression en cours.
 - « J'ai payé et je n'ai rien reçu » : toujours transmettre, jamais improviser.
-- « Les coordonnées sont fausses / le numéro ne fonctionne pas » : transmettre. La garantie « coordonnée inexploitable » existe, mais c'est l'équipe qui l'apprécie — tu ne l'accordes JAMAIS toi-même et tu ne promets rien.
-- Toute demande de remboursement, de facture ou de reçu : transmettre. Il n'existe aujourd'hui aucune page de téléchargement de facture — ne laisse jamais entendre le contraire.
+- « Les coordonnées sont fausses / le numéro ne fonctionne pas » : transmettre. La garantie « coordonnée inexploitable » existe, mais c'est l'équipe qui l'apprécie : tu ne l'accordes JAMAIS toi-même et tu ne promets rien.
+- Toute demande de remboursement, de facture ou de reçu : transmettre. Il n'existe aujourd'hui aucune page de téléchargement de facture : ne laisse jamais entendre le contraire.
 - « Cette fiche a déjà été réclamée » : transmettre (arbitrage humain obligatoire).
 - « Ce n'est pas mon entreprise » / contestation sur l'origine des données : transmettre.
 - Mention de la CNIL, d'un avocat, d'une mise en demeure, d'une plainte ou d'un tribunal : transmettre immédiatement, sans commenter le fond.
@@ -150,7 +150,7 @@ INTERDICTIONS PERMANENTES :
 /**
  * ANTI-INVENTION et anti-détournement. Le corps d'un message venant d'un
  * inconnu est une donnée NON FIABLE : il peut contenir des instructions
- * déguisées. Cette consigne est nécessaire mais jamais suffisante — les
+ * déguisées. Cette consigne est nécessaire mais jamais suffisante : les
  * garanties réelles sont structurelles (aucun accès aux dossiers, aucune
  * capacité d'engagement financier, notes internes jamais transmises).
  */

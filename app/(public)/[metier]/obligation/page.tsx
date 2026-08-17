@@ -34,7 +34,7 @@ import {
  *
  * Angle éditorial : transparence anti-arnaque (faux ramoneurs en démarchage).
  * Tous les chiffres viennent de lib/data/urgence-content.ts (sourcé via
- * Perplexity, sources citées) — zéro chiffre inventé, zéro promesse de délai.
+ * Perplexity, sources citées) : zéro chiffre inventé, zéro promesse de délai.
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
  */
@@ -100,7 +100,7 @@ export default async function RamonageObligationPage({ params }: Props) {
     { label: "Ramonage obligatoire" },
   ];
 
-  // FAQ — réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
+  // FAQ : réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
   const faqs = [
     {
       question: "Le ramonage est-il obligatoire ?",
@@ -129,7 +129,7 @@ export default async function RamonageObligationPage({ params }: Props) {
     {
       question: "Comment éviter les faux ramoneurs ?",
       answer:
-        "Méfiez-vous du démarchage téléphonique ou en porte-à-porte de faux ramoneurs se présentant comme mandatés par la mairie, le bailleur ou l'assureur — aucun de ces organismes ne mandate de démarcheur. Les autres signaux : un prix d'appel anormalement bas suivi de suppléments, l'absence de coordonnées vérifiables ou de numéro SIRET sur le devis et la facture, une urgence artificielle pour vous faire décider immédiatement, ou une pression commerciale pour remplacer des pièces sans diagnostic indépendant.",
+        "Méfiez-vous du démarchage téléphonique ou en porte-à-porte de faux ramoneurs se présentant comme mandatés par la mairie, le bailleur ou l'assureur : aucun de ces organismes ne mandate de démarcheur. Les autres signaux : un prix d'appel anormalement bas suivi de suppléments, l'absence de coordonnées vérifiables ou de numéro SIRET sur le devis et la facture, une urgence artificielle pour vous faire décider immédiatement, ou une pression commerciale pour remplacer des pièces sans diagnostic indépendant.",
     },
   ];
 
@@ -164,7 +164,7 @@ export default async function RamonageObligationPage({ params }: Props) {
         Ramonage obligatoire : ce que dit la loi, l&apos;assurance et les prix réels
       </h1>
 
-      {/* Intro factuelle — ton calme et protecteur, illustration en regard */}
+      {/* Intro factuelle : ton calme et protecteur, illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
@@ -172,7 +172,7 @@ export default async function RamonageObligationPage({ params }: Props) {
             appareils à combustion : une à deux fois par an selon le combustible et
             le règlement local applicable. Le certificat remis par le professionnel
             sert de preuve en cas de contrôle et peut être demandé par votre
-            assurance après un sinistre — et l&apos;absence de ramonage peut exposer
+            assurance après un sinistre, et l&apos;absence de ramonage peut exposer
             à une contravention pouvant aller jusqu&apos;à {fmtEur(450)} €. Côté
             budget, comptez {fmtEur(bois.low)} € à {fmtEur(bois.high)} € constatés
             pour une cheminée bois à conduit simple. Cette page rassemble ce que dit
@@ -183,14 +183,14 @@ export default async function RamonageObligationPage({ params }: Props) {
         <ChimneyArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — au-dessus de la ligne de flottaison. */}
+      {/* CTA héro : au-dessus de la ligne de flottaison. */}
       <HeroCta
         href={`/deposer-projet?categorie=${metier}`}
         label="Trouver un ramoneur vérifié"
-        note="Gratuit, sans engagement — votre demande est visible par les ramoneurs SIRET vérifiés de votre zone, qui vous recontactent directement."
+        note="Gratuit, sans engagement : votre demande est visible par les ramoneurs SIRET vérifiés de votre zone, qui vous recontactent directement."
       />
 
-      {/* ─── Ce que dit la loi — EN PREMIER : c'est l'intention de recherche ─── */}
+      {/* ─── Ce que dit la loi, EN PREMIER : c'est l'intention de recherche ─── */}
       <section className="mb-12">
         <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
           Ce que dit la loi
@@ -261,13 +261,13 @@ export default async function RamonageObligationPage({ params }: Props) {
       <FinalCtaSection
         href={`/deposer-projet?categorie=${metier}`}
         title="Besoin d'un ramoneur de confiance ?"
-        text="Décrivez votre besoin, recevez des devis de ramoneurs SIRET vérifiés près de chez vous — gratuit, sans commission."
+        text="Décrivez votre besoin, recevez des devis de ramoneurs SIRET vérifiés près de chez vous : gratuit, sans commission."
         buttonLabel="Demander un devis gratuitement"
         footnote="Gratuit · sans engagement · demande visible par les pros de votre zone"
       />
 
       {/* ─── FAQ (UI + schema FAQPage injecté plus haut) ─── */}
-      <FaqAccordion faqs={faqs} title="Questions fréquentes — ramonage obligatoire" />
+      <FaqAccordion faqs={faqs} title="Questions fréquentes · ramonage obligatoire" />
 
       {/* ─── Maillage interne ─── */}
       <div className="mt-14 pt-8 border-t border-[var(--border-color)]">

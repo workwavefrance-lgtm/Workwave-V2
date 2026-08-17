@@ -84,7 +84,7 @@ export function buildProContent(pro: ProForContent): ProContent | null {
       .join(", ");
     faqs.push({
       question: `Quels sont les tarifs d'un ${catLower} à ${cityName} ?`,
-      answer: `Les tarifs dépendent de la prestation : par exemple ${ex}. Ces fourchettes sont indicatives (sources web ${sourced.retrievedAt}) — demandez un devis à ${name} pour une estimation précise.`,
+      answer: `Les tarifs dépendent de la prestation : par exemple ${ex}. Ces fourchettes sont indicatives (sources web ${sourced.retrievedAt}), demandez un devis à ${name} pour une estimation précise.`,
     });
   }
 

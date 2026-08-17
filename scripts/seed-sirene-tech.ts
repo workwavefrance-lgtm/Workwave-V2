@@ -335,7 +335,7 @@ async function insertBatch(rows: SeedRow[]): Promise<{ inserted: number; skipped
 // ─── Main ──────────────────────────────────────────────────────────────────
 async function main() {
   console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("Workwave AI — Seed Sirene NAF informatique");
+  console.log("Workwave AI · Seed Sirene NAF informatique");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
   console.log(`Mode    : ${APPLY ? "✓ APPLY (insertion en base)" : "○ DRY-RUN (preview)"}`);
   console.log(`Depts   : ${DEPTS_FILTER ? DEPTS_FILTER.join(",") : "France entiere"}`);
@@ -394,7 +394,7 @@ async function main() {
         // Preview 1 row
         const sample = rowsToInsert[0];
         console.log(
-          `    → preview: ${sample.name.slice(0, 40)} (${sample.siret}) postal=${sample.postal_code} city=${sample.city_id || "—"}`
+          `    → preview: ${sample.name.slice(0, 40)} (${sample.siret}) postal=${sample.postal_code} city=${sample.city_id || "-"}`
         );
       }
     }

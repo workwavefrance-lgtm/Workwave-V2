@@ -7,7 +7,7 @@ import { ShieldCheckArt } from "@/components/seo/PilierArt";
  *
  * Extraits de app/(public)/[metier]/urgence/page.tsx au 3e usage.
  * Tous les chiffres affichés viennent de lib/data/urgence-content.ts
- * (sourcé Perplexity) — zéro chiffre inventé, zéro promesse de délai.
+ * (sourcé Perplexity) : zéro chiffre inventé, zéro promesse de délai.
  */
 
 export function fmtEur(n: number): string {
@@ -127,7 +127,7 @@ export function InfoCallout({ title, text }: { title: string; text: string }) {
   );
 }
 
-/** CTA héro — au-dessus de la ligne de flottaison. */
+/** CTA héro · au-dessus de la ligne de flottaison. */
 export function HeroCta({
   href,
   label,
@@ -151,7 +151,7 @@ export function HeroCta({
   );
 }
 
-/** CTA contextuel post-prix — pic de confiance après les prix honnêtes. */
+/** CTA contextuel post-prix · pic de confiance après les prix honnêtes. */
 export function PostPriceCta({
   href,
   text,
@@ -221,7 +221,7 @@ export function ScamWarningsList({ warnings }: { warnings: string[] }) {
   );
 }
 
-/** CTA post-arnaques — pic émotionnel : on propose la voie sûre. */
+/** CTA post-arnaques · pic émotionnel : on propose la voie sûre. */
 export function PostScamCta({
   href,
   text,

@@ -1,5 +1,5 @@
 /**
- * Script de nettoyage — Détecte les établissements fermés via l'API Recherche d'entreprises
+ * Script de nettoyage · Détecte les établissements fermés via l'API Recherche d'entreprises
  * et marque les pros correspondants comme inactifs (is_active = false).
  *
  * Usage : npx tsx scripts/cleanup-closed-businesses.ts
@@ -108,7 +108,7 @@ async function checkSiret(
 
     if (!res.ok) {
       if (res.status === 429) {
-        // Rate limited — attendre et réessayer une fois
+        // Rate limited : attendre et réessayer une fois
         await sleep(2000);
         const retry = await fetchWithTimeout(
           `${API_BASE}?q=${normalized}&mtm_campaign=workwave-cleanup`
@@ -151,7 +151,7 @@ function analyzeResponse(
     if (!matching) continue;
 
     if (matching.etat_administratif === "F") {
-      // Établissement fermé — chercher un déménagement dans la Vienne
+      // Établissement fermé : chercher un déménagement dans la Vienne
       let relocation: { newSiret: string; address: string; city: string } | undefined;
 
       if (ul.siren === siren) {
@@ -178,7 +178,7 @@ function analyzeResponse(
     return { status: "active" };
   }
 
-  // SIRET pas trouvé dans les résultats — requête large, pas de match exact
+  // SIRET pas trouvé dans les résultats : requête large, pas de match exact
   return { status: "not_found" };
 }
 
@@ -249,7 +249,7 @@ async function main() {
           if (result.relocation) {
             totalRelocations++;
             console.log(
-              `  DÉMÉNAGEMENT DÉTECTÉ : ${pro.name} — ancien SIRET ${pro.siret} fermé, nouveau SIRET ${result.relocation.newSiret} actif à ${result.relocation.address}, ${result.relocation.city}`
+              `  DÉMÉNAGEMENT DÉTECTÉ : ${pro.name}, ancien SIRET ${pro.siret} fermé, nouveau SIRET ${result.relocation.newSiret} actif à ${result.relocation.address}, ${result.relocation.city}`
             );
           }
           break;
@@ -262,7 +262,7 @@ async function main() {
             .eq("id", pro.id);
           break;
         case "not_found":
-          // Pas trouvé dans l'API — on ne touche pas
+          // Pas trouvé dans l'API : on ne touche pas
           break;
         case "error":
           totalErrors++;
@@ -276,7 +276,7 @@ async function main() {
 
     offset += pros.length;
     console.log(
-      `Traité ${Math.min(offset, total)}/${total} — ${batchClosed} fermés dans ce lot (${totalClosed} total)`
+      `Traité ${Math.min(offset, total)}/${total} · ${batchClosed} fermés dans ce lot (${totalClosed} total)`
     );
   }
 

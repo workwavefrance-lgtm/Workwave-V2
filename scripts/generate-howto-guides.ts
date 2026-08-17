@@ -39,7 +39,7 @@ type GuideSpec = {
 
 // 15 guides A4 long-tail informationnels
 const GUIDES: GuideSpec[] = [
-  // 10 guides "comment choisir un X" — metiers non couverts par A3
+  // 10 guides "comment choisir un X" : metiers non couverts par A3
   { id: 1,  categorySlug: "macon",            topicType: "guide", titleSuggestion: "Comment choisir un macon en 2026 : 7 criteres pour eviter les mauvaises surprises", estimatedVolume: 4000 },
   { id: 2,  categorySlug: "couvreur",         topicType: "guide", titleSuggestion: "Comment choisir un couvreur fiable en 2026 : labels, devis, garanties",            estimatedVolume: 3500 },
   { id: 3,  categorySlug: "chauffagiste",     topicType: "guide", titleSuggestion: "Comment choisir un chauffagiste en 2026 : RGE, marques, types de chaudiere",       estimatedVolume: 5000 },
@@ -54,8 +54,8 @@ const GUIDES: GuideSpec[] = [
   // 5 articles transversaux haute valeur
   { id: 11, categorySlug: null,               topicType: "checklist",     titleSuggestion: "Comment lire un devis travaux en 2026 : les 12 points a verifier absolument",     estimatedVolume: 8000 },
   { id: 12, categorySlug: null,               topicType: "guide",         titleSuggestion: "Comment eviter les arnaques travaux en 2026 : 10 signaux d'alerte",               estimatedVolume: 6000 },
-  { id: 13, categorySlug: null,               topicType: "reglementation", titleSuggestion: "MaPrimeRenov 2026 : montants, conditions, demarches — guide complet",            estimatedVolume: 35000 },
-  { id: 14, categorySlug: null,               topicType: "guide",         titleSuggestion: "Aides a la renovation energetique 2026 : MaPrimeRenov, CEE, eco-PTZ — comparatif", estimatedVolume: 15000 },
+  { id: 13, categorySlug: null,               topicType: "reglementation", titleSuggestion: "MaPrimeRenov 2026 : montants, conditions, demarches · guide complet",            estimatedVolume: 35000 },
+  { id: 14, categorySlug: null,               topicType: "guide",         titleSuggestion: "Aides a la renovation energetique 2026 : MaPrimeRenov, CEE, eco-PTZ · comparatif", estimatedVolume: 15000 },
   { id: 15, categorySlug: null,               topicType: "checklist",     titleSuggestion: "Reception des travaux : checklist complete des points a verifier en 2026",         estimatedVolume: 4000 },
 ];
 
@@ -112,7 +112,7 @@ async function main() {
     if (guide.categorySlug) {
       const resolved = categoryByName.get(guide.categorySlug);
       if (!resolved) {
-        console.error(`  [#${guide.id}] Categorie introuvable : ${guide.categorySlug} — SKIP`);
+        console.error(`  [#${guide.id}] Categorie introuvable : ${guide.categorySlug} · SKIP`);
         errors++;
         continue;
       }
@@ -129,7 +129,7 @@ async function main() {
         (s) => s.includes("choisir") && s.includes(guide.categorySlug!.split("-")[0])
       );
       if (conflictCandidate) {
-        console.log(`  [#${guide.id}] [${categoryName}] Conflit potentiel : ${conflictCandidate} — SKIP`);
+        console.log(`  [#${guide.id}] [${categoryName}] Conflit potentiel : ${conflictCandidate} · SKIP`);
         skipped++;
         continue;
       }

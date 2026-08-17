@@ -2,7 +2,7 @@
  * Revalidation à la demande du sitemap (index + sous-sitemaps).
  *
  * POURQUOI : app/sitemap.ts a `revalidate = 86400`. Sur Vercel, le cache ISR de
- * l'index /sitemap-index.xml PERSISTE à travers les déploiements — un simple
+ * l'index /sitemap-index.xml PERSISTE à travers les déploiements : un simple
  * redeploy ne le rafraîchit PAS. Après un gros scrape (le nb de batches change),
  * l'index reste figé sur l'ancien `generateSitemaps()` jusqu'à expiration du
  * timer 24h. Cet endpoint force la régénération immédiate.

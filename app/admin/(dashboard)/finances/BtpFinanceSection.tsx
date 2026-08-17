@@ -12,7 +12,7 @@ const fmtEur = (v: number) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(v);
 
 /**
- * Section "BTP — Pay-per-lead" de la page Finances admin.
+ * Section "BTP · Pay-per-lead" de la page Finances admin.
  * Le CA BTP réel = déblocages de leads à 9,90 € (table lead_unlocks), PAS des
  * abonnements. Données via getBtpFinances() (vraies, en base).
  */
@@ -21,7 +21,7 @@ export default function BtpFinanceSection({ data }: { data: BtpFinances }) {
     <section>
       <div className="mb-4">
         <h2 className="text-base font-semibold" style={{ color: "var(--admin-text)" }}>
-          BTP — Pay-per-lead
+          BTP · Pay-per-lead
         </h2>
         <p className="text-xs mt-0.5" style={{ color: "var(--admin-text-secondary)" }}>
           Revenu réel des déblocages de leads à 9,90 € (table lead_unlocks)
@@ -91,7 +91,7 @@ export default function BtpFinanceSection({ data }: { data: BtpFinances }) {
                   <td className="px-5 py-2.5 tabular-nums font-medium" style={{ color: i < 3 ? "var(--admin-accent)" : "var(--admin-text-tertiary)" }}>
                     {i + 1}
                   </td>
-                  <td className="px-5 py-2.5" style={{ color: "var(--admin-text)" }}>{b.proName ?? "—"}</td>
+                  <td className="px-5 py-2.5" style={{ color: "var(--admin-text)" }}>{b.proName ?? "-"}</td>
                   <td className="px-5 py-2.5 text-right tabular-nums" style={{ color: "var(--admin-text-secondary)" }}>{b.unlocks}</td>
                   <td className="px-5 py-2.5 text-right tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
                     {new Date(b.lastPaidAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" })}
@@ -136,7 +136,7 @@ export default function BtpFinanceSection({ data }: { data: BtpFinances }) {
                   <td className="px-5 py-2.5 tabular-nums" style={{ color: "var(--admin-text-secondary)" }}>
                     {new Date(r.paidAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" })}
                   </td>
-                  <td className="px-5 py-2.5" style={{ color: "var(--admin-text)" }}>{r.proName ?? "—"}</td>
+                  <td className="px-5 py-2.5" style={{ color: "var(--admin-text)" }}>{r.proName ?? "-"}</td>
                   <td className="px-5 py-2.5 tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>#{r.projectId}</td>
                   <td className="px-5 py-2.5 text-right tabular-nums font-medium" style={{ color: "var(--admin-text)" }}>
                     {fmtEur(r.amountEur)}

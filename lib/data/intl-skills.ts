@@ -1,5 +1,5 @@
 /**
- * Skills internationaux (anglais) ciblés par Workwave AI — Phase C wave 1.
+ * Skills internationaux (anglais) ciblés par Workwave AI · Phase C wave 1.
  *
  * Wave 1 = 6 catégories TECH uniquement, car ce sont les seules pour
  * lesquelles on a un TJM de référence (lib/data/tech-tjm-reference.ts). On
@@ -86,7 +86,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     blurb:
       "Builders shipping apps and workflows fast with Bubble, Webflow, Make, Zapier and Airtable.",
   },
-  // ─── Business & creative (wave 2 — pas de TJM de reference) ──────────
+  // ─── Business & creative (wave 2 : pas de TJM de reference) ──────────
   {
     slug: "marketing",
     label: "Marketing & Communication",
@@ -313,7 +313,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI chatbot developer",
     frCategorySlug: "intelligence-artificielle",
     blurb:
-      "Developers building custom AI chatbots and conversational assistants — GPT-powered support bots, WhatsApp and website chatbots, and enterprise virtual agents.",
+      "Developers building custom AI chatbots and conversational assistants: GPT-powered support bots, WhatsApp and website chatbots, and enterprise virtual agents.",
   },
   {
     slug: "ai-app-development",
@@ -322,7 +322,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI app developer",
     frCategorySlug: "intelligence-artificielle",
     blurb:
-      "Engineers shipping AI-powered applications end to end — from custom models and APIs to production apps that put generative AI, automation and ML to work.",
+      "Engineers shipping AI-powered applications end to end: from custom models and APIs to production apps that put generative AI, automation and ML to work.",
   },
   {
     slug: "ai-logo-design",
@@ -331,7 +331,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI logo designer",
     frCategorySlug: "design-creation",
     blurb:
-      "Designers crafting brand logos with AI tools and a human eye — unique, polished identities generated fast and refined to production quality.",
+      "Designers crafting brand logos with AI tools and a human eye: unique, polished identities generated fast and refined to production quality.",
   },
   {
     slug: "ai-content-writing",
@@ -340,7 +340,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI content writer",
     frCategorySlug: "redaction-copywriting",
     blurb:
-      "Writers who pair AI with editorial craft to produce SEO articles, website copy and content at scale — fast drafts, human polish, on-brand voice.",
+      "Writers who pair AI with editorial craft to produce SEO articles, website copy and content at scale: fast drafts, human polish, on-brand voice.",
   },
   {
     slug: "prompt-engineering",
@@ -349,10 +349,10 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "prompt engineer",
     frCategorySlug: "intelligence-artificielle",
     blurb:
-      "Specialists who design, test and optimise prompts for LLMs — building reliable AI workflows, custom GPTs and evaluation pipelines for production.",
+      "Specialists who design, test and optimise prompts for LLMs: building reliable AI workflows, custom GPTs and evaluation pipelines for production.",
   },
 
-  // ─── Wave 4 — lot 2 (P2) ─────────────────────────────────────────────
+  // ─── Wave 4 · lot 2 (P2) ─────────────────────────────────────────────
   {
     slug: "ai-voice-over",
     label: "AI Voice Over",
@@ -360,7 +360,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI voice-over artist",
     frCategorySlug: "audiovisuel-medias",
     blurb:
-      "Voice-over talent and audio producers using AI voices and editing — ads, explainers, e-learning, YouTube and podcasts, delivered fast and on-brand.",
+      "Voice-over talent and audio producers using AI voices and editing: ads, explainers, e-learning, YouTube and podcasts, delivered fast and on-brand.",
   },
   {
     slug: "generative-ai-art",
@@ -369,7 +369,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "generative AI artist",
     frCategorySlug: "design-creation",
     blurb:
-      "Artists generating images, product visuals and brand art with Midjourney, DALL·E and Stable Diffusion — concepts to polished, commercial-ready assets.",
+      "Artists generating images, product visuals and brand art with Midjourney, DALL·E and Stable Diffusion: concepts to polished, commercial-ready assets.",
   },
   {
     slug: "ai-video-editing",
@@ -378,7 +378,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI video editor",
     frCategorySlug: "audiovisuel-medias",
     blurb:
-      "Video editors using AI to cut, caption and repurpose footage at scale — short-form, social, YouTube and podcast video, fast turnaround.",
+      "Video editors using AI to cut, caption and repurpose footage at scale: short-form, social, YouTube and podcast video, fast turnaround.",
   },
   {
     slug: "ai-data-annotation",
@@ -387,7 +387,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "data annotation specialist",
     frCategorySlug: "data-analytics",
     blurb:
-      "Specialists labelling and annotating training data — image, text, audio and video — to power accurate machine-learning and computer-vision models.",
+      "Specialists labelling and annotating training data (image, text, audio and video) to power accurate machine-learning and computer-vision models.",
   },
   {
     slug: "ai-consulting",
@@ -396,7 +396,7 @@ export const INTL_SKILLS: IntlSkill[] = [
     nounSingular: "AI consultant",
     frCategorySlug: "strategie-management",
     blurb:
-      "Consultants who turn AI into business value — strategy, use-case scoping, tool selection and implementation roadmaps for generative AI and automation.",
+      "Consultants who turn AI into business value: strategy, use-case scoping, tool selection and implementation roadmaps for generative AI and automation.",
   },
 ];
 
@@ -445,13 +445,13 @@ export const SKILL_FR: Record<
   "motion-graphics": { label: "Motion & 3D", noun: "motion designers", nounSingular: "motion designer" },
   "game-development": { label: "Développement de Jeux", noun: "développeurs de jeux", nounSingular: "développeur de jeux" },
   "ai-agents": { label: "Agents IA & Automatisation", noun: "développeurs d'agents IA", nounSingular: "développeur d'agents IA" },
-  // Wave 4 — services IA spécifiques (lot 1)
+  // Wave 4 · services IA spécifiques (lot 1)
   "ai-chatbot-development": { label: "Développement de Chatbots IA", noun: "développeurs de chatbots IA", nounSingular: "développeur de chatbots IA" },
   "ai-app-development": { label: "Développement d'Applications IA", noun: "développeurs d'applications IA", nounSingular: "développeur d'applications IA" },
   "ai-logo-design": { label: "Création de Logo IA", noun: "designers de logo IA", nounSingular: "designer de logo IA" },
   "ai-content-writing": { label: "Rédaction de Contenu IA", noun: "rédacteurs de contenu IA", nounSingular: "rédacteur de contenu IA" },
   "prompt-engineering": { label: "Prompt Engineering", noun: "prompt engineers", nounSingular: "prompt engineer" },
-  // Wave 4 — lot 2
+  // Wave 4 · lot 2
   "ai-voice-over": { label: "Voix Off IA", noun: "comédiens voix off IA", nounSingular: "comédien voix off IA" },
   "generative-ai-art": { label: "Art Génératif IA", noun: "artistes IA générative", nounSingular: "artiste IA générative" },
   "ai-video-editing": { label: "Montage Vidéo IA", noun: "monteurs vidéo IA", nounSingular: "monteur vidéo IA" },

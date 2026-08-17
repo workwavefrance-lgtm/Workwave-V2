@@ -7,7 +7,7 @@ import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const metadata: Metadata = {
-  title: "Dashboard — Workwave AI",
+  title: "Dashboard · Workwave AI",
   description: "Votre espace freelance Workwave AI.",
   robots: { index: false, follow: false },
 };
@@ -26,7 +26,7 @@ export default async function AiDashboardPage() {
   // Stats reelles : compte leads 30 derniers jours
   const service = getServiceClient();
   // Fix react-hooks/purity : on calcule la date via new Date() (impure mais autorisee
-  // dans un Server Component async — le linter cible Date.now() specifiquement).
+  // dans un Server Component async, le linter cible Date.now() specifiquement).
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { count: leadsReceived30d } = await service

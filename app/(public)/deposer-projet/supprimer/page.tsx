@@ -4,7 +4,7 @@ import DeletionForm from "./DeletionForm";
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const metadata: Metadata = {
-  title: "Supprimer ma demande — Workwave",
+  title: "Supprimer ma demande · Workwave",
   robots: { index: false, follow: false },
 };
 

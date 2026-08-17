@@ -28,7 +28,7 @@ type CityPageProps = {
 export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { skill, ville } = await params;
   const city = findTechCityBySlug(ville);
-  if (!city) return { title: "Page introuvable — Workwave AI" };
+  if (!city) return { title: "Page introuvable · Workwave AI" };
 
   const sb = createPublicClient();
   const { data: category } = await sb
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
     .eq("slug", skill)
     .eq("vertical", TECH_VERTICAL)
     .maybeSingle();
-  if (!category) return { title: "Page introuvable — Workwave AI" };
+  if (!category) return { title: "Page introuvable · Workwave AI" };
 
   const title = `Les 10 meilleurs freelances ${category.name} a ${city.name} en ${CURRENT_YEAR}`;
   const description = `Decouvrez les meilleurs freelances ${category.name.toLowerCase()} a ${city.name} (${city.dept_name}). Matching IA en moins de 24h, gratuit, sans credit. Devis sans engagement.`;
@@ -138,7 +138,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       };
     }
   } catch {
-    // Table peut ne pas exister en dev, ou pas de droits — silent fallback
+    // Table peut ne pas exister en dev, ou pas de droits : silent fallback
   }
 
   // 2.ter. TJM reference (verifie, source citee)
@@ -203,7 +203,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
         name: `Combien coute un freelance ${category.name.toLowerCase()} a ${city.name} ?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Le TJM d'un freelance ${category.name.toLowerCase()} a ${city.name} varie selon l'experience (junior, mid, senior, expert) et la rarete de la stack technique. Workwave AI vous met en relation avec des profils correspondant a votre budget — gratuitement.`,
+          text: `Le TJM d'un freelance ${category.name.toLowerCase()} a ${city.name} varie selon l'experience (junior, mid, senior, expert) et la rarete de la stack technique. Workwave AI vous met en relation avec des profils correspondant a votre budget, gratuitement.`,
         },
       },
       {
@@ -240,7 +240,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1/4 — HERO (TITLE CLICKBAIT + H1 SOBRE)
+          SECTION 1/4 · HERO (TITLE CLICKBAIT + H1 SOBRE)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-[var(--ai-border-subtle)]">
         <Watermark text={city.name.toUpperCase()} position="bottom" />
@@ -369,7 +369,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2/4 — TOP 10 LISTING
+          SECTION 2/4 · TOP 10 LISTING
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -486,7 +486,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3/6 — CONTEXTE + TARIFS (conditionnel, sourcees)
+          SECTION 3/6 · CONTEXTE + TARIFS (conditionnel, sourcees)
           ═══════════════════════════════════════════════════════════════ */}
       {(aiContent?.intro_html || tjmResolved) && (
         <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
@@ -575,7 +575,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                     className="text-[11px] text-[var(--ai-text-tertiary)] mt-3 leading-relaxed"
                     style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                   >
-                    Source : Blog du Moderateur, Free-Work, Comet — voir refs en bas de page
+                    Source : Blog du Moderateur, Free-Work, Comet · voir refs en bas de page
                   </p>
                 </div>
               )}
@@ -585,7 +585,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4/6 — ECOSYSTEME TECH LOCAL (whitelist, verifie)
+          SECTION 4/6 · ECOSYSTEME TECH LOCAL (whitelist, verifie)
           ═══════════════════════════════════════════════════════════════ */}
       {localCompanies.length > 0 && (
         <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
@@ -665,7 +665,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5/6 — FAQ (utilise aiContent.faq si dispo, fallback default)
+          SECTION 5/6 · FAQ (utilise aiContent.faq si dispo, fallback default)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
@@ -724,7 +724,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 6/6 — VILLES SIMILAIRES + CTA + SOURCES FOOTER
+          SECTION 6/6 · VILLES SIMILAIRES + CTA + SOURCES FOOTER
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
@@ -806,7 +806,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            FOOTER SOURCES — methodologie + URLs cliquables
+            FOOTER SOURCES · methodologie + URLs cliquables
             Garantie : toutes les donnees chiffrees sont sourcees publiquement.
             ═══════════════════════════════════════════════════════════════ */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
@@ -896,7 +896,7 @@ export default async function SkillCityPage({ params }: CityPageProps) {
                         >
                           {src.name}
                         </a>{" "}
-                        — {src.title}
+                        · {src.title}
                       </span>
                     </li>
                   ))}

@@ -88,7 +88,7 @@ export default function CommandPalette() {
           setSearchResults(data);
         }
       } catch {
-        // Silently fail — static commands still work
+        // Silently fail: static commands still work
       } finally {
         setIsSearching(false);
       }
@@ -282,7 +282,7 @@ export default function CommandPalette() {
           paddingTop: "15vh",
         }}
       >
-        {/* Dialog container — stop propagation so clicking inside doesn't close */}
+        {/* Dialog container: stop propagation so clicking inside doesn't close */}
         <div
           onClick={(e) => e.stopPropagation()}
           style={{ width: "100%", maxWidth: 560, padding: "0 16px" }}
@@ -362,7 +362,7 @@ export default function CommandPalette() {
                 </Command.Group>
               )}
 
-              {/* Search results — pros */}
+              {/* Search results · pros */}
               {hasPros && (
                 <Command.Group heading="Professionnels">
                   {searchResults!.pros.map((pro) => (
@@ -381,7 +381,7 @@ export default function CommandPalette() {
                 </Command.Group>
               )}
 
-              {/* Search results — projects */}
+              {/* Search results · projects */}
               {hasProjects && (
                 <Command.Group heading="Projets">
                   {searchResults!.projects.map((project) => (
@@ -391,7 +391,7 @@ export default function CommandPalette() {
                       onSelect={() => handleSelectProject(project.id)}
                     >
                       <span className="cmd-icon"><SearchIcon /></span>
-                      <span className="cmd-label">{project.first_name} — projet #{project.id}</span>
+                      <span className="cmd-label">{project.first_name} · projet #{project.id}</span>
                       <span className="cmd-shortcut" style={{ color: "var(--admin-text-tertiary)", fontSize: 11 }}>
                         Projet
                       </span>

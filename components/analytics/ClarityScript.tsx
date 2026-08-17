@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 
-// Microsoft Clarity (enregistrements de session + heatmaps) — projet workwave.fr.
+// Microsoft Clarity (enregistrements de session + heatmaps), projet workwave.fr.
 // RGPD : l'enregistrement de session est plus intrusif que de l'analytics simple,
 // donc on ne charge Clarity QU'APRÈS consentement analytics (cookie
-// `consent_analytics=accepted`, posé par CookieBanner) — cohérent avec /api/track.
+// `consent_analytics=accepted`, posé par CookieBanner), cohérent avec /api/track.
 // Clarity masque par défaut tout le contenu saisi (champs de formulaire), donc
 // aucune donnée perso n'est enregistrée en clair.
 const CLARITY_PROJECT_ID = "x17wn4qqqr";

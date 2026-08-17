@@ -136,7 +136,7 @@ export function getInitials(name: string | null | undefined): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// BADGES — calcules a la volee depuis le pro + stats
+// BADGES · calcules a la volee depuis le pro + stats
 // ─────────────────────────────────────────────────────────────────────
 
 export type BadgeKind =

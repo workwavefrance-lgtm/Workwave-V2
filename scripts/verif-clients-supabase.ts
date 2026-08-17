@@ -14,7 +14,7 @@
  * Le bug a ete corrige DEUX FOIS a deux mois d'ecart :
  *   - 08/08 dans lib/supabase/public-client.ts (memoisation)
  *   - 09/08 dans 37 autres fichiers, dont components/pro/ProGuidesLinks.tsx
- *     rendu sur CHAQUE fiche pro — la route la plus crawlee du site.
+ *     rendu sur CHAQUE fiche pro, la route la plus crawlee du site.
  *
  * Il reviendra une troisieme fois si rien ne le surveille : ecrire
  * `createClient(url, cle)` est le geste naturel quand on a besoin d'acceder a
@@ -89,7 +89,7 @@ for (const d of DOSSIERS) {
     // Sous quel NOM le SDK est-il importe ici ? Beaucoup de fichiers font
     // `import { createClient as createServiceClient }` tout en important AUSSI
     // `createClient` de lib/supabase/server (le client de session, legitime).
-    // Sans distinguer les deux, on signale a tort les appels legitimes —
+    // Sans distinguer les deux, on signale a tort les appels legitimes :
     // 19 faux positifs a la premiere version de ce script.
     const alias = [...importSdk[1].matchAll(/createClient(?:\s+as\s+(\w+))?/g)]
       .map((m) => m[1] || "createClient");
@@ -101,7 +101,7 @@ for (const d of DOSSIERS) {
       if (!appelSdk.test(l)) return;
       if (/^\s*(\/\/|\*)/.test(l)) return; // commentaire
       // Un createClient QUI POSE ses options auth est tolere s'il desactive
-      // explicitement le rafraichissement — mais on le signale quand meme en
+      // explicitement le rafraichissement, mais on le signale quand meme en
       // avertissement, car il duplique un module canonique.
       const contexte = lignes.slice(i, i + 12).join("\n");
       const sansMinuterie = /autoRefreshToken\s*:\s*false/.test(contexte);
@@ -120,7 +120,7 @@ for (const d of DOSSIERS) {
 const graves = violations.filter((v) => v.raison.startsWith("MINUTERIE"));
 
 if (violations.length === 0) {
-  console.log("OK — aucun client Supabase fabrique a la main cote serveur.");
+  console.log("OK : aucun client Supabase fabrique a la main cote serveur.");
   process.exit(0);
 }
 

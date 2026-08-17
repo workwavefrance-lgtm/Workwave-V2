@@ -72,7 +72,7 @@ export async function generateDraftReply(
     // POURQUOI : une note interne peut contenir tout ce qu'un admin écrit hors
     // du regard du client (« ce pro ment sur son RGE », le téléphone d'un
     // particulier, une consigne juridique). La version précédente les envoyait
-    // au modèle avec la mention « ne jamais recopier au client » — c'est une
+    // au modèle avec la mention « ne jamais recopier au client », c'est une
     // consigne en français, pas un filtre : le corps d'un email entrant est du
     // texte hostile potentiel, et une injection bien tournée peut retourner une
     // consigne. Ce qu'on ne transmet pas ne peut pas fuiter.
@@ -134,7 +134,7 @@ ${contextLines.join("\n")}
 FIL DE LA CONVERSATION (du plus ancien au plus récent) :
 ${thread}
 
-Rédige maintenant UNIQUEMENT le corps du message de réponse au dernier message du client. Pas d'objet, pas de signature, pas de commentaire de ta part — juste le texte de la réponse.`,
+Rédige maintenant UNIQUEMENT le corps du message de réponse au dernier message du client. Pas d'objet, pas de signature, pas de commentaire de ta part, juste le texte de la réponse.`,
         },
       ],
     });

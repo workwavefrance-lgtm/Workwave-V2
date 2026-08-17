@@ -38,9 +38,9 @@ const URGENCY_OPTIONS = [
 
 const BUDGET_OPTIONS = [
   { value: "lt500", label: "Moins de 500 €" },
-  { value: "500_2000", label: "500 € – 2 000 €" },
-  { value: "2000_5000", label: "2 000 € – 5 000 €" },
-  { value: "5000_15000", label: "5 000 € – 15 000 €" },
+  { value: "500_2000", label: "500 € à 2 000 €" },
+  { value: "2000_5000", label: "2 000 € à 5 000 €" },
+  { value: "5000_15000", label: "5 000 € à 15 000 €" },
   { value: "gt15000", label: "Plus de 15 000 €" },
   { value: "unknown", label: "Je ne sais pas" },
 ];
@@ -50,7 +50,7 @@ const initialState: FormState = { success: false };
 
 // Validation client des coordonnées (étape 4), alignée sur le schéma Zod serveur
 // (cf. deposer-projet/actions.ts). Sert UNIQUEMENT à activer/griser le bouton
-// "Envoyer ma demande" — pas à afficher des erreurs. Évite le "mur rouge" quand
+// "Envoyer ma demande", pas à afficher des erreurs. Évite le "mur rouge" quand
 // l'utilisateur clique Envoyer sur des champs vides : le bouton reste simplement
 // grisé tant que ce n'est pas valide, comme le bouton "Continuer" des étapes 1-3.
 const PHONE_RE = /^(?:(?:\+33|0)\s?[1-9])(?:[\s.-]?\d{2}){4}$/;
@@ -108,7 +108,7 @@ export default function ProjectForm({
 
   // Couverture affichee a l'etape 2 : « 997 maçons référencés en Vienne ».
   // Chargee UNIQUEMENT quand metier ET ville sont connus, donc jamais au
-  // chargement de la page — un appel de plus a l'arrivee ralentirait tout le
+  // chargement de la page : un appel de plus a l'arrivee ralentirait tout le
   // monde pour un encart que personne ne verrait encore.
   const [couverture, setCouverture] = useState<{
     count: number;
@@ -181,7 +181,7 @@ export default function ProjectForm({
   };
 
 
-  // ── SUIVI DE L'ENTONNOIR — cinq nombres, rien de plus ────────────────────
+  // ── SUIVI DE L'ENTONNOIR · cinq nombres, rien de plus ────────────────────
   //
   // Ce qu'on veut savoir : sur les gens qui ouvrent le formulaire, combien
   // atteignent chaque etape. Cinq nombres (etapes 1 a 4 + envoye), une
@@ -191,13 +191,13 @@ export default function ProjectForm({
   //
   // 1. L'ETAPE 1 N'ETAIT JAMAIS ENREGISTREE. `next()` ne tire qu'au clic sur
   //    « Continuer », donc on ne mesurait que les etapes 2, 3 et 4. Le premier
-  //    trou — ceux qui ouvrent et ne choisissent meme pas un metier — etait
+  //    trou (ceux qui ouvrent et ne choisissent meme pas un metier) etait
   //    invisible. On la tire donc a l'ouverture, comme les autres.
   //
   // 2. L'ABANDON VIA `beforeunload` MENTAIT. Les navigateurs modernes ignorent
   //    cet evenement la plupart du temps, surtout sur mobile : 3 abandons
   //    enregistres pour ~189 reels sur 30 jours. Un signal faux est pire que
-  //    pas de signal — il donne l'illusion de mesurer. Supprime.
+  //    pas de signal : il donne l'illusion de mesurer. Supprime.
   //    L'abandon se DEDUIT : (etape N) - (etape N+1).
   useEffect(() => {
     trackClient(EVENTS.PROJECT_FORM_STARTED);
@@ -283,7 +283,7 @@ export default function ProjectForm({
             if (cleanPhone) sessionStorage.setItem("wwv:uet_ph", cleanPhone);
           }
         } catch {
-          /* sessionStorage peut être bloqué (mode privé Safari, etc.) — pas critique */
+          /* sessionStorage peut être bloqué (mode privé Safari, etc.), pas critique */
         }
       }}
       className="space-y-8"
@@ -292,7 +292,7 @@ export default function ProjectForm({
       <div>
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-[var(--text-secondary)]">
-            Étape {step + 1} sur {STEPS.length} — {STEPS[step]}
+            Étape {step + 1} sur {STEPS.length} · {STEPS[step]}
           </span>
           <span className="text-xs text-[var(--text-tertiary)]">
             {progressPct}%
@@ -318,12 +318,12 @@ export default function ProjectForm({
       )}
 
       {/* ============================================================ */}
-      {/* ÉTAPE 1 — Métier                                              */}
+      {/* ÉTAPE 1 · Métier                                              */}
       {/* ============================================================ */}
       <div className={step === 0 ? "" : "hidden"}>
         {/* Rappel de ce que l'utilisateur vient d'ecrire dans la barre de
             recherche de l'accueil. Sans ce rappel il arrive ici devant une
-            liste vide et croit que sa saisie a ete perdue — c'est ce que Willy
+            liste vide et croit que sa saisie a ete perdue : c'est ce que Willy
             a constate en testant le 11/08/2026. Le texte etait bien conserve
             (il repart a l'etape 3), mais invisible : donc perdu pour lui. */}
         {defaultDescription && (
@@ -334,7 +334,7 @@ export default function ProjectForm({
                 &laquo;&nbsp;{defaultDescription}&nbsp;&raquo;
               </span>
               {defaultCity ? ` à ${defaultCity.name}` : ""}. Nous l&apos;avons
-              gardée — indiquez juste le métier concerné.
+              gardée : indiquez juste le métier concerné.
             </p>
           </div>
         )}
@@ -383,7 +383,7 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 2 — Ville                                               */}
+      {/* ÉTAPE 2 · Ville                                               */}
       {/* ============================================================ */}
       <div className={step === 1 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
@@ -399,7 +399,7 @@ export default function ProjectForm({
         />
         <input type="hidden" name="cityId" value={cityId ?? ""} />
 
-        {/* Confirmation de couverture — le seul moment du formulaire où le site
+        {/* Confirmation de couverture : le seul moment du formulaire où le site
             répond à la personne au lieu de lui demander quelque chose. Elle
             vient de donner sa ville : on lui prouve qu'on couvre chez elle,
             avec un chiffre vrai tiré de la base.
@@ -410,14 +410,14 @@ export default function ProjectForm({
             <span className="text-[var(--accent)] font-bold leading-5" aria-hidden>
               ✓
             </span>
-            {/* Formulation volontairement « <Métier> — N professionnels » :
+            {/* Formulation volontairement « <Métier> · N professionnels » :
                 accorder le nom de métier au pluriel est impossible proprement
                 sur les 197 catégories (« Débarras » et « Garde d'enfants »
                 sont déjà pluriels, « Ménage » donnerait « 997 ménages », qui
                 ne veut rien dire). « professionnels » est juste partout. */}
             <span>
               <strong>
-                {categoryLabel} — {couverture.count.toLocaleString("fr-FR")}{" "}
+                {categoryLabel} · {couverture.count.toLocaleString("fr-FR")}{" "}
                 professionnels référencés
               </strong>
               {couverture.departement ? ` en ${couverture.departement}` : ""}.
@@ -430,7 +430,7 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 3 — Projet (description optionnelle + urgence + budget) */}
+      {/* ÉTAPE 3 · Projet (description optionnelle + urgence + budget) */}
       {/* ============================================================ */}
       <div className={step === 2 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
@@ -505,7 +505,7 @@ export default function ProjectForm({
           </fieldset>
 
           {/* Budget en pastilles, comme l'urgence juste au-dessus.
-              Avant : un menu déroulant — trois gestes (ouvrir, faire défiler,
+              Avant : un menu déroulant, trois gestes (ouvrir, faire défiler,
               choisir) là où l'urgence n'en demande qu'un, et un rythme cassé au
               milieu de la même étape. « Je ne sais pas » est mis en avant comme
               une réponse normale : c'est le cas le plus fréquent, et le
@@ -545,7 +545,7 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 4 — Coordonnées + RGPD + Submit                         */}
+      {/* ÉTAPE 4 · Coordonnées + RGPD + Submit                         */}
       {/* ============================================================ */}
       <div className={step === 3 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
@@ -556,7 +556,7 @@ export default function ProjectForm({
           c&apos;est presque fini.
         </p>
 
-        {/* Réassurance données — pile au moment où l'utilisateur hésite à
+        {/* Réassurance données, pile au moment où l'utilisateur hésite à
             laisser email + téléphone. Tous les points sont VRAIS :
             - coordonnées derrière un paywall pro (9,90€ à l'unlock), jamais
               publiques ni vendues (cf. broadcast-btp-project.ts) ;
@@ -592,7 +592,7 @@ export default function ProjectForm({
             revendues, et Workwave ne s&apos;en sert jamais pour vous démarcher.
           </p>
           <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
-            Vous pouvez supprimer votre demande quand vous voulez — le lien est
+            Vous pouvez supprimer votre demande quand vous voulez : le lien est
             dans l&apos;email de confirmation.
           </p>
         </div>

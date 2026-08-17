@@ -17,7 +17,7 @@ const WORKWAVE = {
   priceDetail: "Paiement unique par projet, à l'unité",
   commitment: "Aucun engagement",
   subscription: "Aucun abonnement",
-  leads: "Reçu gratuitement, projet visible avant de payer — déblocage à la carte (9,90 €)",
+  leads: "Reçu gratuitement, projet visible avant de payer · déblocage à la carte (9,90 €)",
   commission: "0 % de commission sur vos devis",
   signup: "Inscription gratuite, sans carte bancaire",
 };
@@ -32,7 +32,7 @@ function buildRows(c: CompetitorOffer): Row[] {
     { label: "Partage du lead", ww: WORKWAVE.leads, comp: c.leads_shared },
     { label: "Frais d'inscription", ww: WORKWAVE.signup, comp: c.signup_fee },
   ];
-  // On n'affiche une ligne concurrent que si la donnée est confirmée (sinon "—"
+  // On n'affiche une ligne concurrent que si la donnée est confirmée (sinon "-"
   // côté concurrent, jamais une affirmation inventée). On garde la ligne pour
   // montrer la valeur Workwave, avec "Non communiqué" côté concurrent.
   return rows;
@@ -82,12 +82,12 @@ export default function CompetitorComparison({
         ))}
       </div>
 
-      {/* Note de sources — datée, citée, invite à vérifier (légal) */}
+      {/* Note de sources, datée, citée, invite à vérifier (légal) */}
       <div className="mt-5 text-xs text-[var(--text-tertiary)] leading-relaxed">
         <p>
           Données {competitor.name} indicatives, issues de sources publiques
           tierces constatées en {fmtDate(competitor.retrievedAt)}, susceptibles
-          d&apos;évoluer — vérifiez les conditions à jour sur{" "}
+          d&apos;évoluer : vérifiez les conditions à jour sur{" "}
           <a
             href={`https://${competitor.site}`}
             target="_blank"

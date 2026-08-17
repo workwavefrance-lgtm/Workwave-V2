@@ -5,7 +5,7 @@ import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import PreferencesEditor from "@/components/pro/dashboard/PreferencesEditor";
 
 export const metadata: Metadata = {
-  title: "Zone d'intervention — Workwave Pro",
+  title: "Zone d'intervention · Workwave Pro",
   robots: { index: false, follow: false },
 };
 

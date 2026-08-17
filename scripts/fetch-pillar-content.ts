@@ -4,7 +4,7 @@
  * ramoneur (ramonage obligatoire), climaticien (pose de clim).
  *
  * APPEND dans lib/data/urgence-content.ts (même shape UrgenceContent pour
- * tous — le champ `majorations` porte la note de contexte propre au métier).
+ * tous : le champ `majorations` porte la note de contexte propre au métier).
  * Idempotent : si la clé existe déjà dans le fichier, le métier est sauté.
  *
  * Usage : npx tsx scripts/fetch-pillar-content.ts
@@ -39,7 +39,7 @@ priceRanges attendus : dépannage chaudière (déplacement + main d'œuvre), tar
 priceRanges attendus : ramonage cheminée bois (conduit simple), ramonage poêle à bois, ramonage poêle à granulés, ramonage chaudière gaz/fioul. majorations = phrase sur la HAUTE SAISON (septembre-décembre : délais d'attente, conseils de réserver au printemps/été si constaté). legalFacts : obligation légale du ramonage (décret 2023-641 du 20 juillet 2023 et/ou règlement sanitaire départemental, fréquence 1 à 2 fois/an selon combustible), certificat de ramonage et son rôle vis-à-vis de l'ASSURANCE habitation en cas d'incendie, qualification exigée du professionnel, amende encourue. scamWarnings : démarchage téléphonique/porte-à-porte de faux ramoneurs (phénomène documenté), prix d'appel très bas puis suppléments, faux certificats, pression à remplacer des pièces. Contraintes : chiffres sourcés uniquement, France métropolitaine.`,
 
   climaticien: `Tu es un expert de la climatisation en France. Recherche les données RÉELLES ${YEAR} (ou les plus récentes) sur la POSE/INSTALLATION DE CLIMATISATION en France et renvoie UNIQUEMENT ce JSON strict : ${JSON_SHAPE}
-priceRanges attendus : pose clim monosplit (matériel + pose), pose clim multisplit, clim gainable, entretien annuel climatisation. majorations = phrase sur la haute saison (été/canicule : délais, conseil d'anticiper au printemps si constaté). legalFacts : attestation de capacité fluides frigorigènes OBLIGATOIRE pour manipuler le circuit (interdiction de pose complète en autoinstallation), entretien obligatoire selon puissance (inspection étanchéité), règles de copropriété/autorisation pour l'unité extérieure, état des AIDES réelles (la clim air-air réversible est-elle éligible à MaPrimeRénov ? réponse exacte sourcée — ne rien inventer). scamWarnings : pratiques abusives documentées du secteur (démarchage, sous-dimensionnement, absence d'attestation fluides, devis gonflés). Contraintes : chiffres sourcés uniquement, France métropolitaine.`,
+priceRanges attendus : pose clim monosplit (matériel + pose), pose clim multisplit, clim gainable, entretien annuel climatisation. majorations = phrase sur la haute saison (été/canicule : délais, conseil d'anticiper au printemps si constaté). legalFacts : attestation de capacité fluides frigorigènes OBLIGATOIRE pour manipuler le circuit (interdiction de pose complète en autoinstallation), entretien obligatoire selon puissance (inspection étanchéité), règles de copropriété/autorisation pour l'unité extérieure, état des AIDES réelles (la clim air-air réversible est-elle éligible à MaPrimeRénov ? réponse exacte sourcée, ne rien inventer). scamWarnings : pratiques abusives documentées du secteur (démarchage, sous-dimensionnement, absence d'attestation fluides, devis gonflés). Contraintes : chiffres sourcés uniquement, France métropolitaine.`,
 
   menage: `Tu es un expert du ménage de locations saisonnières (Airbnb, gîtes, résidences secondaires) en France. Recherche les données RÉELLES ${YEAR} (ou les plus récentes) sur le MÉNAGE DE LOCATION SAISONNIÈRE en France et renvoie UNIQUEMENT ce JSON strict : ${JSON_SHAPE}
 priceRanges attendus : ménage de fin de séjour type studio/T2 (forfait), ménage maison/villa (forfait), tarif horaire d'une entreprise de ménage, blanchisserie/linge par lit (si sourcé, sinon une 4e prestation sourcée pertinente). majorations = phrase factuelle sur la HAUTE SAISON touristique (été côte/mer, hiver stations de ski : tension sur les créneaux samedi, conseil de réserver le prestataire à l'avance si constaté). legalFacts : travail dissimulé interdit et risques pour le propriétaire (URSSAF), différence particulier-employeur (CESU) vs entreprise de ménage (facture, assurance RC pro), frais de ménage facturables au voyageur sur les plateformes, TVA/auto-entrepreneur si sourcé. scamWarnings : pièges documentés (prestataire non déclaré = responsabilité du propriétaire, absence d'assurance casse/dégâts, no-show en haute saison sans contrat, suppléments surprise, photos d'état des lieux absentes). goodReflexes : 4 à 6 bons réflexes du propriétaire (contrat récurrent écrit, vérifier SIRET et RC pro, check-list de ménage partagée, synchronisation avec le calendrier de réservation, remise des clés sécurisée, photos avant/après). Contraintes : chiffres sourcés uniquement, France.`,
@@ -74,7 +74,7 @@ async function main() {
   let file = fs.readFileSync(DEST, "utf8");
   for (const [metier, prompt] of Object.entries(PROMPTS)) {
     if (new RegExp(`^  ${metier}:`, "m").test(file)) {
-      console.log(`⏭️  ${metier} déjà présent — sauté`);
+      console.log(`⏭️  ${metier} déjà présent, sauté`);
       continue;
     }
     console.log(`Sourcing ${metier}...`);
@@ -86,7 +86,7 @@ async function main() {
     console.log(
       `  ✓ ${entry.priceRanges?.length} fourchettes · ${entry.legalFacts?.length} faits légaux · ${entry.scamWarnings?.length} arnaques · ${entry.sources?.length} sources`
     );
-    for (const r of entry.priceRanges || []) console.log(`    • ${r.label} : ${r.low}–${r.high} €`);
+    for (const r of entry.priceRanges || []) console.log(`    • ${r.label} : ${r.low} à ${r.high} €`);
   }
   fs.writeFileSync(DEST, file);
   console.log(`\n✓ écrit : ${DEST}`);

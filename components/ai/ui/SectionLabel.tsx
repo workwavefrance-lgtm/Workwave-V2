@@ -1,5 +1,5 @@
 /**
- * SectionLabel — indicateur de pagination + label uppercase + bullet orange.
+ * SectionLabel : indicateur de pagination + label uppercase + bullet orange.
  *
  * Pattern signature Workwave AI (style Pixel Rise). Utilise au debut de
  * chaque section sur /ai/*.

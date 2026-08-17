@@ -79,7 +79,7 @@ async function main() {
     // (jamais afficher « créée en 1900 »). On garde 1901+ uniquement.
     if (!year || year <= 1900 || year > new Date().getFullYear()) {
       miss++;
-      if (!APPLY) console.log(`  – ${p.name.slice(0, 34).padEnd(34)} (pas de date)`);
+      if (!APPLY) console.log(`  - ${p.name.slice(0, 34).padEnd(34)} (pas de date)`);
       continue;
     }
     if (!APPLY) {

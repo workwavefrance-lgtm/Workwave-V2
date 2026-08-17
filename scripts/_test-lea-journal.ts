@@ -1,8 +1,8 @@
 /**
- * DÉTECTION DES CONVERSATIONS À RISQUE — test.
+ * DÉTECTION DES CONVERSATIONS À RISQUE · test.
  *
  * C'est la pièce qui décide de ce que Willy VERRA. Un faux négatif ici, et un
- * dérapage passe inaperçu sans que personne ne s'en doute — le journal donnera
+ * dérapage passe inaperçu sans que personne ne s'en doute : le journal donnera
  * même une fausse impression de sécurité (« rien à relire » alors qu'il y avait
  * quelque chose). D'où un test qui insiste sur les formulations réelles :
  * fautes de frappe, accents manquants, familier.

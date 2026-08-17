@@ -14,7 +14,7 @@ const STEPS = [
   {
     n: "2",
     title: "Vous recevez les demandes de votre zone",
-    desc: "Dès qu'un particulier dépose un projet dans votre métier et votre secteur, vous le recevez — gratuitement.",
+    desc: "Dès qu'un particulier dépose un projet dans votre métier et votre secteur, vous le recevez, gratuitement.",
   },
   {
     n: "3",
@@ -43,7 +43,7 @@ export default function AbonnementView() {
               Votre compte
             </p>
             <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
-              Aucun abonnement — vous êtes listé gratuitement
+              Aucun abonnement · vous êtes listé gratuitement
             </p>
           </div>
           <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400">

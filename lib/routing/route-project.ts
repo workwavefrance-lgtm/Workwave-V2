@@ -288,7 +288,7 @@ async function markUnrouted(
     await resend.emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: process.env.ADMIN_EMAIL || "admin@workwave.fr",
-      subject: `[Workwave Alert] Projet orphelin — ${project.category.name} à ${project.city.name}`,
+      subject: `[Workwave Alert] Projet orphelin · ${project.category.name} à ${project.city.name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
           <h2 style="color: #0A0A0A;">Projet orphelin</h2>

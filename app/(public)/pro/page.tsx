@@ -5,13 +5,13 @@ import { getFaqSchema } from "@/lib/utils/schema";
 import HeroSiretLookup from "@/components/landing/HeroSiretLookup";
 
 export const metadata: Metadata = {
-  title: "Trouver des chantiers près de chez vous — Workwave Pro",
+  title: "Trouver des chantiers près de chez vous · Workwave Pro",
   description:
     "Recevez des demandes qualifiees de particuliers dans votre zone. Vos 2 premiers leads sont offerts. Fiche gratuite, pas d'abonnement, zero commission, puis 9,90 EUR TTC par lead.",
   alternates: { canonical: "https://workwave.fr/pro" },
   openGraph: {
     type: "website",
-    title: "Trouver des chantiers près de chez vous — Workwave Pro",
+    title: "Trouver des chantiers près de chez vous · Workwave Pro",
     description:
       "Vos 2 premiers leads sont offerts. Fiche gratuite, pas d'abonnement, zero commission, puis 9,90 EUR TTC par lead.",
     url: "https://workwave.fr/pro",
@@ -186,7 +186,7 @@ export default function ProLandingPage() {
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed mb-10">
             <strong className="text-[var(--text-primary)] font-semibold">Fiche 100&nbsp;% gratuite</strong>, sans abonnement et sans commission.
-            Recevez les demandes de particuliers dans votre zone — <strong className="text-[var(--text-primary)] font-semibold">vos 2 premiers leads sont offerts</strong>, puis payez uniquement ceux que vous voulez contacter.
+            Recevez les demandes de particuliers dans votre zone : <strong className="text-[var(--text-primary)] font-semibold">vos 2 premiers leads sont offerts</strong>, puis payez uniquement ceux que vous voulez contacter.
           </p>
           {/* Hero CTA : input SIRET inline (zero friction). Le composant client
               gere la Server Action lookupBySiret + redirect intelligent. */}
@@ -366,7 +366,7 @@ export default function ProLandingPage() {
         </div>
       </section>
 
-      {/* Chiffres cles — credibilite par le volume */}
+      {/* Chiffres cles : credibilite par le volume */}
       <section className="py-20 sm:py-28 px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] text-center mb-4 tracking-tight">
@@ -393,7 +393,7 @@ export default function ProLandingPage() {
         </div>
       </section>
 
-      {/* Routing IA — differenciateur fort vs concurrents */}
+      {/* Routing IA : differenciateur fort vs concurrents */}
       <section className="py-20 sm:py-28 px-4 bg-[var(--bg-secondary)]">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] text-center mb-4 tracking-tight">

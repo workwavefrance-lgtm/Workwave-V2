@@ -11,14 +11,14 @@
  *     "secteur": "Il intervient dans tout le secteur." }
  *
  * RÈGLE ABSOLUE : JAMAIS le nom du pro, ni aucune de ses coordonnées.
- * Le reel met en avant un MÉTIER dans une VILLE — pas une personne. Le pro
+ * Le reel met en avant un MÉTIER dans une VILLE, pas une personne. Le pro
  * n'a jamais demandé à être exposé publiquement.
  *
  * `sonMetier` / `unMetier` sont fournis à la main pour éviter toute faute de
- * genre ("son couvreur" mais "sa femme de ménage") — on ne devine pas.
+ * genre ("son couvreur" mais "sa femme de ménage") : on ne devine pas.
  *
  * Pré-requis : serveur local `python3 -m http.server 8877 --directory marketing`.
- * Sortie : marketing/frames-nouveau-pro/ — encoder ensuite avec ffmpeg.
+ * Sortie : marketing/frames-nouveau-pro/, encoder ensuite avec ffmpeg.
  */
 import puppeteer from "puppeteer-core";
 import fs from "fs";
@@ -56,7 +56,7 @@ await page.goto("http://localhost:8877/reel-nouveau-pro-render.html", { waitUnti
 
 const total = await page.evaluate(() => window.TOTAL);
 const nFrames = Math.ceil(total / (1000 / FPS));
-console.log(`[${pro.slug}] theme=${pro.theme} — ${total}ms → ${nFrames} frames`);
+console.log(`[${pro.slug}] theme=${pro.theme} · ${total}ms → ${nFrames} frames`);
 
 for (let i = 0; i < nFrames; i++) {
   await page.evaluate((tt) => window.renderFrame(tt), i * (1000 / FPS));
@@ -67,4 +67,4 @@ for (let i = 0; i < nFrames; i++) {
   if (i % 150 === 0) console.log(`  ${i}/${nFrames}`);
 }
 await browser.close();
-console.log(`OK — ${nFrames} frames dans ${OUT}`);
+console.log(`OK · ${nFrames} frames dans ${OUT}`);

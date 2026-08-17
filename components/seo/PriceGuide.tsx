@@ -20,7 +20,7 @@ function rangeLabel(low: number | null, high: number | null, unit: string): stri
   return "sur devis";
 }
 
-/** CTA réutilisable — déposer un projet (mise en relation = notre avantage).
+/** CTA réutilisable : déposer un projet (mise en relation = notre avantage).
  *  Wording "Déposer votre projet" (jamais "devis"), avec variantes par placement. */
 function DepositCTA({
   metierSlug,
@@ -131,7 +131,7 @@ export default function PriceGuide({
         </p>
       )}
 
-      {/* Badge prix "coup d'œil" — la réponse immédiate, tout en haut */}
+      {/* Badge prix "coup d'œil" : la réponse immédiate, tout en haut */}
       {ranges.length > 0 && (
         <div className="mb-8 rounded-2xl bg-[var(--accent-muted)] border border-[var(--accent)]/20 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -151,7 +151,7 @@ export default function PriceGuide({
         </div>
       )}
 
-      {/* Encart fourchette de prix — tout en haut (le réflexe travaux.com) */}
+      {/* Encart fourchette de prix, tout en haut (le réflexe travaux.com) */}
       {ranges.length > 0 && (
         <div className="rounded-2xl border border-[var(--card-border)] overflow-hidden mb-8">
           <div className="bg-[var(--bg-secondary)] px-6 py-3 border-b border-[var(--card-border)]">
@@ -187,7 +187,7 @@ export default function PriceGuide({
         </div>
       )}
 
-      {/* CTA héro — convertir tout de suite */}
+      {/* CTA héro : convertir tout de suite */}
       <DepositCTA
         metierSlug={metierSlug}
         label={`Votre projet ${categoryName.toLowerCase()} ?`}
@@ -227,7 +227,7 @@ export default function PriceGuide({
       <DepositCTA
         metierSlug={metierSlug}
         label="Comparez plusieurs artisans avant de vous décider"
-        cta="Déposer mon projet — c'est gratuit →"
+        cta="Déposer mon projet · c'est gratuit →"
       />
 
       {/* FAQ (UI + schema FAQPage déjà injecté) */}

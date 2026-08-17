@@ -229,7 +229,7 @@ const CCI_CMA_DATA: Array<{
   { type: "cci", name: "CCI Deux-Sèvres", contact_email: "info@cci79.com", website: "https://www.cci79.com", city: "Niort", postal_code: "79003", department_code: "79" },
   { type: "cci", name: "CCI Limoges Haute-Vienne", contact_email: "contact@limoges.cci.fr", website: "https://www.limoges.cci.fr", city: "Limoges", postal_code: "87000", department_code: "87" },
   { type: "cci", name: "CCI Corrèze", contact_email: "info@correze.cci.fr", website: "https://www.correze.cci.fr", city: "Tulle", postal_code: "19000", department_code: "19" },
-  { type: "chambre_metiers", name: "CMA Nouvelle-Aquitaine — siège", contact_email: "contact@cma-nouvelleaquitaine.fr", website: "https://www.cma-nouvelleaquitaine.fr", city: "Limoges", department_code: "87" },
+  { type: "chambre_metiers", name: "CMA Nouvelle-Aquitaine · siège", contact_email: "contact@cma-nouvelleaquitaine.fr", website: "https://www.cma-nouvelleaquitaine.fr", city: "Limoges", department_code: "87" },
   { type: "chambre_metiers", name: "CMA Charente", contact_email: "contact@cm-angouleme.fr", website: "https://www.cma-nouvelleaquitaine.fr/charente", city: "Angoulême", department_code: "16" },
   { type: "chambre_metiers", name: "CMA Charente-Maritime", contact_email: "contact@cma17.fr", website: "https://www.cma-nouvelleaquitaine.fr/charente-maritime", city: "Lagord", department_code: "17" },
   { type: "chambre_metiers", name: "CMA Corrèze", contact_email: "accueil-cma19@cma-correze.fr", website: "https://www.cma-nouvelleaquitaine.fr/correze", city: "Tulle", department_code: "19" },

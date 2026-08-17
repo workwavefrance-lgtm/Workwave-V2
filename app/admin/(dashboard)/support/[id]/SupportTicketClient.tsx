@@ -98,7 +98,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
       const json = await res.json();
       if (json.success && json.draft) {
         setDraft(json.draft);
-        toast("Brouillon généré — relisez avant d'envoyer", "success");
+        toast("Brouillon généré, relisez avant d'envoyer", "success");
       } else {
         toast(json.error || "Génération impossible", "error");
       }
@@ -277,7 +277,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
               </AdminButton>
               {!ticket.requester_email ? (
                 <span className="text-[10px]" style={{ color: "var(--admin-text-tertiary)" }}>
-                  Pas d&apos;email destinataire — note interne uniquement.
+                  Pas d&apos;email destinataire : note interne uniquement.
                 </span>
               ) : (
                 <span className="text-[10px]" style={{ color: "var(--admin-text-tertiary)" }}>
@@ -326,7 +326,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
               <div>
                 <dt style={{ color: "var(--admin-text-tertiary)" }}>Email</dt>
                 <dd className="break-words" style={{ color: "var(--admin-text)" }}>
-                  {ticket.requester_email || "—"}
+                  {ticket.requester_email || "-"}
                 </dd>
               </div>
               <div>
@@ -362,10 +362,10 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
                   {context.pro.name}
                 </Link>
                 <div style={{ color: "var(--admin-text-secondary)" }}>
-                  {[context.pro.category, context.pro.city].filter(Boolean).join(" · ") || "—"}
+                  {[context.pro.category, context.pro.city].filter(Boolean).join(" · ") || "-"}
                 </div>
                 <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1" style={{ color: "var(--admin-text-tertiary)" }}>
-                  <span>Abo : {context.pro.subscription_status || "—"}</span>
+                  <span>Abo : {context.pro.subscription_status || "-"}</span>
                   <span>{context.unlocks} lead{context.unlocks > 1 ? "s" : ""} débloqué{context.unlocks > 1 ? "s" : ""}</span>
                 </div>
               </div>

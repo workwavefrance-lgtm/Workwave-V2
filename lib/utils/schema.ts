@@ -149,7 +149,7 @@ export function getWebSiteSchema(baseUrl: string): Record<string, unknown> {
 }
 
 /**
- * Schema FAQPage — pour les sections FAQ visibles (home, /pro, etc.)
+ * Schema FAQPage : pour les sections FAQ visibles (home, /pro, etc.)
  *
  * IMPORTANT (exigence Google) : le contenu passe a ce helper DOIT
  * correspondre a une FAQ reellement AFFICHEE sur la page. Ne jamais

@@ -1,5 +1,5 @@
 /**
- * Villes internationales ciblees par Workwave AI (anglais) — Phase C.
+ * Villes internationales ciblees par Workwave AI (anglais), Phase C.
  *
  * BTP reste 100% FR : ces villes ne servent QUE les pages /en/ai/*.
  *
@@ -26,9 +26,9 @@ export type IntlCity = {
   currency: Currency;
   monument: MonumentName;
   blurb: string;
-  // ─── Champs RICHES (tier US) — optionnels. Rendus en sections premium par
+  // ─── Champs RICHES (tier US), optionnels. Rendus en sections premium par
   // le template /en/ai/[skill]/[city] quand présents. Faits PUBLICS vérifiables
-  // uniquement (état, fuseau, métro, écosystème qualitatif) — aucun chiffre
+  // uniquement (état, fuseau, métro, écosystème qualitatif) : aucun chiffre
   // inventé (règle CLAUDE.md). Le Golfe/Europe ne les renseigne pas (fallback).
   state?: string; // "California"
   stateCode?: string; // "CA" (2 lettres)
@@ -137,11 +137,11 @@ export const INTL_CITIES: IntlCity[] = [
     currency: "EUR",
     monument: "monaco",
     blurb:
-      "A sovereign city-state on the French Riviera, Monaco concentrates finance, luxury and a state-backed digital drive into barely two square kilometres — a compact, high-end market for senior freelance talent.",
+      "A sovereign city-state on the French Riviera, Monaco concentrates finance, luxury and a state-backed digital drive into barely two square kilometres: a compact, high-end market for senior freelance talent.",
     metro: "French Riviera (Côte d'Azur)",
     timezone: "Central European Time (CET)",
     techScene:
-      "Few places pack as much wealth and high-end business into so little ground as Monaco — a sovereign principality of barely two square kilometres, ruled by the House of Grimaldi and wrapped around the yachts of Port Hercule and the Belle Époque grandeur of Monte-Carlo. The government-led Extended Monaco programme is digitising public services and courting fintech, sustainability and deep-tech ventures, while private banking, real estate, yachting, hospitality and the Formula 1 Grand Prix sustain steady demand for senior digital, design and engineering freelancers. French is the official language, with English and Italian widely spoken, and the principality levies no personal income tax on residents — a combination that keeps it a magnet for international talent across the wider Côte d'Azur.",
+      "Few places pack as much wealth and high-end business into so little ground as Monaco, a sovereign principality of barely two square kilometres, ruled by the House of Grimaldi and wrapped around the yachts of Port Hercule and the Belle Époque grandeur of Monte-Carlo. The government-led Extended Monaco programme is digitising public services and courting fintech, sustainability and deep-tech ventures, while private banking, real estate, yachting, hospitality and the Formula 1 Grand Prix sustain steady demand for senior digital, design and engineering freelancers. French is the official language, with English and Italian widely spoken, and the principality levies no personal income tax on residents, a combination that keeps it a magnet for international talent across the wider Côte d'Azur.",
   },
   {
     slug: "berlin",
@@ -253,7 +253,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "One of Europe's most productive startup ecosystems, Stockholm has deep demand for engineering and product skills.",
   },
-  // ─── Gulf & Middle East — Tier 2 ─────────────────────────────────────
+  // ─── Gulf & Middle East · Tier 2 ─────────────────────────────────────
   {
     slug: "sharjah",
     name: "Sharjah",
@@ -309,7 +309,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "A flagship Saudi megaproject in technology and innovation, NEOM drives strong demand for senior specialist talent.",
   },
-  // ─── Europe — Tier 2 ─────────────────────────────────────────────────
+  // ─── Europe · Tier 2 ─────────────────────────────────────────────────
   {
     slug: "milan",
     name: "Milan",
@@ -365,7 +365,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "A fast-growing Central-European tech hub, Warsaw offers a deep and competitive pool of engineering talent.",
   },
-  // ─── United States — Tier 1 tech hubs ────────────────────────────────
+  // ─── United States · Tier 1 tech hubs ────────────────────────────────
   {
     slug: "san-francisco", name: "San Francisco", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "golden-gate",
@@ -374,7 +374,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "The heart of the world's largest technology ecosystem, San Francisco concentrates demand for senior engineers, AI and product talent.",
     techScene:
-      "The San Francisco Bay Area is the world's leading technology hub — home to global software companies, the venture-capital industry and one of the deepest pools of senior engineering, AI and product talent anywhere.",
+      "The San Francisco Bay Area is the world's leading technology hub: home to global software companies, the venture-capital industry and one of the deepest pools of senior engineering, AI and product talent anywhere.",
   },
   {
     slug: "new-york", name: "New York", country: "United States",
@@ -384,7 +384,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "A global business capital, New York pairs finance, media and a vast tech scene with one of the largest freelance markets in the world.",
     techScene:
-      "New York pairs Wall Street with a sprawling 'Silicon Alley' spanning fintech, media, adtech and e-commerce — and one of the largest freelance and creative talent markets anywhere.",
+      "New York pairs Wall Street with a sprawling 'Silicon Alley' spanning fintech, media, adtech and e-commerce, and one of the largest freelance and creative talent markets anywhere.",
   },
   {
     slug: "los-angeles", name: "Los Angeles", country: "United States",
@@ -439,7 +439,7 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "denver", name: "Denver", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Colorado", stateCode: "CO", metro: "Denver–Aurora",
+    state: "Colorado", stateCode: "CO", metro: "Denver-Aurora",
     timezone: "Mountain Time (MT)",
     blurb:
       "A magnet for remote-first tech workers and startups, Denver and the Front Range are a fast-rising talent market.",
@@ -464,7 +464,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "The tech capital of the US Southeast, Atlanta is strong in fintech, logistics and media.",
     techScene:
-      "Atlanta is the tech capital of the US Southeast — strong in fintech, logistics and media, with a deep and diverse engineering talent pool.",
+      "Atlanta is the tech capital of the US Southeast: strong in fintech, logistics and media, with a deep and diverse engineering talent pool.",
   },
   {
     slug: "washington-dc", name: "Washington, D.C.", country: "United States",
@@ -486,7 +486,7 @@ export const INTL_CITIES: IntlCity[] = [
     techScene:
       "San Diego blends biotech, defense and a growing software scene, with demand for engineering, data and product specialists along the Southern California coast.",
   },
-  // ─── United States — Tier 2+ ─────────────────────────────────────────
+  // ─── United States · Tier 2+ ─────────────────────────────────────────
   {
     slug: "san-jose", name: "San Jose", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
@@ -510,22 +510,22 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "dallas", name: "Dallas", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Texas", stateCode: "TX", metro: "Dallas–Fort Worth",
+    state: "Texas", stateCode: "TX", metro: "Dallas-Fort Worth",
     timezone: "Central Time (CT)",
     blurb:
       "A major business and tech centre of the US South, strong in telecom, finance and enterprise software.",
     techScene:
-      "The Dallas–Fort Worth metroplex is a major corporate hub strong in telecom, finance and enterprise software, with a large and competitively-priced technical talent market.",
+      "The Dallas-Fort Worth metroplex is a major corporate hub strong in telecom, finance and enterprise software, with a large and competitively-priced technical talent market.",
   },
   {
     slug: "fort-worth", name: "Fort Worth", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Texas", stateCode: "TX", metro: "Dallas–Fort Worth",
+    state: "Texas", stateCode: "TX", metro: "Dallas-Fort Worth",
     timezone: "Central Time (CT)",
     blurb:
-      "Part of the Dallas–Fort Worth metroplex, Fort Worth pairs aerospace and logistics with a growing tech base.",
+      "Part of the Dallas-Fort Worth metroplex, Fort Worth pairs aerospace and logistics with a growing tech base.",
     techScene:
-      "Fort Worth anchors the western side of the Dallas–Fort Worth metroplex, with strengths in aerospace, logistics and manufacturing and growing demand for software and data talent.",
+      "Fort Worth anchors the western side of the Dallas-Fort Worth metroplex, with strengths in aerospace, logistics and manufacturing and growing demand for software and data talent.",
   },
   {
     slug: "san-antonio", name: "San Antonio", country: "United States",
@@ -665,7 +665,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb:
       "A historic East-Coast port city with strengths in cybersecurity, healthcare and research.",
     techScene:
-      "Baltimore pairs major research universities and hospitals with a strong cybersecurity sector linked to the wider Washington–Baltimore corridor, supporting demand for technical talent.",
+      "Baltimore pairs major research universities and hospitals with a strong cybersecurity sector linked to the wider Washington-Baltimore corridor, supporting demand for technical talent.",
   },
   {
     slug: "milwaukee", name: "Milwaukee", country: "United States",
@@ -750,7 +750,7 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "minneapolis", name: "Minneapolis", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Minnesota", stateCode: "MN", metro: "Minneapolis–Saint Paul (Twin Cities)",
+    state: "Minnesota", stateCode: "MN", metro: "Minneapolis-Saint Paul (Twin Cities)",
     timezone: "Central Time (CT)",
     blurb:
       "The larger of the Twin Cities, with a strong corporate, healthcare and software base.",
@@ -890,7 +890,7 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "provo", name: "Provo", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Utah", stateCode: "UT", metro: "Provo–Orem (Silicon Slopes)",
+    state: "Utah", stateCode: "UT", metro: "Provo-Orem (Silicon Slopes)",
     timezone: "Mountain Time (MT)",
     blurb:
       "A core 'Silicon Slopes' city in Utah with a strong SaaS and startup presence.",
@@ -1050,7 +1050,7 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "buffalo", name: "Buffalo", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "New York", stateCode: "NY", metro: "Buffalo–Niagara",
+    state: "New York", stateCode: "NY", metro: "Buffalo-Niagara",
     timezone: "Eastern Time (ET)",
     blurb:
       "A western-New-York metro with strengths in healthcare, advanced manufacturing and research.",
@@ -1140,7 +1140,7 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "reno", name: "Reno", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Nevada", stateCode: "NV", metro: "Reno–Sparks",
+    state: "Nevada", stateCode: "NV", metro: "Reno-Sparks",
     timezone: "Pacific Time (PT)",
     blurb:
       "A northern-Nevada metro with growing logistics, data-centre and tech activity near the Bay Area.",
@@ -1230,12 +1230,12 @@ export const INTL_CITIES: IntlCity[] = [
   {
     slug: "plano", name: "Plano", country: "United States",
     countryCode: "US", region: "USA", currency: "USD", monument: "skyline",
-    state: "Texas", stateCode: "TX", metro: "Dallas–Fort Worth",
+    state: "Texas", stateCode: "TX", metro: "Dallas-Fort Worth",
     timezone: "Central Time (CT)",
     blurb:
       "A northern-Dallas suburb hosting many corporate headquarters, telecom and tech companies.",
     techScene:
-      "Plano hosts numerous corporate headquarters in telecom, finance and technology within the Dallas–Fort Worth metroplex, supporting strong demand for software and data talent.",
+      "Plano hosts numerous corporate headquarters in telecom, finance and technology within the Dallas-Fort Worth metroplex, supporting strong demand for software and data talent.",
   },
   {
     slug: "henderson", name: "Henderson", country: "United States",
@@ -1369,7 +1369,7 @@ export const INTL_CITIES: IntlCity[] = [
   },
 
   // ════════════════════════════════════════════════════════════════════
-  // VAGUE MONDIALE — Asie / Amérique latine / Océanie / Afrique.
+  // VAGUE MONDIALE · Asie / Amérique latine / Océanie / Afrique.
   // currency: "USD" = repère freelance international (Upwork/Toptal/Arc).
   // Les taux affichés sont un BENCHMARK USD, jamais un faux taux local
   // (cf. garde-fou "zéro chiffre inventé"). blurb = faits publics vérifiables.
@@ -1455,7 +1455,7 @@ export const INTL_CITIES: IntlCity[] = [
   { slug: "phnom-penh", name: "Phnom Penh", country: "Cambodia", countryCode: "KH", region: "Asia", currency: "USD", monument: "skyline",
     blurb: "Cambodia's capital and a fast-emerging market with growing demand for web, mobile and digital-marketing talent." },
 
-  // ─── Asie — destinations digital nomad / remote work ────────────────
+  // ─── Asie · destinations digital nomad / remote work ────────────────
   // 🇹🇭 Thaïlande
   { slug: "phuket", name: "Phuket", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
     blurb: "Thailand's largest island and a major digital nomad hub with co-working spaces, English-friendly visa options and a strong remote-work community." },
@@ -1469,7 +1469,7 @@ export const INTL_CITIES: IntlCity[] = [
     blurb: "Coastal province in southern Thailand with growing co-working infrastructure and a relaxed remote-work lifestyle." },
   { slug: "pattaya", name: "Pattaya", country: "Thailand", countryCode: "TH", region: "Asia", currency: "USD", monument: "skyline",
     blurb: "Coastal city near Bangkok with international communities and a growing presence of freelancers and digital service providers." },
-  // 🇮🇩 Indonésie — Bali éclaté + autres
+  // 🇮🇩 Indonésie · Bali éclaté + autres
   { slug: "ubud", name: "Ubud", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
     blurb: "Bali's cultural heart and one of the world's most established digital nomad destinations, with abundant co-working and creative spaces." },
   { slug: "canggu", name: "Canggu", country: "Indonesia", countryCode: "ID", region: "Asia", currency: "USD", monument: "skyline",
@@ -1600,7 +1600,7 @@ export function getCitiesByCountry(countryCode: string): IntlCity[] {
 }
 
 /**
- * Hommage en langue locale — salutation native rendue en filigrane sur les
+ * Hommage en langue locale : salutation native rendue en filigrane sur les
  * pages ville/pays de la vague mondiale (kicker hero). Référence respectueuse
  * au pays. Keyed par countryCode (ISO alpha-2). `roman` = romanisation pour les
  * scripts non latins. Renseigné UNIQUEMENT pour la vague mondiale (les pages

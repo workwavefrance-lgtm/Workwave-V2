@@ -80,7 +80,7 @@ type SendAiProjectNotificationInput = {
   } | null;
   routed: RoutedFreelance[];
   /**
-   * Phase 11 — broadcast a tous les freelances tech au lieu du routing top 3.
+   * Phase 11 : broadcast a tous les freelances tech au lieu du routing top 3.
    * Optionnel pour retrocompat avec d'autres appelants eventuels.
    */
   broadcastInfo?: {
@@ -123,7 +123,7 @@ export async function sendAiProjectNotification(
            <li style="margin-bottom:10px;">
              <a href="${baseUrl}/ai/freelance/${f.slug}" style="color:#FF6803;text-decoration:none;font-weight:600;">${f.name}</a>
              <span style="color:#999;font-size:13px;">
-               · ${f.postal_code || "—"}
+               · ${f.postal_code || "-"}
                · ${f.years_experience != null ? `${f.years_experience} ans XP` : "XP inconnue"}
                ${f.github_username ? `· <a href="https://github.com/${f.github_username}" style="color:#525252;">@${f.github_username}</a>` : ""}
                · score ${f.score}
@@ -139,7 +139,7 @@ export async function sendAiProjectNotification(
        <table style="font-size:13px;width:100%;border-collapse:collapse;">
          <tr><td style="padding:4px 0;color:#999;">Resume</td><td style="color:#0A0A0A;">${input.qualification.summary}</td></tr>
          <tr><td style="padding:4px 0;color:#999;">Confiance categorie</td><td style="color:#0A0A0A;">${input.qualification.confidence}/100</td></tr>
-         <tr><td style="padding:4px 0;color:#999;">Budget realiste</td><td style="color:#0A0A0A;">${input.qualification.budget_realistic ? "✓" : "✗"} — ${input.qualification.budget_comment}</td></tr>
+         <tr><td style="padding:4px 0;color:#999;">Budget realiste</td><td style="color:#0A0A0A;">${input.qualification.budget_realistic ? "✓" : "✗"} · ${input.qualification.budget_comment}</td></tr>
          <tr><td style="padding:4px 0;color:#999;">Keywords</td><td style="color:#0A0A0A;">${input.qualification.keywords.join(", ")}</td></tr>
        </table>`
     : "";
@@ -163,16 +163,16 @@ export async function sendAiProjectNotification(
     <table style="font-size:13px;width:100%;border-collapse:collapse;">
       <tr><td style="padding:4px 0;color:#999;">Budget</td><td style="color:#0A0A0A;font-family:'SF Mono',Menlo,monospace;">${input.budget}</td></tr>
       <tr><td style="padding:4px 0;color:#999;">Calendrier</td><td style="color:#0A0A0A;">${input.timeline}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Stack</td><td style="color:#0A0A0A;">${input.stack || "—"}</td></tr>
+      <tr><td style="padding:4px 0;color:#999;">Stack</td><td style="color:#0A0A0A;">${input.stack || "-"}</td></tr>
       <tr><td style="padding:4px 0;color:#999;">Remote OK</td><td style="color:#0A0A0A;">${input.remoteOk ? "✓ Oui" : "✗ Non"}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Localisation</td><td style="color:#0A0A0A;font-family:'SF Mono',Menlo,monospace;">${input.postal || "—"}</td></tr>
+      <tr><td style="padding:4px 0;color:#999;">Localisation</td><td style="color:#0A0A0A;font-family:'SF Mono',Menlo,monospace;">${input.postal || "-"}</td></tr>
     </table>
 
     <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Contact :</h3>
     <table style="font-size:13px;width:100%;border-collapse:collapse;">
       <tr><td style="padding:4px 0;color:#999;">Nom</td><td style="color:#0A0A0A;"><strong>${input.contactName}</strong>${input.company ? ` · ${input.company}` : ""}</td></tr>
       <tr><td style="padding:4px 0;color:#999;">Email</td><td style="color:#0A0A0A;"><a href="mailto:${input.contactEmail}" style="color:#FF6803;">${input.contactEmail}</a></td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Telephone</td><td style="color:#0A0A0A;">${input.contactPhone || "—"}</td></tr>
+      <tr><td style="padding:4px 0;color:#999;">Telephone</td><td style="color:#0A0A0A;">${input.contactPhone || "-"}</td></tr>
     </table>
 
     ${aiInsightsHtml}

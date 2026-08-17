@@ -4,7 +4,7 @@
  * Pendant du canal email (ingestInboundEmailAsTicket), mais avec une contrainte
  * inversée : par email on CONNAÎT l'expéditeur, dans un chat public on ne sait
  * rien du visiteur. L'email est donc demandé dans la conversation et il est
- * OBLIGATOIRE ici — sans lui le ticket serait une impasse : la route de réponse
+ * OBLIGATOIRE ici, sans lui le ticket serait une impasse : la route de réponse
  * de l'admin refuse d'envoyer quand `requester_email` est vide, et personne ne
  * pourrait jamais répondre à la personne.
  */
@@ -62,7 +62,7 @@ export async function createTicketFromChat(
   //
   // On ne peut PAS se contenter de l'identifiant de conversation : un visiteur
   // peut légitimement escalader deux sujets différents dans le même échange, et
-  // la deuxième demande serait alors rejetée comme un doublon — donc perdue.
+  // la deuxième demande serait alors rejetée comme un doublon, donc perdue.
   // On y ajoute une empreinte de la demande : deux demandes identiques dans la
   // même conversation sont un vrai doublon (double clic, reprise réseau), deux
   // demandes différentes n'en sont pas.
@@ -85,7 +85,7 @@ export async function createTicketFromChat(
     }
   }
 
-  // 2) Threading : même règle que le canal email (match EXACT, jamais ilike —
+  // 2) Threading : même règle que le canal email (match EXACT, jamais ilike :
   //    un '_' ou un '%' dans une adresse serait un joker et mélangerait deux
   //    clients). Un ticket CLOS n'est pas rouvert : on en crée un nouveau.
   let ticket: SupportTicket | null = null;
@@ -176,7 +176,7 @@ export async function createTicketFromChat(
   //    Uniquement à la CRÉATION du ticket. Un visiteur peut escalader deux
   //    sujets dans le même échange ; réécrire le fil à chaque fois empilerait
   //    des copies quasi identiques de plusieurs milliers de caractères dans le
-  //    ticket — exactement ce qu'on vient de borner ailleurs. Les demandes
+  //    ticket, exactement ce qu'on vient de borner ailleurs. Les demandes
   //    suivantes s'ajoutent en messages visibles, qui se lisent à la suite.
   if (created) {
     const contextLine = input.pathname ? `Page : ${input.pathname}\n\n` : "";

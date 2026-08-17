@@ -22,7 +22,7 @@ import { TOURISTIC_CITIES } from "@/lib/data/touristic-cities";
 // Cache 24h sur les sub-sitemaps (ISR statique). Vercel pre-genere et garde le
 // resultat -> reponse en quelques ms (crucial pour ne pas timeout Googlebot, ~30s/fetch)
 // ET servi depuis le CDN sans invoquer de fonction (donc pas challenge par le firewall
-// BotID de Vercel — un sitemap doit etre crawlable universellement).
+// BotID de Vercel : un sitemap doit etre crawlable universellement).
 // NB : ne PAS passer en force-dynamic (teste 01/06 -> firewall renvoie 403 "Security
 // Checkpoint" sur les requetes dynamiques). Le nb de batches /artisan est fige par
 // generateSitemaps() au build ; pour le rafraichir apres un gros scrape, redeployer
@@ -47,7 +47,7 @@ const SUPABASE_PAGE_SIZE = 5000;
 // 1    : cat x dept
 // 2    : cat x ville
 // 3    : specialites
-// 4    : Workwave AI (/ai/* — landing + categories + skills + villes + dept)
+// 4    : Workwave AI (/ai/* · landing + categories + skills + villes + dept)
 // 100+N : pros batch N (toutes verticales, format /artisan/[slug])
 // 200+N : pros tech batch N (format /ai/freelance/[slug])
 //
@@ -96,7 +96,7 @@ export async function generateSitemaps() {
   //   08/06/2026 : 1 271 741 non-tech → 29 (marge 32) ; 510 808 tech → 12 (marge 14).
   //   12/06/2026 : 1 779 007 non-tech (scrape domicile/personne France) → 40
   //   (marge 48 : le scrape tourne encore, ~+80k attendus). Alerte du cron
-  //   sitemap-audit reçue le matin même — le garde-fou a fonctionné.
+  //   sitemap-audit reçue le matin même : le garde-fou a fonctionné.
   //   Marge volontaire : un sous-sitemap vide est inoffensif (Google l'ignore),
   //   mais un sous-sitemap NON déclaré = des pros invisibles pour Google. Le
   //   "24" figé depuis le 01/06 tronquait ~568k pros (bug détecté le 08/06).
@@ -158,7 +158,7 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/ai/barometre-tjm`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
   ];
 
-  // /ai/{category} — 6 categories racines
+  // /ai/{category} · 6 categories racines
   const aiCategories: MetadataRoute.Sitemap = AI_CATEGORIES.map((slug) => ({
     url: `${BASE_URL}/ai/${slug}`,
     lastModified: now,
@@ -166,7 +166,7 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  // /ai/barometre-tjm/{skill} — 35 stacks
+  // /ai/barometre-tjm/{skill} · 35 stacks
   const aiBarometerSkills: MetadataRoute.Sitemap = Object.keys(TJM_REFERENCE).map(
     (skill) => ({
       url: `${BASE_URL}/ai/barometre-tjm/${skill}`,
@@ -176,7 +176,7 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
-  // /ai/{category}/{ville} — extended : TOUTES les villes BDD avec >= 1 pro
+  // /ai/{category}/{ville} · extended : TOUTES les villes BDD avec >= 1 pro
   // tech (vs 60 villes hardcodees auparavant). Charge depuis pros + cities.
   const supabase = getAdminServiceClient();
 
@@ -252,7 +252,7 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // /ai/{category}/dept/{dept-code} — 6 cat x 96 dept = 576 URLs
+  // /ai/{category}/dept/{dept-code} · 6 cat x 96 dept = 576 URLs
   const aiCategoryDept: MetadataRoute.Sitemap = AI_CATEGORIES.flatMap((catSlug) =>
     TECH_DEPARTMENTS.map((dept) => ({
       url: `${BASE_URL}/ai/${catSlug}/dept/${dept.code}`,
@@ -262,7 +262,7 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
-  // /ai/monde/* — francophone international (hors France)
+  // /ai/monde/* · francophone international (hors France)
   const aiMonde: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/ai/monde`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
   ];
@@ -437,7 +437,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     const cat = allCats.find((c) => c.slug === metierSlug);
     if (!cat) continue;
 
-    // 1. Charger UNIQUEMENT city_id (rows minuscules — léger en egress).
+    // 1. Charger UNIQUEMENT city_id (rows minuscules : léger en egress).
     //    Pagination canonique CLAUDE.md : break sur 0 row, increment par le
     //    réel reçu (le cap PostgREST 1000 ne casse alors jamais la boucle).
     const countByCityId = new Map<number, number>();
@@ -479,7 +479,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     // 3. Replier les arrondissements municipaux (Marseille/Lyon/Paris) sur la
     //    commune parent : la page /{metier}/{segment}/{ville} agrège pareil via
     //    getAggregatedCityIds, et c'est le slug parent (ex. "marseille") qui
-    //    porte le volume SEO — on n'émet pas les arrondissements.
+    //    porte le volume SEO : on n'émet pas les arrondissements.
     const ARRONDISSEMENT_PARENT: Record<string, string> = {
       Paris: "paris",
       Marseille: "marseille",
@@ -588,7 +588,7 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
     getAllCategories(),
     getTopCities(TOP_CITIES_FOR_LISTINGS),
   ]);
-  // Anti-fuite vertical : exclure les cat tech (AI) — cf. buildCategoryDeptUrls.
+  // Anti-fuite vertical : exclure les cat tech (AI). Cf. buildCategoryDeptUrls.
   const categories = allCategories.filter((c) =>
     ["btp", "domicile", "personne"].includes(c.vertical)
   );
@@ -637,7 +637,7 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
 
   // ── Alias belges × villes BE (>= 3 pros du parent) ──────────────────────────
   // Réutilise countMap : le parent (plaquiste/menuisier) est déjà compté par ville.
-  // On n'émet QUE pour les villes BE — une URL alias sur une ville FR renverrait
+  // On n'émet QUE pour les villes BE : une URL alias sur une ville FR renverrait
   // 404 via le garde country dans [metier]/[location]/page.tsx.
   const beCityIds = new Set(
     topCities.filter((c) => c.country === "BE").map((c) => c.id)

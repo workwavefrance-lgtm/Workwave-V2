@@ -4,13 +4,13 @@ import { getAiProByUserId } from "@/lib/queries/pros";
 import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 
 export const metadata: Metadata = {
-  title: "Membership — Workwave AI Dashboard",
+  title: "Membership · Workwave AI Dashboard",
   description: "Your Workwave AI membership.",
   robots: { index: false, follow: false },
 };
 
 /**
- * Membership page — ENGLISH, FREE-ONLY.
+ * Membership page : ENGLISH, FREE-ONLY.
  *
  * Unlike the FR /ai/dashboard/abonnement page, this page does NOT expose any
  * Stripe checkout / customer portal UI: international accounts are free-only
@@ -116,7 +116,7 @@ export default async function AiEnDashboardMembershipPage() {
         )}
       </div>
 
-      {/* Premium — coming soon (info card, no checkout) */}
+      {/* Premium · coming soon (info card, no checkout) */}
       <div className="bg-[var(--ai-text)] text-white rounded-2xl p-8 relative overflow-hidden">
         <div
           aria-hidden="true"
@@ -149,7 +149,7 @@ export default async function AiEnDashboardMembershipPage() {
           <p className="text-[14px] text-white/70 leading-relaxed mb-6 max-w-lg">
             For now, your Workwave AI profile is completely free and already
             visible in the directory. We&apos;re finalising paid plans for
-            international freelancers — you don&apos;t need to do anything. We&apos;ll
+            international freelancers. You don&apos;t need to do anything. We&apos;ll
             let you know by email when Premium goes live in your region.
           </p>
           <ul className="space-y-2 text-[13px] text-white/80">

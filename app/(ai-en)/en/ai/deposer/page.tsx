@@ -17,7 +17,7 @@ import { aiAlternatesEnOnly } from "@/lib/i18n/alternates";
  */
 
 export const metadata: Metadata = {
-  title: "Post a tech project — Workwave AI",
+  title: "Post a tech project · Workwave AI",
   description:
     "Post your tech project in 4 steps. We alert our whole freelance community in real time. Replies in under 24h, free, no commission.",
   alternates: aiAlternatesEnOnly("/en/ai/deposer"),
@@ -34,8 +34,8 @@ const CATEGORIES = [
 
 const BUDGETS = [
   { value: "lt5k", label: "< €5K", desc: "Short mission or MVP" },
-  { value: "5k-15k", label: "€5 — 15K", desc: "Mid-size project" },
-  { value: "15k-50k", label: "€15 — 50K", desc: "Full build" },
+  { value: "5k-15k", label: "€5-15K", desc: "Mid-size project" },
+  { value: "15k-50k", label: "€15-50K", desc: "Full build" },
   { value: "gt50k", label: "> €50K", desc: "Long-term or team" },
   { value: "tbd", label: "To define", desc: "Let's discuss" },
 ];
@@ -103,7 +103,7 @@ export default async function DeposerEnPage({
               <span className="text-[var(--ai-text-tertiary)]">your project.</span>
             </h1>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] max-w-2xl leading-relaxed">
-              4 steps, 60 seconds. We alert our whole freelance community in real time — interested profiles contact you directly. Free, no strings, no commission.
+              4 steps, 60 seconds. We alert our whole freelance community in real time: interested profiles contact you directly. Free, no strings, no commission.
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default async function DeposerEnPage({
         <input type="hidden" name="locale" value="en" />
 
         <div className="max-w-3xl space-y-12 sm:space-y-16">
-          {/* Step 01 — Category */}
+          {/* Step 01 · Category */}
           <div>
             <SectionLabel index={1} total={4} label="Category" />
             <h2 className="font-black text-[var(--ai-text)] uppercase mb-3" style={{ fontSize: "clamp(28px, 4vw, 44px)", lineHeight: 1, letterSpacing: "-0.04em" }}>
@@ -143,7 +143,7 @@ export default async function DeposerEnPage({
             </div>
           </div>
 
-          {/* Step 02 — Your project */}
+          {/* Step 02 · Your project */}
           <div>
             <SectionLabel index={2} total={4} label="Your project" />
             <h2 className="font-black text-[var(--ai-text)] uppercase mb-3" style={{ fontSize: "clamp(28px, 4vw, 44px)", lineHeight: 1, letterSpacing: "-0.04em" }}>
@@ -171,14 +171,14 @@ export default async function DeposerEnPage({
             </div>
           </div>
 
-          {/* Step 03 — Budget & timeline */}
+          {/* Step 03 · Budget & timeline */}
           <div>
             <SectionLabel index={3} total={4} label="Budget" />
             <h2 className="font-black text-[var(--ai-text)] uppercase mb-3" style={{ fontSize: "clamp(28px, 4vw, 44px)", lineHeight: 1, letterSpacing: "-0.04em" }}>
               Budget &amp; timeline.
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
-              Signals to match compatible profiles. No commitment — you negotiate directly with the freelancer.
+              Signals to match compatible profiles. No commitment: you negotiate directly with the freelancer.
             </p>
             <div className="space-y-8">
               <div>
@@ -208,13 +208,13 @@ export default async function DeposerEnPage({
               <label className="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" name="remoteOk" className="mt-1 w-4 h-4 rounded border-[var(--ai-border-strong)] text-[var(--ai-accent)] focus:ring-2 focus:ring-[var(--ai-accent-subtle)] cursor-pointer" />
                 <span className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
-                  <span className="font-semibold text-[var(--ai-text)]">Remote OK</span> — I accept fully remote freelancers (recommended to widen matching).
+                  <span className="font-semibold text-[var(--ai-text)]">Remote OK</span>: I accept fully remote freelancers (recommended to widen matching).
                 </span>
               </label>
             </div>
           </div>
 
-          {/* Step 04 — Contact */}
+          {/* Step 04 · Contact */}
           <div>
             <SectionLabel index={4} total={4} label="You" />
             <h2 className="font-black text-[var(--ai-text)] uppercase mb-3" style={{ fontSize: "clamp(28px, 4vw, 44px)", lineHeight: 1, letterSpacing: "-0.04em" }}>

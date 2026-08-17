@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function AppelDansArticle({ rang, tag }: { rang: number; tag?: string }) {
   // Elision obligatoire : « de aide administrative » ne se dit pas. Les tags
   // couvrent 197 metiers, dont « aide aux seniors », « electricien »,
-  // « accompagnement handicap » — le cas voyelle est frequent, pas marginal.
+  // « accompagnement handicap » : le cas voyelle est frequent, pas marginal.
   const metier = tag ? tag.toLowerCase() : null;
   const de = metier && /^[aeiouyàâéèêëîïôöûü]/.test(metier) ? `d'${metier}` : `de ${metier}`;
   const variantes = [
@@ -79,7 +79,7 @@ function AppelDansArticle({ rang, tag }: { rang: number; tag?: string }) {
     {
       titre: "Vous n'êtes engagé à rien",
       texte:
-        "Vous recevez des propositions, vous comparez, et vous choisissez — ou vous ne choisissez personne.",
+        "Vous recevez des propositions, vous comparez, et vous choisissez. Ou vous ne choisissez personne.",
       bouton: "Demander des devis",
     },
   ];
@@ -146,7 +146,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
       <div className="flex items-center gap-4 mb-8">
         <p className="text-sm text-[var(--text-tertiary)]">
-          Par {post.author} —{" "}
+          Par {post.author} ·{" "}
           {post.published_at
             ? new Date(post.published_at).toLocaleDateString("fr-FR", {
                 year: "numeric",
@@ -170,7 +170,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
       {/* ── L'ARTICLE, ENTRECOUPE D'APPELS A L'ACTION ────────────────────────
           Avant : un seul bouton tout en bas. La plupart des lecteurs ne
-          descendent jamais jusque-la — l'article travaille pour rien.
+          descendent jamais jusque-la : l'article travaille pour rien.
 
           TROIS inseres, pas cinq, et surtout PAS le meme bouton repete : cinq
           fois « Deposer un projet » se lit comme une publicite et fait

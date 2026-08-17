@@ -77,7 +77,7 @@ async function main() {
   const file =
     `// Baromètre « déserts d'artisans » : par métier bien couvert, densité (entreprises\n` +
     `// référencées / 10 000 hab) par département. Pros = SIRENE (notre base), pop = INSEE 2021.\n` +
-    `// Généré le ${generatedAt} par scripts/build-penurie.ts — NE PAS éditer à la main. 0 invention.\n\n` +
+    `// Généré le ${generatedAt} par scripts/build-penurie.ts. NE PAS éditer à la main. 0 invention.\n\n` +
     `export type PenurieDept = { code: string; name: string; density: number; count: number };\n` +
     `export type PenurieMetier = {\n  slug: string; name: string; vertical: string; covered: number;\n` +
     `  totalCount: number; avgDensity: number;\n  scarcest: PenurieDept[]; densest: PenurieDept[];\n  byDept: Record<string, number>;\n};\n\n` +

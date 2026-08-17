@@ -1,6 +1,6 @@
 /**
  * Audit GEO : sonde Perplexity (sonar) sur des requêtes type-utilisateur et
- * regarde QUI est cité — workwave.fr est-il dans les sources ? Qui domine ?
+ * regarde QUI est cité : workwave.fr est-il dans les sources ? Qui domine ?
  *
  * Sortie : rapport console + ~/Desktop/Workwave-GEO-Audit.md
  * Coût : ~30 requêtes × $0.005 ≈ $0.15.
@@ -79,7 +79,7 @@ async function ask(q: string): Promise<{ domains: string[]; workwave: boolean; c
 }
 
 async function main() {
-  console.log(`Audit GEO — ${QUERIES.length} requêtes\n`);
+  console.log(`Audit GEO · ${QUERIES.length} requêtes\n`);
   const rows: { q: string; workwave: boolean; top: string[] }[] = [];
   const domainCount = new Map<string, number>();
   let cited = 0;
@@ -107,7 +107,7 @@ async function main() {
 
   // Rapport markdown
   const md =
-    `# Audit GEO Workwave — ${new Date().toISOString().slice(0, 10)}\n\n` +
+    `# Audit GEO Workwave · ${new Date().toISOString().slice(0, 10)}\n\n` +
     `Sonde : Perplexity (sonar). ${QUERIES.length} requêtes type-utilisateur.\n\n` +
     `## Résultat clé\n\n` +
     `**workwave.fr cité dans ${cited}/${QUERIES.length} requêtes (${Math.round((cited / QUERIES.length) * 100)}%).**\n\n` +

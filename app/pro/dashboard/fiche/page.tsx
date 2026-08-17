@@ -3,7 +3,7 @@ import { getCategoriesForPicker } from "@/lib/queries/categories";
 import FicheEditor from "@/components/pro/dashboard/FicheEditor";
 
 export const metadata: Metadata = {
-  title: "Ma fiche — Workwave Pro",
+  title: "Ma fiche · Workwave Pro",
   robots: { index: false, follow: false },
 };
 

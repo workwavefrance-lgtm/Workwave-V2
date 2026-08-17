@@ -11,7 +11,7 @@ export const DEFAULT_PERIODS: PeriodOption[] = [
   { label: "12m", value: "12m" },
 ];
 
-// Variante avec le jour en cours (timeline en direct) — utilisée par l'analytics.
+// Variante avec le jour en cours (timeline en direct), utilisée par l'analytics.
 export const PERIODS_WITH_TODAY: PeriodOption[] = [
   { label: "Auj.", value: "today" },
   ...DEFAULT_PERIODS,

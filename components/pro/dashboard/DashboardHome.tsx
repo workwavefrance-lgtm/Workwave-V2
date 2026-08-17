@@ -198,7 +198,7 @@ export default function DashboardHome({ data }: Props) {
 
           <p className="text-sm text-[var(--text-tertiary)] mb-4">
             Vous êtes listé gratuitement. Vous recevez les demandes de votre
-            zone — débloquez un contact pour 9,90 € seulement quand un projet
+            zone : débloquez un contact pour 9,90 € seulement quand un projet
             vous intéresse.
           </p>
 

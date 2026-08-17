@@ -1,5 +1,5 @@
 /**
- * VITESSE REELLE DU SITE ENTIER — echantillon aleatoire tire de la base.
+ * VITESSE REELLE DU SITE ENTIER · echantillon aleatoire tire de la base.
  *
  * `bench-site.sh` mesure 6 pages ecrites en dur : ca ne dit rien de 2,5 M de
  * pages. Ici on TIRE AU HASARD de vraies URL dans Supabase, sur chaque type de
@@ -66,13 +66,13 @@ function stats(v: number[]) {
 }
 
 async function main() {
-  console.log(`\nVITESSE DU SITE — ${BASE}`);
+  console.log(`\nVITESSE DU SITE · ${BASE}`);
   console.log("Echantillon aleatoire tire de la base, tous types de pages.\n");
 
   const par = Math.max(4, Math.floor(TOTAL / 8));
   const urls: { type: string; url: string }[] = [];
 
-  // 1. Fiches pros — le gros du site (~2,4 M pages)
+  // 1. Fiches pros : le gros du site (~2,4 M pages)
   const pros = await q<{ slug: string }>(
     "pros?is_active=eq.true&deleted_at=is.null&select=slug&limit=1000"
   );
@@ -103,7 +103,7 @@ async function main() {
   const posts = await q<{ slug: string }>("blog_posts?status=eq.published&select=slug&limit=200");
   tirer(posts, Math.floor(par / 2)).forEach((b) => urls.push({ type: "blog", url: `/blog/${b.slug}` }));
 
-  // 6. Pages fixes — celles qui convertissent
+  // 6. Pages fixes : celles qui convertissent
   ["/", "/deposer-projet", "/pro", "/recherche?q=plombier", "/departements", "/guide-des-prix", "/blog", "/trouver-des-chantiers"]
     .forEach((u) => urls.push({ type: "page fixe", url: u }));
 

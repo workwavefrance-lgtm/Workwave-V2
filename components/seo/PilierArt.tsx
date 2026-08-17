@@ -32,7 +32,7 @@ export function DoorKeyArt({ className }: { className?: string }) {
       {/* trou de serrure */}
       <circle cx="94" cy="104" r="7" />
       <path d="M94 110 L94 122" />
-      {/* clé — accent coral */}
+      {/* clé · accent coral */}
       <g stroke="var(--accent)" strokeWidth={1.8}>
         <circle cx="170" cy="142" r="13" />
         <circle cx="170" cy="142" r="5.5" opacity="0.6" />
@@ -78,7 +78,7 @@ export function FlameRadiatorArt({ className }: { className?: string }) {
       <path d="M154 152 H176 V186" />
       <circle cx="176" cy="142" r="6" />
       <path d="M176 148 L176 152" />
-      {/* flamme — accent coral */}
+      {/* flamme · accent coral */}
       <g stroke="var(--accent)" strokeWidth={1.8}>
         <path d="M94 50 C82 38 88 22 100 12 C98 24 108 26 110 36 C118 28 120 22 118 14 C130 24 134 40 124 52 C116 61 100 60 94 50 Z" />
         <path d="M104 50 C100 45 102 38 108 33 C107 39 113 41 112 47 C110 52 106 53 104 50 Z" opacity="0.6" />
@@ -120,7 +120,7 @@ export function ChimneyArt({ className }: { className?: string }) {
       {/* briques suggérées */}
       <path d="M150 76 H166" opacity="0.4" />
       <path d="M134 94 H150" opacity="0.4" />
-      {/* hérisson de ramonage — accent coral */}
+      {/* hérisson de ramonage · accent coral */}
       <g stroke="var(--accent)" strokeWidth={1.8}>
         <circle cx="150" cy="34" r="11" />
         <path d="M150 23 L150 12" opacity="0.8" />
@@ -157,7 +157,7 @@ export function AcUnitArt({ className }: { className?: string }) {
       <path d="M42 62 H148" opacity="0.5" />
       <path d="M46 68 H144" opacity="0.4" />
       <circle cx="146" cy="44" r="3" opacity="0.5" />
-      {/* flux d'air — accent coral */}
+      {/* flux d'air · accent coral */}
       <g stroke="var(--accent)" strokeWidth={1.8}>
         <path d="M56 88 C50 100 58 108 52 120" />
         <path d="M86 88 C80 102 88 112 82 126" />
@@ -174,7 +174,7 @@ export function AcUnitArt({ className }: { className?: string }) {
       {/* grille latérale */}
       <path d="M186 140 V174" opacity="0.5" />
       <path d="M192 140 V174" opacity="0.5" />
-      {/* liaison frigorifique — accent */}
+      {/* liaison frigorifique · accent */}
       <g stroke="var(--accent)" strokeWidth={1.6} opacity="0.7">
         <path d="M160 76 C170 92 180 104 182 126" />
       </g>
@@ -214,7 +214,7 @@ export function HouseSparkleArt({ className }: { className?: string }) {
       <rect x="126" y="120" width="24" height="22" rx="3" opacity="0.6" />
       <path d="M138 120 V142" opacity="0.4" />
       <path d="M126 131 H150" opacity="0.4" />
-      {/* clé de la location — accent coral */}
+      {/* clé de la location · accent coral */}
       <g stroke="var(--accent)" strokeWidth={1.8}>
         <circle cx="186" cy="148" r="11" />
         <circle cx="186" cy="148" r="4.5" opacity="0.6" />
@@ -222,7 +222,7 @@ export function HouseSparkleArt({ className }: { className?: string }) {
         <path d="M186 170 L194 170" />
         <path d="M186 179 L192 179" />
       </g>
-      {/* éclats de propreté — accent coral */}
+      {/* éclats de propreté · accent coral */}
       <g stroke="var(--accent)" strokeWidth={1.6}>
         <path d="M50 24 L50 44" />
         <path d="M40 34 L60 34" />

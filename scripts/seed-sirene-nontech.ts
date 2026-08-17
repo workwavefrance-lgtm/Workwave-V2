@@ -141,7 +141,7 @@ function sanitize(r: { siret: string; siren: string; name: string; category_id: 
 
 async function main() {
   console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("Workwave AI — Seed Sirene NON-TECH");
+  console.log("Workwave AI · Seed Sirene NON-TECH");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
   console.log(`Mode  : ${APPLY ? "✓ APPLY" : "○ DRY-RUN"}`);
   console.log(`Depts : ${DEPTS_FILTER ? DEPTS_FILTER.join(",") : "France entiere"}`);

@@ -3,7 +3,7 @@
  * `/[metier]/[ville]` et `/[metier]/[departement]` style "Top X
  * meilleurs [metier] a [ville] en {annee}".
  *
- * Scoring composite et objectif (pas de boost abonnes Workwave —
+ * Scoring composite et objectif (pas de boost abonnes Workwave :
  * les abonnes beneficient du routing automatique des leads sprint 5,
  * pas d'un boost de visibilite cache). Cf. discussion 24/05/2026.
  *
@@ -200,10 +200,10 @@ export async function getTopProsByCategoryAndCityIds(
     .limit(MAX_FETCH);
 
   const pros = (data as unknown as ProCardData[] | null) ?? [];
-  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré —
+  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré,
   // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
   // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
-  // leçon "estimated ignore/sous-estime les filtres" — ici pros.length est la
+  // leçon "estimated ignore/sous-estime les filtres" : ici pros.length est la
   // source fiable pour les petites zones (arrondissements, zone Monaco).
   const total = Math.max(count ?? 0, pros.length);
   return { tops: scoreAndSelectTop(pros, limit), total };
@@ -233,10 +233,10 @@ export async function getTopProsByCategoryAndCity(
     .limit(MAX_FETCH);
 
   const pros = (data as unknown as ProCardData[] | null) ?? [];
-  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré —
+  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré,
   // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
   // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
-  // leçon "estimated ignore/sous-estime les filtres" — ici pros.length est la
+  // leçon "estimated ignore/sous-estime les filtres" : ici pros.length est la
   // source fiable pour les petites zones (arrondissements, zone Monaco).
   const total = Math.max(count ?? 0, pros.length);
   return { tops: scoreAndSelectTop(pros, limit), total };

@@ -59,7 +59,7 @@ function buildPrompt(name: string, site: string): string {
     `plateforme de mise en relation entre particuliers et professionnels du bâtiment / travaux.\n\n` +
     `Donne UNIQUEMENT des informations vérifiables issues de sources web récentes et fiables ` +
     `(site officiel, avis pros, articles spécialisés). Si une donnée est inconnue ou incertaine, ` +
-    `mets null — n'invente JAMAIS un chiffre.\n\n` +
+    `mets null : n'invente JAMAIS un chiffre.\n\n` +
     `Champs demandés :\n` +
     `- model : type de facturation au pro ("Abonnement mensuel", "Achat de leads / crédits", "Commission sur devis", "Mixte", ou null)\n` +
     `- price_text : fourchette de prix indicative payée par le pro, avec unité (ex "100 € à 150 € / mois", "15 € à 40 € / lead"), ou null\n` +
@@ -131,7 +131,7 @@ async function fetchOne(c: { slug: string; name: string; site: string }): Promis
 
 async function main() {
   const list = DRY ? COMPETITORS.slice(0, 1) : COMPETITORS;
-  console.log(`Fetch modèles concurrents Perplexity — ${list.length} plateformes${DRY ? " (DRY RUN)" : ""}\n`);
+  console.log(`Fetch modèles concurrents Perplexity · ${list.length} plateformes${DRY ? " (DRY RUN)" : ""}\n`);
   const out: Record<string, Offer> = {};
   let total = 0;
   for (const c of list) {
@@ -146,7 +146,7 @@ async function main() {
 
   console.log(`\nOK : ${Object.keys(out).length}/${list.length} · coût ≈ $${total.toFixed(4)}`);
   if (DRY) {
-    console.log("\nDRY RUN — aperçu complet :\n", JSON.stringify(out, null, 2));
+    console.log("\nDRY RUN · aperçu complet :\n", JSON.stringify(out, null, 2));
     return;
   }
   const file =

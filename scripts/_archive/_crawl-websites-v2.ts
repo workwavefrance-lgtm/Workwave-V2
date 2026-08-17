@@ -1,5 +1,5 @@
 /**
- * Crawler emails v2 — version BEAUCOUP plus aggressive que v1.
+ * Crawler emails v2 : version BEAUCOUP plus aggressive que v1.
  *
  * Ameliorations vs v1 :
  *   1. Decodage obfuscation : detecte les patterns "[at]", " at ", "(at)",

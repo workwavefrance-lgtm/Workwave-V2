@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /**
- * Header du vertical freelance (/ai/*) — unifié avec workwave.fr.
+ * Header du vertical freelance (/ai/*) : unifié avec workwave.fr.
  *
  * Depuis le 28/06/2026 : même identité visuelle que le site principal
  * (wordmark "Workwave", accent coral, style sobre). Le vertical freelance
@@ -52,11 +52,11 @@ export default function AiHeader() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 h-[72px] flex items-center justify-between gap-3">
-        {/* Logo wordmark — identique au site principal + tag section */}
+        {/* Logo wordmark : identique au site principal + tag section */}
         <Link
           href="/ai"
           className="flex items-baseline gap-1.5 flex-shrink-0"
-          aria-label="Workwave — Freelances & services digitaux"
+          aria-label="Workwave · Freelances & services digitaux"
         >
           <span className="text-xl font-bold tracking-tight text-[var(--ai-text)]">
             Workwave

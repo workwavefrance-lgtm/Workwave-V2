@@ -75,10 +75,10 @@ async function main() {
   const { urls, dropped } = buildUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs internationales qui seraient pingées ===\n");
+    console.log("=== DRY RUN : URLs internationales qui seraient pingées ===\n");
     urls.forEach((url, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${url.replace(BASE, "")}`));
     console.log(`\nTotal pingées : ${urls.length} / quota ${QUOTA}`);
-    if (dropped > 0) console.log(`⚠️  ${dropped} URLs au-delà du quota — relancer demain ou compter sur le sitemap.`);
+    if (dropped > 0) console.log(`⚠️  ${dropped} URLs au-delà du quota, relancer demain ou compter sur le sitemap.`);
     return;
   }
 

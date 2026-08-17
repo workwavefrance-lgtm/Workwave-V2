@@ -29,9 +29,9 @@ const URGENCY_LABELS: Record<string, string> = {
 
 const BUDGET_LABELS: Record<string, string> = {
   lt500: "Moins de 500 €",
-  "500_2000": "500 € – 2 000 €",
-  "2000_5000": "2 000 € – 5 000 €",
-  "5000_15000": "5 000 € – 15 000 €",
+  "500_2000": "500 € à 2 000 €",
+  "2000_5000": "2 000 € à 5 000 €",
+  "5000_15000": "5 000 € à 15 000 €",
   gt15000: "Plus de 15 000 €",
   unknown: "Je ne sais pas",
 };
@@ -107,7 +107,7 @@ ${buildGoogleReviewBlock({ audience: "particulier" })}
     <!-- Footer -->
     <div style="padding:16px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
       <p style="margin:0 0 8px;color:#9CA3AF;font-size:12px;">
-        Workwave — Trouvez un professionnel de confiance près de chez vous
+        Workwave · Trouvez un professionnel de confiance près de chez vous
       </p>
       <p style="margin:0;color:#9CA3AF;font-size:11px;">
         Workwave est un simple intermédiaire d'information. Les devis, contrats et prestations sont de la responsabilité exclusive du professionnel et du particulier.
@@ -121,7 +121,7 @@ ${buildGoogleReviewBlock({ audience: "particulier" })}
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: data.email,
-      subject: "Votre demande a bien été reçue — Workwave",
+      subject: "Votre demande a bien été reçue · Workwave",
       html,
     });
   } catch (error) {

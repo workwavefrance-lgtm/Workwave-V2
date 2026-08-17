@@ -25,7 +25,7 @@ export async function sendFeedbackRequest(params: {
   <div style="max-width:560px;margin:0 auto;padding:28px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.65;color:#1a1a1a;">
     <p style="margin:0 0 16px;">Bonjour,</p>
     <p style="margin:0 0 16px;">${intro} Une question simple&nbsp;: <strong>qu'est-ce qu'on pourrait am&eacute;liorer&nbsp;?</strong></p>
-    <p style="margin:0 0 16px;">Une id&eacute;e, un bug, quelque chose qui vous a agac&eacute; ou plu — dites-le en 2 minutes, c'est lu par l'&eacute;quipe et &ccedil;a fait vraiment avancer la plateforme.</p>
+    <p style="margin:0 0 16px;">Une id&eacute;e, un bug, quelque chose qui vous a agac&eacute; ou plu : dites-le en 2 minutes, c'est lu par l'&eacute;quipe et &ccedil;a fait vraiment avancer la plateforme.</p>
     <p style="margin:0 0 20px;"><a href="${baseUrl}/feedback" style="display:inline-block;background:#FF5A36;color:#fff;padding:12px 26px;border-radius:9999px;font-size:14px;font-weight:600;text-decoration:none;">Donner mon avis (2 min)</a></p>
     <p style="margin:0 0 4px;">Merci d'avance,</p>
     <p style="margin:0 0 24px;"><strong>L'&eacute;quipe Workwave</strong><br>

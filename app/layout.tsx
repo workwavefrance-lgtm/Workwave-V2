@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://workwave.fr"),
   title: {
-    default: "Workwave.fr — Trouvez un artisan & recevez des devis gratuits",
+    default: "Workwave.fr · Trouvez un artisan & recevez des devis gratuits",
     template: "%s | Workwave.fr",
   },
   description:
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: "Workwave.fr",
-    title: "Workwave.fr — Trouvez un artisan & recevez des devis gratuits",
+    title: "Workwave.fr · Trouvez un artisan & recevez des devis gratuits",
     description:
-      "Décrivez votre projet, recevez des devis gratuits d'artisans près de chez vous. BTP, services à domicile, aide à la personne — partout en France et en Belgique francophone, sans engagement.",
+      "Décrivez votre projet, recevez des devis gratuits d'artisans près de chez vous. BTP, services à domicile, aide à la personne, partout en France et en Belgique francophone, sans engagement.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workwave.fr — Trouvez un artisan & recevez des devis gratuits",
+    title: "Workwave.fr · Trouvez un artisan & recevez des devis gratuits",
     description:
       "Décrivez votre projet, recevez des devis gratuits d'artisans près de chez vous. Partout en France et en Belgique francophone, sans engagement.",
   },
@@ -67,7 +67,7 @@ export default function RootLayout({
     >
       <head>
         {/* Google Tag Manager + Consent Mode v2.
-            RGPD/CNIL : le consentement mesure/pub est REFUSÉ PAR DÉFAUT — GA (via
+            RGPD/CNIL : le consentement mesure/pub est REFUSÉ PAR DÉFAUT, GA (via
             GTM) ne dépose AUCUN cookie tant que le visiteur n'a pas cliqué « OK »
             dans le bandeau. On lit d'abord le cookie consent_analytics : un
             visiteur déjà consentant repart en 'granted' sans flash. Le consent
@@ -98,7 +98,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         {/* End Google Tag Manager (noscript) */}
-        {/* Microsoft Advertising UET pixel — track conversions /deposer-projet/merci.
+        {/* Microsoft Advertising UET pixel · track conversions /deposer-projet/merci.
             S'active si NEXT_PUBLIC_UET_TAG_ID est défini en env. Sinon : skip silencieux. */}
         <UETPixel />
         <Providers>{children}</Providers>

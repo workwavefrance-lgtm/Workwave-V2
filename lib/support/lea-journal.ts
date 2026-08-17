@@ -9,11 +9,11 @@
  * PRINCIPE : on n'enregistre pas tout. 95 % des échanges sont des « bonjour je
  * cherche un plombier » sans intérêt, et les stocker reviendrait à accumuler
  * des données personnelles de particuliers sans raison valable. On garde ce qui
- * mérite un œil humain, plus un petit échantillon aléatoire — parce que
+ * mérite un œil humain, plus un petit échantillon aléatoire, parce que
  * surveiller uniquement les incidents ne dit rien du fonctionnement normal.
  *
  * DÉTECTION PAR MOTIFS, PAS PAR IA : c'est instantané, gratuit, et surtout
- * auditable — on peut lire la liste et savoir exactement ce qui déclenche. Un
+ * auditable : on peut lire la liste et savoir exactement ce qui déclenche. Un
  * classifieur IA coûterait un appel par message, ajouterait de la latence à
  * chaque réponse, et serait lui-même imprévisible.
  */

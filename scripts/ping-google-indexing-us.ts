@@ -1,5 +1,5 @@
 /**
- * Ping Google Indexing API sur les pages US (Workwave AI) — gTLD workwaveai.co.
+ * Ping Google Indexing API sur les pages US (Workwave AI) · gTLD workwaveai.co.
  *
  * Priorité (cap 200/jour) :
  *   1. Home /en/ai (1)
@@ -64,7 +64,7 @@ async function main() {
   const urls = buildUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs US qui seraient pingées ===\n");
+    console.log("=== DRY RUN : URLs US qui seraient pingées ===\n");
     urls.forEach((url, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${url.replace(BASE, "")}`));
     console.log(`\nTotal: ${urls.length}\n`);
     return;

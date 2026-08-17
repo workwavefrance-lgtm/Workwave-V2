@@ -3,7 +3,7 @@ import Link from "next/link";
 import RetrouverFicheForm from "./RetrouverFicheForm";
 
 export const metadata: Metadata = {
-  title: "Retrouver ma fiche pro — Workwave",
+  title: "Retrouver ma fiche pro · Workwave",
   description:
     "Vous êtes professionnel ? Retrouvez votre fiche Workwave en saisissant simplement votre SIRET.",
   // Page utilitaire pas strategique en SEO mais on la laisse indexable :

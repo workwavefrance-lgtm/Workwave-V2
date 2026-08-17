@@ -66,7 +66,7 @@ async function main() {
 
     const prosCount = count || 0;
 
-    console.log(`  [${cat.name}] ${prosCount} pros — generation en cours...`);
+    console.log(`  [${cat.name}] ${prosCount} pros · generation en cours...`);
 
     try {
       const guide = await generateGuideContent({

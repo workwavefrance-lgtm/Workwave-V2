@@ -21,11 +21,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { skill } = await params;
   const ref = getTjmReference(skill);
-  if (!ref) return { title: "Skill introuvable — Workwave AI" };
+  if (!ref) return { title: "Skill introuvable · Workwave AI" };
   const month = MONTH_NAMES[new Date().getMonth()];
   const skillName = skill.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   return {
-    title: `TJM freelance ${skillName} en ${month} ${CURRENT_YEAR} — Barometre Workwave AI`,
+    title: `TJM freelance ${skillName} en ${month} ${CURRENT_YEAR} · Barometre Workwave AI`,
     description: `Tarifs journaliers ${skillName} freelance France ${CURRENT_YEAR} : junior ${ref.junior.min}-${ref.junior.max}€, mid ${ref.mid.min}-${ref.mid.max}€, senior ${ref.senior.min}-${ref.senior.max}€. Sources publiques.`,
     alternates: { canonical: `/ai/barometre-tjm/${skill}` },
   };

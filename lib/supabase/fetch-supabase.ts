@@ -18,7 +18,7 @@
  *
  * La branche gardee n'est lue que si EXACTEMENT la meme URL est refetchee
  * pendant le rendu de la meme page. Nos requetes Supabase etant presque toutes
- * uniques, elle est abandonnee a chaque fois — et n'est liberee que quand le
+ * uniques, elle est abandonnee a chaque fois, et n'est liberee que quand le
  * ramasse-miettes finit par declencher la FinalizationRegistry de Next.
  *
  * Sous le crawl continu de Google, ce moment n'arrive pas assez souvent.
@@ -48,7 +48,7 @@
  * filtre a chaque appel.
  *
  * CE QU'ON NE PERD PAS : le cache ISR des pages, le cache disque de Next, et le
- * cache de fetch cote `patch-fetch` — tout cela est en amont et reste actif.
+ * cache de fetch cote `patch-fetch`, tout cela est en amont et reste actif.
  */
 
 /**

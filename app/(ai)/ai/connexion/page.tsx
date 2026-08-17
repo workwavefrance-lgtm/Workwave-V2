@@ -5,7 +5,7 @@ import SubmitButton from "@/components/ai/SubmitButton";
 import { submitConnexion } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Connexion — Workwave AI",
+  title: "Connexion · Workwave AI",
   description:
     "Connectez-vous a votre compte freelance Workwave AI. Code de connexion envoye par email, sans mot de passe a retenir.",
   robots: { index: false, follow: false },

@@ -22,7 +22,7 @@ type ReviewRow = {
  *
  * Liste les avis pending QUI ONT ETE SOUMIS (submitted_at IS NOT NULL).
  * Les pending sans submitted_at sont des reviews creees par cron mais
- * pas encore soumises par le particulier — pas a moderer.
+ * pas encore soumises par le particulier, pas a moderer.
  *
  * Auto-publication : les avis >= 3 etoiles sont publies directement
  * sans passer ici (cf. lib/queries/reviews.ts submitReview).

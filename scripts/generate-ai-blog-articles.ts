@@ -43,7 +43,7 @@ type Topic = {
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// A. CHOISIR UN FREELANCE X — 40 sujets
+// A. CHOISIR UN FREELANCE X · 40 sujets
 // ─────────────────────────────────────────────────────────────────────
 const CHOISIR_FREELANCE: Array<{ skill: string; slug: string; ctx?: string }> = [
   { skill: "React", slug: "react" },
@@ -89,7 +89,7 @@ const CHOISIR_FREELANCE: Array<{ skill: string; slug: string; ctx?: string }> = 
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// B. TJM STACK 2026 — 30 sujets
+// B. TJM STACK 2026 · 30 sujets
 // ─────────────────────────────────────────────────────────────────────
 const TJM_STACK: Array<{ skill: string; slug: string }> = [
   { skill: "React", slug: "react" },
@@ -125,7 +125,7 @@ const TJM_STACK: Array<{ skill: string; slug: string }> = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// C. TOP FREELANCES X EN FRANCE — 25 sujets (avec ville si pertinent)
+// C. TOP FREELANCES X EN FRANCE · 25 sujets (avec ville si pertinent)
 // ─────────────────────────────────────────────────────────────────────
 const TOP_FREELANCES: Array<{ skill: string; slug: string; city?: string }> = [
   { skill: "React", slug: "react", city: "Paris" },
@@ -156,7 +156,7 @@ const TOP_FREELANCES: Array<{ skill: string; slug: string; city?: string }> = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// D. GUIDE PRATIQUE — 35 sujets
+// D. GUIDE PRATIQUE · 35 sujets
 // ─────────────────────────────────────────────────────────────────────
 const GUIDE_PRATIQUE: Array<{ title: string; skill: string; slug: string; ctx?: string }> = [
   { title: "Comment construire son MVP en startup tech en 2026 : guide complet", skill: "MVP startup", slug: "mvp-startup" },
@@ -197,7 +197,7 @@ const GUIDE_PRATIQUE: Array<{ title: string; skill: string; slug: string; ctx?: 
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// E. COMPARATIFS — 35 sujets
+// E. COMPARATIFS · 35 sujets
 // ─────────────────────────────────────────────────────────────────────
 const COMPARATIFS: Array<{ a: string; b: string; slug: string }> = [
   { a: "React", b: "Vue.js", slug: "react-vs-vue" },
@@ -238,7 +238,7 @@ const COMPARATIFS: Array<{ a: string; b: string; slug: string }> = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// F. GLOSSAIRE IA / LLM — 25 sujets
+// F. GLOSSAIRE IA / LLM · 25 sujets
 // ─────────────────────────────────────────────────────────────────────
 const GLOSSAIRE_IA: Array<{ title: string; slug: string }> = [
   { title: "Qu'est-ce qu'un LLM (Large Language Model) ?", slug: "llm-definition" },
@@ -269,7 +269,7 @@ const GLOSSAIRE_IA: Array<{ title: string; slug: string }> = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// G. RESSOURCES / STACK 2026 — 10 sujets
+// G. RESSOURCES / STACK 2026 · 10 sujets
 // ─────────────────────────────────────────────────────────────────────
 const RESSOURCES: Array<{ title: string; slug: string }> = [
   { title: "Quelle stack pour un MVP SaaS B2B en 2026 ? Guide complet", slug: "stack-mvp-saas-b2b" },

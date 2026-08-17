@@ -152,7 +152,7 @@ async function generateForPage(
   if (error) {
     console.error(`  ERROR ${slug}:`, error.message);
   } else {
-    console.log(`  OK ${slug} — "${result.title}"`);
+    console.log(`  OK ${slug} · "${result.title}"`);
   }
 }
 

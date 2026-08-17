@@ -3,7 +3,7 @@ import { getAdminServiceClient } from "@/lib/admin/service-client";
 /**
  * Projets récents ANONYMISÉS pour la home (section "Projets déposés récemment").
  *
- * RGPD : on ne SELECT QUE des champs non-identifiants — métier, ville, budget
+ * RGPD : on ne SELECT QUE des champs non-identifiants : métier, ville, budget
  * (fourchette), urgence, date. JAMAIS first_name / email / phone / description BRUTE.
  * On expose UNIQUEMENT `ai_qualification.summary` (résumé IA déjà anonymisé : il dit
  * « le client » / « un particulier », jamais de nom/tél/email) comme teaser, avec un
@@ -23,13 +23,13 @@ export type PublicProject = {
   categorySlug: string;
   cityName: string;
   deptCode: string;
-  /** Code postal de la commune — plus précis que le n° de département
+  /** Code postal de la commune, plus précis que le n° de département
    *  (« Villars (42390) » lève l'ambiguïté : il existe 4 Villars en France). */
   postalCode: string;
   budget: string | null;
   urgency: string | null;
   createdAt: string;
-  /** Résumé IA anonymisé (sans PII) — teaser affiché sur la home. "" si vide/risqué. */
+  /** Résumé IA anonymisé (sans PII), teaser affiché sur la home. "" si vide/risqué. */
   teaser: string;
 };
 

@@ -36,7 +36,7 @@ export async function generateMetadata({
   const year = new Date().getFullYear();
   const path = `/en/ai/freelance-visa/${slug}`;
   return {
-    title: `Freelance visa in ${country.name} — cost, permit & how to apply (${year})`,
+    title: `Freelance visa in ${country.name} · cost, permit & how to apply (${year})`,
     description: `How to freelance legally in ${country.name}: permits, costs, eligibility and how to apply. Practical guide for digital freelancers, with official sources.`,
     alternates: aiAlternatesEnOnly(path),
     openGraph: {
@@ -70,11 +70,11 @@ export default async function FreelanceVisaPage({
     },
     {
       q: `How much does a freelance permit cost in ${country.name}?`,
-      a: `${guide.costSummary} Always confirm the current fee with the official issuer before applying — see the sources at the bottom of this page.`,
+      a: `${guide.costSummary} Always confirm the current fee with the official issuer before applying: see the sources at the bottom of this page.`,
     },
     {
       q: `How do I get started as a freelancer in ${country.name}?`,
-      a: `In short: ${guide.steps.join(" → ")}. Once you can invoice legally, you can find clients on Workwave AI — posting a profile is free.`,
+      a: `In short: ${guide.steps.join(" → ")}. Once you can invoice legally, you can find clients on Workwave AI: posting a profile is free.`,
     },
   ];
 
@@ -90,7 +90,7 @@ export default async function FreelanceVisaPage({
   const articleLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: `Freelance visa in ${country.name} — cost, permit & how to apply`,
+    headline: `Freelance visa in ${country.name} · cost, permit & how to apply`,
     inLanguage: "en",
     dateModified: guide.lastReviewed,
     author: { "@type": "Organization", name: "Workwave AI" },
@@ -136,7 +136,7 @@ export default async function FreelanceVisaPage({
       {/* Disclaimer légal */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="rounded-xl border border-[var(--ai-border)] bg-[var(--ai-bg-subtle)] p-4 text-[13px] text-[var(--ai-text-secondary)] leading-relaxed">
-          <strong className="text-[var(--ai-text)]">General information, not legal advice.</strong> Rules and fees change — last reviewed {guide.lastReviewed}. Always confirm the current requirements with the official sources listed at the bottom before applying.
+          <strong className="text-[var(--ai-text)]">General information, not legal advice.</strong> Rules and fees change: last reviewed {guide.lastReviewed}. Always confirm the current requirements with the official sources listed at the bottom before applying.
         </div>
       </div>
 
@@ -173,7 +173,7 @@ export default async function FreelanceVisaPage({
         {/* CTA Workwave */}
         <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] p-7 my-10">
           <h2 className="text-[19px] font-bold text-[var(--ai-text)]">Set up? Find clients on Workwave AI.</h2>
-          <p className="mt-2 text-[14px] text-[var(--ai-text-secondary)]">Once you can invoice legally, create a free profile and get matched with projects across the Gulf and Europe — 0% commission.</p>
+          <p className="mt-2 text-[14px] text-[var(--ai-text-secondary)]">Once you can invoice legally, create a free profile and get matched with projects across the Gulf and Europe, 0% commission.</p>
           <div className="mt-5 flex flex-col sm:flex-row gap-3">
             <Link href="/ai/inscription" className="inline-flex items-center justify-center h-11 px-6 text-[14px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">Create my free profile</Link>
             <Link href="/en/ai" className="inline-flex items-center justify-center h-11 px-6 text-[14px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">Explore Workwave AI</Link>

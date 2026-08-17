@@ -7,7 +7,7 @@ import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { updateAiPreferences } from "@/app/(ai)/ai/dashboard/preferences/actions";
 
 export const metadata: Metadata = {
-  title: "Preferences — Workwave AI Dashboard",
+  title: "Preferences · Workwave AI Dashboard",
   description: "Configure your project matching preferences.",
   robots: { index: false, follow: false },
 };

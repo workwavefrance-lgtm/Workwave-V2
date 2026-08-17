@@ -1,7 +1,7 @@
 /**
  * Ping Google Indexing API pour forcer un re-crawl des URLs prioritaires.
  *
- * Utilise Application Default Credentials (ADC) — la commande
+ * Utilise Application Default Credentials (ADC) : la commande
  * `gcloud auth application-default login` doit avoir été lancée AU PRÉALABLE
  * avec le compte Google qui est PROPRIÉTAIRE de la propriété workwave.fr
  * dans Google Search Console (sinon l'API renvoie 403).
@@ -76,7 +76,7 @@ async function main() {
   const urls = buildPriorityUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs qui seraient pingées ===\n");
+    console.log("=== DRY RUN · URLs qui seraient pingées ===\n");
     urls.forEach((u, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${u}`));
     console.log(`\nTotal: ${urls.length} URLs (limite jour: 200).\n`);
     return;

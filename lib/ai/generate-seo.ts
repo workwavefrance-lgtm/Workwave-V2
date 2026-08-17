@@ -88,7 +88,7 @@ Un paragraphe de 3-4 conseils concrets et actionnables pour bien choisir un prof
 
   // Générer title et meta_description
   const titlePrompt = `Pour la page "${input.categoryName} à ${input.locationName}" d'un annuaire de professionnels, génère UNIQUEMENT sur deux lignes séparées :
-Ligne 1 : un title SEO optimisé de max 60 caractères (format : "${input.categoryName} à ${input.locationName} — X professionnels disponibles", remplace X par ${input.prosCount})
+Ligne 1 : un title SEO optimisé de max 60 caractères (format : "${input.categoryName} à ${input.locationName} · X professionnels disponibles", remplace X par ${input.prosCount})
 Ligne 2 : une meta description SEO de 130 à 155 caractères MAXIMUM. La phrase DOIT être complète et se terminer par un point. Compte les caractères avant de répondre. Ne dépasse jamais 155 caractères.
 
 Écris en français correct avec tous les accents (à, é, è, ê, ç, ù). Pas de préfixe, pas de guillemets, juste les deux lignes.`;
@@ -105,7 +105,7 @@ Ligne 2 : une meta description SEO de 130 à 155 caractères MAXIMUM. La phrase 
 
   const title =
     metaLines[0]?.trim() ||
-    `${input.categoryName} à ${input.locationName} — ${input.prosCount} professionnels`;
+    `${input.categoryName} à ${input.locationName} · ${input.prosCount} professionnels`;
   const metaDescription =
     metaLines[1]?.trim() ||
     `Trouvez ${getCategoryArticle(input.categoryName)} ${input.categoryName.toLowerCase()} à ${input.locationName}. ${input.prosCount} professionnels référencés.`;

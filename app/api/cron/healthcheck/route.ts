@@ -5,7 +5,7 @@
  * (typiquement 500 ou 404 sur une route critique), envoie une alerte email
  * IMMÉDIATE à contact@workwave.fr.
  *
- * NB (16/06/2026) : l'AI international EN (workwaveai.co) est EN PAUSE — tout
+ * NB (16/06/2026) : l'AI international EN (workwaveai.co) est EN PAUSE : tout
  * redirige en 301/308 vers le BTP. Le healthcheck ne teste plus le contenu IA
  * EN (en sommeil), juste que la redirection .co → BTP renvoie bien 307/308.
  *
@@ -30,7 +30,7 @@ type RouteCheck = {
 };
 
 const ROUTES: RouteCheck[] = [
-  // ════════ BTP — workwave.fr ════════
+  // ════════ BTP · workwave.fr ════════
   { label: "BTP home",                       url: "https://workwave.fr/",                                       expect: [200], critical: true },
   { label: "BTP listing métier",             url: "https://workwave.fr/plombier",                               expect: [200], critical: true },
   { label: "BTP cat × dept",                 url: "https://workwave.fr/plombier/vienne-86",                     expect: [200], critical: true },
@@ -43,7 +43,7 @@ const ROUTES: RouteCheck[] = [
   { label: "BTP blog",                       url: "https://workwave.fr/blog",                                   expect: [200], critical: false },
   { label: "BTP cgv",                        url: "https://workwave.fr/cgv",                                    expect: [200], critical: false },
 
-  // ════════ AI FR — workwave.fr/ai (redirige → workwaveai.co/en/ai ou sert /ai/* FR) ════════
+  // ════════ AI FR · workwave.fr/ai (redirige → workwaveai.co/en/ai ou sert /ai/* FR) ════════
   { label: "AI-FR home",                     url: "https://workwave.fr/ai",                                     expect: [200], critical: true },
   { label: "AI-FR skill",                    url: "https://workwave.fr/ai/developpement-web",                   expect: [200], critical: true },
   { label: "AI-FR skill × ville",            url: "https://workwave.fr/ai/developpement-web/paris",             expect: [200], critical: true },
@@ -51,9 +51,9 @@ const ROUTES: RouteCheck[] = [
   { label: "AI-FR inscription",              url: "https://workwave.fr/ai/inscription",                         expect: [200], critical: true },
   { label: "AI-FR /monde",                   url: "https://workwave.fr/ai/monde/web-development/geneve",        expect: [200], critical: false },
 
-  // ════════ AI international (EN) — EN PAUSE depuis le 16/06/2026 ════════
+  // ════════ AI international (EN) · EN PAUSE depuis le 16/06/2026 ════════
   // workwaveai.co redirige désormais TOUT en 301/308 vers workwave.fr (BTP).
-  // On ne monitore plus le contenu IA (en sommeil) — on VÉRIFIE seulement que
+  // On ne monitore plus le contenu IA (en sommeil) : on VÉRIFIE seulement que
   // la redirection fonctionne (sinon le .co re-servirait du duplicate content).
   // expect: [307, 308] => la pause est active et propre. warning, pas critique
   // (workwave.fr BTP reste up de toute façon, donc 0 urgence si ça casse).
@@ -103,7 +103,7 @@ async function tenter(r: RouteCheck, t0: number): Promise<CheckResult> {
  *
  * Pourquoi : les 22 routes partent en parallele (Promise.all plus bas), donc le
  * serveur encaisse 22 regenerations ISR simultanees et devient momentanement tres
- * lent — au point de depasser les 20 s. Mesure du 03/08/2026 sur les deux routes
+ * lent, au point de depasser les 20 s. Mesure du 03/08/2026 sur les deux routes
  * qui alertaient : 15,2 s au 1er appel, puis 0,65 s au second. La page allait
  * parfaitement bien ; c'est le healthcheck qui se mettait a genoux tout seul.
  *
@@ -157,7 +157,7 @@ function buildAlertHtml(failures: CheckResult[], allResults: CheckResult[]): str
 <html><body style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#fafafa;padding:20px;">
 <div style="max-width:680px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;">
   <div style="background:#fee;border-bottom:2px solid #f55;padding:20px 24px;">
-    <h1 style="margin:0;font-size:18px;color:#900;">🚨 Workwave healthcheck — ${criticalCount} critique${criticalCount > 1 ? "s" : ""}, ${warningCount} warning${warningCount > 1 ? "s" : ""}</h1>
+    <h1 style="margin:0;font-size:18px;color:#900;">🚨 Workwave healthcheck · ${criticalCount} critique${criticalCount > 1 ? "s" : ""}, ${warningCount} warning${warningCount > 1 ? "s" : ""}</h1>
     <p style="margin:6px 0 0;font-size:13px;color:#666;">${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })} · ${allResults.length} routes · ${totalMs}ms total</p>
   </div>
   <div style="padding:20px 24px;">
@@ -191,7 +191,7 @@ export async function GET(req: Request) {
   //
   // Surtout PAS en parallèle : le cron tourne SUR le VPS et interroge ce même VPS.
   // Lancer les 22 routes d'un coup, c'est lui demander 22 régénérations ISR
-  // simultanées — il s'étrangle et le healthcheck se met en échec tout seul.
+  // simultanées : il s'étrangle et le healthcheck se met en échec tout seul.
   // Constaté le 04/08/2026 à 02h01 : 431 s pour 22 routes et 6 fausses alertes,
   // alors que les 6 URL répondaient en 0,4 à 3,5 s quand on les testait une par une.
   // C'est pire la nuit, quand elaguer-cache.sh vient de vider une partie du cache.

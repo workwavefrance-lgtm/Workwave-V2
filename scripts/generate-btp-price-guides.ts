@@ -1,8 +1,8 @@
 /**
- * BTP — Génération des guides des prix (prix RÉELS sourcés Perplexity).
+ * BTP : Génération des guides des prix (prix RÉELS sourcés Perplexity).
  *
  * Pour chaque sujet : 1 appel Perplexity `sonar` renvoie un guide FACTUEL et
- * SOURCÉ (intro, fourchettes, facteurs, devis, FAQ) — TOUT vient du web cité,
+ * SOURCÉ (intro, fourchettes, facteurs, devis, FAQ), TOUT vient du web cité,
  * ZÉRO chiffre inventé. Upsert dans price_guides (status='published').
  *
  * Usage :
@@ -68,7 +68,7 @@ function buildPrompt(s: Subject): string {
     `Parmi les FAQ, inclure obligatoirement : une question "comment payer moins cher / économiser sur ${s.what}", ` +
     `une question sur les aides, subventions ou crédit d'impôt éventuels (si pertinent), et une sur ce que doit contenir un bon devis. ` +
     `Les autres FAQ couvrent ces recherches réelles : ${s.longtail}. ` +
-    `Tous les prix sont en euros TTC, France ${YEAR}, et proviennent de sources web réelles — n'invente AUCUN chiffre. Pas de superlatif marketing, ton factuel et utile.`
+    `Tous les prix sont en euros TTC, France ${YEAR}, et proviennent de sources web réelles : n'invente AUCUN chiffre. Pas de superlatif marketing, ton factuel et utile.`
   );
 }
 
@@ -104,7 +104,7 @@ function toFactorsMd(factors: any[]): string {
 async function main() {
   const FORCE = process.argv.includes("--force");
   const list = DRY ? BATCH.slice(0, 1) : BATCH;
-  console.log(`Génération guides des prix — ${list.length} sujets${DRY ? " (DRY)" : ""}\n`);
+  console.log(`Génération guides des prix : ${list.length} sujets${DRY ? " (DRY)" : ""}\n`);
   let total = 0, ok = 0;
   for (const s of list) {
     // Skip si déjà publié (re-run = retry des seuls échecs), sauf --force.

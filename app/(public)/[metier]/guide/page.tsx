@@ -103,7 +103,7 @@ export default async function GuidePage({ params }: Props) {
       </h1>
 
       <p className="text-sm text-[var(--text-tertiary)] mb-8">
-        Par {guide.author} — Mis a jour le{" "}
+        Par {guide.author} · Mis a jour le{" "}
         {new Date(guide.updated_at).toLocaleDateString("fr-FR", {
           year: "numeric",
           month: "long",

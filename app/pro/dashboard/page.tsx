@@ -7,7 +7,7 @@ import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
 export const metadata: Metadata = {
-  title: "Tableau de bord — Workwave Pro",
+  title: "Tableau de bord · Workwave Pro",
   robots: { index: false, follow: false },
 };
 

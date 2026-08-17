@@ -62,7 +62,7 @@ export async function lookupBySiret(
   }
 
   // Validation : SIRET francais (14 chiffres) OU numero d'entreprise belge
-  // BCE (10 chiffres) — les deux vivent dans pros.siret, longueurs disjointes.
+  // BCE (10 chiffres) : les deux vivent dans pros.siret, longueurs disjointes.
   const raw = ((formData.get("siret") as string) || "").replace(/\D/g, "");
   if (raw.length !== 14 && raw.length !== 10) {
     return {

@@ -34,7 +34,7 @@ export async function generateMetadata({
   const year = new Date().getFullYear();
   const path = `/en/ai/continent/${continent.slug}`;
   return {
-    title: `Hire freelancers in ${continent.shortName} — developers, designers & more (${year})`,
+    title: `Hire freelancers in ${continent.shortName} · developers, designers & more (${year})`,
     description: `Hire vetted freelancers across ${continent.shortName}: web developers, AI engineers, designers, marketers and more. Get matched in 24h, 0% commission. Post your project for free on Workwave AI.`,
     alternates: aiAlternatesEnOnly(path),
     openGraph: {
@@ -135,11 +135,11 @@ export default async function ContinentHubPage({
             Hire freelancers in {continent.shortName}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            Find vetted freelance developers, designers, marketers and more across {continent.shortName}. Post your project for free — our AI alerts matching freelancers and they contact you directly. 0% commission.
+            Find vetted freelance developers, designers, marketers and more across {continent.shortName}. Post your project for free: our AI alerts matching freelancers and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Browse freelances
@@ -208,7 +208,7 @@ export default async function ContinentHubPage({
         </div>
       </section>
 
-      {/* MESH — autres continents */}
+      {/* MESH : autres continents */}
       <section className="border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <h2 className="text-[19px] font-semibold text-[var(--ai-text)] mb-5">Hire freelancers in other regions</h2>
@@ -238,7 +238,7 @@ export default async function ContinentHubPage({
           </p>
           <div className="mt-8">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
           </div>
         </div>

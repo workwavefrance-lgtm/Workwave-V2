@@ -75,9 +75,9 @@ const URGENCY_LABELS: Record<string, string> = {
 
 const BUDGET_LABELS: Record<string, string> = {
   lt500: "Moins de 500 €",
-  "500_2000": "500 € – 2 000 €",
-  "2000_5000": "2 000 € – 5 000 €",
-  "5000_15000": "5 000 € – 15 000 €",
+  "500_2000": "500 € à 2 000 €",
+  "2000_5000": "2 000 € à 5 000 €",
+  "5000_15000": "5 000 € à 15 000 €",
   gt15000: "Plus de 15 000 €",
   unknown: "Je ne sais pas",
 };
@@ -100,11 +100,11 @@ export async function sendProjectNotification(
   const aiSection = data.aiQualification
     ? `
     <tr><td colspan="2" style="padding:20px 0 8px;font-size:16px;font-weight:600;color:#0A0A0A;border-top:1px solid #E5E7EB;">Qualification IA</td></tr>
-    <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Résumé</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).summary || "—"}</td></tr>
+    <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Résumé</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).summary || "-"}</td></tr>
     <tr><td style="padding:6px 0;color:#6B7280;">Catégorie correcte</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).category_match ? "✓ Oui" : "✗ Non → " + (data.aiQualification as Record<string, unknown>).suggested_category}</td></tr>
-    <tr><td style="padding:6px 0;color:#6B7280;">Urgence réelle</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).urgency_assessment || "—"}</td></tr>
-    <tr><td style="padding:6px 0;color:#6B7280;">Budget réaliste</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).budget_realistic ? "✓ Oui" : "✗ Non"} — ${(data.aiQualification as Record<string, unknown>).budget_comment || ""}</td></tr>
-    <tr><td style="padding:6px 0;color:#6B7280;">Mots-clés</td><td style="padding:6px 0;color:#0A0A0A;">${Array.isArray((data.aiQualification as Record<string, unknown>).keywords) ? ((data.aiQualification as Record<string, unknown>).keywords as string[]).join(", ") : "—"}</td></tr>
+    <tr><td style="padding:6px 0;color:#6B7280;">Urgence réelle</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).urgency_assessment || "-"}</td></tr>
+    <tr><td style="padding:6px 0;color:#6B7280;">Budget réaliste</td><td style="padding:6px 0;color:#0A0A0A;">${(data.aiQualification as Record<string, unknown>).budget_realistic ? "✓ Oui" : "✗ Non"} · ${(data.aiQualification as Record<string, unknown>).budget_comment || ""}</td></tr>
+    <tr><td style="padding:6px 0;color:#6B7280;">Mots-clés</td><td style="padding:6px 0;color:#0A0A0A;">${Array.isArray((data.aiQualification as Record<string, unknown>).keywords) ? ((data.aiQualification as Record<string, unknown>).keywords as string[]).join(", ") : "-"}</td></tr>
     `
     : `<tr><td colspan="2" style="padding:20px 0 8px;color:#9CA3AF;border-top:1px solid #E5E7EB;">Qualification IA non disponible</td></tr>`;
 
@@ -125,7 +125,7 @@ export async function sendProjectNotification(
         <tr><td colspan="2" style="padding:0 0 8px;font-size:16px;font-weight:600;color:#0A0A0A;">Projet</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Catégorie</td><td style="padding:6px 0;color:#0A0A0A;">${data.categoryName}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Ville</td><td style="padding:6px 0;color:#0A0A0A;">${data.cityName}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">${data.isBE ? "Province" : "Département"}</td><td style="padding:6px 0;color:#0A0A0A;">${data.departmentName || "—"}</td></tr>
+        <tr><td style="padding:6px 0;color:#6B7280;">${data.isBE ? "Province" : "Département"}</td><td style="padding:6px 0;color:#0A0A0A;">${data.departmentName || "-"}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Urgence</td><td style="padding:6px 0;color:#0A0A0A;">${urgencyLabel}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Budget</td><td style="padding:6px 0;color:#0A0A0A;">${budgetLabel}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;vertical-align:top;">Description</td><td style="padding:6px 0;color:#0A0A0A;">${data.description}</td></tr>
@@ -147,7 +147,7 @@ export async function sendProjectNotification(
     </div>
     <!-- Footer -->
     <div style="padding:16px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
-      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave — Notification automatique</p>
+      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave · Notification automatique</p>
     </div>
   </div>
 </body>
@@ -157,7 +157,7 @@ export async function sendProjectNotification(
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
-      subject: `${data.isSuspicious ? "[SUSPECT] " : ""}[Workwave] Nouveau projet — ${data.categoryName} à ${data.cityName}`,
+      subject: `${data.isSuspicious ? "[SUSPECT] " : ""}[Workwave] Nouveau projet · ${data.categoryName} à ${data.cityName}`,
       html,
     });
     // Audit trail : envoi reussi

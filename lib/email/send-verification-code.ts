@@ -45,7 +45,7 @@ export async function sendVerificationCode(
       </p>
     </div>
     <div style="padding:16px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
-      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave — Trouvez un professionnel de confiance près de chez vous</p>
+      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave · Trouvez un professionnel de confiance près de chez vous</p>
     </div>
   </div>
 </body>
@@ -53,7 +53,7 @@ export async function sendVerificationCode(
 
   // Le SDK Resend ne LEVE PAS d'exception quand l'envoi est refusé : il renvoie
   // { data: null, error: {...} }. Ignorer ce champ rend un échec d'envoi
-  // strictement indiscernable d'un succès — c'est ce qui a fait qu'un pro n'a
+  // strictement indiscernable d'un succès : c'est ce qui a fait qu'un pro n'a
   // jamais reçu son code (Fabien, 14/06) sans la moindre trace côté serveur,
   // et qu'on a cherché la panne du mauvais côté pendant des heures.
   // On remonte donc l'erreur à l'appelant, qui la trace dans claim_attempts
@@ -61,7 +61,7 @@ export async function sendVerificationCode(
   const { error } = await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
-    subject: "Votre code de vérification — Workwave",
+    subject: "Votre code de vérification · Workwave",
     html,
   });
 
@@ -88,7 +88,7 @@ export async function sendClaimAlreadyClaimedAlert(
 <body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
     <div style="background:#991B1B;padding:24px 32px;">
-      <h1 style="margin:0;color:#FFFFFF;font-size:18px;font-weight:600;">Alerte — Tentative de réclamation sur fiche déjà réclamée</h1>
+      <h1 style="margin:0;color:#FFFFFF;font-size:18px;font-weight:600;">Alerte · Tentative de réclamation sur fiche déjà réclamée</h1>
     </div>
     <div style="padding:32px;">
       <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;">
@@ -111,7 +111,7 @@ export async function sendClaimAlreadyClaimedAlert(
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
-      subject: `[Workwave Alert] Tentative de réclamation sur fiche déjà réclamée — ${proName}`,
+      subject: `[Workwave Alert] Tentative de réclamation sur fiche déjà réclamée · ${proName}`,
       html,
     });
   } catch (error) {
@@ -155,7 +155,7 @@ export async function sendClaimSuccessAlert(params: {
         <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Fiche</td><td style="padding:6px 0;color:#0A0A0A;font-weight:500;">${params.proName}</td></tr>
         ${params.proCategory ? `<tr><td style="padding:6px 0;color:#6B7280;">Catégorie</td><td style="padding:6px 0;color:#0A0A0A;">${params.proCategory}</td></tr>` : ""}
         ${params.proCity ? `<tr><td style="padding:6px 0;color:#6B7280;">Ville</td><td style="padding:6px 0;color:#0A0A0A;">${params.proCity}</td></tr>` : ""}
-        <tr><td style="padding:6px 0;color:#6B7280;">SIRET</td><td style="padding:6px 0;font-family:'Courier New',monospace;color:#0A0A0A;">${params.proSiret ?? "—"}</td></tr>
+        <tr><td style="padding:6px 0;color:#6B7280;">SIRET</td><td style="padding:6px 0;font-family:'Courier New',monospace;color:#0A0A0A;">${params.proSiret ?? "-"}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Email du pro</td><td style="padding:6px 0;color:#0A0A0A;">${params.claimEmail}</td></tr>
         ${params.ip ? `<tr><td style="padding:6px 0;color:#6B7280;">IP</td><td style="padding:6px 0;color:#0A0A0A;">${params.ip}</td></tr>` : ""}
         <tr><td style="padding:6px 0;color:#6B7280;">Date</td><td style="padding:6px 0;color:#0A0A0A;">${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</td></tr>
@@ -176,7 +176,7 @@ export async function sendClaimSuccessAlert(params: {
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
-      subject: `[Workwave] Nouvelle fiche réclamée — ${params.proName}`,
+      subject: `[Workwave] Nouvelle fiche réclamée · ${params.proName}`,
       html,
     });
   } catch (error) {

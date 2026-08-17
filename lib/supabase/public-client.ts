@@ -33,7 +33,7 @@ import { fetchSupabase } from "./fetch-supabase";
 // Partager l'instance est sans risque ICI, et c'est deja ce que fait
 // `getAdminServiceClient` avec une cle bien plus sensible : ce client utilise
 // la cle anon (identique pour tout le monde) et ne porte AUCUN etat par
-// utilisateur — `persistSession: false` le garantit. C'est meme la raison
+// utilisateur : `persistSession: false` le garantit. C'est meme la raison
 // d'etre de ce fichier : ne pas toucher a la session.
 // `build()` existe pour que TypeScript garde le type EXACT retourne par
 // createClient. Annoter la variable avec `ReturnType<typeof createClient>`
@@ -50,7 +50,7 @@ function build() {
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
-      // Empeche Next.js de dedoubler le corps de chaque reponse — la branche
+      // Empeche Next.js de dedoubler le corps de chaque reponse : la branche
       // non lue n'etait liberee que par le ramasse-miettes, d'ou 512 Mo
       // retenus sur un processus d'une heure. Cf. lib/supabase/fetch-supabase.ts.
       global: { fetch: fetchSupabase },

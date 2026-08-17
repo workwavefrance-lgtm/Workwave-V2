@@ -80,7 +80,7 @@ export async function GET(req: Request) {
         });
         results.push({ id: p.id, vertical: "btp", sent: r.sent, total: r.totalTargets });
       } else if (p.vertical === "tech") {
-        // Tech broadcast (workwave AI) — signature plus simple (pas de city, c'est remote)
+        // Tech broadcast (workwave AI) : signature plus simple (pas de city, c'est remote)
         const { data: cat } = await sb.from("categories").select("id, name").eq("id", p.category_id).single();
         const r = await broadcastTechProject({
           projectId: p.id,

@@ -7,7 +7,7 @@
  *  - 1 résultat par requête (onePerQuery),
  *  - VALIDATEUR STRICT : on n'attribue QUE si le nom Google recoupe fortement le
  *    nom SIRENE (≥50% des tokens significatifs) ET la ville correspond.
- *  - On ne récupère NI les textes d'avis (copyright/ToS) NI email/téléphone — juste
+ *  - On ne récupère NI les textes d'avis (copyright/ToS) NI email/téléphone, juste
  *    note (totalScore), nb d'avis (reviewsCount), placeId.
  *
  *   npx tsx scripts/enrich-google-reviews.ts --ville poitiers --limit 15           # test (mesure coût + matching)
@@ -131,7 +131,7 @@ async function main() {
   const { items, runId } = await runActor(queries);
   const cost = await runCost(runId);
   console.log(`${items.length} résultats Google · coût réel run = $${cost.toFixed(4)}\n`);
-  if (cost > MAX_COST) console.log(`⚠️ coût ($${cost.toFixed(2)}) > plafond ($${MAX_COST}) — on n'écrit pas, vérifie.`);
+  if (cost > MAX_COST) console.log(`⚠️ coût ($${cost.toFixed(2)}) > plafond ($${MAX_COST}) : on n'écrit pas, vérifie.`);
 
   // index résultats par nom normalisé pour matcher
   let matched = 0, rejected = 0;

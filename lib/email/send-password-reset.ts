@@ -46,7 +46,7 @@ export async function sendPasswordResetEmail(
       </p>
     </div>
     <div style="padding:16px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
-      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave — Trouvez un professionnel de confiance près de chez vous</p>
+      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave · Trouvez un professionnel de confiance près de chez vous</p>
     </div>
   </div>
 </body>
@@ -55,7 +55,7 @@ export async function sendPasswordResetEmail(
   await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
-    subject: "Réinitialisation de votre mot de passe — Workwave",
+    subject: "Réinitialisation de votre mot de passe · Workwave",
     html,
   });
 }

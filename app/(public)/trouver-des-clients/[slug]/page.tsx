@@ -76,7 +76,7 @@ export default async function Page({
     <main>
       <JsonLd
         data={getClientsServiceSchema({
-          name: `Trouver des clients ${name} — Workwave`,
+          name: `Trouver des clients ${name} · Workwave`,
           description: `Recevez des demandes de clients en ${nameLower} près de chez vous. 9,90 € le contact, sans abonnement ni commission.`,
         })}
       />
@@ -94,7 +94,7 @@ export default async function Page({
           <p className="text-lg text-[var(--text-secondary)] leading-relaxed mb-10 max-w-2xl mx-auto">
             Recevez les demandes des particuliers qui cherchent un service de{" "}
             {nameLower} près de chez eux. Vous ne payez 9,90 € que pour débloquer
-            un contact qui vous intéresse — pas d&apos;abonnement, pas de
+            un contact qui vous intéresse, pas d&apos;abonnement, pas de
             commission sur vos prestations.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">

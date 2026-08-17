@@ -66,7 +66,7 @@ function classify(timeS: number): "OK" | "WARN" | "FAIL" {
 }
 
 async function main() {
-  console.log(`\nAudit sitemap perf — base: ${BASE}\n`);
+  console.log(`\nAudit sitemap perf · base: ${BASE}\n`);
 
   // 1. Index
   const indexUrl = `${BASE}/sitemap-index.xml`;

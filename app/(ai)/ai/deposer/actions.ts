@@ -218,7 +218,7 @@ export async function submitTechProject(formData: FormData): Promise<void> {
   //
   // Les projets suspicious SONT diffuses aussi mais avec une card "ATTENTION"
   // dans le dashboard (info du user 26/05). Donc on broadcast quoi qu'il
-  // arrive — l'IA flag mais ne cache pas.
+  // arrive : l'IA flag mais ne cache pas.
   const broadcastResult = await broadcastTechProject({
     projectId: project.id,
     projectTitle: title,
@@ -233,7 +233,7 @@ export async function submitTechProject(formData: FormData): Promise<void> {
     `[submitTechProject] broadcast project=${project.id}: ${broadcastResult.sent}/${broadcastResult.totalTargets} sent, ${broadcastResult.failed} failed`
   );
 
-  // ─── 7. Email admin (await pour fiabilite — cf. lesson 24/05) ──────────
+  // ─── 7. Email admin (await pour fiabilite, cf. lesson 24/05) ──────────
   // Phase 11 : on passe routed=[] car le routing IA est deprecate. Le mail
   // admin contient maintenant le broadcastResult (count freelances joins).
   await sendAiProjectNotification({

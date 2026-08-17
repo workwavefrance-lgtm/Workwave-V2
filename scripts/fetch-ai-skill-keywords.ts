@@ -2,12 +2,12 @@
  * Extraction SOURCÉE (Perplexity sonar) de la demande + des mots-clés longue
  * traîne pour les SERVICES IA candidats de workwaveai.co (/en/ai/{slug}).
  *
- * But : finaliser le plan de silos IA (vs Fiverr) avec des données RÉELLES —
+ * But : finaliser le plan de silos IA (vs Fiverr) avec des données RÉELLES,
  * jamais de volume inventé. Perplexity s'appuie sur le web (catégories
  * Upwork/Fiverr, offres d'emploi, articles de tendance) ; si un volume précis
  * n'est pas sourçable, on garde "not publicly available".
  *
- * ⚠️ 100 % côté AI/tech — ce script ne touche RIEN du BTP.
+ * ⚠️ 100 % côté AI/tech : ce script ne touche RIEN du BTP.
  *
  * Sortie : data/competitive/ai-skill-keywords.json (gitignoré) + récap console.
  * Coût : ~22 requêtes sonar ≈ $0.15.
@@ -116,7 +116,7 @@ async function fetchOne(c: { slug: string; kw: string }): Promise<Row> {
 }
 
 async function main() {
-  console.log(`Extraction mots-clés IA — ${CANDIDATES.length} services (Perplexity sonar)\n`);
+  console.log(`Extraction mots-clés IA · ${CANDIDATES.length} services (Perplexity sonar)\n`);
   const out: Row[] = [];
   let cost = 0;
   for (const c of CANDIDATES) {

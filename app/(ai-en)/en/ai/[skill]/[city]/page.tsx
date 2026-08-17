@@ -23,7 +23,7 @@ import { SOURCED_INTL_CITY } from "@/lib/data/sourced-intl-market";
 
 /**
  * Page programmatique EN : /en/ai/[skill]/[city]
- * Ex. /en/ai/web-development/dubai — "Hire web developers in Dubai".
+ * Ex. /en/ai/web-development/dubai : "Hire web developers in Dubai".
  *
  * ISR (revalidate 6h), pas de generateStaticParams pour garder le build léger
  * (8 Go local) : génération à la demande au 1er hit/crawl puis cache.
@@ -69,8 +69,8 @@ function buildFaq(skill: IntlSkill, city: IntlCity, seniorRange: string): FaqIte
     {
       q: `How much does it cost to hire a freelance ${skill.nounSingular} in ${city.name}?`,
       a: seniorRange
-        ? `Senior freelance ${skill.noun} typically charge around ${seniorRange}. The figure is indicative${city.currency === "EUR" ? "" : ", converted from European market data, and local rates may vary"}. Final rates depend on seniority, the stack, the scope and the length of the engagement. On Workwave you contact ${skill.noun} directly and agree the rate with them — Workwave takes 0% commission.`
-        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer — Workwave takes 0% commission, so pricing stays transparent and you keep full control.`,
+        ? `Senior freelance ${skill.noun} typically charge around ${seniorRange}. The figure is indicative${city.currency === "EUR" ? "" : ", converted from European market data, and local rates may vary"}. Final rates depend on seniority, the stack, the scope and the length of the engagement. On Workwave you contact ${skill.noun} directly and agree the rate with them. Workwave takes 0% commission.`
+        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer. Workwave takes 0% commission, so pricing stays transparent and you keep full control.`,
     },
     {
       q: `Do freelance ${skill.noun} in ${city.name} work remotely?`,
@@ -78,11 +78,11 @@ function buildFaq(skill: IntlSkill, city: IntlCity, seniorRange: string): FaqIte
     },
     {
       q: `How do I hire a freelance ${skill.nounSingular} in ${city.name} on Workwave?`,
-      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching ${skill.noun}, who reach out to you directly by email or phone. You compare profiles, choose, and work together — with no middleman and no commission.`,
+      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching ${skill.noun}, who reach out to you directly by email or phone. You compare profiles, choose, and work together, with no middleman and no commission.`,
     },
     {
       q: `Is there any fee or commission for clients?`,
-      a: `No. Posting a project, being contacted by ${skill.noun} and hiring them is 100% free. Workwave never takes a commission on the engagement — freelancers fund the platform through an optional subscription.`,
+      a: `No. Posting a project, being contacted by ${skill.noun} and hiring them is 100% free. Workwave never takes a commission on the engagement: freelancers fund the platform through an optional subscription.`,
     },
   ];
 }
@@ -197,7 +197,7 @@ export default async function SkillCityPage({
               ) : null}
               <span className="text-[var(--ai-text-tertiary)]">
                 {" "}
-                — {homage.lang} for &ldquo;{homage.translation}&rdquo;
+                · {homage.lang} for &ldquo;{homage.translation}&rdquo;
               </span>
             </p>
           )}
@@ -205,11 +205,11 @@ export default async function SkillCityPage({
             Hire {skill.noun} in {city.name}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            {city.blurb} Post your project for free — our AI alerts matching freelance {skill.noun} and they contact you directly. 0% commission.
+            {city.blurb} Post your project for free: our AI alerts matching freelance {skill.noun} and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Browse freelances
@@ -218,7 +218,7 @@ export default async function SkillCityPage({
         </div>
       </section>
 
-      {/* THE LOCAL SCENE — section premium, rendue seulement si data riche (US) */}
+      {/* THE LOCAL SCENE : section premium, rendue seulement si data riche (US) */}
       {city.techScene && (
         <section className="border-t border-[var(--ai-border-subtle)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20 grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-14">
@@ -233,7 +233,7 @@ export default async function SkillCityPage({
                 {city.techScene}
               </p>
               <p className="mt-4 text-[15px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-                Most freelance {skill.noun} work remotely, so you can hire the best fit whether they&rsquo;re based in {city.name} or elsewhere — and brief them in your own timezone.
+                Most freelance {skill.noun} work remotely, so you can hire the best fit whether they&rsquo;re based in {city.name} or elsewhere, and brief them in your own timezone.
               </p>
             </div>
             <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] p-6 self-start">
@@ -269,7 +269,7 @@ export default async function SkillCityPage({
         </section>
       )}
 
-      {/* MARKET — paragraphe sourcé Perplexity (vague mondiale). Zéro chiffre
+      {/* MARKET : paragraphe sourcé Perplexity (vague mondiale). Zéro chiffre
           inventé : texte web cité. Rendu seulement si la donnée existe. */}
       {sourced && (
         <section className="border-t border-[var(--ai-border-subtle)]">
@@ -304,8 +304,8 @@ export default async function SkillCityPage({
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-10 max-w-2xl">
               {city.currency === "EUR"
-                ? "Indicative European freelance day rates by seniority. For planning only — final rates depend on scope and stack."
-                : `Indicative day rates by seniority, based on European market data converted to ${city.currency}. Local rates may vary — for planning only.`}
+                ? "Indicative European freelance day rates by seniority. For planning only: final rates depend on scope and stack."
+                : `Indicative day rates by seniority, based on European market data converted to ${city.currency}. Local rates may vary. For planning only.`}
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {tiers.map((t) => {
@@ -324,7 +324,7 @@ export default async function SkillCityPage({
         </section>
       )}
 
-      {/* HOURLY RATE (fallback pays, USD) — pour les skills SANS TJM jour, afin
+      {/* HOURLY RATE (fallback pays, USD) : pour les skills SANS TJM jour, afin
           que CHAQUE page ville ait un signal prix. Indicatif + sourcé. */}
       {hasCountryRate && (
         <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)]">
@@ -333,13 +333,13 @@ export default async function SkillCityPage({
               {skill.label} rates in {city.name}
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-8 max-w-2xl">
-              Indicative hourly rate for an experienced freelancer in {city.country} (USD). Rates vary by skill, seniority and project — you agree the final rate directly with the freelancer, 0% commission.
+              Indicative hourly rate for an experienced freelancer in {city.country} (USD). Rates vary by skill, seniority and project: you agree the final rate directly with the freelancer, 0% commission.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <div className="rounded-2xl border border-[var(--ai-border-subtle)] bg-[var(--ai-bg)] p-6">
                 <p className="text-[12px] font-semibold tracking-wide uppercase text-[var(--ai-text-tertiary)]">Senior · hourly</p>
                 <p className="mt-2 text-[20px] sm:text-[24px] font-black text-[var(--ai-accent)] tracking-tight">
-                  ${cityCountryRate!.seniorHourlyMinUsd}–${cityCountryRate!.seniorHourlyMaxUsd}/hr
+                  ${cityCountryRate!.seniorHourlyMinUsd}-${cityCountryRate!.seniorHourlyMaxUsd}/hr
                 </p>
               </div>
               {cityCountryRate!.level && (
@@ -363,7 +363,7 @@ export default async function SkillCityPage({
         </section>
       )}
 
-      {/* DIGITAL NOMAD CITY DATA — sections sourcées Perplexity (services + hubs) */}
+      {/* DIGITAL NOMAD CITY DATA : sections sourcées Perplexity (services + hubs) */}
       {hasDnData && (
         <section className="border-t border-[var(--ai-border-subtle)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
@@ -517,7 +517,7 @@ export default async function SkillCityPage({
           </p>
           <div className="mt-8">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
           </div>
         </div>

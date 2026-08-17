@@ -78,7 +78,7 @@ async function main() {
         // La LIGNE est conservée (avec son SIRET) et sert de pierre tombale :
         // le scraper SIRENE insère en `on_conflict=siret, ignore_duplicates`,
         // donc supprimer la ligne ferait RECRÉER la fiche au prochain passage
-        // et republierait la personne — pire que de n'avoir rien fait. On
+        // et republierait la personne, pire que de n'avoir rien fait. On
         // garde le strict minimum technique qui rend l'effacement durable.
         name: "Fiche supprimée à la demande du titulaire",
         address: null,

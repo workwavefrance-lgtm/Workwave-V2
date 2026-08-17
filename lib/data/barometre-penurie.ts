@@ -1,6 +1,6 @@
 // Baromètre « déserts d'artisans » : par métier bien couvert, densité (entreprises
 // référencées / 10 000 hab) par département. Pros = SIRENE (notre base), pop = INSEE 2021.
-// Généré le 2026-07-27 par scripts/build-penurie.ts — NE PAS éditer à la main. 0 invention.
+// Généré le 2026-07-27 par scripts/build-penurie.ts. NE PAS éditer à la main. 0 invention.
 
 export type PenurieDept = { code: string; name: string; density: number; count: number };
 export type PenurieMetier = {

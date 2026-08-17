@@ -23,7 +23,7 @@ const mode = isLive ? "🔴 LIVE" : "🟢 TEST";
 const stripe = new Stripe(stripeKey, { typescript: true });
 
 async function main() {
-  console.log(`\n=== Creation Workwave AI Premium — mode ${mode} ===\n`);
+  console.log(`\n=== Creation Workwave AI Premium · mode ${mode} ===\n`);
 
   // 1) Verifier idempotence
   const products = await stripe.products.list({ limit: 100, active: true });
@@ -58,7 +58,7 @@ async function main() {
     unit_amount: 2990,
     recurring: { interval: "month" },
     metadata: { vertical: "ai", plan_type: "monthly" },
-    nickname: "Workwave AI Premium — Mensuel",
+    nickname: "Workwave AI Premium · Mensuel",
   });
   console.log(`   ✓ Price monthly : ${priceMonthly.id}`);
 
@@ -70,7 +70,7 @@ async function main() {
     unit_amount: 29900,
     recurring: { interval: "year" },
     metadata: { vertical: "ai", plan_type: "annual" },
-    nickname: "Workwave AI Premium — Annuel",
+    nickname: "Workwave AI Premium · Annuel",
   });
   console.log(`   ✓ Price annual : ${priceAnnual.id}`);
 

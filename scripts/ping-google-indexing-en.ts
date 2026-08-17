@@ -64,7 +64,7 @@ async function main() {
   const urls = buildUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs EN qui seraient pingées ===\n");
+    console.log("=== DRY RUN : URLs EN qui seraient pingées ===\n");
     urls.forEach((url, i) => console.log(`  ${(i + 1).toString().padStart(3)}. ${url.replace(BASE, "")}`));
     console.log(`\nTotal: ${urls.length}\n`);
     return;

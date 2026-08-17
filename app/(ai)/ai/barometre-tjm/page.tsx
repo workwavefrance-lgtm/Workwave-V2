@@ -14,13 +14,13 @@ const MONTH_NAMES = [
 ];
 
 export const metadata: Metadata = {
-  title: `Barometre TJM freelance tech ${CURRENT_YEAR} — 35 stacks analysees`,
+  title: `Barometre TJM freelance tech ${CURRENT_YEAR} · 35 stacks analysees`,
   description: `Tarifs journaliers moyens (TJM) des freelances tech en France pour ${CURRENT_YEAR} : React, Python, AWS, Kubernetes, IA/LLM, data engineering, design Figma. 35 stacks par niveau d'experience (junior, intermediaire, senior, expert). Sources publiques verifiees (Blog du Moderateur, Free-Work, Comet).`,
   alternates: { canonical: "/ai/barometre-tjm" },
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// FAQ barometre — 5 questions methodologie (essentielles pour AEO/GEO)
+// FAQ barometre : 5 questions methodologie (essentielles pour AEO/GEO)
 // ─────────────────────────────────────────────────────────────────────
 const FAQ_BAROMETRE: FaqItem[] = [
   {
@@ -41,7 +41,7 @@ const FAQ_BAROMETRE: FaqItem[] = [
   },
   {
     q: "Le barometre tient-il compte des freelances en remote depuis l'etranger ?",
-    a: "Oui pour les freelances francais travaillant en remote depuis l'etranger (Portugal, Espagne, Maroc) — ils restent dans la fourchette francaise car le client paie la prestation pour un freelance francais avec une fiscalite francaise. Non pour le 'nearshoring' offshore (developpeurs d'Europe de l'Est par exemple) qui represente un marche different avec ses propres references (souvent 30-40% moins cher mais avec barrieres langue et coordination). Workwave AI cible le marche tech francophone et europeen.",
+    a: "Oui pour les freelances francais travaillant en remote depuis l'etranger (Portugal, Espagne, Maroc) : ils restent dans la fourchette francaise car le client paie la prestation pour un freelance francais avec une fiscalite francaise. Non pour le 'nearshoring' offshore (developpeurs d'Europe de l'Est par exemple) qui represente un marche different avec ses propres references (souvent 30-40% moins cher mais avec barrieres langue et coordination). Workwave AI cible le marche tech francophone et europeen.",
   },
 ];
 
@@ -81,7 +81,7 @@ export default async function BarometreTjmHubPage() {
     description: `Donnees TJM (Tarif Journalier Moyen) compilees pour 35 skills tech freelance en France ${CURRENT_YEAR}, ventilees par niveau d'experience (junior, mid, senior, expert).`,
     license: "https://creativecommons.org/licenses/by/4.0/",
     creator: { "@type": "Organization", name: "Workwave AI", url: `${baseUrl}/ai` },
-    citation: TJM_SOURCES.map((s) => `${s.name} — ${s.title} (${s.url})`).join(" ; "),
+    citation: TJM_SOURCES.map((s) => `${s.name} · ${s.title} (${s.url})`).join(" ; "),
     temporalCoverage: `${CURRENT_YEAR}`,
     spatialCoverage: { "@type": "Country", name: "France" },
   };
@@ -132,7 +132,7 @@ export default async function BarometreTjmHubPage() {
               <p className="text-[13px] text-[var(--ai-text-tertiary)] leading-relaxed max-w-2xl">
                 <strong className="text-[var(--ai-text)]">Methodologie</strong> : compilation
                 de 3 sources concordantes (Blog du Moderateur, Free-Work TJM tracker, Comet
-                Observatoire). Workwave AI n&apos;invente aucun chiffre — les ranges sont
+                Observatoire). Workwave AI n&apos;invente aucun chiffre : les ranges sont
                 citables et verifiables (URLs en bas de page).
               </p>
             </div>
@@ -156,7 +156,7 @@ export default async function BarometreTjmHubPage() {
                   Echantillon
                 </p>
                 <p className="text-2xl font-black text-[var(--ai-text)] tracking-tight" style={{ fontFamily: "var(--font-geist-mono), monospace" }}>
-                  {totalProsCount ? (totalProsCount / 1000).toFixed(0) + "k" : "—"}
+                  {totalProsCount ? (totalProsCount / 1000).toFixed(0) + "k" : "-"}
                 </p>
                 <p className="text-[12px] text-[var(--ai-text-tertiary)] mt-1 leading-relaxed">
                   freelances tech actifs en base Workwave AI (source : Sirene INSEE)
@@ -357,7 +357,7 @@ export default async function BarometreTjmHubPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4/4 — FAQ Barometre (FAQPage schema)
+          SECTION 4/4 · FAQ Barometre (FAQPage schema)
           ═══════════════════════════════════════════════════════════════ */}
       <AiFaqSection
         id="faq"

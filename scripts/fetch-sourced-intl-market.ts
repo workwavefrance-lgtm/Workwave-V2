@@ -107,7 +107,7 @@ async function main() {
   const cities = INTL_CITIES.filter((c) => NEW_REGIONS.includes(c.region));
   const countries = WORLD_COUNTRIES.filter((c) => NEW_CONTINENTS.includes(c.continentSlug));
   console.log(
-    `Marché intl sourcé — ${cities.length} villes + ${countries.length} pays${DRY ? " (DRY : 1+1)" : ""}\n`
+    `Marché intl sourcé · ${cities.length} villes + ${countries.length} pays${DRY ? " (DRY : 1+1)" : ""}\n`
   );
 
   const cityOut: Record<string, Entry> = {};

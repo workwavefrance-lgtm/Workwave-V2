@@ -63,7 +63,7 @@ const deletionSchema = z.object({
 });
 
 // ============================================
-// submitDeletionRequest — Vérification SIRET + envoi code
+// submitDeletionRequest · Vérification SIRET + envoi code
 // ============================================
 
 export async function submitDeletionRequest(
@@ -177,7 +177,7 @@ export async function submitDeletionRequest(
 }
 
 // ============================================
-// verifyDeletion — Vérification code + soft-delete
+// verifyDeletion · Vérification code + soft-delete
 // ============================================
 
 export async function verifyDeletion(
@@ -270,7 +270,7 @@ export async function verifyDeletion(
     };
   }
 
-  // Code correct — soft-delete la fiche
+  // Code correct : soft-delete la fiche
 
   // Récupérer le pro pour vérification et infos Stripe
   const { data: pro } = await serviceClient
@@ -309,7 +309,7 @@ export async function verifyDeletion(
 
   // Une mutation Supabase qui echoue renvoie { error } SANS lever d'exception.
   // Sans ce controle, on annoncait la suppression au pro ET a l'admin alors que
-  // la fiche etait toujours en ligne — le pire des cas en RGPD : la personne
+  // la fiche etait toujours en ligne, le pire des cas en RGPD : la personne
   // croit sa demande traitee et ne relance pas. On s'arrete net.
   if (deleteError) {
     console.error("[verifyDeletion] soft-delete KO:", deleteError.message);
@@ -322,7 +322,7 @@ export async function verifyDeletion(
 
   // 1 bis. Blacklist de l'email du demandeur : sans ca, il reste dans les
   // listes de prospection tant qu'il figure sur une AUTRE fiche (32 % des
-  // fiches partagent leur email — cf. memoire `pros-email-non-unique`).
+  // fiches partagent leur email, cf. memoire `pros-email-non-unique`).
   try {
     await serviceClient
       .from("email_blacklist")
@@ -365,7 +365,7 @@ export async function verifyDeletion(
     await resend.emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: process.env.ADMIN_EMAIL || "admin@workwave.fr",
-      subject: `[Workwave Alert] Demande de suppression de fiche — ${pro.name}`,
+      subject: `[Workwave Alert] Demande de suppression de fiche · ${pro.name}`,
       html: `
         <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
           <h2 style="color: #0A0A0A;">Fiche supprimée (RGPD)</h2>
@@ -380,7 +380,7 @@ export async function verifyDeletion(
     console.error("Erreur envoi alerte admin suppression fiche:", err);
   }
 
-  // 5. PURGE DU CACHE — sans ca, la suppression n'existe pas pour le visiteur.
+  // 5. PURGE DU CACHE : sans ca, la suppression n'existe pas pour le visiteur.
   //
   // La fiche `/artisan/[slug]` est en cache ISR 7 jours. Le 08/08/2026, la fiche
   // de MOSES UTUKA repondait encore 200 huit heures apres sa demande, alors que

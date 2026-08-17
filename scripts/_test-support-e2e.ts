@@ -1,5 +1,5 @@
 /**
- * TEST BOUT EN BOUT DU SUPPORT (prod) — envoie un VRAI email vers contact@workwave.fr
+ * TEST BOUT EN BOUT DU SUPPORT (prod) : envoie un VRAI email vers contact@workwave.fr
  * et vérifie que toute la chaîne se déclenche :
  *
  *   email → MX Resend Receiving → webhook /api/resend/inbound → ticket
@@ -60,7 +60,7 @@ async function send() {
     console.log(`❌ Envoi refuse (HTTP ${r.status}) : ${j.message}`);
     process.exit(1);
   }
-  console.log(`✅ Email de test envoye — id Resend ${j.id}`);
+  console.log(`✅ Email de test envoye · id Resend ${j.id}`);
   console.log(`   ${TEST_FROM} → ${TEST_TO}`);
   console.log(`   Sujet : ${SUBJECT}`);
 }

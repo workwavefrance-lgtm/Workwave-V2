@@ -163,7 +163,7 @@ export default async function Home() {
             lit d'un seul coup d'oeil au lieu d'etre coupee sur "vous." seul. */}
         <div className="relative w-[min(92vw,1440px)] mx-auto xl:mx-0 xl:ml-[max(2rem,calc((100vw-1440px)/2))] xl:max-w-[60%] text-center xl:text-left">
           {/* La PREUVE avant la promesse (11/08/2026).
-              Avant : "Trouvez le bon artisan près de chez vous." — une phrase
+              Avant : "Trouvez le bon artisan près de chez vous." : une phrase
               que TOUS les concurrents ecrivent. Le seul chiffre qui nous
               distingue (2,5 M de fiches contre 58 216 chez Travaux.com, soit
               43x) etait relegue sous la barre de recherche, dans un compteur
@@ -171,7 +171,7 @@ export default async function Home() {
               Il passe donc en premier mot du H1.
               La 2e ligne garde "celui qu'il vous faut, pres de chez vous" :
               2,5 millions peut sonner "base de donnees" plutot que "on
-              s'occupe de vous" — cette ligne ramene le chiffre a une personne.
+              s'occupe de vous", cette ligne ramene le chiffre a une personne.
               Mots-cles de referencement conserves : "artisan" et
               "pres de chez vous" (intention locale). */}
           {/* 13/08 (decision Willy) : la PROMESSE s'affiche en premier, le
@@ -236,7 +236,7 @@ export default async function Home() {
               <span className="text-[var(--accent)]">gratuitement</span>.
             </p>
             <SearchForm categories={allCategories} destination="depot" />
-          {/* Réassurance QUALITÉ — uniquement des signaux VRAIS (pub honnête + RGPD) :
+          {/* Réassurance QUALITÉ : uniquement des signaux VRAIS (pub honnête + RGPD) :
               SIRET vérifiable au registre officiel (annuaire-entreprises.data.gouv.fr),
               données publiques SIRENE, gratuité réelle. PAS de "décennale validée"
               (auto-déclaré, non vérifié) ni d'avis inventés (0 avis natif à ce jour). */}
@@ -313,18 +313,18 @@ export default async function Home() {
               de flottaison. Les deux autres chiffres (35 163 communes,
               107 departements) restent visibles sur /departements et /pro. */}
           {/* CTA principal du hero : déposer un projet (gratuit), juste sous le
-              bandeau de stats — emplacement validé par Willy (le "rond"). */}
+              bandeau de stats, emplacement validé par Willy (le "rond"). */}
         </div>
       </section>
 
       {/* Section photo isolee SUPPRIMEE le 13/08 : la mosaique de metiers du
           hero joue desormais ce role, et beaucoup mieux. Une photo unique de
           macon en pleine largeur au milieu de la page faisait doublon. */}
-      {/* Projets déposés récemment — double CTA (particulier dépose / pro reçoit).
+      {/* Projets déposés récemment : double CTA (particulier dépose / pro reçoit).
           Modulable : 1→10 vrais projets anonymisés, se masque si 0. */}
       <RecentProjectsSection projects={recentProjects} />
 
-      {/* Categories par vertical — CTA pro inséré juste après le BTP (demande
+      {/* Categories par vertical : CTA pro inséré juste après le BTP (demande
           Willy 14/07 : visibilité max pour le recrutement de pros). */}
       {verticals.map((vertical) => (
         <Fragment key={vertical.title}>
@@ -355,7 +355,7 @@ export default async function Home() {
       {/* Barre de recherche "consultation", APRES les trois univers de metiers.
           Celle du haut fait entrer dans l'entonnoir ; celle-ci est pour qui
           veut d'abord regarder les fiches avant de se decider. Deux intentions
-          differentes, deux emplacements — au lieu d'une seule barre qui doit
+          differentes, deux emplacements, au lieu d'une seule barre qui doit
           servir les deux et n'en sert bien aucune. */}
       <section className="py-16 px-4 border-t border-[var(--border-color)]">
         <div className="max-w-3xl mx-auto text-center">
@@ -399,7 +399,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* FAQ — section visible + JSON-LD FAQPage (cf. getFaqSchema).
+      {/* FAQ : section visible + JSON-LD FAQPage (cf. getFaqSchema).
           Enrichit aussi le volume de contenu de la home (signal SEO/GEO). */}
       <JsonLd data={getFaqSchema(homeFaqs)} />
       <section className="py-16 px-4 border-t border-[var(--border-color)]">

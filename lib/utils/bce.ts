@@ -1,12 +1,12 @@
 /**
- * Numéro d'entreprise belge (BCE/KBO) — validation et formatage.
+ * Numéro d'entreprise belge (BCE/KBO) · validation et formatage.
  *
  * Format : 10 chiffres, commence par 0 ou 1 (ex. 1016514072).
  * Checksum officiel mod 97 : les 2 derniers chiffres = 97 − (8 premiers % 97).
  * Affiché en Belgique sous la forme "1016.514.072" (ou "BE 1016.514.072" TVA).
  *
  * Stockage Workwave : le numéro BCE (10 chiffres) va dans pros.siret
- * (varchar(14), UNIQUE) — aucune collision possible avec un SIRET français
+ * (varchar(14), UNIQUE) : aucune collision possible avec un SIRET français
  * (toujours 14 chiffres). pros.siren reste NULL pour les pros belges.
  */
 

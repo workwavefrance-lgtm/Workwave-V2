@@ -194,26 +194,26 @@ export default function VerificationForm({ attemptId, slug, destinationEmail }: 
         Le code est valable 15 minutes. Vous disposez de 3 tentatives.
       </p>
 
-      {/* Pas reçu ? — anti-spam + solution boîtes filtrantes (OVH, Orange, pro…) */}
+      {/* Pas reçu ? Anti-spam + solution boîtes filtrantes (OVH, Orange, pro…) */}
       <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl p-4 text-left">
         <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">
           Vous n&apos;avez pas reçu le code ?
         </p>
         <ul className="space-y-1.5 text-xs text-[var(--text-secondary)] leading-relaxed">
           <li>
-            • Vérifiez votre dossier <strong>spam / indésirables</strong> — l&apos;email vient
+            • Vérifiez votre dossier <strong>spam / indésirables</strong>, l&apos;email vient
             de <span className="font-mono">contact@workwave.fr</span>.
           </li>
           <li>
             • Certaines messageries professionnelles (OVH, Orange…) filtrent fortement.
-            Le plus simple : <strong>recommencez avec une adresse Gmail</strong> — votre SIRET
+            Le plus simple : <strong>recommencez avec une adresse Gmail</strong> : votre SIRET
             reste le même, c&apos;est lui qui valide la fiche.
           </li>
           <li>• Le code arrive en général en moins de 2 minutes.</li>
         </ul>
       </div>
 
-      {/* Fallback contact (filet de sécurité — évite l'abandon / la plainte) */}
+      {/* Fallback contact (filet de sécurité, évite l'abandon / la plainte) */}
       <p className="text-xs text-[var(--text-tertiary)] text-center">
         Un problème ? Écrivez-nous à{" "}
         <a

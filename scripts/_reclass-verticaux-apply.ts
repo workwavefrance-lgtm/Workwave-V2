@@ -4,7 +4,7 @@
  *   chauffagiste → climaticien (regex CLIM|FROID|CVC,    5 203 pros, 0 réclamé)
  *
  * Mécanique NON destructive : la catégorie d'origine devient SECONDAIRE
- * (le pro continue de recevoir les leads de son ancien métier — le broadcast
+ * (le pro continue de recevoir les leads de son ancien métier, le broadcast
  * couvre secondary_category_ids), et il gagne sa visibilité sur les pages du
  * nouveau métier. Réversible (filtre possible sur secondary contient from).
  *

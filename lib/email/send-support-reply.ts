@@ -37,7 +37,7 @@ export async function sendSupportReply(
     ? input.subject.trim().toLowerCase().startsWith("re:")
       ? input.subject.trim()
       : `Re: ${input.subject.trim()}`
-    : "Votre demande — Workwave";
+    : "Votre demande · Workwave";
 
   // Corps : on préserve les sauts de ligne de l'admin.
   const bodyHtml = esc(input.body).replace(/\n/g, "<br>");
@@ -56,7 +56,7 @@ export async function sendSupportReply(
   </div>
 </body></html>`;
 
-  const text = `${input.body}\n\n—\nL'équipe Workwave · workwave.fr\nRépondez directement à cet email, nous le recevons.`;
+  const text = `${input.body}\n\n-\nL'équipe Workwave · workwave.fr\nRépondez directement à cet email, nous le recevons.`;
 
   try {
     const r = await getResend().emails.send({

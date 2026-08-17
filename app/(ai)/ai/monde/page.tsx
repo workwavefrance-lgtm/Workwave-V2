@@ -14,7 +14,7 @@ const SITE_URL = "https://workwave.fr";
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 export const metadata: Metadata = {
-  title: "Freelances dans le monde francophone — Workwave AI",
+  title: "Freelances dans le monde francophone · Workwave AI",
   description:
     "Recrutez des freelances tech, marketing, design, data et plus à Bruxelles, Genève, Luxembourg, Montréal, Casablanca, Dakar… Mise en relation IA, 0 commission, gratuit pour les clients.",
   alternates: { canonical: `${SITE_URL}/ai/monde` },
@@ -28,7 +28,7 @@ export default function MondeLandingPage() {
     },
     {
       q: "Comment ça marche ?",
-      a: "Vous déposez votre projet en 60 secondes (gratuit). Notre IA qualifie votre besoin et alerte les freelances francophones qui correspondent — ils vous contactent directement. Vous comparez, choisissez, sans intermédiaire ni commission.",
+      a: "Vous déposez votre projet en 60 secondes (gratuit). Notre IA qualifie votre besoin et alerte les freelances francophones qui correspondent. Ils vous contactent directement. Vous comparez, choisissez, sans intermédiaire ni commission.",
     },
     {
       q: "C'est gratuit ?",
@@ -39,7 +39,7 @@ export default function MondeLandingPage() {
   const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Métiers freelance — monde francophone",
+    name: "Métiers freelance · monde francophone",
     itemListElement: INTL_SKILLS.map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
@@ -72,7 +72,7 @@ export default function MondeLandingPage() {
               Déposer un projet (gratuit)
             </Link>
             <Link href="/ai/inscription" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
-              Je suis freelance — créer mon profil
+              Je suis freelance : créer mon profil
             </Link>
           </div>
         </div>

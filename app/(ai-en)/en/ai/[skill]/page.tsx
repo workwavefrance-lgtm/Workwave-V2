@@ -31,7 +31,7 @@ export async function generateMetadata({
   const year = new Date().getFullYear();
   const path = `/en/ai/${skill.slug}`;
   return {
-    title: `Hire freelance ${skill.noun} — day rates & talent (${year})`,
+    title: `Hire freelance ${skill.noun} · day rates & talent (${year})`,
     description: `Hire vetted freelance ${skill.noun} worldwide. Compare day rates, get matched in 24h, 0% commission. Free to post on Workwave AI.`,
     alternates: aiAlternatesEnOnly(path),
     openGraph: {
@@ -75,16 +75,16 @@ export default async function SkillHubPage({
     {
       q: `How much does it cost to hire a freelance ${skill.nounSingular}?`,
       a: tjm
-        ? `Day rates depend on seniority, stack and region. As an indicative global benchmark, senior ${skill.noun} charge around ${formatTjmRange(tjm.senior.min, tjm.senior.max, "en")} (USD). Rates in the Gulf and top European hubs trend higher. On Workwave you agree the rate directly with the freelancer — 0% commission.`
-        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer — Workwave takes 0% commission, so pricing stays transparent.`,
+        ? `Day rates depend on seniority, stack and region. As an indicative global benchmark, senior ${skill.noun} charge around ${formatTjmRange(tjm.senior.min, tjm.senior.max, "en")} (USD). Rates in the Gulf and top European hubs trend higher. On Workwave you agree the rate directly with the freelancer, 0% commission.`
+        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer: Workwave takes 0% commission, so pricing stays transparent.`,
     },
     {
       q: `Where can I hire freelance ${skill.noun} on Workwave?`,
-      a: `Worldwide — across Asia (Bangalore, Singapore, Tokyo, Dubai and more), Europe, the Americas, Africa and Oceania. Most freelancers work remotely, so you can hire across borders and timezones.`,
+      a: `Worldwide, across Asia (Bangalore, Singapore, Tokyo, Dubai and more), Europe, the Americas, Africa and Oceania. Most freelancers work remotely, so you can hire across borders and timezones.`,
     },
     {
       q: `How does hiring work?`,
-      a: `Post your project for free in 60 seconds. Our AI qualifies it and alerts matching ${skill.noun}, who contact you directly. You compare, choose and work together — no middleman, no commission.`,
+      a: `Post your project for free in 60 seconds. Our AI qualifies it and alerts matching ${skill.noun}, who contact you directly. You compare, choose and work together: no middleman, no commission.`,
     },
     {
       q: `Is it free for clients?`,
@@ -166,11 +166,11 @@ export default async function SkillHubPage({
             Hire freelance {skill.noun}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            {skill.blurb} Post your project for free — our AI alerts matching {skill.noun} worldwide, and they contact you directly. 0% commission.
+            {skill.blurb} Post your project for free: our AI alerts matching {skill.noun} worldwide, and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Browse freelances
@@ -187,7 +187,7 @@ export default async function SkillHubPage({
               {skill.label} day rates
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-10 max-w-2xl">
-              Indicative day rates by seniority (USD, converted from European market data). For planning only — see a specific city below for local-currency rates.
+              Indicative day rates by seniority (USD, converted from European market data). For planning only, see a specific city below for local-currency rates.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {tiers.map((t) => (
@@ -252,7 +252,7 @@ export default async function SkillHubPage({
           <p className="mt-5 text-[16px] text-white/60 max-w-xl mx-auto">Post your project for free and get matched in 24 hours.</p>
           <div className="mt-8">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
           </div>
         </div>

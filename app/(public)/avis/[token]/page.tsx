@@ -4,7 +4,7 @@ import { getReviewByToken } from "@/lib/queries/reviews";
 import ReviewSubmitForm from "./ReviewSubmitForm";
 
 export const metadata: Metadata = {
-  title: "Donnez votre avis — Workwave",
+  title: "Donnez votre avis · Workwave",
   description:
     "Évaluez la prestation de l'artisan contacté via Workwave. Votre avis aide d'autres particuliers à choisir le bon professionnel.",
   robots: {
@@ -77,7 +77,7 @@ export default async function ReviewPage({ params }: Props) {
                 >
                   contact@workwave.fr
                 </a>{" "}
-                en indiquant le lien complet — on s&apos;en occupe.
+                en indiquant le lien complet, on s&apos;en occupe.
               </p>
               <Link
                 href="/"

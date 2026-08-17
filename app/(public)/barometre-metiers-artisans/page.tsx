@@ -119,7 +119,7 @@ export default async function BarometreMetiersPage() {
           <div className="rounded-2xl bg-[var(--accent)]/8 border border-[var(--accent)]/20 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="font-semibold text-lg text-[var(--text-primary)]">Besoin de l&apos;un de ces artisans ?</p>
-              <p className="text-sm text-[var(--text-secondary)]">Décrivez votre projet, recevez plusieurs devis gratuits — sans engagement.</p>
+              <p className="text-sm text-[var(--text-secondary)]">Décrivez votre projet, recevez plusieurs devis gratuits, sans engagement.</p>
             </div>
             <Link href="/deposer-projet" className="shrink-0 inline-flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-6 py-3 rounded-full transition-all duration-250 hover:-translate-y-0.5">
               Déposer mon projet <span aria-hidden>→</span>

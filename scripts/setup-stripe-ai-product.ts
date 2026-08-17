@@ -49,7 +49,7 @@ if (!isLive && !isTest) {
 }
 
 const mode = isLive ? "🔴 LIVE" : "🟢 TEST";
-console.log(`\n=== Setup Stripe Workwave AI Premium — mode ${mode} ===\n`);
+console.log(`\n=== Setup Stripe Workwave AI Premium · mode ${mode} ===\n`);
 
 if (isLive && !CONFIRM_LIVE) {
   console.error(
@@ -118,7 +118,7 @@ async function main() {
   console.log("                     = 24,92€/mois equivalent (2 mois offerts)\n");
 
   if (DRY_RUN) {
-    console.log("DRY RUN — aucune action executee. Relance sans --dry-run pour creer.");
+    console.log("DRY RUN : aucune action executee. Relance sans --dry-run pour creer.");
     return;
   }
 
@@ -147,7 +147,7 @@ async function main() {
     unit_amount: 2990, // 29,90€ TTC
     recurring: { interval: "month" },
     metadata: { vertical: "ai", plan_type: "monthly" },
-    nickname: "Workwave AI Premium — Mensuel",
+    nickname: "Workwave AI Premium · Mensuel",
   });
   console.log(`   ✓ Price monthly cree : ${priceMonthly.id}`);
 
@@ -158,7 +158,7 @@ async function main() {
     unit_amount: 29900, // 299€ TTC
     recurring: { interval: "year" },
     metadata: { vertical: "ai", plan_type: "annual" },
-    nickname: "Workwave AI Premium — Annuel",
+    nickname: "Workwave AI Premium · Annuel",
   });
   console.log(`   ✓ Price annual cree : ${priceAnnual.id}`);
 

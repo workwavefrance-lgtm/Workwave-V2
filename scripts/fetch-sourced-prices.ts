@@ -152,8 +152,8 @@ function buildPrompt(slug: string, labels: string[]): string {
     `pour CHACUNE de ces prestations précises, en te basant sur des sources web récentes et fiables :\n` +
     labels.map((l, i) => `${i + 1}. ${l}`).join("\n") +
     `\n\nRÈGLES IMPÉRATIVES :\n` +
-    `- Prix TOUT COMPRIS (fourniture + pose/main d'œuvre) dès que la prestation implique une installation — JAMAIS le prix du matériel seul.\n` +
-    `- Une fourchette DISTINCTE, spécifique et réaliste pour CHAQUE prestation — n'utilise jamais deux fois la même fourchette.\n` +
+    `- Prix TOUT COMPRIS (fourniture + pose/main d'œuvre) dès que la prestation implique une installation : JAMAIS le prix du matériel seul.\n` +
+    `- Une fourchette DISTINCTE, spécifique et réaliste pour CHAQUE prestation : n'utilise jamais deux fois la même fourchette.\n` +
     `- Chiffres conformes à ce que paie réellement un particulier qui fait appel à un pro.\n\n` +
     `Réponds UNIQUEMENT avec un objet JSON valide (aucun texte avant ou après), au format EXACT :\n` +
     `{"ranges":[{"label":"<le libellé exact fourni>","range":"<ex: 80 € à 150 €>"}]}\n` +
@@ -221,7 +221,7 @@ function loadExisting(): Record<string, Entry> {
   try {
     return JSON.parse(m[1]) as Record<string, Entry>;
   } catch {
-    console.warn("⚠️  Impossible de parser les prix existants — on repart de zéro.");
+    console.warn("⚠️  Impossible de parser les prix existants : on repart de zéro.");
     return {};
   }
 }
@@ -232,7 +232,7 @@ async function main() {
     ([slug]) => FORCE || !existing[slug]
   );
   console.log(
-    `Fetch prix sourcés Perplexity — ${Object.keys(existing).length} déjà en base, ${todo.length} à générer${FORCE ? " (--force)" : ""}${DRY ? " (DRY RUN, 1 cat)" : ""}\n`
+    `Fetch prix sourcés Perplexity · ${Object.keys(existing).length} déjà en base, ${todo.length} à générer${FORCE ? " (--force)" : ""}${DRY ? " (DRY RUN, 1 cat)" : ""}\n`
   );
   const fetched: Record<string, Entry> = {};
   let total = 0;
@@ -249,13 +249,13 @@ async function main() {
 
   console.log(`\nOK : ${Object.keys(fetched).length}/${entries.length} générées · coût ≈ $${total.toFixed(4)}`);
   if (DRY) {
-    console.log("\nDRY RUN — aperçu :\n", JSON.stringify(fetched, null, 2));
+    console.log("\nDRY RUN · aperçu :\n", JSON.stringify(fetched, null, 2));
     return;
   }
   // Merge : on préserve l'existant et on ajoute/écrase les nouvelles.
   const out: Record<string, Entry> = { ...existing, ...fetched };
   const file =
-    `// Prix sourcés via Perplexity API (recherche web + citations) — généré le ${new Date().toISOString().slice(0, 10)}.\n` +
+    `// Prix sourcés via Perplexity API (recherche web + citations) · généré le ${new Date().toISOString().slice(0, 10)}.\n` +
     `// NE PAS éditer à la main : relancer \`npx tsx scripts/fetch-sourced-prices.ts\`.\n` +
     `// Respecte « zéro chiffre inventé » : chiffres issus de sources web réelles, citées.\n\n` +
     `export type SourcedPrice = { label: string; range: string };\n` +

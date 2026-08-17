@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 /**
- * Footer du vertical freelance (/ai/*) — unifié avec workwave.fr.
+ * Footer du vertical freelance (/ai/*), unifié avec workwave.fr.
  *
  * Depuis le 28/06/2026 : wordmark "Workwave", accent coral, FR uniquement.
  * Caché sur /ai/dashboard (expérience freelance dédiée).

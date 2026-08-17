@@ -4,7 +4,7 @@
  * Renvoie la notification admin pour un projet. Utilise par le
  * bouton "Renvoyer la notif" du dashboard admin quand
  * `projects.admin_notified_at IS NULL` (perte silencieuse possible
- * detectee — cf. projet #19 du 13/05 et migration 2026-05-23).
+ * detectee, cf. projet #19 du 13/05 et migration 2026-05-23).
  *
  * sendProjectNotification trace lui-meme le resultat en base
  * (admin_notified_at ou admin_notification_error via
@@ -69,8 +69,8 @@ export async function POST(
     firstName: (project.first_name as string) ?? "",
     email: (project.email as string) ?? "",
     phone: (project.phone as string) ?? "",
-    categoryName: category?.name ?? "—",
-    cityName: city?.name ?? "—",
+    categoryName: category?.name ?? "-",
+    cityName: city?.name ?? "-",
     departmentName,
     isBE: city?.country === "BE",
     description: (project.description as string) ?? "",

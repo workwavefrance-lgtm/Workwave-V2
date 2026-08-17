@@ -57,7 +57,7 @@ async function main() {
 
   const file =
     `// Baromètre densité d'entreprises artisanales par département.\n` +
-    `// Généré le ${generatedAt} par scripts/build-barometre.ts — NE PAS éditer à la main.\n` +
+    `// Généré le ${generatedAt} par scripts/build-barometre.ts. NE PAS éditer à la main.\n` +
     `// Pros = notre base (source SIRENE). Population = INSEE population municipale 2021 (data.gouv).\n` +
     `// Densité = entreprises référencées / population * 10 000. 0 invention.\n\n` +
     `export type BarometreDept = {\n  rank: number; code: string; name: string; region: string;\n` +

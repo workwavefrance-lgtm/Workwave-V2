@@ -66,7 +66,7 @@ function buildEmailHtml(input: BroadcastInput, baseUrl: string): string {
   const suspiciousBanner = input.isSuspicious
     ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
         <p style="font-size:12px;color:#92400E;margin:0;font-weight:600;">
-          &#9888; Projet flague par notre IA — verifiez les informations avant de contacter.
+          &#9888; Projet flague par notre IA : verifiez les informations avant de contacter.
         </p>
       </div>`
     : "";
@@ -156,7 +156,7 @@ export async function broadcastTechProject(
   input: BroadcastInput
 ): Promise<BroadcastResult> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
-  const subject = `Nouveau projet ${input.projectCategoryName} — Workwave AI`;
+  const subject = `Nouveau projet ${input.projectCategoryName} · Workwave AI`;
   const html = buildEmailHtml(input, baseUrl);
 
   const sb = getServiceClient();

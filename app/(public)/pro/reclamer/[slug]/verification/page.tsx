@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const metadata: Metadata = {
-  title: "Vérification — Workwave",
+  title: "Vérification · Workwave",
   robots: { index: false, follow: false },
 };
 

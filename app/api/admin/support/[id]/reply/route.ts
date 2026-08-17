@@ -41,7 +41,7 @@ export async function POST(
 
   if (!ticket.requester_email) {
     return NextResponse.json(
-      { error: "Ce ticket n'a pas d'email destinataire — répondez via une note interne." },
+      { error: "Ce ticket n'a pas d'email destinataire. Répondez via une note interne." },
       { status: 400 }
     );
   }

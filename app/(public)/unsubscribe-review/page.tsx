@@ -2,7 +2,7 @@ import Link from "next/link";
 import { processReviewUnsubscribe } from "./actions";
 
 export const metadata = {
-  title: "Désinscription des demandes d'avis — Workwave",
+  title: "Désinscription des demandes d'avis · Workwave",
   robots: "noindex, nofollow",
 };
 

@@ -1,10 +1,10 @@
 /**
- * ESCALADE DE LÉA — test du lot 2.
+ * ESCALADE DE LÉA · test du lot 2.
  *
  * Deux moitiés :
- *   A. la DÉCISION — appelle-t-elle l'outil au bon moment, et seulement là ?
+ *   A. la DÉCISION : appelle-t-elle l'outil au bon moment, et seulement là ?
  *      (exerce le vrai prompt et la vraie définition d'outil de production)
- *   B. l'EXÉCUTION — le ticket créé est-il exploitable et sans fuite ?
+ *   B. l'EXÉCUTION : le ticket créé est-il exploitable et sans fuite ?
  *
  * N'envoie aucun email : la notification admin n'est pas déclenchée ici (elle
  * l'est par la route). Les tickets créés sont nettoyés à la fin.

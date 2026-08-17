@@ -39,7 +39,7 @@ const VERTICAL_LABELS: Record<string, string> = {
 const VERTICAL_ORDER = ["btp", "domicile", "personne"];
 
 // Recherche insensible aux accents/casse. Escapes \u (pas de char combinant
-// littéral dans la source — cf. CLAUDE.md 26/05).
+// littéral dans la source, cf. CLAUDE.md 26/05).
 function normalize(s: string): string {
   return s
     .toLowerCase()
@@ -163,7 +163,7 @@ export default function SearchForm({
     // "refaire ma salle de bain"...). Avant le 11/08/2026 il ne se passait
     // RIEN : il cliquait, la page ne bougeait pas. C'est ce cul-de-sac qui
     // empechait d'ecrire "Quel est votre projet ?" dans le champ.
-    // Desormais on l'emmene deposer son projet, avec son texte deja repris —
+    // Desormais on l'emmene deposer son projet, avec son texte deja repris :
     // il a decrit son besoin, on ne le lui fait pas retaper.
     if (!slug && metierQuery.trim()) {
       const ville = selectedCity?.slug || (suggestions.length > 0 ? suggestions[0].slug : "");
@@ -205,7 +205,7 @@ export default function SearchForm({
       onSubmit={handleSubmit}
       className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-2xl mx-auto bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-full p-2 shadow-sm hover:shadow-md transition-shadow duration-250"
     >
-      {/* Sélecteur métier — combobox searchable groupé */}
+      {/* Sélecteur métier · combobox searchable groupé */}
       <div ref={metierRef} className="flex-1 min-w-0 relative flex items-center gap-3 pl-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -234,7 +234,7 @@ export default function SearchForm({
           // repond en une seconde. Les trois exemples sont choisis pour montrer
           // les trois formes acceptees : un metier ("plombier"), un probleme
           // ("fuite d'eau"), une phrase entiere ("refaire ma salle de bain").
-          // Les points de suspension disent "et tout ce que vous voulez" —
+          // Les points de suspension disent "et tout ce que vous voulez" :
           // sans eux, le visiteur croit devoir choisir dans la liste.
           placeholder="Ex. : plombier, fuite d'eau, refaire ma salle de bain…"
           className={`flex-1 min-w-0 bg-transparent text-sm text-[var(--text-primary)] py-3 outline-none placeholder:text-[var(--text-tertiary)] ${

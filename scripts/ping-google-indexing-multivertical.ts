@@ -109,7 +109,7 @@ async function pingUrl(client: any, url: string): Promise<{ ok: boolean; error?:
 
 async function main() {
   const urls = buildPriorityUrls();
-  console.log(`\nMulti-vertical Phase 11 — ping Google Indexing API`);
+  console.log(`\nMulti-vertical Phase 11 · ping Google Indexing API`);
   console.log(`Total URLs : ${urls.length} (sous quota 200/jour)\n`);
 
   if (DRY_RUN) {

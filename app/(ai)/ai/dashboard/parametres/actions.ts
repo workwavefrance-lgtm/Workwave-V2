@@ -125,7 +125,7 @@ export async function deleteAiAccount(formData: FormData): Promise<void> {
 
   // 3) Email blacklist (anti futur broadcast Brevo/Resend)
   // Le insert peut echouer si l'email est deja blacklisté (UNIQUE constraint).
-  // Dans ce cas on ignore silencieusement — l'effet est deja en place.
+  // Dans ce cas on ignore silencieusement, l'effet est deja en place.
   if (pro.email) {
     try {
       await service.from("email_blacklist").insert({

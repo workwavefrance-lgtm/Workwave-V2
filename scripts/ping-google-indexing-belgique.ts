@@ -51,7 +51,7 @@ async function main() {
   const topCities = (cities || []) as { slug: string; name: string }[];
 
   const urls: string[] = [];
-  // 1. Provinces × métiers (toujours valides — la province agrège toutes les communes)
+  // 1. Provinces × métiers (toujours valides, la province agrège toutes les communes)
   for (const p of PROVINCES) for (const m of METIERS) urls.push(`${BASE}/${m}/${p}`);
   // 2. Top villes × métiers principaux
   for (const c of topCities) for (const m of METIERS_VILLE) urls.push(`${BASE}/${m}/${c.slug}`);

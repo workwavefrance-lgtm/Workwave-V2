@@ -29,7 +29,7 @@ export async function generateMetadata({
   const year = new Date().getFullYear();
   const path = `/ai/monde/${skillSlug}`;
   return {
-    title: `Freelance ${fr.label} — monde francophone (${year})`,
+    title: `Freelance ${fr.label} · monde francophone (${year})`,
     description: `Trouvez un freelance ${fr.nounSingular} à Bruxelles, Genève, Montréal, Casablanca, Dakar et plus. TJM indicatifs, mise en relation en 24h, 0 commission.`,
     alternates: { canonical: `${SITE_URL}${path}` },
   };
@@ -61,8 +61,8 @@ export default async function MondeSkillHubPage({
     {
       q: `Combien coûte un freelance ${fr.nounSingular} ?`,
       a: tjm
-        ? `Repère indicatif (TJM marché européen) : un ${fr.nounSingular} senior facture autour de ${formatTjmRange(tjm.senior.min, tjm.senior.max, "fr")}. Le tarif final dépend de la séniorité, du périmètre et de la mission. Sur Workwave, vous convenez du tarif directement avec le freelance — 0 commission.`
-        : `Le tarif varie selon la séniorité, le périmètre et l'expérience. Vous le négociez directement avec le freelance — Workwave ne prend aucune commission.`,
+        ? `Repère indicatif (TJM marché européen) : un ${fr.nounSingular} senior facture autour de ${formatTjmRange(tjm.senior.min, tjm.senior.max, "fr")}. Le tarif final dépend de la séniorité, du périmètre et de la mission. Sur Workwave, vous convenez du tarif directement avec le freelance, 0 commission.`
+        : `Le tarif varie selon la séniorité, le périmètre et l'expérience. Vous le négociez directement avec le freelance : Workwave ne prend aucune commission.`,
     },
     {
       q: `Dans quels pays francophones puis-je recruter ?`,
@@ -105,7 +105,7 @@ export default async function MondeSkillHubPage({
             Freelance {fr.label}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            Recrutez un freelance {fr.nounSingular} dans l&apos;espace francophone. Déposez votre projet gratuitement — notre IA alerte les profils qui correspondent et ils vous contactent. 0 commission.
+            Recrutez un freelance {fr.nounSingular} dans l&apos;espace francophone. Déposez votre projet gratuitement : notre IA alerte les profils qui correspondent et ils vous contactent. 0 commission.
           </p>
           <div className="mt-8">
             <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>

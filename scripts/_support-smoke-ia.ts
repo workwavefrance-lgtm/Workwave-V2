@@ -41,7 +41,7 @@ async function main() {
   let failures = 0;
 
   // 1) Tri : cas déblocage / remboursement
-  console.log("— Cas 1 : pro qui demande un remboursement —");
+  console.log("- Cas 1 : pro qui demande un remboursement -");
   const t1 = await triageTicket(CAS_UNLOCK);
   console.log("  tri :", t1);
   if (!t1) {
@@ -53,7 +53,7 @@ async function main() {
   }
 
   // 2) Tri : cas menace juridique
-  console.log("\n— Cas 2 : mise en demeure + CNIL + avocat —");
+  console.log("\n- Cas 2 : mise en demeure + CNIL + avocat -");
   const t2 = await triageTicket(CAS_LEGAL);
   console.log("  tri :", t2);
   if (!t2) {
@@ -68,7 +68,7 @@ async function main() {
   }
 
   // 3) Brouillon de réponse sur le cas 1 (le plus piégeux : demande de remboursement)
-  console.log("\n— Brouillon de réponse (cas remboursement) —");
+  console.log("\n- Brouillon de réponse (cas remboursement) -");
   const draft = await generateDraftReply({
     subject: CAS_UNLOCK.subject,
     requesterName: "Julien",
@@ -86,7 +86,7 @@ async function main() {
     console.log(draft.split("\n").map((l) => "    " + l).join("\n"));
     const lower = draft.toLowerCase();
     if (/\brembours/.test(lower) && !/pas de rembours|aucun rembours|ne peut pas être rembours|non rembours/.test(lower)) {
-      console.log("\n  ⚠️ à vérifier : le brouillon parle de remboursement — s'assurer qu'il ne le PROMET pas.");
+      console.log("\n  ⚠️ à vérifier : le brouillon parle de remboursement : s'assurer qu'il ne le PROMET pas.");
     }
     if (/cordialement|l'équipe workwave/i.test(draft)) {
       console.log("  ⚠️ le brouillon ajoute une signature alors que le template en met déjà une.");
@@ -94,7 +94,7 @@ async function main() {
   }
 
   // 4) Bout-en-bout : ingestion + tri appliqué en base
-  console.log("\n— Bout-en-bout : ingestion + tri écrit en base —");
+  console.log("\n- Bout-en-bout : ingestion + tri écrit en base -");
   const fakeId = `smoke-ia-${Date.now()}`;
   const ing = await ingestInboundEmailAsTicket({
     resendEmailId: fakeId,
@@ -128,7 +128,7 @@ async function main() {
     console.log(`\n❌ ${failures} échec(s) bloquant(s).`);
     process.exit(1);
   }
-  console.log("\n✅ COUCHE IA OK — tri et brouillon opérationnels.");
+  console.log("\n✅ COUCHE IA OK : tri et brouillon opérationnels.");
 }
 
 main().catch((e) => {

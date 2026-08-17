@@ -17,11 +17,11 @@ const BASE_URL = "https://workwave.fr";
 export const metadata: Metadata = {
   title: "Trouver des clients : 9,90 €/contact, sans abonnement",
   description:
-    "Professionnels des services à domicile et de l'aide à la personne : trouvez des clients près de chez vous. Payez 9,90 € seulement pour débloquer un contact qui vous intéresse — sans abonnement, sans commission. Créez votre fiche gratuite.",
+    "Professionnels des services à domicile et de l'aide à la personne : trouvez des clients près de chez vous. Payez 9,90 € seulement pour débloquer un contact qui vous intéresse, sans abonnement, sans commission. Créez votre fiche gratuite.",
   alternates: { canonical: `${BASE_URL}/trouver-des-clients` },
   openGraph: {
     title:
-      "Trouver des clients près de chez vous — 9,90 €/contact, sans abonnement",
+      "Trouver des clients près de chez vous · 9,90 €/contact, sans abonnement",
     description:
       "Ménage, jardinage, garde d'enfants, soutien scolaire… Recevez des clients près de chez vous. 9,90 € le contact, zéro abonnement, zéro commission.",
     url: `${BASE_URL}/trouver-des-clients`,

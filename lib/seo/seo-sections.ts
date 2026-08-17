@@ -52,7 +52,7 @@ const DEPT_STATS: Record<string, DeptStats> = {
   "86": { pop_k: 442, logements_k: 256, ancien_pct: 47, res_principales_pct: 84 },
   "87": { pop_k: 373, logements_k: 232, ancien_pct: 50, res_principales_pct: 79 },
   // ── Provinces belges (population réelle Statbel 2025 ; logements estimés,
-  // NON affichés pour BE — cf. localContext ci-dessous qui n'utilise que pop_k
+  // NON affichés pour BE : cf. localContext ci-dessous qui n'utilise que pop_k
   // pour éviter d'inventer un % de logements anciens non sourcé). ──
   WHT: { pop_k: 1347, logements_k: 586, ancien_pct: 0, res_principales_pct: 0 },
   WLG: { pop_k: 1110, logements_k: 483, ancien_pct: 0, res_principales_pct: 0 },
@@ -411,14 +411,14 @@ type VerticalTerms = {
   h2_works: (cat: string, loc: string, prep: string) => string;
   /** Section 2 intro */
   intro_works: (catPlural: string, loc: string, prep: string) => string;
-  /** Section 5 (depannage / autre) — null si pas pertinent */
+  /** Section 5 (depannage / autre) · null si pas pertinent */
   section_urgence: ((cat: string, loc: string, prep: string) => {
     h2: string;
     paragraphs: string[];
   }) | null;
   /** Phrase "demander des devis en 30 secondes" adaptée */
   cta_phrase: string;
-  /** Phrase pour la "garantie/assurance" — varie selon vertical */
+  /** Phrase pour la "garantie/assurance" · varie selon vertical */
   garantie_phrase: (cat: string) => string;
   /** Adjectif qualifiant la profession (pour FAQ) */
   qualif: string;
@@ -441,7 +441,7 @@ const VERTICAL_TERMS: Record<Vertical, VerticalTerms> = {
     }),
     cta_phrase: "comparer des devis gratuits en 30 secondes",
     garantie_phrase: () =>
-      "C'est aussi l'assurance d'un devis détaillé, d'une responsabilité civile professionnelle et — pour les travaux concernés — d'une garantie décennale.",
+      "C'est aussi l'assurance d'un devis détaillé, d'une responsabilité civile professionnelle et (pour les travaux concernés) d'une garantie décennale.",
     qualif: "qualifié",
   },
   domicile: {
@@ -597,7 +597,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
           ? `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous fait gagner du temps avec un ${v.pro} ${v.qualif}, formé à ses prestations et accountable. ${v.garantie_phrase(catLower)}`
           : `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous garantit un ${v.pro} ${v.qualif}, attentif et déclaré, capable d'instaurer une relation de confiance avec votre famille. ${v.garantie_phrase(catLower)}`,
       `${localContext} Cette zone génère une demande régulière en ${catPlural}, et Workwave référence ${ctx.prosCount} ${v.proPlural} actifs sur le secteur.`,
-      `Vous pouvez comparer leurs profils, leurs spécialités et — quand l'information est publique — leurs avis vérifiés, avant de prendre contact ou de demander plusieurs propositions.`,
+      `Vous pouvez comparer leurs profils, leurs spécialités et (quand l'information est publique) leurs avis vérifiés, avant de prendre contact ou de demander plusieurs propositions.`,
     ],
   };
 
@@ -649,7 +649,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     h2: `Comment choisir le bon ${catLower} ${preposition} ${locationName} ?`,
     paragraphs: [
       `Plusieurs critères vous aident à identifier ${artInst} ${catLower} ${v.qualif} et de confiance ${preposition} ${locationName} :`,
-      `Sur Workwave, chaque fiche affiche ${L.registreVerifPhrase}, les certifications déclarées et les avis vérifiés des particuliers passés par la plateforme — autant d'éléments à comparer avant de contacter.`,
+      `Sur Workwave, chaque fiche affiche ${L.registreVerifPhrase}, les certifications déclarées et les avis vérifiés des particuliers passés par la plateforme : autant d'éléments à comparer avant de contacter.`,
     ],
     bullets: choisirBullets,
   };
@@ -693,7 +693,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
     ],
   };
 
-  // Section "marché local" SOURCÉE par Perplexity (par dépt) — contenu unique +
+  // Section "marché local" SOURCÉE par Perplexity (par dépt) : contenu unique +
   // cité, zéro chiffre inventé. Présente uniquement pour les dépts sourcés
   // (4 nouvelles régions) ; ailleurs, pas de section (pas de fallback inventé).
   // Cas spécial Monaco (zone transfrontalière, pas un dépt FR) : paragraphe
@@ -754,7 +754,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
       answer:
         vertical === "btp"
           ? `La grande majorité des artisans proposent un devis gratuit et sans engagement. Si un professionnel facture le devis, demandez-vous pourquoi. Sur Workwave, tous les devis sont 100% gratuits.`
-          : `Oui, la plupart des ${catPlural} ${preposition} ${locationName} proposent un premier échange et une estimation gratuite, sans engagement. Sur Workwave, le service est 100% gratuit pour les particuliers — sans inscription, sans frais cachés.`,
+          : `Oui, la plupart des ${catPlural} ${preposition} ${locationName} proposent un premier échange et une estimation gratuite, sans engagement. Sur Workwave, le service est 100% gratuit pour les particuliers, sans inscription, sans frais cachés.`,
     },
     {
       question: `Combien de ${catPlural} sont référencés ${preposition} ${locationName} sur Workwave ?`,

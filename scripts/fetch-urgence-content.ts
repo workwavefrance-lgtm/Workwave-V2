@@ -1,11 +1,11 @@
 /**
  * Sourcing Perplexity pour les PAGES PILIER « urgence » (/[metier]/urgence).
  * 1er métier : serrurier (cluster « serrurier urgence » ~8k vol/mois + angle
- * anti-arnaque identifié par l'analyse SERP du 10/06 — personne ne joue la
+ * anti-arnaque identifié par l'analyse SERP du 10/06, personne ne joue la
  * transparence : la SERP vit de prix d'appel trompeurs « dès 39€ » vs ~150€ réels).
  *
  * Sortie : lib/data/urgence-content.ts (statique → ISR-safe, zéro requête au rendu).
- * Règle absolue : ZÉRO chiffre inventé — tout vient de sources web citées.
+ * Règle absolue : ZÉRO chiffre inventé, tout vient de sources web citées.
  *
  * Usage : npx tsx scripts/fetch-urgence-content.ts [--dry-run]
  */
@@ -48,7 +48,7 @@ const PROMPT = `Tu es un expert du dépannage serrurerie en France. Recherche le
 Contraintes : chiffres issus de sources web réelles uniquement. Pas de promesse de délai d'intervention. France métropolitaine.`;
 
 async function main() {
-  console.log(`Sourcing Perplexity — urgence serrurier (${YEAR})...`);
+  console.log(`Sourcing Perplexity : urgence serrurier (${YEAR})...`);
   if (DRY) {
     console.log("[DRY] Prompt prêt, aucun appel.");
     return;
@@ -78,9 +78,9 @@ async function main() {
   const parsed = JSON.parse(m[0].replace(/\[\d+\]/g, ""));
 
   const out =
-    `// Contenu sourcé via Perplexity API (recherche web + citations) — généré le ${new Date().toISOString().slice(0, 10)}.\n` +
+    `// Contenu sourcé via Perplexity API (recherche web + citations), généré le ${new Date().toISOString().slice(0, 10)}.\n` +
     `// Régénérer : npx tsx scripts/fetch-urgence-content.ts\n` +
-    `// RÈGLE : zéro chiffre inventé — tout chiffre affiché vient des sources listées.\n\n` +
+    `// RÈGLE : zéro chiffre inventé, tout chiffre affiché vient des sources listées.\n\n` +
     `export type UrgenceContent = {\n` +
     `  priceRanges: { label: string; low: number; high: number }[];\n` +
     `  majorations: string;\n` +
@@ -110,7 +110,7 @@ async function main() {
   console.log(`✓ écrit : ${dest}`);
   console.log(`  fourchettes : ${parsed.priceRanges?.length} · faits légaux : ${parsed.legalFacts?.length} · arnaques : ${parsed.scamWarnings?.length} · réflexes : ${parsed.goodReflexes?.length} · sources : ${citations.length}`);
   console.log("\nAperçu prix :");
-  for (const r of parsed.priceRanges || []) console.log(`  • ${r.label} : ${r.low}–${r.high} €`);
+  for (const r of parsed.priceRanges || []) console.log(`  • ${r.label} : ${r.low} à ${r.high} €`);
   console.log(`  Majorations : ${parsed.majorations}`);
 }
 

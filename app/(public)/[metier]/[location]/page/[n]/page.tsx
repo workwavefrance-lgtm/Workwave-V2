@@ -2,14 +2,14 @@
  * Pages 2 et suivantes d'un listing : /[metier]/[location]/page/2
  *
  * POURQUOI une route dediee plutot que `?page=2` : lire un parametre d'URL
- * (`searchParams`) rend TOUTE la route dynamique dans Next.js — la page est
+ * (`searchParams`) rend TOUTE la route dynamique dans Next.js : la page est
  * alors recalculee a chaque visite, `revalidate` est ignore. Resultat mesure le
  * 03/08 sous le crawl de Google : 8 a 20 secondes par listing, et Googlebot qui
  * commence a reduire son rythme. En passant le numero de page dans le CHEMIN,
  * la page redevient cachable.
  *
  * SEO : aucun impact. Ces pages ne sont pas dans le sitemap et leur canonical
- * pointe deja vers la page 1 — Google ne les indexe pas. Les anciens liens
+ * pointe deja vers la page 1, Google ne les indexe pas. Les anciens liens
  * `?page=N` sont rediriges en 301 par le middleware.
  *
  * Le segment litteral `page` prime sur le segment dynamique `[ville]` du meme
@@ -34,7 +34,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metier, location, n } = await params;
-  // Canonical vers la page 1 — EXACTEMENT le comportement d'avant (`?page=N`
+  // Canonical vers la page 1 : EXACTEMENT le comportement d'avant (`?page=N`
   // canonicalisait deja vers la page 1). Pas de noindex ajoute : la regle du
   // projet interdit d'en poser un sans comptage prealable et validation de Willy.
   return {

@@ -7,7 +7,7 @@ import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 export const metadata: Metadata = {
-  title: "Dashboard — Workwave AI",
+  title: "Dashboard · Workwave AI",
   description: "Your Workwave AI freelancer space.",
   robots: { index: false, follow: false },
 };
@@ -26,7 +26,7 @@ export default async function AiEnDashboardPage() {
   // Real stats : count leads over the last 30 days
   const service = getServiceClient();
   // Fix react-hooks/purity : we compute the date via new Date() (impure but
-  // allowed in an async Server Component — the linter targets Date.now()).
+  // allowed in an async Server Component: the linter targets Date.now()).
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { count: leadsReceived30d } = await service
@@ -94,7 +94,7 @@ export default async function AiEnDashboardPage() {
         />
       </div>
 
-      {/* Membership info banner (free-only — no checkout) */}
+      {/* Membership info banner (free-only, no checkout) */}
       {!isPremium && (
         <div className="bg-[var(--ai-text)] text-white rounded-2xl p-8 sm:p-10 mb-10 relative overflow-hidden">
           <div
@@ -128,7 +128,7 @@ export default async function AiEnDashboardPage() {
             </h2>
             <p className="text-sm text-white/70 leading-relaxed mb-6 max-w-lg">
               Your free profile is already live and visible in the directory.
-              Paid plans for international freelancers are on the way — no
+              Paid plans for international freelancers are on the way, no
               action needed for now.
             </p>
             <Link

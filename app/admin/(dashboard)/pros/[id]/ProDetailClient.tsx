@@ -236,7 +236,7 @@ export default function ProDetailClient({
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: "var(--admin-text-secondary)" }}>Plan</span>
-                  <span>{pro.subscription_plan || "—"}</span>
+                  <span>{pro.subscription_plan || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: "var(--admin-text-secondary)" }}>
@@ -245,7 +245,7 @@ export default function ProDetailClient({
                   <span className="tabular-nums">
                     {pro.current_period_end
                       ? new Date(pro.current_period_end).toLocaleDateString("fr-FR")
-                      : "—"}
+                      : "-"}
                   </span>
                 </div>
                 {pro.stripe_customer_id && (
@@ -390,10 +390,10 @@ export default function ProDetailClient({
                     {u.project ? (
                       <>
                         <span style={{ color: "var(--admin-accent)" }}>#{u.project.id}</span>{" "}
-                        {u.project.first_name || "—"} — {u.project.description?.slice(0, 60) || ""}
+                        {u.project.first_name || "-"} · {u.project.description?.slice(0, 60) || ""}
                       </>
                     ) : (
-                      "—"
+                      "-"
                     )}
                   </span>
                   <span className="tabular-nums font-medium">
@@ -458,7 +458,7 @@ function InfoRow({
         {label}
       </span>
       <span className={mono ? "font-mono" : ""}>
-        {value || "—"}
+        {value || "-"}
       </span>
     </div>
   );

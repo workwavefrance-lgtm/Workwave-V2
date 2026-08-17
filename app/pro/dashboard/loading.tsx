@@ -2,7 +2,7 @@
  * Squelette de chargement du dashboard pro.
  *
  * POURQUOI : sans ce fichier, Next attendait que TOUTES les requêtes serveur du
- * layout ET de la page soient résolues avant d'afficher quoi que ce soit — soit
+ * layout ET de la page soient résolues avant d'afficher quoi que ce soit, soit
  * 1,5 à 3 s d'interface figée à chaque changement d'onglet sur mobile. Le pro
  * tapait, rien ne bougeait, il croyait que l'appli avait planté. Le shell
  * (sidebar, header, barre du bas) s'affiche désormais immédiatement et seul le

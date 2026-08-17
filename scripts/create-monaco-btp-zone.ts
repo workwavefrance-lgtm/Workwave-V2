@@ -57,10 +57,10 @@ async function main() {
     console.log(`  ${b.name} (${b.slug}) → ${count} artisans`);
   }
   if ((borders?.length ?? 0) !== 4) {
-    throw new Error("Communes frontalières manquantes — vérifier les slugs");
+    throw new Error("Communes frontalières manquantes : vérifier les slugs");
   }
 
-  // Ville Monaco — données publiques réelles (zéro inventé)
+  // Ville Monaco : données publiques réelles (zéro inventé)
   const monaco = {
     department_id: dept.id,
     name: "Monaco",
@@ -79,7 +79,7 @@ async function main() {
     .maybeSingle();
 
   if (existing) {
-    console.log(`\n= Ville "Monaco" existe déjà (city_id=${existing.id}) — rien à faire.`);
+    console.log(`\n= Ville "Monaco" existe déjà (city_id=${existing.id}) : rien à faire.`);
     return;
   }
 

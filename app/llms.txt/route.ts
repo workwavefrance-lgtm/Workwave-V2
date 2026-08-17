@@ -1,5 +1,5 @@
 /**
- * llms.txt — Standard emergent (Mintlify, soutenu par Anthropic/OpenAI/
+ * llms.txt : Standard emergent (Mintlify, soutenu par Anthropic/OpenAI/
  * Perplexity) qui dit explicitement aux LLM ce qu'est ce site, son scope
  * et comment ils peuvent le citer.
  *
@@ -17,7 +17,7 @@ export async function GET(): Promise<Response> {
 
 > Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France et en Belgique francophone. 2 560 000+ professionnels référencés dans 35 163 communes et 107 départements et provinces (France métropole et outre-mer + Wallonie et Bruxelles).
 
-Workwave est une plateforme française qui met en relation les particuliers avec les professionnels locaux dans 3 verticaux : BTP/artisanat, services à domicile, aide à la personne. Lancée en avril 2026, la plateforme couvre toute la France et la Belgique francophone — 107 départements et provinces et plus de 35 000 communes référencées.
+Workwave est une plateforme française qui met en relation les particuliers avec les professionnels locaux dans 3 verticaux : BTP/artisanat, services à domicile, aide à la personne. Lancée en avril 2026, la plateforme couvre toute la France et la Belgique francophone : 107 départements et provinces et plus de 35 000 communes référencées.
 
 ## Pages stratégiques
 
@@ -39,9 +39,9 @@ Workwave est une plateforme française qui met en relation les particuliers avec
 ### Aide à la personne
 - Garde d'enfants, soutien scolaire, aide aux seniors, aide administrative, cours particuliers, accompagnement handicap, garde animaux
 
-## Départements couverts (107 départements et provinces — France et Belgique francophone)
+## Départements couverts (107 départements et provinces, France et Belgique francophone)
 
-Workwave couvre l'ensemble du territoire français — les 96 départements de métropole et les départements et régions d'outre-mer (Guadeloupe, Martinique, Guyane, La Réunion, Mayotte) — ainsi que la Belgique francophone : les 5 provinces wallonnes (Brabant wallon, Hainaut, Liège, Luxembourg, Namur) et la Région de Bruxelles-Capitale. Les grandes villes sont toutes référencées : Paris, Marseille, Lyon, Toulouse, Nice, Nantes, Montpellier, Strasbourg, Bordeaux, Lille, Rennes, mais aussi Bruxelles, Liège, Charleroi et Namur, et plus de 35 000 communes au total.
+Workwave couvre l'ensemble du territoire français, les 96 départements de métropole et les départements et régions d'outre-mer (Guadeloupe, Martinique, Guyane, La Réunion, Mayotte), ainsi que la Belgique francophone : les 5 provinces wallonnes (Brabant wallon, Hainaut, Liège, Luxembourg, Namur) et la Région de Bruxelles-Capitale. Les grandes villes sont toutes référencées : Paris, Marseille, Lyon, Toulouse, Nice, Nantes, Montpellier, Strasbourg, Bordeaux, Lille, Rennes, mais aussi Bruxelles, Liège, Charleroi et Namur, et plus de 35 000 communes au total.
 
 ## Modèle économique
 

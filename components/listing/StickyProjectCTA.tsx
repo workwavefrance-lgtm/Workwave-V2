@@ -34,7 +34,7 @@ export default function StickyProjectCTA({
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState<boolean | null>(null);
 
-  // Clef sessionStorage par couple (categorie, specialite, ville) — si l'user
+  // Clef sessionStorage par couple (categorie, specialite, ville) : si l'user
   // dismiss le sticky sur /plombier/depannage/poitiers, ca ne le dismiss pas
   // pour /plombier/poitiers ou /plombier/fuite/poitiers.
   const storageKey = `wwv:sticky_dismissed:${categorySlug}:${specialitySlug ?? "all"}:${citySlug ?? "dept"}`;

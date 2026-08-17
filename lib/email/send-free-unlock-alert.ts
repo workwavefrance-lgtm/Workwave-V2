@@ -10,7 +10,7 @@ function getResendClient() {
 
 /**
  * Alerte admin à chaque déblocage de lead OFFERT (offre "2 premiers leads offerts").
- * Permet de suivre en temps réel les nouveaux pros qui consomment l'offre —
+ * Permet de suivre en temps réel les nouveaux pros qui consomment l'offre :
  * ce sont les meilleurs candidats à la conversion payante (relance possible
  * quand freeUsed === freeTotal).
  */
@@ -38,7 +38,7 @@ export async function sendFreeUnlockAlert(params: {
       ${
         last
           ? `<div style="background:#FFF7ED;border-left:3px solid #FF5A36;border-radius:8px;padding:14px 16px;margin:14px 0;">
-      <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.6;"><strong>Offre consommée</strong> — le prochain déblocage de ce pro sera payant (9,90&nbsp;€). Bon moment pour une relance / demande de retour d'expérience.</p>
+      <p style="margin:0;font-size:14px;color:#0A0A0A;line-height:1.6;"><strong>Offre consommée</strong> : le prochain déblocage de ce pro sera payant (9,90&nbsp;€). Bon moment pour une relance / demande de retour d'expérience.</p>
     </div>`
           : `<p style="margin:0;font-size:13px;color:#6B7280;">Il lui reste ${params.freeTotal - params.freeUsed} déblocage(s) offert(s).</p>`
       }
@@ -50,7 +50,7 @@ export async function sendFreeUnlockAlert(params: {
   await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: adminEmail,
-    subject: `🎁 Lead offert ${params.freeUsed}/${params.freeTotal} — ${params.proName} → projet #${params.projectId}`,
+    subject: `🎁 Lead offert ${params.freeUsed}/${params.freeTotal} · ${params.proName} → projet #${params.projectId}`,
     html,
   });
 }

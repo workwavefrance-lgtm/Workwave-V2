@@ -109,7 +109,7 @@ export default function CreerFicheForm({
       {/* Pays de l'entreprise : pilote la validation côté serveur. */}
       <input type="hidden" name="country" value={country} />
 
-      {/* Sélecteur de pays — drapeaux explicites pour ne perdre personne. */}
+      {/* Sélecteur de pays : drapeaux explicites pour ne perdre personne. */}
       <div>
         <span className={LABEL}>Où est enregistrée votre entreprise ?</span>
         <div className="flex gap-3" role="radiogroup" aria-label="Pays de l'entreprise">
@@ -136,8 +136,8 @@ export default function CreerFicheForm({
         </div>
         <p className="mt-2 text-xs text-[var(--text-tertiary)]">
           {isBE
-            ? "Entreprise belge : identifiez-vous avec votre numéro d'entreprise (BCE), 10 chiffres — celui de votre inscription à la Banque-Carrefour des Entreprises."
-            : "Entreprise française : identifiez-vous avec votre numéro SIRET, 14 chiffres — celui de votre inscription au registre INSEE."}
+            ? "Entreprise belge : identifiez-vous avec votre numéro d'entreprise (BCE), 10 chiffres, celui de votre inscription à la Banque-Carrefour des Entreprises."
+            : "Entreprise française : identifiez-vous avec votre numéro SIRET, 14 chiffres, celui de votre inscription au registre INSEE."}
         </p>
       </div>
 

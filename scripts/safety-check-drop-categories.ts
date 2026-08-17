@@ -125,7 +125,7 @@ async function main() {
   const hasReferences = leadsCount > 0 || emailsCount > 0 || sequencesCount > 0;
 
   if (hasBlocking) {
-    console.log("❌ BLOQUANT — Au moins un pro a un compte / abonnement actif. NE PAS hard-delete.");
+    console.log("❌ BLOQUANT : au moins un pro a un compte / abonnement actif. NE PAS hard-delete.");
     console.log("Liste des pros bloquants :");
     [...claimedPros, ...stripePros, ...subscribedPros].forEach((p) => {
       console.log(`  - ${p.slug} (${p.name})`);
@@ -137,7 +137,7 @@ async function main() {
     console.log("   a) Soft-delete (is_active=false, deleted_at=NOW()) + garder catégorie en place");
     console.log("   b) Cascade delete via SQL (DELETE FROM project_leads + email_logs + email_sequences d'abord)");
   } else {
-    console.log("✅ SAFE — Aucun pro claimed/payant, aucune référence FK. Hard-delete OK.");
+    console.log("✅ SAFE : aucun pro claimed/payant, aucune référence FK. Hard-delete OK.");
   }
 }
 

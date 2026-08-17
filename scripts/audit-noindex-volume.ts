@@ -39,7 +39,7 @@ async function main() {
   if (!cities) return;
   console.log(`Villes Vienne     : ${cities.length}`);
 
-  // 3. Compter les pros par couple (catégorie × ville) — paginé
+  // 3. Compter les pros par couple (catégorie × ville), paginé
   console.log("\nChargement pros par couple (catégorie × ville)...");
   let allRows: { category_id: number; city_id: number }[] = [];
   let offset = 0;

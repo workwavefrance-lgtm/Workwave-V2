@@ -267,7 +267,7 @@ export default function ProjectDetailClient({
             </div>
           </Card>
 
-          {/* Broadcast / Routing — Phase 11 model :
+          {/* Broadcast / Routing · Phase 11 model :
               - AI projects (vertical='tech') sont broadcastes a TOUS les freelances inscrits.
                 broadcast_count = nombre de freelances ayant recu le mail.
                 Les leads (project_leads) sont crees A LA VOLEE quand un Premium clique
@@ -290,8 +290,8 @@ export default function ProjectDetailClient({
               <Card
                 title={
                   isAi
-                    ? `Broadcast (${broadcastCount ?? 0} freelances) — ${leads.length} contact${leads.length > 1 ? "s" : ""}`
-                    : `Routing — ${leads.length} destinataire${leads.length > 1 ? "s" : ""}${paidCount > 0 ? ` · ${paidCount} payé${paidCount > 1 ? "s" : ""}` : ""}${freeCount > 0 ? ` · ${freeCount} offert${freeCount > 1 ? "s" : ""}` : ""}`
+                    ? `Broadcast (${broadcastCount ?? 0} freelances) · ${leads.length} contact${leads.length > 1 ? "s" : ""}`
+                    : `Routing · ${leads.length} destinataire${leads.length > 1 ? "s" : ""}${paidCount > 0 ? ` · ${paidCount} payé${paidCount > 1 ? "s" : ""}` : ""}${freeCount > 0 ? ` · ${freeCount} offert${freeCount > 1 ? "s" : ""}` : ""}`
                 }
               >
                 {!isAi && broadcastedAt && (
@@ -301,9 +301,9 @@ export default function ProjectDetailClient({
                       day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
                     })}
                     {paidCount > 0
-                      ? ` — ${paidCount} a${paidCount > 1 ? "/ont" : ""} payé (${revenueEur.toFixed(2).replace(".", ",")} €)`
+                      ? `, ${paidCount} a${paidCount > 1 ? "/ont" : ""} payé (${revenueEur.toFixed(2).replace(".", ",")} €)`
                       : ""}
-                    {freeCount > 0 ? ` — ${freeCount} déblocage${freeCount > 1 ? "s" : ""} offert${freeCount > 1 ? "s" : ""}` : ""}.
+                    {freeCount > 0 ? `, ${freeCount} déblocage${freeCount > 1 ? "s" : ""} offert${freeCount > 1 ? "s" : ""}` : ""}.
                   </p>
                 )}
                 {isAi && broadcastedAt && (
@@ -326,7 +326,7 @@ export default function ProjectDetailClient({
                         ? "Aucun freelance Premium n'a encore marque ce projet comme contacte."
                         : "Pas encore broadcasté (ou pas de freelances eligibles)."
                       : unlocks.length > 0
-                        ? `Aucun pro ciblé par le broadcast au moment du dépôt — mais ${unlocks.length} pro${unlocks.length > 1 ? "s ont" : " a"} pris ce projet depuis son feed (voir « Qui a pris ce projet » ci-dessous).`
+                        ? `Aucun pro ciblé par le broadcast au moment du dépôt, mais ${unlocks.length} pro${unlocks.length > 1 ? "s ont" : " a"} pris ce projet depuis son feed (voir « Qui a pris ce projet » ci-dessous).`
                         : "Aucun pro n'a reçu ce projet"}
                   </p>
                 ) : (
@@ -344,7 +344,7 @@ export default function ProjectDetailClient({
                         className="font-medium cursor-pointer transition-colors duration-150"
                         style={{ color: "var(--admin-accent)" }}
                       >
-                        {lead.pro?.name || "—"}
+                        {lead.pro?.name || "-"}
                       </button>
                       <span className="flex-1" />
                       <span className="tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
@@ -379,11 +379,11 @@ export default function ProjectDetailClient({
             );
           })()}
 
-          {/* Qui a PRIS ce projet — les déblocages (feed pull), indépendants du
+          {/* Qui a PRIS ce projet : les déblocages (feed pull), indépendants du
               broadcast. Répond au besoin "je dois voir qui a pris le projet".
               Un pro apparaît ici même s'il n'a jamais été ciblé par le broadcast. */}
           <Card
-            title={`Qui a pris ce projet — ${unlocks.length} déblocage${
+            title={`Qui a pris ce projet · ${unlocks.length} déblocage${
               unlocks.length > 1 ? "s" : ""
             }`}
           >
@@ -567,7 +567,7 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
       <span className="text-[11px] block mb-0.5" style={{ color: "var(--admin-text-tertiary)" }}>
         {label}
       </span>
-      <span>{value || "—"}</span>
+      <span>{value || "-"}</span>
     </div>
   );
 }

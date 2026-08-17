@@ -26,7 +26,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 15,
     "seniorHourlyMaxUsd": 40,
     "level": "budget",
-    "note": "For senior freelance software/digital talent based in India, realistic hourly pricing is still below the global mid-market, with many India-based rates clustering around $6–$25/hour and experienced/specialist Indian rates often around ₹2,000–₹5,000+/hour ($24–$60+/hour), so a $15–$40/hour senior band is a conservative market fit.",
+    "note": "For senior freelance software/digital talent based in India, realistic hourly pricing is still below the global mid-market, with many India-based rates clustering around $6-$25/hour and experienced/specialist Indian rates often around ₹2,000-₹5,000+/hour ($24-$60+/hour), so a $15-$40/hour senior band is a conservative market fit.",
     "sources": [
       "https://www.karboncard.com/blog/freelance-hourly-rate",
       "https://www.upwork.com/resources/upwork-hourly-rates",
@@ -41,7 +41,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 20,
     "seniorHourlyMaxUsd": 50,
     "level": "mid",
-    "note": "For Japan, senior freelance software/digital hourly rates sit below premium US/EU markets and are generally in a mid-market global band, with Upwork showing software developers at about $10–$100/hr and senior Japan-based salary data translating to a lower local market ceiling than premium freelance hubs.",
+    "note": "For Japan, senior freelance software/digital hourly rates sit below premium US/EU markets and are generally in a mid-market global band, with Upwork showing software developers at about $10-$100/hr and senior Japan-based salary data translating to a lower local market ceiling than premium freelance hubs.",
     "sources": [
       "https://japan-dev.com/blog/software-developer-salaries-in-japan-the-ultimate-guide",
       "https://www.upwork.com/hire/software-developers/cost/",
@@ -71,7 +71,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 60,
     "seniorHourlyMaxUsd": 100,
     "level": "mid",
-    "note": "For the UAE, reported senior freelance software/developer hourly rates cluster around about $60–$100/hr, which is above low-cost markets but below premium US/Switzerland-style pricing.",
+    "note": "For the UAE, reported senior freelance software/developer hourly rates cluster around about $60-$100/hr, which is above low-cost markets but below premium US/Switzerland-style pricing.",
     "sources": [
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
       "https://www.upwork.com/hire/software-developers/cost/",
@@ -86,7 +86,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 55,
     "seniorHourlyMaxUsd": 95,
     "level": "mid",
-    "note": "Saudi Arabia’s senior freelance software/digital hourly rates are generally below premium global markets and are commonly cited around the mid-market range, roughly $55–$95 per hour.",
+    "note": "Saudi Arabia’s senior freelance software/digital hourly rates are generally below premium global markets and are commonly cited around the mid-market range, roughly $55-$95 per hour.",
     "sources": [
       "https://www.upwork.com/hire/software-developers/cost/",
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
@@ -116,7 +116,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 24,
     "seniorHourlyMaxUsd": 33,
     "level": "budget",
-    "note": "Indonesia fits the Southeast Asia low-cost band, where senior software freelancer hourly rates are typically around $24–$33/hour, well below global senior-market benchmarks.",
+    "note": "Indonesia fits the Southeast Asia low-cost band, where senior software freelancer hourly rates are typically around $24-$33/hour, well below global senior-market benchmarks.",
     "sources": [
       "https://www.remotecrew.io/blog/software-developer-per-hour-rate-by-country",
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
@@ -131,7 +131,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 75,
     "level": "mid",
-    "note": "Brazil-based senior freelance software talent typically prices below U.S./Western Europe levels but around the upper-middle of Latin America, with 2026 benchmarked senior hourly rates commonly in the $45–$75 range.",
+    "note": "Brazil-based senior freelance software talent typically prices below U.S./Western Europe levels but around the upper-middle of Latin America, with 2026 benchmarked senior hourly rates commonly in the $45-$75 range.",
     "sources": [
       "https://www.howdy.com/blog/brazil-software-engineer-salary-hiring-cost-benchmarks",
       "https://uvik.net/blog/global-software-developer-rates-2026/",
@@ -206,7 +206,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 65,
     "level": "mid",
-    "note": "Spain’s senior freelance software/digital hourly rates are generally below premium US/Western Europe top-end pricing and sit in a mid-market band around $40–$65/hour versus the global market.",
+    "note": "Spain’s senior freelance software/digital hourly rates are generally below premium US/Western Europe top-end pricing and sit in a mid-market band around $40-$65/hour versus the global market.",
     "sources": [
       "https://www.upwork.com/resources/upwork-hourly-rates",
       "https://hubstaff.com/time-tracking/average-hourly-rates",
@@ -251,7 +251,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 25,
     "seniorHourlyMaxUsd": 55,
     "level": "mid",
-    "note": "Philippines senior freelance software-digital hourly rates are generally below premium US/EU market rates and cluster in a mid-market band, with published 2026 benchmarks showing about $25–$55/hour for senior talent.",
+    "note": "Philippines senior freelance software-digital hourly rates are generally below premium US/EU market rates and cluster in a mid-market band, with published 2026 benchmarks showing about $25-$55/hour for senior talent.",
     "sources": [
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
       "https://www.remotecrew.io/blog/software-developer-per-hour-rate-by-country",
@@ -266,7 +266,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 20,
     "seniorHourlyMaxUsd": 45,
     "level": "mid",
-    "note": "Pakistan sits in a lower-cost South Asian freelance band, with senior hourly rates commonly quoted around $20–$45/hr, below the global senior market and well under premium Western rates.",
+    "note": "Pakistan sits in a lower-cost South Asian freelance band, with senior hourly rates commonly quoted around $20-$45/hr, below the global senior market and well under premium Western rates.",
     "sources": [
       "https://www.upwork.com/hire/software-developers/cost/",
       "https://www.youtube.com/watch?v=TcmIPwsUh4U",
@@ -371,7 +371,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 78,
     "seniorHourlyMaxUsd": 125,
     "level": "high",
-    "note": "In the UK, senior freelance digital and software rates sit in the high tier globally, with a representative 2026 benchmark around $78–$125 per hour, above mid-market regions and below the top premium markets.",
+    "note": "In the UK, senior freelance digital and software rates sit in the high tier globally, with a representative 2026 benchmark around $78-$125 per hour, above mid-market regions and below the top premium markets.",
     "sources": [
       "https://arc.dev/employer-blog/freelance-developers-cost/",
       "https://gigradar.io/blog/upwork-hourly-rate",
@@ -401,7 +401,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 80,
     "level": "mid",
-    "note": "Taiwan’s senior freelance software/digital hourly rates are generally below U.S. premium-market levels and fit a mid-market international band, with senior offshore-style benchmarks in Asia often clustering around roughly $40–$80/hour.",
+    "note": "Taiwan’s senior freelance software/digital hourly rates are generally below U.S. premium-market levels and fit a mid-market international band, with senior offshore-style benchmarks in Asia often clustering around roughly $40-$80/hour.",
     "sources": [
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
       "https://www.contractrates.fyi/Senior-Software-Engineer/hourly-rates",
@@ -416,7 +416,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 31,
     "seniorHourlyMaxUsd": 65,
     "level": "mid",
-    "note": "Sweden’s senior freelance software rates sit in the mid-to-high global range, roughly around $31–$54/hr for senior contracts and up to about $65/hr for strong senior talent, which is below premium US/Nordics top-end pricing.",
+    "note": "Sweden’s senior freelance software rates sit in the mid-to-high global range, roughly around $31-$54/hr for senior contracts and up to about $65/hr for strong senior talent, which is below premium US/Nordics top-end pricing.",
     "sources": [
       "https://lemon.io/rate-calculator/sweden/",
       "https://www.contractrates.fyi/Senior-Software-Engineer/hourly-rates",
@@ -431,7 +431,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": null,
     "seniorHourlyMaxUsd": null,
     "level": "budget",
-    "note": "Sri Lanka is a lower-cost freelance market; senior software and digital rates sit well below premium global levels (precise hourly figure under review — not displayed).",
+    "note": "Sri Lanka is a lower-cost freelance market; senior software and digital rates sit well below premium global levels (precise hourly figure under review, not displayed).",
     "sources": [
       "https://hashtagcoders.lk/blogs/remote-software-jobs-sri-lanka-2026",
       "https://www.levels.fyi/t/software-engineer/levels/senior/locations/sri-lanka",
@@ -446,7 +446,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 25,
     "seniorHourlyMaxUsd": 60,
     "level": "mid",
-    "note": "Singapore freelance software/digital senior hourly rates are in a mid-market band and sit below top-tier global hubs like the U.S. and Switzerland, with published Singapore benchmarks commonly around $25–$60/hour.",
+    "note": "Singapore freelance software/digital senior hourly rates are in a mid-market band and sit below top-tier global hubs like the U.S. and Switzerland, with published Singapore benchmarks commonly around $25-$60/hour.",
     "sources": [
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
       "https://www.contractrates.fyi/Senior-Software-Engineer/hourly-rates",
@@ -461,7 +461,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 15,
     "seniorHourlyMaxUsd": 40,
     "level": "budget",
-    "note": "Senegal-based senior freelance software/digital rates are in a low-cost market band below the typical global senior developer range, with common offshore Africa comparisons clustering around roughly $15–$40 per hour.",
+    "note": "Senegal-based senior freelance software/digital rates are in a low-cost market band below the typical global senior developer range, with common offshore Africa comparisons clustering around roughly $15-$40 per hour.",
     "sources": [
       "https://www.upwork.com/hire/software-developers/cost/",
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
@@ -476,7 +476,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 70,
     "level": "mid",
-    "note": "Rwanda-based senior software/digital freelancers are best placed in a lower-cost international market, with realistic hourly senior rates around $40–$70/h, below North American and Western European senior market rates.",
+    "note": "Rwanda-based senior software/digital freelancers are best placed in a lower-cost international market, with realistic hourly senior rates around $40-$70/h, below North American and Western European senior market rates.",
     "sources": [
       "https://www.remotecrew.io/blog/software-developer-per-hour-rate-by-country",
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
@@ -506,7 +506,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 45,
     "level": "mid",
-    "note": "Portuguese senior freelance software rates are in the mid-market range globally, with 2026 developer data clustering around $40–$45 per hour and still below typical US senior rates.",
+    "note": "Portuguese senior freelance software rates are in the mid-market range globally, with 2026 developer data clustering around $40-$45 per hour and still below typical US senior rates.",
     "sources": [
       "https://lemon.io/rate-calculator/portugal/",
       "https://www.getharvest.com/calculators/hourly-rate-calculator-in-portugal",
@@ -521,7 +521,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 30,
     "seniorHourlyMaxUsd": 65,
     "level": "mid",
-    "note": "Poland’s senior freelance software/digital hourly rates sit in a mid-market band and are typically below Western Europe and U.S. senior benchmarks, with strong senior developers clustering around the $40–$65/hour range.",
+    "note": "Poland’s senior freelance software/digital hourly rates sit in a mid-market band and are typically below Western Europe and U.S. senior benchmarks, with strong senior developers clustering around the $40-$65/hour range.",
     "sources": [
       "https://lemon.io/rate-calculator/poland/",
       "https://www.upwork.com/hire/software-developers/cost/",
@@ -536,7 +536,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 35,
     "seniorHourlyMaxUsd": 60,
     "level": "mid",
-    "note": "Peru’s senior freelance software hourly rates are in a lower-to-mid global band, with 2026 market data placing experienced developers around $35–$60 per hour, below premium US and Western European rates but above many entry-level global markets.",
+    "note": "Peru’s senior freelance software hourly rates are in a lower-to-mid global band, with 2026 market data placing experienced developers around $35-$60 per hour, below premium US and Western European rates but above many entry-level global markets.",
     "sources": [
       "https://lemon.io/rate-calculator/peru/",
       "https://www.upwork.com/hire/software-developers/cost/",
@@ -566,7 +566,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 23,
     "seniorHourlyMaxUsd": 45,
     "level": "budget",
-    "note": "Nigeria’s senior freelance software rates are reported around $23–$45 per hour, which sits in a lower-cost, budget-to-low-mid global market band rather than the premium international tier.",
+    "note": "Nigeria’s senior freelance software rates are reported around $23-$45 per hour, which sits in a lower-cost, budget-to-low-mid global market band rather than the premium international tier.",
     "sources": [
       "https://lemon.io/rate-calculator/nigeria/",
       "https://golance.com/hiring/best-freelance-software-developers-hourly-rate",
@@ -596,7 +596,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 15,
     "seniorHourlyMaxUsd": 40,
     "level": "mid",
-    "note": "Morocco’s realistic senior freelance hourly rates sit below premium global markets and are generally in a lower-cost mid range, with Morocco-specific benchmarks around $16–$42/hr and common senior freelance developer rates worldwide much higher.",
+    "note": "Morocco’s realistic senior freelance hourly rates sit below premium global markets and are generally in a lower-cost mid range, with Morocco-specific benchmarks around $16-$42/hr and common senior freelance developer rates worldwide much higher.",
     "sources": [
       "https://www.upwork.com/hire/software-developers/cost/",
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
@@ -626,7 +626,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 70,
     "level": "mid",
-    "note": "Kuwait-based senior software/digital freelancers appear to sit in a mid-market hourly band that is below premium US/Western Europe pricing but above low-cost markets, with a realistic senior range around $40–70/hour.",
+    "note": "Kuwait-based senior software/digital freelancers appear to sit in a mid-market hourly band that is below premium US/Western Europe pricing but above low-cost markets, with a realistic senior range around $40-70/hour.",
     "sources": [
       "https://www.levels.fyi/t/software-engineer/locations/kuwait",
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
@@ -656,7 +656,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 90,
     "level": "mid",
-    "note": "Italy’s senior freelance software/digital hourly rates are generally below premium US/Swiss levels and sit in a mid-market band, with Upwork-style benchmarks for experienced developers commonly clustering around the $40–$90/hour range.",
+    "note": "Italy’s senior freelance software/digital hourly rates are generally below premium US/Swiss levels and sit in a mid-market band, with Upwork-style benchmarks for experienced developers commonly clustering around the $40-$90/hour range.",
     "sources": [
       "https://www.upwork.com/hire/software-developers/cost/",
       "https://www.contractrates.fyi/Senior-Software-Engineer/hourly-rates",
@@ -671,7 +671,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 75,
     "level": "mid",
-    "note": "Israel’s senior freelance software/digital rates are generally above low-cost markets and sit around the upper-mid global band, with market benchmarks showing roughly $47/h average freelancer rates and Israel hourly ranges around $31–$75/h.",
+    "note": "Israel’s senior freelance software/digital rates are generally above low-cost markets and sit around the upper-mid global band, with market benchmarks showing roughly $47/h average freelancer rates and Israel hourly ranges around $31-$75/h.",
     "sources": [
       "https://globalbit.co.il/blog/real-cost-hiring-developer-israel",
       "https://www.freelancermap.com/freelancer/israel",
@@ -686,7 +686,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 30,
     "seniorHourlyMaxUsd": 60,
     "level": "mid",
-    "note": "Ireland’s realistic senior freelance hourly rates sit below US premium markets and align with a mid-market European range, with one 2026 estimate placing Ireland at about $30–60/hour for app/developer work.",
+    "note": "Ireland’s realistic senior freelance hourly rates sit below US premium markets and align with a mid-market European range, with one 2026 estimate placing Ireland at about $30-60/hour for app/developer work.",
     "sources": [
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
       "https://www.upwork.com/hire/software-developers/cost/",
@@ -791,7 +791,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 30,
     "seniorHourlyMaxUsd": 70,
     "level": "mid",
-    "note": "Chile’s senior freelance hourly rates are generally below premium US/Western Europe market levels and fit a mid-market band, with South America averages and Latin America offshore developer benchmarks clustering around roughly $24–$47/hour.",
+    "note": "Chile’s senior freelance hourly rates are generally below premium US/Western Europe market levels and fit a mid-market band, with South America averages and Latin America offshore developer benchmarks clustering around roughly $24-$47/hour.",
     "sources": [
       "https://www.upwork.com/resources/upwork-hourly-rates",
       "https://hubstaff.com/time-tracking/average-hourly-rates",
@@ -806,7 +806,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 40,
     "seniorHourlyMaxUsd": 70,
     "level": "mid",
-    "note": "For Cambodia, a realistic senior freelance hourly rate is typically below premium Western-market pricing and fits a lower-cost Southeast Asia outsourcing band, with senior rates commonly around $40–$70/hour versus $90+/hour in North America and Western Europe.",
+    "note": "For Cambodia, a realistic senior freelance hourly rate is typically below premium Western-market pricing and fits a lower-cost Southeast Asia outsourcing band, with senior rates commonly around $40-$70/hour versus $90+/hour in North America and Western Europe.",
     "sources": [
       "https://arc.dev/employer-blog/software-developer-freelance-vs-full-time-costs/",
       "https://www.remotecrew.io/blog/software-developer-per-hour-rate-by-country",
@@ -821,7 +821,7 @@ export const AI_COUNTRY_RATES: Record<string, AiCountryRate> = {
     "seniorHourlyMinUsd": 90,
     "seniorHourlyMaxUsd": 130,
     "level": "high",
-    "note": "Belgium’s senior freelance software rates are reported around €90–€130+ per hour, which places them in the high but not premium segment of the global senior freelance market.",
+    "note": "Belgium’s senior freelance software rates are reported around €90-€130+ per hour, which places them in the high but not premium segment of the global senior freelance market.",
     "sources": [
       "https://www.abbacustechnologies.com/developer-rates-and-pricing-in-belgium-for-2026/",
       "https://www.contractrates.fyi/Senior-Software-Engineer/hourly-rates",

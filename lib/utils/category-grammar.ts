@@ -90,7 +90,7 @@ export function pluralizeCategoryName(categoryName: string): string {
  * soutien scolaire).
  */
 const SERVICE_LABEL_BY_CATEGORY_SLUG: Record<string, string> = {
-  // BTP — mappings necessaires
+  // BTP · mappings necessaires
   plombier: "plomberie",
   electricien: "électricité",
   macon: "maçonnerie",
@@ -115,7 +115,7 @@ const SERVICE_LABEL_BY_CATEGORY_SLUG: Record<string, string> = {
   cuisiniste: "cuisine sur mesure",
   videosurveillance: "vidéosurveillance",
   "nettoyage-pro": "nettoyage professionnel",
-  // Domicile — generalement le nom est deja le nom du service
+  // Domicile · generalement le nom est deja le nom du service
   jardinage: "jardinage",
   menage: "ménage",
   repassage: "repassage",
@@ -125,7 +125,7 @@ const SERVICE_LABEL_BY_CATEGORY_SLUG: Record<string, string> = {
   demenagement: "déménagement",
   "livraison-de-courses": "livraison de courses",
   "lavage-voiture-a-domicile": "lavage de voiture",
-  // Personne — pareil
+  // Personne · pareil
   "garde-d-enfants": "garde d'enfants",
   "garde-enfants": "garde d'enfants",
   "soutien-scolaire": "soutien scolaire",

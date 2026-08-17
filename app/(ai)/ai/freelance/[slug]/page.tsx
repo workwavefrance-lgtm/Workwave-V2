@@ -56,7 +56,7 @@ function getFirstName(fullName: string): string {
 // Regroupe les appels identiques d'un meme rendu (`generateMetadata` puis la
 // page). Sans cela, chaque affichage ferait DEUX fois la meme requete : Next
 // regroupait au niveau de la reponse HTTP, en la dedoublant, ce qui retenait la
-// memoire — cf. lib/supabase/fetch-supabase.ts.
+// memoire : cf. lib/supabase/fetch-supabase.ts.
 const fetchPro = cache(async function fetchPro(slug: string) {
   const sb = createPublicClient();
   const { data, error } = await sb
@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: FreelancePageProps): Promise<
   const pro = await fetchPro(slug);
   if (!pro) {
     return {
-      title: "Freelance introuvable — Workwave AI",
+      title: "Freelance introuvable · Workwave AI",
       robots: { index: false, follow: false },
     };
   }
@@ -90,13 +90,13 @@ export async function generateMetadata({ params }: FreelancePageProps): Promise<
   const cityName = city?.name ? titleCase(city.name) : "France";
 
   return {
-    title: `${name} — Freelance ${category?.name || "Tech"} a ${cityName} — Workwave AI`,
+    title: `${name} · Freelance ${category?.name || "Tech"} a ${cityName} · Workwave AI`,
     description: `${name}, freelance ${(category?.name || "tech").toLowerCase()} a ${cityName}.${
       pro.years_experience && pro.years_experience > 0 && pro.years_experience <= 50 ? ` ${pro.years_experience} ans d'experience.` : ""
     } Contactez via Workwave AI : publiez votre projet, alertez la communaute. Sans credit, sans commission.`,
     alternates: { canonical: `/ai/freelance/${pro.slug}` },
     openGraph: {
-      title: `${name} — Freelance ${category?.name || "Tech"} a ${cityName}`,
+      title: `${name} · Freelance ${category?.name || "Tech"} a ${cityName}`,
       url: `/ai/freelance/${pro.slug}`,
       type: "profile",
     },
@@ -116,7 +116,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
   const city = Array.isArray(pro.cities) ? pro.cities[0] : pro.cities;
   const cityName = city?.name ? titleCase(city.name) : null;
 
-  // Phase 12 — personnalisation : avatar + theme color + badges
+  // Phase 12, personnalisation : avatar + theme color + badges
   const avatarStyle = getAvatarStyle(pro.avatar_color);
   const themeMain = getThemeColor(pro.theme_color);
   const themeHover = getThemeColorHover(pro.theme_color);
@@ -128,7 +128,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
 
   // Fiche revendiquee = compte freelance deja cree pour ce SIRET (via /ai/inscription
   // ou /pro/reclamer/[slug]). Dans ce cas on n'affiche pas le CTA "Reclamer ma fiche"
-  // ni la card "Profil minimal / non revendiquee" — la fiche est detenue par le freelance.
+  // ni la card "Profil minimal / non revendiquee" : la fiche est detenue par le freelance.
   const isClaimed = !!pro.claimed_by_user_id;
 
   // Schema.org Person
@@ -160,7 +160,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
       />
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1/3 — HERO
+          SECTION 1/3 · HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-[var(--ai-border-subtle)]">
         <Watermark text="PROFIL" position="bottom" />
@@ -193,7 +193,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
             <div className="lg:col-span-8">
               <SectionLabel index={1} total={3} label="Freelance tech" />
 
-              {/* Avatar perso (Phase 12 cool/fun) — photo uploadee OU initiales avec gradient */}
+              {/* Avatar perso (Phase 12 cool/fun) : photo uploadee OU initiales avec gradient */}
               {pro.logo_url ? (
                 <div
                   className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-3xl mb-6 shadow-lg overflow-hidden bg-white"
@@ -322,7 +322,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                 )}
               </div>
 
-              {/* Description placeholder (profil non revendique) — masquee si pro.description existe OU si fiche revendiquee */}
+              {/* Description placeholder (profil non revendique) : masquee si pro.description existe OU si fiche revendiquee */}
               {!isClaimed && !pro.description && (
                 <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-subtle)] rounded-2xl p-6 sm:p-8 max-w-2xl">
                   <p
@@ -344,7 +344,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                     >
                       deposer votre projet
                     </Link>{" "}
-                    — notre IA verifiera si {firstName} est un bon match et le
+                    : notre IA verifiera si {firstName} est un bon match et le
                     contactera directement.
                   </p>
                 </div>
@@ -371,7 +371,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
 
             {/* Stat block droite */}
             <div className="lg:col-span-4 space-y-6">
-              {/* Card "Reclamer ma fiche" — UNIQUEMENT si la fiche n'est pas encore revendiquee */}
+              {/* Card "Reclamer ma fiche" : UNIQUEMENT si la fiche n'est pas encore revendiquee */}
               {!isClaimed && (
                 <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl p-6">
                   <p
@@ -410,7 +410,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                 </div>
               )}
 
-              {/* Card "Contacter via Workwave" — affichee quand fiche revendiquee
+              {/* Card "Contacter via Workwave" : affichee quand fiche revendiquee
                   (alternative au CTA "Reclamer ma fiche") */}
               {isClaimed && (
                 <div className="bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl p-6">
@@ -424,7 +424,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                     Travailler avec {firstName} ?
                   </p>
                   <p className="text-[13px] text-[var(--ai-text-secondary)] leading-relaxed mb-5">
-                    Decrivez votre projet en 60 secondes — {firstName} verra
+                    Decrivez votre projet en 60 secondes : {firstName} verra
                     automatiquement votre brief dans son dashboard et vous
                     contactera s&apos;il est interesse.
                   </p>
@@ -502,7 +502,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2/3 — COMPETENCES (placeholder)
+          SECTION 2/3 · COMPETENCES (placeholder)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
@@ -524,7 +524,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
               </p>
             )}
 
-            {/* Skills/stack du freelance — si remplies.
+            {/* Skills/stack du freelance, si remplies.
                 Compat double-format : `skills` peut etre `string` (signup AI nouveau)
                 OU `string[]` (BTP legacy jsonb default '[]'). */}
             {(() => {
@@ -616,7 +616,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          PORTFOLIO — Galerie de photos publiques (Phase 12 polish)
+          PORTFOLIO · Galerie de photos publiques (Phase 12 polish)
           Affichee uniquement si le freelance a uploade des photos.
           ═══════════════════════════════════════════════════════════════ */}
       {pro.photos && Array.isArray(pro.photos) && pro.photos.length > 0 && (
@@ -665,7 +665,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3/3 — CTA TRAVAILLER AVEC X
+          SECTION 3/3 · CTA TRAVAILLER AVEC X
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
         <Watermark text="MATCH" position="bottom" />
@@ -686,7 +686,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
               <span className="text-[var(--ai-text-tertiary)]">{firstName}.</span>
             </h2>
             <p className="text-base sm:text-lg text-[var(--ai-text-secondary)] leading-relaxed mb-8">
-              Decrivez votre projet — notre IA verifie si {firstName} est
+              Decrivez votre projet : notre IA verifie si {firstName} est
               compatible (dispo, TJM, expertise) et le contacte si oui.
               Sinon, d&apos;autres freelances de la communaute vous contacteront directement.
               Gratuit, sans engagement.

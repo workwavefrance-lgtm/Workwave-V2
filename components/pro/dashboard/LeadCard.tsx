@@ -47,7 +47,7 @@ export default function LeadCard({ lead }: { lead: LeadWithProject }) {
   const badge = STATUS_BADGES[lead.status] || STATUS_BADGES.sent;
   const project = lead.project;
 
-  // Projet supprimé — affichage dégradé
+  // Projet supprimé : affichage dégradé
   if (!project) {
     return (
       <div className="block bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5 opacity-60">
@@ -80,7 +80,7 @@ export default function LeadCard({ lead }: { lead: LeadWithProject }) {
               {project.first_name}
             </p>
             <p className="text-xs text-[var(--text-tertiary)]">
-              {project.city?.name || "Ville non précisée"} —{" "}
+              {project.city?.name || "Ville non précisée"} ·{" "}
               {project.category.name}
             </p>
           </div>

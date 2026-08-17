@@ -212,7 +212,7 @@ export default function AnalyticsClient({
       const res = await fetch(`/api/admin/analytics/kpis?period=${newPeriod}`);
       if (res.ok) setAnalytics((await res.json()) as AdminAnalytics);
     } catch {
-      // fail silently — stale data stays visible
+      // fail silently: stale data stays visible
     } finally {
       setLoading(false);
     }

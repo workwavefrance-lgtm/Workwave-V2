@@ -64,5 +64,5 @@ export function TimeAgo({ iso }: { iso: string }) {
   useEffect(() => {
     setTxt(relativeTime(iso));
   }, [iso]);
-  return <span suppressHydrationWarning>{txt || "—"}</span>;
+  return <span suppressHydrationWarning>{txt || "-"}</span>;
 }

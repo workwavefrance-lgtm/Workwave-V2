@@ -33,11 +33,11 @@ import {
  * "prix installation climatisation".
  *
  * ⚠️ VOCABULAIRE : dans tout le texte visible, dire "installateur(s) de
- * climatisation" — jamais "climaticien" (c'est le langage de recherche réel ;
+ * climatisation", jamais "climaticien" (c'est le langage de recherche réel ;
  * le slug technique reste /climaticien).
  *
  * Tous les chiffres viennent de lib/data/urgence-content.ts (sourcé via
- * Perplexity, sources citées) — zéro chiffre inventé, RIEN d'inventé sur
+ * Perplexity, sources citées) : zéro chiffre inventé, RIEN d'inventé sur
  * MaPrimeRénov (réponse prudente strictement sourcée).
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
@@ -104,7 +104,7 @@ export default async function ClimInstallationPage({ params }: Props) {
     { label: "Pose de climatisation" },
   ];
 
-  // FAQ — réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
+  // FAQ : réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
   const faqs = [
     {
       question: "Combien coûte la pose d'une climatisation ?",
@@ -118,7 +118,7 @@ export default async function ClimInstallationPage({ params }: Props) {
     {
       question: "Quelles aides pour une climatisation réversible ?",
       answer:
-        "Prudence sur ce point : la climatisation réversible air-air n'est pas éligible à MaPrimeRénov' en tant que telle. Les aides citées par les sources consultées portent surtout sur la TVA réduite — 10 % sur la main-d'œuvre, sous conditions de recours à un professionnel qualifié — et, selon les cas, sur d'autres dispositifs distincts. Méfiez-vous des discours commerciaux promettant une clim « éligible à toutes les aides ».",
+        "Prudence sur ce point : la climatisation réversible air-air n'est pas éligible à MaPrimeRénov' en tant que telle. Les aides citées par les sources consultées portent surtout sur la TVA réduite (10 % sur la main-d'œuvre, sous conditions de recours à un professionnel qualifié) et, selon les cas, sur d'autres dispositifs distincts. Méfiez-vous des discours commerciaux promettant une clim « éligible à toutes les aides ».",
     },
     {
       question: "L'entretien d'une climatisation est-il obligatoire ?",
@@ -167,7 +167,7 @@ export default async function ClimInstallationPage({ params }: Props) {
         Pose de clim : prix réels, aides et comment choisir son installateur
       </h1>
 
-      {/* Intro factuelle — ton calme et protecteur, illustration en regard */}
+      {/* Intro factuelle : ton calme et protecteur, illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
@@ -176,7 +176,7 @@ export default async function ClimInstallationPage({ params }: Props) {
             {fmtEur(mono.high)} € (matériel et pose), un multisplit entre{" "}
             {fmtEur(multi.low)} € et {fmtEur(multi.high)} €, et la manipulation des
             fluides frigorigènes est réservée aux entreprises détenant une
-            attestation de capacité — vous ne pouvez pas raccorder le circuit
+            attestation de capacité : vous ne pouvez pas raccorder le circuit
             vous-même. Cette page rassemble les prix réellement constatés (sources
             citées), l&apos;état réel des aides, les pratiques commerciales à fuir
             et les bons réflexes pour choisir votre installateur de climatisation.
@@ -185,11 +185,11 @@ export default async function ClimInstallationPage({ params }: Props) {
         <AcUnitArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — au-dessus de la ligne de flottaison. */}
+      {/* CTA héro, au-dessus de la ligne de flottaison. */}
       <HeroCta
         href={`/deposer-projet?categorie=${metier}`}
         label="Trouver un installateur vérifié"
-        note="Gratuit, sans engagement — votre demande est visible par les installateurs de climatisation SIRET vérifiés de votre zone, qui vous recontactent directement."
+        note="Gratuit, sans engagement : votre demande est visible par les installateurs de climatisation SIRET vérifiés de votre zone, qui vous recontactent directement."
       />
 
       {/* ─── Prix constatés ─── */}
@@ -261,13 +261,13 @@ export default async function ClimInstallationPage({ params }: Props) {
       <FinalCtaSection
         href={`/deposer-projet?categorie=${metier}`}
         title="Besoin d'un installateur de climatisation de confiance ?"
-        text="Décrivez votre projet, recevez des devis d'installateurs SIRET vérifiés près de chez vous — gratuit, sans commission."
+        text="Décrivez votre projet, recevez des devis d'installateurs SIRET vérifiés près de chez vous, gratuit, sans commission."
         buttonLabel="Décrire mon projet gratuitement"
         footnote="Gratuit · sans engagement · projet visible par les pros de votre zone"
       />
 
       {/* ─── FAQ (UI + schema FAQPage injecté plus haut) ─── */}
-      <FaqAccordion faqs={faqs} title="Questions fréquentes — pose de climatisation" />
+      <FaqAccordion faqs={faqs} title="Questions fréquentes · pose de climatisation" />
 
       {/* ─── Maillage interne ─── */}
       <div className="mt-14 pt-8 border-t border-[var(--border-color)]">

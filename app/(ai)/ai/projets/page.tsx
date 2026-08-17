@@ -8,7 +8,7 @@ import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 // visiteurs en inscrits. AUCUNE donnee personnelle exposee (pas de description,
 // pas de nom/email/tel) -> uniquement categorie + budget + delai + date.
 export const metadata: Metadata = {
-  title: "Projets freelance en ligne — Workwave AI",
+  title: "Projets freelance en ligne · Workwave AI",
   description:
     "Des entreprises publient chaque semaine des projets tech, marketing, design, finance, juridique, RH et audiovisuel sur Workwave AI. Inscrivez-vous gratuitement pour voir les details et repondre.",
   alternates: { canonical: "https://workwave.fr/ai/projets" },
@@ -113,7 +113,7 @@ export default async function AiProjetsPublicPage() {
           href="/ai/inscription"
           className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-lg bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
         >
-          Créer mon compte freelance — gratuit
+          Créer mon compte freelance, gratuit
         </Link>
       </div>
 
@@ -165,7 +165,7 @@ export default async function AiProjetsPublicPage() {
               href="/ai/inscription"
               className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-lg bg-[var(--ai-text)] hover:bg-[#1F1F1F] text-white transition-colors"
             >
-              Voir tous les projets — inscription gratuite
+              Voir tous les projets, inscription gratuite
             </Link>
           </div>
         </>

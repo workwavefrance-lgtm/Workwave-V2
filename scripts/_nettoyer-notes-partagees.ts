@@ -30,7 +30,7 @@ const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPAB
 
 (async () => {
   // Pagination : un count exact sur 2,5 M de lignes echoue en SILENCE et
-  // renvoie 0 (constate ce soir — j'ai cru qu'aucune fiche n'avait de note).
+  // renvoie 0 (constate ce soir, j'ai cru qu'aucune fiche n'avait de note).
   const PAGE = 1000; let offset = 0; const toutes: any[] = [];
   while (true) {
     const { data, error } = await sb.from("pros")
@@ -55,7 +55,7 @@ const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPAB
   console.log(`  plus de ${SEUIL_AVIS} avis (invraisemblable pour un artisan) : ${invraisemblables.length}`);
   console.log(`  a nettoyer au total (sans doublon) : ${ids.length}\n`);
 
-  if (!APPLIQUER) { console.log("(simulation — relancer avec --appliquer)"); return; }
+  if (!APPLIQUER) { console.log("(simulation, relancer avec --appliquer)"); return; }
 
   // Par lots : un IN() de 300 identifiants passe, 3 000 non.
   let total = 0;

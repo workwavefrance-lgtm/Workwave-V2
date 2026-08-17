@@ -98,7 +98,7 @@ const profileSchema = z.object({
   // que le tatouage ou les services domestiques ; le 8121Z melange menage et
   // nettoyage professionnel ; le 4334Z melange peintre et vitrier. Le classement
   // automatique se trompe donc regulierement, et le pro etait le seul a pouvoir
-  // corriger — sans en avoir les moyens.
+  // corriger, sans en avoir les moyens.
   //
   // Cas reel du 04/08/2026 : une pro classee « garde animaux » par deduction du
   // 96.09Z, qui avait ajoute « multiservice » en categorie SECONDAIRE faute de
@@ -150,7 +150,7 @@ export async function updateProProfile(
     category_id: formData.get("category_id")
       ? Number(formData.get("category_id"))
       : undefined,
-    // On exclut le metier principal des secondaires — en prenant celui que le pro
+    // On exclut le metier principal des secondaires, en prenant celui que le pro
     // vient de CHOISIR, pas l'ancien : sinon il resterait en doublon dans la liste.
     secondary_category_ids: formData
       .getAll("secondary_category_ids")
@@ -234,7 +234,7 @@ export async function updateProProfile(
   const supabase = await createClient();
 
   // Metier principal : on ne fait confiance a rien de ce qui vient du formulaire.
-  // On verifie que la categorie existe VRAIMENT en base avant de l'ecrire — un
+  // On verifie que la categorie existe VRAIMENT en base avant de l'ecrire : un
   // identifiant fantaisiste rendrait la fiche invisible partout, elle
   // n'apparaitrait plus dans aucun listing. Au moindre doute, on garde l'actuelle.
   // Changement de metier principal.
@@ -244,7 +244,7 @@ export async function updateProProfile(
   // (/ai/*), qui a son propre dashboard, son propre routage et sa propre
   // facturation. Le menu du dashboard filtre deja par vertical, mais un menu
   // n'est pas une barriere : la requete peut etre forgee. C'est la lecon du
-  // 07/08 — un controle pose sur l'interface doit l'etre sur le serveur.
+  // 07/08 : un controle pose sur l'interface doit l'etre sur le serveur.
   if (data.category_id && data.category_id !== pro.category_id) {
     const { data: cible } = await supabase
       .from("categories")

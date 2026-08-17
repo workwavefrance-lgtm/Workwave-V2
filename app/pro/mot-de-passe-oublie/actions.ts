@@ -27,7 +27,7 @@ export async function requestPasswordReset(
 
   const resetUrl = `${baseUrl}/pro/reinitialiser-mot-de-passe?email=${encodeURIComponent(email)}&ts=${timestamp}&token=${token}`;
 
-  // Envoyer l'email (fire and forget — on ne révèle pas si le compte existe)
+  // Envoyer l'email (fire and forget, on ne révèle pas si le compte existe)
   try {
     await sendPasswordResetEmail(email, resetUrl);
   } catch (err) {

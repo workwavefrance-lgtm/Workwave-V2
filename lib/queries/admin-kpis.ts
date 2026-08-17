@@ -21,7 +21,7 @@ export const getAdminKPIs = cache(async (): Promise<AdminKPIs> => {
   const db = getAdminServiceClient();
 
   // UNE seule fonction agrégée (migration 2026-07-13_admin_overview_rpc.sql) au lieu
-  // de 8 count exact dont 2 sur pros 2,4M rows — supprime la cause des déconnexions
+  // de 8 count exact dont 2 sur pros 2,4M rows, supprime la cause des déconnexions
   // (leçon 28/04). activePros = pros RÉCLAMÉS (l'ancienne métrique « abonnés actifs »
   // valait 0 : on est en pay-per-lead).
   const { data, error } = await db.rpc("admin_overview_stats");

@@ -4,7 +4,7 @@ import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 import { aiAlternates } from "@/lib/i18n/alternates";
 
 /**
- * Landing /ai (Workwave AI) — style Pixel Rise (validee Willy 25/05).
+ * Landing /ai (Workwave AI), style Pixel Rise (validee Willy 25/05).
  *
  * Structure 7 sections :
  *   [1/7] Hero (watermark, socials, scroll)
@@ -26,13 +26,13 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Workwave AI — La plateforme freelance de reference (tech, marketing, finance, design, juridique)",
+    "Workwave AI · La plateforme freelance de reference (tech, marketing, finance, design, juridique)",
   description:
     "Publiez votre projet et alertez en temps reel toute la communaute des freelances FR : tech (IA, dev, cloud, data), marketing & com, finance & compta, juridique, RH, design & creation, audiovisuel, redaction. Inscription gratuite, sans commission, sans engagement.",
   // hreflang reciproque FR <-> EN (+ x-default => EN international).
   alternates: aiAlternates({ fr: "/ai", en: "/en/ai", current: "fr" }),
   openGraph: {
-    title: "Workwave AI — La plateforme freelance de reference",
+    title: "Workwave AI · La plateforme freelance de reference",
     description:
       "Postez votre projet (tech, marketing, finance, juridique, design, RH...), alertez la communaute des freelances FR en temps reel. Gratuit, sans commission.",
     url: `${SITE_URL}/ai`,
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// FAQ — 8 questions strategiques (SEO + AEO + GEO)
+// FAQ · 8 questions strategiques (SEO + AEO + GEO)
 // ─────────────────────────────────────────────────────────────────────
 const FAQ: FaqItem[] = [
   {
@@ -68,7 +68,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "Le freelance travaille en remote ou en presentiel ?",
-    a: "Au choix. 80% de notre base travaille en 100% remote (la norme dans la tech francaise depuis 2020), 15% en hybride (remote + bureau client 1-2 jours/semaine), 5% sur site uniquement. Vous precisez vos contraintes (geo, presentiel obligatoire ou pas) dans le formulaire de depot — chaque freelance verra ces criteres dans son dashboard et choisira si le projet l'interesse.",
+    a: "Au choix. 80% de notre base travaille en 100% remote (la norme dans la tech francaise depuis 2020), 15% en hybride (remote + bureau client 1-2 jours/semaine), 5% sur site uniquement. Vous precisez vos contraintes (geo, presentiel obligatoire ou pas) dans le formulaire de depot. Chaque freelance verra ces criteres dans son dashboard et choisira si le projet l'interesse.",
   },
   {
     q: "Qui sont les freelances references sur Workwave AI ?",
@@ -76,12 +76,12 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "Comment Workwave AI se differencie de Malt, Comet, Free-Work ?",
-    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances inscrits (tech + business + creatif), ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet — vous payez le freelance directement, prix transparent. (3) Modele pay-per-lead pour les freelances (9,90 € pour debloquer un projet qui les interesse, sans abonnement ni credits, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
+    a: "3 differences majeures : (1) Modele communaute : votre projet est diffuse en temps reel a TOUS les freelances inscrits (tech + business + creatif), ils choisissent ceux qu'ils veulent vous proposer (vs recherche manuelle dans des listes de centaines de profils chez Malt). (2) Aucune commission Workwave sur la mission, vs 10-15% chez Malt/Comet : vous payez le freelance directement, prix transparent. (3) Modele pay-per-lead pour les freelances (9,90 € pour debloquer un projet qui les interesse, sans abonnement ni credits, vs systeme de credits chez Codeur ou commission Malt). Resultat : meilleur prix pour vous et pour le freelance.",
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// PERSONAS — 4 profils types de porteurs de projet
+// PERSONAS · 4 profils types de porteurs de projet
 // ─────────────────────────────────────────────────────────────────────
 const PERSONAS = [
   {
@@ -115,7 +115,7 @@ const PERSONAS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// VS CONCURRENTS — comparatif synthetique (verifie public)
+// VS CONCURRENTS · comparatif synthetique (verifie public)
 // ─────────────────────────────────────────────────────────────────────
 const VS_COMPETITORS = [
   {
@@ -169,7 +169,7 @@ const VS_COMPETITORS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// MAILLAGE FOOTER — top skills + villes + ressources
+// MAILLAGE FOOTER · top skills + villes + ressources
 // ─────────────────────────────────────────────────────────────────────
 const FOOTER_SKILLS = [
   { name: "React", slug: "react" },
@@ -220,7 +220,7 @@ const FOOTER_CITIES = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────
-// TJM teaser — top 8 skills avec fourchette TJM senior (source: barometre)
+// TJM teaser · top 8 skills avec fourchette TJM senior (source: barometre)
 // Donnees verifiees vs lib/data/tech-tjm-reference.ts
 // ─────────────────────────────────────────────────────────────────────
 const TJM_TEASER = [
@@ -483,7 +483,7 @@ export default function AiHomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(categoriesItemList) }}
       />
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1/5 — HERO
+          SECTION 1/5 · HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
         {/* Socials flottantes verticales droite (xl+ only pour eviter overlap col droite a lg) */}
@@ -593,9 +593,9 @@ export default function AiHomePage() {
                 href="/ai/deposer"
                 className="group flex flex-col sm:flex-row items-stretch bg-[var(--ai-bg-card)] border-2 border-[var(--ai-border-strong)] rounded-2xl overflow-hidden hover:border-[var(--ai-text)] hover:-translate-y-1 hover:shadow-2xl transition-all duration-200 max-w-3xl"
                 style={{ boxShadow: "var(--ai-shadow-lg)" }}
-                aria-label="Deposer un projet — formulaire en 4 etapes"
+                aria-label="Deposer un projet · formulaire en 4 etapes"
               >
-                {/* Hint text (left) — XL */}
+                {/* Hint text (left) · XL */}
                 <div className="flex-1 flex items-center gap-4 px-6 py-6 sm:py-7 min-w-0">
                   <div
                     className="grid grid-cols-2 grid-rows-2 gap-[3px] w-7 h-7 flex-shrink-0 transition-transform duration-200 group-hover:rotate-90"
@@ -611,12 +611,12 @@ export default function AiHomePage() {
                       Decrivez votre projet
                     </p>
                     <p className="text-[12px] sm:text-[13px] text-[var(--ai-text-secondary)] mt-0.5">
-                      Matching IA en moins de 24h — gratuit, sans credit
+                      Matching IA en moins de 24h, gratuit, sans credit
                     </p>
                   </div>
                 </div>
 
-                {/* Orange CTA (right) — XL */}
+                {/* Orange CTA (right) · XL */}
                 <div className="flex items-center justify-center gap-2.5 bg-[var(--ai-accent)] group-hover:bg-[var(--ai-accent-hover)] text-white px-7 sm:px-9 py-5 sm:py-0 transition-colors duration-200">
                   <span className="text-[15px] sm:text-[16px] font-bold whitespace-nowrap tracking-tight">
                     Deposer un projet
@@ -639,7 +639,7 @@ export default function AiHomePage() {
               </Link>
 
               {/* Liens secondaires : 2 audiences distinctes. Le CTA freelance
-                  (recrutement) est rendu visible des le hero — avant, un
+                  (recrutement) est rendu visible des le hero : avant, un
                   freelance arrivant sur /ai ne voyait QUE le message client. */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-x-6 gap-y-3 mt-5">
                 <Link
@@ -767,7 +767,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2/5 — COMMENT CA MARCHE
+          SECTION 2/5 · COMMENT CA MARCHE
           ═══════════════════════════════════════════════════════════════ */}
       <section
         id="methode"
@@ -852,7 +852,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3/5 — CATEGORIES TECH
+          SECTION 3/5 · CATEGORIES TECH
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
@@ -955,7 +955,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4/5 — POURQUOI WORKWAVE AI
+          SECTION 4/5 · POURQUOI WORKWAVE AI
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
@@ -1008,7 +1008,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5/9 — POUR QUI (4 personas)
+          SECTION 5/9 · POUR QUI (4 personas)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
@@ -1074,7 +1074,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 6/9 — VS CONCURRENTS (comparatif synthetique)
+          SECTION 6/9 · VS CONCURRENTS (comparatif synthetique)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
@@ -1228,7 +1228,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 7/9 — TJM PAR TECHNOLOGIE (teaser barometre)
+          SECTION 7/9 · TJM PAR TECHNOLOGIE (teaser barometre)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-24">
@@ -1310,7 +1310,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 6/7 — FAQ (FAQPage schema via AiFaqSection)
+          SECTION 6/7 · FAQ (FAQPage schema via AiFaqSection)
           ═══════════════════════════════════════════════════════════════ */}
       <AiFaqSection
         id="faq"
@@ -1323,7 +1323,7 @@ export default function AiHomePage() {
       />
 
       {/* ═══════════════════════════════════════════════════════════════
-          MAILLAGE INTERNE — sitelinks dense (skills + villes + ressources)
+          MAILLAGE INTERNE · sitelinks dense (skills + villes + ressources)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="border-t border-[var(--ai-border-subtle)] bg-[var(--ai-bg)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
@@ -1461,7 +1461,7 @@ export default function AiHomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 9/9 — FREELANCES + CTA FINAL
+          SECTION 9/9 · FREELANCES + CTA FINAL
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
         {/* Watermark bottom */}
@@ -1554,7 +1554,7 @@ export default function AiHomePage() {
                 <span className="text-[var(--ai-accent)]">freelance ?</span>
               </h2>
               <p className="text-sm text-white/70 leading-relaxed mb-8 relative z-10">
-                Inscription gratuite — tech, marketing, finance, juridique, RH,
+                Inscription gratuite : tech, marketing, finance, juridique, RH,
                 design, creation. Recevez tous les projets de votre vertical en
                 temps reel. Debloquez un projet pour 9,90 € quand il vous
                 interesse. Sans abonnement, sans engagement.

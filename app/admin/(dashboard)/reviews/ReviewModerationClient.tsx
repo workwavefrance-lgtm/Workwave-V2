@@ -73,7 +73,7 @@ export default function ReviewModerationClient({
               hour: "2-digit",
               minute: "2-digit",
             })
-          : "—";
+          : "-";
         const isProcessing = pendingId === r.id;
 
         return (
@@ -127,7 +127,7 @@ export default function ReviewModerationClient({
               </div>
             ) : (
               <p className="text-[13px] text-[var(--text-tertiary)] italic mb-4">
-                (Aucun commentaire — note uniquement)
+                (Aucun commentaire, note uniquement)
               </p>
             )}
 

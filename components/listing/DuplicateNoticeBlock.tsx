@@ -21,7 +21,7 @@ export default function DuplicateNoticeBlock({
   locationName,
   isBE = false,
 }: Props) {
-  const subject = `Doublon de fiche à fusionner — ${categoryName} ${locationName}`;
+  const subject = `Doublon de fiche à fusionner · ${categoryName} ${locationName}`;
   const mailto = `mailto:contact@workwave.fr?subject=${encodeURIComponent(subject)}`;
 
   return (

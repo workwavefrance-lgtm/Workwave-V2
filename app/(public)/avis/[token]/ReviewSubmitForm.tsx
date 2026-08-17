@@ -166,7 +166,7 @@ export default function ReviewSubmitForm({
             color: displayRating > 0 ? "var(--accent)" : "transparent",
           }}
         >
-          {displayRating > 0 ? ratingLabels[displayRating] : "—"}
+          {displayRating > 0 ? ratingLabels[displayRating] : "-"}
         </p>
       </div>
 

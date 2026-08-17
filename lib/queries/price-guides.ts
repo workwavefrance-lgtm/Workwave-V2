@@ -53,7 +53,7 @@ export async function getPriceGuideBySlug(slug: string): Promise<PriceGuide | nu
 // Regroupe les appels identiques d'un meme rendu (`generateMetadata` puis la
 // page). Sans cela, chaque affichage ferait DEUX fois la meme requete : Next
 // regroupait au niveau de la reponse HTTP, en la dedoublant, ce qui retenait la
-// memoire — cf. lib/supabase/fetch-supabase.ts.
+// memoire, cf. lib/supabase/fetch-supabase.ts.
 export const getMetierPriceGuide = cache(async function getMetierPriceGuide(metierSlug: string): Promise<PriceGuide | null> {
   const sb = createPublicClient();
   const { data } = await sb

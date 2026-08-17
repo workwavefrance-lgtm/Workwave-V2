@@ -6,7 +6,7 @@ import { getServiceClient } from "@/lib/supabase/service-client";
  *
  * POURQUOI : `contact@workwave.fr` est une adresse PUBLIQUE. N'importe qui peut
  * y déverser des milliers de mails, depuis autant d'adresses d'expéditeur qu'il
- * veut — aucune authentification n'est possible sur du courrier entrant. Sans
+ * veut : aucune authentification n'est possible sur du courrier entrant. Sans
  * plafond, chaque mail déclenche : un appel Resend receiving.get, deux SELECT
  * de contexte, deux INSERT, un appel Haiku de tri, et un envoi vers la boîte
  * admin. Les dégâts d'un flot ne sont pas théoriques :

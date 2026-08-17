@@ -28,11 +28,11 @@ const SITE_URL = "https://www.workwaveai.co";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Workwave AI — Hire vetted freelancers (tech, AI, data, design)",
+    default: "Workwave AI · Hire vetted freelancers (tech, AI, data, design)",
     template: "%s | Workwave AI",
   },
   description:
-    "Post your project and reach a community of vetted freelancers across Europe, the Gulf and beyond — AI, development, cloud, data, design, marketing, finance, legal. Free to post, AI-matched, 0% commission.",
+    "Post your project and reach a community of vetted freelancers across Europe, the Gulf and beyond: AI, development, cloud, data, design, marketing, finance, legal. Free to post, AI-matched, 0% commission.",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Workwave AI — Hire vetted freelancers",
+    title: "Workwave AI · Hire vetted freelancers",
     description:
       "AI-matched freelancers across Europe, the Gulf and beyond. Free to post a project, 0% commission.",
   },

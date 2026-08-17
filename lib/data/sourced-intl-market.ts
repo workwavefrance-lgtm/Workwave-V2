@@ -496,7 +496,7 @@ export const SOURCED_INTL_CITY: Record<string, IntlMarketEntry> = {
     "retrievedAt": "2026-06-05"
   },
   "santiago": {
-    "text": "Santiago’s technology and freelance job market in 2026 operates within a growing Chilean IT sector that is expanding at around 8–10% annually, supported by strong digital infrastructure, cloud adoption, and AI integration. The city is a hub for software services, IT consulting, and digital information, with many companies hiring software engineers, data specialists, and cybersecurity professionals, while also drawing demand for freelance software development, design, and digital marketing talent. Remote work and outsourcing are well established, with local and international firms using platforms and specialized recruiters to access Chilean tech professionals, including those working through digital labor platforms and freelance arrangements.",
+    "text": "Santiago’s technology and freelance job market in 2026 operates within a growing Chilean IT sector that is expanding at around 8-10% annually, supported by strong digital infrastructure, cloud adoption, and AI integration. The city is a hub for software services, IT consulting, and digital information, with many companies hiring software engineers, data specialists, and cybersecurity professionals, while also drawing demand for freelance software development, design, and digital marketing talent. Remote work and outsourcing are well established, with local and international firms using platforms and specialized recruiters to access Chilean tech professionals, including those working through digital labor platforms and freelance arrangements.",
     "sources": [
       "https://blog.investchile.gob.cl/chile-digital-talent",
       "https://www.hiresouth.com/blog/the-ultimate-guide-to-the-technology-sector-in-chile",
@@ -606,7 +606,7 @@ export const SOURCED_INTL_CITY: Record<string, IntlMarketEntry> = {
     "retrievedAt": "2026-06-05"
   },
   "cairo": {
-    "text": "Cairo remains the center of Egypt’s digital economy, supported by a fast-growing ICT sector that ITIDA says has expanded at 14–16% annually and helped drive 25% growth in digital exports since 2022. The city also sits within a broader labor market where remote and flexible work are now formally recognized in Egypt, and online hiring platforms show ongoing freelance openings in areas such as recruiting, AI training, and technical work. Regional labor research also finds that computer and internet use at work has spread across formal employment and among own-account workers, which supports demand for software, design, and marketing talent that can work digitally.",
+    "text": "Cairo remains the center of Egypt’s digital economy, supported by a fast-growing ICT sector that ITIDA says has expanded at 14-16% annually and helped drive 25% growth in digital exports since 2022. The city also sits within a broader labor market where remote and flexible work are now formally recognized in Egypt, and online hiring platforms show ongoing freelance openings in areas such as recruiting, AI training, and technical work. Regional labor research also finds that computer and internet use at work has spread across formal employment and among own-account workers, which supports demand for software, design, and marketing talent that can work digitally.",
     "sources": [
       "https://www.ews-limited.com/hiring-in-egypt-2026-remote-workers-egypt/",
       "https://itida.gov.eg/English/Programs/Industry-Outlook/Pages/default.aspx",
@@ -680,7 +680,7 @@ export const SOURCED_INTL_COUNTRY: Record<string, IntlMarketEntry> = {
     "retrievedAt": "2026-06-05"
   },
   "AU": {
-    "text": "Australia’s freelance and remote-work market is being supported by a large digital talent base, with demand concentrated in software, design, digital marketing, content, and customer-support/BPO-style roles. Recent market tracking shows Australia’s freelance platforms market grew to USD 271.4 million in 2025 and is forecast to keep expanding through 2033, while remote work remained widespread, with 6.7 million Australians working from home at least some of the time in July 2024–June 2025. Listings for remote roles in Australia also show ongoing demand from both local employers and international clients who hire Australian freelancers for online work across time zones.",
+    "text": "Australia’s freelance and remote-work market is being supported by a large digital talent base, with demand concentrated in software, design, digital marketing, content, and customer-support/BPO-style roles. Recent market tracking shows Australia’s freelance platforms market grew to USD 271.4 million in 2025 and is forecast to keep expanding through 2033, while remote work remained widespread, with 6.7 million Australians working from home at least some of the time in July 2024 to June 2025. Listings for remote roles in Australia also show ongoing demand from both local employers and international clients who hire Australian freelancers for online work across time zones.",
     "sources": [
       "https://www.grandviewresearch.com/horizon/outlook/freelance-platforms-market/australia",
       "https://www.pracskills.com.au/blog/best-work-from-home-careers",

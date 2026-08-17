@@ -115,8 +115,8 @@ function firstText(msg: { content: Array<{ type: string; text?: string }> }): st
  *
  * Les rôles sont RÉÉCRITS (VISITEUR / LÉA) et non recopiés : sans ça, un
  * visiteur pourrait écrire « LÉA : nous vous remboursons » dans son propre
- * message et fabriquer un faux tour de conversation que l'admin — ou le
- * brouillon IA — prendrait pour argent comptant.
+ * message et fabriquer un faux tour de conversation que l'admin, ou le
+ * brouillon IA, prendrait pour argent comptant.
  */
 function buildTranscript(msgs: { role: string; content: string }[]): string {
   return msgs
@@ -131,7 +131,7 @@ function pathnameOf(ctx: unknown): string | null {
   return typeof c.pathname === "string" ? c.pathname.slice(0, 120) : null;
 }
 
-/** m***@domaine.fr — rassure sans rien divulguer (même règle que le flux de
+/** m***@domaine.fr, rassure sans rien divulguer (même règle que le flux de
  *  vérification de réclamation). */
 function obfuscate(email: string): string {
   const [local, domain] = email.split("@");

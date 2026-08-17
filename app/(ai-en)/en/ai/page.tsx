@@ -7,7 +7,7 @@ import { formatTjmRange, formatMoney, convertFromEur } from "@/lib/i18n/format";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 
 /**
- * Landing ANGLAISE Workwave AI (/en/ai) — Phase B i18n.
+ * Landing ANGLAISE Workwave AI (/en/ai), Phase B i18n.
  *
  * Contenu anglais natif (pas une traduction mot-a-mot de la home FR) optimise
  * pour le SEO international (Europe, Golfe, Afrique anglophone, Moyen-Orient).
@@ -20,12 +20,12 @@ const SITE_URL = "https://www.workwaveai.co";
 
 export const metadata: Metadata = {
   title:
-    "Workwave AI — Hire vetted freelancers across Europe, the Gulf & beyond",
+    "Workwave AI · Hire vetted freelancers across Europe, the Gulf & beyond",
   description:
-    "Post your project and reach a community of 100,000+ vetted freelancers — AI, development, cloud, data, design, marketing, finance, legal. Free to post, AI-matched in 24h, 0% commission. Europe, the Gulf, the Middle East and beyond.",
+    "Post your project and reach a community of 100,000+ vetted freelancers: AI, development, cloud, data, design, marketing, finance, legal. Free to post, AI-matched in 24h, 0% commission. Europe, the Gulf, the Middle East and beyond.",
   alternates: aiAlternates({ fr: "/ai", en: "/en/ai", current: "en" }),
   openGraph: {
-    title: "Workwave AI — Hire vetted freelancers, 0% commission",
+    title: "Workwave AI · Hire vetted freelancers, 0% commission",
     description:
       "Post your project, our AI alerts a community of 100,000+ freelancers across Europe and the Gulf. They contact you directly. Free to post, no commission.",
     url: `${SITE_URL}/en/ai`,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// FAQ — questions strategiques SEO/AEO/GEO international
+// FAQ : questions strategiques SEO/AEO/GEO international
 // ─────────────────────────────────────────────────────────────────────
 const FAQ: FaqItem[] = [
   {
@@ -53,7 +53,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "How is Workwave different from Upwork, Fiverr or Malt?",
-    a: "Three key differences. (1) Community broadcast: your project is sent in real time to every relevant freelancer, who chooses to reach out — instead of you scrolling through endless profiles. (2) 0% commission on the engagement: you pay the freelancer directly, transparent pricing, versus 10–20% taken by most marketplaces. (3) A simple flat subscription model for freelancers instead of per-bid credits or rising fees. The result: a better price for you and for the freelancer.",
+    a: "Three key differences. (1) Community broadcast: your project is sent in real time to every relevant freelancer, who chooses to reach out, instead of you scrolling through endless profiles. (2) 0% commission on the engagement: you pay the freelancer directly, transparent pricing, versus 10% to 20% taken by most marketplaces. (3) A simple flat subscription model for freelancers instead of per-bid credits or rising fees. The result: a better price for you and for the freelancer.",
   },
   {
     q: "How fast will freelancers contact me?",
@@ -61,15 +61,15 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "How much does it cost to hire a freelance developer or AI expert?",
-    a: "Day rates vary by skill, seniority and region. As a rough global benchmark: a senior web developer runs about $650–$900/day, a senior AI/ML engineer about $850–$1,300/day, a senior cloud/DevOps engineer about $800–$1,100/day. Rates in the Gulf and major European hubs trend higher. See our day-rate benchmark for a detailed, sourced breakdown.",
+    a: "Day rates vary by skill, seniority and region. As a rough global benchmark: a senior web developer runs about $650 to $900/day, a senior AI/ML engineer about $850 to $1,300/day, a senior cloud/DevOps engineer about $800 to $1,100/day. Rates in the Gulf and major European hubs trend higher. See our day-rate benchmark for a detailed, sourced breakdown.",
   },
   {
     q: "Do freelancers work remotely?",
-    a: "Most do. Around 80% of our community works fully remote, which is the norm in tech since 2020, with the rest hybrid or on-site. You specify your constraints (location, on-site requirement, time zone) when you post — each freelancer sees those criteria and decides whether the project is a fit.",
+    a: "Most do. Around 80% of our community works fully remote, which is the norm in tech since 2020, with the rest hybrid or on-site. You specify your constraints (location, on-site requirement, time zone) when you post: each freelancer sees those criteria and decides whether the project is a fit.",
   },
   {
-    q: "I am a freelancer — how do I get clients on Workwave?",
-    a: "Create your profile for free in a few minutes (bio, skills, day rate, portfolio, links). You will be alerted about new projects that match your skills. To reply to a client and win the engagement, you subscribe to Premium — a flat monthly fee with no per-bid credits and no commission on what you earn. Your profile and project alerts stay free.",
+    q: "I am a freelancer: how do I get clients on Workwave?",
+    a: "Create your profile for free in a few minutes (bio, skills, day rate, portfolio, links). You will be alerted about new projects that match your skills. To reply to a client and win the engagement, you subscribe to Premium, a flat monthly fee with no per-bid credits and no commission on what you earn. Your profile and project alerts stay free.",
   },
 ];
 
@@ -102,12 +102,12 @@ const STEPS = [
   {
     n: "02",
     title: "Our AI alerts the community",
-    desc: "We qualify your brief and notify every freelancer whose skills match — across Europe, the Gulf and beyond, in real time.",
+    desc: "We qualify your brief and notify every freelancer whose skills match, across Europe, the Gulf and beyond, in real time.",
   },
   {
     n: "03",
     title: "Freelancers reach out to you",
-    desc: "Matching freelancers contact you directly. You compare, choose and work together — with 0% commission from Workwave.",
+    desc: "Matching freelancers contact you directly. You compare, choose and work together, with 0% commission from Workwave.",
   },
 ];
 
@@ -115,11 +115,11 @@ const STEPS = [
 const VALUE_PROPS = [
   { title: "0% commission", desc: "You pay the freelancer directly. We never take a cut of the engagement." },
   { title: "Free to post", desc: "Posting a project and receiving offers is completely free for clients." },
-  { title: "AI-matched in 24h", desc: "Your brief reaches the right freelancers in real time — most replies land within a day." },
+  { title: "AI-matched in 24h", desc: "Your brief reaches the right freelancers in real time: most replies land within a day." },
   { title: "Vetted profiles", desc: "100,000+ registered freelancers with verified business identities." },
 ];
 
-// TJM teaser — quelques skills, fourchette senior convertie en USD
+// TJM teaser : quelques skills, fourchette senior convertie en USD
 const TJM_TEASER: { label: string; key: string }[] = [
   { label: "Web Development", key: "developpement-web" },
   { label: "AI / ML", key: "intelligence-artificielle" },
@@ -129,7 +129,7 @@ const TJM_TEASER: { label: string; key: string }[] = [
   { label: "React", key: "react" },
 ];
 
-// Coverage strip — villes + monuments line-art
+// Coverage strip : villes + monuments line-art
 const COVERAGE: { monument: MonumentName; region: string; cities: string }[] = [
   { monument: "dubai", region: "Gulf & Middle East", cities: "Dubai · Abu Dhabi · Riyadh · Doha · Manama" },
   { monument: "london", region: "Europe", cities: "London · Dublin · Amsterdam · Lisbon · Stockholm" },
@@ -216,7 +216,7 @@ export default function AiEnHomePage() {
 
           <p className="mt-7 text-[17px] sm:text-[19px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
             Post your project in 60 seconds. Our AI alerts a community of
-            100,000+ freelancers — in AI, development, data, design, marketing
+            100,000+ freelancers, in AI, development, data, design, marketing
             and more. They reach out to you directly. 0% commission, free to
             post.
           </p>
@@ -227,7 +227,7 @@ export default function AiEnHomePage() {
               className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors"
               style={{ boxShadow: "var(--ai-shadow-sm)" }}
             >
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
               <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -236,7 +236,7 @@ export default function AiEnHomePage() {
               href="/ai/inscription"
               className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors"
             >
-              I&rsquo;m a freelancer — create my free profile
+              I&rsquo;m a freelancer · create my free profile
             </Link>
           </div>
 
@@ -281,7 +281,7 @@ export default function AiEnHomePage() {
             14 categories. One community.
           </h2>
           <p className="text-[15px] text-[var(--ai-text-secondary)] mb-12 max-w-2xl">
-            From AI engineers to fractional CFOs — tech, business and creative talent, all in one place.
+            From AI engineers to fractional CFOs: tech, business and creative talent, all in one place.
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {CATEGORIES.map((c) => (
@@ -379,7 +379,7 @@ export default function AiEnHomePage() {
                 ))}
               </ul>
               <p className="mt-7 text-[13px] text-[var(--ai-text-tertiary)]">
-                Clients pay nothing — ever. Posting a project and hiring is 100% free.
+                Clients pay nothing, ever. Posting a project and hiring is 100% free.
               </p>
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function AiEnHomePage() {
             What freelancers charge.
           </h2>
           <p className="text-[15px] text-[var(--ai-text-secondary)] mb-12 max-w-2xl">
-            Indicative senior day rates (USD, converted from EUR market data). For planning only — final rates depend on stack, scope and region.
+            Indicative senior day rates (USD, converted from EUR market data). For planning only: final rates depend on stack, scope and region.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {TJM_TEASER.map((t) => {
@@ -434,7 +434,7 @@ export default function AiEnHomePage() {
           </p>
           <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/inscription" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
               Create my free profile

@@ -17,7 +17,7 @@ import { submitConnexion } from "@/app/(ai)/ai/connexion/actions";
  */
 
 export const metadata: Metadata = {
-  title: "Sign in — Workwave AI",
+  title: "Sign in · Workwave AI",
   description:
     "Sign in to your Workwave AI freelancer account. Login code sent by email, no password to remember.",
   robots: { index: false, follow: false },

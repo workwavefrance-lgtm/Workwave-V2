@@ -1,5 +1,5 @@
 /**
- * BTP Phase 0 — Gap analysis "guides des prix".
+ * BTP Phase 0 : Gap analysis "guides des prix".
  *
  * Lit le CSV concurrent (travaux.com, data/competitive/), collapse en sujets
  * "guide des prix" uniques, mappe chaque sujet -> un de NOS métiers (ou flat),
@@ -231,7 +231,7 @@ async function main() {
     else if (r.metierValid.startsWith("?")) unmapped++;
     else byMetier[r.metierValid] = (byMetier[r.metierValid] || 0) + 1;
   }
-  console.log(`\n========== BACKLOG GUIDES DES PRIX — ${rows.length} sujets ==========\n`);
+  console.log(`\n========== BACKLOG GUIDES DES PRIX : ${rows.length} sujets ==========\n`);
   console.log("Par priorité :", JSON.stringify(byPrio));
   console.log("Par couverture :", JSON.stringify(byCov), "(migrate = déjà un article blog à migrer)");
   console.log(`Sans métier dédié (guides 'flat') : ${flat} · slug→métier inconnu (à vérifier) : ${unmapped}`);

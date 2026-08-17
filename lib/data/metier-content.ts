@@ -1,5 +1,5 @@
 // Contenu éditorial SOURCÉ par métier (Perplexity sonar, recherche web + citations).
-// Généré le 2026-07-26 — NE PAS éditer à la main.
+// Généré le 2026-07-26. NE PAS éditer à la main.
 // « zéro invention » : intro/certifs/conseils issus de sources web réelles, citées.
 
 export type MetierFaq = { q: string; a: string };
@@ -671,7 +671,7 @@ export const METIER_CONTENT: Record<string, MetierContentEntry> = {
   "couture-retouches": {
     "intro": "Un couturier-retoucheur ajuste, reprend et transforme des vêtements déjà portés ou achetés, et peut aussi réaliser des pièces sur mesure, surtout en vêtement féminin selon le titre professionnel RNCP35228. Les interventions les plus courantes sont l’ourlet, la reprise de taille, l’ajustement des manches, la pose ou le remplacement de fermetures, et la transformation d’un vêtement pour améliorer l’aisance ou la coupe. Un particulier fait appel à lui quand un vêtement est trop long, trop large, mal ajusté après un achat, abîmé sur une fermeture ou quand une pièce doit être adaptée à une morphologie précise. Le métier s’exerce en atelier de retouche, dans le commerce de l’habillement, dans la location/entretien de vêtements ou en indépendant.",
     "certifications": [
-      "CAP Métiers de la mode – vêtement flou",
+      "CAP Métiers de la mode · vêtement flou",
       "CAP Couture tailleur",
       "Brevet professionnel vêtement sur mesure",
       "Brevet professionnel métiers de la mode et industries connexes",
@@ -1228,8 +1228,8 @@ export const METIER_CONTENT: Record<string, MetierContentEntry> = {
   "garde-animaux": {
     "intro": "Le garde animaux en France consiste à prendre en charge un animal de compagnie en l’absence de son propriétaire, le plus souvent au domicile du client, au domicile du gardien ou lors de visites/promenades planifiées. Les interventions courantes sont l’alimentation, le renouvellement de l’eau, les sorties pour chiens, le nettoyage de litière, l’administration de soins simples déjà prescrits et la surveillance du comportement de l’animal. Un particulier y fait appel pendant les vacances, des absences professionnelles, une hospitalisation ou lorsque l’animal ne peut pas être laissé seul plusieurs heures. L’activité de garde d’animaux de compagnie contre rémunération relève du code APE 9609Z et nécessite l’ACACED pour exercer légalement avec chiens, chats et, selon les cas, autres espèces domestiques.",
     "certifications": [
-      "ACACED (Attestation de Connaissances pour les Animaux de Compagnie d’Espèces Domestiques) — obligatoire pour garder des animaux de compagnie contre rémunération en France.",
-      "Certificat de capacité pour la faune sauvage captive — uniquement si la garde concerne des animaux sauvages, l’ACACED ne suffit pas."
+      "ACACED (Attestation de Connaissances pour les Animaux de Compagnie d’Espèces Domestiques) : obligatoire pour garder des animaux de compagnie contre rémunération en France.",
+      "Certificat de capacité pour la faune sauvage captive : uniquement si la garde concerne des animaux sauvages, l’ACACED ne suffit pas."
     ],
     "choisir": [
       "Vérifier que le garde animaux détient bien l’ACACED en cours de validité et qu’elle couvre les espèces réellement confiées, surtout si vous avez un chien, un chat ou des NAC.",
@@ -1646,7 +1646,7 @@ export const METIER_CONTENT: Record<string, MetierContentEntry> = {
     "intro": "Une entreprise de nettoyage intervient sur des prestations d’entretien courant ou ponctuel : bureaux, parties communes d’immeubles, vitres, remises en état après travaux, désinfection ciblée ou nettoyage de locaux professionnels. Dans le résidentiel, un particulier y fait appel pour un grand ménage, un état des lieux, un nettoyage de vitres, un décapage de sols ou une remise en état après un déménagement ou des travaux. Les prestations sont généralement organisées avec un cahier des charges, une fréquence d’intervention et des contrôles de qualité. Les tarifs dépendent surtout du temps de main-d’œuvre, de la complexité du site et du niveau de technicité demandé.",
     "certifications": [
       "ISO 9001",
-      "NF Services Propreté – AFNOR Certification",
+      "NF Services Propreté · AFNOR Certification",
       "Qualibat"
     ],
     "choisir": [

@@ -93,9 +93,9 @@ function slugifyName(firstName: string, lastName: string, signupId: number): str
 // Helper : recuperer un auth user par email.
 //
 // Tentatives (par ordre de preference) :
-//   1. listUsers({ filter: email }) — supporte une chaine sql-like dans le
+//   1. listUsers({ filter: email }) : supporte une chaine sql-like dans le
 //      filter param. Plus efficace que de tout charger.
-//   2. listUsers() sans filtre, on parcourt cote app — fallback simple.
+//   2. listUsers() sans filtre, on parcourt cote app : fallback simple.
 //
 // NB : `auth.admin.getUserByEmail` n'existe PAS dans le SDK Supabase actuel
 // (verifie via typeof === undefined). Et `sb.schema("auth").from("users")`

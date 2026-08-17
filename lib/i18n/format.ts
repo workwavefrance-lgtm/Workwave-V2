@@ -7,7 +7,7 @@
  *
  * Les taux ci-dessous sont INDICATIFS et a rafraichir periodiquement. Les pages
  * qui affichent une conversion doivent le mentionner ("approx.", "indicatif").
- * On ne pretend pas a un taux de marche temps reel — c'est un repere de TJM.
+ * On ne pretend pas a un taux de marche temps reel : c'est un repere de TJM.
  *
  * Derniere MAJ taux : 2026-05 (ordre de grandeur).
  */
@@ -101,7 +101,7 @@ export function formatTjm(
 
 /**
  * Formate une fourchette de TJM.
- *   formatTjmRange(450, 600, "en") -> "$490–$650/day"
+ *   formatTjmRange(450, 600, "en") -> "$490 to $650/day"
  */
 export function formatTjmRange(
   minEur: number,
@@ -115,6 +115,6 @@ export function formatTjmRange(
   const minStr = formatMoney(min, cur, locale);
   const maxStr = formatMoney(max, cur, locale);
   return locale === "en"
-    ? `${minStr}–${maxStr}/day`
-    : `${minStr}–${maxStr}/jour`;
+    ? `${minStr} to ${maxStr}/day`
+    : `${minStr} à ${maxStr}/jour`;
 }

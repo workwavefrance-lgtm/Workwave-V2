@@ -91,7 +91,7 @@ export async function sendAiSignupAdminNotification(data: SignupData): Promise<v
       from: "Workwave AI <contact@workwave.fr>",
       to: [adminEmail],
       replyTo: data.email,
-      subject: `[AI Signup] ${data.firstName} ${data.lastName} — ${data.categoryName} (${data.plan})`,
+      subject: `[AI Signup] ${data.firstName} ${data.lastName} · ${data.categoryName} (${data.plan})`,
       html,
     });
     if (r.error) {

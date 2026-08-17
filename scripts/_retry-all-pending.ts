@@ -46,9 +46,9 @@ async function main() {
       location: s.location || null,
     });
     if (r.ok) {
-      console.log(`   ✓ ACTIVE — proId=${r.proId} createdNewUser=${r.createdNewUser}`);
+      console.log(`   ✓ ACTIVE · proId=${r.proId} createdNewUser=${r.createdNewUser}`);
     } else {
-      console.log(`   ✗ FAIL — ${r.reason}`);
+      console.log(`   ✗ FAIL · ${r.reason}`);
     }
   }
 }

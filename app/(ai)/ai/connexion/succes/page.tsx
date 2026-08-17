@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
 export const metadata: Metadata = {
-  title: "Email envoye — Workwave AI",
+  title: "Email envoye · Workwave AI",
   description: "Email de connexion envoye.",
   robots: { index: false, follow: false },
 };

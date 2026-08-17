@@ -7,7 +7,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 const WELCOME: Msg = {
   role: "assistant",
   content:
-    "Bonjour ! Je recueille les retours des utilisateurs pour améliorer Workwave — tout ce que vous me direz est transmis directement à l'équipe. Pour commencer : qu'est-ce qui vous amène ? Une idée d'amélioration, un problème rencontré, ou simplement un avis sur la plateforme ?",
+    "Bonjour ! Je recueille les retours des utilisateurs pour améliorer Workwave, tout ce que vous me direz est transmis directement à l'équipe. Pour commencer : qu'est-ce qui vous amène ? Une idée d'amélioration, un problème rencontré, ou simplement un avis sur la plateforme ?",
 };
 
 export default function FeedbackAgent() {

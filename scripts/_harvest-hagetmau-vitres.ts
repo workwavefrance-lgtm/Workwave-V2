@@ -1,6 +1,6 @@
 /**
  * Harvest ciblé : pros du nettoyage autour de Hagetmau (Landes, dept 40) via
- * Apify Google Maps → table `prospects`. Déclenché par le lead d'Aurélie #70 — nettoyage vitres (11/06).
+ * Apify Google Maps → table `prospects`. Déclenché par le lead d'Aurélie #70, nettoyage vitres (11/06).
  * Mobiles 06/07 uniquement, filtre code postal "87", dédup interne. Idempotent.
  *   npx tsx scripts/_harvest-hagetmau-vitres.ts            # DRY-RUN
  *   npx tsx scripts/_harvest-hagetmau-vitres.ts --execute  # insère dans prospects
@@ -68,7 +68,7 @@ async function runApify(queries: string[]) {
 }
 
 async function main() {
-  console.log(`\n=== HARVEST Les Billanges plombiers (dept ${DEPT}) — ${DRY ? "DRY-RUN" : "EXECUTE"} ===\n`);
+  console.log(`\n=== HARVEST Les Billanges plombiers (dept ${DEPT}) · ${DRY ? "DRY-RUN" : "EXECUTE"} ===\n`);
   console.log("Requêtes :", QUERIES.join(" · "), "\n");
   const { items, cost } = await runApify(QUERIES);
   console.log(`${items.length} résultats Google Maps · coût ~$${cost != null ? Number(cost).toFixed(4) : "?"}\n`);

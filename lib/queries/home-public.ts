@@ -24,7 +24,7 @@ import type { Category, City, Department } from "@/lib/types/database";
 // session utilisateur (dashboard pro, admin, claim flow, etc.).
 
 // Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
-// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts :
 // Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
 export const getCategoriesByVerticalPublic = cache(async function getCategoriesByVerticalPublic(
   vertical: string
@@ -39,7 +39,7 @@ export const getCategoriesByVerticalPublic = cache(async function getCategoriesB
 })
 
 // Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
-// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts :
 // Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
 export const getTopCitiesPublic = cache(async function getTopCitiesPublic(
   limit: number = 20
@@ -54,17 +54,17 @@ export const getTopCitiesPublic = cache(async function getTopCitiesPublic(
 })
 
 // Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
-// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts :
 // Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
 export const getAllCategoriesPublic = getAllCategories;
 
-// Lookup CIBLÉ par slug (clé de cache distincte par slug) — utilisé par les
+// Lookup CIBLÉ par slug (clé de cache distincte par slug), utilisé par les
 // pages /trouver-des-{chantiers,clients}/[slug]. Avantage vs getAllCategoriesPublic :
 // une catégorie nouvellement créée est résolue immédiatement, sans dépendre de
 // l'expiration du cache de la requête "toutes les catégories" (bug Vague 3 :
 // multiservice & co restaient en notFound car la liste complète était périmée).
 // Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
-// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts :
 // Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
 export const getCategoryBySlugPublic = cache(async function getCategoryBySlugPublic(
   slug: string
@@ -80,6 +80,6 @@ export const getCategoryBySlugPublic = cache(async function getCategoryBySlugPub
 })
 
 // Regroupe les appels IDENTIQUES pendant le rendu d'une meme page : le pied de
-// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts —
+// page ET la page appellent ces requetes. Cf. lib/supabase/fetch-supabase.ts :
 // Next le faisait en dedoublant la reponse HTTP, ce qui retenait 512 Mo.
 export const getAllDepartmentsPublic = getAllDepartments;

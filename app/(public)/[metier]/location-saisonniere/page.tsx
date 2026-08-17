@@ -32,13 +32,13 @@ import {
  * pattern que /[metier]/urgence, /[metier]/obligation, /[metier]/installation).
  *
  * Intention de recherche : "ménage airbnb" / "ménage location saisonnière" /
- * "prix ménage fin de séjour" — audience : hôtes Airbnb, propriétaires de
+ * "prix ménage fin de séjour". Audience : hôtes Airbnb, propriétaires de
  * gîtes et résidences secondaires (turnover entre deux locations, samedi de
  * changement, linge).
  *
  * Angle éditorial : transparence prix + statuts légaux de l'intervenant
  * (entreprise / auto-entrepreneur / CESU). Tous les chiffres viennent de
- * lib/data/urgence-content.ts (sourcé via Perplexity, sources citées) — zéro
+ * lib/data/urgence-content.ts (sourcé via Perplexity, sources citées) : zéro
  * chiffre inventé, zéro promesse de délai.
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
@@ -105,7 +105,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
     { label: "Location saisonnière" },
   ];
 
-  // FAQ — réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
+  // FAQ · réponses dérivées UNIQUEMENT du contenu sourcé (urgence-content.ts).
   const faqs = [
     {
       question: "Quel est le prix d'un ménage de fin de séjour ?",
@@ -173,30 +173,30 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
         prestataire
       </h1>
 
-      {/* Intro factuelle — audience hôtes/propriétaires, illustration en regard */}
+      {/* Intro factuelle · audience hôtes/propriétaires, illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
             Hôtes Airbnb, propriétaires de gîtes ou de résidences secondaires :
             entre deux locations, le ménage doit souvent tenir dans les quelques
-            heures du samedi de changement, entre un départ et une arrivée — linge
+            heures du samedi de changement, entre un départ et une arrivée, linge
             compris. Côté budget, comptez {fmtEur(studio.low)} € à{" "}
             {fmtEur(studio.high)} € constatés en forfait fin de séjour pour un
             studio ou un T2, et {fmtEur(maison.low)} € à {fmtEur(maison.high)} €
             pour une maison ou une villa. Cette page rassemble les prix réellement
             constatés (sources citées), les statuts possibles de votre intervenant
-            — entreprise de ménage, auto-entrepreneur ou emploi direct via le CESU
-            —, les pièges à éviter et les bons réflexes avant de confier vos clés.
+            (entreprise de ménage, auto-entrepreneur ou emploi direct via le CESU),
+            les pièges à éviter et les bons réflexes avant de confier vos clés.
           </p>
         </div>
         <HouseSparkleArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — au-dessus de la ligne de flottaison. */}
+      {/* CTA héro · au-dessus de la ligne de flottaison. */}
       <HeroCta
         href={`/deposer-projet?categorie=${metier}`}
         label="Trouver une aide ménage vérifiée"
-        note="Gratuit, sans engagement — votre demande est visible par les pros du ménage SIRET vérifiés de votre zone, qui vous recontactent directement."
+        note="Gratuit, sans engagement : votre demande est visible par les pros du ménage SIRET vérifiés de votre zone, qui vous recontactent directement."
       />
 
       {/* ─── Prix constatés ─── */}
@@ -246,7 +246,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
             </span>
             <p className="text-xs text-[var(--text-tertiary)] mt-1.5 leading-relaxed">
               Facture et SIRET vérifiable : idéal pour un logement ou deux. La
-              majorité des pros du ménage exercent en indépendant — et ils sont
+              majorité des pros du ménage exercent en indépendant, et ils sont
               les bienvenus ici.
             </p>
           </div>
@@ -262,7 +262,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
         </div>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed mt-5">
           Sur Workwave, vous trouvez du micro-entrepreneur à la société de ménage,
-          tous avec un SIRET vérifiable au registre officiel — le CESU restant
+          tous avec un SIRET vérifiable au registre officiel, le CESU restant
           l&apos;option si vous préférez employer directement votre intervenant.
         </p>
       </section>
@@ -274,7 +274,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
         </h2>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
           Travail non déclaré, prestataire non assuré, suppléments surprise :
-          voici les risques les plus fréquemment signalés — dont certains pèsent
+          voici les risques les plus fréquemment signalés, dont certains pèsent
           directement sur vous, le propriétaire.
         </p>
         <ScamWarningsList warnings={content.scamWarnings} />
@@ -320,7 +320,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
         </h2>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5">
           Auto-entrepreneur, indépendant ou société : votre fiche Workwave est{" "}
-          <strong className="text-[var(--text-primary)]">gratuite</strong> — les
+          <strong className="text-[var(--text-primary)]">gratuite</strong> : les
           propriétaires de votre zone déposent leurs demandes ici.
         </p>
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -343,7 +343,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
       <FinalCtaSection
         href={`/deposer-projet?categorie=${metier}`}
         title="Besoin d'une aide ménage fiable pour votre location ?"
-        text="Décrivez votre logement et votre rythme de séjours, recevez des devis de prestataires SIRET vérifiés près de chez vous — gratuit, sans commission."
+        text="Décrivez votre logement et votre rythme de séjours, recevez des devis de prestataires SIRET vérifiés près de chez vous, gratuit, sans commission."
         buttonLabel="Demander un devis gratuitement"
         footnote="Gratuit · sans engagement · demande visible par les pros de votre zone"
       />
@@ -351,7 +351,7 @@ export default async function MenageLocationSaisonnierePage({ params }: Props) {
       {/* ─── FAQ (UI + schema FAQPage injecté plus haut) ─── */}
       <FaqAccordion
         faqs={faqs}
-        title="Questions fréquentes — ménage en location saisonnière"
+        title="Questions fréquentes · ménage en location saisonnière"
       />
 
       {/* ─── Maillage interne ─── */}

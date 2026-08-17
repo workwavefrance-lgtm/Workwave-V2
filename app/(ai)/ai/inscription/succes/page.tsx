@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Watermark } from "@/components/ai/ui/Watermark";
 
 export const metadata: Metadata = {
-  title: "Compte cree — Workwave AI",
+  title: "Compte cree · Workwave AI",
   description:
     "Votre compte freelance Workwave AI est actif. Connectez-vous a votre dashboard pour voir tous les projets tech en temps reel.",
   robots: { index: false, follow: false },
@@ -69,7 +69,7 @@ export default async function InscriptionSuccesPage({
             Votre profil freelance Workwave AI est cree gratuitement. Des qu&apos;un
             projet tech est publie, vous le recevez en temps reel. Debloque
             pour 9,90 € ceux qui vous interessent pour voir les coordonnees et
-            contacter le client — sans abonnement ni commission.
+            contacter le client, sans abonnement ni commission.
           </p>
 
           {id && (

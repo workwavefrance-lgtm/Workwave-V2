@@ -56,7 +56,7 @@ function getResendClient(): Resend {
  * Decision Willy 23/06/2026 :
  *   - genie climatique (CVC) : plombier + chauffagiste + climaticien (meme
  *     artisan ; "climaticien" comme metier autonome n'existe quasiment pas).
- * Resolu slug → id au runtime (JAMAIS d'id en dur — lecon CATEGORY_ID_MAP 26/05).
+ * Resolu slug → id au runtime (JAMAIS d'id en dur, lecon CATEGORY_ID_MAP 26/05).
  */
 const MATCHING_CLUSTERS: string[][] = [
   ["plombier", "chauffagiste", "climaticien"],
@@ -105,7 +105,7 @@ async function markProjectDone(
   //
   // Mesure du 07/08/2026 : 53 projets BTP sur 108 dans cet etat. La cause n'est
   // pas un echec d'envoi mais l'absence de pro eligible (36 pros ont reclame
-  // leur fiche en tout) — sauf que c'est justement le cas qu'il faut garder
+  // leur fiche en tout), sauf que c'est justement le cas qu'il faut garder
   // ouvert : le jour ou un pro de la zone reclame sa fiche, le projet doit
   // repartir. 7 des projets bloques auraient un preneur aujourd'hui.
   // Meme raisonnement si Resend tombe (deja vu 12 jours en mai 2026) : le lead
@@ -147,7 +147,7 @@ export type BroadcastBtpInput = {
   projectCategoryName: string;
   projectCategoryId: number;
   projectCityName: string | null;
-  /** Id de la ville du projet — utilise pour fetcher lat/lng et calculer la distance vs rayon des pros. */
+  /** Id de la ville du projet, utilise pour fetcher lat/lng et calculer la distance vs rayon des pros. */
   projectCityId: number | null;
   /** Fallback si la ville du projet n'a pas de lat/lng (filtre "meme departement"). */
   projectDepartmentId: number;
@@ -157,8 +157,8 @@ export type BroadcastBtpInput = {
   /**
    * Type de relance. Chaque relance a SA propre colonne d'idempotence, sinon la
    * 1re bloquerait la 2e :
-   *   "j1" -> relance_j1_sent_at — 24 h apres, "un projet vous attend"
-   *   "j3" -> relance_sent_at    — 3 jours apres, "toujours disponible"
+   *   "j1" -> relance_j1_sent_at : 24 h apres, "un projet vous attend"
+   *   "j3" -> relance_sent_at    : 3 jours apres, "toujours disponible"
    * Non fourni + isRelance=true => "j3" (comportement historique preserve).
    */
   relanceKind?: "j1" | "j3";
@@ -173,7 +173,7 @@ export type BroadcastBtpResult = {
 
 /**
  * Mappe les enums du form deposer-projet vers des libelles humains FR.
- * Si la valeur est inconnue, on la renvoie telle quelle (defensive — evite
+ * Si la valeur est inconnue, on la renvoie telle quelle (defensive, evite
  * de cacher l'info en cas de nouveau enum non encore mappe).
  */
 function humanBudget(value: string | null): string | null {
@@ -241,15 +241,15 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
 
   const introText =
     kind === "j1"
-      ? "Personne n'a encore pris ce projet et le particulier attend toujours ses devis. Vous êtes donc encore parmi les premiers à pouvoir vous positionner — tout est dans votre tableau de bord."
+      ? "Personne n'a encore pris ce projet et le particulier attend toujours ses devis. Vous êtes donc encore parmi les premiers à pouvoir vous positionner. Tout est dans votre tableau de bord."
       : kind === "j3"
-        ? "Ce projet est toujours en ligne et cherche un professionnel. Si vous souhaitez le traiter, c'est encore le moment — tout est dans votre dashboard."
+        ? "Ce projet est toujours en ligne et cherche un professionnel. Si vous souhaitez le traiter, c'est encore le moment. Tout est dans votre dashboard."
         : "Un particulier de votre zone vient de publier une demande qui correspond à votre savoir-faire. Connectez-vous à votre dashboard pour la consulter.";
 
   const suspiciousBanner = input.isSuspicious
     ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
         <p style="font-size:12px;color:#92400E;margin:0;font-weight:600;">
-          &#9888; Projet flague par notre IA — verifiez avant de debloquer.
+          &#9888; Projet flague par notre IA : verifiez avant de debloquer.
         </p>
       </div>`
     : "";
@@ -333,7 +333,7 @@ async function sendOne(
 export async function broadcastBtpProject(
   input: BroadcastBtpInput
 ): Promise<BroadcastBtpResult> {
-  // baseUrl nettoyé (un espace/nbsp dans l'env casserait tous les liens du mail — leçon 18/04).
+  // baseUrl nettoyé (un espace/nbsp dans l'env casserait tous les liens du mail, leçon 18/04).
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr")
     .replace(/\s+/g, "")
     .replace(/\/+$/, "");
@@ -344,10 +344,10 @@ export async function broadcastBtpProject(
   const lieuSujet = input.projectCityName ? ` a ${input.projectCityName}` : "";
   const subject =
     kind === "j1"
-      ? `Un projet ${input.projectCategoryName}${lieuSujet} vous attend — Workwave`
+      ? `Un projet ${input.projectCategoryName}${lieuSujet} vous attend · Workwave`
       : kind === "j3"
-        ? `Rappel : projet ${input.projectCategoryName}${lieuSujet} toujours disponible — Workwave`
-        : `Nouveau projet ${input.projectCategoryName}${lieuSujet} — Workwave`;
+        ? `Rappel : projet ${input.projectCategoryName}${lieuSujet} toujours disponible · Workwave`
+        : `Nouveau projet ${input.projectCategoryName}${lieuSujet} · Workwave`;
 
   const sb = getServiceClient();
   const nowIso = new Date().toISOString();
@@ -384,15 +384,15 @@ export async function broadcastBtpProject(
 
   // 2) Selection des pros BTP eligibles (categorie + claimed + actif).
   //    On NE filtre PAS par city_id en SQL : la bbox naive serait plafonnee
-  //    a 1000 cities par PostgREST (leçon 09/05/2026 — recidive du bug
+  //    a 1000 cities par PostgREST (leçon 09/05/2026, recidive du bug
   //    cap 1000). Le pool des pros claimed etant petit (~quelques dizaines
   //    aujourd'hui, ~quelques milliers cibles), filtrer 100% cote JS via
   //    Haversine sur le SELECT joint avec cities est plus simple et correct.
   //    NB : a l'echelle 50k+ pros claimed par categorie, il faudra introduire
-  //    une vraie bbox paginee ou une RPC PostGIS — pas pour aujourd'hui.
+  //    une vraie bbox paginee ou une RPC PostGIS, pas pour aujourd'hui.
   const useDistance = projectLat != null && projectLng != null;
 
-  // Relance : ne JAMAIS re-notifier un pro qui a déjà débloqué ce projet — il a
+  // Relance : ne JAMAIS re-notifier un pro qui a déjà débloqué ce projet, il a
   // déjà les coordonnées du particulier, le rappel "toujours disponible" serait
   // absurde (et énervant). On exclut ses id du SELECT.
   let excludeProIds: number[] = [];
@@ -429,7 +429,7 @@ export async function broadcastBtpProject(
       "id, email, name, paused_until, intervention_radius_km, city:cities!inner(latitude, longitude, department_id)"
     )
     .or(categoryOrFilter)
-    // Whitelist de TOUTES les sources legitimes (lecon 26/05) — 'bce' =
+    // Whitelist de TOUTES les sources legitimes (lecon 26/05) : 'bce' =
     // registre belge (Belgique, 11/07). L'oublier = aucun pro belge ne
     // recevrait jamais un lead.
     .in("source", ["sirene", "pagesjaunes", "manual", "ai_signup", "bce"])

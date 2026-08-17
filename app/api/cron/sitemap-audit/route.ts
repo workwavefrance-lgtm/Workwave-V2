@@ -64,7 +64,7 @@ export async function GET(req: Request) {
   const aiIds = [...AI_CATEGORY_IDS];
   const aiInList = `(${aiIds.join(",")})`;
 
-  // 1) Vrais counts en base (filtrés) — exact, car estimated ignore le WHERE.
+  // 1) Vrais counts en base (filtrés) : exact, car estimated ignore le WHERE.
   const [{ count: nonTech }, { count: tech }] = await Promise.all([
     supabase
       .from("pros")
@@ -146,7 +146,7 @@ export async function GET(req: Request) {
         subject: `🗺️ Sitemap : ${issues.length} régression${issues.length > 1 ? "s" : ""} détectée${issues.length > 1 ? "s" : ""}`,
         html: `<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#fafafa;padding:20px;">
 <div style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:12px;padding:24px;">
-<h2 style="margin:0 0 12px;font-size:18px;color:#900;">🗺️ Audit sitemap — ${issues.length} problème(s)</h2>
+<h2 style="margin:0 0 12px;font-size:18px;color:#900;">🗺️ Audit sitemap · ${issues.length} problème(s)</h2>
 <ul style="font-size:14px;line-height:1.6;color:#333;">${issues.map((i) => `<li>${i}</li>`).join("")}</ul>
 <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
 <p style="font-size:12px;color:#888;">pros non-tech : ${nonTech} · tech : ${tech}<br>

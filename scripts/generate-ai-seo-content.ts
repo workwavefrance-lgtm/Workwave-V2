@@ -1,5 +1,5 @@
 /**
- * Genere du contenu SEO UNIQUE pour /ai/[skill]/[ville] — version
+ * Genere du contenu SEO UNIQUE pour /ai/[skill]/[ville] : version
  * sourcee + verifiee (zero invention).
  *
  * Principe ANTI-HALLUCINATION :
@@ -143,7 +143,7 @@ Retourne UNIQUEMENT un JSON valide (sans markdown, sans backticks) :
     const fullText = parsed.intro_html + JSON.stringify(parsed.faq);
     const numbers = fullText.match(NUMBER_PATTERNS);
     if (numbers && numbers.length > 0) {
-      console.warn(`    ⚠ Numbers leaked: ${numbers.join(", ")} — rejecting`);
+      console.warn(`    ⚠ Numbers leaked: ${numbers.join(", ")} · rejecting`);
       return null;
     }
 
@@ -156,7 +156,7 @@ Retourne UNIQUEMENT un JSON valide (sans markdown, sans backticks) :
 
 async function main() {
   console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("Workwave AI — Generation contenu SEO (anti-hallucination)");
+  console.log("Workwave AI · Generation contenu SEO (anti-hallucination)");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("Garanties : zero chiffre invente, zero nom d'entreprise");
   console.log("Donnees factuelles (TJM, entreprises) viennent de data files");
@@ -248,7 +248,7 @@ async function main() {
         city_slug: citySlug,
         intro_html: content.intro_html,
         faq: content.faq,
-        stats: {}, // empty — TJM viennent de tech-tjm-reference, pas du LLM
+        stats: {}, // empty : TJM viennent de tech-tjm-reference, pas du LLM
         meta_title: content.meta_title,
         meta_description: content.meta_description,
         generated_at: new Date().toISOString(),

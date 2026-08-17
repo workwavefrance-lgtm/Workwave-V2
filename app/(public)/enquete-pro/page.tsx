@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ProSurveyForm from "@/components/survey/ProSurveyForm";
 
 export const metadata: Metadata = {
-  title: "2 minutes pour orienter les outils qu'on développe — Workwave",
+  title: "2 minutes pour orienter les outils qu'on développe · Workwave",
   description:
     "Artisans du BTP : 2 minutes pour nous dire ce qui vous prend du temps en dehors du chantier. Vos réponses orientent les outils qu'on construit.",
   alternates: { canonical: "https://workwave.fr/enquete-pro" },
@@ -16,7 +16,7 @@ export default function EnqueteProPage() {
           2 minutes pour orienter les outils qu&apos;on développe.
         </h1>
         <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
-          Vos réponses comptent. Une idée, un bug, quelque chose qui vous a agacé ou plu — dites-le,
+          Vos réponses comptent. Une idée, un bug, quelque chose qui vous a agacé ou plu : dites-le,
           c&apos;est lu par l&apos;équipe et ça fait vraiment avancer la plateforme.
         </p>
       </div>

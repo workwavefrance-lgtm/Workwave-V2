@@ -24,7 +24,7 @@ export type City = {
   name: string;
   slug: string;
   postal_code: string | null;
-  /** France : code INSEE. Belgique : code NIS (5 chiffres aussi) — la clé logique est (country, insee_code). */
+  /** France : code INSEE. Belgique : code NIS (5 chiffres aussi). La clé logique est (country, insee_code). */
   insee_code: string | null;
   population: number | null;
   latitude: number | null;
@@ -195,7 +195,7 @@ export type Pro = {
   hourly_rate_min: number | null;
   hourly_rate_max: number | null;
   subscription_product: "btp" | "ai" | null;
-  // Personnalisation Phase 12 (cool/fun) — palette 8 couleurs
+  // Personnalisation Phase 12 (cool/fun) · palette 8 couleurs
   avatar_color:
     | "orange"
     | "blue"

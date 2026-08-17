@@ -8,7 +8,7 @@ import {
 } from "@/lib/data/chantiers";
 
 // Page hub PRO-ACQUISITION : capter l'intention "trouver des chantiers"
-// (artisans qui cherchent du travail) — requête sur laquelle travaux.com,
+// (artisans qui cherchent du travail) : requête sur laquelle travaux.com,
 // habitatpresto, ootravaux… paient des Google Ads, et où Workwave n'avait
 // AUCUNE page. Angle gagnant (analyse concurrentielle) : on est le SEUL à
 // afficher le prix (9,90 €/lead) ; tous les autres le cachent. + FAQPage schema
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   alternates: { canonical: `${BASE_URL}/trouver-des-chantiers` },
   openGraph: {
     title:
-      "Trouver des chantiers près de chez vous — 9,90 €/lead, sans abonnement",
+      "Trouver des chantiers près de chez vous · 9,90 €/lead, sans abonnement",
     description:
       "Le seul service d'apport de chantiers à prix transparent : 9,90 € le contact, zéro abonnement, zéro commission. Créez votre fiche gratuite sur Workwave.",
     url: `${BASE_URL}/trouver-des-chantiers`,

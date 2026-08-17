@@ -2,7 +2,7 @@
 // & aide à la personne : ménage, jardinage, garde d'enfants, soutien scolaire,
 // déménagement, petit bricolage…). Pendant services de lib/data/chantiers.ts (BTP).
 // Angle identique : prix transparent 9,90 €/contact, zéro abonnement, zéro
-// commission — le seul à afficher son prix.
+// commission, le seul à afficher son prix.
 
 const BASE_URL = "https://workwave.fr";
 
@@ -47,7 +47,7 @@ export const CLIENTS_COMPARISON: {
   {
     feature: "Prix",
     others: "Abonnement mensuel ou prix opaque sur devis",
-    workwave: "9,90 € le contact — affiché, fixe",
+    workwave: "9,90 € le contact · affiché, fixe",
   },
   {
     feature: "Engagement",
@@ -57,17 +57,17 @@ export const CLIENTS_COMPARISON: {
   {
     feature: "Commission sur vos prestations",
     others: "Un % prélevé sur chaque mission",
-    workwave: "0 % — vous gardez tout",
+    workwave: "0 % · vous gardez tout",
   },
   {
     feature: "Vous lisez le descriptif avant de payer",
     others: "Souvent non (contact acheté à l'aveugle)",
-    workwave: "Oui — descriptif, ville, budget, délai",
+    workwave: "Oui · descriptif, ville, budget, délai",
   },
   {
     feature: "Commercial à rappeler",
     others: "Oui (prix sur devis)",
-    workwave: "Non — tout en ligne",
+    workwave: "Non · tout en ligne",
   },
 ];
 
@@ -91,7 +91,7 @@ export function getClientsServiceSchema(opts?: {
   return {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: opts?.name ?? "Trouver des clients pour les professionnels des services — Workwave",
+    name: opts?.name ?? "Trouver des clients pour les professionnels des services · Workwave",
     serviceType: "Mise en relation professionnels / particuliers",
     provider: { "@type": "Organization", name: "Workwave", url: BASE_URL },
     areaServed: opts?.areaServed ?? "France",

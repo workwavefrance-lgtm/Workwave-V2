@@ -73,7 +73,7 @@ async function main() {
   console.log(`\n${urls.length} pages /[metier]/monaco éligibles (>= 3 artisans en zone).\n`);
   if (DRY) {
     urls.forEach((u, i) => console.log(`  ${(i + 1).toString().padStart(2)}. ${u.replace(BASE, "")}`));
-    console.log(`\n[DRY] ${urls.length} URLs — relance sans --dry-run pour pinger.`);
+    console.log(`\n[DRY] ${urls.length} URLs : relance sans --dry-run pour pinger.`);
     return;
   }
   console.log("Auth ADC (scope indexing)...");
@@ -92,7 +92,7 @@ async function main() {
     else {
       fail++; console.error(`  [${i + 1}/${urls.length}] ✗ ${p} → ${r.error}`);
       if (r.error?.includes("Quota") || r.error?.includes("429") || r.error?.includes("403")) {
-        console.error("\n⚠️ Quota/auth — arrêt (non bloquant, la sitemap prend le relais).");
+        console.error("\n⚠️ Quota/auth : arrêt (non bloquant, la sitemap prend le relais).");
         break;
       }
     }

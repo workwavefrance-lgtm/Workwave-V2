@@ -17,7 +17,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 /**
  * Alerte admin à chaque feedback plateforme recueilli par l'agent SAV.
  * C'est le CHEMIN CRITIQUE du flow (la table platform_feedback n'est que
- * l'archive) — toujours await côté appelant (leçon 24/05 : pas de promise
+ * l'archive) : toujours await côté appelant (leçon 24/05 : pas de promise
  * détachée en Server Action / API route).
  */
 export async function sendFeedbackAlert(params: {
@@ -42,7 +42,7 @@ export async function sendFeedbackAlert(params: {
 <body style="margin:0;padding:24px;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;">
     <div style="background:#0A0A0A;padding:20px 28px;">
-      <h1 style="margin:0;color:#fff;font-size:17px;font-weight:700;">Feedback plateforme — ${e(label)}</h1>
+      <h1 style="margin:0;color:#fff;font-size:17px;font-weight:700;">Feedback plateforme · ${e(label)}</h1>
     </div>
     <div style="padding:28px;">
       <p style="margin:0 0 6px;font-size:13px;color:#6B7280;">Profil : <strong style="color:#0A0A0A;">${e(params.userKind)}</strong>${params.email ? ` · ${e(params.email)}` : " · email non communiqué"}</p>
@@ -58,7 +58,7 @@ export async function sendFeedbackAlert(params: {
   await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: adminEmail,
-    subject: `[Feedback] ${label} — ${params.summary.slice(0, 80)}`,
+    subject: `[Feedback] ${label} · ${params.summary.slice(0, 80)}`,
     html,
   });
 }

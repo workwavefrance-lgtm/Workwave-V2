@@ -85,7 +85,7 @@ type RawUnlock = {
 
 const isAi = (v: string | null | undefined) => v === "tech" || v === "ai";
 
-/** Pagination robuste (contourne le cap PostgREST de 1000 lignes — leçon 30/04). */
+/** Pagination robuste (contourne le cap PostgREST de 1000 lignes, leçon 30/04). */
 async function loadPaged<T>(
   table: string,
   select: string,

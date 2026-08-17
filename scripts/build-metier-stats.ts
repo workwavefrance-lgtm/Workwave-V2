@@ -51,8 +51,8 @@ async function main() {
   const total = Object.values(stats).reduce((a, b) => a + b, 0);
   const file =
     `// Stats RÉELLES par métier (nombre de pros actifs) issues de notre base.\n` +
-    `// Généré le ${retrievedAt} — relancer \`npx tsx scripts/build-metier-stats.ts\` après un scrape.\n` +
-    `// Donnée unique (dataset propriétaire) — 0 invention.\n\n` +
+    `// Généré le ${retrievedAt} : relancer \`npx tsx scripts/build-metier-stats.ts\` après un scrape.\n` +
+    `// Donnée unique (dataset propriétaire) : 0 invention.\n\n` +
     `export const METIER_STATS: Record<string, number> = ${JSON.stringify(stats, null, 2)};\n\n` +
     `export const COVERAGE = {\n` +
     `  departments: ${deptCount || 0},\n` +

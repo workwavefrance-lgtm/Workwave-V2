@@ -15,7 +15,7 @@ export default function FeedbackPage() {
       </h1>
       <p className="text-base text-[#6B7280] leading-relaxed mb-10">
         Workwave se construit avec ses utilisateurs. Une idée d&apos;amélioration, un
-        bug, quelque chose qui vous a agacé ou plu&nbsp;: dites-le ici — chaque retour
+        bug, quelque chose qui vous a agacé ou plu&nbsp;: dites-le ici, chaque retour
         est lu par l&apos;équipe et fait avancer la plateforme.
       </p>
       <FeedbackAgent />

@@ -4,7 +4,7 @@
  * Servent les pages /ai/monde/[skill]/[ville] (en français). La France est
  * déjà couverte par /ai/[skill]/[ville] (pilotée par la base). BTP = France only.
  *
- * Tarifs affichés en EUR (locale "fr") avec mention "indicatif" — on ne convertit
+ * Tarifs affichés en EUR (locale "fr") avec mention "indicatif" : on ne convertit
  * pas en devise locale (MAD/XOF/CAD…) pour ne pas inventer de précision locale.
  */
 
@@ -64,7 +64,7 @@ export const FR_CITIES: FrCity[] = [
     region: "Europe",
     monument: "monaco",
     blurb:
-      "Cité-État souveraine de la Côte d'Azur, Monaco concentre finance, luxe et une stratégie numérique d'État (Extended Monaco) sur à peine deux kilomètres carrés — un marché compact et haut de gamme pour les freelances tech et créatifs.",
+      "Cité-État souveraine de la Côte d'Azur, Monaco concentre finance, luxe et une stratégie numérique d'État (Extended Monaco) sur à peine deux kilomètres carrés : un marché compact et haut de gamme pour les freelances tech et créatifs.",
   },
   // ─── Amérique francophone ────────────────────────────────────────────
   {

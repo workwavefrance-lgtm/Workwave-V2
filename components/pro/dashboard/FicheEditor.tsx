@@ -15,7 +15,7 @@ import type { Certification, PaymentMethod, OpeningHours } from "@/lib/types/dat
 import type { CategoryOption } from "@/lib/queries/categories";
 
 type Props = {
-  // Liste allégée (id/name/vertical) : voir getCategoriesForPicker — la liste
+  // Liste allégée (id/name/vertical) : voir getCategoriesForPicker. La liste
   // complète représentait 60-150 Ko de JSON envoyés au téléphone pour un menu.
   categories: CategoryOption[];
 };
@@ -562,7 +562,7 @@ export default function FicheEditor({ categories }: Props) {
             </Field>
           </Accordion>
 
-          {/* 3. Photos (pas de <form> imbriquée — appels directs) */}
+          {/* 3. Photos (pas de <form> imbriquée, appels directs) */}
           <Accordion title="Photos">
             {/* Logo */}
             <div className="space-y-3">
@@ -813,14 +813,14 @@ export default function FicheEditor({ categories }: Props) {
           <Accordion title="Services proposés">
             {/* Metier principal MODIFIABLE depuis le 08/08/2026.
                 Il etait affiche grise, donc un pro mal classe au scraping
-                n'avait AUCUN moyen de se corriger — son seul recours etait
+                n'avait AUCUN moyen de se corriger : son seul recours etait
                 d'ecrire a l'equipe. Cas reel : Aicha SANGARE, classee « Garde
                 animaux » alors qu'elle fait de l'accompagnement sante, a
                 ecrit deux fois puis demande la suppression de sa fiche.
                 Sur 2,5 M de fiches issues d'un scraping ou les codes NAF sont
                 ambigus (cf. les lecons du 18/04), le mauvais metier est
                 frequent : c'est donc un blocage systemique, pas un cas isole.
-                Le backend acceptait deja `category_id` — il ne manquait que ce
+                Le backend acceptait deja `category_id` : il ne manquait que ce
                 menu. */}
             <Field label="Métier principal">
               <select

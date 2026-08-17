@@ -52,7 +52,7 @@ export default async function BarometrePenuriePage() {
   const faq = [
     { q: `Dans quel département manque-t-il le plus d'artisans ?`, a: `${worst.name} est le département le moins doté par habitant pour ${worst.count} des ${PENURIE.length} métiers analysés. À l'inverse, les départements ruraux et de montagne (Hautes-Alpes, Alpes-de-Haute-Provence…) comptent le plus d'artisans par habitant.` },
     plombier ? { q: `Où manque-t-il le plus de plombiers en France ?`, a: `Rapporté à la population, c'est en ${plombier.scarcest[0].name} qu'il y a le moins de plombiers (${dec(plombier.scarcest[0].density)} pour 10 000 habitants), contre ${dec(plombier.densest[0].density)} en ${plombier.densest[0].name}.` } : null,
-    { q: `Comment est mesurée la « pénurie » d'artisans ?`, a: `Nous rapportons le nombre d'entreprises artisanales référencées (répertoire SIRENE de l'INSEE) à la population du département (INSEE 2021). Une faible densité par habitant signale un territoire moins pourvu — pas nécessairement une pénurie de main-d'œuvre.` },
+    { q: `Comment est mesurée la « pénurie » d'artisans ?`, a: `Nous rapportons le nombre d'entreprises artisanales référencées (répertoire SIRENE de l'INSEE) à la population du département (INSEE 2021). Une faible densité par habitant signale un territoire moins pourvu, pas nécessairement une pénurie de main-d'œuvre.` },
   ].filter(Boolean) as { q: string; a: string }[];
 
   const datasetSchema = {
@@ -120,7 +120,7 @@ export default async function BarometrePenuriePage() {
           <div className="rounded-2xl bg-[var(--accent)]/8 border border-[var(--accent)]/20 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="font-semibold text-lg text-[var(--text-primary)]">Vous cherchez un artisan dans votre département ?</p>
-              <p className="text-sm text-[var(--text-secondary)]">Déposez votre projet, recevez plusieurs devis gratuits — même là où ils sont rares.</p>
+              <p className="text-sm text-[var(--text-secondary)]">Déposez votre projet, recevez plusieurs devis gratuits, même là où ils sont rares.</p>
             </div>
             <Link href="/deposer-projet" className="shrink-0 inline-flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-6 py-3 rounded-full transition-all duration-250 hover:-translate-y-0.5">
               Déposer mon projet <span aria-hidden>→</span>

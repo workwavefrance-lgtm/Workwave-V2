@@ -35,7 +35,7 @@ export type AgentContext =
   // 1 (« je n'ai pas reçu le code »), Léa doit y arriver en le sachant.
   | { type: "claim"; proName: string | null; step: "form" | "verification" }
   // Depot de projet EN COURS. Contexte ajoute le 08/08/2026 : c'est l'ecran ou
-  // se joue tout le revenu, et Lea y arrivait SANS contexte — sa consigne
+  // se joue tout le revenu, et Lea y arrivait SANS contexte : sa consigne
   // generique etait donc de proposer au visiteur d'aller deposer un projet,
   // sur la page ou il etait deja en train d'en deposer un. Mesure du jour :
   // 244 formulaires commences pour 55 envoyes sur 30 jours (77 % d'abandon).

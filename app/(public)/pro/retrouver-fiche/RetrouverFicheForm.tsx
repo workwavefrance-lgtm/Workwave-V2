@@ -68,7 +68,7 @@ export default function RetrouverFicheForm() {
           className="w-full h-14 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] text-lg font-mono tracking-wide placeholder:text-[var(--text-tertiary)] placeholder:font-sans placeholder:text-base transition-all duration-250 outline-none border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
         />
         <p className="mt-2 text-xs text-[var(--text-tertiary)]">
-          France : SIRET (14 chiffres) · Belgique : BCE (10 chiffres) — {digitsCount} saisis
+          France : SIRET (14 chiffres) · Belgique : BCE (10 chiffres) · {digitsCount} saisis
         </p>
       </div>
 

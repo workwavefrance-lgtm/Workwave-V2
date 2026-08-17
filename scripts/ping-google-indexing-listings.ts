@@ -69,7 +69,7 @@ async function fetchTopCategoryCityCombos(): Promise<ProsByCity[]> {
   const categories = (cats as any[]) ?? [];
 
   // Villes Vienne triees par POPULATION DESC (Poitiers, Chatellerault,
-  // etc. en premier — celles qui ont le plus de volume Google search)
+  // etc. en premier, celles qui ont le plus de volume Google search)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: viennecities } = await (supabase as any)
     .from("cities")
@@ -179,7 +179,7 @@ async function main() {
   const urls = combos.map((c) => `${BASE}/${c.category_slug}/${c.city_slug}`);
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs qui seraient pingées ===\n");
+    console.log("=== DRY RUN · URLs qui seraient pingées ===\n");
     combos.forEach((c, i) => {
       console.log(
         `  ${(i + 1).toString().padStart(3)}. /${c.category_slug}/${c.city_slug.padEnd(25)} [${c.count} pros] (${c.city_name})`

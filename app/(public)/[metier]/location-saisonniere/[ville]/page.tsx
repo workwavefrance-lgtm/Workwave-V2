@@ -38,7 +38,7 @@ import {
  * Décline le pilier national (/menage/location-saisonniere) sur ~88 communes
  * touristiques VÉRIFIÉES en base (lib/data/touristic-cities.ts). Intention :
  * "ménage airbnb Biarritz", "femme de ménage location saisonnière Arcachon"…
- * — audience : hôtes/propriétaires en zone touristique, demande saisonnière.
+ * Audience : hôtes/propriétaires en zone touristique, demande saisonnière.
  *
  * Contenu RICHE même sans pros (prix sourcés + statuts + FAQ localisée + maillage
  * de zone) → JAMAIS thin, donc indexable (règle noindex CLAUDE.md 27/04). Pas de
@@ -230,7 +230,7 @@ export default async function MenageLocationSaisonniereVillePage({
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
-            {touristic.zone} — {kindPhrase(touristic)}. Côté budget, comptez{" "}
+            {touristic.zone}, {kindPhrase(touristic)}. Côté budget, comptez{" "}
             {fmtEur(studio.low)} € à {fmtEur(studio.high)} € constatés en forfait
             fin de séjour pour un studio ou un T2, et {fmtEur(maison.low)} € à{" "}
             {fmtEur(maison.high)} € pour une maison ou une villa. Cette page
@@ -245,7 +245,7 @@ export default async function MenageLocationSaisonniereVillePage({
       <HeroCta
         href={`/deposer-projet?categorie=${metier}&ville=${city.slug}`}
         label={`Trouver une aide ménage à ${touristic.name}`}
-        note={`Gratuit, sans engagement — votre demande est visible par les pros du ménage SIRET vérifiés de ${touristic.name} et des environs, qui vous recontactent directement.`}
+        note={`Gratuit, sans engagement : votre demande est visible par les pros du ménage SIRET vérifiés de ${touristic.name} et des environs, qui vous recontactent directement.`}
       />
 
       {/* ─── Prix constatés ─── */}
@@ -332,14 +332,14 @@ export default async function MenageLocationSaisonniereVillePage({
       <FinalCtaSection
         href={`/deposer-projet?categorie=${metier}&ville=${city.slug}`}
         title={`Besoin d'une aide ménage fiable à ${touristic.name} ?`}
-        text="Décrivez votre logement et votre rythme de séjours, recevez des devis de prestataires SIRET vérifiés près de chez vous — gratuit, sans commission."
+        text="Décrivez votre logement et votre rythme de séjours, recevez des devis de prestataires SIRET vérifiés près de chez vous, gratuit, sans commission."
         buttonLabel="Demander un devis gratuitement"
         footnote="Gratuit · sans engagement · demande visible par les pros de votre zone"
       />
 
       <FaqAccordion
         faqs={faqs}
-        title={`Questions fréquentes — ménage en location saisonnière à ${touristic.name}`}
+        title={`Questions fréquentes · ménage en location saisonnière à ${touristic.name}`}
       />
 
       {/* ─── Maillage interne ─── */}
@@ -348,7 +348,7 @@ export default async function MenageLocationSaisonniereVillePage({
           <MaillageCard
             href={`/${metier}/location-saisonniere`}
             title="Ménage Airbnb : le guide"
-            subtitle="Prix, statuts et pièges — la page nationale"
+            subtitle="Prix, statuts et pièges : la page nationale"
           />
           <MaillageCard
             href={`/${metier}/${city.slug}`}
@@ -357,14 +357,14 @@ export default async function MenageLocationSaisonniereVillePage({
           />
           <MaillageCard
             href={`/${metier}/${cityDeptSlug}`}
-            title={`Ménage — ${city.department.name}`}
+            title={`Ménage · ${city.department.name}`}
             subtitle="Élargir la recherche au département"
           />
         </div>
 
         {zoneCities.length > 0 && (
           <VillePills
-            title={`Ménage location saisonnière — ${touristic.zone}`}
+            title={`Ménage location saisonnière · ${touristic.zone}`}
             links={zoneCities.map((c) => ({
               href: `/${metier}/location-saisonniere/${c.slug}`,
               label: `Ménage ${c.name}`,

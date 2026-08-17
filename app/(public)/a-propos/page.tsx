@@ -5,7 +5,7 @@ import { getOrganizationSchema } from "@/lib/utils/schema";
 import { BASE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "À propos — pourquoi Workwave existe",
+  title: "À propos · pourquoi Workwave existe",
   description:
     "Workwave est né d'un constat simple : les artisans paient 500 à 600 € par mois pour 2 ou 3 leads qui ne répondent même pas. On a créé une alternative claire, locale et accessible.",
   alternates: { canonical: `${BASE_URL}/a-propos` },
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: "Workwave",
-    title: "À propos — pourquoi Workwave existe",
+    title: "À propos · pourquoi Workwave existe",
     description:
       "Workwave est né d'un constat simple : les artisans paient 500 à 600 € par mois pour 2 ou 3 leads qui ne répondent même pas. On a créé une alternative claire, locale et accessible.",
     url: `${BASE_URL}/a-propos`,
@@ -153,7 +153,7 @@ export default function AProposPage() {
               faire facturer des fortunes pour des plateformes qui ne livrent
               pas. L&apos;idée : utiliser ce que la technologie permet
               aujourd&apos;hui (automatisation, IA, hébergement low-cost) pour
-              proposer un service au prix réel — pas au prix marketing.
+              proposer un service au prix réel, pas au prix marketing.
             </p>
             <p>
               Une question, un retour, une critique ? Écrivez à{" "}

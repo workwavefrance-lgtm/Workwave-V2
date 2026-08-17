@@ -1,5 +1,5 @@
 /**
- * BTP — Génération EN MASSE des guides des prix depuis le backlog.
+ * BTP · Génération EN MASSE des guides des prix depuis le backlog.
  *
  * Lit data/competitive/backlog-guides-prix.csv (486 prestations) + les métiers
  * (catégories) et génère, via Perplexity `sonar`, un guide FACTUEL + SOURCÉ par
@@ -36,7 +36,7 @@ const PRIO = arg("prio"); // P1 | P2 | P3
 const METIER = arg("metier");
 const TRACK = arg("track") || "both"; // prestation | metier | both
 
-// Sujets déjà faits manuellement (fournée 1) — à NE PAS recréer (travaux_slug).
+// Sujets déjà faits manuellement (fournée 1) : à NE PAS recréer (travaux_slug).
 const DONE_TRAVAUX = new Set([
   "prix-dune-dalle-exterieure-en-beton", "prix-de-lentretien-de-jardin", "prix-de-lenlevement-dechets",
   "prix-de-lelagage-arbres", "prix-pose-volets", "prix-de-remplacement-dune-fenetre",
@@ -90,7 +90,7 @@ function buildPrompt(s: Subject, metierName: string): string {
     `CONTRAINTES : 5 à 8 "ranges", 5 à 7 "factors", 3 "devis", 7 à 8 "faq" dont une "comment payer moins cher", une sur les aides/crédit d'impôt si pertinent, une sur ce que doit contenir un bon devis. ` +
     `Autres FAQ : couvre ces recherches : ${s.longtail}. ` +
     `Le "title" et le "h1" sont NATIONAUX (France entière) : n'inclure AUCUN nom de ville, de département, de région, NI de marque ou d'entreprise. ` +
-    `Prix en euros TTC France ${YEAR}, issus de sources web réelles — n'invente AUCUN chiffre. Ton factuel, zéro superlatif.`
+    `Prix en euros TTC France ${YEAR}, issus de sources web réelles : n'invente AUCUN chiffre. Ton factuel, zéro superlatif.`
   );
 }
 
@@ -155,7 +155,7 @@ async function main() {
   list.sort((a, b) => (a.prio === b.prio ? b.volume - a.volume : a.prio < b.prio ? -1 : 1));
   list = list.slice(OFFSET, OFFSET + (LIMIT === Infinity ? list.length : LIMIT));
 
-  console.log(`Bulk guides des prix — ${list.length} sujets (track=${TRACK}${PRIO ? ", " + PRIO : ""})${DRY ? " [DRY]" : ""}\n`);
+  console.log(`Bulk guides des prix · ${list.length} sujets (track=${TRACK}${PRIO ? ", " + PRIO : ""})${DRY ? " [DRY]" : ""}\n`);
   let ok = 0, skip = 0, fail = 0, total = 0;
   for (const s of list) {
     if (!DRY && !FORCE) {

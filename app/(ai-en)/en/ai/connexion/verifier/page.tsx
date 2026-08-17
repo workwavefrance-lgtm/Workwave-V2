@@ -18,7 +18,7 @@ import { verifyCode } from "@/app/(ai)/ai/connexion/verifier/actions";
  */
 
 export const metadata: Metadata = {
-  title: "Login code — Workwave AI",
+  title: "Login code · Workwave AI",
   description: "Enter the code sent by email to sign in to your Workwave AI workspace.",
   robots: { index: false, follow: false },
 };

@@ -1,4 +1,4 @@
-// Phase 4 — propose le mapping article blog "prix" (localisé Vienne) -> guide
+// Phase 4 · propose le mapping article blog "prix" (localisé Vienne) -> guide
 // des prix NATIONAL équivalent, pour 301 uniquement les vrais doublons.
 // Read-only (analyse).
 import { config } from "dotenv";

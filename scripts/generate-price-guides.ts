@@ -37,7 +37,7 @@ type GuideSpec = {
 // 15 articles prix prioritaires (vol/mois estime entre parentheses)
 const GUIDES: GuideSpec[] = [
   // 7 nouvelles categories
-  { id: 1, categorySlug: "pisciniste",                    titleSuggestion: "Prix construction piscine en 2026 : coque, beton, monobloc — guide complet",                estimatedVolume: 12000 },
+  { id: 1, categorySlug: "pisciniste",                    titleSuggestion: "Prix construction piscine en 2026 : coque, beton, monobloc · guide complet",                estimatedVolume: 12000 },
   { id: 2, categorySlug: "vitrier",                       titleSuggestion: "Prix vitrier urgence 2026 : remplacement vitre cassee, devis et tarifs",                   estimatedVolume: 8000 },
   { id: 3, categorySlug: "ramoneur",                      titleSuggestion: "Prix ramonage cheminee 2026 : tarif, obligations legales et astuces",                       estimatedVolume: 5000 },
   { id: 4, categorySlug: "videosurveillance-installateur", titleSuggestion: "Prix installation alarme et videosurveillance maison 2026 : guide complet",                estimatedVolume: 8000 },
@@ -48,12 +48,12 @@ const GUIDES: GuideSpec[] = [
   // 8 long-tail haute valeur sur categories existantes
   { id: 8,  categorySlug: "plaquiste",   titleSuggestion: "Prix au m2 placoplatre en 2026 : pose, fourniture, fourchettes completes",       estimatedVolume: 15000 },
   { id: 9,  categorySlug: "electricien", titleSuggestion: "Tarif horaire electricien en 2026 : prix moyen, deplacement et facturation",       estimatedVolume: 12000 },
-  { id: 10, categorySlug: "carreleur",   titleSuggestion: "Prix pose carrelage au m2 en 2026 : sol, mur, salle de bain — toutes fourchettes", estimatedVolume: 10000 },
+  { id: 10, categorySlug: "carreleur",   titleSuggestion: "Prix pose carrelage au m2 en 2026 : sol, mur, salle de bain · toutes fourchettes", estimatedVolume: 10000 },
   { id: 11, categorySlug: "peintre",     titleSuggestion: "Prix peinture interieure au m2 en 2026 : tarifs, devis types et astuces",          estimatedVolume: 8000 },
   { id: 12, categorySlug: "plombier",    titleSuggestion: "Prix debouchage canalisation 2026 : tarif urgence et intervention plombier",       estimatedVolume: 10000 },
   { id: 13, categorySlug: "facadier",    titleSuggestion: "Prix isolation exterieure (ITE) en 2026 : cout au m2 et aides financieres",        estimatedVolume: 7000 },
   { id: 14, categorySlug: "paysagiste",  titleSuggestion: "Prix creation terrasse bois 2026 : tarif au m2, bois exotique vs composite",       estimatedVolume: 6000 },
-  { id: 15, categorySlug: "menuisier",   titleSuggestion: "Prix pose porte d'entree 2026 : PVC, alu, bois — fourchettes completes",           estimatedVolume: 5000 },
+  { id: 15, categorySlug: "menuisier",   titleSuggestion: "Prix pose porte d'entree 2026 : PVC, alu, bois · fourchettes completes",           estimatedVolume: 5000 },
 ];
 
 function parseArgs() {
@@ -104,7 +104,7 @@ async function main() {
   for (const guide of targets) {
     const categoryName = categoryByName.get(guide.categorySlug);
     if (!categoryName) {
-      console.error(`  [#${guide.id}] Categorie introuvable : ${guide.categorySlug} — SKIP`);
+      console.error(`  [#${guide.id}] Categorie introuvable : ${guide.categorySlug} · SKIP`);
       errors++;
       continue;
     }
@@ -115,7 +115,7 @@ async function main() {
       (s) => s.startsWith(expectedSlugStart) && s.includes(guide.categorySlug.split("-")[0])
     );
     if (conflictCandidate) {
-      console.log(`  [#${guide.id}] [${categoryName}] Conflit potentiel : ${conflictCandidate} — SKIP`);
+      console.log(`  [#${guide.id}] [${categoryName}] Conflit potentiel : ${conflictCandidate} · SKIP`);
       skipped++;
       continue;
     }

@@ -122,7 +122,7 @@ export default function ProsTableClient({
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-bold truncate" style={{ color: "var(--admin-text)" }}>{row.name}</div>
                   <div className="text-[11px] truncate" style={{ color: "var(--admin-text-tertiary)" }}>
-                    {row.category?.name || "—"} · {row.city?.name || "—"}{row.city?.department?.code ? ` (${row.city.department.code})` : ""}
+                    {row.category?.name || "-"} · {row.city?.name || "-"}{row.city?.department?.code ? ` (${row.city.department.code})` : ""}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">

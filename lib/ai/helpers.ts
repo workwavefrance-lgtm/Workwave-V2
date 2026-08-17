@@ -14,7 +14,7 @@
 //   47 = data-analytics
 //   48 = design-produit
 //
-// Business & creatif (8 macro categories — etendu Phase 13) :
+// Business & creatif (8 macro categories, etendu Phase 13) :
 //   79 = marketing-communication
 //   80 = design-creation
 //   81 = strategie-management

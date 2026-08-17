@@ -50,6 +50,6 @@ export async function GET(request: NextRequest) {
     console.error("[auth/callback] erreur exchangeCodeForSession:", error.message);
   }
 
-  // Pas de code — redirection vers la connexion
+  // Pas de code : redirection vers la connexion
   return NextResponse.redirect(new URL("/pro/connexion", baseUrl));
 }

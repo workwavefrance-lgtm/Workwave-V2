@@ -96,7 +96,7 @@ export default function SupportInboxClient({
             </div>
           ) : null}
           <div className="truncate text-[11px]" style={{ color: "var(--admin-text-tertiary)" }}>
-            {row.requester_email || "—"}
+            {row.requester_email || "-"}
           </div>
         </div>
       ),

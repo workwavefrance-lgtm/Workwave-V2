@@ -206,7 +206,7 @@ async function searchGitHub(
 ): Promise<GitHubUser[]> {
   // Search par nom uniquement, location verifiee apres dans getUserDetails
   // (filtre location:France GitHub matche que les profils contenant
-  // exactement "France" — trop restrictif, 99% des profils FR ne l'ont pas)
+  // exactement "France" : trop restrictif, 99% des profils FR ne l'ont pas)
   const q = `${firstName} ${lastName}`;
   const url = `${SEARCH_API}?q=${encodeURIComponent(q)}&per_page=10`;
   try {
@@ -261,7 +261,7 @@ function looksLikeName(githubName: string | null, firstName: string, lastName: s
 // ─── Main ──────────────────────────────────────────────────────────────────
 async function main() {
   console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("Workwave AI — Enrich GitHub username pour pros tech");
+  console.log("Workwave AI · Enrich GitHub username pour pros tech");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
   console.log(`Mode    : ${APPLY ? "✓ APPLY" : "○ DRY-RUN"}`);
   console.log(`Limit   : ${LIMIT}`);

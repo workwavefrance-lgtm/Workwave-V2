@@ -6,7 +6,7 @@
  *   J+3   "toujours disponible"      -> relance_sent_at
  *
  * Pourquoi deux : un pro qui ne clique pas le jour meme oublie. La relance a
- * 24 h le rattrape quand le particulier attend encore ses devis — c'est la que
+ * 24 h le rattrape quand le particulier attend encore ses devis : c'est la que
  * se declenchent les deblocages a 9,90 EUR. Celle a J+3 est un dernier rappel.
  *
  * Simple + fiable :

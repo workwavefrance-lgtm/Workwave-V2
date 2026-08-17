@@ -6,7 +6,7 @@ import type { ProWithRelations } from "@/lib/types/database";
 /**
  * Contexte serveur du dashboard pro : session + fiche BTP, MÉMOÏSÉ par requête.
  *
- * PERF : avant, chaque affichage de page refaisait le même travail 2 à 3 fois —
+ * PERF : avant, chaque affichage de page refaisait le même travail 2 à 3 fois :
  * `auth.getUser()` dans le middleware, puis dans le layout, puis dans la page
  * (et `getUser()` n'est PAS un décodage local : c'est un aller-retour réseau
  * vers l'auth Supabase), plus un chargement complet de la fiche pro dans le

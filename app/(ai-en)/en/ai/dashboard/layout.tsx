@@ -61,7 +61,7 @@ export default async function AiEnDashboardLayout({
   return (
     <div className="min-h-screen flex bg-[var(--ai-bg)]">
       {/* ════════════════════════════════════════════════════════════
-          SIDEBAR DESKTOP (md+) — Pixel Rise style
+          SIDEBAR DESKTOP (md+) · Pixel Rise style
           ════════════════════════════════════════════════════════════ */}
       <aside className="hidden md:flex md:flex-col md:w-64 lg:w-72 border-r border-[var(--ai-border-subtle)] bg-[var(--ai-bg-card)] sticky top-0 h-screen">
         {/* Logo */}

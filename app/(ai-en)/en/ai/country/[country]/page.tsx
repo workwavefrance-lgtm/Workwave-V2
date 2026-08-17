@@ -37,7 +37,7 @@ export async function generateMetadata({
   const year = new Date().getFullYear();
   const path = `/en/ai/country/${country.slug}`;
   return {
-    title: `Hire freelancers in ${country.name} — developers, designers & more (${year})`,
+    title: `Hire freelancers in ${country.name} · developers, designers & more (${year})`,
     description: `Hire vetted freelancers in ${country.name}: web developers, AI engineers, designers, marketers and more. Get matched in 24h, 0% commission. Post your project for free on Workwave AI.`,
     alternates: aiAlternatesEnOnly(path),
     openGraph: {
@@ -76,15 +76,15 @@ export default async function CountryHubPage({
     },
     {
       q: `Do freelancers in ${country.name} work remotely?`,
-      a: `Most do. The large majority of freelancers work fully remote, so you can hire the best fit anywhere in ${country.name} — or collaborate across borders and timezones.`,
+      a: `Most do. The large majority of freelancers work fully remote, so you can hire the best fit anywhere in ${country.name}, or collaborate across borders and timezones.`,
     },
     {
       q: `How do I hire a freelancer in ${country.name} on Workwave?`,
-      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching freelancers, who reach out to you directly. You compare profiles, choose and work together — no middleman, no commission.`,
+      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching freelancers, who reach out to you directly. You compare profiles, choose and work together: no middleman, no commission.`,
     },
     {
       q: `Is it free for clients?`,
-      a: `Yes. Posting a project, being contacted by freelancers and hiring them is 100% free. Workwave never takes a commission — freelancers fund the platform through an optional subscription.`,
+      a: `Yes. Posting a project, being contacted by freelancers and hiring them is 100% free. Workwave never takes a commission: freelancers fund the platform through an optional subscription.`,
     },
   ];
 
@@ -131,18 +131,18 @@ export default async function CountryHubPage({
             <p className="mb-4 text-[15px] sm:text-[16px] text-[var(--ai-text-secondary)]">
               <span className="font-semibold text-[var(--ai-text)]">{homage.phrase}</span>
               {homage.roman ? <span className="text-[var(--ai-text-tertiary)]"> ({homage.roman})</span> : null}
-              <span className="text-[var(--ai-text-tertiary)]"> — {homage.lang} for &ldquo;{homage.translation}&rdquo;</span>
+              <span className="text-[var(--ai-text-tertiary)]"> · {homage.lang} for &ldquo;{homage.translation}&rdquo;</span>
             </p>
           )}
           <h1 className="font-black text-[var(--ai-text)] max-w-3xl" style={{ fontSize: "clamp(34px, 6vw, 68px)", lineHeight: 0.97, letterSpacing: "-0.04em" }}>
             Hire freelancers in {country.name}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            Find vetted freelance developers, designers, marketers and more across {country.name}. Post your project for free — our AI alerts matching freelancers and they contact you directly. 0% commission.
+            Find vetted freelance developers, designers, marketers and more across {country.name}. Post your project for free: our AI alerts matching freelancers and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Browse freelances
@@ -151,7 +151,7 @@ export default async function CountryHubPage({
         </div>
       </section>
 
-      {/* MARKET — paragraphe sourcé (si présent). Zéro chiffre inventé. */}
+      {/* MARKET : paragraphe sourcé (si présent). Zéro chiffre inventé. */}
       {sourced && (
         <section className="border-t border-[var(--ai-border-subtle)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
@@ -235,7 +235,7 @@ export default async function CountryHubPage({
         </div>
       </section>
 
-      {/* MESH — autres pays du continent */}
+      {/* MESH : autres pays du continent */}
       {peerCountries.length > 0 && (
         <section className="border-t border-[var(--ai-border-subtle)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
@@ -277,7 +277,7 @@ export default async function CountryHubPage({
           </p>
           <div className="mt-8">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
           </div>
         </div>

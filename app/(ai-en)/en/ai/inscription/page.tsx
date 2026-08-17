@@ -20,7 +20,7 @@ import { submitInscription } from "@/app/(ai)/ai/inscription/actions";
  */
 
 export const metadata: Metadata = {
-  title: "Join as a freelancer — Workwave AI",
+  title: "Join as a freelancer · Workwave AI",
   description:
     "Create your freelancer profile on Workwave AI in 4 steps (tech, marketing, finance, legal, HR, design, creative, media). Free to join. Receive every project posted in your vertical in real time.",
   robots: { index: false, follow: false },
@@ -138,7 +138,7 @@ export default async function InscriptionEnPage({
         <input type="hidden" name="plan" value="free" />
 
         <div className="max-w-3xl space-y-12 sm:space-y-16">
-          {/* ───────── Step 01 — Identity ───────── */}
+          {/* ───────── Step 01 · Identity ───────── */}
           <div>
             <SectionLabel index={1} total={3} label="Identity" />
             <h2
@@ -264,7 +264,7 @@ export default async function InscriptionEnPage({
             </div>
           </div>
 
-          {/* ───────── Step 02 — Pro profile ───────── */}
+          {/* ───────── Step 02 · Pro profile ───────── */}
           <div>
             <SectionLabel index={2} total={3} label="Pro profile" />
             <h2
@@ -358,7 +358,7 @@ export default async function InscriptionEnPage({
             </div>
           </div>
 
-          {/* ───────── Step 03 — Availability & rate ───────── */}
+          {/* ───────── Step 03 · Availability & rate ───────── */}
           <div>
             <SectionLabel index={3} total={3} label="Availability" />
             <h2
@@ -373,7 +373,7 @@ export default async function InscriptionEnPage({
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
               Indicative only, shown on your public profile. You receive EVERY
-              tech project posted, in real time — you decide which ones interest
+              tech project posted, in real time: you decide which ones interest
               you from your dashboard. Editable anytime.
             </p>
 

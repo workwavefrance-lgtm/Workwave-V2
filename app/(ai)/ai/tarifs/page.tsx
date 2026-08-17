@@ -8,14 +8,14 @@ const SITE_URL = "https://workwave.fr";
 
 export const metadata: Metadata = {
   title:
-    "Tarifs Workwave AI — Gratuit cote client, sans abonnement ni commission cote freelance",
+    "Tarifs Workwave AI · Gratuit cote client, sans abonnement ni commission cote freelance",
   description:
-    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances debloquent un projet pour 9,90€ (paiement unique) uniquement quand il les interesse — sans abonnement, sans credits, sans engagement. Comparatif vs Malt et Codeur.com.",
+    "Workwave AI est gratuit pour les porteurs de projet, sans aucune commission. Les freelances debloquent un projet pour 9,90€ (paiement unique) uniquement quand il les interesse, sans abonnement, sans credits, sans engagement. Comparatif vs Malt et Codeur.com.",
   alternates: { canonical: `${SITE_URL}/ai/tarifs` },
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// FAQ pricing — 6 questions strategiques (objections, billing, B2B)
+// FAQ pricing : 6 questions strategiques (objections, billing, B2B)
 // ─────────────────────────────────────────────────────────────────────
 const FAQ_PRICING: FaqItem[] = [
   {
@@ -24,7 +24,7 @@ const FAQ_PRICING: FaqItem[] = [
   },
   {
     q: "Comment fonctionne le deblocage a 9,90€ ?",
-    a: "Votre inscription et votre profil sont 100% gratuits. Quand un projet est diffuse, vous voyez le brief complet (description, budget, delai) sans payer. Si ce projet vous interesse et que vous voulez contacter le client, vous debloquez ses coordonnees pour 9,90€ — un paiement unique, pour ce projet uniquement. Vous ne payez que les projets qui vous interessent vraiment. Aucun abonnement, aucun credit prepaye, aucune commission.",
+    a: "Votre inscription et votre profil sont 100% gratuits. Quand un projet est diffuse, vous voyez le brief complet (description, budget, delai) sans payer. Si ce projet vous interesse et que vous voulez contacter le client, vous debloquez ses coordonnees pour 9,90€ : un paiement unique, pour ce projet uniquement. Vous ne payez que les projets qui vous interessent vraiment. Aucun abonnement, aucun credit prepaye, aucune commission.",
   },
   {
     q: "Pourquoi 9,90€ par projet et pas un abonnement ?",
@@ -109,7 +109,7 @@ export default function TarifsPage() {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: "Workwave AI — Mise en relation freelances multi-verticaux",
+    name: "Workwave AI · Mise en relation freelances multi-verticaux",
     serviceType: "Plateforme freelance multi-verticale (tech + business + creatif)",
     provider: {
       "@type": "Organization",
@@ -133,7 +133,7 @@ export default function TarifsPage() {
       },
       {
         "@type": "Offer",
-        name: "Workwave AI — Deblocage projet (freelance)",
+        name: "Workwave AI · Deblocage projet (freelance)",
         description:
           "Deblocage des coordonnees client pour un projet : 9,90€ paiement unique. Brief visible avant paiement. Inscription et profil gratuits. Aucun abonnement, aucune commission, aucun engagement.",
         price: "9.90",
@@ -175,7 +175,7 @@ export default function TarifsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 1 — HERO
+          SECTION 1 · HERO
           ═══════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
         <Watermark text="PRICING" position="bottom" />
@@ -214,7 +214,7 @@ export default function TarifsPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 2 — CARDS PRICING (CLIENT + FREELANCE)
+          SECTION 2 · CARDS PRICING (CLIENT + FREELANCE)
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
@@ -380,7 +380,7 @@ export default function TarifsPage() {
                   </svg>
                 </Link>
                 <p className="text-[11px] text-white/40 text-center mt-3">
-                  Inscription gratuite — vous payez uniquement les projets qui vous interessent
+                  Inscription gratuite : vous payez uniquement les projets qui vous interessent
                 </p>
               </div>
             </div>
@@ -389,7 +389,7 @@ export default function TarifsPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 3 — COMPARATIF
+          SECTION 3 · COMPARATIF
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg)] border-t border-[var(--ai-border-subtle)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 lg:py-28">
@@ -524,7 +524,7 @@ export default function TarifsPage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4 — FAQ PRICING (FAQPage schema via AiFaqSection)
+          SECTION 4 · FAQ PRICING (FAQPage schema via AiFaqSection)
           ═══════════════════════════════════════════════════════════════ */}
       <AiFaqSection
         id="faq"
@@ -537,7 +537,7 @@ export default function TarifsPage() {
       />
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 5 — CTA FINAL
+          SECTION 5 · CTA FINAL
           ═══════════════════════════════════════════════════════════════ */}
       <section className="bg-[var(--ai-bg-card)] border-t border-[var(--ai-border-subtle)] relative overflow-hidden">
         <Watermark text="START.NOW" position="bottom" />

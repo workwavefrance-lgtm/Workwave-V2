@@ -9,7 +9,7 @@ import { getAllCategories } from "@/lib/queries/categories";
  * "Ville".
  *
  * Objectif business : capter les visiteurs qui ont scrollé la liste sans
- * trouver le pro idéal — ils n'ont qu'à décrire leur besoin sans changer
+ * trouver le pro idéal, ils n'ont qu'à décrire leur besoin sans changer
  * de page. Impact attendu : × 3-5 la conversion sur les pages listing.
  */
 export default async function InlineProjectForm({
@@ -23,7 +23,7 @@ export default async function InlineProjectForm({
   variant?: "default" | "compact";
 }) {
   // Le composant ProjectForm a besoin de la liste complète des catégories
-  // (utilisée seulement si l'user revient en arrière à l'étape 1 — non bloquant).
+  // (utilisée seulement si l'user revient en arrière à l'étape 1, non bloquant).
   const categories = await getAllCategories();
 
   const wrapperClasses =

@@ -1,5 +1,5 @@
 // Baromètre densité d'entreprises artisanales par département.
-// Généré le 2026-07-27 par scripts/build-barometre.ts — NE PAS éditer à la main.
+// Généré le 2026-07-27 par scripts/build-barometre.ts. NE PAS éditer à la main.
 // Pros = notre base (source SIRENE). Population = INSEE population municipale 2021 (data.gouv).
 // Densité = entreprises référencées / population * 10 000. 0 invention.
 

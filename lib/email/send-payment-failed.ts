@@ -18,7 +18,7 @@ export async function sendPaymentFailedEmail(
   await resend.emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
-    subject: "Problème de paiement — Workwave Pro",
+    subject: "Problème de paiement · Workwave Pro",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="font-size: 20px; font-weight: 700; color: #0A0A0A; margin-bottom: 16px;">

@@ -66,11 +66,11 @@ function buildPrompt(slug: string, labels: string[]): string {
   const year = new Date().getFullYear();
   return (
     `En BELGIQUE (Wallonie et Bruxelles) en ${year}, indique la fourchette de prix moyenne TVAC (TVA comprise) FACTURÉE PAR UN ARTISAN/ENTREPRENEUR pour un ${metier}, ` +
-    `pour CHACUNE de ces prestations précises, en te basant sur des sources web BELGES récentes et fiables (prix en euros, marché belge — PAS français) :\n` +
+    `pour CHACUNE de ces prestations précises, en te basant sur des sources web BELGES récentes et fiables (prix en euros, marché belge, PAS français) :\n` +
     labels.map((l, i) => `${i + 1}. ${l}`).join("\n") +
     `\n\nRÈGLES IMPÉRATIVES :\n` +
-    `- Prix TOUT COMPRIS (fourniture + pose/main d'œuvre) dès que la prestation implique une installation — JAMAIS le prix du matériel seul.\n` +
-    `- Une fourchette DISTINCTE, spécifique et réaliste pour CHAQUE prestation — n'utilise jamais deux fois la même fourchette.\n` +
+    `- Prix TOUT COMPRIS (fourniture + pose/main d'œuvre) dès que la prestation implique une installation : JAMAIS le prix du matériel seul.\n` +
+    `- Une fourchette DISTINCTE, spécifique et réaliste pour CHAQUE prestation : n'utilise jamais deux fois la même fourchette.\n` +
     `- Chiffres conformes au marché BELGE (Wallonie/Bruxelles), prix TVAC, ce que paie réellement un particulier belge.\n\n` +
     `Réponds UNIQUEMENT avec un objet JSON valide (aucun texte avant ou après), au format EXACT :\n` +
     `{"ranges":[{"label":"<le libellé exact fourni>","range":"<ex: 80 € à 150 €>"}]}\n` +
@@ -128,7 +128,7 @@ async function fetchCat(slug: string, labels: string[]): Promise<{ entry: Entry 
 }
 
 async function main() {
-  console.log(`Fetch prix sourcés Perplexity — ${Object.keys(CATS).length} catégories${DRY ? " (DRY RUN, 1 cat)" : ""}\n`);
+  console.log(`Fetch prix sourcés Perplexity · ${Object.keys(CATS).length} catégories${DRY ? " (DRY RUN, 1 cat)" : ""}\n`);
   const out: Record<string, Entry> = {};
   let total = 0;
   const entries = DRY ? Object.entries(CATS).slice(0, 1) : Object.entries(CATS);
@@ -144,11 +144,11 @@ async function main() {
 
   console.log(`\nOK : ${Object.keys(out).length}/${entries.length} catégories · coût ≈ $${total.toFixed(4)}`);
   if (DRY) {
-    console.log("\nDRY RUN — aperçu :\n", JSON.stringify(out, null, 2));
+    console.log("\nDRY RUN · aperçu :\n", JSON.stringify(out, null, 2));
     return;
   }
   const file =
-    `// Prix BELGES sourcés via Perplexity API (recherche web + citations, prix TVAC) — généré le ${new Date().toISOString().slice(0, 10)}.\n` +
+    `// Prix BELGES sourcés via Perplexity API (recherche web + citations, prix TVAC), généré le ${new Date().toISOString().slice(0, 10)}.\n` +
     `// NE PAS éditer à la main : relancer \`npx tsx scripts/fetch-sourced-prices.ts\`.\n` +
     `// Respecte « zéro chiffre inventé » : chiffres issus de sources web réelles, citées.\n\n` +
     `export type SourcedPrice = { label: string; range: string };\n` +

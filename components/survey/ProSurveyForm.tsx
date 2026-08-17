@@ -106,7 +106,7 @@ export default function ProSurveyForm({ source = "enquete-pro" }: { source?: str
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Métier — obligatoire */}
+      {/* Métier : obligatoire */}
       <div>
         <label htmlFor="metier" className={labelCls}>Votre métier&nbsp;?</label>
         <div className="relative">
@@ -137,7 +137,7 @@ export default function ProSurveyForm({ source = "enquete-pro" }: { source?: str
           placeholder="Ex : 86 (optionnel)" maxLength={60} className={inputBase} />
       </div>
 
-      {/* Tâches chronophages — obligatoire, max 2 */}
+      {/* Tâches chronophages : obligatoire, max 2 */}
       <div>
         <label className={labelCls}>
           Dans une semaine type, qu&apos;est-ce qui vous prend le plus de temps EN DEHORS du chantier&nbsp;?

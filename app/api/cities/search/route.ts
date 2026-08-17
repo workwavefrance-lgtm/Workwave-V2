@@ -4,7 +4,7 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import type { Department } from "@/lib/types/database";
 
 // Résultat unifié : commune OU département (une région tapée se "déplie" en
-// ses départements, faute de page région dédiée — décision 13/06). Le `slug`
+// ses départements, faute de page région dédiée, décision 13/06). Le `slug`
 // est directement le segment d'URL `location` (/[metier]/[slug]).
 export type CitySearchResult = {
   kind: "city" | "department";
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   const isNumeric = /^\d+$/.test(raw);
   const nq = normalize(raw);
 
-  // 1) Communes (par CP si numérique, sinon par nom) — comportement existant.
+  // 1) Communes (par CP si numérique, sinon par nom) : comportement existant.
   const cityQuery = supabase
     .from("cities")
     .select("id, name, slug, postal_code, population, departments!inner(code, country)")

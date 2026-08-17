@@ -10,10 +10,10 @@ import { getFrCity, FR_CITIES } from "@/lib/data/intl-fr-cities";
 
 /**
  * Page programmatique francophone : /ai/monde/[skill]/[ville]
- * Ex. /ai/monde/web-development/bruxelles — "Freelance développeur web à Bruxelles".
+ * Ex. /ai/monde/web-development/bruxelles : "Freelance développeur web à Bruxelles".
  *
  * Hors-France (la France est sur /ai/[skill]/[ville], pilotée par la base).
- * Tarifs en EUR (locale "fr"), indicatifs marché européen — pas de conversion
+ * Tarifs en EUR (locale "fr"), indicatifs marché européen, pas de conversion
  * locale inventée. ISR 6h. BTP = France only, non concerné.
  */
 
@@ -34,7 +34,7 @@ export async function generateMetadata({
   const year = new Date().getFullYear();
   const path = `/ai/monde/${skillSlug}/${ville}`;
   return {
-    title: `Freelance ${fr.label} à ${city.name} — TJM & profils (${year})`,
+    title: `Freelance ${fr.label} à ${city.name} · TJM & profils (${year})`,
     description: `Trouvez un freelance ${fr.nounSingular} à ${city.name} (${city.country}). Comparez les TJM, soyez mis en relation en 24h, 0 commission. Déposez votre projet gratuitement sur Workwave AI.`,
     alternates: { canonical: `${SITE_URL}${path}` },
     openGraph: {
@@ -58,8 +58,8 @@ function buildFaq(
     {
       q: `Combien coûte un freelance ${frNounSingular} à ${cityName} ?`,
       a: seniorRange
-        ? `Un freelance ${frNounSingular} senior facture en général autour de ${seniorRange}. Fourchette indicative (TJM marché européen) ; le tarif final dépend de la séniorité, de la stack, du périmètre et de la durée de la mission. Sur Workwave, vous convenez du tarif directement avec le freelance — 0 commission.`
-        : `Le tarif varie selon la séniorité, le périmètre et l'expérience du freelance. Vous le négociez directement avec lui — Workwave ne prend aucune commission, le prix reste transparent.`,
+        ? `Un freelance ${frNounSingular} senior facture en général autour de ${seniorRange}. Fourchette indicative (TJM marché européen) ; le tarif final dépend de la séniorité, de la stack, du périmètre et de la durée de la mission. Sur Workwave, vous convenez du tarif directement avec le freelance, 0 commission.`
+        : `Le tarif varie selon la séniorité, le périmètre et l'expérience du freelance. Vous le négociez directement avec lui : Workwave ne prend aucune commission, le prix reste transparent.`,
     },
     {
       q: `Les freelances ${frLabelNoun} à ${cityName} travaillent-ils en remote ?`,
@@ -67,7 +67,7 @@ function buildFaq(
     },
     {
       q: `Comment trouver un freelance ${frNounSingular} à ${cityName} sur Workwave ?`,
-      a: `Déposez votre projet en 60 secondes (gratuit). Notre IA qualifie votre besoin et alerte les freelances ${frLabelNoun} qui correspondent — ils vous contactent directement. Vous comparez, choisissez, sans intermédiaire ni commission.`,
+      a: `Déposez votre projet en 60 secondes (gratuit). Notre IA qualifie votre besoin et alerte les freelances ${frLabelNoun} qui correspondent. Ils vous contactent directement. Vous comparez, choisissez, sans intermédiaire ni commission.`,
     },
     {
       q: `Y a-t-il des frais pour les clients ?`,
@@ -153,7 +153,7 @@ export default async function MondeSkillCityPage({
             Freelance {fr.label} à {city.name}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            {city.blurb} Déposez votre projet gratuitement — notre IA alerte les freelances {fr.noun} qui correspondent, et ils vous contactent directement. 0 commission.
+            {city.blurb} Déposez votre projet gratuitement : notre IA alerte les freelances {fr.noun} qui correspondent, et ils vous contactent directement. 0 commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
@@ -174,7 +174,7 @@ export default async function MondeSkillCityPage({
               TJM {fr.label} à {city.name}
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-10 max-w-2xl">
-              Fourchettes indicatives par séniorité (TJM marché européen, en €). À titre de repère — le tarif final dépend du périmètre et de la stack.
+              Fourchettes indicatives par séniorité (TJM marché européen, en €). À titre de repère : le tarif final dépend du périmètre et de la stack.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {tiers.map((t) => (

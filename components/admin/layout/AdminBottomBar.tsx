@@ -10,7 +10,7 @@ import {
 } from "./nav-config";
 
 /**
- * Barre d'onglets mobile (refonte 13/07) — navigation au pouce, remplace le
+ * Barre d'onglets mobile (refonte 13/07) : navigation au pouce, remplace le
  * burger + slide-over. 4 espaces principaux + « Plus » (feuille remontante avec
  * les espaces secondaires). Masquée en desktop (lg:hidden, le sidebar prend le relais).
  */

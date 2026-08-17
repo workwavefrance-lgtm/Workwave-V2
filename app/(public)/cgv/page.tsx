@@ -62,7 +62,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "6. Caractère définitif du Déblocage — absence de remboursement",
+    title: "6. Caractère définitif du Déblocage · absence de remboursement",
     blocks: [
       { p: "Chaque Déblocage est **ferme et définitif**. Le Professionnel agit dans le cadre de son activité professionnelle : s'agissant de l'achat d'un Lead relevant de son activité, le droit de rétractation prévu par le Code de la consommation ne lui est en principe pas applicable (article L. 221-3 du Code de la consommation). En tout état de cause, en validant le Déblocage, le Professionnel **demande expressément l'exécution immédiate** de la fourniture des coordonnées. **Aucun remboursement** ne pourra être exigé une fois le Lead débloqué." },
       { p: "En particulier, et sans que cette liste soit limitative, **ne constituent pas un motif de remboursement** :" },

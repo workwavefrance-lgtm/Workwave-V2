@@ -9,7 +9,7 @@ function getResendClient() {
 }
 
 /**
- * Sprint 13 — IMPORTANT : ce mail est USAGE WORKWAVE AI UNIQUEMENT.
+ * Sprint 13. IMPORTANT : ce mail est USAGE WORKWAVE AI UNIQUEMENT.
  * BTP est pivote sur pay-per-lead (9,90 EUR/lead), plus d'essai/trialing
  * pour les BTP. Si un cron est cree pour appeler cette fonction, il DOIT
  * filtrer sur `category_id IN AI_CATEGORY_IDS` pour ne cibler que les
@@ -28,7 +28,7 @@ export async function sendTrialReminderEmail(
   await resend.emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
-    subject: "Votre essai gratuit se termine demain — Workwave Pro",
+    subject: "Votre essai gratuit se termine demain · Workwave Pro",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
         <h1 style="font-size: 20px; font-weight: 700; color: #0A0A0A; margin-bottom: 16px;">

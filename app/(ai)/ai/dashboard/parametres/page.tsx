@@ -7,7 +7,7 @@ import SubmitButton from "@/components/ai/SubmitButton";
 import { deleteAiAccount } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Parametres — Dashboard Workwave AI",
+  title: "Parametres · Dashboard Workwave AI",
   description: "Parametres de votre compte Workwave AI.",
   robots: { index: false, follow: false },
 };
@@ -153,13 +153,13 @@ export default async function AiDashboardParametresPage({
         </Link>
       </div>
 
-      {/* Suppression compte — RGPD self-service */}
+      {/* Suppression compte : RGPD self-service */}
       <div className="mt-12 pt-8 border-t border-[var(--ai-border-subtle)]">
         <p
           className="text-[10px] uppercase font-semibold text-red-700 mb-3"
           style={{ letterSpacing: "0.18em", fontFamily: "var(--font-geist-mono), monospace" }}
         >
-          Zone sensible — Suppression du compte
+          Zone sensible · Suppression du compte
         </p>
 
         <div className="p-6 bg-red-50/40 border border-red-200 rounded-2xl">

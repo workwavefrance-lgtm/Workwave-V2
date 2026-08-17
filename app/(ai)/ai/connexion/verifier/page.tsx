@@ -5,7 +5,7 @@ import SubmitButton from "@/components/ai/SubmitButton";
 import { verifyCode } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Code de connexion — Workwave AI",
+  title: "Code de connexion · Workwave AI",
   description: "Saisissez le code envoye par email pour vous connecter a votre espace Workwave AI.",
   robots: { index: false, follow: false },
 };

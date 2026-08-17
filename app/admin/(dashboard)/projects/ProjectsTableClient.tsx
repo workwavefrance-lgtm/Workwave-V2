@@ -28,8 +28,8 @@ const FILTERS: FilterConfig[] = [{
 }];
 
 const BUDGET_LABEL: Record<string, string> = {
-  lt500: "< 500 €", "500_2000": "500–2 000 €", "2000_5000": "2–5 k€",
-  "5000_15000": "5–15 k€", gt15000: "> 15 k€", unknown: "Budget ?",
+  lt500: "< 500 €", "500_2000": "500-2 000 €", "2000_5000": "2-5 k€",
+  "5000_15000": "5-15 k€", gt15000: "> 15 k€", unknown: "Budget ?",
 };
 const URGENCY_LABEL: Record<string, string> = {
   today: "Aujourd'hui", this_week: "Cette semaine", this_month: "Ce mois-ci", not_urgent: "Pas pressé",
@@ -93,7 +93,7 @@ export default function ProjectsTableClient({
                   </span>
                 </div>
                 <div className="text-[15px] font-bold" style={{ color: "var(--admin-text)" }}>
-                  {p.category?.name || "—"} <span className="font-medium" style={{ color: "var(--admin-text-secondary)" }}>· {p.city?.name || "—"}{p.city?.department?.code ? ` (${p.city.department.code})` : ""}</span>
+                  {p.category?.name || "-"} <span className="font-medium" style={{ color: "var(--admin-text-secondary)" }}>· {p.city?.name || "-"}{p.city?.department?.code ? ` (${p.city.department.code})` : ""}</span>
                 </div>
                 <div className="text-[11px] mt-0.5" style={{ color: "var(--admin-text-tertiary)" }}>
                   {p.first_name} · {BUDGET_LABEL[p.budget] || p.budget} · {URGENCY_LABEL[p.urgency] || p.urgency}

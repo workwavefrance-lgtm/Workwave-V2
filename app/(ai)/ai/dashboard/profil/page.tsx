@@ -21,7 +21,7 @@ import {
 import SubmitButton from "@/components/ai/SubmitButton";
 
 export const metadata: Metadata = {
-  title: "Mon profil — Dashboard Workwave AI",
+  title: "Mon profil · Dashboard Workwave AI",
   description: "Editez votre profil freelance Workwave AI.",
   robots: { index: false, follow: false },
 };
@@ -103,7 +103,7 @@ export default async function AiDashboardProfilePage({
         </p>
       </div>
 
-      {/* Avatar photo upload — FORM SEPARE (multipart/form-data) */}
+      {/* Avatar photo upload : FORM SEPARE (multipart/form-data) */}
       <div className="mb-8" id="avatar">
         <p
           className="text-[11px] uppercase font-semibold text-[var(--ai-text-tertiary)] mb-1"
@@ -187,7 +187,7 @@ export default async function AiDashboardProfilePage({
             fontFamily: "var(--font-geist-mono), monospace",
           }}
         >
-          Portfolio — Galerie publique
+          Portfolio · Galerie publique
         </p>
         <p className="text-[12px] text-[var(--ai-text-tertiary)] mb-4">
           Jusqu&apos;a {MAX_PORTFOLIO_PHOTOS} photos / captures de vos
@@ -270,7 +270,7 @@ export default async function AiDashboardProfilePage({
           label="Skills / Stack"
           name="skills"
           defaultValue={pro.skills || ""}
-          hint="React, Node.js, AWS, etc. — separer par des virgules."
+          hint="React, Node.js, AWS, etc. Separer par des virgules."
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

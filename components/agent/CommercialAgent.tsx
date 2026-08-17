@@ -105,7 +105,7 @@ function hasCookieConsentHandled(): boolean {
 // /pro/reclamer/ et /pro/connexion ont été RETIRÉS de cette liste le
 // 20/07/2026, quand Léa est devenue le support de niveau 1. Le motif de
 // contact numéro 1 est « je n'ai pas reçu le code », et il se pose exactement
-// sur /pro/reclamer/[slug]/verification — la page où elle était masquée. On
+// sur /pro/reclamer/[slug]/verification, la page où elle était masquée. On
 // aurait construit une assistance que personne ne peut atteindre au moment
 // précis où elle sert. Elle y est disponible mais ne s'ouvre pas toute seule
 // (l'auto-ouverture ne concerne que l'accueil, les listings et les fiches),
@@ -138,7 +138,7 @@ function buildWelcomeMessage(ctx: AgentContext | null): string {
     }
     case "listing": {
       const art = getCategoryArticle(ctx.categoryName);
-      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez ${art} ${ctx.categoryName.toLowerCase()} à **${ctx.locationName}** ? Au lieu d'éplucher toute la liste, décrivez-moi votre projet en 30 secondes — je le transmets aux artisans qualifiés de votre zone, gratuitement et sans engagement.`;
+      return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez ${art} ${ctx.categoryName.toLowerCase()} à **${ctx.locationName}** ? Au lieu d'éplucher toute la liste, décrivez-moi votre projet en 30 secondes : je le transmets aux artisans qualifiés de votre zone, gratuitement et sans engagement.`;
     }
     case "home":
       return `Bonjour, je suis ${AGENT_NAME} de Workwave. Vous cherchez un artisan pour un projet, ou vous êtes vous-même artisan et voulez gérer votre fiche ?`;
@@ -233,7 +233,7 @@ function AgentAvatar({
 /**
  * Parse une chaîne markdown simple : remplace [texte](url) par
  * un <Link> Next.js cliquable. Le reste reste du texte brut.
- * (Ne supporte pas d'autres formats — pas besoin pour notre cas.)
+ * (Ne supporte pas d'autres formats, pas besoin pour notre cas.)
  */
 function renderMarkdownLite(text: string): ReactNode {
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -523,7 +523,7 @@ export default function CommercialAgent() {
           "0 32px 64px -16px rgba(15, 23, 42, 0.25), 0 12px 24px -8px rgba(15, 23, 42, 0.10)",
       }}
       role="dialog"
-      aria-label={`Assistant ${AGENT_NAME} — Workwave`}
+      aria-label={`Assistant ${AGENT_NAME} · Workwave`}
     >
       {/* Liseré coral en haut pour la signature visuelle */}
       <div

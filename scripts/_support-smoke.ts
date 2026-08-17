@@ -82,7 +82,7 @@ async function main() {
     console.log(`\n🧹 Ticket de test #${ticketId} supprimé (${count} row, cascade messages).`);
   }
 
-  console.log("\n✅ SMOKE TEST OK — la Phase 1 tourne.");
+  console.log("\n✅ SMOKE TEST OK : la Phase 1 tourne.");
 }
 
 main().catch((e) => {

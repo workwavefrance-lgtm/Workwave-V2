@@ -62,7 +62,7 @@ const TOPIC_INSTRUCTIONS: Record<AiBlogTopicType, string> = {
   "tjm-stack":
     "Redige un article sur le TJM moyen d'un freelance sur cette stack en 2026 : fourchettes par niveau (junior 0-3 ans, intermediaire 3-7, senior 7-10, expert 10+), facteurs d'evolution (Paris vs province, remote, stack precise), comparaison avec marche du salariat, conseils pour negocier.",
   "top-freelances":
-    "Redige un article guide qui presente comment trouver les meilleurs freelances de cette technologie. PAS DE LISTE NOMINATIVE (RGPD + faits) — focus sur les criteres de selection, ou les chercher, comment evaluer un portfolio, exemples de profils types.",
+    "Redige un article guide qui presente comment trouver les meilleurs freelances de cette technologie. PAS DE LISTE NOMINATIVE (RGPD + faits) : focus sur les criteres de selection, ou les chercher, comment evaluer un portfolio, exemples de profils types.",
   "guide-pratique":
     "Redige un tutoriel pratique de niveau intermediaire : approche, etapes principales, pieges classiques, outils recommandes, ressources pour aller plus loin. Format actionnable.",
   comparatif:

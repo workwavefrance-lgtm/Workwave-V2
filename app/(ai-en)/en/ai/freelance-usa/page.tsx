@@ -14,12 +14,12 @@ const SITE_URL = "https://www.workwaveai.co";
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 
 export const metadata: Metadata = {
-  title: "Freelancing in the US — taxes, LLC vs sole prop & work authorization",
+  title: "Freelancing in the US · taxes, LLC vs sole prop & work authorization",
   description:
     "Practical guides for US freelancers: LLC vs sole proprietorship, freelancer taxes (1099, self-employment tax, quarterly estimates) and work authorization for foreign nationals. Sourced from IRS, SBA & USCIS.",
   alternates: aiAlternatesEnOnly("/en/ai/freelance-usa"),
   openGraph: {
-    title: "Freelancing in the US — practical guides",
+    title: "Freelancing in the US · practical guides",
     description: "LLC vs sole prop, freelancer taxes and work authorization. Sourced guides.",
     url: `${SITE_URL}/en/ai/freelance-usa`,
     siteName: "Workwave AI",
@@ -34,7 +34,7 @@ export default function FreelanceUsaHubPage() {
   const faq: FaqItem[] = [
     {
       q: "Do I need an LLC to freelance in the US?",
-      a: "No. By default you are a sole proprietor the moment you do paid work for yourself, with no registration required. An LLC is optional — its main benefit is protecting your personal assets from business debts and lawsuits (per the SBA). See the LLC vs sole proprietorship guide for the details.",
+      a: "No. By default you are a sole proprietor the moment you do paid work for yourself, with no registration required. An LLC is optional: its main benefit is protecting your personal assets from business debts and lawsuits (per the SBA). See the LLC vs sole proprietorship guide for the details.",
     },
     {
       q: "How do US freelancer taxes work?",
@@ -42,18 +42,18 @@ export default function FreelanceUsaHubPage() {
     },
     {
       q: "Is there a freelance visa for the United States?",
-      a: "No. The US has no dedicated 'freelance visa' — what matters is work authorization (citizen, green-card holder, or a noncitizen with a status or work permit that allows it). See the work authorization guide. It's general information, not legal advice.",
+      a: "No. The US has no dedicated 'freelance visa': what matters is work authorization (citizen, green-card holder, or a noncitizen with a status or work permit that allows it). See the work authorization guide. It's general information, not legal advice.",
     },
     {
       q: "Is it free to use Workwave AI as a freelancer?",
-      a: "Yes — creating a profile and getting matched with projects is free. An optional subscription lets you reply to projects. Workwave takes 0% commission on what you earn.",
+      a: "Yes: creating a profile and getting matched with projects is free. An optional subscription lets you reply to projects. Workwave takes 0% commission on what you earn.",
     },
   ];
 
   const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: "Freelancing in the US — guides",
+    name: "Freelancing in the US · guides",
     itemListElement: guides.map((g, i) => ({
       "@type": "ListItem",
       position: i + 1,
@@ -76,7 +76,7 @@ export default function FreelanceUsaHubPage() {
             Freelancing in the US
           </h1>
           <p className="mt-5 text-[16px] sm:text-[17px] leading-relaxed text-[var(--ai-text-secondary)]">
-            Setting up as a freelancer in the United States? These guides cover how to structure your business, how freelancer taxes work, and what foreign nationals need to work legally — with official sources. General information, not legal or tax advice.
+            Setting up as a freelancer in the United States? These guides cover how to structure your business, how freelancer taxes work, and what foreign nationals need to work legally, with official sources. General information, not legal or tax advice.
           </p>
         </div>
       </section>

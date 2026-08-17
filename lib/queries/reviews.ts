@@ -8,7 +8,7 @@
  * - submitReview() : appele depuis la page /avis/[token] quand le
  *   particulier soumet sa note. Passe en 'pending' (modere par admin
  *   si < 3 etoiles) ou directement en 'published' (>= 3 etoiles).
- * - getReviewByToken() : pour la page /avis/[token] — verifie validite.
+ * - getReviewByToken() : pour la page /avis/[token], verifie validite.
  * - getPublishedReviewsForPro() : pour la fiche pro et listings.
  *
  * Anonymisation : on affiche prenom + 1ere lettre du nom ("Marie B.").
@@ -160,10 +160,10 @@ export async function submitReview(params: {
 
   // ─── Side-effects : awaited pour garantir l'envoi avant fin function ─
   // IMPORTANT : pas de "fire-and-forget" via .then() sans await dans une
-  // Server Action — Vercel ferme la function des que la response part vers
+  // Server Action : Vercel ferme la function des que la response part vers
   // le client et tue les promises detachees. Bug observe le 24/05/2026 :
   // les mails n'arrivaient jamais. Solution : await direct (latence +2-3s
-  // mais fiable). Le user voit "Envoi en cours..." puis "Merci !" — l'attente
+  // mais fiable). Le user voit "Envoi en cours..." puis "Merci !" : l'attente
   // est invisible UX-wise.
   const proName = e.pro?.name ?? "l'artisan";
   const proSlug = e.pro?.slug ?? "";

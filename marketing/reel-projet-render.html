@@ -2,13 +2,13 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Reel projet — template Workwave</title>
+<title>Reel projet · template Workwave</title>
 <style>
   /* ============================================================
-     TEMPLATE REEL "NOUVEAU PROJET" — data-driven, 2 thèmes.
+     TEMPLATE REEL "NOUVEAU PROJET" : data-driven, 2 thèmes.
      Données injectées via reel-projet-data.js (window.PROJECT).
-     Rendu déterministe : window.renderFrame(t) — cf. _render-reel-projet.mjs
-     Thème light : blanc / orange / noir — thème dark : noir / orange / blanc.
+     Rendu déterministe : window.renderFrame(t), cf. _render-reel-projet.mjs
+     Thème light : blanc / orange / noir. Thème dark : noir / orange / blanc.
      ============================================================ */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 1080px; height: 1920px; overflow: hidden;
@@ -48,7 +48,7 @@
   .lieu { font-size: 58px; font-weight: 600; color: var(--text2); }
   .lieu strong { color: var(--text); font-weight: 700; }
 
-  /* Badge "gros budget" sur la scène d'annonce — affiché seulement si P.budgetHero.
+  /* Badge "gros budget" sur la scène d'annonce : affiché seulement si P.budgetHero.
      Met en avant les leads à fort budget (ex. 15 000 € et +) dès le hook. */
   .bb-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
   .bb-super { font-size: 50px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
@@ -56,7 +56,7 @@
     font-size: 62px; font-weight: 800; letter-spacing: -0.01em; padding: 24px 54px; border-radius: 999px;
     box-shadow: 0 18px 46px rgba(255, 90, 54, 0.34); }
 
-  /* Chantier "héros" sur la scène d'annonce — LE vrai hook : l'artisan voit
+  /* Chantier "héros" sur la scène d'annonce, LE vrai hook : l'artisan voit
      TOUT DE SUITE la nature du chantier (pas un "budget à définir" inutile).
      Capte les bons pros dès la 1re seconde + permet un reel plus court. */
   .ch-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
@@ -66,7 +66,7 @@
     padding: 24px 56px; border-radius: 999px; max-width: 940px; line-height: 1.05;
     box-shadow: 0 18px 46px rgba(255, 90, 54, 0.34); }
 
-  /* Budget sur S1 — normal = pastille "ghost" (contour, secondaire vs le chantier
+  /* Budget sur S1 : normal = pastille "ghost" (contour, secondaire vs le chantier
      plein) ; gros budget (≥ 5000 €) = pastille pleine + halo appuyé pour faire pop. */
   .bigbudget.ghost { background: transparent; color: var(--accent); border: 3px solid var(--accent); box-shadow: none; }
   .bigbudget.gros { box-shadow: 0 0 0 6px rgba(255, 90, 54, 0.15), 0 22px 56px rgba(255, 90, 54, 0.46); }
@@ -101,7 +101,7 @@
   /* ── Drapeau belge (affiché seulement si P.country === "BE") ── */
   .beflag-stripes { flex: none; border-radius: 10px; overflow: hidden;
     background: linear-gradient(90deg, #000 0 33.34%, #FDDA24 33.34% 66.67%, #EF3340 66.67% 100%); }
-  /* Bandeau persistant sous le wordmark — visible sur toutes les scènes */
+  /* Bandeau persistant sous le wordmark, visible sur toutes les scènes */
   #bepill { position: absolute; top: 178px; left: 0; right: 0; z-index: 50; display: none; justify-content: center; }
   #bepill .chip { display: inline-flex; align-items: center; gap: 20px; background: var(--bg2);
     border: 2px solid var(--border); border-radius: 999px; padding: 14px 36px 14px 18px;
@@ -120,7 +120,7 @@
   <div id="brand">Workwave<i>.fr</i></div>
   <div id="bepill"><span class="chip"><span class="beflag-stripes"></span>Belgique</span></div>
 
-  <!-- S1 — annonce
+  <!-- S1 · annonce
        BUDGET DE DUREE : 14 s MAXIMUM pour le reel entier (regle Willy).
        Les 4 scenes totalisent donc 14000 ms : 3600 + 4200 + 3100 + 3100.
        Si tu allonges une scene, retires-en autant ailleurs. Regle de lecture :
@@ -137,35 +137,35 @@
     </div>
     <div class="el ch-wrap" id="chantierbadge" data-d="1050" data-anim="pop" style="display:none">
       <span class="ch-super">Le chantier</span>
-      <span class="chantier-pill"><span id="chantierheroval">—</span></span>
+      <span class="chantier-pill"><span id="chantierheroval">-</span></span>
     </div>
     <div class="el bb-wrap" id="budgetbadge" data-d="1450" data-anim="pop" style="display:none">
       <span class="bb-super" id="budgetherolabel">Budget</span>
-      <span class="bigbudget"><span id="budgetheroval">—</span></span>
+      <span class="bigbudget"><span id="budgetheroval">-</span></span>
     </div>
   </section>
 
-  <!-- S2 — détails (raccourci : l'info clé est désormais front-loadée sur S1) -->
+  <!-- S2 · détails (raccourci : l'info clé est désormais front-loadée sur S1) -->
   <section class="scene" data-dur="4200">
     <div class="el"><span class="stitle">Le projet</span></div>
     <div class="el" data-d="400" style="width:100%">
       <div class="card">
-        <div class="row"><span class="k">Budget</span><span class="v" id="budget">—</span></div>
-        <div class="row"><span class="k">Urgence</span><span class="v" id="urgence">—</span></div>
-        <div class="row"><span class="k">Zone</span><span class="v" id="zone">—</span></div>
-        <p class="desc" id="description">—</p>
+        <div class="row"><span class="k">Budget</span><span class="v" id="budget">-</span></div>
+        <div class="row"><span class="k">Urgence</span><span class="v" id="urgence">-</span></div>
+        <div class="row"><span class="k">Zone</span><span class="v" id="zone">-</span></div>
+        <p class="desc" id="description">-</p>
       </div>
     </div>
   </section>
 
-  <!-- S3 — offre -->
+  <!-- S3 · offre -->
   <section class="scene" data-dur="3100">
     <div class="el" data-anim="pop"><span class="gift">🎁</span></div>
     <div class="el" data-d="350"><p class="offer">Vos 2 premiers leads<br><em>sont offerts.</em></p></div>
     <div class="el" data-d="800"><p class="sub">Coordonnées du client débloquées <strong>gratuitement</strong>.<br>Sans abonnement, sans commission.</p></div>
   </section>
 
-  <!-- S4 — CTA -->
+  <!-- S4 · CTA -->
   <section class="scene" data-dur="3100">
     <div class="el"><p class="offer" style="font-size:76px">Ce chantier vous intéresse&nbsp;?</p></div>
     <div class="el" data-d="450" data-anim="pop"><span class="cta">workwave.fr/pro</span></div>
@@ -205,7 +205,7 @@
     if (n > 40) pill.style.fontSize = "36px";
   }
   // Budget sur la scène d'ANNONCE.
-  // Affiché SEULEMENT si un VRAI montant (jamais "À définir" — il reste sur la
+  // Affiché SEULEMENT si un VRAI montant (jamais "À définir", il reste sur la
   // carte détails S2). Source = `budget` (ou `budgetHero` en override). Détection
   // AUTO du "gros budget" ≥ 5 000 € (on lit le plus gros nombre du champ, ex.
   // "Plus de 15 000 €") → label "Gros budget" + pastille pleine avec halo pour

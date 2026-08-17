@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
 /**
- * AiFaqSection — composant FAQ unifie pour toutes les pages /ai/*.
+ * AiFaqSection : composant FAQ unifie pour toutes les pages /ai/*.
  *
  * Rend en une seule fois :
  *   - Le HTML accessible (h2 + serie de <details>/<summary>)
@@ -56,7 +56,7 @@ export function AiFaqSection({
 }: Props) {
   if (!questions || questions.length === 0) return null;
 
-  // JSON-LD FAQPage — strict spec schema.org pour rich snippets Google
+  // JSON-LD FAQPage : strict spec schema.org pour rich snippets Google
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

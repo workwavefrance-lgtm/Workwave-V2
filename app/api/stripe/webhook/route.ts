@@ -12,7 +12,7 @@ import { getServiceClient } from "@/lib/supabase/service-client";
  *
  * Par defaut ce webhook renvoie 200 sur toute erreur de traitement, pour ne pas
  * declencher de tempete de reprises sur un bug applicatif. C'est le bon choix
- * pour la plupart des evenements — mais PAS quand de l'argent a ete encaisse et
+ * pour la plupart des evenements, mais PAS quand de l'argent a ete encaisse et
  * que la contrepartie n'a pas ete livree. Dans ce cas precis on veut que Stripe
  * revienne (il reessaie avec un delai croissant pendant 3 jours), parce que le
  * traitement est idempotent : un doublon est deja rattrape par la contrainte
@@ -56,7 +56,7 @@ function getPlanFromPriceId(priceId: string): PlanInfo {
 // ============================================
 
 /**
- * Sprint 13 — BTP Lead Unlock.
+ * Sprint 13 · BTP Lead Unlock.
  * Un pro BTP paie 9,90 EUR TTC one-time pour debloquer les coordonnees
  * d'un particulier sur un projet specifique. INSERT dans lead_unlocks.
  *
@@ -124,7 +124,7 @@ async function handleBtpLeadUnlock(session: Stripe.Checkout.Session) {
     // est idempotent (23505 ci-dessus). En parallele l'admin est prevenu tout
     // de suite, pour pouvoir debloquer a la main sans attendre.
     throw new StripeRetryableError(
-      `INSERT lead_unlocks echoue (${insertError.code}: ${insertError.message}) — ` +
+      `INSERT lead_unlocks echoue (${insertError.code}: ${insertError.message}) : ` +
         `pro ${proId}, projet ${projectId}, paiement ${paymentIntentId}, ` +
         `${(session.amount_total || 990) / 100} EUR encaisses SANS deblocage`
     );
@@ -142,7 +142,7 @@ async function handleBtpLeadUnlock(session: Stripe.Checkout.Session) {
 
   // Notif admin (leçon 28/04 : tout événement business critique = notif admin
   // dans le même flux). Best-effort strict : un échec d'email ne casse JAMAIS
-  // le webhook — l'unlock est déjà inséré, l'idempotence protège les replays.
+  // le webhook : l'unlock est déjà inséré, l'idempotence protège les replays.
   try {
     const { data: pro } = await supabase
       .from("pros")
@@ -173,7 +173,7 @@ async function handleBtpLeadUnlock(session: Stripe.Checkout.Session) {
   }
 
   console.log(
-    `[handleBtpLeadUnlock] OK — pro ${proId} a unlock le projet ${projectId} (${(session.amount_total || 990) / 100}€)`
+    `[handleBtpLeadUnlock] OK : pro ${proId} a unlock le projet ${projectId} (${(session.amount_total || 990) / 100}€)`
   );
 }
 
@@ -391,7 +391,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 // ============================================
-// Route POST — Webhook principal
+// Route POST · Webhook principal
 // ============================================
 
 export async function POST(req: Request) {
@@ -491,7 +491,7 @@ export async function POST(req: Request) {
         break;
 
       default:
-        // Événement non géré — on log sans crasher
+        // Événement non géré : on log sans crasher
         console.log(`Webhook Stripe non géré: ${event.type}`);
     }
   } catch (err) {
@@ -515,12 +515,12 @@ export async function POST(req: Request) {
         await new Resend(process.env.RESEND_API_KEY).emails.send({
           from: "Workwave <contact@workwave.fr>",
           to: process.env.ADMIN_EMAIL || "workwave.france@gmail.com",
-          subject: "[Workwave] PAIEMENT ENCAISSE SANS DEBLOCAGE — action requise",
+          subject: "[Workwave] PAIEMENT ENCAISSE SANS DEBLOCAGE · action requise",
           html: `<div style="font-family:sans-serif;max-width:560px;padding:24px">
             <h2 style="color:#0A0A0A">Un pro a payé, le déblocage n'a pas été enregistré</h2>
             <p>L'écriture dans <code>lead_unlocks</code> a échoué. Stripe va rejouer
             l'événement automatiquement, mais vérifie que le pro obtient bien ses
-            coordonnées — sinon débloque-le à la main.</p>
+            coordonnées, sinon débloque-le à la main.</p>
             <p><strong>Événement Stripe :</strong> ${event.id}</p>
             <p><strong>Détail :</strong> ${message}</p>
           </div>`,

@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!pro) return {};
 
   return {
-    title: `Réclamer la fiche ${pro.name} — Workwave`,
+    title: `Réclamer la fiche ${pro.name} · Workwave`,
     description: `Vous êtes le gérant de ${pro.name} ? Réclamez votre fiche professionnelle sur Workwave pour gérer votre profil et recevoir des demandes de clients.`,
     robots: { index: false, follow: false },
     alternates: {
@@ -231,10 +231,10 @@ export default async function ClaimPage({ params }: Props) {
             </p>
             <p className="text-sm font-bold text-red-700 dark:text-red-300 leading-snug">
               {!pro.email && !pro.phone
-                ? "Email et téléphone manquants — vos clients ne peuvent pas vous joindre."
+                ? "Email et téléphone manquants : vos clients ne peuvent pas vous joindre."
                 : !pro.email
-                  ? "Email manquant — vos clients ne peuvent pas vous joindre."
-                  : "Téléphone manquant — vos clients ne peuvent pas vous joindre."}
+                  ? "Email manquant : vos clients ne peuvent pas vous joindre."
+                  : "Téléphone manquant : vos clients ne peuvent pas vous joindre."}
             </p>
           </div>
         </div>

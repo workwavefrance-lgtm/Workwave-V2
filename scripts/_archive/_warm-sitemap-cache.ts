@@ -15,7 +15,7 @@
  *  3. Log temps de fetch pour visibilite
  *
  * Si on detecte des sub-sitemaps lents persistants, c'est qu'il y a un bug
- * de perf BDD (ex: PostgREST cap 1000 rows, count exact, etc.) — cf. lecons
+ * de perf BDD (ex: PostgREST cap 1000 rows, count exact, etc.), cf. lecons
  * CLAUDE.md 29/04 et 30/04 sur les bugs sitemap historiques.
  */
 import { config } from "dotenv";

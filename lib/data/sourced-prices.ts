@@ -1,4 +1,4 @@
-// Prix sourcés via Perplexity API (recherche web + citations) — généré le 2026-07-26.
+// Prix sourcés via Perplexity API (recherche web + citations) · généré le 2026-07-26.
 // NE PAS éditer à la main : relancer `npx tsx scripts/fetch-sourced-prices.ts`.
 // Respecte « zéro chiffre inventé » : chiffres issus de sources web réelles, citées.
 

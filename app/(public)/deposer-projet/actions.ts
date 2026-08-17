@@ -32,7 +32,7 @@ const projectSchema = z.object({
     .positive("Veuillez choisir un type de travaux"),
   cityId: z.coerce.number().int().positive("Veuillez choisir une ville"),
   // Description OPTIONNELLE : l'UI l'annonce comme telle (« Laissez vide si vous
-  // préférez, les artisans vous rappelleront pour préciser ») — choix délibéré
+  // préférez, les artisans vous rappelleront pour préciser »), choix délibéré
   // pour réduire la friction et le drop-off du tunnel. Le serveur doit donc
   // accepter une description vide (avant : .min(20) → submit en échec SILENCIEUX
   // quand l'user suivait l'invitation à laisser vide, erreur sur l'étape cachée).
@@ -47,7 +47,7 @@ const projectSchema = z.object({
   consent: z.literal("on", {
     message: "Vous devez accepter la transmission de vos données",
   }),
-  // Honeypot — doit rester vide
+  // Honeypot : doit rester vide
   website: z.string().max(0).optional(),
 });
 
@@ -145,7 +145,7 @@ export async function submitProject(
   const data = result.data;
   console.log(`[submitProject] zod OK, category=${data.categoryId} city=${data.cityId} budget=${data.budget}`);
 
-  // Sprint 13 — Anti-PII bypass : detection de tel/email/URL dans la description.
+  // Sprint 13 · Anti-PII bypass : detection de tel/email/URL dans la description.
   const piiResult = detectPii(data.description);
   if (piiResult.hasPii) {
     console.log(
@@ -206,7 +206,7 @@ export async function submitProject(
 
   // Dédup anti double-soumission : si un projet identique (même email + ville +
   // métier + description) a été déposé dans les 5 dernières minutes, on NE
-  // recrée PAS et on NE re-broadcast PAS — on renvoie l'utilisateur sur l'écran
+  // recrée PAS et on NE re-broadcast PAS : on renvoie l'utilisateur sur l'écran
   // de confirmation comme si c'était passé. Cas réel 15/06 : projet #74/#75
   // déposé 2× à 44 s d'écart (le particulier a re-cliqué pendant la qualif IA
   // qui dure ~4 s). Évite le doublon en base + le double mail aux pros.
@@ -223,7 +223,7 @@ export async function submitProject(
     .limit(1);
   if (recentDup && recentDup.length > 0) {
     console.log(
-      `[submitProject] doublon détecté (projet ${recentDup[0].id} < 5min) — skip insert + broadcast`
+      `[submitProject] doublon détecté (projet ${recentDup[0].id} < 5min) : skip insert + broadcast`
     );
     redirect("/deposer-projet/merci");
   }
@@ -260,7 +260,7 @@ export async function submitProject(
     };
   }
 
-  // Département (pour le brief admin) — dérivé de la ville
+  // Département (pour le brief admin), dérivé de la ville
   const deptRel = (city as unknown as {
     department?: { name?: string; code?: string } | { name?: string; code?: string }[] | null;
   }).department;
@@ -308,7 +308,7 @@ export async function submitProject(
     },
   });
 
-  // Sprint 14 (06/06/2026) — Broadcast BTP en SYNCHRONE, AWAIT direct.
+  // Sprint 14 (06/06/2026) · Broadcast BTP en SYNCHRONE, AWAIT direct.
   // Pourquoi pas after() : after() de Next.js 16 n'execute PAS la callback
   // en prod Vercel sur les Server Actions (bug confirme : projet #55 cree le
   // 02/06 broadcast_count=0 jusqu'au cron rescue du 06/06 = 4 jours de

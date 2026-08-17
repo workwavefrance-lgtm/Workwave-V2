@@ -6,7 +6,7 @@ import SubmitButton from "@/components/ai/SubmitButton";
 import { submitInscription } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Inscription freelance — Workwave AI",
+  title: "Inscription freelance · Workwave AI",
   description:
     "Creez votre profil freelance sur Workwave AI en 4 etapes (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Inscription gratuite. Recevez tous les projets de votre vertical et debloquez ceux qui vous interessent a 9,90 € l'unite.",
   robots: { index: false, follow: false },
@@ -120,7 +120,7 @@ export default async function InscriptionPage({
         className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20"
       >
         <div className="max-w-3xl space-y-12 sm:space-y-16">
-          {/* ───────── Step 01 — Identite ───────── */}
+          {/* ───────── Step 01 · Identite ───────── */}
           <div>
             <SectionLabel index={1} total={4} label="Identite" />
             <h2
@@ -246,7 +246,7 @@ export default async function InscriptionPage({
             </div>
           </div>
 
-          {/* ───────── Step 02 — Profil pro ───────── */}
+          {/* ───────── Step 02 · Profil pro ───────── */}
           <div>
             <SectionLabel index={2} total={4} label="Profil pro" />
             <h2
@@ -341,7 +341,7 @@ export default async function InscriptionPage({
             </div>
           </div>
 
-          {/* ───────── Step 03 — Disponibilite & tarif ───────── */}
+          {/* ───────── Step 03 · Disponibilite & tarif ───────── */}
           <div>
             <SectionLabel index={3} total={4} label="Disponibilite" />
             <h2
@@ -356,7 +356,7 @@ export default async function InscriptionPage({
             </h2>
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
               Indicatifs pour affichage sur votre fiche publique. Vous recevez
-              en temps reel TOUS les projets tech publies — c&apos;est vous qui
+              en temps reel TOUS les projets tech publies : c&apos;est vous qui
               choisissez ceux qui vous interessent dans le dashboard.
               Modifiable a tout moment.
             </p>
@@ -479,7 +479,7 @@ export default async function InscriptionPage({
             </div>
           </div>
 
-          {/* ───────── Step 04 — Inscription gratuite ───────── */}
+          {/* ───────── Step 04 · Inscription gratuite ───────── */}
           <div>
             <SectionLabel index={4} total={4} label="Inscription gratuite" />
             <h2
@@ -495,7 +495,7 @@ export default async function InscriptionPage({
             <p className="text-sm text-[var(--ai-text-secondary)] mb-8">
               Aucun abonnement, aucun engagement. Vous recevez tous les projets
               de votre domaine et vous debloquez a 9,90 € seulement ceux qui
-              vous interessent — apres les avoir vus.
+              vous interessent, apres les avoir vus.
             </p>
 
             <div className="p-7 bg-[var(--ai-bg-card)] border border-[var(--ai-border-strong)] rounded-2xl">

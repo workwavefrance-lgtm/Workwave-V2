@@ -37,7 +37,7 @@ function de(noun: string): string {
 /**
  * Réutilise exactement la logique de seo-sections.ts (getPriceRanges,
  * non exportée) : prix sourcés Perplexity en priorité, sinon `null`.
- * Pas de fallback de chiffres hardcodés ici — si pas de prix sourcé, la
+ * Pas de fallback de chiffres hardcodés ici : si pas de prix sourcé, la
  * réponse PRIX reste générique (aucun chiffre inventé).
  */
 function getSourcedPriceForFaq(

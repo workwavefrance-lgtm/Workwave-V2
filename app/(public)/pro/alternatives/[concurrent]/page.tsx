@@ -31,8 +31,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { concurrent } = await params;
   const c = COMPETITOR_OFFERS[concurrent];
-  if (!publishable(c)) return { title: "Alternative — Workwave" };
-  const title = `Workwave, l'alternative à ${c.name} sans abonnement — 9,90 € / lead`;
+  if (!publishable(c)) return { title: "Alternative · Workwave" };
+  const title = `Workwave, l'alternative à ${c.name} sans abonnement · 9,90 € / lead`;
   const description = `${c.name} : ${c.model.toLowerCase()}. Workwave : pas d'abonnement, pas de commission, 9,90 € TTC par lead que vous voulez contacter. Comparatif factuel et inscription gratuite.`;
   const canonical = `${BASE_URL}/pro/alternatives/${c.slug}`;
   return {
@@ -47,7 +47,7 @@ function buildFaqs(c: PublishableOffer): { question: string; answer: string }[] 
   const faqs: { question: string; answer: string }[] = [
     {
       question: `Workwave est-il vraiment sans abonnement, contrairement à ${c.name} ?`,
-      answer: `Oui. Sur Workwave, vous réclamez votre fiche gratuitement (vérification SIRET, 2 minutes) et recevez automatiquement les projets de votre zone par email. Vous ne payez que 9,90 € TTC pour débloquer les coordonnées d'un client qui vous intéresse — paiement unique, sans abonnement ni carte bancaire à l'inscription. ${c.name} fonctionne, lui, sur un modèle de type « ${c.model.toLowerCase()} ».`,
+      answer: `Oui. Sur Workwave, vous réclamez votre fiche gratuitement (vérification SIRET, 2 minutes) et recevez automatiquement les projets de votre zone par email. Vous ne payez que 9,90 € TTC pour débloquer les coordonnées d'un client qui vous intéresse : paiement unique, sans abonnement ni carte bancaire à l'inscription. ${c.name} fonctionne, lui, sur un modèle de type « ${c.model.toLowerCase()} ».`,
     },
     {
       question: `Combien coûte un lead sur Workwave par rapport à ${c.name} ?`,

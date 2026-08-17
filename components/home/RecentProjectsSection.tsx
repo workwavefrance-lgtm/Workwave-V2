@@ -3,7 +3,7 @@ import type { PublicProject } from "@/lib/queries/recent-projects";
 import { getCategoryIcon } from "@/lib/data/category-icons";
 
 /**
- * Section "Projets déposés récemment" — double CTA sous la bande de stats de la home.
+ * Section "Projets déposés récemment" : double CTA sous la bande de stats de la home.
  * - Particulier : "je peux déposer un projet ici" → /deposer-projet
  * - Pro : "il y a des demandes à recevoir" → /pro
  *
@@ -14,9 +14,9 @@ import { getCategoryIcon } from "@/lib/data/category-icons";
 
 const BUDGET_LABELS: Record<string, string> = {
   lt500: "< 500 €",
-  "500_2000": "500 – 2 000 €",
-  "2000_5000": "2 000 – 5 000 €",
-  "5000_15000": "5 000 – 15 000 €",
+  "500_2000": "500 à 2 000 €",
+  "2000_5000": "2 000 à 5 000 €",
+  "5000_15000": "5 000 à 15 000 €",
   gt15000: "> 15 000 €",
 };
 
@@ -74,7 +74,7 @@ export default function RecentProjectsSection({
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed">
             Des particuliers cherchent un pro près de chez eux. Déposez le
-            vôtre — gratuit, en 60 secondes, sans inscription.
+            vôtre, gratuit, en 60 secondes, sans inscription.
           </p>
         </div>
 

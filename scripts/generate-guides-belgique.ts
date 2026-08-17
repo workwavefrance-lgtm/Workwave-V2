@@ -1,5 +1,5 @@
 /**
- * Génère les guides réglementaires belges (blog_posts) — contenu SOURCÉ Perplexity
+ * Génère les guides réglementaires belges (blog_posts) : contenu SOURCÉ Perplexity
  * (l'info réglementaire DOIT être exacte + citée). Fort SEO/AEO : requêtes à
  * haute intention que les concurrents couvrent mal ou avec de l'info périmée.
  *
@@ -120,7 +120,7 @@ async function fetchGuide(g: Guide): Promise<{ content: string; sources: string[
 }
 
 async function main() {
-  console.log(`Guides réglementaires belges — ${GUIDES.length} guides${DRY ? " (DRY, 1)" : ""}\n`);
+  console.log(`Guides réglementaires belges · ${GUIDES.length} guides${DRY ? " (DRY, 1)" : ""}\n`);
   const FORCE = process.argv.includes("--force");
   const list = DRY ? GUIDES.slice(0, 1) : GUIDES;
   for (const g of list) {

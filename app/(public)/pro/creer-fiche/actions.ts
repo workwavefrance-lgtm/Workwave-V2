@@ -146,7 +146,7 @@ export async function createFiche(
   const naf = String(formData.get("naf") || "").trim().slice(0, 10) || null;
   const foundingDate = String(formData.get("founding_date") || "").trim() || null;
 
-  // Validation — identifiant d'entreprise selon le pays :
+  // Validation de l'identifiant d'entreprise selon le pays :
   // France = SIRET 14 chiffres, Belgique = numéro BCE 10 chiffres (checksum
   // mod 97). Le numéro BCE est stocké dans pros.siret (varchar 14, UNIQUE) :
   // aucune collision possible avec un SIRET (longueurs différentes).

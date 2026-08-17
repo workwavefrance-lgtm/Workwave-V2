@@ -132,7 +132,7 @@ export default function EditProSection({
           onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : null)}
           className={inputCls}
         >
-          <option value="">— Aucune —</option>
+          <option value="">- Aucune -</option>
           {Object.entries(byVertical).map(([vertical, cats]) => (
             <optgroup key={vertical} label={verticalLabels[vertical] || vertical}>
               {cats
@@ -218,7 +218,7 @@ export default function EditProSection({
             Distance d&apos;intervention
           </label>
           <span className="text-xs text-zinc-600">
-            Rayon autour de l&apos;adresse — détermine quels projets reçoit ce pro.
+            Rayon autour de l&apos;adresse : détermine quels projets reçoit ce pro.
           </span>
         </div>
         <div className="flex items-center gap-4">

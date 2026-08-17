@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true 
     const a = await getAdminAnalytics(days);
     const b = a.all;
     const k = b.kpis;
-    console.log(`\n════ Période ${days}j (all) — ${b.totalEvents} events ════`);
+    console.log(`\n════ Période ${days}j (all) · ${b.totalEvents} events ════`);
     console.log("KPIs (courant → préc):");
     console.log(`  Revenu        ${(k.revenueCents.current/100).toFixed(2)}€ ← ${(k.revenueCents.previous/100).toFixed(2)}€  (${k.revenueCents.pct ?? "n/a"}%)`);
     console.log(`  Contacts payés ${k.unlocksPaid.current} ← ${k.unlocksPaid.previous}`);

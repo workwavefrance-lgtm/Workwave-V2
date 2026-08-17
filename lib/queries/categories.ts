@@ -27,7 +27,7 @@ export type CategoryOption = Pick<Category, "id" | "name" | "vertical">;
  *
  * PERF : getAllCategories() fait un `SELECT *` sur les 183 catégories
  * (description, seo_keywords, naf_codes…) et le tableau entier était sérialisé
- * vers le téléphone du pro pour alimenter un simple menu déroulant — de l'ordre
+ * vers le téléphone du pro pour alimenter un simple menu déroulant : de l'ordre
  * de 60 à 150 Ko de JSON inutile à télécharger ET à parser sur mobile.
  * Ici : 3 champs, et uniquement les verticaux physiques (le dashboard BTP ne
  * peut de toute façon pas proposer les ~145 catégories tech/AI). ~2 Ko.

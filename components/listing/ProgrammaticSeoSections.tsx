@@ -130,7 +130,7 @@ function SectionRenderer({ section }: { section: SeoSection }) {
 
       {section.source && (
         <p className="mt-3 text-[12px] text-[var(--text-tertiary)]">
-          Fourchettes consolidées —{" "}
+          Fourchettes consolidées :{" "}
           {section.source.url ? (
             <a
               href={section.source.url}

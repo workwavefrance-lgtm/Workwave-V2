@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr"
   ),
   title: {
-    default: "Workwave AI — Trouvez le freelance tech idéal",
+    default: "Workwave AI · Trouvez le freelance tech idéal",
     template: "%s | Workwave AI",
   },
   description:
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   // "1 000 000+ professionnels en France".
   twitter: {
     card: "summary_large_image",
-    title: "Workwave AI — Trouvez le freelance tech ideal",
+    title: "Workwave AI · Trouvez le freelance tech ideal",
     description:
       "Matching IA entre porteurs de projet et freelances tech (IA, dev, cloud, no-code, data, design). France & Europe. Inscription gratuite, sans credit.",
   },

@@ -48,7 +48,7 @@ const columns: AdminColumn<AdminLeadRow>[] = [
     label: "Projet",
     render: (row) => (
       <span className="font-medium">
-        {row.project?.first_name || "—"} — #{row.project?.id}
+        {row.project?.first_name || "-"} · #{row.project?.id}
       </span>
     ),
   },
@@ -57,7 +57,7 @@ const columns: AdminColumn<AdminLeadRow>[] = [
     label: "Pro",
     render: (row) => (
       <span style={{ color: "var(--admin-accent)" }}>
-        {row.pro?.name || "—"}
+        {row.pro?.name || "-"}
       </span>
     ),
   },
@@ -95,7 +95,7 @@ const columns: AdminColumn<AdminLeadRow>[] = [
               day: "2-digit",
               month: "short",
             })
-          : "—"}
+          : "-"}
       </span>
     ),
   },
@@ -109,7 +109,7 @@ const columns: AdminColumn<AdminLeadRow>[] = [
               day: "2-digit",
               month: "short",
             })
-          : "—"}
+          : "-"}
       </span>
     ),
   },

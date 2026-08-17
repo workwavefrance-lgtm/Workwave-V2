@@ -10,20 +10,20 @@ import { fetchSupabase } from "./fetch-supabase";
  * tous avec `createClient(url, cle)` sans aucune option. Or par defaut,
  * `autoRefreshToken` est ACTIF : chaque client lance une minuterie de 30 s qui
  * n'est jamais arretee. Une minuterie vivante rend son client impossible a
- * liberer — il reste en memoire pour toute la duree du processus.
+ * liberer : il reste en memoire pour toute la duree du processus.
  *
  * Banc d'essai local, 3 000 creations dans un contexte de rendu :
  *
  *     client sans options (comportement d'avant) : 29,0 Mo retenus
  *     avec autoRefreshToken desactive            :  0,2 Mo retenus
  *
- * Soit ~8,7 Ko retenus DEFINITIVEMENT par client cree — verifie stable quelle
+ * Soit ~8,7 Ko retenus DEFINITIVEMENT par client cree, verifie stable quelle
  * que soit la taille de la page rendue autour (donc c'est bien le client qui
  * est retenu, pas le contexte du rendu).
  *
  * C'est exactement le bug corrige le 08/08 dans `public-client.ts`. Il restait
  * partout ailleurs, notamment dans `components/pro/ProGuidesLinks.tsx`, rendu
- * sur CHAQUE fiche pro — la route la plus crawlee du site.
+ * sur CHAQUE fiche pro, la route la plus crawlee du site.
  *
  * Trois protections, toutes necessaires :
  *   - une seule instance partagee (pas un client neuf par appel) ;

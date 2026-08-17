@@ -29,7 +29,7 @@ import {
 
 /**
  * Déclinaison PAR VILLE de la page pilier ramonage obligatoire :
- * /[metier]/obligation/[ville] (ramoneur only — ex.
+ * /[metier]/obligation/[ville] (ramoneur only, ex.
  * /ramoneur/obligation/lyon, requêtes SERP cibles « ramoneur {ville} » et
  * « ramonage {ville} »).
  *
@@ -40,7 +40,7 @@ import {
  *
  * GARDE ANTI-THIN STRICT : ville introuvable OU < 3 pros actifs du métier
  * dans la ville → notFound(). Le count est fait en head:true (zéro row
- * transférée — crise egress 11/06/2026).
+ * transférée, crise egress 11/06/2026).
  *
  * ⚠️ Ne JAMAIS ajouter de loading.tsx sur cette route (casse notFound()).
  * ⚠️ Le segment doit s'appeler [ville] : Next.js impose le MÊME nom de
@@ -63,7 +63,7 @@ export function generateStaticParams() {
 const OBLIGATION_METIERS = new Set(["ramoneur"]);
 
 // Grandes villes du maillage (toutes vérifiées >= 3 ramoneurs actifs au
-// 11/06/2026 — Paris 308, Marseille 229, Nice 163, Lyon 58, Toulouse 57,
+// 11/06/2026 : Paris 308, Marseille 229, Nice 163, Lyon 58, Toulouse 57,
 // Bordeaux 49, arrondissements agrégés).
 const GRANDES_VILLES = [
   { slug: "paris", name: "Paris" },
@@ -156,7 +156,7 @@ export default async function RamonageObligationVillePage({ params }: Props) {
     { label: city.name },
   ];
 
-  // FAQ locale (4 Q) — réponses dérivées UNIQUEMENT du contenu sourcé.
+  // FAQ locale (4 Q) : réponses dérivées UNIQUEMENT du contenu sourcé.
   const faqs: FaqItem[] = [
     {
       question: `Le ramonage est-il obligatoire à ${city.name} ?`,
@@ -202,11 +202,11 @@ export default async function RamonageObligationVillePage({ params }: Props) {
         {`Ramonage à ${city.name} : obligation, prix réels et ${count} ramoneurs SIRET vérifiés`}
       </h1>
 
-      {/* Intro courte LOCALISÉE (3 phrases) — illustration en regard */}
+      {/* Intro courte LOCALISÉE (3 phrases), illustration en regard */}
       <div className="flex flex-col sm:flex-row gap-8 items-start mb-10">
         <div className="text-base text-[var(--text-secondary)] leading-relaxed space-y-3 flex-1">
           <p>
-            {`Le ramonage des conduits de fumée est obligatoire en France pour les appareils à combustion, une à deux fois par an selon le combustible et le règlement local applicable. Les prix constatés au niveau national s'appliquent : comptez entre ${fmtEur(bois.low)} € et ${fmtEur(bois.high)} € pour une cheminée bois à conduit simple. À ${city.name}, ${count} ramoneurs au SIRET vérifiable sont référencés sur Workwave — la liste complète est sur la page `}
+            {`Le ramonage des conduits de fumée est obligatoire en France pour les appareils à combustion, une à deux fois par an selon le combustible et le règlement local applicable. Les prix constatés au niveau national s'appliquent : comptez entre ${fmtEur(bois.low)} € et ${fmtEur(bois.high)} € pour une cheminée bois à conduit simple. À ${city.name}, ${count} ramoneurs au SIRET vérifiable sont référencés sur Workwave : la liste complète est sur la page `}
             <Link href={listingHref} className="underline hover:text-[var(--accent)]">
               {`ramoneurs à ${city.name}`}
             </Link>
@@ -216,14 +216,14 @@ export default async function RamonageObligationVillePage({ params }: Props) {
         <ChimneyArt className="hidden sm:block w-44 shrink-0 text-[var(--text-tertiary)]" />
       </div>
 
-      {/* CTA héro — au-dessus de la ligne de flottaison */}
+      {/* CTA héro, au-dessus de la ligne de flottaison */}
       <HeroCta
         href={deposerHref}
         label={`Trouver un ramoneur vérifié à ${city.name}`}
-        note="Gratuit, sans engagement — votre demande est visible par les ramoneurs SIRET vérifiés de votre zone, qui vous recontactent directement."
+        note="Gratuit, sans engagement : votre demande est visible par les ramoneurs SIRET vérifiés de votre zone, qui vous recontactent directement."
       />
 
-      {/* ─── Ce que dit la loi — COMPACTE, EN PREMIER (intention de recherche) ─── */}
+      {/* ─── Ce que dit la loi · COMPACTE, EN PREMIER (intention de recherche) ─── */}
       <section className="mb-12">
         <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
           Ce que dit la loi
@@ -300,7 +300,7 @@ export default async function RamonageObligationVillePage({ params }: Props) {
       {/* ─── FAQ locale (UI + schema FAQPage injecté plus haut) ─── */}
       <FaqAccordion
         faqs={faqs}
-        title={`Questions fréquentes — ramonage à ${city.name}`}
+        title={`Questions fréquentes · ramonage à ${city.name}`}
       />
 
       {/* ─── Maillage interne ─── */}

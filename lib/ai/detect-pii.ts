@@ -18,7 +18,7 @@
  *   - Tel FR international : +33 6 12 34 56 78, +33612345678 (avec ou sans
  *     espaces/points/tirets entre chaque paire).
  *   - Email RFC-light : x@y.z avec extensions courantes
- *   - URLs : http(s)://x.y, www.x.y, x.y (TLD reconnu) — optionnel, on
+ *   - URLs : http(s)://x.y, www.x.y, x.y (TLD reconnu) : optionnel, on
  *     limite aux ones avec http/www pour eviter faux positifs sur du texte
  *     metier comme "ardoise type schiste".
  */
@@ -142,5 +142,5 @@ export function formatPiiErrorMessage(result: PiiDetectionResult): string {
   if (result.foundEmails.length > 0) items.push("adresse email");
   if (result.foundUrls.length > 0) items.push("lien web");
   const what = items.join(", ");
-  return `Merci de retirer ${what} de la description. Vos coordonnees seront automatiquement partagees aux freelances qui debloquent votre demande — pas besoin de les ecrire ici. (Les coordonnees dans la description rendent votre demande moins claire et risquent un blocage par notre IA anti-spam.)`;
+  return `Merci de retirer ${what} de la description. Vos coordonnees seront automatiquement partagees aux freelances qui debloquent votre demande : pas besoin de les ecrire ici. (Les coordonnees dans la description rendent votre demande moins claire et risquent un blocage par notre IA anti-spam.)`;
 }

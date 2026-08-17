@@ -1,5 +1,5 @@
 /**
- * ENVOI SMS à une LISTE de pros (CSV nom;ville;mobile) — recrutement direct.
+ * ENVOI SMS à une LISTE de pros (CSV nom;ville;mobile) : recrutement direct.
  *
  * Pour des entreprises trouvées sur Google Maps (PAS encore dans notre base) :
  * on les invite à créer leur fiche gratuitement pour recevoir une demande de
@@ -67,7 +67,7 @@ function sleep(ms: number) {
 }
 
 async function main() {
-  console.log(`\n=== RECRUTEMENT SMS LISTE — ${DRY_RUN ? "DRY-RUN" : TEST_SMS ? "TEST" : "EXECUTE"} ===\n`);
+  console.log(`\n=== RECRUTEMENT SMS LISTE · ${DRY_RUN ? "DRY-RUN" : TEST_SMS ? "TEST" : "EXECUTE"} ===\n`);
   console.log("Message :\n  " + MESSAGE + "\n");
 
   // TEST : 1 SMS vers ton numéro

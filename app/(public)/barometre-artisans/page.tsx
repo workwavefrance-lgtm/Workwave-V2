@@ -16,7 +16,7 @@ const PATH = "/barometre-artisans";
 const YEAR = 2026;
 
 export const metadata: Metadata = {
-  title: `Baromètre des artisans en France ${YEAR} — densité par département`,
+  title: `Baromètre des artisans en France ${YEAR} · densité par département`,
   description: `Où trouve-t-on le plus d'artisans en France ? ${(BAROMETRE_META.totalPros / 1_000_000).toFixed(2)} millions d'entreprises artisanales analysées, département par département. La France rurale compte jusqu'à 6× plus d'artisans par habitant que les métropoles. Données SIRENE + INSEE.`,
   alternates: { canonical: `${BASE_URL}${PATH}` },
   openGraph: {
@@ -45,7 +45,7 @@ export default async function BarometreArtisansPage() {
   const bottom5 = rows.slice(-5).reverse();
   const maxDens = top.densite;
 
-  // Classement par région (agrégé depuis les départements — donnée réelle).
+  // Classement par région (agrégé depuis les départements, donnée réelle).
   const regMap = new Map<string, { region: string; pros: number; pop: number }>();
   for (const r of rows) {
     const g = regMap.get(r.region) || { region: r.region, pros: 0, pop: 0 };
@@ -58,9 +58,9 @@ export default async function BarometreArtisansPage() {
     .sort((a, b) => b.densite - a.densite);
   const regMax = regions[0].densite;
 
-  // Analyse « pourquoi » — points FACTUELS sourcés (Perplexity/sonar, 27/07/2026).
+  // Analyse « pourquoi » : points FACTUELS sourcés (Perplexity/sonar, 27/07/2026).
   const ANALYSE = [
-    { titre: "Un secteur de proximité calqué sur la population", texte: "L'artisanat est un secteur de proximité : l'ISM et Bpifrance Création décrivent un tissu « en correspondance quasi parfaite avec la répartition de la population » — d'où une densité par habitant souvent plus forte dans les territoires peu denses que dans les métropoles." },
+    { titre: "Un secteur de proximité calqué sur la population", texte: "L'artisanat est un secteur de proximité : l'ISM et Bpifrance Création décrivent un tissu « en correspondance quasi parfaite avec la répartition de la population », d'où une densité par habitant souvent plus forte dans les territoires peu denses que dans les métropoles." },
     { titre: "Des entreprises plus petites, donc plus nombreuses par habitant", texte: "En zone rurale, les entreprises individuelles dominent : les entreprises sans salarié représentent environ 64 % du tissu artisanal, contre 60 à 62 % dans les grandes agglomérations. Ce profil augmente mécaniquement le nombre d'entreprises rapporté à la population." },
     { titre: "Une histoire économique et le tourisme", texte: "Le phénomène est ancien : les anciennes « terres industrielles » sont moins pourvues en artisanat, tandis que l'économie touristique renforce la densité artisanale dans certains départements ruraux ou de montagne." },
   ];
@@ -90,7 +90,7 @@ export default async function BarometreArtisansPage() {
   const datasetSchema = {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: `Baromètre des artisans en France ${YEAR} — densité par département`,
+    name: `Baromètre des artisans en France ${YEAR} · densité par département`,
     description: `Densité d'entreprises artisanales (bâtiment, services à domicile, aide à la personne) pour 10 000 habitants, dans les 100 départements français. ${BAROMETRE_META.totalPros.toLocaleString("fr-FR")} entreprises analysées.`,
     creator: { "@type": "Organization", name: "Workwave", url: BASE_URL },
     temporalCoverage: String(YEAR),
@@ -138,7 +138,7 @@ export default async function BarometreArtisansPage() {
           <p className="text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
             Où trouve-t-on le plus d&apos;artisans, et où en manque-t-il le plus ? Nous avons
             analysé <strong className="text-[var(--text-primary)]">{grp(BAROMETRE_META.totalPros)} entreprises
-            artisanales</strong> — bâtiment, services à domicile, aide à la personne — dans
+            artisanales</strong> (bâtiment, services à domicile, aide à la personne) dans
             les 100 départements français.
           </p>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -213,7 +213,7 @@ export default async function BarometreArtisansPage() {
           <div className="rounded-2xl bg-[var(--accent)]/8 border border-[var(--accent)]/20 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <p className="font-semibold text-lg text-[var(--text-primary)]">Vous cherchez un artisan près de chez vous ?</p>
-              <p className="text-sm text-[var(--text-secondary)]">Déposez votre projet en 2 minutes, recevez plusieurs devis gratuits — sans engagement.</p>
+              <p className="text-sm text-[var(--text-secondary)]">Déposez votre projet en 2 minutes, recevez plusieurs devis gratuits, sans engagement.</p>
             </div>
             <Link
               href="/deposer-projet"

@@ -81,7 +81,7 @@ function buildPriorityUrls(): string[] {
     });
   });
 
-  // 6. Top 6 cat x dept Paris (75) — 6
+  // 6. Top 6 cat x dept Paris (75) · 6
   AI_CATEGORIES.forEach((cat) => {
     urls.push(`${BASE}/ai/${cat}/dept/75`);
   });
@@ -109,7 +109,7 @@ async function main() {
   const urls = buildPriorityUrls();
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — URLs qui seraient pingées ===\n");
+    console.log("=== DRY RUN · URLs qui seraient pingées ===\n");
     urls.forEach((url, i) => {
       const p = url.replace(BASE, "");
       console.log(`  ${(i + 1).toString().padStart(3)}. ${p}`);

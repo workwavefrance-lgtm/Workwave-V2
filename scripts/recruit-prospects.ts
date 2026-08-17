@@ -92,7 +92,7 @@ async function resolveFromProject(id: string): Promise<{ slug: string; dept: str
 }
 
 async function main() {
-  console.log(`\n=== RECRUTEMENT PROSPECTS — ${DRY_RUN ? "DRY-RUN" : TEST_SMS ? "TEST" : "EXECUTE"} ===\n`);
+  console.log(`\n=== RECRUTEMENT PROSPECTS · ${DRY_RUN ? "DRY-RUN" : TEST_SMS ? "TEST" : "EXECUTE"} ===\n`);
 
   let slug = CAT || "", dept = DEPT || "", lieu = LABEL || "", metier = CAT || "";
   let urgence = "", besoin = "";

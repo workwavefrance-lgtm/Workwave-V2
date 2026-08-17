@@ -79,20 +79,20 @@ export default async function SkillStatePage({
     {
       q: `How much does it cost to hire a freelance ${skill.nounSingular} in ${state.name}?`,
       a: tjm
-        ? `Senior freelance ${skill.noun} typically charge around ${formatTjmRange(tjm.senior.min, tjm.senior.max, "en", "USD")}/day. The figure is indicative, converted from European market data — US rates vary by metro and seniority. You agree the rate directly with the freelancer; Workwave takes 0% commission.`
-        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer — Workwave takes 0% commission, so pricing stays transparent.`,
+        ? `Senior freelance ${skill.noun} typically charge around ${formatTjmRange(tjm.senior.min, tjm.senior.max, "en", "USD")}/day. The figure is indicative, converted from European market data: US rates vary by metro and seniority. You agree the rate directly with the freelancer; Workwave takes 0% commission.`
+        : `Rates vary by seniority, scope and the freelancer's experience. You agree the rate directly with the freelancer. Workwave takes 0% commission, so pricing stays transparent.`,
     },
     {
       q: `Do freelance ${skill.noun} in ${state.name} work remotely?`,
-      a: `Most do. The majority of freelance ${skill.noun} work fully remote, so you can hire the best fit anywhere in ${state.name} — or beyond — and brief them in your own timezone.`,
+      a: `Most do. The majority of freelance ${skill.noun} work fully remote, so you can hire the best fit anywhere in ${state.name} (or beyond) and brief them in your own timezone.`,
     },
     {
       q: `How do I hire a freelance ${skill.nounSingular} in ${state.name} on Workwave?`,
-      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching ${skill.noun}, who reach out to you directly. You compare, choose and work together — no middleman, no commission.`,
+      a: `Post your project in 60 seconds (it's free). Our AI qualifies your brief and alerts matching ${skill.noun}, who reach out to you directly. You compare, choose and work together: no middleman, no commission.`,
     },
     {
       q: `Is it free for clients?`,
-      a: `Yes. Posting a project, being contacted by ${skill.noun} and hiring them is 100% free. Workwave never takes a commission — freelancers fund the platform through an optional subscription.`,
+      a: `Yes. Posting a project, being contacted by ${skill.noun} and hiring them is 100% free. Workwave never takes a commission: freelancers fund the platform through an optional subscription.`,
     },
   ];
 
@@ -143,11 +143,11 @@ export default async function SkillStatePage({
             Hire {skill.noun} in {state.name}
           </h1>
           <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed text-[var(--ai-text-secondary)] max-w-2xl">
-            {state.blurb} Post your project for free — our AI alerts matching freelance {skill.noun} across {state.name} and they contact you directly. 0% commission.
+            {state.blurb} Post your project for free: our AI alerts matching freelance {skill.noun} across {state.name} and they contact you directly. 0% commission.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors" style={{ boxShadow: "var(--ai-shadow-sm)" }}>
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
             <Link href="/ai/freelances" className="inline-flex items-center justify-center h-12 px-7 text-[15px] font-semibold rounded-full bg-[var(--ai-text)] hover:bg-[var(--ai-primary-hover)] text-white transition-colors">
               Browse freelances
@@ -185,7 +185,7 @@ export default async function SkillStatePage({
               {skill.label} day rates in {state.name}
             </h2>
             <p className="text-[14px] text-[var(--ai-text-secondary)] mb-10 max-w-2xl">
-              Indicative day rates by seniority, based on European market data converted to USD. US rates vary by metro — for planning only.
+              Indicative day rates by seniority, based on European market data converted to USD. US rates vary by metro. For planning only.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {tiers.map((t) => {
@@ -254,7 +254,7 @@ export default async function SkillStatePage({
           </p>
           <div className="mt-8">
             <Link href="/en/ai/deposer" className="inline-flex items-center justify-center h-12 px-8 text-[15px] font-semibold rounded-full bg-[var(--ai-accent)] hover:bg-[var(--ai-accent-hover)] text-white transition-colors">
-              Post a project — it&rsquo;s free
+              Post a project · it&rsquo;s free
             </Link>
           </div>
         </div>

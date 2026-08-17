@@ -19,7 +19,7 @@ export default function PublicLayout({
           particuliers / artisans selon la page et oriente vers
           deposer-projet ou reclamer/[slug] (cf. composant). */}
       <CommercialAgent />
-      {/* Microsoft Clarity (heatmaps + enregistrements) — chargé après
+      {/* Microsoft Clarity (heatmaps + enregistrements), chargé après
           consentement analytics uniquement (RGPD). */}
       <ClarityScript />
     </>

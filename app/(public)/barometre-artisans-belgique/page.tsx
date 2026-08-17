@@ -14,7 +14,7 @@ const PATH = "/barometre-artisans-belgique";
 const YEAR = 2026;
 
 export const metadata: Metadata = {
-  title: `Baromètre des artisans en Belgique francophone ${YEAR} — densité par province`,
+  title: `Baromètre des artisans en Belgique francophone ${YEAR} · densité par province`,
   description: `Où trouve-t-on le plus d'artisans en Wallonie et à Bruxelles ? Densité d'entreprises artisanales par province. Le Brabant wallon en tête, le Hainaut en bas. Données BCE + Statbel.`,
   alternates: { canonical: `${BASE_URL}${PATH}` },
   openGraph: {

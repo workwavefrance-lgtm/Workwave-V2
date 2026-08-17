@@ -1,11 +1,11 @@
 /**
- * Fiche N.C.O Design — PREMIER ARTISAN BELGE de Workwave.
+ * Fiche N.C.O Design · PREMIER ARTISAN BELGE de Workwave.
  *
  * Nelson Celestino (Insta @nco_design_, DM avec Willy depuis le 18/06 : "vous
  * pouvez compter sur moi en tant que premier artisan à intégrer la trame en
  * Belgique"). Données 100 % issues du registre officiel BCE (Public Search,
  * consultation unitaire du 11/07/2026) :
- *   BCE 1016.514.072 — N.C.O Design SRL, créée le 22/11/2024, active,
+ *   BCE 1016.514.072 · N.C.O Design SRL, créée le 22/11/2024, active,
  *   Boulevard Louis Mettewie 71/22, 1080 Molenbeek-Saint-Jean.
  *   NACE : peinture, menuiserie, isolation, revêtements sols/murs, nettoyage.
  *   Email public (bio Insta pro) : nelsoncelestino@outlook.com.
@@ -42,7 +42,7 @@ async function main() {
     return;
   }
 
-  // Catégories par SLUG (jamais d'ID hardcodé — leçon 26/05).
+  // Catégories par SLUG (jamais d'ID hardcodé, leçon 26/05).
   const { data: cats } = await sb
     .from("categories")
     .select("id, slug, name")

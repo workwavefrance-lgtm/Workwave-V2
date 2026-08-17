@@ -2,7 +2,7 @@
  * Bloc "Laissez un avis Google" réutilisable dans les emails transactionnels.
  *
  * Lien officiel de la fiche Google Business "Workwave" (3 Rue des Rosiers,
- * 86110 Craon, fiche validée — récupéré depuis business.google.com le
+ * 86110 Craon, fiche validée, récupéré depuis business.google.com le
  * 12/06/2026). Le lien ouvre directement le formulaire d'avis Google.
  *
  * Stratégie : Trustpilot est payant, les avis Google sont gratuits et
@@ -17,7 +17,7 @@ export const GOOGLE_REVIEW_URL = "https://g.page/r/CTOGdKur57CKEBM/review";
 
 export function buildGoogleReviewBlock(opts: { audience: "particulier" | "pro" }): string {
   // ⚠️ Cadrage volontaire (décision Willy 12/06) : l'avis porte sur l'EXPÉRIENCE
-  // DE L'ÉTAPE qui vient d'être vécue (formulaire, simplicité, rapidité) — PAS
+  // DE L'ÉTAPE qui vient d'être vécue (formulaire, simplicité, rapidité), PAS
   // sur « avez-vous trouvé un pro » : la couverture pro par zone est encore en
   // construction, un avis basé sur le résultat serait injustement négatif.
   const question =

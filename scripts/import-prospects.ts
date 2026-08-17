@@ -2,7 +2,7 @@
  * Import du CSV de moisson Google Maps (mobiles) dans la table `prospects`.
  *
  * - normalise les numéros (0XXXXXXXXX), garde uniquement les mobiles 06/07
- * - résout category_id par lookup en base (categories.slug) — pas de map hardcodé
+ * - résout category_id par lookup en base (categories.slug), pas de map hardcodé
  * - mappe ville -> code département (table CITY_DEPT ci-dessous)
  * - DÉDUP vs fiches `pros` existantes par numéro (anti double-contact / anti-mismatch)
  * - upsert onConflict(phone) ignoreDuplicates => ré-exécutable sans créer de doublon
@@ -67,7 +67,7 @@ function normPhone(s: string): string | null {
 }
 
 async function main() {
-  console.log(`\n=== IMPORT PROSPECTS — ${DRY_RUN ? "DRY-RUN" : "EXECUTE"} ===\n`);
+  console.log(`\n=== IMPORT PROSPECTS : ${DRY_RUN ? "DRY-RUN" : "EXECUTE"} ===\n`);
 
   // 1) Charger le CSV
   const lines = fs.readFileSync(FILE, "utf-8").trim().split("\n").slice(1);

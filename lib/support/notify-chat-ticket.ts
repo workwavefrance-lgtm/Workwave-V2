@@ -4,7 +4,7 @@
  * Volontairement SÉPARÉ du forward de la route email : celui-ci retransmet un
  * vrai email (HTML d'origine, pièces jointes), celui-là résume une
  * conversation. Les fusionner obligerait à un module qui gère deux formes très
- * différentes, pour refactorer du code de production qui fonctionne — mauvais
+ * différentes, pour refactorer du code de production qui fonctionne : mauvais
  * échange.
  *
  * Le `replyTo` pointe sur le visiteur : l'admin peut répondre directement

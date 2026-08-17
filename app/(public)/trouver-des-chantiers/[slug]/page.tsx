@@ -74,7 +74,7 @@ export async function generateMetadata({
     };
   }
   return {
-    title: `Trouver des chantiers en ${formatDepartmentLabel(r.dept)} — 9,90 €/lead`,
+    title: `Trouver des chantiers en ${formatDepartmentLabel(r.dept)} · 9,90 €/lead`,
     description: `Artisans du ${formatDepartmentLabel(r.dept)} : recevez les demandes de chantiers de votre département et payez 9,90 € pour débloquer un contact. Sans abonnement.`,
     alternates: { canonical: `${BASE_URL}/trouver-des-chantiers/${slug}` },
   };
@@ -99,8 +99,8 @@ export default async function Page({
     : `Trouvez des chantiers en ${r.dept.name}.`;
 
   const intro = isMetier
-    ? `Recevez les demandes des particuliers qui cherchent un ${nameLower} près de chez eux. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse — pas d'abonnement, pas de commission sur vos chantiers.`
-    : `Recevez les demandes de chantiers des particuliers du ${formatDepartmentLabel(r.dept)}, tous métiers du bâtiment. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse — sans abonnement ni engagement.`;
+    ? `Recevez les demandes des particuliers qui cherchent un ${nameLower} près de chez eux. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse : pas d'abonnement, pas de commission sur vos chantiers.`
+    : `Recevez les demandes de chantiers des particuliers du ${formatDepartmentLabel(r.dept)}, tous métiers du bâtiment. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse, sans abonnement ni engagement.`;
 
   // Maillage interne : vers la page listing correspondante + le hub
   const listingHref = isMetier ? `/${r.cat.slug}` : "/departements";
@@ -114,7 +114,7 @@ export default async function Page({
     <main>
       <JsonLd
         data={getChantiersServiceSchema({
-          name: `Trouver des chantiers ${name} — Workwave`,
+          name: `Trouver des chantiers ${name} · Workwave`,
           areaServed: isMetier ? "France" : r.dept.name,
           description: intro,
         })}

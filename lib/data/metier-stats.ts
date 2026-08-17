@@ -1,6 +1,6 @@
 // Stats RÉELLES par métier (nombre de pros actifs) issues de notre base.
-// Généré le 2026-07-26 — relancer `npx tsx scripts/build-metier-stats.ts` après un scrape.
-// Donnée unique (dataset propriétaire) — 0 invention.
+// Généré le 2026-07-26 : relancer `npx tsx scripts/build-metier-stats.ts` après un scrape.
+// Donnée unique (dataset propriétaire) : 0 invention.
 
 export const METIER_STATS: Record<string, number> = {
   "accompagnement-handicap": 7828,

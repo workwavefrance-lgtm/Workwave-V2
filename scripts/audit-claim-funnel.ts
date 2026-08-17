@@ -21,7 +21,7 @@ const supabase = createClient(
 );
 
 function pct(num: number, denom: number): string {
-  if (denom === 0) return "—";
+  if (denom === 0) return "-";
   return ((num / denom) * 100).toFixed(2) + "%";
 }
 
@@ -44,7 +44,7 @@ async function main() {
   if (claimedPros && claimedPros.length > 0) {
     for (const p of claimedPros) {
       console.log(
-        `  [${p.id}] ${p.name?.slice(0, 35).padEnd(35)} | email: ${p.email ?? "—"} | claimed_at: ${p.claimed_at ?? "—"} | sub: ${p.subscription_status ?? "—"}`
+        `  [${p.id}] ${p.name?.slice(0, 35).padEnd(35)} | email: ${p.email ?? "-"} | claimed_at: ${p.claimed_at ?? "-"} | sub: ${p.subscription_status ?? "-"}`
       );
     }
   } else {
@@ -63,7 +63,7 @@ async function main() {
     if (attempts && attempts.length > 0) {
       for (const a of attempts) {
         console.log(
-          `  ${a.created_at?.slice(0, 19) ?? "—"} | siret: ${a.siret ?? "—"} | email: ${a.email ?? "—"} | success: ${a.success} | ${a.error_reason ?? ""}`
+          `  ${a.created_at?.slice(0, 19) ?? "-"} | siret: ${a.siret ?? "-"} | email: ${a.email ?? "-"} | success: ${a.success} | ${a.error_reason ?? ""}`
         );
       }
     } else {

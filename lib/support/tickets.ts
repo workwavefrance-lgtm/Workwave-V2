@@ -1,5 +1,5 @@
 /**
- * Support maison — helper tickets.
+ * Support maison : helper tickets.
  *
  * Cœur de la boîte de réception : transforme une demande (email entrant, chat
  * Léa escaladé, formulaire) en TICKET traçable + fil de messages, relié au pro
@@ -11,7 +11,7 @@
  *     (UNIQUE partiel) + catch 23505 côté code.
  *   - THREADING : un nouvel email d'un expéditeur regroupé dans son ticket
  *     ouvert/en attente le plus récent ; sinon nouveau ticket.
- *   - service_role (bypass RLS) — jamais appelé depuis un contexte client.
+ *   - service_role (bypass RLS) : jamais appelé depuis un contexte client.
  *   - best-effort sur la résolution pro/projet : un échec ne bloque pas la
  *     création du ticket.
  */
@@ -97,7 +97,7 @@ export async function resolveContext(
     // Pro : on n'établit le lien QUE s'il est certain.
     //
     // POURQUOI : `pros.email` n'est PAS unique. Sur un échantillon de 28 137
-    // fiches actives avec email (audit 20/07), 9 137 — soit 32 % — partagent
+    // fiches actives avec email (audit 20/07), 9 137 (soit 32 %) partagent
     // leur adresse avec au moins une autre fiche (jusqu'à 30 fiches sur une
     // seule adresse : e-mails de groupe type @equans.com, ou adresses de
     // service client aspirées par erreur lors de l'enrichissement Apify).
@@ -175,7 +175,7 @@ export async function ingestInboundEmailAsTicket(
   // Bornes de taille : un email entrant est une donnée NON MAÎTRISÉE. Un HTML
   // de plusieurs Mo (signature avec images en base64, mail généré) serait sinon
   // passé aux 11 regex globales de crudeStripHtml, stocké tel quel, puis
-  // rechargé intégralement à chaque ouverture du ticket — le mécanisme exact
+  // rechargé intégralement à chaque ouverture du ticket, le mécanisme exact
   // qui avait déjà mis l'egress Supabase à 188 % en juin.
   const MAX_HTML_CHARS = 200_000;
   const MAX_BODY_CHARS = 20_000;
@@ -272,7 +272,7 @@ export async function ingestInboundEmailAsTicket(
       // deux webhooks concurrents ont créé deux tickets pour le même
       // expéditeur, un second email a pu être rattaché à CE ticket entre notre
       // INSERT et notre rollback. Le supprimer à l'aveugle détruirait alors un
-      // vrai email client, définitivement, sans la moindre trace — la fonction
+      // vrai email client, définitivement, sans la moindre trace, la fonction
       // renvoyant "duplicate: true" comme si tout allait bien.
       const { data: siblings } = await sb
         .from("support_messages")

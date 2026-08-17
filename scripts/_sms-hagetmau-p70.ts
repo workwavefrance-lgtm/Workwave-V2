@@ -1,5 +1,5 @@
 /**
- * SMS recrutement — projet #70 (nettoyage vitres à Hagetmau, Landes).
+ * SMS recrutement · projet #70 (nettoyage vitres à Hagetmau, Landes).
  * Source : harvest Apify secteur 40/64 (run xebRxylf9OPcYKb0X, déjà payé),
  * 42 mobiles extraits → curation (exclut lavage auto, laveries, peinture).
  * Modèle validé GSM-7 + sender Workwave + STOP 36180. Idempotent.

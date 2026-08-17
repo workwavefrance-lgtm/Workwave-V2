@@ -11,7 +11,7 @@ import { useState, useEffect } from "react";
  * 1. Il DISPARAIT TOUT SEUL a la date ci-dessous. Un message d'excuses qui traine
  *    trois mois apres la panne fait plus de mal que la panne elle-meme : il donne
  *    l'impression d'un site fragile a des visiteurs qui n'ont jamais rien vu.
- *    Ne pas repousser cette date "au cas ou" — la supprimer, elle et ce fichier.
+ *    Ne pas repousser cette date "au cas ou" : la supprimer, elle et ce fichier.
  *
  * 2. Il n'annonce AUCUNE cause technique. Au moment de l'ecrire, la raison exacte
  *    du crash n'etait pas etablie. On ne publie pas une explication qu'on n'a pas
@@ -64,7 +64,7 @@ export default function IncidentBanner() {
           <span className="text-[#6B7280] dark:text-[#9CA3AF]">
             Si vous avez essayé de déposer un projet ou d&apos;accéder à votre espace
             professionnel sans y parvenir, le problème venait de nous. Tout refonctionne.
-            Merci de réessayer, et désolé pour le temps perdu. — Willy
+            Merci de réessayer, et désolé pour le temps perdu. - Willy
           </span>
         </p>
         <button

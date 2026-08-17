@@ -105,7 +105,7 @@ async function countActiveSubscribers(stripe: Stripe): Promise<number> {
     stripe.subscriptions.list({ status: "trialing", limit: 1 }),
   ]);
   // Stripe doesn't expose total_count directly; use list with limit 1 and check has_more
-  // For a precise count we need to paginate — use a simpler approach via search count
+  // For a precise count we need to paginate, use a simpler approach via search count
   let count = 0;
   let hasMore = true;
   let startingAfter: string | undefined;

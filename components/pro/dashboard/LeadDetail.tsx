@@ -53,7 +53,7 @@ export default function LeadDetail({
    * Le pro a-t-il payé (ou consommé un offert) pour CE projet ? Calculé côté
    * serveur dans page.tsx : quand c'est faux, les coordonnées ont déjà été
    * retirées de `lead` avant d'arriver ici. Ce booléen ne sert donc qu'à
-   * choisir ce qu'on affiche — il n'est pas la barrière de sécurité.
+   * choisir ce qu'on affiche : il n'est pas la barrière de sécurité.
    */
   unlocked: boolean;
   /** Déblocages offerts restants (offre de lancement), pour le libellé du bouton. */
@@ -127,7 +127,7 @@ export default function LeadDetail({
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Colonne gauche — Détail du projet */}
+        {/* Colonne gauche : Détail du projet */}
         <div className="lg:col-span-2 space-y-6">
           {/* En-tête */}
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
@@ -137,8 +137,8 @@ export default function LeadDetail({
                   Demande de {project.first_name}
                 </h1>
                 <p className="text-sm text-[var(--text-tertiary)] mt-1">
-                  {project.category.name} —{" "}
-                  {project.city?.name || "Ville non précisée"} — Reçu le{" "}
+                  {project.category.name} ·{" "}
+                  {project.city?.name || "Ville non précisée"} · Reçu le{" "}
                   {formatDateFR(lead.sent_at)}
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default function LeadDetail({
           )}
         </div>
 
-        {/* Colonne droite — Coordonnées + Actions */}
+        {/* Colonne droite : Coordonnées + Actions */}
         <div className="space-y-6">
           {/* Coordonnées */}
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
@@ -286,7 +286,7 @@ export default function LeadDetail({
                     >
                       {freeRemaining > 0
                         ? `Débloquer gratuitement (${freeRemaining} offert${freeRemaining > 1 ? "s" : ""})`
-                        : "Débloquer le contact — 9,90 €"}
+                        : "Débloquer le contact · 9,90 €"}
                     </button>
                   </form>
                   <p className="text-[11px] text-[var(--text-tertiary)] mt-3">

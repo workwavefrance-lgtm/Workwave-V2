@@ -15,7 +15,7 @@ const INTRO =
 
 const SECTIONS: LegalSection[] = [
   {
-    title: "Article 1 — Objet et acceptation",
+    title: "Article 1 · Objet et acceptation",
     blocks: [
       { p: "1.1. Les présentes CGU définissent les conditions dans lesquelles Workwave met la Plateforme à disposition de ses utilisateurs, ainsi que les droits et obligations des parties." },
       { p: "1.2. Workwave est un service de mise en relation qui permet à un Particulier de déposer gratuitement un Projet, et à un Professionnel de consulter ce Projet puis, s'il le souhaite, de débloquer les coordonnées du Particulier afin de le contacter. Le fonctionnement, le prix et les conditions du service payant de Déblocage sont détaillés dans les CGV." },
@@ -24,7 +24,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 2 — Définitions",
+    title: "Article 2 · Définitions",
     blocks: [
       {
         ul: [
@@ -40,7 +40,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 3 — Accès à la Plateforme et disponibilité",
+    title: "Article 3 · Accès à la Plateforme et disponibilité",
     blocks: [
       { p: "3.1. La consultation de la Plateforme et le dépôt d'un Projet sont gratuits. Seul le Déblocage d'un Lead est payant." },
       { p: "3.2. **Obligation de moyens.** Workwave s'efforce de maintenir la Plateforme accessible 24h/24 et 7j/7, mais est tenue à une obligation de moyens, non de résultat, quant à la disponibilité, la continuité et l'absence d'erreur. Elle ne garantit pas un accès ininterrompu ou exempt d'anomalie." },
@@ -50,7 +50,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 4 — Compte Professionnel",
+    title: "Article 4 · Compte Professionnel",
     blocks: [
       { p: "4.1. **Création.** L'accès à certaines fonctionnalités, notamment le Déblocage, suppose la création d'un compte. Le Professionnel garantit agir dans le cadre de son activité professionnelle." },
       { p: "4.2. **Exactitude.** Le Professionnel fournit des informations exactes, complètes et à jour (identité, coordonnées, SIRET en France ou numéro BCE en Belgique, qualifications) et les met à jour en cas de changement. Toute information inexacte ou frauduleuse engage sa seule responsabilité." },
@@ -60,7 +60,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 5 — Dépôt d'un Projet et fiabilité des déclarations du Particulier",
+    title: "Article 5 · Dépôt d'un Projet et fiabilité des déclarations du Particulier",
     blocks: [
       { p: "5.1. Le Particulier dépose gratuitement un Projet en décrivant sincèrement son besoin et en fournissant des coordonnées valides." },
       { p: "5.2. **Garantie de sincérité.** Le Particulier garantit l'exactitude, la sincérité et le sérieux des informations communiquées (identité, coordonnées, nature, budget, description). Il s'engage à ne déposer que des demandes réelles et à tenir ses coordonnées à jour tant que le Projet est actif." },
@@ -69,7 +69,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 6 — Usages et contenus interdits",
+    title: "Article 6 · Usages et contenus interdits",
     blocks: [
       { p: "Sont notamment interdits :" },
       {
@@ -86,7 +86,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 7 — Avis",
+    title: "Article 7 · Avis",
     blocks: [
       { p: "7.1. La Plateforme peut proposer un système d'avis permettant au Particulier de partager son expérience." },
       { p: "7.2. **Conditions.** Un avis ne peut être déposé qu'après un contact ou une prestation réels. L'auteur garantit une expérience personnelle, vécue et sincère. Sont interdits les avis mensongers, fictifs, achetés, en contrepartie d'un avantage, ou déposés sans relation réelle avec le Professionnel." },
@@ -95,7 +95,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 8 — Rôle d'hébergeur et signalement",
+    title: "Article 8 · Rôle d'hébergeur et signalement",
     blocks: [
       { p: "8.1. Les Projets déposés par les Particuliers, les avis et les contenus ajoutés par les Professionnels sur leur fiche constituent des **contenus tiers** : à leur égard, Workwave agit en qualité d'**hébergeur** (art. 6 de la LCEN du 21 juin 2004). **Les fiches établies à partir de données publiques (registre Sirene) relèvent de la responsabilité éditoriale de Workwave**, tout Professionnel pouvant en demander la rectification ou la suppression via le lien prévu à cet effet." },
       { p: "8.2. Pour les contenus tiers, Workwave n'est pas soumise à une obligation générale de surveillance et n'engage sa responsabilité qu'à défaut d'avoir agi promptement pour retirer un contenu manifestement illicite dont elle a eu connaissance." },
@@ -103,7 +103,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 9 — Propriété intellectuelle et base de données",
+    title: "Article 9 · Propriété intellectuelle et base de données",
     blocks: [
       { p: "9.1. La Plateforme (structure, design, textes, logos, marque, éléments graphiques et logiciels) est protégée par le droit de la propriété intellectuelle et demeure la propriété exclusive de Workwave. Toute reproduction ou exploitation sans autorisation écrite est interdite." },
       { p: "9.2. La base de données de Workwave (fiches, Projets, Leads et données associées) est protégée par le **droit sui generis du producteur de bases de données** (art. L341-1 et suivants du Code de la propriété intellectuelle)." },
@@ -111,7 +111,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 10 — Suspension, résiliation et lutte contre la fraude",
+    title: "Article 10 · Suspension, résiliation et lutte contre la fraude",
     blocks: [
       { p: "10.1. L'utilisateur peut cesser d'utiliser la Plateforme à tout moment. Le Professionnel peut demander la fermeture de son compte (contact@workwave.fr), sans remise en cause des Déblocages déjà réalisés ni droit à remboursement." },
       { p: "10.2. Workwave peut **suspendre l'accès, restreindre les fonctionnalités ou fermer le compte**, sans préavis ni indemnité, en cas de manquement, notamment : SIRET/BCE faux, inexistant, radié ou usurpé ; fausses qualifications ; Projets fantômes ou usurpation ; revente ou détournement de Leads ; scraping ou usage automatisé prohibé ; comportement abusif ; tentative de contournement du paiement ; fraude avérée ou raisonnablement présumée." },
@@ -120,7 +120,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 11 — Données personnelles",
+    title: "Article 11 · Données personnelles",
     blocks: [
       { p: "11.1. Le traitement des données (finalités, bases légales, durées, droits) est décrit dans les [Mentions légales](/mentions-legales)." },
       { p: "11.2. Les coordonnées transmises au Professionnel lors d'un Déblocage ne peuvent être utilisées que pour répondre au Projet concerné. Le Professionnel en devient responsable de traitement au sens du RGPD." },
@@ -128,7 +128,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 12 — Dispositions générales",
+    title: "Article 12 · Dispositions générales",
     blocks: [
       { p: "12.1. **Divisibilité.** Si une stipulation était déclarée nulle ou inapplicable, elle serait réputée non écrite sans affecter la validité des autres." },
       { p: "12.2. **Non-renonciation.** Le fait pour Workwave de ne pas se prévaloir d'une stipulation ne vaut pas renonciation à s'en prévaloir ultérieurement." },
@@ -137,7 +137,7 @@ const SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "Article 13 — Droit applicable, médiation et juridiction",
+    title: "Article 13 · Droit applicable, médiation et juridiction",
     blocks: [
       { p: "13.1. Les présentes CGU sont régies par le **droit français**. **Si l'utilisateur est un consommateur résidant dans un autre État de l'Union européenne, notamment en Belgique, il conserve le bénéfice des dispositions impératives protectrices de la loi de son pays de résidence, que le choix du droit français ne saurait écarter.**" },
       { p: "13.2. **Réclamation préalable.** Toute réclamation est adressée à contact@workwave.fr ; Workwave s'engage à y répondre dans un délai raisonnable et à rechercher une solution amiable." },

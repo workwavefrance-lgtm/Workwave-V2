@@ -164,7 +164,7 @@ async function main() {
   const existing = loadExisting();
   const todo = list.filter((c) => FORCE || !existing[c.slug]);
   console.log(
-    `Contenu métier Perplexity — ${Object.keys(existing).length} déjà en base, ${todo.length} à générer${DRY ? " (DRY, 2 max)" : ""}\n`
+    `Contenu métier Perplexity · ${Object.keys(existing).length} déjà en base, ${todo.length} à générer${DRY ? " (DRY, 2 max)" : ""}\n`
   );
 
   const fetched: Record<string, Entry> = {};
@@ -184,13 +184,13 @@ async function main() {
 
   console.log(`\nOK : ${Object.keys(fetched).length}/${entries.length} · coût ≈ $${total.toFixed(4)}`);
   if (DRY) {
-    console.log("\nDRY — aperçu :\n", JSON.stringify(fetched, null, 2));
+    console.log("\nDRY · aperçu :\n", JSON.stringify(fetched, null, 2));
     return;
   }
   const out: Record<string, Entry> = { ...existing, ...fetched };
   const file =
     `// Contenu éditorial SOURCÉ par métier (Perplexity sonar, recherche web + citations).\n` +
-    `// Généré le ${new Date().toISOString().slice(0, 10)} — NE PAS éditer à la main.\n` +
+    `// Généré le ${new Date().toISOString().slice(0, 10)}. NE PAS éditer à la main.\n` +
     `// « zéro invention » : intro/certifs/conseils issus de sources web réelles, citées.\n\n` +
     `export type MetierFaq = { q: string; a: string };\n` +
     `export type MetierContentEntry = {\n` +

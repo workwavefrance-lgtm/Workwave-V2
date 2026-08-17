@@ -12,7 +12,7 @@ import { buildProSummary, buildProBadges } from "@/lib/utils/pro-summary";
  * - Badges visuels (RGE, anciennete, note Google si dispo)
  * - 2 CTAs distincts : "Voir la fiche" + "Demander un devis"
  *
- * Pas de logique d'affaire ici — tout est cote helpers (buildProSummary,
+ * Pas de logique d'affaire ici : tout est cote helpers (buildProSummary,
  * buildProBadges). Composant pur visuel.
  */
 export default function TopProCard({

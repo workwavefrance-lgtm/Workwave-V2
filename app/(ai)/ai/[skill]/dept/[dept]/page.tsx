@@ -64,7 +64,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { skill, dept } = await params;
   const department = findDepartmentByCode(dept);
-  if (!department) return { title: "Page introuvable — Workwave AI" };
+  if (!department) return { title: "Page introuvable · Workwave AI" };
 
   const sb = createPublicClient();
   const { data: category } = await sb
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("slug", skill)
     .eq("vertical", TECH_VERTICAL)
     .maybeSingle();
-  if (!category) return { title: "Page introuvable — Workwave AI" };
+  if (!category) return { title: "Page introuvable · Workwave AI" };
 
   const month = MONTH_NAMES[new Date().getMonth()];
   const title = `Freelances ${category.name} dans le ${department.name} (${department.code}) en ${month} ${CURRENT_YEAR}`;
@@ -368,7 +368,7 @@ export default async function SkillDeptPage({ params }: Props) {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          SECTION 4/4 — FAQ dynamique skill x dept (FAQPage schema)
+          SECTION 4/4 · FAQ dynamique skill x dept (FAQPage schema)
           ═══════════════════════════════════════════════════════════════ */}
       <AiFaqSection
         id="faq"
@@ -417,7 +417,7 @@ export default async function SkillDeptPage({ params }: Props) {
               {tjmRef && TJM_SOURCES.map((src) => (
                 <li key={src.url} className="flex items-start gap-2">
                   <span className="text-[var(--ai-accent)]">→</span>
-                  TJM : <a href={src.url} target="_blank" rel="noopener noreferrer nofollow" className="underline decoration-[var(--ai-border)] hover:text-[var(--ai-accent)] ml-1">{src.name} — {src.title}</a>
+                  TJM : <a href={src.url} target="_blank" rel="noopener noreferrer nofollow" className="underline decoration-[var(--ai-border)] hover:text-[var(--ai-accent)] ml-1">{src.name} · {src.title}</a>
                 </li>
               ))}
             </ul>

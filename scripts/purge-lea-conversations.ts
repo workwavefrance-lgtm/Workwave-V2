@@ -1,7 +1,7 @@
 /**
  * Purge RGPD du journal des conversations de Léa.
  *
- * Ces lignes contiennent ce que des visiteurs ont tapé — donc potentiellement
+ * Ces lignes contiennent ce que des visiteurs ont tapé, donc potentiellement
  * des données personnelles. On ne les garde que le temps utile à la
  * surveillance de l'IA : 90 jours. Au-delà, elles n'ont plus de valeur d'audit
  * et ne sont plus qu'un risque.
@@ -60,7 +60,7 @@ async function main() {
     .from("lea_conversations")
     .select("*", { count: "exact", head: true })
     .lt("created_at", limite);
-  console.log(`✅ ${supprimees} supprimée(s) — restant hors rétention : ${restant ?? 0}`);
+  console.log(`✅ ${supprimees} supprimée(s), restant hors rétention : ${restant ?? 0}`);
   if ((restant ?? 0) !== 0) process.exit(1);
 }
 

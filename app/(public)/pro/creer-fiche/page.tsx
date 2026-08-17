@@ -6,7 +6,7 @@ import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import CreerFicheForm from "./CreerFicheForm";
 
 export const metadata: Metadata = {
-  title: "Créer ma fiche pro gratuitement — Workwave",
+  title: "Créer ma fiche pro gratuitement · Workwave",
   description:
     "Créez gratuitement votre fiche professionnelle sur Workwave à partir de votre SIRET. Sans abonnement, sans commission. Recevez les demandes de particuliers dans votre zone.",
 };

@@ -77,11 +77,11 @@ async function pingIndexNow(urls: string[]): Promise<{ ok: boolean; status: numb
 
 async function main() {
   const urls = buildUrls();
-  console.log(`\nIndexNow ping pour ${HOST} — ${urls.length} URLs uniques`);
+  console.log(`\nIndexNow ping pour ${HOST} · ${urls.length} URLs uniques`);
   console.log(`Key location : ${KEY_LOCATION}\n`);
 
   if (DRY_RUN) {
-    console.log("=== DRY RUN — échantillon (10 premières) ===");
+    console.log("=== DRY RUN · échantillon (10 premières) ===");
     urls.slice(0, 10).forEach((u, i) => console.log(`  ${i + 1}. ${u}`));
     console.log(`\n... et ${urls.length - 10} autres.`);
     return;

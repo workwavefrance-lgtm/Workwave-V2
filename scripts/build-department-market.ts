@@ -28,7 +28,7 @@ const sb = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Pagination robuste PostgREST (cap 1000 par défaut) — pattern canonique CLAUDE.md.
+// Pagination robuste PostgREST (cap 1000 par défaut) : pattern canonique CLAUDE.md.
 async function loadAll<T>(table: string, cols: string): Promise<T[]> {
   const PAGE = 1000;
   let offset = 0;
@@ -162,12 +162,12 @@ async function main() {
   console.log(`\n${nbDepts} départements agrégés :`);
   for (const [code, a] of [...acc.entries()].sort()) {
     const m = out[code];
-    console.log(`  ${code.padEnd(4)} prix=${m.prix_m2_moyen ?? "—"}€/m²(${a.prixCount}) · revenu=${m.revenu_median ?? "—"}€(${a.revCount}) · vacance=${m.taux_vacance ?? "—"}%(${a.vacCount}) · ${m.nb_communes} communes`);
+    console.log(`  ${code.padEnd(4)} prix=${m.prix_m2_moyen ?? "-"}€/m²(${a.prixCount}) · revenu=${m.revenu_median ?? "-"}€(${a.revCount}) · vacance=${m.taux_vacance ?? "-"}%(${a.vacCount}) · ${m.nb_communes} communes`);
   }
   if (dropped.length) console.log(`\n⚠️ prix masqué (couverture insuffisante) : ${dropped.join(", ")}`);
 
   if (DRY) {
-    console.log("\nDRY RUN — fichier non écrit.");
+    console.log("\nDRY RUN : fichier non écrit.");
     return;
   }
   const file =

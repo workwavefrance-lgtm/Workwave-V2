@@ -3,7 +3,7 @@ import Link from "next/link";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Mot de passe oublié — Workwave",
+  title: "Mot de passe oublié · Workwave",
   robots: { index: false, follow: false },
 };
 

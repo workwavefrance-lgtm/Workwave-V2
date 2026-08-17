@@ -10,7 +10,7 @@ import { isAiPremium, AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { markProjectAsContacted } from "@/app/(ai)/ai/dashboard/projets/actions";
 
 export const metadata: Metadata = {
-  title: "All projects — Workwave AI Dashboard",
+  title: "All projects · Workwave AI Dashboard",
   description:
     "Every project posted on Workwave AI, in real time (tech, marketing, finance, legal, HR, design, creative, media).",
   robots: { index: false, follow: false },
@@ -84,7 +84,7 @@ export default async function AiEnDashboardProjetsPage({
 
   // Load all active Workwave AI projects (Phase 11 broadcast model : every
   // freelancer sees ALL projects, no more project_leads filter).
-  // NB: the `projects` table has NO `deleted_at` column — soft-delete uses
+  // NB: the `projects` table has NO `deleted_at` column: soft-delete uses
   // `status='deleted'`. The only filter needed is .neq("status", "deleted").
   let projectsQuery = service
     .from("projects")

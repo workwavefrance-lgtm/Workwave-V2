@@ -128,7 +128,7 @@ function buildHtml(params: {
               </p>
 
               <p style="margin:0 0 16px;">
-                Vous pouvez la compléter en 2 minutes (photos, description, horaires) — c'est gratuit, sans engagement.
+                Vous pouvez la compléter en 2 minutes (photos, description, horaires), c'est gratuit, sans engagement.
               </p>
 
               <p style="margin:0 0 4px;">Encore désolé pour la confusion,</p>
@@ -288,7 +288,7 @@ async function main() {
         sender: { email: SENDER_EMAIL, name: SENDER_NAME },
         to: [{ email: t.email, name: t.name || undefined }],
         replyTo: { email: REPLY_TO_EMAIL, name: SENDER_NAME },
-        subject: "Désolé pour le bug — votre fiche Workwave",
+        subject: "Désolé pour le bug · votre fiche Workwave",
         htmlContent: html,
       });
       ok++;

@@ -15,7 +15,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
 
 
 /**
- * Sprint 13 — Demarrer le checkout one-time pour debloquer un lead BTP.
+ * Sprint 13 : Demarrer le checkout one-time pour debloquer un lead BTP.
  *
  * Securite (defense en profondeur) :
  *   1. Auth Supabase (user logge)
@@ -98,7 +98,7 @@ export async function startBtpUnlock(formData: FormData): Promise<void> {
     redirect(`/pro/dashboard/leads?already_unlocked=${projectId}`);
   }
 
-  // 5 bis) OFFRE DE LANCEMENT — les 2 premiers déblocages sont OFFERTS.
+  // 5 bis) OFFRE DE LANCEMENT : les 2 premiers déblocages sont OFFERTS.
   // Si le pro a encore un crédit offert, on débloque directement (pas de Stripe).
   const freeRemaining = await getFreeUnlocksRemaining(service, pro.id);
   if (freeRemaining > 0) {

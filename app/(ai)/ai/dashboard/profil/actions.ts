@@ -81,7 +81,7 @@ export async function updateAiProfile(formData: FormData): Promise<void> {
     redirect(localizeAiPath("/ai/dashboard/profil", locale) + "?error=name_required");
   }
 
-  // Phase 12 — personnalisation (avatar_color + theme_color)
+  // Phase 12 · personnalisation (avatar_color + theme_color)
   // Whitelist stricte : on n'accepte QUE les 8 couleurs autorisees.
   // Si l'input est absent ou invalide, on retombe sur null (= orange par defaut).
   const avatarColorRaw = String(formData.get("avatar_color") || "").trim();

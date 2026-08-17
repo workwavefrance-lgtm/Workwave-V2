@@ -6,7 +6,7 @@
  *   - « entreprise de châssis » = le menuisier spécialisé pose de châssis (fenêtres)
  *
  * Plutôt que de créer de VRAIES catégories en base (ce qui fragmenterait les
- * pros — un plafonneur EST un plaquiste — et ferait fuiter des URLs parasites
+ * pros (un plafonneur EST un plaquiste) et ferait fuiter des URLs parasites
  * côté France via getAllCategories()), on expose ces termes comme des ALIAS
  * qui réutilisent 100 % des pros de la catégorie PARENTE.
  *
@@ -22,7 +22,7 @@
  * /plafonneur/vienne-86 servirait les plaquistes français = duplicate content.
  *
  * Comme un alias n'entre JAMAIS dans getAllCategories(), il n'apparaît nulle
- * part côté FR (sitemap, maillage, "métiers similaires") — ses URLs sont
+ * part côté FR (sitemap, maillage, "métiers similaires") : ses URLs sont
  * émises explicitement, BE-only, par un builder dédié dans app/sitemap.ts.
  */
 

@@ -15,7 +15,7 @@ const PATH = "/barometre-prix-artisans";
 const YEAR = 2026;
 
 export const metadata: Metadata = {
-  title: `Baromètre des prix des artisans ${YEAR} — combien coûte un artisan ?`,
+  title: `Baromètre des prix des artisans ${YEAR} · combien coûte un artisan ?`,
   description: `Combien coûte un plombier, un électricien, un maçon en ${YEAR} ? Fourchettes de prix réelles et sourcées, métier par métier, pour comparer avant de vous engager. Devis gratuits sur Workwave.`,
   alternates: { canonical: `${BASE_URL}${PATH}` },
   openGraph: {
@@ -98,7 +98,7 @@ export default async function BarometrePrixPage() {
           <p className="text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
             Combien coûte vraiment un plombier, un électricien, un maçon ? Voici les fourchettes de prix
             de référence pour <strong className="text-[var(--text-primary)]">{withPrices.length} métiers</strong>,
-            issues de sources spécialisées — pour savoir à quoi vous attendre avant de demander un devis.
+            issues de sources spécialisées, pour savoir à quoi vous attendre avant de demander un devis.
           </p>
         </section>
 
