@@ -114,31 +114,44 @@ async function fetchAllRGE(): Promise<Map<string, Qualif[]>> {
   return map;
 }
 
-async function fetchAllProsWithSiret(): Promise<{ id: number; siret: string }[]> {
-  // PostgREST cap a 1000 rows par requete par defaut. Cf. lecon CLAUDE.md
-  // 30/04/2026 : ne PAS supposer que rows.length === PAGE indique "il y a
-  // plus", utiliser rows.length > 0 et incrementer offset par rows.length.
-  const all: { id: number; siret: string }[] = [];
-  let offset = 0;
-  const PAGE = 1000;
-  while (true) {
-    const { data } = await supabase
+/**
+ * Recherche les fiches correspondant AUX SIRET DE L'ADEME, au lieu de
+ * charger toute la base.
+ *
+ * 17/08/2026, pourquoi ce changement. La version precedente parcourait les
+ * pros par tranches de 1000 avec un decalage croissant. Elle a ete ecrite
+ * quand la base faisait 226 000 fiches ; elle en compte 2 561 166
+ * aujourd'hui, soit plus de 2 500 allers-retours, chacun de plus en plus
+ * lent (un decalage de 2 000 000 oblige Postgres a parcourir 2 millions de
+ * lignes avant de renvoyer la suivante, cf. lecon du 26/05 sur la
+ * pagination par decalage).
+ *
+ * Le sens inverse est bien plus court : l'ADEME ne publie que ~162 000
+ * qualifications, donc quelques dizaines de milliers de SIRET distincts.
+ * On interroge la base SUR CES SIRET uniquement, par paquets, ce qui
+ * utilise l'index et ne ramene que ce qui nous interesse.
+ */
+async function fetchProsForSirets(sirets: string[]): Promise<{ id: number; siret: string }[]> {
+  const trouves: { id: number; siret: string }[] = [];
+  const PAQUET = 300; // au-dela, l'URL du filtre `in` devient trop longue
+  for (let i = 0; i < sirets.length; i += PAQUET) {
+    const lot = sirets.slice(i, i + PAQUET);
+    const { data, error } = await supabase
       .from("pros")
       .select("id, siret")
-      .not("siret", "is", null)
+      .in("siret", lot)
       .eq("is_active", true)
-      .is("deleted_at", null)
-      .order("id", { ascending: true })
-      .range(offset, offset + PAGE - 1);
-    const rows = (data || []) as { id: number; siret: string }[];
-    if (rows.length === 0) break;
-    all.push(...rows);
-    offset += rows.length;
-    if (offset % 50000 === 0) {
-      process.stdout.write(`  ${offset}... `);
+      .is("deleted_at", null);
+    if (error) {
+      console.error("  ERREUR de lecture:", error.message);
+      process.exit(1);
+    }
+    trouves.push(...((data || []) as { id: number; siret: string }[]));
+    if (i > 0 && (i / PAQUET) % 50 === 0) {
+      process.stdout.write(`  ${i}/${sirets.length} SIRET interroges, ${trouves.length} fiches trouvees\n`);
     }
   }
-  return all;
+  return trouves;
 }
 
 async function main() {
@@ -152,10 +165,13 @@ async function main() {
     `   -> ${rgeMap.size} SIRET uniques avec qualif valide (${((Date.now() - t0) / 1000).toFixed(1)}s)\n`
   );
 
-  // 2. Pull pros Workwave
-  console.log("2. Pull des pros Workwave avec siret...");
-  const pros = await fetchAllProsWithSiret();
-  console.log(`   -> ${pros.length} pros actifs avec siret\n`);
+  // 2. Chercher NOS fiches correspondant aux SIRET de l'ADEME
+  console.log("2. Recherche des fiches Workwave portant ces SIRET...");
+  const siretsAdeme = [...rgeMap.keys()];
+  const pros = await fetchProsForSirets(siretsAdeme);
+  console.log(
+    `   -> ${pros.length} fiches trouvees sur ${siretsAdeme.length} SIRET certifies RGE\n`
+  );
 
   // 3. Match
   console.log("3. Matching SIRET...");
@@ -219,6 +235,55 @@ async function main() {
     if (i % (CHUNK * 10) === 0 || done === matches.length) {
       console.log(`   ${done}/${matches.length} updates`);
     }
+  }
+
+  // 5. RETRAIT DU BADGE AUX QUALIFICATIONS EXPIREES.
+  //
+  // 17/08/2026. Le script savait poser le badge, jamais l'enlever. Une
+  // entreprise dont la qualification a expire depuis la derniere
+  // synchronisation gardait rge_certified=true et affichait publiquement une
+  // certification perimee, donc une affirmation fausse sur sa fiche. Les
+  // qualifs expirees sont deja ecartees plus haut (date_fin < aujourd'hui),
+  // il suffit donc de nettoyer tout ce qui porte encore le badge sans etre
+  // dans la liste du jour.
+  console.log("\n5. Retrait du badge aux qualifications expirees...");
+  const marquesIds = new Set(matches.map((m) => m.id));
+  const aNettoyer: number[] = [];
+  {
+    let offset = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data } = await supabase
+        .from("pros")
+        .select("id")
+        .eq("rge_certified", true)
+        .range(offset, offset + PAGE - 1);
+      const rows = (data || []) as { id: number }[];
+      if (rows.length === 0) break;
+      for (const r of rows) if (!marquesIds.has(r.id)) aNettoyer.push(r.id);
+      offset += rows.length;
+    }
+  }
+  if (aNettoyer.length === 0) {
+    console.log("   aucune fiche a nettoyer.");
+  } else {
+    let nettoyees = 0;
+    for (let i = 0; i < aNettoyer.length; i += 200) {
+      const lot = aNettoyer.slice(i, i + 200);
+      const { error, count } = await supabase
+        .from("pros")
+        .update(
+          { rge_certified: false, rge_qualifications: [], rge_number: null, rge_synced_at: now },
+          { count: "exact" }
+        )
+        .in("id", lot);
+      if (error) {
+        console.error("   ERREUR de nettoyage:", error.message);
+        process.exit(1);
+      }
+      nettoyees += count || 0;
+    }
+    console.log(`   ${nettoyees} fiche(s) ont perdu un badge RGE devenu invalide.`);
   }
 
   console.log(
