@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AdminTable, { type AdminColumn } from "@/components/admin/data-display/AdminTable";
 import AdminBadge from "@/components/admin/data-display/AdminBadge";
@@ -47,7 +47,78 @@ export default function SupportInboxClient({
     [router, searchParams]
   );
 
+  // ACTIONS DIRECTES DEPUIS LA LISTE (18/08/2026, demande Willy).
+  // Avant : il fallait ouvrir un ticket pour le fermer, soit trois clics et un
+  // aller-retour de page par ligne. Sur une vague de six publicites, c'est
+  // dix-huit clics. L'interface serveur pour changer un statut existait deja
+  // (PATCH /api/admin/support/[id]) : il n'y avait que l'affichage a faire.
+  const [enCours, demarrer] = useTransition();
+  const [selection, setSelection] = useState<Set<number>>(new Set());
+  const [traites, setTraites] = useState<Set<number>>(new Set());
+
+  const changerStatut = useCallback(
+    async (ids: number[], statut: "closed" | "resolved") => {
+      // Marquage optimiste : la ligne s'estompe tout de suite, on n'attend pas
+      // le rechargement de la page pour que le clic paraisse pris en compte.
+      setTraites((prec) => new Set([...prec, ...ids]));
+      const reponses = await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/support/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: statut }),
+          }).then((r) => r.ok)
+        )
+      );
+      const echecs = ids.filter((_, i) => !reponses[i]);
+      if (echecs.length > 0) {
+        // On ne ment pas sur le resultat : les lignes qui ont echoue
+        // redeviennent normales et le probleme est dit.
+        setTraites((prec) => {
+          const n = new Set(prec);
+          for (const id of echecs) n.delete(id);
+          return n;
+        });
+        alert(
+          `Impossible de mettre a jour ${echecs.length} ticket(s) : #${echecs.join(", #")}. Reessayez.`
+        );
+      }
+      setSelection(new Set());
+      demarrer(() => router.refresh());
+    },
+    [router]
+  );
+
+  const basculer = useCallback((id: number) => {
+    setSelection((prec) => {
+      const n = new Set(prec);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  }, []);
+
+  const toutSelectionner = useCallback(() => {
+    setSelection((prec) =>
+      prec.size === initialData.length ? new Set() : new Set(initialData.map((t) => t.id))
+    );
+  }, [initialData]);
+
   const columns: AdminColumn<SupportTicket>[] = [
+    {
+      key: "selection",
+      label: "",
+      render: (row) => (
+        <input
+          type="checkbox"
+          aria-label={`Selectionner le ticket ${row.id}`}
+          checked={selection.has(row.id)}
+          onClick={(e) => e.stopPropagation()}
+          onChange={() => basculer(row.id)}
+          className="w-4 h-4 cursor-pointer accent-[var(--admin-accent)]"
+        />
+      ),
+    },
     {
       key: "id",
       label: "#",
@@ -132,6 +203,45 @@ export default function SupportInboxClient({
         </span>
       ),
     },
+    {
+      key: "actions",
+      label: "",
+      render: (row) => {
+        if (row.status === "closed" || traites.has(row.id)) return null;
+        // stopPropagation partout : la ligne entiere ouvre le ticket, ces
+        // boutons ne doivent surtout pas declencher cette navigation.
+        return (
+          <div className="flex gap-1.5 justify-end" onClick={(e) => e.stopPropagation()}>
+            {row.status !== "resolved" ? (
+              <button
+                onClick={() => changerStatut([row.id], "resolved")}
+                disabled={enCours}
+                title="Marquer comme résolu"
+                className="px-2 py-1 text-[10px] font-semibold rounded-md transition-opacity hover:opacity-80 disabled:opacity-40"
+                style={{
+                  color: "var(--admin-success, #34d399)",
+                  background: "rgba(52,211,153,.12)",
+                }}
+              >
+                Résolu
+              </button>
+            ) : null}
+            <button
+              onClick={() => changerStatut([row.id], "closed")}
+              disabled={enCours}
+              title="Fermer sans réponse"
+              className="px-2 py-1 text-[10px] font-semibold rounded-md transition-opacity hover:opacity-80 disabled:opacity-40"
+              style={{
+                color: "var(--admin-text-secondary)",
+                background: "var(--admin-bg, rgba(255,255,255,.06))",
+              }}
+            >
+              Fermer
+            </button>
+          </div>
+        );
+      },
+    },
   ];
 
   return (
@@ -185,6 +295,42 @@ export default function SupportInboxClient({
           placeholder="Email, nom, objet…"
         />
       </div>
+
+      {/* Barre d'actions groupees : n'apparait que quand quelque chose est
+          coche, pour ne pas encombrer l'ecran le reste du temps. */}
+      {selection.size > 0 ? (
+        <div
+          className="flex items-center gap-3 mb-3 px-3 py-2 rounded-xl"
+          style={{ background: "var(--admin-card)", border: "1px solid var(--admin-accent)" }}
+        >
+          <span className="text-xs font-semibold" style={{ color: "var(--admin-text)" }}>
+            {selection.size} ticket{selection.size > 1 ? "s" : ""} sélectionné
+            {selection.size > 1 ? "s" : ""}
+          </span>
+          <button
+            onClick={() => changerStatut([...selection], "closed")}
+            disabled={enCours}
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg disabled:opacity-40"
+            style={{ background: "var(--admin-accent)", color: "#fff" }}
+          >
+            {enCours ? "En cours…" : "Fermer la sélection"}
+          </button>
+          <button
+            onClick={() => setSelection(new Set())}
+            className="text-xs"
+            style={{ color: "var(--admin-text-tertiary)" }}
+          >
+            Annuler
+          </button>
+          <button
+            onClick={toutSelectionner}
+            className="text-xs ml-auto"
+            style={{ color: "var(--admin-text-secondary)" }}
+          >
+            {selection.size === initialData.length ? "Tout décocher" : "Tout cocher"}
+          </button>
+        </div>
+      ) : null}
 
       <div
         className="rounded-xl overflow-hidden"

@@ -235,7 +235,9 @@ export async function ingestInboundEmailAsTicket(
       .from("support_tickets")
       .insert({
         source: "email",
-        status: "open",
+        // Un accuse d'absence est cree puis ferme d'emblee : il reste
+        // consultable dans "Fermes" mais n'encombre pas les ouverts.
+        status: estUneReponseAutomatique(subject) ? "closed" : "open",
         subject,
         requester_email: email,
         requester_name: name,
@@ -308,7 +310,11 @@ export async function ingestInboundEmailAsTicket(
   //    le client a répondu, balle dans notre camp ; resolved -> open + efface les
   //    horodatages de résolution/fermeture obsolètes).
   const update: Record<string, unknown> = { last_message_at: nowIso };
-  if (!created && ticket.status !== "open") {
+  // ...SAUF si le message entrant est un accuse d'absence (18/08/2026) :
+  // sans cette garde, un "je suis en conges" renvoye par un pro rouvrirait un
+  // ticket qu'on vient de fermer, et la boite se remplirait toute seule apres
+  // chaque diffusion de chantier.
+  if (!created && ticket.status !== "open" && !estUneReponseAutomatique(subject)) {
     update.status = "open";
     update.resolved_at = null;
     update.closed_at = null;
@@ -360,4 +366,39 @@ export async function updateTicketTriage(
   if (error) {
     console.error("[support] update tri échec :", error.message);
   }
+}
+
+/**
+ * Un accuse d'absence n'est pas une demande. Les pros a qui on diffuse un
+ * chantier repondent parfois automatiquement ("je suis en conges"), et chaque
+ * reponse ouvrait un ticket. Constat du 18/08/2026 : 3 des 13 tickets ouverts
+ * etaient de ce type, et ils reviennent a CHAQUE diffusion.
+ *
+ * On ne supprime rien : le ticket est cree puis ferme d'emblee, il reste donc
+ * consultable dans l'onglet "Fermes" mais n'encombre plus les ouverts.
+ *
+ * Volontairement STRICT : uniquement les formulations normalisees des
+ * logiciels de messagerie, en debut d'objet. Un client qui ecrirait
+ * "je serai absent la semaine prochaine, pouvez-vous rappeler ?" doit
+ * evidemment rester un vrai ticket.
+ */
+export function estUneReponseAutomatique(subject: string | null | undefined): boolean {
+  const s = (subject || "").trim().toLowerCase();
+  if (!s) return false;
+  const debuts = [
+    "reponse automatique",
+    "réponse automatique",
+    "automatic reply",
+    "auto-reply",
+    "autoreply",
+    "out of office",
+    "automatische antwort",
+    "risposta automatica",
+    "respuesta automatica",
+    "respuesta automática",
+    "abwesenheitsnotiz",
+  ];
+  // On accepte les prefixes de reponse/transfert ajoutes par les messageries.
+  const nu = s.replace(/^((re|rép|rep|fw|fwd|tr)\s*:\s*)+/i, "").trim();
+  return debuts.some((d) => nu.startsWith(d));
 }

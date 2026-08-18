@@ -40,7 +40,16 @@ export const getAdminTickets = cache(async (filters: AdminTicketsFilters = {}) =
       );
     }
   }
-  q = q.order("last_message_at", { ascending: false });
+  // TRI PAR URGENCE (18/08/2026). Constat : le ticket #57, une demande de
+  // suppression de fiche, est reste 11 jours sous six publicites, jusqu'a
+  // revenir sous forme de mise en demeure avec menace d'avocat. La colonne
+  // `is_legal` existait deja et ne servait qu'a afficher un badge : elle
+  // remonte desormais le ticket. Postgres classe false avant true, donc
+  // `ascending: false` met bien le legal en tete. L'activite reste le
+  // second critere.
+  q = q
+    .order("is_legal", { ascending: false, nullsFirst: false })
+    .order("last_message_at", { ascending: false });
   const from = (page - 1) * pageSize;
   q = q.range(from, from + pageSize - 1);
 
