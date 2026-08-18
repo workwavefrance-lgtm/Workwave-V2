@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProBySlug, getSimilarPros } from "@/lib/queries/pros";
+import { getProBySlug, getSimilarPros, getFicheRemplacante } from "@/lib/queries/pros";
 import { getPublishedReviewsForPro } from "@/lib/queries/reviews";
 import { getNearbyCities } from "@/lib/queries/cities";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule la
@@ -112,7 +112,15 @@ const PAYMENT_LABELS: Record<string, string> = {
 export default async function ProPage({ params }: Props) {
   const { slug } = await params;
   const pro = await getProBySlug(slug);
-  if (!pro) notFound();
+  if (!pro) {
+    // 18/08/2026 : la fiche a peut-etre ete retiree comme DOUBLON (meme
+    // entreprise, meme commune, autre etablissement). Dans ce cas on renvoie
+    // vers la fiche conservee au lieu d'afficher une erreur. Cette requete ne
+    // part QUE sur le chemin d'erreur, jamais sur une page qui existe.
+    const remplacante = await getFicheRemplacante(slug);
+    if (remplacante) permanentRedirect(`/artisan/${remplacante}`);
+    notFound();
+  }
 
   // Si pro Workwave AI (tech + business + creatif), rediriger 308 vers
   // /ai/freelance/[slug] qui a le bon layout (header AI, terminologie

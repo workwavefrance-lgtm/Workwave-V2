@@ -304,3 +304,56 @@ export async function searchPros(
 
   return paginatedQuery(q, page, pageSize);
 }
+
+/**
+ * Quand une fiche a ete retiree comme DOUBLON, retrouve la fiche conservee.
+ *
+ * 18/08/2026. Mesure : 122 447 fiches actives etaient des doublons du meme
+ * SIREN dans la MEME commune. L'INSEE recense un etablissement par service
+ * (le CCAS de Chatellerault en avait 13, dont 5 a la meme adresse) et on
+ * publiait une page par etablissement. Google y voit du contenu duplique et
+ * refuse d'indexer.
+ *
+ * Plutot que de laisser 122 447 pages en erreur, on renvoie vers la fiche
+ * conservee : un visiteur arrivant par un vieux lien tombe sur la bonne
+ * entreprise, et la redirection permanente transfere a la fiche gardee le
+ * peu de valeur accumulee par les doublons.
+ *
+ * La recherche se fait sur les 9 premiers chiffres du numero (le SIREN,
+ * commun a tous les etablissements) ET sur la commune : deux etablissements
+ * dans deux villes differentes restent deux pages legitimes.
+ *
+ * Retourne null si la fiche est inconnue, si elle a ete supprimee pour une
+ * autre raison (demande RGPD), ou s'il ne reste aucune fiche active : dans
+ * ces cas la page doit bien repondre 404.
+ */
+export async function getFicheRemplacante(slug: string): Promise<string | null> {
+  const sb = createPublicClient();
+  const { data: retiree } = await sb
+    .from("pros")
+    .select("siret, city_id, deleted_at, do_not_contact")
+    .eq("slug", slug)
+    // Une suppression RGPD porte TOUJOURS do_not_contact = true. Ces
+    // fiches-la doivent repondre 404 et surtout PAS rediriger vers un autre
+    // etablissement de la meme entreprise : la personne a demande a ne plus
+    // figurer, l'envoyer vers sa societe voisine reviendrait a la republier.
+    .eq("do_not_contact", false)
+    .not("deleted_at", "is", null)
+    .limit(1)
+    .maybeSingle();
+  if (!retiree?.siret || !retiree.city_id) return null;
+
+  const siren = String(retiree.siret).slice(0, 9);
+  if (siren.length !== 9) return null;
+
+  const { data: gardee } = await sb
+    .from("pros")
+    .select("slug")
+    .like("siret", `${siren}%`)
+    .eq("city_id", retiree.city_id)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .limit(1)
+    .maybeSingle();
+  return gardee?.slug || null;
+}
