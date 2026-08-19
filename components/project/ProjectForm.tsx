@@ -216,7 +216,15 @@ export default function ProjectForm({
   function canProceed(): boolean {
     if (step === 0) return categoryId !== null;
     if (step === 1) return cityId !== null;
-    if (step === 2) return urgency !== "" && budget !== "";
+    // 19/08/2026 : la description devient OBLIGATOIRE, et le blocage se fait
+    // ICI, sur le bouton "Continuer", jamais a l'envoi final. Raison : le
+    // formulaire est en plusieurs etapes ; une erreur serveur sur un champ
+    // d'une etape MASQUEE produisait un echec silencieux (l'utilisateur
+    // cliquait "Envoyer" et il ne se passait rien). C'est le piege qui avait
+    // fait rendre ce champ facultatif. En bloquant a l'etape, l'utilisateur
+    // voit tout de suite ce qui manque, sous les yeux.
+    if (step === 2)
+      return urgency !== "" && budget !== "" && description.trim().length >= 20;
     return true;
   }
 
@@ -430,15 +438,16 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 3 · Projet (description optionnelle + urgence + budget) */}
+      {/* ÉTAPE 3 · Projet (description OBLIGATOIRE + urgence + budget) */}
       {/* ============================================================ */}
       <div className={step === 2 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
           Votre projet
         </label>
         <p className="text-sm text-[var(--text-secondary)] mb-6">
-          Donnez quelques éléments pour aider les artisans à comprendre votre
-          besoin.
+          Plus vous êtes précis, plus les artisans qui vous rappellent sont
+          les bons. Deux phrases suffisent : ce qu&apos;il y a à faire, et
+          où.
         </p>
 
         <div className="space-y-6">
@@ -447,16 +456,13 @@ export default function ProjectForm({
               htmlFor="description"
               className="block text-sm font-medium text-[var(--text-primary)] mb-2"
             >
-              Description{" "}
-              <span className="text-[var(--text-tertiary)] font-normal">
-                (optionnelle)
-              </span>
+              Décrivez votre projet
             </label>
             <textarea
               id="description"
               name="description"
               rows={4}
-              placeholder="Type de travaux, surface, contraintes... Laissez vide si vous préférez, les artisans vous rappelleront pour préciser."
+              placeholder={"Exemple : refaire le carrelage de la salle de bain, environ 8 m\u00b2, l\u0027ancien carrelage est \u00e0 d\u00e9poser. Logement occup\u00e9."}
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value);
@@ -469,11 +475,17 @@ export default function ProjectForm({
                   : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
               }`}
             />
-            {showError("description") && (
+            {showError("description") ? (
               <p className="mt-1.5 text-sm text-red-500">
                 {showError("description")}
               </p>
-            )}
+            ) : description.trim().length > 0 && description.trim().length < 20 ? (
+              <p className="mt-1.5 text-sm text-[var(--text-tertiary)]">
+                Encore {20 - description.trim().length} caractère
+                {20 - description.trim().length > 1 ? "s" : ""} pour que les
+                artisans comprennent votre besoin.
+              </p>
+            ) : null}
           </div>
 
           <fieldset>

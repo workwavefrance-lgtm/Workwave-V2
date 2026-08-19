@@ -31,12 +31,24 @@ const projectSchema = z.object({
     .int()
     .positive("Veuillez choisir un type de travaux"),
   cityId: z.coerce.number().int().positive("Veuillez choisir une ville"),
-  // Description OPTIONNELLE : l'UI l'annonce comme telle (« Laissez vide si vous
-  // préférez, les artisans vous rappelleront pour préciser »), choix délibéré
-  // pour réduire la friction et le drop-off du tunnel. Le serveur doit donc
-  // accepter une description vide (avant : .min(20) → submit en échec SILENCIEUX
-  // quand l'user suivait l'invitation à laisser vide, erreur sur l'étape cachée).
-  description: z.string().max(5000, "Description trop longue (5000 caractères max)"),
+  // Description OBLIGATOIRE depuis le 19/08/2026 (demande Willy) : un pro a qui
+  // on demande 9,90 EUR pour un contact doit pouvoir juger sur piece. Deux
+  // projets deposes le 18/08 (Chateauroux, Mevoisins) n'avaient pas une ligne.
+  //
+  // L'echec silencieux de l'ancienne version est evite AUTREMENT : le bouton
+  // "Continuer" de l'etape 2 est desormais bloque tant que le champ n'est pas
+  // rempli, donc l'utilisateur ne peut plus atteindre l'envoi avec un champ
+  // vide. Cette regle serveur n'est plus que le filet de securite.
+  //
+  // A SURVEILLER : le tunnel etait a 18 % de completion (758 formulaires
+  // ouverts pour 134 projets soumis). Un champ obligatoire de plus fera
+  // abandonner des gens. Si le nombre de projets deposes chute nettement, le
+  // seuil de 20 caracteres est le premier levier a baisser.
+  description: z
+    .string()
+    .trim()
+    .min(20, "Décrivez votre projet en quelques mots : les artisans en ont besoin pour vous répondre")
+    .max(5000, "Description trop longue (5000 caractères max)"),
   urgency: z.enum(["today", "this_week", "this_month", "not_urgent"], {
     message: "Veuillez indiquer l'urgence",
   }),
