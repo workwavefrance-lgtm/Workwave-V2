@@ -8,10 +8,17 @@
 import puppeteer from "puppeteer-core";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const HTML = "file://" + path.resolve("marketing/reel-belgique.html");
-const OUT = path.resolve("marketing/frames-belgique");
+// Les images NE DOIVENT PAS etre ecrites sous ~/Desktop : ce dossier est
+// synchronise par iCloud, qui recree des copies "f00419 2.png" pendant que
+// le script vide le dossier. D ou l echec ENOTEMPTY du nettoyage, puis des
+// videos TRONQUEES en silence (5,9 s au lieu de 14 s le 17/08 : ffmpeg
+// s arrete a la premiere image manquante). Mesure du 20/08 : 644 fichiers
+// dans le dossier pour 420 images reelles, soit 224 doublons iCloud.
+const OUT = process.env.REEL_FRAMES_DIR || path.join(os.tmpdir(), "workwave-frames-belgique");
 const FPS = 30;
 
 // maxRetries : sur macOS, rmSync recursif echoue par intermittence en
