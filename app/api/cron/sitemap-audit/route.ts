@@ -8,6 +8,12 @@
  * (vs le vrai count en base) et alerte par mail à la moindre régression.
  *
  * Checks :
+ *  0. LE DERNIER SOUS-SITEMAP DÉCLARÉ EST-IL PLEIN ? C'est le contrôle le plus
+ *     sûr, et il ne dépend d'AUCUN comptage en base : si le dernier fichier
+ *     déclaré sert ses 45 000 adresses, la plage est saturée et des fiches
+ *     sont forcément dehors. Ajouté le 20/08/2026, jour où l'index déclarait
+ *     jusqu'à /sitemap/141.xml alors que /sitemap/142.xml servait déjà 41 158
+ *     adresses réelles : le 141 était plein, le signal était là.
  *  1. Assez de sous-sitemaps pros déclarés ? (sinon = compteur figé non re-bumpé)
  *  2. /sitemap/2.xml (cat×ville BTP) non vide ?
  *  3. /sitemap/4.xml (/ai) non vide ?
@@ -80,12 +86,23 @@ export async function GET(req: Request) {
       .in("category_id", aiIds),
   ]);
 
-  const expectedBtpSubs = Math.ceil((nonTech || 0) / PROS_PER_SITEMAP);
-  const expectedAiSubs = Math.ceil((tech || 0) / PROS_PER_SITEMAP);
+  // 🔴 Un comptage qui ECHOUE renvoie null. Avant le 20/08/2026, le `|| 0`
+  // le transformait en "0 sous-sitemap necessaire", et la comparaison
+  // "42 declares < 0 necessaires" etait fausse : le cron concluait que tout
+  // allait bien. C'est exactement ce qui s'est produit, tous les jours, alors
+  // que 54 970 fiches etaient hors sitemap. Le comptage exact sur 1,9 M de
+  // lignes filtrees par un NOT IN depasse le delai autorise. Un garde-fou qui
+  // transforme sa propre panne en "tout va bien" est pire que pas de garde-fou.
+  const comptageBtpKo = nonTech === null || nonTech === undefined;
+  const comptageAiKo = tech === null || tech === undefined;
+  const expectedBtpSubs = comptageBtpKo ? -1 : Math.ceil(nonTech / PROS_PER_SITEMAP);
+  const expectedAiSubs = comptageAiKo ? -1 : Math.ceil(tech / PROS_PER_SITEMAP);
 
   // 2) Ce que l'index DÉCLARE
   let declaredBtpSubs = -1;
   let declaredAiSubs = -1;
+  let dernierBtp = -1;
+  let dernierAi = -1;
   try {
     const idxRes = await fetch(`${BASE}/sitemap-index.xml`, {
       headers: { "User-Agent": UA },
@@ -93,30 +110,72 @@ export async function GET(req: Request) {
     });
     const idxTxt = await idxRes.text();
     const ids = [...idxTxt.matchAll(/sitemap\/(\d+)\.xml/g)].map((m) => Number(m[1]));
-    declaredBtpSubs = ids.filter((id) => id >= 100 && id < 200).length;
-    declaredAiSubs = ids.filter((id) => id >= 200).length;
+    const btpIds = ids.filter((id) => id >= 100 && id < 200);
+    const aiIdsDeclares = ids.filter((id) => id >= 200);
+    declaredBtpSubs = btpIds.length;
+    declaredAiSubs = aiIdsDeclares.length;
+    dernierBtp = btpIds.length ? Math.max(...btpIds) : -1;
+    dernierAi = aiIdsDeclares.length ? Math.max(...aiIdsDeclares) : -1;
   } catch {
     // garde -1 -> alerte ci-dessous
   }
 
-  // 3) Sous-sitemaps "builders" sensibles (ceux qui timeoutaient)
-  const [catCity, aiUrls] = await Promise.all([
+  // 3) Sous-sitemaps "builders" sensibles + LE CONTROLE DE SATURATION.
+  //
+  // Le dernier fichier declare de chaque famille doit avoir de la place. S'il
+  // sert ses 45 000 adresses, la plage est pleine et des fiches sont dehors,
+  // quoi qu'en disent les comptages. Deux requetes HTTP, zero base, aucun
+  // delai a depasser : c'est le controle le plus sur dont on dispose.
+  // On sonde AUSSI le fichier juste apres le dernier declare : s'il sert des
+  // adresses, c'est un orphelin, construit et servi mais jamais nomme.
+  const [catCity, aiUrls, pleinBtp, pleinAi, orphelinBtp, orphelinAi] = await Promise.all([
     countUrls(`${BASE}/sitemap/2.xml`),
     countUrls(`${BASE}/sitemap/4.xml`),
+    dernierBtp >= 0 ? countUrls(`${BASE}/sitemap/${dernierBtp}.xml`) : Promise.resolve(-1),
+    dernierAi >= 0 ? countUrls(`${BASE}/sitemap/${dernierAi}.xml`) : Promise.resolve(-1),
+    dernierBtp >= 0 ? countUrls(`${BASE}/sitemap/${dernierBtp + 1}.xml`) : Promise.resolve(-1),
+    dernierAi >= 0 ? countUrls(`${BASE}/sitemap/${dernierAi + 1}.xml`) : Promise.resolve(-1),
   ]);
 
   // 4) Diagnostic
   const issues: string[] = [];
-  if (declaredBtpSubs < 0) {
-    issues.push("Impossible de lire sitemap-index.xml (fetch KO).");
-  } else if (declaredBtpSubs < expectedBtpSubs) {
+
+  if (pleinBtp >= PROS_PER_SITEMAP) {
     issues.push(
-      `Compteur pros BTP périmé : ${declaredBtpSubs} sous-sitemaps déclarés < ${expectedBtpSubs} nécessaires (${nonTech} pros non-tech). → bumper proSitemapsCount dans app/sitemap.ts.`
+      `SATURATION : le dernier sous-sitemap pros declare (/sitemap/${dernierBtp}.xml) sert ses ${pleinBtp} adresses. La plage est pleine, des fiches sont forcement hors sitemap. -> augmenter NB_SITEMAPS_PROS dans lib/seo/sitemap-ids.ts.`
     );
   }
-  if (declaredAiSubs >= 0 && declaredAiSubs < expectedAiSubs) {
+  if (pleinAi >= PROS_PER_SITEMAP) {
     issues.push(
-      `Compteur pros tech périmé : ${declaredAiSubs} < ${expectedAiSubs} (${tech} pros tech). → bumper aiProSitemapsCount.`
+      `SATURATION : le dernier sous-sitemap tech declare (/sitemap/${dernierAi}.xml) sert ses ${pleinAi} adresses. -> augmenter NB_SITEMAPS_PROS_AI dans lib/seo/sitemap-ids.ts.`
+    );
+  }
+  if (orphelinBtp > 0) {
+    issues.push(
+      `ORPHELIN : /sitemap/${dernierBtp + 1}.xml sert ${orphelinBtp} adresses reelles mais n'est PAS declare dans l'index. Ces pages sont invisibles de Google.`
+    );
+  }
+  if (orphelinAi > 0) {
+    issues.push(
+      `ORPHELIN : /sitemap/${dernierAi + 1}.xml sert ${orphelinAi} adresses reelles mais n'est PAS declare dans l'index.`
+    );
+  }
+  if (comptageBtpKo || comptageAiKo) {
+    issues.push(
+      `COMPTAGE IMPOSSIBLE en base (${comptageBtpKo ? "pros BTP" : ""}${comptageBtpKo && comptageAiKo ? " et " : ""}${comptageAiKo ? "pros tech" : ""}). Le controle de completude par comptage est AVEUGLE ce matin : se fier aux controles de saturation ci-dessus.`
+    );
+  }
+
+  if (declaredBtpSubs < 0) {
+    issues.push("Impossible de lire sitemap-index.xml (fetch KO).");
+  } else if (expectedBtpSubs >= 0 && declaredBtpSubs < expectedBtpSubs) {
+    issues.push(
+      `Compteur pros BTP périmé : ${declaredBtpSubs} sous-sitemaps déclarés < ${expectedBtpSubs} nécessaires (${nonTech} pros non-tech). → augmenter NB_SITEMAPS_PROS dans lib/seo/sitemap-ids.ts.`
+    );
+  }
+  if (declaredAiSubs >= 0 && expectedAiSubs >= 0 && declaredAiSubs < expectedAiSubs) {
+    issues.push(
+      `Compteur pros tech périmé : ${declaredAiSubs} < ${expectedAiSubs} (${tech} pros tech). → augmenter NB_SITEMAPS_PROS_AI dans lib/seo/sitemap-ids.ts.`
     );
   }
   if (catCity <= 0) {
@@ -149,8 +208,11 @@ export async function GET(req: Request) {
 <h2 style="margin:0 0 12px;font-size:18px;color:#900;">🗺️ Audit sitemap · ${issues.length} problème(s)</h2>
 <ul style="font-size:14px;line-height:1.6;color:#333;">${issues.map((i) => `<li>${i}</li>`).join("")}</ul>
 <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
-<p style="font-size:12px;color:#888;">pros non-tech : ${nonTech} · tech : ${tech}<br>
-sous-sitemaps BTP déclarés : ${declaredBtpSubs}/${expectedBtpSubs} · AI : ${declaredAiSubs}/${expectedAiSubs}<br>
+<p style="font-size:12px;color:#888;">pros non-tech : ${nonTech ?? "comptage KO"} · tech : ${tech ?? "comptage KO"}<br>
+sous-sitemaps BTP déclarés : ${declaredBtpSubs}/${expectedBtpSubs < 0 ? "?" : expectedBtpSubs} · AI : ${declaredAiSubs}/${expectedAiSubs < 0 ? "?" : expectedAiSubs}<br>
+dernier BTP déclaré : /sitemap/${dernierBtp}.xml → ${pleinBtp} adresses (plein à ${PROS_PER_SITEMAP})<br>
+dernier tech déclaré : /sitemap/${dernierAi}.xml → ${pleinAi} adresses<br>
+suivant non déclaré : /sitemap/${dernierBtp + 1}.xml → ${orphelinBtp} · /sitemap/${dernierAi + 1}.xml → ${orphelinAi}<br>
 /sitemap/2 (cat×ville) : ${catCity} URLs · /sitemap/4 (/ai) : ${aiUrls} URLs</p>
 <p style="font-size:11px;color:#aaa;">Cron quotidien · /api/cron/sitemap-audit</p>
 </div></body></html>`,
@@ -166,6 +228,11 @@ sous-sitemaps BTP déclarés : ${declaredBtpSubs}/${expectedBtpSubs} · AI : ${d
       ok: issues.length === 0,
       checkedAt: new Date().toISOString(),
       counts: { nonTech, tech },
+      saturation: {
+        btp: { dernier: dernierBtp, adresses: pleinBtp, orphelinSuivant: orphelinBtp },
+        ai: { dernier: dernierAi, adresses: pleinAi, orphelinSuivant: orphelinAi },
+        limite: PROS_PER_SITEMAP,
+      },
       subSitemaps: {
         btp: { declared: declaredBtpSubs, expected: expectedBtpSubs },
         ai: { declared: declaredAiSubs, expected: expectedAiSubs },

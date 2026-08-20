@@ -35,6 +35,8 @@ export const maxDuration = 300;
 // Limites :
 // - Google : 50 000 URLs max par sitemap, 50 MB max
 // - On split tous les types pour rester confortablement sous la limite
+import { tousLesIdsDeSitemap } from "@/lib/seo/sitemap-ids";
+
 const PROS_PER_SITEMAP = 45000;
 const TOP_CITIES_FOR_LISTINGS = 300; // top villes par population pour cat x ville
 const TOP_CITIES_FOR_SPECIALTIES = 100; // top villes pour les sous-specialites
@@ -84,39 +86,19 @@ const AI_CATEGORY_IDS = AI_CATEGORY_IDS_HELPER as unknown as number[];
 // et /sitemap/N.xml pour chaque id retourne.
 // ============================================================================
 export async function generateSitemaps() {
-  // Nombre de sous-sitemaps EN DUR (déterministe). Le calcul via un count DB au
-  // build s'est révélé non fiable : le prérendu STATIQUE de l'index restait figé
-  // sur d'anciennes valeurs (count pendant le scrape) et l'entrée de cache ISR
-  // survivait aux redéploiements + purges (cf. CLAUDE.md 01/06). En figeant les
-  // valeurs, generateSitemaps() devient pur (aucun appel réseau) → résultat
-  // déterministe, plus rien à invalider.
-  // ⚠️ À BUMPER après un gros scrape :
-  //   pros : Math.ceil(pros_non_tech / 45000)   |   ai : Math.ceil(pros_tech / 45000)
-  //   01/06/2026 : 1 069 733 pros actifs → 24  ;  110 085 pros tech → 3.
-  //   08/06/2026 : 1 271 741 non-tech → 29 (marge 32) ; 510 808 tech → 12 (marge 14).
-  //   12/06/2026 : 1 779 007 non-tech (scrape domicile/personne France) → 40
-  //   (marge 48 : le scrape tourne encore, ~+80k attendus). Alerte du cron
-  //   sitemap-audit reçue le matin même : le garde-fou a fonctionné.
-  //   Marge volontaire : un sous-sitemap vide est inoffensif (Google l'ignore),
-  //   mais un sous-sitemap NON déclaré = des pros invisibles pour Google. Le
-  //   "24" figé depuis le 01/06 tronquait ~568k pros (bug détecté le 08/06).
-  const proSitemapsCount = 48;
-  const aiProSitemapsCount = 14;
-
-  const sitemaps = [
-    { id: SITEMAP_STATIC },
-    { id: SITEMAP_CAT_DEPT },
-    { id: SITEMAP_CAT_CITY },
-    { id: SITEMAP_SPECIALTY },
-    { id: SITEMAP_AI },
-  ];
-  for (let i = 0; i < proSitemapsCount; i++) {
-    sitemaps.push({ id: SITEMAP_PROS_OFFSET + i });
-  }
-  for (let i = 0; i < aiProSitemapsCount; i++) {
-    sitemaps.push({ id: SITEMAP_AI_PROS_OFFSET + i });
-  }
-  return sitemaps;
+  // La liste vient de lib/seo/sitemap-ids.ts, PARTAGEE avec l'index
+  // (app/sitemap-index.xml/route.ts). Avant le 20/08/2026, chacun calculait
+  // la sienne : celui-ci avec des nombres en dur genereux, l'index avec un
+  // comptage `estimated` en base. Les deux ont diverge, et /sitemap/142.xml
+  // (41 158 adresses) et /sitemap/211.xml (13 812) ont ete construits et
+  // servis sans jamais etre nommes dans l'index. 54 970 fiches invisibles.
+  //
+  // La fonction reste PURE (aucun appel reseau) : le calcul par requete au
+  // build s'etait revele non fiable, l'index prerendu restant fige sur de
+  // vieilles valeurs et son entree de cache survivant aux redeploiements
+  // (cf. CLAUDE.md 01/06). Pour bumper apres un gros scrape, un seul endroit
+  // a modifier : lib/seo/sitemap-ids.ts.
+  return tousLesIdsDeSitemap().map((id) => ({ id }));
 }
 
 // ============================================================================
