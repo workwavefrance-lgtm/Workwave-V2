@@ -1,8 +1,9 @@
 /**
- * Sitemap index : 1 seul URL a soumettre a Google qui pointe vers les 10
- * sub-sitemaps generes par app/sitemap.ts (via generateSitemaps).
+ * Sitemap index : la SEULE adresse a soumettre a Google. Elle pointe vers les
+ * sous-sitemaps produits par app/sitemap.ts (generateSitemaps).
  *
- * Soumettre dans Google Search Console : https://workwave.fr/sitemap-index.xml
+ * A soumettre dans Search Console : https://workwave.fr/sitemap-index.xml
+ * Ne JAMAIS soumettre un sous-sitemap individuellement (lecon du 29/04/2026).
  */
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
@@ -43,8 +44,22 @@ export async function GET() {
     .eq("is_active", true)
     .is("deleted_at", null);
 
-  const proSitemapsCount = Math.ceil((count || 0) / PROS_PER_SITEMAP);
-  const aiProSitemapsCount = Math.ceil((techCount || 0) / PROS_PER_SITEMAP);
+  // MARGE DE SECURITE (20/08/2026). Le comptage "estimated" lit les
+  // statistiques de pg_class, qui derivent apres toute grosse suppression :
+  // depuis la deduplication des 121 197 doublons, il sous-estimait le BTP de
+  // 61 687 lignes. Un seul sous-sitemap manquant a l'appel, et 45 000 fiches
+  // deviennent invisibles de Google. Mesure du jour : /sitemap/142.xml servait
+  // 41 158 adresses reelles et /sitemap/211.xml 13 812, sans etre declares,
+  // soit 54 970 fiches hors sitemap.
+  //
+  // La marge ne coute rien : un sous-sitemap au-dela des donnees repond 200
+  // avec zero adresse (verifie sur /sitemap/143.xml et /sitemap/212.xml), ce
+  // qui est inoffensif. L'asymetrie est totale : un fichier vide en trop ne
+  // fait rien, un fichier manquant coute 45 000 pages.
+  const avecMarge = (n: number | null) =>
+    n && n > 0 ? Math.ceil((n * 1.05) / PROS_PER_SITEMAP) + 2 : 0;
+  const proSitemapsCount = avecMarge(count);
+  const aiProSitemapsCount = avecMarge(techCount);
   const allIds = [
     ...FIXED_SITEMAP_IDS,
     ...Array.from(
@@ -57,7 +72,16 @@ export async function GET() {
     ),
   ];
 
-  const now = new Date().toISOString();
+  // Date de derniere modification a la JOURNEE, pas a la milliseconde.
+  // Avant (20/08/2026), c'etait `new Date().toISOString()` : a chaque
+  // regeneration du cache, les 58 enfants annoncaient tous "modifie a
+  // l'instant". Mesure : 17h20 la veille, 17h45 puis 18h23 le meme jour.
+  // Google ignore purement et simplement une date qu'il juge peu fiable, et
+  // nous perdons alors le seul moyen de lui signaler qu'un lot de fiches a
+  // reellement change. A la journee, la valeur est stable d'une lecture a
+  // l'autre et reste vraie : le parc bouge tous les jours (scrapes,
+  // enrichissements, suppressions RGPD).
+  const now = new Date().toISOString().slice(0, 10);
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allIds
