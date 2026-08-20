@@ -80,3 +80,7 @@ for (let i = 0; i < nFrames; i++) {
 }
 await browser.close();
 console.log(`OK · ${nFrames} frames dans ${OUT}`);
+// Sortie forcee : apres browser.close(), le processus Chrome garde parfois le
+// boucle d evenements de Node en vie et le script ne rend jamais la main.
+// Le rendu est termine et les images sont sur le disque : on sort.
+process.exit(0);
