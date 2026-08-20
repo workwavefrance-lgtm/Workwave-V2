@@ -14,7 +14,12 @@ const HTML = "file://" + path.resolve("marketing/reel-belgique.html");
 const OUT = path.resolve("marketing/frames-belgique");
 const FPS = 30;
 
-fs.rmSync(OUT, { recursive: true, force: true });
+// maxRetries : sur macOS, rmSync recursif echoue par intermittence en
+// ENOTEMPTY quand le dossier contient les 420 images du rendu precedent.
+// C'est ce qui produisait des videos TRONQUEES en silence le 17/08 : le
+// nettoyage echouait, ffmpeg s'arretait a la premiere image manquante et
+// sortait une video de 5,9 s au lieu de 14 s, sans erreur.
+fs.rmSync(OUT, { recursive: true, force: true, maxRetries: 20, retryDelay: 150 });
 fs.mkdirSync(OUT, { recursive: true });
 
 const browser = await puppeteer.launch({
