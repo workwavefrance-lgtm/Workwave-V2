@@ -9,6 +9,8 @@
 import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
 import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
 import { libelleNaf } from "@/lib/data/naf-labels";
+import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
+import { formatDateCreation } from "@/lib/utils/sirene";
 
 type ProForContent = {
   name: string;
@@ -17,6 +19,8 @@ type ProForContent = {
   founding_date?: string | null;
   /** Code d'activité principale (NAF rév. 2), tel que stocké par le scrape. */
   naf_code?: string | null;
+  /** Code de catégorie juridique INSEE à 4 chiffres (1000 = entreprise individuelle). */
+  forme_juridique?: string | null;
   /** Adresse de l'établissement (rue), telle que fournie par le registre. */
   address?: string | null;
   phone?: string | null;
@@ -48,6 +52,21 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   const year = getYear(pro);
   const anc = year ? new Date().getFullYear() - year : 0;
 
+  // Date de creation COMPLETE ("12 mars 2009") plutot que la seule annee.
+  // Mesure du 20/08/2026 : 24 annees distinctes pour 40 voisins, mais 300
+  // jours calendaires distincts pour 1000 fiches. C'est donc le fait gratuit
+  // le plus discriminant dont on dispose, et il couvre 93,8 % des fiches.
+  //
+  // Garde-fou : founded_year est EDITABLE par le pro dans son tableau de
+  // bord et prime sur la date Sirene. Si les deux se contredisent, on
+  // retombe sur l'annee, pour ne jamais afficher une date que le pro a
+  // lui-meme corrigee.
+  const dateSirene = formatDateCreation(pro.founding_date);
+  const anneeSirene = pro.founding_date ? Number(String(pro.founding_date).slice(0, 4)) : null;
+  const dateCreation = dateSirene && (!year || year === anneeSirene) ? dateSirene : null;
+  // "le 12 mars 2009" ou, a defaut, "2009".
+  const quand = dateCreation ? `le ${dateCreation}` : year ? String(year) : null;
+
   // Belgique : registre = Banque-Carrefour des Entreprises (BCE), pas Sirene/INSEE.
   // Obligation d'attribution de la licence BCE (art. 2.8) + signal "site belge".
   const isBE = pro.city?.department?.country === "BE";
@@ -63,6 +82,14 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   // Libellé officiel du code d'activité (table figée INSEE, aucun appel
   // exterieur, aucun cout). Present sur 2 050 350 fiches.
   const activite = libelleNaf(pro.naf_code);
+  // Forme juridique. Mesure du 20/08 sur 4 000 fiches reparties dans toute
+  // la base : 94,6 % de NOS artisans sont "entrepreneur individuel" (le
+  // fichier national de l'INSEE annonce 67 %, mais il compte toutes les
+  // entreprises, pas seulement les artisans). L'afficher partout reviendrait
+  // donc a recopier la meme phrase sur 2,3 millions de pages, c'est-a-dire a
+  // aggraver la cause mesuree de notre non-indexation. On ne la garde que
+  // sur les 5,4 % ou elle apprend quelque chose (SAS, SARL, SCI, association).
+  const forme = formeJuridiqueDistinctive(pro.forme_juridique);
 
   // ── LES FAITS PROPRES A CETTE ENTREPRISE ──
   // 17/08/2026. Mesure : deux artisans du meme metier dans la meme ville
@@ -80,10 +107,10 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   const rue = (pro.address || "").trim() || null;
   // "installée 12 rue des Lilas" / "installée à Sanary-sur-Mer" en repli.
   const situee = rue ? `installée ${rue} à ${cityName}` : `installée à ${cityName}`;
-  const depuis = year
+  const depuis = quand
     ? anc >= 1
-      ? `exerce depuis ${year}, soit ${anc} ${anc > 1 ? "ans" : "an"} d'activité`
-      : `exerce depuis ${year}`
+      ? `exerce depuis ${quand}, soit ${anc} ${anc > 1 ? "ans" : "an"} d'activité`
+      : `exerce depuis ${quand}`
     : null;
 
   // ── « À propos » : prose factuelle, unique par pro (nom/métier/ville/SIRET/année) ──
@@ -92,12 +119,15 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   ];
   const facts: string[] = [];
   if (pro.siret) facts.push(`inscrite ${registreAvecPrep} sous le ${numLabel} ${pro.siret}`);
-  if (year) facts.push(`active depuis ${year}${anc >= 1 ? ` (${anc} ${anc > 1 ? "ans" : "an"} d'activité)` : ""}`);
+  if (quand) facts.push(`active depuis ${quand}${anc >= 1 ? ` (${anc} ${anc > 1 ? "ans" : "an"} d'activité)` : ""}`);
   if (facts.length > 0) aboutParts.push(`Cette entreprise est ${facts.join(", ")}.`);
   if (activite) {
     aboutParts.push(
       `Son activité déclarée ${isBE ? "à la BCE" : "au répertoire Sirene"} est : ${activite}.`
     );
+  }
+  if (forme) {
+    aboutParts.push(`Elle est enregistrée sous la forme juridique : ${forme}.`);
   }
   aboutParts.push(
     `Pour comparer les ${catLower}s à ${cityName} et recevoir des devis gratuits, déposez votre projet sur Workwave : la mise en relation est gratuite et sans engagement.`
@@ -120,7 +150,7 @@ export function buildProContent(pro: ProForContent): ProContent | null {
     },
     {
       question: `${name} est-elle une entreprise vérifiée ?`,
-      answer: `${name} est une entreprise inscrite ${registreAvecPrep}${pro.siret ? ` (${numLabel} ${pro.siret})` : ""}${year ? `, active depuis ${year}` : ""}${activite ? `, sous l'activité « ${activite} »` : ""}. Workwave ne référence que des entreprises disposant d'un identifiant officiel valide.`,
+      answer: `${name} est une entreprise inscrite ${registreAvecPrep}${pro.siret ? ` (${numLabel} ${pro.siret})` : ""}${quand ? `, active depuis ${quand}` : ""}${activite ? `, sous l'activité « ${activite} »` : ""}. Workwave ne référence que des entreprises disposant d'un identifiant officiel valide.`,
     },
   ];
 
@@ -130,7 +160,7 @@ export function buildProContent(pro: ProForContent): ProContent | null {
     faqs.push({
       question: `Depuis combien de temps ${name} exerce-t-elle ?`,
       answer:
-        `${name} est enregistrée depuis ${year}, soit ${anc} ${anc > 1 ? "ans" : "an"} d'activité` +
+        `${name} est enregistrée depuis ${quand}, soit ${anc} ${anc > 1 ? "ans" : "an"} d'activité` +
         `${rue ? `, à l'adresse ${rue} à ${cityName}` : ` à ${cityName}`}. ` +
         `Cette date est celle ${isBE ? "de la BCE" : "du répertoire Sirene de l'INSEE"} et non une information déclarative.`,
     });

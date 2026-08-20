@@ -59,3 +59,28 @@ export function formatAgeYears(date: string | null | undefined): number | null {
   const age = currentYear - year;
   return age >= 0 ? age : null;
 }
+
+const MOIS = ["janvier","février","mars","avril","mai","juin",
+              "juillet","août","septembre","octobre","novembre","décembre"];
+
+/**
+ * Date de creation en toutes lettres : "12 mars 2009", ou null.
+ *
+ * Pourquoi la date COMPLETE et pas seulement l'annee (20/08/2026) : la cause
+ * mesuree de notre non-indexation est le texte partage entre fiches voisines.
+ * Sur un groupe de 40 artisans du meme metier dans la meme ville, on compte
+ * 24 annees de creation distinctes, mais 300 jours calendaires distincts pour
+ * 1000 fiches. La date exacte est donc le fait gratuit le PLUS discriminant
+ * dont on dispose, et il est renseigne sur 93,8 % des fiches actives.
+ */
+export function formatDateCreation(date: string | null | undefined): string | null {
+  if (!date) return null;
+  const m = String(date).slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return null;
+  const [, a, mo, j] = m;
+  const mois = MOIS[parseInt(mo, 10) - 1];
+  if (!mois) return null;
+  const jour = parseInt(j, 10);
+  if (!jour || jour > 31) return null;
+  return `${jour === 1 ? "1er" : jour} ${mois} ${a}`;
+}

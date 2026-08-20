@@ -282,3 +282,23 @@ export function libelleFormeJuridique(code: string | null | undefined): string |
   if (!code) return null;
   return CATEGORIES_JURIDIQUES[String(code).trim()] || null;
 }
+
+/**
+ * Libelle a AFFICHER, ou null quand la forme ne distingue rien.
+ *
+ * Mesure du 20/08/2026 sur 4 000 fiches reparties dans toute la base :
+ * 94,6 % de nos artisans sont "Entrepreneur individuel" (code 1000). Le
+ * fichier national de l'INSEE en annonce 67 %, mais notre base est faite
+ * d'artisans, pas d'entreprises tout venant. Afficher cette mention
+ * reviendrait donc a recopier la meme phrase sur 2,3 millions de pages, et
+ * la cause mesuree de notre non-indexation est justement le texte partage
+ * entre fiches voisines (80,4 % de recouvrement le 17/08).
+ *
+ * On ne montre donc la forme juridique que sur les 5,4 % ou elle apprend
+ * vraiment quelque chose : SAS, SARL, SCI, association, societe civile.
+ */
+export function formeJuridiqueDistinctive(code: string | null | undefined): string | null {
+  if (!code) return null;
+  if (String(code).trim() === "1000") return null;
+  return libelleFormeJuridique(code);
+}

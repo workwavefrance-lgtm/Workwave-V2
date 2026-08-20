@@ -21,8 +21,9 @@ import { truncateDescription } from "@/lib/utils/seo";
 import { getCategoryArticle } from "@/lib/utils/category-grammar";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
-import { formatEffectifRange, formatFoundingYear, formatAgeYears } from "@/lib/utils/sirene";
+import { formatEffectifRange, formatFoundingYear, formatAgeYears, formatDateCreation } from "@/lib/utils/sirene";
 import { libelleNaf } from "@/lib/data/naf-labels";
+import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
 // l'URL canonique est /ai/freelance/[slug] (design Workwave AI). Évite le
@@ -264,10 +265,18 @@ export default async function ProPage({ params }: Props) {
   // (signal d'anciennete et de taille pour Google + LLM)
   // founded_year (éditable par le pro dans son dashboard) prime sur founding_date
   // (date Sirene de l'établissement, parfois plus récente que le début d'activité).
+  // Schema.org accepte une Date complete : on la donne quand elle ne
+  // contredit pas l'annee saisie par le pro (20/08/2026). Une date exacte est
+  // une donnee structuree plus forte qu'une simple annee, et elle differencie
+  // deux etablissements voisins.
+  const dateSireneIso = pro.founding_date ? String(pro.founding_date).slice(0, 10) : null;
   if (pro.founded_year && pro.founded_year > 1800) {
-    jsonLd.foundingDate = String(pro.founded_year);
-  } else if (pro.founding_date) {
-    jsonLd.foundingDate = pro.founding_date;
+    jsonLd.foundingDate =
+      dateSireneIso && dateSireneIso.slice(0, 4) === String(pro.founded_year)
+        ? dateSireneIso
+        : String(pro.founded_year);
+  } else if (dateSireneIso) {
+    jsonLd.foundingDate = dateSireneIso;
   }
   if (pro.effectif_range) {
     const effLabel = formatEffectifRange(pro.effectif_range);
@@ -546,7 +555,7 @@ export default async function ProPage({ params }: Props) {
               plus rien pour le code "NN" (92 % des fiches), donc la carte
               "Taille de l'equipe" disparait quand la donnee manque au lieu
               d'afficher "Effectif inconnu" a l'identique partout. */}
-          {(pro.founded_year || pro.founding_date || pro.effectif_range || libelleNaf(pro.naf_code)) && (
+          {(pro.founded_year || pro.founding_date || pro.effectif_range || libelleNaf(pro.naf_code) || formeJuridiqueDistinctive(pro.forme_juridique)) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(pro.founded_year || pro.founding_date) && (() => {
                 // founded_year (édité par le pro) prime sur founding_date Sirene.
@@ -559,6 +568,14 @@ export default async function ProPage({ params }: Props) {
                   pro.founded_year && pro.founded_year > 1800
                     ? new Date().getFullYear() - pro.founded_year
                     : formatAgeYears(pro.founding_date);
+                // Date COMPLETE quand elle ne contredit pas l'année saisie par
+                // le pro. Deux voisins partagent souvent l'année, presque
+                // jamais le jour : c'est ce qui distingue leurs deux pages.
+                const dateComplete = formatDateCreation(pro.founding_date);
+                const libelle =
+                  dateComplete && formatFoundingYear(pro.founding_date) === year
+                    ? { titre: "Entreprise créée le", valeur: dateComplete }
+                    : { titre: "Entreprise créée en", valeur: year };
                 return (
                   <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
@@ -570,9 +587,9 @@ export default async function ProPage({ params }: Props) {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">Entreprise créée en</p>
+                      <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">{libelle.titre}</p>
                       <p className="text-sm font-semibold text-[var(--text-primary)]">
-                        {year}
+                        {libelle.valeur}
                         {age !== null && age >= 1 && (
                           <span className="text-[var(--text-secondary)] font-normal"> · {age} {age > 1 ? "ans" : "an"} d&apos;activité</span>
                         )}
@@ -615,6 +632,27 @@ export default async function ProPage({ params }: Props) {
                     <p className="text-sm font-semibold text-[var(--text-primary)]">
                       {libelleNaf(pro.naf_code)}
                       <span className="text-[var(--text-tertiary)] font-normal text-xs"> · code {pro.naf_code}</span>
+                    </p>
+                  </div>
+                </div>
+              )}
+              {/* FORME JURIDIQUE (19/08/2026). Renseignee pour 100 % des
+                  entreprises au registre. 47 % sont "entrepreneur individuel",
+                  donc elle ne distingue deux voisins qu'une fois sur deux :
+                  c'est un apport modeste, mais c'est la derniere donnee
+                  gratuite disponible sur l'ensemble de la base. */}
+              {formeJuridiqueDistinctive(pro.forme_juridique) && (
+                <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
+                    <svg className="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-4h6v4" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">Forme juridique</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      {formeJuridiqueDistinctive(pro.forme_juridique)}
+                      <span className="text-[var(--text-tertiary)] font-normal text-xs"> · INSEE</span>
                     </p>
                   </div>
                 </div>

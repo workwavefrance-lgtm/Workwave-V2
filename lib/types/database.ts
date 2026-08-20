@@ -121,6 +121,8 @@ export type Pro = {
   photos: string[];
   source: "sirene" | "pagesjaunes" | "manual" | "ai_signup" | "bce";
   naf_code: string | null;
+  /** Categorie juridique INSEE a 4 chiffres (1000 = entrepreneur individuel). */
+  forme_juridique: string | null;
   created_at: string;
   updated_at: string;
   // Réclamation
