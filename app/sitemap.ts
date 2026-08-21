@@ -772,7 +772,7 @@ type ProSitemapRow = {
 async function withSitemapRetry<T>(
   run: () => PromiseLike<{ data: T; error: { message: string } | null }>,
   label: string,
-  retries = 4
+  retries = 6
 ): Promise<T> {
   let lastErr = "";
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -784,7 +784,12 @@ async function withSitemapRetry<T>(
         error.message
       );
     if (!transient || attempt === retries) break;
-    await new Promise((r) => setTimeout(r, attempt * 2500));
+    // Attente progressive plafonnee a 30 s : 5, 10, 15, 20, 25 s, soit
+    // 75 s au total. L'ancienne cadence (2,5 s a 7,5 s, 15 s en tout) ne
+    // laissait pas a la base le temps de souffler quand plusieurs
+    // sous-sitemaps se construisaient en meme temps, et le deploiement du
+    // 21/08/2026 a echoue pour cette raison.
+    await new Promise((r) => setTimeout(r, Math.min(attempt * 5000, 30000)));
   }
   throw new Error(`${label} : ${lastErr}`);
 }

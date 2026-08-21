@@ -26,6 +26,17 @@ const nextConfig: NextConfig = {
   // 6 Mo : les 5 Mo autorises par l'application, plus le reste du formulaire.
   experimental: {
     serverActions: { bodySizeLimit: "6mb" },
+    // Nombre de processus de generation statique au BUILD (aucun effet a
+    // l'execution). Par defaut Next en lance un par coeur moins un, soit 7
+    // sur le VPS. Chacun construit un sous-sitemap qui enchaine 45 requetes
+    // Supabase : sept en parallele saturent la base, et Postgres annule des
+    // requetes qui prennent pourtant 200 ms a vide.
+    //
+    // Constate le 21/08/2026 : le deploiement echoue sur /sitemap/104.xml
+    // avec "canceling statement due to statement timeout", alors que la meme
+    // requete mesuree seule met 204 ms par millier de lignes, soit 9 s pour
+    // les 45 000. Ce n'est pas la requete qui est lente, c'est la rafale.
+    cpus: 2,
   },
   staticPageGenerationTimeout: 180,
   // Compression deleguee au proxy (Caddy/Traefik de Coolify), qui sait faire du
