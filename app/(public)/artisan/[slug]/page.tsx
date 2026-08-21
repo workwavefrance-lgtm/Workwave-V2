@@ -31,7 +31,7 @@ import { libelleNaf } from "@/lib/data/naf-labels";
 // dependre de l'analyse statique de Next. Le rendu serveur reste actif, donc
 // les figures, les legendes et les textes alternatifs sont bien dans le HTML
 // que Google recoit.
-const ProGallery = dynamic(() => import("@/components/pro/ProGallery"));
+import ProGallery from "@/components/pro/ProGallery";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
@@ -252,6 +252,20 @@ export default async function ProPage({ params }: Props) {
     }
   };
 
+  // Une photo est "du pro" si elle vient de NOTRE compartiment de stockage,
+  // c'est-a-dire s'il l'a lui-meme envoyee depuis son tableau de bord. Celles
+  // de places.googleapis.com viennent de l'enrichissement Google Places et
+  // sont le plus souvent deposees par des CLIENTS : on ne peut rien affirmer
+  // sur leur auteur. Mesure du 21/08/2026 : 665 photos sur 724 sont dans ce
+  // cas, reparties sur 182 fiches dont aucune n'est reclamee.
+  const estDuPro = (url: string) => {
+    try {
+      return new URL(url).hostname.endsWith(".supabase.co");
+    } catch {
+      return false;
+    }
+  };
+
   const photos = Array.isArray(pro.photos)
     ? pro.photos.filter(
         (url): url is string =>
@@ -294,7 +308,17 @@ export default async function ProPage({ params }: Props) {
     return typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
   };
 
-  const photosPourSchema = photos.map((url) => ({ url, legende: legendeDe(url) }));
+  // On ne declare a Google QUE les photos du pro : celles de Google Places
+  // ont des URL signees qui EXPIRENT (403 constates dans les journaux du
+  // 21/08), et donner a Google des adresses qui cesseront de repondre est
+  // contre-productif.
+  // On ne parle de "ses chantiers" que si TOUTES les photos viennent du pro.
+  // Un melange rendrait la phrase fausse pour une partie d'entre elles.
+  const toutesDuPro = photos.length > 0 && photos.every(estDuPro);
+
+  const photosPourSchema = photos
+    .filter(estDuPro)
+    .map((url) => ({ url, legende: legendeDe(url) }));
 
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -689,15 +713,27 @@ export default async function ProPage({ params }: Props) {
                 id="titre-chantiers"
                 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-1"
               >
-                {photos.length > 1 ? "Ses chantiers" : "Son chantier"}
+                {toutesDuPro
+                  ? photos.length > 1
+                    ? "Ses chantiers"
+                    : "Son chantier"
+                  : "Photos"}
               </h2>
               <p className="text-sm text-[var(--text-secondary)] mb-4">
-                {photos.length > 1
-                  ? `${photos.length} réalisations photographiées par l'entreprise.`
-                  : "Une réalisation photographiée par l'entreprise."}
+                {toutesDuPro
+                  ? photos.length > 1
+                    ? `${photos.length} réalisations photographiées par l'entreprise.`
+                    : "Une réalisation photographiée par l'entreprise."
+                  : photos.length > 1
+                    ? `${photos.length} photos de cet établissement.`
+                    : "Une photo de cet établissement."}
               </p>
               <ProGallery
-                photos={photos.map((url) => ({ url, legende: legendeDe(url) }))}
+                photos={photos.map((url) => ({
+                  url,
+                  legende: legendeDe(url),
+                  duPro: estDuPro(url),
+                }))}
                 nomPro={pro.name}
                 metier={pro.category?.name?.toLowerCase() || null}
                 ville={pro.city?.name || null}

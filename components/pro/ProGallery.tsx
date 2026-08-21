@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
-export type PhotoRealisation = { url: string; legende: string | null };
+export type PhotoRealisation = {
+  url: string;
+  legende: string | null;
+  /** Vrai si le pro a lui-meme envoye cette photo. Faux pour les photos
+   *  d'enrichissement Google Places, dont l'auteur nous est inconnu. */
+  duPro: boolean;
+};
 
 /**
  * Bande defilante des realisations d'un pro, avec agrandissement au clic.
@@ -44,8 +50,16 @@ export default function ProGallery({
   // Texte alternatif : la legende du pro d'abord, puis le contexte. C'est le
   // seul texte de la fiche que personne d'autre ne possede, et c'est ce que
   // Google Images lit.
+  // Le texte alternatif ne revendique un AUTEUR que pour les photos que le
+  // pro a lui-meme envoyees. Mesure du 21/08/2026 : sur 724 photos en base,
+  // 665 viennent de Google Places, deposees le plus souvent par des CLIENTS,
+  // sur 182 fiches dont aucune n'est reclamee. Ecrire "chantier realise par"
+  // sur ces photos serait une affirmation d'auteur fausse, servie a Google.
   const texteAlternatif = (p: PhotoRealisation, i: number) => {
     const lieu = ville ? ` à ${ville}${departement ? ` (${departement})` : ""}` : "";
+    if (!p.duPro) {
+      return `${nomPro}, ${metier || "professionnel"}${lieu}, photo ${i + 1}`;
+    }
     const contexte = `Chantier de ${metier || "professionnel"} réalisé par ${nomPro}${lieu}`;
     return p.legende ? `${p.legende}. ${contexte}` : `${contexte}, photo ${i + 1}`;
   };
@@ -119,14 +133,29 @@ export default function ProGallery({
       <dialog
         ref={dialogue}
         onClose={() => setOuverte(null)}
-        onClick={(e) => {
-          if (e.target === dialogue.current) setOuverte(null);
-        }}
         aria-label="Photo agrandie"
         className="backdrop:bg-black/90 bg-transparent p-0 m-0 max-w-none max-h-none w-full h-full"
       >
+        {/* Le gestionnaire de fermeture est porte par le div ci-dessous et
+            compare a currentTarget, PAS par le dialogue. Ce div le recouvre au
+            pixel pres (w-full h-full sur un dialogue sans marge ni bordure),
+            donc un vrai clic humain a toujours ce div pour cible et jamais le
+            dialogue. Verification du 21/08/2026 : un test par element.click()
+            passait, parce qu'un clic synthetique vise le dialogue ; un clic par
+            coordonnees echouait. La sonde trompait le test. */}
         {active && (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-6">
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setOuverte(null);
+            }}
+            /* L'assombrissement est porte ICI et pas seulement par le
+               pseudo-element ::backdrop : celui-ci vit dans la couche
+               superieure du navigateur, ou son rendu depend du compositeur.
+               Le porter sur le div garantit le fond sombre partout, et fait
+               coincider la zone visiblement "hors photo" avec la zone qui
+               ferme au clic. */
+            className="w-full h-full bg-black/90 flex flex-col items-center justify-center gap-4 p-6"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={active.url}
