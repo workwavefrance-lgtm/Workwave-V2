@@ -160,9 +160,17 @@ export async function GET(req: Request) {
       `ORPHELIN : /sitemap/${dernierAi + 1}.xml sert ${orphelinAi} adresses reelles mais n'est PAS declare dans l'index.`
     );
   }
-  if (comptageBtpKo || comptageAiKo) {
+  // Un comptage indisponible n'alerte PAS a lui seul. Le comptage exact du
+  // parc BTP (1,9 M de lignes filtrees par un NOT IN) depasse le delai
+  // autorise a peu pres tous les jours : en faire une alerte quotidienne
+  // reviendrait a noyer les vraies. Les controles de saturation et
+  // d'orphelin ci-dessus mesurent la REALITE servie et suffisent.
+  // On n'alerte que si l'on est aveugle des DEUX cotes a la fois.
+  const aveugle =
+    (comptageBtpKo || comptageAiKo) && pleinBtp < 0 && pleinAi < 0 && orphelinBtp < 0 && orphelinAi < 0;
+  if (aveugle) {
     issues.push(
-      `COMPTAGE IMPOSSIBLE en base (${comptageBtpKo ? "pros BTP" : ""}${comptageBtpKo && comptageAiKo ? " et " : ""}${comptageAiKo ? "pros tech" : ""}). Le controle de completude par comptage est AVEUGLE ce matin : se fier aux controles de saturation ci-dessus.`
+      `AVEUGLE : ni le comptage en base ni la lecture des sous-sitemaps n'ont abouti. Aucun controle de completude n'a pu s'executer ce matin.`
     );
   }
 
@@ -208,7 +216,7 @@ export async function GET(req: Request) {
 <h2 style="margin:0 0 12px;font-size:18px;color:#900;">🗺️ Audit sitemap · ${issues.length} problème(s)</h2>
 <ul style="font-size:14px;line-height:1.6;color:#333;">${issues.map((i) => `<li>${i}</li>`).join("")}</ul>
 <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
-<p style="font-size:12px;color:#888;">pros non-tech : ${nonTech ?? "comptage KO"} · tech : ${tech ?? "comptage KO"}<br>
+<p style="font-size:12px;color:#888;">pros non-tech : ${nonTech ?? "comptage indisponible (normal, non bloquant)"} · tech : ${tech ?? "comptage indisponible"}<br>
 sous-sitemaps BTP déclarés : ${declaredBtpSubs}/${expectedBtpSubs < 0 ? "?" : expectedBtpSubs} · AI : ${declaredAiSubs}/${expectedAiSubs < 0 ? "?" : expectedAiSubs}<br>
 dernier BTP déclaré : /sitemap/${dernierBtp}.xml → ${pleinBtp} adresses (plein à ${PROS_PER_SITEMAP})<br>
 dernier tech déclaré : /sitemap/${dernierAi}.xml → ${pleinAi} adresses<br>
