@@ -13,6 +13,20 @@ const nextConfig: NextConfig = {
   // timeout par défaut de 60s/page statique au build (surtout en local :
   // latence machine→Supabase × nombreux round-trips). 180s laisse la marge
   // sans masquer un vrai problème. Vercel build largement sous cette limite.
+  // Taille maximale d'un envoi de formulaire vers une Server Action.
+  // Next.js plafonne a 1 Mo par defaut, alors que le code du tableau de bord
+  // accepte des photos jusqu'a 5 Mo (MAX_PHOTO_SIZE dans
+  // app/pro/dashboard/fiche/actions.ts) : la verification de taille de
+  // l'application n'etait donc JAMAIS atteinte, le cadre rejetait avant.
+  // Constate en production le 21/08/2026 : le pro « Elagage precis », arrive
+  // le matin meme, a recu deux pages d'erreur a 10h20 et 10h21 en enregistrant
+  // sa fiche (« Body exceeded 1 MB limit » dans les journaux). Il a contourne
+  // seul, mais sur 56 pros reclames on ne peut pas se permettre d'en perdre un
+  // sur un envoi de photo.
+  // 6 Mo : les 5 Mo autorises par l'application, plus le reste du formulaire.
+  experimental: {
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   staticPageGenerationTimeout: 180,
   // Compression deleguee au proxy (Caddy/Traefik de Coolify), qui sait faire du
   // brotli — ~25 % plus efficace que le gzip de Next. Sur Vercel c'etait deja

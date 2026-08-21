@@ -284,7 +284,23 @@ export default function FicheEditor({ categories }: Props) {
     }));
   }
 
+  // Le poids est verifie AVANT l'envoi. Sans ce controle, le pro televerse,
+  // attend cinq secondes, puis lit « Erreur inattendue lors de l'upload » sans
+  // savoir que sa photo est trop lourde. Constate en production le 21/08/2026 :
+  // le pro « Elagage precis », arrive le matin meme, a echoue deux fois de
+  // suite a 10h20 et 10h21 avant de contourner seul.
+  // Ces plafonds doivent rester alignes sur MAX_LOGO_SIZE et MAX_PHOTO_SIZE
+  // dans app/pro/dashboard/fiche/actions.ts, et rester SOUS la limite
+  // serverActions.bodySizeLimit de next.config.ts.
+  const MO = 1024 * 1024;
+  const trop = (file: File, plafondMo: number) =>
+    file.size > plafondMo * MO
+      ? `Cette image pèse ${(file.size / MO).toFixed(1)} Mo, le maximum est de ${plafondMo} Mo. Réduisez-la ou choisissez-en une autre.`
+      : null;
+
   async function handleLogoUpload(file: File) {
+    const souci = trop(file, 2);
+    if (souci) { setLogoError(souci); return; }
     setLogoPending(true);
     setLogoError(null);
     try {
@@ -297,13 +313,15 @@ export default function FicheEditor({ categories }: Props) {
         setLogoError(result.error || "Erreur lors de l'upload");
       }
     } catch {
-      setLogoError("Erreur inattendue lors de l'upload");
+      setLogoError("L'envoi a échoué. Si l'image est lourde, réduisez-la (2 Mo maximum) et réessayez.");
     } finally {
       setLogoPending(false);
     }
   }
 
   async function handlePhotoUpload(file: File) {
+    const souci = trop(file, 5);
+    if (souci) { setPhotoError(souci); return; }
     setPhotoPending(true);
     setPhotoError(null);
     try {
@@ -316,7 +334,7 @@ export default function FicheEditor({ categories }: Props) {
         setPhotoError(result.error || "Erreur lors de l'upload");
       }
     } catch {
-      setPhotoError("Erreur inattendue lors de l'upload");
+      setPhotoError("L'envoi a échoué. Si l'image est lourde, réduisez-la (5 Mo maximum) et réessayez.");
     } finally {
       setPhotoPending(false);
     }
