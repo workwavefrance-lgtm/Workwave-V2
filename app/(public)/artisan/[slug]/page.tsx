@@ -234,8 +234,29 @@ export default async function ProPage({ params }: Props) {
   // lever d'erreur, et les suppressions de photos renverraient "succes"
   // sans rien supprimer). Les legendes vivent donc a cote, dans
   // `photo_captions`.
+  // Domaines autorises pour next/image. Ils DOIVENT rester alignes sur
+  // next.config.ts images.remotePatterns : next/image JETTE sur un domaine
+  // non declare, et une exception au rendu d'un composant serveur produit
+  // une 500 mise en cache TRENTE JOURS.
+  //
+  // Mesure du 21/08/2026, avant d'ecrire ce filtre : sur 724 photos en base,
+  // 665 viennent de places.googleapis.com (enrichissement Google Places) et
+  // 59 seulement de notre compartiment. Un filtre restreint au seul
+  // compartiment aurait supprime 92 % des photos du site, en silence.
+  const hoteAutorise = (url: string) => {
+    try {
+      const h = new URL(url).hostname;
+      return h.endsWith(".supabase.co") || h === "places.googleapis.com";
+    } catch {
+      return false;
+    }
+  };
+
   const photos = Array.isArray(pro.photos)
-    ? pro.photos.filter((url): url is string => typeof url === "string" && url.startsWith("http"))
+    ? pro.photos.filter(
+        (url): url is string =>
+          typeof url === "string" && url.startsWith("https://") && hoteAutorise(url)
+      )
     : [];
 
   // Couverture envoyee par le pro. JAMAIS fabriquee a partir des photos de
@@ -246,8 +267,16 @@ export default async function ProPage({ params }: Props) {
   // La colonne peut ne pas encore exister en base au moment du deploiement
   // (migration 2026-08-21) : la valeur est alors absente et la fiche affiche
   // simplement le fond calme, sans la moindre erreur.
+  // On n'accepte QUE les URL de notre propre compartiment de stockage.
+  // Raison : next/image JETTE une exception sur une source dont le domaine
+  // n'est pas autorise dans next.config, et une exception au rendu d'un
+  // composant serveur produit une 500 qui reste en cache TRENTE JOURS. Une
+  // valeur heritee ou saisie a la main pointant ailleurs mettrait la fiche
+  // par terre sans qu'on s'en apercoive.
   const coverUrl =
-    typeof pro.cover_url === "string" && pro.cover_url.startsWith("http")
+    typeof pro.cover_url === "string" &&
+    pro.cover_url.startsWith("https://") &&
+    hoteAutorise(pro.cover_url)
       ? pro.cover_url
       : null;
 
