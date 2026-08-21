@@ -243,10 +243,14 @@ export default async function ProPage({ params }: Props) {
   // 665 viennent de places.googleapis.com (enrichissement Google Places) et
   // 59 seulement de notre compartiment. Un filtre restreint au seul
   // compartiment aurait supprime 92 % des photos du site, en silence.
+  // Ces deux hotes sont EXACTEMENT ceux declares dans next.config.ts
+  // images.remotePatterns. Un endsWith(".supabase.co") serait plus permissif
+  // que la configuration : next/image jetterait sur un autre projet Supabase,
+  // et une exception au rendu produit une 500 en cache trente jours.
+  const HOTES_IMAGES = ["eifypjlyzgfpunxrouwo.supabase.co", "places.googleapis.com"];
   const hoteAutorise = (url: string) => {
     try {
-      const h = new URL(url).hostname;
-      return h.endsWith(".supabase.co") || h === "places.googleapis.com";
+      return HOTES_IMAGES.includes(new URL(url).hostname);
     } catch {
       return false;
     }
@@ -480,7 +484,7 @@ export default async function ProPage({ params }: Props) {
         {coverUrl ? (
           <Image
             src={coverUrl}
-            alt={`Chantier de ${pro.category?.name?.toLowerCase() || "professionnel"} realise par ${pro.name}${pro.city ? ` a ${pro.city.name}` : ""}`}
+            alt={`${isServiceVertical ? "Intervention" : "Chantier"} de ${pro.category?.name?.toLowerCase() || "professionnel"} réalisé par ${pro.name}${pro.city ? ` à ${pro.city.name}` : ""}`}
             fill
             sizes="(max-width: 1024px) 100vw, 1024px"
             className="object-cover"
@@ -714,12 +718,19 @@ export default async function ProPage({ params }: Props) {
                 className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-1"
               >
                 {toutesDuPro
-                  ? photos.length > 1
-                    ? "Ses chantiers"
-                    : "Son chantier"
+                  ? isServiceVertical
+                    ? photos.length > 1
+                      ? "Ses interventions"
+                      : "Son intervention"
+                    : photos.length > 1
+                      ? "Ses chantiers"
+                      : "Son chantier"
                   : "Photos"}
               </h2>
               <p className="text-sm text-[var(--text-secondary)] mb-4">
+                {/* "Chantier" ne veut rien dire pour une femme de menage ou
+                    une garde d'enfants : le vocabulaire suit le vertical, qui
+                    est deja calcule plus haut pour l'appel a l'action. */}
                 {toutesDuPro
                   ? photos.length > 1
                     ? `${photos.length} réalisations photographiées par l'entreprise.`

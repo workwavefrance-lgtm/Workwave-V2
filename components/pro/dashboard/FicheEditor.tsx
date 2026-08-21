@@ -242,7 +242,18 @@ export default function FicheEditor({ categories }: Props) {
       : {})
   );
   const [legendeEnregistree, setLegendeEnregistree] = useState<string | null>(null);
-  const [legendeErreur, setLegendeErreur] = useState<string | null>(null);
+  // Erreur PAR PHOTO : un message global serait efface par le succes de la
+  // legende suivante, et le pro ne saurait pas laquelle a echoue.
+  const [legendeErreurs, setLegendeErreurs] = useState<Record<string, string>>({});
+  // Dernieres valeurs REELLEMENT enregistrees. Se comparer a la valeur figee
+  // au chargement rendait impossible d'EFFACER une legende : on la saisissait,
+  // on l'enregistrait, on la vidait, et la comparaison "vide contre vide
+  // d'origine" sortait avant d'ecrire. La suppression ne partait jamais.
+  const dernieresLegendes = useRef<Record<string, string>>(
+    (pro.photo_captions && typeof pro.photo_captions === "object" && !Array.isArray(pro.photo_captions)
+      ? { ...(pro.photo_captions as Record<string, string>) }
+      : {}) as Record<string, string>
+  );
   const photoInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const formTopRef = useRef<HTMLDivElement>(null);
@@ -369,20 +380,31 @@ export default function FicheEditor({ categories }: Props) {
   /** Enregistre la legende d'une photo quand le champ perd le focus. */
   async function handleLegendeBlur(url: string) {
     const valeur = (legendes[url] || "").trim();
-    const ancienne = ((pro.photo_captions as Record<string, string> | null) || {})[url] || "";
-    if (valeur === ancienne.trim()) return;
+    if (valeur === (dernieresLegendes.current[url] || "").trim()) return;
     const fd = new FormData();
     fd.append("url", url);
     fd.append("legende", valeur);
-    const result = await saveProPhotoCaption({} as UploadState, fd);
-    if (result.success) {
-      setLegendeErreur(null);
-      setLegendeEnregistree(url);
-      window.setTimeout(() => setLegendeEnregistree((u) => (u === url ? null : u)), 2200);
-    } else {
-      // Un echec silencieux ferait croire au pro que sa legende est
-      // enregistree alors qu'elle est perdue des qu'il quitte la page.
-      setLegendeErreur(result.error || "Légende non enregistrée. Réessayez.");
+    try {
+      const result = await saveProPhotoCaption({} as UploadState, fd);
+      if (result.success) {
+        dernieresLegendes.current[url] = valeur;
+        setLegendeErreurs((prev) => {
+          const suite = { ...prev };
+          delete suite[url];
+          return suite;
+        });
+        setLegendeEnregistree(url);
+        window.setTimeout(() => setLegendeEnregistree((u) => (u === url ? null : u)), 2200);
+      } else {
+        // Un echec silencieux ferait croire au pro que sa legende est
+        // enregistree alors qu'elle est perdue des qu'il quitte la page.
+        setLegendeErreurs((prev) => ({ ...prev, [url]: result.error || "Légende non enregistrée. Réessayez." }));
+      }
+    } catch {
+      // Une action serveur peut REJETER (reseau coupe, session expiree) :
+      // sans ce filet, la promesse partait en erreur non rattrapee et la
+      // legende disparaissait sans un mot.
+      setLegendeErreurs((prev) => ({ ...prev, [url]: "Enregistrement impossible. Vérifiez votre connexion et réessayez." }));
     }
   }
 
@@ -417,6 +439,7 @@ export default function FicheEditor({ categories }: Props) {
         delete suite[url];
         return suite;
       });
+      delete dernieresLegendes.current[url];
     }
     setDeletingPhoto(null);
   }
@@ -838,18 +861,40 @@ export default function FicheEditor({ categories }: Props) {
                           type="text"
                           maxLength={160}
                           value={legendes[url] ?? ""}
-                          onChange={(e) =>
-                            setLegendes((prev) => ({ ...prev, [url]: e.target.value }))
-                          }
+                          onChange={(e) => {
+                            setLegendes((prev) => ({ ...prev, [url]: e.target.value }));
+                            // Sinon "Légende enregistrée." reste affiche
+                            // pendant que le pro retape par-dessus.
+                            setLegendeEnregistree((u) => (u === url ? null : u));
+                          }}
                           onBlur={() => handleLegendeBlur(url)}
+                          onKeyDown={(e) => {
+                            // Ce champ vit DANS le formulaire du profil :
+                            // sans ce garde, la touche Entree soumettrait
+                            // toute la fiche au lieu d'enregistrer la
+                            // legende. On force plutot la sortie du champ,
+                            // qui declenche l'enregistrement.
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
                           placeholder="Décrivez ce chantier en une phrase"
                           aria-label="Légende de cette réalisation"
                           className="w-full text-sm bg-transparent border border-[var(--border-color)] rounded-lg px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-none transition-colors"
                         />
-                        <p className="text-[11px] text-[var(--text-tertiary)] mt-1.5">
-                          {legendeEnregistree === url
-                            ? "Légende enregistrée."
-                            : `${(legendes[url] ?? "").length}/160 caractères`}
+                        <p
+                          className={`text-[11px] mt-1.5 ${
+                            legendeErreurs[url]
+                              ? "text-red-500"
+                              : "text-[var(--text-tertiary)]"
+                          }`}
+                        >
+                          {legendeErreurs[url]
+                            ? legendeErreurs[url]
+                            : legendeEnregistree === url
+                              ? "Légende enregistrée."
+                              : `${(legendes[url] ?? "").length}/160 caractères`}
                         </p>
                       </div>
                       <button
@@ -865,8 +910,6 @@ export default function FicheEditor({ categories }: Props) {
                   ))}
                 </ul>
               )}
-
-              {legendeErreur && <p className="text-xs text-red-500">{legendeErreur}</p>}
 
               {photos.length > 0 && (
                 <p className="text-xs text-[var(--text-tertiary)] leading-relaxed border-l-2 border-[var(--border-color)] pl-3">

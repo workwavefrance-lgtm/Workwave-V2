@@ -330,20 +330,27 @@ export async function uploadProLogo(
     .from("pro-logos")
     .getPublicUrl(fileName);
 
-  // Supprimer l'ancien logo si existant
+  const { error: updateError } = await admin
+    .from("pros")
+    .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+
+  if (updateError) {
+    // On ne laisse pas un fichier orphelin dans le compartiment.
+    await admin.storage.from("pro-logos").remove([fileName]);
+    return { error: "Erreur lors de la mise à jour" };
+  }
+
+  // L'ancien logo n'est supprime QU'APRES le succes de l'ecriture (21/08/2026).
+  // Il l'etait avant : si la mise a jour echouait, la fiche continuait de
+  // pointer vers un fichier qui venait d'etre efface, et le pro se retrouvait
+  // avec un logo casse sur sa page publique comme dans son tableau de bord.
   if (pro.logo_url) {
     const oldPath = pro.logo_url.split("/pro-logos/")[1];
     if (oldPath) {
       await admin.storage.from("pro-logos").remove([oldPath]);
     }
   }
-
-  const { error: updateError } = await admin
-    .from("pros")
-    .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
-    .eq("id", pro.id);
-
-  if (updateError) return { error: "Erreur lors de la mise à jour" };
 
   // Pas de revalidatePath sur /pro/dashboard/fiche : le state client gere
   // deja l'affichage du nouveau logo (setLogoUrl). Revalider le dashboard ici

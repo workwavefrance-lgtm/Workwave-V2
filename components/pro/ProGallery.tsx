@@ -103,8 +103,12 @@ export default function ProGallery({
     <>
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
+          {/* Aucune max-width sur les figures : elle recadrait les photos
+              PAYSAGE, exactement le defaut que cette refonte visait a
+              supprimer. A 260 px de haut, une photo en 16/9 fait 462 px de
+              large, ce qui reste raisonnable dans une bande qui defile. */}
           {photos.map((p, i) => (
-            <figure key={p.url} className="m-0 shrink-0 snap-start max-w-[340px]">
+            <figure key={p.url} className="m-0 shrink-0 snap-start">
               <button
                 type="button"
                 onClick={() => setOuverte(i)}
@@ -116,7 +120,12 @@ export default function ProGallery({
                   alt={texteAlternatif(p, i)}
                   width={520}
                   height={390}
-                  sizes="(max-width: 640px) 70vw, 380px"
+                  /* Fourchette REELLE des largeurs rendues : a hauteur
+                     fixe, une photo portrait fait environ 120 px de large et
+                     une photo 16/9 environ 460 px. Declarer 70vw faisait
+                     demander des images de 640 px pour des vignettes de
+                     150 px, soit de l'octet paye pour rien sous le crawl. */
+                  sizes="(max-width: 640px) 45vw, 460px"
                   className="h-[220px] sm:h-[260px] w-auto object-cover"
                 />
               </button>
@@ -156,11 +165,19 @@ export default function ProGallery({
                ferme au clic. */
             className="w-full h-full bg-black/90 flex flex-col items-center justify-center gap-4 p-6"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            {/* Passage par l'optimiseur d'images plutot que le fichier
+                d'origine : une photo envoyee par un pro peut peser 5 Mo, et
+                la servir telle quelle a chaque agrandissement gaspille la
+                bande passante du visiteur comme la notre. `unoptimized` est
+                volontairement absent. */}
+            <Image
               src={active.url}
               alt={texteAlternatif(active, ouverte ?? 0)}
-              className="max-w-full max-h-[76vh] object-contain rounded-xl"
+              width={1400}
+              height={1400}
+              sizes="(max-width: 640px) 92vw, 76vh"
+              className="max-w-full max-h-[76vh] w-auto h-auto object-contain rounded-xl"
+              priority
             />
             {active.legende && (
               <p className="text-white text-center text-[15px] leading-snug max-w-2xl">
