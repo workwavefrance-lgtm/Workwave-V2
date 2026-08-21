@@ -130,7 +130,7 @@ export default async function AiEnDashboardProfilePage({
               <img
                 src={pro.logo_url}
                 alt=""
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             ) : (
               <span

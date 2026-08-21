@@ -81,7 +81,8 @@ export default function TopProCard({
             alt={`Logo ${pro.name}`}
             width={56}
             height={56}
-            className="w-14 h-14 rounded-full object-cover border border-[var(--card-border)] shrink-0"
+            /* object-contain : un logo non carre etait decoupe (cf. fiche pro). */
+            className="w-14 h-14 rounded-full object-contain bg-white dark:bg-[#FAFAFA] p-0.5 border border-[var(--card-border)] shrink-0"
           />
         ) : (
           <div

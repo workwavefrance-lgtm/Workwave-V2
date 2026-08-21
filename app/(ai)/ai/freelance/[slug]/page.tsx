@@ -204,7 +204,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                   <img
                     src={pro.logo_url}
                     alt={`Photo de profil de ${displayName}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               ) : (

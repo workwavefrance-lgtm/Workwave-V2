@@ -17,7 +17,8 @@ export default function ProCard({ pro }: { pro: ProCardData }) {
             alt={`Logo ${pro.name}`}
             width={48}
             height={48}
-            className="w-12 h-12 rounded-full object-cover border border-[var(--card-border)] shrink-0"
+            /* object-contain : un logo non carre etait decoupe (cf. fiche pro). */
+            className="w-12 h-12 rounded-full object-contain bg-white dark:bg-[#FAFAFA] p-0.5 border border-[var(--card-border)] shrink-0"
           />
         ) : (
           <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>

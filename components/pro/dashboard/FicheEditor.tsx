@@ -5,6 +5,9 @@ import Image from "next/image";
 import { useDashboard } from "@/components/pro/dashboard/DashboardProvider";
 import {
   updateProProfile,
+  uploadProCover,
+  deleteProCover,
+  saveProPhotoCaption,
   uploadProLogo,
   uploadProPhoto,
   deleteProPhoto,
@@ -226,6 +229,20 @@ export default function FicheEditor({ categories }: Props) {
   const [deletingPhoto, setDeletingPhoto] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>(pro.photos || []);
   const [logoUrl, setLogoUrl] = useState(pro.logo_url || "");
+  const [coverUrl, setCoverUrl] = useState(pro.cover_url || "");
+  const [coverPending, setCoverPending] = useState(false);
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  // Legendes des realisations, {url: legende}. C'est le seul texte de la
+  // fiche que personne d'autre ne possede : mesure du 20/08/2026, deux fiches
+  // voisines partagent 71,4 % de leur texte.
+  const [legendes, setLegendes] = useState<Record<string, string>>(
+    () => (pro.photo_captions && typeof pro.photo_captions === "object" && !Array.isArray(pro.photo_captions)
+      ? { ...(pro.photo_captions as Record<string, string>) }
+      : {})
+  );
+  const [legendeEnregistree, setLegendeEnregistree] = useState<string | null>(null);
+  const [legendeErreur, setLegendeErreur] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const formTopRef = useRef<HTMLDivElement>(null);
@@ -319,6 +336,56 @@ export default function FicheEditor({ categories }: Props) {
     }
   }
 
+  async function handleCoverUpload(file: File) {
+    const souci = trop(file, 5);
+    if (souci) { setCoverError(souci); return; }
+    setCoverPending(true);
+    setCoverError(null);
+    try {
+      const fd = new FormData();
+      fd.append("couverture", file);
+      const result = await uploadProCover({} as UploadState, fd);
+      if (result.success && result.url) setCoverUrl(result.url);
+      else setCoverError(result.error || "Erreur lors de l'envoi");
+    } catch {
+      setCoverError("L'envoi a échoué. Si l'image est lourde, réduisez-la (5 Mo maximum) et réessayez.");
+    } finally {
+      setCoverPending(false);
+    }
+  }
+
+  async function handleCoverDelete() {
+    setCoverPending(true);
+    setCoverError(null);
+    try {
+      const result = await deleteProCover();
+      if (result.success) setCoverUrl("");
+      else setCoverError(result.error || "Erreur lors du retrait");
+    } finally {
+      setCoverPending(false);
+    }
+  }
+
+  /** Enregistre la legende d'une photo quand le champ perd le focus. */
+  async function handleLegendeBlur(url: string) {
+    const valeur = (legendes[url] || "").trim();
+    const ancienne = ((pro.photo_captions as Record<string, string> | null) || {})[url] || "";
+    if (valeur === ancienne.trim()) return;
+    const fd = new FormData();
+    fd.append("url", url);
+    fd.append("legende", valeur);
+    const result = await saveProPhotoCaption({} as UploadState, fd);
+    if (result.success) {
+      setLegendeErreur(null);
+      setLegendeEnregistree(url);
+      window.setTimeout(() => setLegendeEnregistree((u) => (u === url ? null : u)), 2200);
+    } else {
+      // Un echec silencieux ferait croire au pro que sa legende est
+      // enregistree alors qu'elle est perdue des qu'il quitte la page.
+      setLegendeErreur(result.error || "Légende non enregistrée. Réessayez.");
+    }
+  }
+
   async function handlePhotoUpload(file: File) {
     const souci = trop(file, 5);
     if (souci) { setPhotoError(souci); return; }
@@ -345,6 +412,11 @@ export default function FicheEditor({ categories }: Props) {
     const result = await deleteProPhoto(url);
     if (result.success) {
       setPhotos((prev) => prev.filter((p) => p !== url));
+      setLegendes((prev) => {
+        const suite = { ...prev };
+        delete suite[url];
+        return suite;
+      });
     }
     setDeletingPhoto(null);
   }
@@ -582,6 +654,85 @@ export default function FicheEditor({ categories }: Props) {
 
           {/* 3. Photos (pas de <form> imbriquée, appels directs) */}
           <Accordion title="Photos">
+            {/* PHOTO DE COUVERTURE (21/08/2026). Fournie par le pro, jamais
+                fabriquee a partir de ses photos de chantier : sur seize
+                photos reelles mesurees, treize sont en portrait, et les
+                decouper en bandeau large ne garderait que 19 % de la hauteur.
+                Les dimensions sont annoncees AVANT l'envoi, pas apres un
+                echec : un pro a bute deux fois de suite le 21/08 sans savoir
+                que le probleme etait le poids de son image. */}
+            <div className="space-y-3 mb-8">
+              <p className="text-sm font-medium text-[var(--text-primary)]">
+                Photo de couverture
+              </p>
+              <p className="text-xs text-[var(--text-secondary)]">
+                La grande image en haut de votre fiche. Choisissez votre plus beau chantier, en format paysage.
+              </p>
+              <div className="relative w-full h-28 rounded-2xl overflow-hidden border border-[var(--border-color)] bg-[var(--bg-tertiary)] flex items-center justify-center">
+                {coverUrl ? (
+                  <Image
+                    src={coverUrl}
+                    alt="Aperçu de votre photo de couverture"
+                    fill
+                    sizes="(max-width: 640px) 100vw, 600px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="text-xs text-[var(--text-tertiary)]">
+                    Aucune couverture envoyée
+                  </span>
+                )}
+              </div>
+              <dl className="text-xs text-[var(--text-secondary)] border border-[var(--border-color)] rounded-xl divide-y divide-[var(--border-color)]">
+                <div className="flex justify-between gap-3 px-3 py-2">
+                  <dt>Dimensions conseillées</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">2048 × 460 px</dd>
+                </div>
+                <div className="flex justify-between gap-3 px-3 py-2">
+                  <dt>Proportions</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">4,5 : 1</dd>
+                </div>
+                <div className="flex justify-between gap-3 px-3 py-2">
+                  <dt>Formats et poids</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">JPEG · PNG · WebP · 5 Mo</dd>
+                </div>
+              </dl>
+              <p className="text-xs text-[var(--text-tertiary)] leading-relaxed border-l-2 border-[var(--border-color)] pl-3">
+                Une photo prise à la verticale avec votre téléphone ne conviendra pas. Tournez l&apos;appareil, ou choisissez une vue large du chantier.
+              </p>
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleCoverUpload(file);
+                  e.target.value = "";
+                }}
+              />
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => coverInputRef.current?.click()}
+                  disabled={coverPending}
+                  className="text-sm font-medium text-[var(--accent)] hover:underline disabled:opacity-60"
+                >
+                  {coverPending ? "Envoi..." : coverUrl ? "Changer la couverture" : "Ajouter une couverture"}
+                </button>
+                {coverUrl && !coverPending && (
+                  <button
+                    type="button"
+                    onClick={handleCoverDelete}
+                    className="text-sm text-[var(--text-tertiary)] hover:text-red-500 transition-colors"
+                  >
+                    Retirer
+                  </button>
+                )}
+              </div>
+              {coverError && <p className="text-xs text-red-500">{coverError}</p>}
+            </div>
+
             {/* Logo */}
             <div className="space-y-3">
               <p className="text-sm font-medium text-[var(--text-primary)]">
@@ -594,7 +745,7 @@ export default function FicheEditor({ categories }: Props) {
                     alt={`Logo ${pro.name}`}
                     width={64}
                     height={64}
-                    className="w-16 h-16 rounded-xl object-cover border border-[var(--border-color)]"
+                    className="w-16 h-16 rounded-xl object-contain border border-[var(--border-color)]"
                   />
                 ) : (
                   <div className="w-16 h-16 rounded-xl bg-[var(--bg-tertiary)] flex items-center justify-center">
@@ -628,8 +779,22 @@ export default function FicheEditor({ categories }: Props) {
               {logoError && (
                 <p className="text-xs text-red-500">{logoError}</p>
               )}
-              <p className="text-xs text-[var(--text-tertiary)]">
-                JPEG, PNG ou WebP. 2 Mo maximum.
+              <dl className="text-xs text-[var(--text-secondary)] border border-[var(--border-color)] rounded-xl divide-y divide-[var(--border-color)]">
+                <div className="flex justify-between gap-3 px-3 py-2">
+                  <dt>Dimensions conseillées</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">400 × 400 px</dd>
+                </div>
+                <div className="flex justify-between gap-3 px-3 py-2">
+                  <dt>Proportions</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">carré</dd>
+                </div>
+                <div className="flex justify-between gap-3 px-3 py-2">
+                  <dt>Formats et poids</dt>
+                  <dd className="font-mono text-[var(--text-primary)]">PNG · JPEG · WebP · 2 Mo</dd>
+                </div>
+              </dl>
+              <p className="text-xs text-[var(--text-tertiary)] leading-relaxed border-l-2 border-[var(--border-color)] pl-3">
+                Votre logo est posé entier dans le cercle, jamais découpé. Un fond transparent est idéal, un fond blanc convient très bien.
               </p>
             </div>
 
@@ -644,28 +809,69 @@ export default function FicheEditor({ categories }: Props) {
                 </span>
               </div>
 
+              {/* Une LEGENDE par realisation (21/08/2026). C'est le seul
+                  texte de la fiche que personne d'autre ne possede : mesure
+                  du 20/08, deux fiches voisines partagent 71,4 % de leur
+                  texte, dont 28 points ecrits par la plateforme. La legende
+                  se retrouve sous la photo, dans le texte alternatif lu par
+                  Google Images, et dans les donnees structurees.
+                  Enregistrement a la sortie du champ : pas de bouton a
+                  cliquer, donc pas de legende perdue par oubli. */}
               {photos.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                <ul className="space-y-3 list-none p-0 m-0">
                   {photos.map((url) => (
-                    <div key={url} className="relative group aspect-square">
-                      <Image
-                        src={url}
-                        alt={`Réalisation ${pro.name}`}
-                        fill
-                        sizes="(max-width: 640px) 33vw, 20vw"
-                        className="object-cover rounded-xl border border-[var(--border-color)]"
-                      />
+                    <li
+                      key={url}
+                      className="flex items-start gap-3 border border-[var(--border-color)] rounded-xl p-3"
+                    >
+                      <div className="relative w-20 h-16 shrink-0">
+                        <Image
+                          src={url}
+                          alt={`Réalisation ${pro.name}`}
+                          fill
+                          sizes="80px"
+                          className="object-cover rounded-lg border border-[var(--border-color)]"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <input
+                          type="text"
+                          maxLength={160}
+                          value={legendes[url] ?? ""}
+                          onChange={(e) =>
+                            setLegendes((prev) => ({ ...prev, [url]: e.target.value }))
+                          }
+                          onBlur={() => handleLegendeBlur(url)}
+                          placeholder="Décrivez ce chantier en une phrase"
+                          aria-label="Légende de cette réalisation"
+                          className="w-full text-sm bg-transparent border border-[var(--border-color)] rounded-lg px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-none transition-colors"
+                        />
+                        <p className="text-[11px] text-[var(--text-tertiary)] mt-1.5">
+                          {legendeEnregistree === url
+                            ? "Légende enregistrée."
+                            : `${(legendes[url] ?? "").length}/160 caractères`}
+                        </p>
+                      </div>
                       <button
                         type="button"
                         onClick={() => handleDeletePhoto(url)}
                         disabled={deletingPhoto === url}
-                        className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs"
+                        aria-label="Supprimer cette réalisation"
+                        className="shrink-0 w-8 h-8 rounded-full text-[var(--text-tertiary)] hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors text-sm disabled:opacity-50"
                       >
                         &times;
                       </button>
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
+              )}
+
+              {legendeErreur && <p className="text-xs text-red-500">{legendeErreur}</p>}
+
+              {photos.length > 0 && (
+                <p className="text-xs text-[var(--text-tertiary)] leading-relaxed border-l-2 border-[var(--border-color)] pl-3">
+                  Dites ce qu&apos;on voit et où : « Réfection complète d&apos;une toiture en tuiles plates, 120 m² ». Évitez « photo 1 » ou « mon travail ». C&apos;est ce texte que Google lit.
+                </p>
               )}
 
               {photos.length < MAX_PHOTOS && (

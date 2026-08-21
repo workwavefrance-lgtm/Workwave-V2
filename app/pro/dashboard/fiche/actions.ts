@@ -31,6 +31,8 @@ const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2 MB
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 MB
 const MAX_PHOTOS = 10;
+const MAX_COUVERTURE_SIZE = 5 * 1024 * 1024; // 5 Mo, comme une realisation
+const MAX_LEGENDE = 160; // une phrase, pas un paragraphe
 
 function generateUniqueFileName(proId: number, originalName: string): string {
   const ext = originalName.split(".").pop()?.toLowerCase() || "jpg";
@@ -352,6 +354,163 @@ export async function uploadProLogo(
 }
 
 // ============================================
+// Photo de couverture
+// ============================================
+
+/**
+ * Envoi de la photo de couverture affichee en haut de la fiche.
+ *
+ * Elle est FOURNIE par le pro, jamais fabriquee a partir de ses photos de
+ * chantier : mesure du 21/08/2026 sur seize photos reelles, treize sont en
+ * portrait et la plus etroite fait 720x1560. La decouper en bandeau large ne
+ * garderait que 19 % de la hauteur, soit une tranche de tronc d'arbre.
+ *
+ * Elle vit dans le compartiment existant `pro-photos` sous un prefixe
+ * `couverture/`, donc aucun nouveau compartiment ni nouvelle regle d'acces.
+ */
+export async function uploadProCover(
+  _prevState: UploadState,
+  formData: FormData
+): Promise<UploadState> {
+  const pro = await getAuthenticatedPro();
+  if (!pro) return { error: "Non authentifié" };
+
+  const file = formData.get("couverture") as File | null;
+  if (!file || file.size === 0) return { error: "Aucun fichier sélectionné" };
+
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return { error: "Format accepté : JPEG, PNG ou WebP" };
+  }
+  if (file.size > MAX_COUVERTURE_SIZE) {
+    const mo = (file.size / 1024 / 1024).toFixed(1);
+    return { error: `Cette image pèse ${mo} Mo, le maximum est de 5 Mo. Réduisez-la ou choisissez-en une autre.` };
+  }
+
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const fileName = `couverture/${pro.id}/${crypto.randomUUID()}.${ext}`;
+  const admin = createAdminClient();
+
+  const { error: uploadError } = await admin.storage
+    .from("pro-photos")
+    .upload(fileName, file, { contentType: file.type, upsert: false });
+
+  if (uploadError) {
+    console.error("[uploadProCover] storage error :", uploadError.message);
+    return { error: `Envoi impossible : ${uploadError.message}` };
+  }
+
+  const { data: urlData } = admin.storage.from("pro-photos").getPublicUrl(fileName);
+
+  const { error: updateError } = await admin
+    .from("pros")
+    .update({ cover_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+
+  if (updateError) {
+    console.error("[uploadProCover] update error :", updateError.message);
+    // On ne laisse pas un fichier orphelin dans le compartiment.
+    await admin.storage.from("pro-photos").remove([fileName]);
+    return { error: "Erreur lors de la mise à jour" };
+  }
+
+  // L'ancienne couverture n'est supprimee QU'APRES le succes de la mise a
+  // jour : si on la supprimait avant et que l'ecriture echouait, la fiche
+  // pointerait vers un fichier qui n'existe plus.
+  const ancienne = (pro as { cover_url?: string | null }).cover_url;
+  if (ancienne) {
+    const chemin = ancienne.split("/pro-photos/")[1];
+    if (chemin) await admin.storage.from("pro-photos").remove([chemin]);
+  }
+
+  revalidatePath(`/artisan/${pro.slug}`);
+  return { success: true, url: urlData.publicUrl };
+}
+
+/** Retrait de la photo de couverture. La fiche retombe sur le fond calme. */
+export async function deleteProCover(): Promise<UploadState> {
+  const pro = await getAuthenticatedPro();
+  if (!pro) return { error: "Non authentifié" };
+
+  const admin = createAdminClient();
+  const actuelle = (pro as { cover_url?: string | null }).cover_url;
+
+  const { error } = await admin
+    .from("pros")
+    .update({ cover_url: null, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+  if (error) return { error: "Erreur lors de la mise à jour" };
+
+  if (actuelle) {
+    const chemin = actuelle.split("/pro-photos/")[1];
+    if (chemin) await admin.storage.from("pro-photos").remove([chemin]);
+  }
+
+  revalidatePath(`/artisan/${pro.slug}`);
+  return { success: true };
+}
+
+// ============================================
+// Legendes des realisations
+// ============================================
+
+/**
+ * Enregistre la legende d'une realisation.
+ *
+ * C'est le seul texte de la fiche que personne d'autre ne possede. Mesure du
+ * 20/08/2026 : deux fiches voisines (meme metier, meme commune) partagent
+ * 71,4 % de leur texte, dont 28 points ecrits par la plateforme. Une phrase
+ * ecrite par l'artisan sur SON chantier est du contenu unique, et c'est ce
+ * que Google Images lit dans le texte alternatif.
+ *
+ * Stockage : une table de correspondance {url: legende}, clef = URL de la
+ * photo. Pas d'index numerique, qui se decalerait a la premiere suppression
+ * et collerait la legende d'un chantier sur la photo d'un autre.
+ */
+export async function saveProPhotoCaption(
+  _prevState: UploadState,
+  formData: FormData
+): Promise<UploadState> {
+  const pro = await getAuthenticatedPro();
+  if (!pro) return { error: "Non authentifié" };
+
+  const url = String(formData.get("url") || "");
+  const legende = String(formData.get("legende") || "").trim();
+
+  const photos: unknown = pro.photos;
+  const liste = Array.isArray(photos) ? photos : [];
+  // Garde anti-usurpation : on n'ecrit une legende que pour une photo qui
+  // appartient VRAIMENT a ce pro.
+  if (!url || !liste.includes(url)) {
+    return { error: "Photo introuvable" };
+  }
+  if (legende.length > MAX_LEGENDE) {
+    return { error: `La légende ne doit pas dépasser ${MAX_LEGENDE} caractères` };
+  }
+
+  const actuelles = (pro as { photo_captions?: Record<string, string> | null }).photo_captions;
+  const table: Record<string, string> =
+    actuelles && typeof actuelles === "object" && !Array.isArray(actuelles)
+      ? { ...actuelles }
+      : {};
+
+  if (legende) table[url] = legende;
+  else delete table[url];
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("pros")
+    .update({ photo_captions: table, updated_at: new Date().toISOString() })
+    .eq("id", pro.id);
+  if (error) {
+    console.error("[saveProPhotoCaption] update error :", error.message);
+    return { error: "Erreur lors de l'enregistrement" };
+  }
+
+  revalidatePath(`/artisan/${pro.slug}`);
+  return { success: true };
+}
+
+// ============================================
 // Upload photo galerie
 // ============================================
 
@@ -439,6 +598,26 @@ export async function deleteProPhoto(photoUrl: string) {
     .eq("id", pro.id);
 
   if (error) return { error: "Erreur lors de la suppression" };
+
+  // La legende part avec sa photo, mais dans une ECRITURE SEPAREE et non
+  // bloquante. Raison : tant que la migration 2026-08-21 n'est pas appliquee,
+  // la colonne `photo_captions` n'existe pas. Si on l'incluait dans la mise a
+  // jour ci-dessus, la suppression de photo, qui fonctionne aujourd'hui,
+  // echouerait pour tous les pros. Un nettoyage rate laisse une entree
+  // orpheline sans consequence visible ; une suppression ratee, elle, est un
+  // sujet d'image et de RGPD.
+  const legendes = (pro as { photo_captions?: Record<string, string> | null }).photo_captions;
+  if (legendes && typeof legendes === "object" && !Array.isArray(legendes) && photoUrl in legendes) {
+    const tableNettoyee = { ...legendes };
+    delete tableNettoyee[photoUrl];
+    const { error: erreurLegende } = await admin
+      .from("pros")
+      .update({ photo_captions: tableNettoyee })
+      .eq("id", pro.id);
+    if (erreurLegende) {
+      console.error("[deleteProPhoto] nettoyage de la legende impossible :", erreurLegende.message);
+    }
+  }
 
   // Pas de revalidatePath sur /pro/dashboard/fiche : meme raison que pour
   // uploadProLogo (cf. commentaire). Le client gere setPhotos.

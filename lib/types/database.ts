@@ -119,6 +119,16 @@ export type Pro = {
   description: string | null;
   logo_url: string | null;
   photos: string[];
+  /** Photo de couverture envoyee par le pro (migration 2026-08-21). */
+  cover_url: string | null;
+  /**
+   * Legendes des realisations, {"url_de_la_photo": "legende"}.
+   * Clef = URL et non index : une correspondance par position se decalerait
+   * a la premiere suppression et collerait la legende d'un chantier sur la
+   * photo d'un autre. `photos` garde donc sa forme de tableau de chaines,
+   * que 34 endroits du depot lisent aujourd'hui (cartographie du 21/08).
+   */
+  photo_captions: Record<string, string> | null;
   source: "sirene" | "pagesjaunes" | "manual" | "ai_signup" | "bce";
   naf_code: string | null;
   /** Categorie juridique INSEE a 4 chiffres (1000 = entrepreneur individuel). */

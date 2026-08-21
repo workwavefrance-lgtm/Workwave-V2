@@ -101,7 +101,7 @@ export default async function AiEnDashboardLayout({
                 <img
                   src={pro.logo_url}
                   alt=""
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             ) : (
@@ -208,7 +208,7 @@ export default async function AiEnDashboardLayout({
                 aria-hidden="true"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={pro.logo_url} alt="" className="w-full h-full object-cover" />
+                <img src={pro.logo_url} alt="" className="w-full h-full object-contain" />
               </div>
             ) : (
               <div

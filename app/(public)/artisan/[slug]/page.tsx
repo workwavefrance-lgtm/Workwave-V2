@@ -22,7 +22,16 @@ import { getCategoryArticle } from "@/lib/utils/category-grammar";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import { formatEffectifRange, formatFoundingYear, formatAgeYears, formatDateCreation } from "@/lib/utils/sirene";
+import dynamic from "next/dynamic";
 import { libelleNaf } from "@/lib/data/naf-labels";
+// Chargement PARESSEUX explicite. La bande n'est rendue que sur les fiches
+// qui ont des photos, soit 17 sur 2 439 970 aujourd'hui : son code ne doit
+// pas peser sur les autres. `next/dynamic` garantit un morceau de code a part,
+// telecharge seulement quand le composant est reellement dans l'arbre, sans
+// dependre de l'analyse statique de Next. Le rendu serveur reste actif, donc
+// les figures, les legendes et les textes alternatifs sont bien dans le HTML
+// que Google recoit.
+const ProGallery = dynamic(() => import("@/components/pro/ProGallery"));
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
@@ -218,6 +227,46 @@ export default async function ProPage({ params }: Props) {
   const proContent = buildProContent(pro);
   const openingHours = pro.opening_hours as OpeningHours | null;
 
+  // Realisations envoyees par le pro. `photos` GARDE sa forme de tableau de
+  // chaines : la cartographie du 21/08 a recense 34 endroits qui la lisent,
+  // dont trois casseraient EN SILENCE si elle devenait un tableau d'objets
+  // (le filtre ci-dessous viderait la galerie de toutes les fiches sans
+  // lever d'erreur, et les suppressions de photos renverraient "succes"
+  // sans rien supprimer). Les legendes vivent donc a cote, dans
+  // `photo_captions`.
+  const photos = Array.isArray(pro.photos)
+    ? pro.photos.filter((url): url is string => typeof url === "string" && url.startsWith("http"))
+    : [];
+
+  // Couverture envoyee par le pro. JAMAIS fabriquee a partir des photos de
+  // chantier : mesure du 21/08/2026 sur 16 photos reelles de trois artisans,
+  // 13 sont en portrait et la plus etroite fait 720x1560. La decouper en
+  // bandeau large ne garderait que 19 % de la hauteur, soit une tranche de
+  // tronc d'arbre. Sans couverture, la fiche affiche un fond calme.
+  // La colonne peut ne pas encore exister en base au moment du deploiement
+  // (migration 2026-08-21) : la valeur est alors absente et la fiche affiche
+  // simplement le fond calme, sans la moindre erreur.
+  const coverUrl =
+    typeof pro.cover_url === "string" && pro.cover_url.startsWith("http")
+      ? pro.cover_url
+      : null;
+
+  // Legendes des realisations, ecrites par le pro. C'est le seul texte de la
+  // fiche que personne d'autre ne possede : mesure du 20/08, deux fiches
+  // voisines partagent 71,4 % de leur texte. Table de correspondance par URL
+  // et non par position, pour survivre aux suppressions de photos.
+  const captionsRaw: unknown = pro.photo_captions;
+  const captions: Record<string, string> =
+    captionsRaw && typeof captionsRaw === "object" && !Array.isArray(captionsRaw)
+      ? (captionsRaw as Record<string, string>)
+      : {};
+  const legendeDe = (url: string): string | null => {
+    const v = captions[url];
+    return typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
+  };
+
+  const photosPourSchema = photos.map((url) => ({ url, legende: legendeDe(url) }));
+
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -231,6 +280,19 @@ export default async function ProPage({ params }: Props) {
     ...(pro.phone && !blurCoords ? { telephone: pro.phone } : {}),
     ...(pro.email && !blurCoords ? { email: pro.email } : {}),
     ...(pro.logo_url ? { image: pro.logo_url } : {}),
+    // GALERIE D'IMAGES (21/08/2026). Chaque realisation est declaree avec sa
+    // legende ecrite par le pro : c'est ce qui permet a Google de savoir ce
+    // qu'on voit, au lieu d'un "Realisation nom-du-pro 1" qui ne dit rien.
+    // Trafic Google Images qu'on ne capte pas du tout aujourd'hui.
+    ...(photosPourSchema.length > 0
+      ? {
+          photo: photosPourSchema.map((p) => ({
+            "@type": "ImageObject",
+            contentUrl: p.url,
+            ...(p.legende ? { caption: p.legende, name: p.legende } : {}),
+          })),
+        }
+      : {}),
     address: {
       "@type": "PostalAddress",
       ...(pro.address ? { streetAddress: pro.address } : {}),
@@ -346,7 +408,6 @@ export default async function ProPage({ params }: Props) {
   const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
 
   const initial = (pro.name || "?").charAt(0).toUpperCase();
-  const photos = Array.isArray(pro.photos) ? pro.photos.filter((url): url is string => typeof url === "string" && url.startsWith("http")) : [];
   const certifications = Array.isArray(pro.certifications) ? pro.certifications : [];
   const paymentMethods = Array.isArray(pro.payment_methods) ? pro.payment_methods : [];
 
@@ -355,6 +416,39 @@ export default async function ProPage({ params }: Props) {
       <JsonLd data={jsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
+
+      {/* BANDEAU DE COUVERTURE (21/08/2026). Les photos sont la seule chose
+          qu'un artisan produit lui-meme : tout le reste vient de l'INSEE.
+          Avec une couverture, on montre le metier des le premier ecran au
+          lieu d'un numero d'immatriculation. Sans, un fond calme, aucune
+          image inventee ni photo d'agence. L'ecart entre les deux est ce qui
+          donne envie de reclamer sa fiche. */}
+      <div className="relative h-40 sm:h-52 rounded-2xl overflow-hidden border border-[var(--card-border)] mb-4">
+        {coverUrl ? (
+          <Image
+            src={coverUrl}
+            alt={`Chantier de ${pro.category?.name?.toLowerCase() || "professionnel"} realise par ${pro.name}${pro.city ? ` a ${pro.city.name}` : ""}`}
+            fill
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(120% 130% at 10% 0%, var(--accent-muted) 0%, transparent 60%), linear-gradient(180deg, var(--bg-secondary) 0%, var(--card-bg) 100%)",
+            }}
+          />
+        )}
+        {photos.length > 0 && (
+          <span className="absolute top-3 right-3 bg-black/60 text-white text-[11px] font-mono px-2.5 py-1 rounded-full backdrop-blur-sm">
+            {photos.length} réalisation{photos.length > 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
 
       {/* Banniere de reclamation TOP : version fine (Levier D, mai 2026).
           Reduite vs version originelle (gros bloc orange dominant) pour
@@ -413,7 +507,12 @@ export default async function ProPage({ params }: Props) {
                 alt={`Logo ${pro.name}`}
                 width={64}
                 height={64}
-                className="w-16 h-16 rounded-full object-cover border border-[var(--card-border)] shrink-0"
+                /* object-contain, pas object-cover : un logo non carre etait
+                   DECOUPE. Mesure du 21/08/2026 : celui d'Elagage precis fait
+                   230x320, on lui coupait le haut et le bas. Le disque clair
+                   derriere sert aux logos livres sur fond blanc opaque, qui
+                   sinon font une tache en mode sombre. */
+                className="w-16 h-16 rounded-full object-contain bg-white dark:bg-[#FAFAFA] p-1 border border-[var(--card-border)] shrink-0"
               />
             ) : (
               <div
@@ -544,6 +643,39 @@ export default async function ProPage({ params }: Props) {
               </div>
             );
           })()}
+
+          {/* SES CHANTIERS (21/08/2026). Remplace la grille carree qui vivait
+              en NEUVIEME position, sous les modes de paiement, avec un titre
+              au style d'une metadonnee. Deux defauts mesures : les images
+              etaient recadrees au carre, or 13 des 16 photos reelles de nos
+              pros sont en portrait, donc les cimes d'arbres et les toitures
+              sautaient ; et rien n'etait cliquable.
+              La bande a hauteur fixe preserve les proportions d'origine et
+              tient avec UNE photo comme avec DIX : sept de nos dix-sept pros
+              equipes n'en ont qu'une seule, ce qui elimine toute mise en page
+              en grille avec cas particulier. */}
+          {photos.length > 0 && (
+            <section aria-labelledby="titre-chantiers">
+              <h2
+                id="titre-chantiers"
+                className="text-xl font-bold tracking-tight text-[var(--text-primary)] mb-1"
+              >
+                {photos.length > 1 ? "Ses chantiers" : "Son chantier"}
+              </h2>
+              <p className="text-sm text-[var(--text-secondary)] mb-4">
+                {photos.length > 1
+                  ? `${photos.length} réalisations photographiées par l'entreprise.`
+                  : "Une réalisation photographiée par l'entreprise."}
+              </p>
+              <ProGallery
+                photos={photos.map((url) => ({ url, legende: legendeDe(url) }))}
+                nomPro={pro.name}
+                metier={pro.category?.name?.toLowerCase() || null}
+                ville={pro.city?.name || null}
+                departement={pro.city?.department?.name || null}
+              />
+            </section>
+          )}
 
           {/* Bandeau Sirene : age + effectif. Source officielle INSEE
               (sync via scripts/enrich-sirene-v3.ts). Signal de confiance
@@ -927,28 +1059,6 @@ export default async function ProPage({ params }: Props) {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          )}
-
-          {/* Galerie photos */}
-          {photos.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
-                Réalisations
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {photos.map((url, i) => (
-                  <div key={i} className="relative aspect-square">
-                    <Image
-                      src={url}
-                      alt={`Réalisation ${pro.name} ${i + 1}`}
-                      fill
-                      sizes="(max-width: 640px) 50vw, 33vw"
-                      className="object-cover rounded-2xl border border-[var(--card-border)]"
-                    />
-                  </div>
-                ))}
               </div>
             </div>
           )}
