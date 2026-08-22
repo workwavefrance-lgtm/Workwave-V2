@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 // Rate limit en memoire : 15 lookups / 5 min / IP. Generaux mais anti-scrape.
@@ -31,7 +30,10 @@ export type LookupState = {
  * Cherche un pro par son SIRET et redirige vers le bon endroit :
  *  - SIRET trouve + fiche non reclamee → /pro/reclamer/[slug] (workflow claim)
  *  - SIRET trouve + fiche deja reclamee → /pro/connexion?from=lookup (deja un compte)
- *  - SIRET non trouve → renvoie une erreur (l'user reste sur la page avec CTA creer un compte)
+ *  - SIRET non trouve → /pro/creer-fiche?siret=... (creation, numero pre-rempli)
+ *
+ * Aucun chemin ne se termine par un cul-de-sac : le seul message d'erreur
+ * possible concerne un numero mal forme ou le rate limit.
  *
  * Le SIRET est une donnee publique (annuaire Sirene), donc pas de leak de
  * confidentialite. La redirection ne revele que l'existence de la fiche
@@ -83,11 +85,15 @@ export async function lookupBySiret(
     .maybeSingle();
 
   if (!pro) {
-    return {
-      success: false,
-      message:
-        "Aucune fiche trouvée pour ce numéro. Vérifiez-le ou créez votre fiche ci-dessous.",
-    };
+    // Aucune fiche en base : on n'envoie plus l'artisan dans le mur. Il a
+    // deja tape son numero, on l'emmene directement le creer avec le numero
+    // pre-rempli. Cote francais, /pro/creer-fiche interroge le registre
+    // officiel et pre-remplit nom/adresse/NAF ; cote belge il saisit a la
+    // main (le webservice BCE est payant, le scraping de Public Search est
+    // interdit par ses CGU).
+    redirect(
+      `/pro/creer-fiche?siret=${raw}${raw.length === 10 ? "&pays=be" : ""}`
+    );
   }
 
   // Fiche deja reclamee : on envoie vers la connexion
