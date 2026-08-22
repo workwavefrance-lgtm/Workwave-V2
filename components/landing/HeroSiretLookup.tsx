@@ -160,7 +160,7 @@ export default function HeroSiretLookup() {
           <ul className="space-y-1.5 text-sm font-medium">
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="font-extrabold">✓</span>
-              Vos 2 premiers leads offerts
+              Vos 2 premiers projets offerts
             </li>
             <li className="flex items-start gap-2">
               <span aria-hidden="true" className="font-extrabold">✓</span>

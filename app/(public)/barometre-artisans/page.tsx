@@ -95,8 +95,25 @@ export default async function BarometreArtisansPage() {
     creator: { "@type": "Organization", name: "Workwave", url: BASE_URL },
     temporalCoverage: String(YEAR),
     isBasedOn: [
-      { "@type": "Dataset", name: "Répertoire SIRENE des entreprises", creator: { "@type": "Organization", name: "INSEE" } },
-      { "@type": "Dataset", name: "Population municipale 2021", creator: { "@type": "Organization", name: "INSEE" } },
+      {
+        "@type": "Dataset",
+        name: "Répertoire SIRENE des entreprises",
+        // Google exige name ET description sur CHAQUE noeud Dataset, y compris
+        // ceux imbriques dans isBasedOn. Sans description : "Champ description
+        // manquant", signale comme critique dans la Search Console.
+        description:
+          "Répertoire officiel des entreprises et de leurs établissements, tenu par l'INSEE et publié en Licence Ouverte.",
+        url: "https://www.insee.fr/fr/information/3591226",
+        creator: { "@type": "Organization", name: "INSEE" },
+      },
+      {
+        "@type": "Dataset",
+        name: "Population municipale 2021",
+        description:
+          "Populations légales des communes françaises au 1er janvier 2021, publiées par l'INSEE.",
+        url: "https://www.insee.fr/fr/statistiques/7739582",
+        creator: { "@type": "Organization", name: "INSEE" },
+      },
     ],
     url: `${BASE_URL}${PATH}`,
   };
