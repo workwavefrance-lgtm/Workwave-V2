@@ -83,7 +83,10 @@ export default async function BarometreTjmHubPage() {
     creator: { "@type": "Organization", name: "Workwave AI", url: `${baseUrl}/ai` },
     citation: TJM_SOURCES.map((s) => `${s.name} · ${s.title} (${s.url})`).join(" ; "),
     temporalCoverage: `${CURRENT_YEAR}`,
-    spatialCoverage: { "@type": "Country", name: "France" },
+    // Google rejette le type Country sur spatialCoverage ("Invalid object
+    // type") et attend un Place ou une chaine, meme si Country derive de
+    // Place chez schema.org.
+    spatialCoverage: { "@type": "Place", name: "France" },
   };
 
   const articleSchema = {

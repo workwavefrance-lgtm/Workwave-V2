@@ -61,6 +61,12 @@ export default async function BarometreMetiersPage() {
     name: `Les métiers artisanaux les plus répandus en France ${YEAR}`,
     description: `Classement de ${ranked.length} métiers artisanaux par nombre d'entreprises actives en France (${grp(total)} entreprises).`,
     creator: { "@type": "Organization", name: "Workwave", url: BASE_URL },
+    // Google reclame le champ "license" sur tout Dataset (avertissement dans
+    // la Search Console). CC BY 4.0 : reutilisation libre, y compris
+    // commerciale, a condition de citer Workwave.fr. Compatible avec la
+    // Licence Ouverte 2.0 d'Etalab qui couvre nos sources INSEE, et invite
+    // les reprises a nous citer, donc a nous lier.
+    license: "https://creativecommons.org/licenses/by/4.0/",
     temporalCoverage: String(YEAR),
     url: `${BASE_URL}${PATH}`,
   };

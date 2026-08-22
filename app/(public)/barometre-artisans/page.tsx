@@ -93,6 +93,12 @@ export default async function BarometreArtisansPage() {
     name: `Baromètre des artisans en France ${YEAR} · densité par département`,
     description: `Densité d'entreprises artisanales (bâtiment, services à domicile, aide à la personne) pour 10 000 habitants, dans les 100 départements français. ${BAROMETRE_META.totalPros.toLocaleString("fr-FR")} entreprises analysées.`,
     creator: { "@type": "Organization", name: "Workwave", url: BASE_URL },
+    // Google reclame le champ "license" sur tout Dataset (avertissement dans
+    // la Search Console). CC BY 4.0 : reutilisation libre, y compris
+    // commerciale, a condition de citer Workwave.fr. Compatible avec la
+    // Licence Ouverte 2.0 d'Etalab qui couvre nos sources INSEE, et invite
+    // les reprises a nous citer, donc a nous lier.
+    license: "https://creativecommons.org/licenses/by/4.0/",
     temporalCoverage: String(YEAR),
     isBasedOn: [
       {
@@ -104,6 +110,7 @@ export default async function BarometreArtisansPage() {
         description:
           "Répertoire officiel des entreprises et de leurs établissements, tenu par l'INSEE et publié en Licence Ouverte.",
         url: "https://www.insee.fr/fr/information/3591226",
+        license: "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
         creator: { "@type": "Organization", name: "INSEE" },
       },
       {
@@ -112,6 +119,7 @@ export default async function BarometreArtisansPage() {
         description:
           "Populations légales des communes françaises au 1er janvier 2021, publiées par l'INSEE.",
         url: "https://www.insee.fr/fr/statistiques/7739582",
+        license: "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
         creator: { "@type": "Organization", name: "INSEE" },
       },
     ],
