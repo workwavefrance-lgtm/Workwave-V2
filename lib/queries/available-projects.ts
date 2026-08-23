@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { haversineKm } from "@/lib/utils/haversine";
+import { dateLimiteProjet } from "@/lib/matching/fraicheur";
 import {
   getGeneralistCategoryIds,
   getAllBtpCategoryIds,
@@ -103,6 +104,9 @@ export async function getAvailableProjectsForPro(
     // PAYES restent visibles pour le pro (cf. lib/queries/leads.ts, volontairement
     // non filtre : on ne retire jamais ce qui a ete achete).
     .not("status", "in", "(deleted,closed)")
+    // Jamais annoncer a un nouveau pro des chantiers d'il y a deux mois : la
+    // premiere impression se joue la.
+    .gte("created_at", dateLimiteProjet())
     .order("created_at", { ascending: false })
     .limit(300);
 

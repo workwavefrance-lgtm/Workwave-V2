@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import { haversineKm } from "@/lib/utils/haversine";
+import { projetTropAncien, ageEnJours } from "@/lib/matching/fraicheur";
 import { startBtpUnlock } from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
 import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
@@ -166,6 +167,14 @@ export default async function LeadsPage({
       // Fallback (coordonnées manquantes) : on retombe sur le département du pro.
       return proDeptId != null && (c?.department_id ?? null) === proDeptId;
     })
+    .sort((a, b) => {
+      // Les projets de plus de 30 jours passent en fin de liste : ils restent
+      // disponibles (le pro decide) mais ne masquent plus les frais.
+      const va = projetTropAncien(a.created_at) ? 1 : 0;
+      const vb = projetTropAncien(b.created_at) ? 1 : 0;
+      if (va !== vb) return va - vb;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    })
     .slice(0, PROJECTS_LIMIT);
 
   // Offre de lancement : les 2 premiers déblocages sont offerts.
@@ -276,15 +285,35 @@ export default async function LeadsPage({
             const aiSummary = aiQual?.summary?.trim() || "";
             const budgetComment = aiQual?.budget_comment?.trim() || "";
 
+            // Un chantier de plus de 30 jours a tres probablement trouve son
+            // artisan. On ne le retire pas (les dashboards sont deja peu
+            // remplis) mais on previent franchement avant de faire payer.
+            const perime = projetTropAncien(p.created_at);
+            const jours = ageEnJours(p.created_at);
+
             return (
               <li
                 key={p.id}
                 className={`p-6 rounded-2xl border transition-colors ${
-                  isSuspicious
-                    ? "bg-amber-50/50 border-amber-300"
-                    : "bg-[var(--bg-secondary)] border-[var(--border)]"
+                  perime
+                    ? "bg-red-50/50 border-red-300 dark:bg-red-950/20 dark:border-red-900"
+                    : isSuspicious
+                      ? "bg-amber-50/50 border-amber-300"
+                      : "bg-[var(--bg-secondary)] border-[var(--border)]"
                 }`}
               >
+                {perime && (
+                  <div className="mb-4 p-4 rounded-lg bg-red-600 text-white">
+                    <p className="text-sm font-bold uppercase tracking-wide">
+                      Projet déposé il y a {jours} jours
+                    </p>
+                    <p className="text-sm mt-1 text-red-50">
+                      Au-delà d&apos;un mois, le client a le plus souvent déjà
+                      trouvé son artisan. Débloquez-le en connaissance de cause.
+                    </p>
+                  </div>
+                )}
+
                 {isSuspicious && (
                   <div className="mb-4 p-3 bg-amber-100/70 border border-amber-300 rounded-lg">
                     <p className="text-xs font-semibold text-amber-900">

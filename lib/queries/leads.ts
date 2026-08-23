@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { getServiceClient } from "@/lib/supabase/service-client";
 import { haversineKm } from "@/lib/utils/haversine";
+import { dateLimiteProjet } from "@/lib/matching/fraicheur";
 import type {
   ProjectLead,
   ProjectLeadStatus,
@@ -375,6 +376,9 @@ export async function getProDashboardData(args: {
     .eq("vertical", "btp")
     .in("category_id", args.categoryIds)
     .neq("status", "deleted")
+    // Un projet de plus de 30 jours n'est plus proposable : le particulier a
+    // trouve quelqu'un. Les deblocages deja faits sont reinjectes plus bas.
+    .gte("created_at", dateLimiteProjet())
     .order("created_at", { ascending: false })
     .limit(500);
 
