@@ -297,13 +297,31 @@ export default function ProjectForm({
   function goTo(target: number) {
     const t = Math.min(Math.max(target, 0), STEPS.length - 1);
     setStep(t);
+    remonterAuFormulaire();
     trackClient(EVENTS.PROJECT_STEP_REACHED, { step: t + 1, name: STEPS[t] });
+  }
+
+  /** Ramene la barre de progression en haut de l'ecran a chaque changement
+   *  d'etape. Sans ca, le visiteur retombe sur le titre de la page et son
+   *  sous-titre (450 px sur un telephone) et doit redefiler pour retrouver la
+   *  question, a CHAQUE etape. Constate sur les captures du 28/08/2026 : c'est
+   *  le meme defaut que les quatre cartes de confiance, en plus discret.
+   *  `block: "start"` et non `center` : on veut la barre en haut, pas au
+   *  milieu, sinon la question passe sous la ligne de flottaison. */
+  function remonterAuFormulaire() {
+    if (typeof window === "undefined") return;
+    requestAnimationFrame(() => {
+      document
+        .getElementById("depot-progression")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function next() {
     if (canProceed()) {
       const target = Math.min(step + 1, STEPS.length - 1);
       setStep(target);
+      remonterAuFormulaire();
       trackClient(EVENTS.PROJECT_STEP_REACHED, {
         step: target + 1,
         name: STEPS[target],
@@ -312,6 +330,7 @@ export default function ProjectForm({
   }
   function prev() {
     setStep((s) => Math.max(s - 1, 0));
+    remonterAuFormulaire();
   }
 
   // Group categories par vertical pour le select de l'étape 1
@@ -376,8 +395,9 @@ export default function ProjectForm({
       }}
       className="space-y-8"
     >
-      {/* Barre de progression */}
-      <div>
+      {/* Barre de progression. L'id sert d'ancre au defilement automatique
+          entre etapes (cf. remonterAuFormulaire). */}
+      <div id="depot-progression" className="scroll-mt-20">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-[var(--text-secondary)]">
             Étape {step + 1} sur {STEPS.length} · {STEPS[step]}
@@ -724,13 +744,9 @@ export default function ProjectForm({
               a l'endroit ou la personne hesite le plus, un mur de texte se
               saute au lieu de se lire. */}
           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Vos coordonnées ne sont visibles que par un artisan qui décide de
-            traiter votre demande. Jamais affichées sur le site, jamais
-            revendues, et Workwave ne s&apos;en sert jamais pour vous démarcher.
-          </p>
-          <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
-            Vous pouvez supprimer votre demande quand vous voulez : le lien est
-            dans l&apos;email de confirmation.
+            Visibles uniquement par l&apos;artisan qui traite votre demande.
+            Jamais affichées, jamais revendues. Suppression en un clic depuis
+            l&apos;email de confirmation.
           </p>
         </div>
 

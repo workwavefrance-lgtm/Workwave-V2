@@ -33,7 +33,6 @@ const BUDGET_LABELS: Record<string, string> = {
   "2000_5000": "2 000 € à 5 000 €",
   "5000_15000": "5 000 € à 15 000 €",
   gt15000: "Plus de 15 000 €",
-  unknown: "Je ne sais pas",
 };
 
 export async function sendProjectConfirmation(
@@ -41,7 +40,10 @@ export async function sendProjectConfirmation(
 ): Promise<void> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr";
   const urgencyLabel = URGENCY_LABELS[data.urgency] || data.urgency;
-  const budgetLabel = BUDGET_LABELS[data.budget] || data.budget;
+  // 28/08/2026 : budget retire du formulaire, les nouveaux projets valent
+  // « unknown » et la ligne ne s'affiche plus (cf. broadcast-btp-project.ts).
+  // Les anciens projets gardent la leur.
+  const budgetLabel = BUDGET_LABELS[data.budget] ?? null;
 
   const html = `
 <!DOCTYPE html>
@@ -78,10 +80,10 @@ export async function sendProjectConfirmation(
             <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Urgence</td>
             <td style="padding:8px 0;color:#0A0A0A;font-weight:500;">${urgencyLabel}</td>
           </tr>
-          <tr>
+          ${budgetLabel ? `<tr>
             <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Budget</td>
             <td style="padding:8px 0;color:#0A0A0A;font-weight:500;">${budgetLabel}</td>
-          </tr>
+          </tr>` : ""}
           <tr>
             <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Description</td>
             <td style="padding:8px 0;color:#0A0A0A;">${data.description}</td>

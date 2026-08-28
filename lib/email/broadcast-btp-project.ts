@@ -334,9 +334,39 @@ async function sendOne(
   }
 }
 
+/** Marqueur d'un depot de test technique : un projet dont la description
+ *  commence par cette phrase n'est JAMAIS diffuse aux artisans.
+ *
+ *  Pourquoi (28/08/2026) : en verifiant le nouveau formulaire de bout en bout,
+ *  un projet de test est parti a trois artisans, dont deux vrais. Avoir choisi
+ *  une categorie sans aucun pro reclame ne suffisait pas : les pros
+ *  GENERALISTES (multiservice, petit bricolage) recoivent TOUS les projets BTP
+ *  de leur zone, quelle que soit la categorie (cf. le commentaire du filtre
+ *  categorie plus bas). Un faux chantier envoye a de vrais artisans abime le
+ *  lien avec les rares pros reclames.
+ *
+ *  Le controle est ICI et non dans la Server Action, pour couvrir d'un seul
+ *  endroit TOUS les appelants : le depot, le cron de rattrapage
+ *  (broadcast-rescue) et la relance manuelle. Le mettre dans l'action laissait
+ *  le cron rediffuser le projet quelques minutes plus tard.
+ *
+ *  Le marqueur est assez explicite pour qu'aucun particulier ne l'ecrive par
+ *  hasard. Le reste du parcours (validation, insertion, qualification IA,
+ *  mails admin et confirmation) s'execute normalement : c'est bien un test de
+ *  bout en bout. */
+const MARQUEUR_TEST = "TEST TECHNIQUE WORKWAVE";
+
 export async function broadcastBtpProject(
   input: BroadcastBtpInput
 ): Promise<BroadcastBtpResult> {
+  if (
+    (input.projectDescription ?? "").trim().toUpperCase().startsWith(MARQUEUR_TEST)
+  ) {
+    console.log(
+      `[broadcastBtpProject] projet ${input.projectId} : marqueur de test, AUCUNE diffusion aux artisans`
+    );
+    return { sent: 0, failed: 0, totalTargets: 0, errors: [] };
+  }
   // baseUrl nettoyé (un espace/nbsp dans l'env casserait tous les liens du mail, leçon 18/04).
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "https://workwave.fr")
     .replace(/\s+/g, "")
