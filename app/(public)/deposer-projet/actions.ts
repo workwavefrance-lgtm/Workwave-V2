@@ -26,6 +26,10 @@ const projectSchema = z.object({
       /^(?:(?:\+33|0)\s?[1-9])(?:[\s.-]?\d{2}){4}$/,
       "Numéro de téléphone invalide"
     ),
+  // Liste complete des metiers choisis, « 3,1,2 » (le premier est le
+  // principal, deja porte par categoryId). Optionnel : un formulaire qui
+  // n'envoie que categoryId continue de fonctionner a l'identique.
+  categoryIds: z.string().optional(),
   categoryId: z.coerce
     .number()
     .int()
@@ -132,6 +136,7 @@ export async function submitProject(
     email: formData.get("email") as string,
     phone: formData.get("phone") as string,
     categoryId: formData.get("categoryId") as string,
+    categoryIds: (formData.get("categoryIds") as string) || undefined,
     cityId: formData.get("cityId") as string,
     description: formData.get("description") as string,
     urgency: formData.get("urgency") as string,
@@ -281,6 +286,28 @@ export async function submitProject(
     ? `${deptObj.name}${deptObj.code ? ` (${deptObj.code})` : ""}`
     : undefined;
 
+  // Metiers supplementaires demandes (cf. la boucle de creation plus bas).
+  // Calcules ici parce que le mail de confirmation au particulier doit les
+  // citer TOUS : il n'en recoit qu'un, pas un par metier.
+  const idsSupplementaires = [
+    ...new Set(
+      (data.categoryIds ?? "")
+        .split(",")
+        .map((x) => Number(x.trim()))
+        .filter((id) => Number.isFinite(id) && id > 0 && id !== data.categoryId)
+    ),
+  ];
+  let libelleMetiers = category.name;
+  if (idsSupplementaires.length) {
+    const { data: autres } = await serviceClient
+      .from("categories")
+      .select("name")
+      .in("id", idsSupplementaires);
+    if (autres?.length) {
+      libelleMetiers = [category.name, ...autres.map((c) => c.name)].join(", ");
+    }
+  }
+
   // Emails (non bloquants)
   sendProjectNotification({
     firstName: data.firstName,
@@ -301,7 +328,9 @@ export async function submitProject(
   sendProjectConfirmation({
     firstName: data.firstName,
     email: data.email,
-    categoryName: category.name,
+    // Tous les metiers demandes, pas seulement le principal : le particulier
+    // ne recoit qu'un mail meme s'il a fait trois demandes.
+    categoryName: libelleMetiers,
     cityName: city.name,
     description: data.description,
     urgency: data.urgency,
@@ -355,6 +384,103 @@ export async function submitProject(
     // Non bloquant : si le broadcast plante, le projet reste cree et le cron
     // de rattrapage 9h/15h reprendra le relais. L'user ne voit pas l'erreur.
     console.error(`[submitProject] broadcast project ${project.id} failed :`, err);
+  }
+
+  // ------------------------------------------------------------------
+  // Metiers supplementaires : un projet DISTINCT par metier
+  // ------------------------------------------------------------------
+  // 28/08/2026 : un particulier qui renove a souvent besoin de plusieurs corps
+  // de metier. Plutot qu'une demande fourre-tout qu'aucun artisan ne sait
+  // traiter, on cree une demande par metier : chacune part aux bons pros et se
+  // debloque separement. Sur la meme demande et le meme visiteur, trois
+  // projets valent trois deblocages possibles au lieu d'un.
+  //
+  // Volontairement APRES le projet principal et son broadcast : si quoi que ce
+  // soit echoue ici, la demande principale est deja creee et partie. Chaque
+  // metier est traite dans son propre try/catch, pour qu'un metier en echec
+  // n'emporte pas les autres.
+  //
+  // La qualification IA est REUTILISEE telle quelle : c'est la meme
+  // description, le meme lieu, le meme client. La refaire coûterait N appels
+  // Claude pour un resultat identique.
+  //
+  // Pas de second mail de confirmation au particulier : il en recoit UN, qui
+  // liste ses metiers. En revanche un mail admin par projet, pour que chaque
+  // demande soit suivie (et filmee) separement.
+  for (const autreId of idsSupplementaires) {
+    try {
+      const { data: autreCat } = await serviceClient
+        .from("categories")
+        .select("id, name")
+        .eq("id", autreId)
+        .maybeSingle();
+      if (!autreCat) {
+        console.warn(`[submitProject] metier supplementaire ${autreId} inconnu, ignore`);
+        continue;
+      }
+
+      const jetonSuppression = crypto.randomUUID();
+      const { data: autreProjet, error: erreurInsert } = await serviceClient
+        .from("projects")
+        .insert({
+          first_name: data.firstName,
+          email: data.email,
+          phone: data.phone,
+          category_id: autreCat.id,
+          city_id: data.cityId,
+          description: data.description,
+          urgency: data.urgency,
+          budget: data.budget,
+          ai_qualification: aiQualification,
+          status: isSuspicious ? "suspicious" : "new",
+          suspicion_score: suspicionScore,
+          deletion_token: jetonSuppression,
+        })
+        .select("id")
+        .single();
+
+      if (erreurInsert || !autreProjet) {
+        console.error(`[submitProject] insertion metier ${autreCat.name} :`, erreurInsert);
+        continue;
+      }
+      console.log(`[submitProject] projet ${autreProjet.id} cree pour ${autreCat.name}`);
+
+      sendProjectNotification({
+        firstName: data.firstName,
+        email: data.email,
+        phone: data.phone,
+        categoryName: autreCat.name,
+        cityName: city.name,
+        departmentName,
+        isBE,
+        description: data.description,
+        urgency: data.urgency,
+        budget: data.budget,
+        aiQualification: aiQualification as Record<string, unknown> | null,
+        projectId: autreProjet.id,
+        isSuspicious,
+      }).catch((err) => console.error("Erreur email admin (non bloquante) :", err));
+
+      const diffusion = await broadcastBtpProject({
+        projectId: autreProjet.id,
+        projectTitle:
+          data.description.split("\n")[0].slice(0, 100) || "Nouveau projet",
+        projectDescription: data.description,
+        projectBudget: data.budget,
+        projectTimeline: data.urgency,
+        projectCategoryName: autreCat.name,
+        projectCategoryId: autreCat.id,
+        projectCityName: city.name,
+        projectCityId: data.cityId,
+        projectDepartmentId: city.department_id,
+        isSuspicious,
+      });
+      console.log(
+        `[submitProject] diffusion projet ${autreProjet.id} (${autreCat.name}) : ${diffusion.sent}/${diffusion.totalTargets}`
+      );
+    } catch (err) {
+      console.error(`[submitProject] metier supplementaire ${autreId} en echec :`, err);
+    }
   }
 
   redirect("/deposer-projet/merci");

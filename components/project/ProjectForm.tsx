@@ -159,6 +159,16 @@ export default function ProjectForm({
   // n'afficher a l'ecran 2 que les metiers de cette famille, au lieu des 57
   // d'un seul menu deroulant.
   const [vertical, setVertical] = useState<string>("");
+  // 28/08/2026 : un particulier qui renove a souvent besoin de PLUSIEURS corps
+  // de metier (« un plombier, un macon et un electricien »). L'ecran 2 accepte
+  // donc plusieurs metiers, et le serveur cree un projet DISTINCT par metier :
+  // chacun part aux bons artisans et se debloque separement. Sur la meme
+  // demande et le meme visiteur, trois projets valent trois deblocages
+  // possibles au lieu d'un.
+  //
+  // `categoryId` (le premier choisi) reste le metier principal : il porte la
+  // redirection, le mail de confirmation et toute la compatibilite existante.
+  const [extraCategoryIds, setExtraCategoryIds] = useState<number[]>([]);
   // Fix critique : inputs uncontrolled = React reset les valeurs au re-render.
   // Si l'action retourne une erreur (rate limit, validation), l'user voit son
   // formulaire vide et croit que "rien ne se passe". Solution : controlled.
@@ -289,6 +299,25 @@ export default function ProjectForm({
     // ce qui manque, sous les yeux.
     if (step === 3) return description.trim().length >= 20;
     return true;
+  }
+
+  /** Tous les metiers choisis, le principal en tete. */
+  function metiersChoisis(): number[] {
+    return categoryId === null ? [] : [categoryId, ...extraCategoryIds];
+  }
+  function estChoisi(id: number): boolean {
+    return metiersChoisis().includes(id);
+  }
+  /** Ajoute ou retire un metier. Le premier choisi devient le principal ; si on
+   *  le retire, le suivant prend sa place, pour que `categoryId` ne soit jamais
+   *  vide tant qu'il reste au moins un metier. */
+  function basculerMetier(id: number) {
+    const actuels = metiersChoisis();
+    const apres = actuels.includes(id)
+      ? actuels.filter((x) => x !== id)
+      : [...actuels, id];
+    setCategoryId(apres.length ? apres[0] : null);
+    setExtraCategoryIds(apres.slice(1));
   }
 
   /** Avance vers une etape precise. Utilise par les ecrans a choix, ou le clic
@@ -523,31 +552,63 @@ export default function ProjectForm({
         <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
           {vertical ? FAMILY_LABELS[vertical] : "Choisissez votre métier"}
         </label>
+        {/* L'invitation au choix multiple doit etre lisible AVANT le premier
+            clic : sinon personne ne devine qu'on peut en cocher plusieurs, et
+            la fonctionnalite ne sert a rien. Elle est donc dans l'aide, et
+            repetee sous le bouton une fois un metier choisi. */}
         <p className="text-sm text-[var(--text-secondary)] mb-4">
-          Touchez le métier qui vous concerne.
+          Touchez <strong className="text-[var(--text-primary)] font-semibold">un ou plusieurs métiers</strong>. Une demande partira pour chacun.
         </p>
         <div className="grid grid-cols-2 gap-2">
           {(grouped[vertical] ?? []).map((cat) => (
             <button
               key={cat.id}
               type="button"
-              onClick={() => {
-                setCategoryId(cat.id);
-                goTo(2);
-              }}
+              aria-pressed={estChoisi(cat.id)}
+              onClick={() => basculerMetier(cat.id)}
               className={`rounded-xl border px-3 py-3 text-sm font-medium transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
-                categoryId === cat.id
+                estChoisi(cat.id)
                   ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--text-primary)]"
                   : "border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-[var(--accent)]"
               }`}
             >
+              {estChoisi(cat.id) ? (
+                <span className="text-[var(--accent)] font-bold mr-1.5" aria-hidden>
+                  ✓
+                </span>
+              ) : null}
               {cat.name}
             </button>
           ))}
         </div>
-        {/* Le metier part au serveur par ce champ cache : les boutons ci-dessus
-            ne sont pas des <input>, et la Server Action lit le FormData. */}
+        {/* Les metiers partent au serveur par ces champs caches : les boutons
+            ci-dessus ne sont pas des <input>, et la Server Action lit le
+            FormData. `categoryId` = le metier principal (compatibilite avec
+            tout l'existant), `categoryIds` = la liste complete. */}
         <input type="hidden" name="categoryId" value={categoryId ?? ""} />
+        <input type="hidden" name="categoryIds" value={metiersChoisis().join(",")} />
+
+        {/* Ici le clic ne peut plus valider tout seul : il faut pouvoir en
+            choisir plusieurs. Le bouton n'apparait qu'une fois un metier
+            choisi, et dit combien de demandes vont partir. */}
+        {categoryId !== null && (
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={() => goTo(2)}
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-6 py-3.5 rounded-full text-sm transition-all duration-250 hover:scale-[1.01]"
+            >
+              {metiersChoisis().length > 1
+                ? `Continuer avec ${metiersChoisis().length} métiers →`
+                : "Continuer →"}
+            </button>
+            <p className="mt-2.5 text-center text-[13px] text-[var(--text-secondary)]">
+              {metiersChoisis().length > 1
+                ? `Vous pouvez en choisir plusieurs : ${metiersChoisis().length} demandes distinctes partiront, une par métier.`
+                : "Besoin d’un autre corps de métier ? Touchez-en autant que nécessaire, une demande partira pour chacun."}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* ============================================================ */}
