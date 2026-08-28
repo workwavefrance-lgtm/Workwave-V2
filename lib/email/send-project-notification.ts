@@ -79,7 +79,6 @@ const BUDGET_LABELS: Record<string, string> = {
   "2000_5000": "2 000 € à 5 000 €",
   "5000_15000": "5 000 € à 15 000 €",
   gt15000: "Plus de 15 000 €",
-  unknown: "Je ne sais pas",
 };
 
 export async function sendProjectNotification(
@@ -95,7 +94,9 @@ export async function sendProjectNotification(
   }
 
   const urgencyLabel = URGENCY_LABELS[data.urgency] || data.urgency;
-  const budgetLabel = BUDGET_LABELS[data.budget] || data.budget;
+  // 28/08/2026 : budget retire du formulaire, les nouveaux projets valent
+  // « unknown » et n'affichent plus la ligne (cf. broadcast-btp-project.ts).
+  const budgetLabel = BUDGET_LABELS[data.budget] ?? null;
 
   const aiSection = data.aiQualification
     ? `
@@ -127,7 +128,7 @@ export async function sendProjectNotification(
         <tr><td style="padding:6px 0;color:#6B7280;">Ville</td><td style="padding:6px 0;color:#0A0A0A;">${data.cityName}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">${data.isBE ? "Province" : "Département"}</td><td style="padding:6px 0;color:#0A0A0A;">${data.departmentName || "-"}</td></tr>
         <tr><td style="padding:6px 0;color:#6B7280;">Urgence</td><td style="padding:6px 0;color:#0A0A0A;">${urgencyLabel}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">Budget</td><td style="padding:6px 0;color:#0A0A0A;">${budgetLabel}</td></tr>
+        ${budgetLabel ? `<tr><td style="padding:6px 0;color:#6B7280;">Budget</td><td style="padding:6px 0;color:#0A0A0A;">${budgetLabel}</td></tr>` : ""}
         <tr><td style="padding:6px 0;color:#6B7280;vertical-align:top;">Description</td><td style="padding:6px 0;color:#0A0A0A;">${data.description}</td></tr>
 
         <tr><td colspan="2" style="padding:20px 0 8px;font-size:16px;font-weight:600;color:#0A0A0A;border-top:1px solid #E5E7EB;">Contact</td></tr>

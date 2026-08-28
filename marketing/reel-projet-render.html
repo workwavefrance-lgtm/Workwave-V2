@@ -150,7 +150,6 @@
     <div class="el"><span class="stitle">Le projet</span></div>
     <div class="el" data-d="400" style="width:100%">
       <div class="card">
-        <div class="row"><span class="k">Budget</span><span class="v" id="budget">-</span></div>
         <div class="row"><span class="k">Urgence</span><span class="v" id="urgence">-</span></div>
         <div class="row"><span class="k">Zone</span><span class="v" id="zone">-</span></div>
         <p class="desc" id="description">-</p>
@@ -211,7 +210,13 @@
   // "Plus de 15 000 €") → label "Gros budget" + pastille pleine avec halo pour
   // faire pop le gros lead ; sinon pastille "ghost" (contour), secondaire pour ne
   // pas voler la vedette au chantier.
-  const rawBudget = (P.budgetHero || P.budget || "").trim();
+  // 28/08/2026 : le budget n'est plus demande au particulier (71 % de reponses
+  // inexploitables sur 132 projets : « moins de 500 € » clique par defaut ou
+  // « je ne sais pas »). Il ne figure donc plus ni dans les emails aux
+  // artisans ni dans les reels. Le badge et sa mise en page restent en place
+  // au cas ou on remettrait la question un jour : il suffirait de rendre la
+  // ligne ci-dessous a sa forme d'origine.
+  const rawBudget = "";
   if (rawBudget && rawBudget.toLowerCase() !== "à définir") {
     const nums = (rawBudget.match(/\d[\d\s.]*/g) || [])
       .map((s) => parseInt(s.replace(/[^\d]/g, ""), 10))

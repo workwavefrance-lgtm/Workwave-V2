@@ -29,6 +29,52 @@ const VERTICAL_LABELS: Record<string, string> = {
   personne: "Aide à la personne",
 };
 
+// Metiers les plus demandes, MESURES sur les 132 projets deja deposes
+// (28/08/2026) : Macon 18, Plombier 9, Couvreur 8, Nettoyage vitres 8,
+// Electricien 7, Menuisier 7, Carreleur 7, Garde animaux 7, Plaquiste 6,
+// Chauffagiste 6, Menage 5, Debarras 4.
+//
+// Sert a deux endroits : les exemples cites sur chaque porte, et l'ordre des
+// boutons a l'ecran 2. Sans ce tri, l'ordre est alphabetique et la porte
+// « Bâtiment » s'annonce par « Architecte, Ascensoriste… », qui ne parle a
+// personne, au lieu de « Maçon, plombier, couvreur… ».
+//
+// A remesurer quand le volume de projets aura change d'ordre de grandeur :
+// npx tsx scripts/_diag-motscles.ts
+const POPULAIRES = [
+  "Maçon",
+  "Plombier",
+  "Couvreur",
+  "Électricien",
+  "Menuisier",
+  "Carreleur",
+  "Nettoyage vitres",
+  "Garde animaux",
+  "Plaquiste",
+  "Chauffagiste",
+  "Ménage",
+  "Débarras",
+  "Peintre",
+  "Serrurier",
+  "Garde d'enfants",
+  "Aide aux seniors",
+  "Déménagement",
+  "Soutien scolaire",
+];
+
+function rangPopularite(nom: string): number {
+  const i = POPULAIRES.indexOf(nom);
+  return i === -1 ? POPULAIRES.length : i;
+}
+
+// Les trois portes du premier ecran. Formules du point de vue du particulier
+// (« Bâtiment et travaux »), pas du decoupage interne de la base (« btp »).
+const FAMILY_LABELS: Record<string, string> = {
+  btp: "Bâtiment et travaux",
+  domicile: "Entretien de la maison",
+  personne: "Aide à la personne",
+};
+
 const URGENCY_OPTIONS = [
   { value: "today", label: "Aujourd'hui" },
   { value: "this_week", label: "Cette semaine" },
@@ -36,16 +82,27 @@ const URGENCY_OPTIONS = [
   { value: "not_urgent", label: "Pas pressé" },
 ];
 
-const BUDGET_OPTIONS = [
-  { value: "lt500", label: "Moins de 500 €" },
-  { value: "500_2000", label: "500 € à 2 000 €" },
-  { value: "2000_5000", label: "2 000 € à 5 000 €" },
-  { value: "5000_15000", label: "5 000 € à 15 000 €" },
-  { value: "gt15000", label: "Plus de 15 000 €" },
-  { value: "unknown", label: "Je ne sais pas" },
-];
+// 28/08/2026 : la question du budget est SUPPRIMEE du formulaire. Mesure sur
+// les 132 projets deposes : 38 % repondaient « moins de 500 € » (la premiere
+// option de la liste, donc largement du clic par defaut) et 33 % « je ne sais
+// pas ». 71 % de reponses inexploitables, et une donnee fausse est pire que
+// pas de donnee : un artisan qui lit « moins de 500 € » sur un chantier a
+// 3 000 € ne debloque pas le lead, et la vente est perdue sur un champ mal
+// rempli.
+//
+// La colonne `budget` reste NOT NULL en base et le schema Zod l'exige toujours
+// (cf. deposer-projet/actions.ts) : on envoie donc « unknown » en champ cache,
+// valeur deja acceptee par l'enum. Aucun changement de schema, aucun risque
+// sur la soumission.
+const BUDGET_ABSENT = "unknown";
 
-const STEPS = ["Métier", "Ville", "Projet", "Contact"];
+// 28/08/2026 : cinq ecrans au lieu de quatre. Une question par ecran, et le
+// clic vaut validation quand la reponse est un choix (famille, metier, quand) :
+// plus de bouton « Continuer » a presser derriere. Le bouton ne survit que la
+// ou l'on ECRIT (projet, coordonnees), sinon on ne sait pas quand la personne
+// a fini de taper. Mesure qui a declenche la refonte : 408 formulaires
+// commences sur 60 jours, 117 termines, soit 71 % d'abandon.
+const STEPS = ["Besoin", "Métier", "Quand", "Projet", "Coordonnées"];
 const initialState: FormState = { success: false };
 
 // Validation client des coordonnées (étape 4), alignée sur le schéma Zod serveur
@@ -87,14 +144,21 @@ export default function ProjectForm({
   // Step initial intelligent : skip auto les étapes déjà remplies via les
   // props (cas embed sur pages listing où catégorie+ville sont connues).
   // Comportement par défaut (sans pré-remplissage) inchangé = step 0.
-  const initialStep = defaultCategoryId && defaultCity ? 2 : defaultCategoryId ? 1 : 0;
+  // Le formulaire integre dans une page metier/ville arrive deja rempli : on
+  // saute alors les deux ecrans de choix et on demarre a « Quand ». La ville
+  // n'avance plus le depart : elle est passee au DERNIER ecran, avec les
+  // coordonnees, donc un defaultCity ne fait que pre-remplir un champ.
+  const initialStep = defaultCategoryId ? 2 : 0;
   const [step, setStep] = useState(initialStep);
   const [categoryId, setCategoryId] = useState<number | null>(
     defaultCategoryId ?? null
   );
   const [cityId, setCityId] = useState<number | null>(defaultCity?.id ?? null);
   const [urgency, setUrgency] = useState<string>("");
-  const [budget, setBudget] = useState<string>("");
+  // Famille de metiers choisie a l'ecran 1 (btp / domicile / personne). Sert a
+  // n'afficher a l'ecran 2 que les metiers de cette famille, au lieu des 57
+  // d'un seul menu deroulant.
+  const [vertical, setVertical] = useState<string>("");
   // Fix critique : inputs uncontrolled = React reset les valeurs au re-render.
   // Si l'action retourne une erreur (rate limit, validation), l'user voit son
   // formulaire vide et croit que "rien ne se passe". Solution : controlled.
@@ -214,18 +278,26 @@ export default function ProjectForm({
   // Validation client minimale pour permettre "Continuer".
   // (la validation serveur Zod reste le filet de sécurité)
   function canProceed(): boolean {
-    if (step === 0) return categoryId !== null;
-    if (step === 1) return cityId !== null;
-    // 19/08/2026 : la description devient OBLIGATOIRE, et le blocage se fait
-    // ICI, sur le bouton "Continuer", jamais a l'envoi final. Raison : le
-    // formulaire est en plusieurs etapes ; une erreur serveur sur un champ
-    // d'une etape MASQUEE produisait un echec silencieux (l'utilisateur
-    // cliquait "Envoyer" et il ne se passait rien). C'est le piege qui avait
-    // fait rendre ce champ facultatif. En bloquant a l'etape, l'utilisateur
-    // voit tout de suite ce qui manque, sous les yeux.
-    if (step === 2)
-      return urgency !== "" && budget !== "" && description.trim().length >= 20;
+    if (step === 0) return vertical !== "";
+    if (step === 1) return categoryId !== null;
+    if (step === 2) return urgency !== "";
+    // 19/08/2026 : la description est OBLIGATOIRE, et le blocage se fait ICI,
+    // sur le bouton "Continuer", jamais a l'envoi final. Raison : le formulaire
+    // est en plusieurs etapes ; une erreur serveur sur un champ d'une etape
+    // MASQUEE produisait un echec silencieux (l'utilisateur cliquait "Envoyer"
+    // et il ne se passait rien). En bloquant a l'etape, il voit tout de suite
+    // ce qui manque, sous les yeux.
+    if (step === 3) return description.trim().length >= 20;
     return true;
+  }
+
+  /** Avance vers une etape precise. Utilise par les ecrans a choix, ou le clic
+   *  sur la reponse vaut validation : on ne repasse pas par canProceed(), qui
+   *  lirait un state pas encore commite par React. */
+  function goTo(target: number) {
+    const t = Math.min(Math.max(target, 0), STEPS.length - 1);
+    setStep(t);
+    trackClient(EVENTS.PROJECT_STEP_REACHED, { step: t + 1, name: STEPS[t] });
   }
 
   function next() {
@@ -247,6 +319,14 @@ export default function ProjectForm({
   for (const cat of categories) {
     if (!grouped[cat.vertical]) grouped[cat.vertical] = [];
     grouped[cat.vertical].push(cat);
+  }
+  // Les plus demandes d'abord, le reste par ordre alphabetique. Vaut pour les
+  // exemples cites sur les portes ET pour l'ordre des boutons a l'ecran 2.
+  for (const v of Object.keys(grouped)) {
+    grouped[v].sort((a, b) => {
+      const d = rangPopularite(a.name) - rangPopularite(b.name);
+      return d !== 0 ? d : a.name.localeCompare(b.name, "fr");
+    });
   }
 
   const isLast = step === STEPS.length - 1;
@@ -326,14 +406,13 @@ export default function ProjectForm({
       )}
 
       {/* ============================================================ */}
-      {/* ÉTAPE 1 · Métier                                              */}
+      {/* ÉCRAN 1 · La famille de métiers                               */}
       {/* ============================================================ */}
+      {/* Avant le 28/08/2026 : un menu deroulant de 57 metiers, sans recherche,
+          en toute premiere question. Sur un telephone c'est un rouleau
+          interminable. Trois portes guident sans noyer, et le clic vaut
+          validation : on passe directement aux metiers de la famille. */}
       <div className={step === 0 ? "" : "hidden"}>
-        {/* Rappel de ce que l'utilisateur vient d'ecrire dans la barre de
-            recherche de l'accueil. Sans ce rappel il arrive ici devant une
-            liste vide et croit que sa saisie a ete perdue : c'est ce que Willy
-            a constate en testant le 11/08/2026. Le texte etait bien conserve
-            (il repart a l'etape 3), mais invisible : donc perdu pour lui. */}
         {defaultDescription && (
           <div className="mb-6 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
             <p className="text-sm text-[var(--text-secondary)]">
@@ -346,43 +425,63 @@ export default function ProjectForm({
             </p>
           </div>
         )}
-        <label
-          htmlFor="categoryId"
-          className="block text-base font-medium text-[var(--text-primary)] mb-3"
-        >
+        <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
           Quel type de travaux ?
         </label>
         <p className="text-sm text-[var(--text-secondary)] mb-4">
-          Choisissez le métier dont vous avez besoin.
+          Gratuit, sans engagement.
         </p>
-        <select
-          id="categoryId"
-          name="categoryId"
-          value={categoryId ?? ""}
-          onChange={(e) =>
-            setCategoryId(e.target.value ? Number(e.target.value) : null)
-          }
-          className={`w-full h-12 px-4 rounded-xl border bg-[var(--bg-primary)] text-[var(--text-primary)] transition-all duration-250 outline-none appearance-none cursor-pointer ${
-            state.errors?.categoryId
-              ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
-              : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
-          }`}
-        >
-          <option value="" disabled>
-            Choisissez un métier...
-          </option>
-          {(["btp", "domicile", "personne"] as const).map((vertical) =>
-            grouped[vertical] ? (
-              <optgroup key={vertical} label={VERTICAL_LABELS[vertical]}>
-                {grouped[vertical].map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </optgroup>
+
+        <div className="space-y-3">
+          {(["btp", "domicile", "personne"] as const).map((v) =>
+            grouped[v]?.length ? (
+              <button
+                key={v}
+                type="button"
+                onClick={() => {
+                  setVertical(v);
+                  goTo(1);
+                }}
+                className="w-full text-left rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] px-5 py-4 transition-all duration-250 hover:border-[var(--accent)] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+              >
+                <span className="block text-base font-semibold text-[var(--text-primary)]">
+                  {FAMILY_LABELS[v]}
+                </span>
+                <span className="mt-1 block text-sm text-[var(--text-secondary)]">
+                  {grouped[v]
+                    .slice(0, 4)
+                    .map((c, i) => (i === 0 ? c.name : c.name.toLowerCase()))
+                    .join(", ")}
+                  … {grouped[v].length} métiers
+                </span>
+              </button>
             ) : null
           )}
-        </select>
+        </div>
+
+        {/* Reassurance affichee UNE SEULE FOIS, ici. Avant le 28/08/2026 elle
+            occupait quatre grandes cartes AU-DESSUS du formulaire, reaffichees
+            a chaque etape : sur mobile, aucun champ n'etait visible sans
+            defiler, a aucune etape. Le fond est conserve, le volume non. */}
+        <ul className="mt-6 flex flex-wrap gap-2">
+          {[
+            "Gratuit",
+            "Sans engagement",
+            "SIRET vérifié",
+            "Numéro jamais affiché",
+          ].map((t) => (
+            <li
+              key={t}
+              className="rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-medium text-[var(--text-primary)]"
+            >
+              <span className="text-[var(--accent)] font-bold" aria-hidden>
+                ✓
+              </span>{" "}
+              {t}
+            </li>
+          ))}
+        </ul>
+
         {state.errors?.categoryId && (
           <p className="mt-1.5 text-sm text-red-500">
             {state.errors.categoryId}
@@ -391,9 +490,56 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 2 · Ville                                               */}
+      {/* ÉCRAN 2 · Le métier, dans la famille choisie                  */}
       {/* ============================================================ */}
       <div className={step === 1 ? "" : "hidden"}>
+        <button
+          type="button"
+          onClick={() => goTo(0)}
+          className="mb-4 rounded-full border border-[var(--border-color)] px-3 py-1.5 text-[13px] text-[var(--text-secondary)] transition-colors duration-250 hover:text-[var(--text-primary)]"
+        >
+          ← Changer de besoin
+        </button>
+        <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
+          {vertical ? FAMILY_LABELS[vertical] : "Choisissez votre métier"}
+        </label>
+        <p className="text-sm text-[var(--text-secondary)] mb-4">
+          Touchez le métier qui vous concerne.
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {(grouped[vertical] ?? []).map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => {
+                setCategoryId(cat.id);
+                goTo(2);
+              }}
+              className={`rounded-xl border px-3 py-3 text-sm font-medium transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+                categoryId === cat.id
+                  ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--text-primary)]"
+                  : "border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-[var(--accent)]"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+        {/* Le metier part au serveur par ce champ cache : les boutons ci-dessus
+            ne sont pas des <input>, et la Server Action lit le FormData. */}
+        <input type="hidden" name="categoryId" value={categoryId ?? ""} />
+      </div>
+
+      {/* ============================================================ */}
+      {/* ÉCRAN 5a · La ville, réunie avec les coordonnées               */}
+      {/* ============================================================ */}
+      {/* 28/08/2026 : la ville passe de l'ecran 2 au dernier ecran, avec les
+          coordonnees. Deux effets : le clavier ne s'ouvre qu'a partir de
+          l'ecran 4, et la preuve chiffree (« Maçon · 997 professionnels
+          référencés en Vienne ») arrive juste au-dessus du champ telephone,
+          c'est-a-dire pile au moment ou la personne se demande si donner son
+          numero sert a quelque chose. */}
+      <div className={step === 4 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
           Dans quelle ville ?
         </label>
@@ -438,19 +584,65 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 3 · Projet (description OBLIGATOIRE + urgence + budget) */}
+      {/* ÉCRAN 3 · Quand                                               */}
       {/* ============================================================ */}
+      {/* Le clic vaut validation : la reponse fait avancer, sans bouton a
+          presser derriere sur un ecran ou l'on a deja repondu. */}
       <div className={step === 2 ? "" : "hidden"}>
-        <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
-          Votre projet
+        <button
+          type="button"
+          onClick={() => goTo(1)}
+          className="mb-4 rounded-full border border-[var(--border-color)] px-3 py-1.5 text-[13px] text-[var(--text-secondary)] transition-colors duration-250 hover:text-[var(--text-primary)]"
+        >
+          ← Retour
+        </button>
+        <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
+          C&apos;est pour quand ?
         </label>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">
-          Plus vous êtes précis, plus les artisans qui vous rappellent sont
-          les bons. Deux phrases suffisent : ce qu&apos;il y a à faire, et
-          où.
+        <p className="text-sm text-[var(--text-secondary)] mb-4">
+          Une idée suffit.
         </p>
+        <div className="flex flex-wrap gap-2">
+          {URGENCY_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                setUrgency(opt.value);
+                goTo(3);
+              }}
+              className={`rounded-full border px-5 py-3 text-sm font-medium transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+                urgency === opt.value
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                  : "border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-[var(--accent)]"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {/* L'urgence part au serveur par ce champ cache (les boutons ci-dessus
+            ne sont pas des <input> : ils valident ET font avancer). */}
+        <input type="hidden" name="urgency" value={urgency} />
+        {/* Budget : question retiree du formulaire le 28/08/2026, valeur
+            neutre conservee pour le schema serveur (cf. BUDGET_ABSENT). */}
+        <input type="hidden" name="budget" value={BUDGET_ABSENT} />
+        {state.errors?.urgency && (
+          <p className="mt-2 text-sm text-red-500">{state.errors.urgency}</p>
+        )}
+      </div>
 
-        <div className="space-y-6">
+      {/* ============================================================ */}
+      {/* ÉCRAN 4 · Le chantier (description obligatoire)               */}
+      {/* ============================================================ */}
+      <div className={step === 3 ? "" : "hidden"}>
+        <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
+          Décrivez votre chantier
+        </label>
+        <p className="text-sm text-[var(--text-secondary)] mb-4">
+          Plus vous êtes précis, plus les artisans qui vous rappellent sont les
+          bons. Deux phrases suffisent : ce qu&apos;il y a à faire, et où.
+        </p>
           <div>
             <label
               htmlFor="description"
@@ -487,79 +679,12 @@ export default function ProjectForm({
               </p>
             ) : null}
           </div>
-
-          <fieldset>
-            <legend className="block text-sm font-medium text-[var(--text-primary)] mb-3">
-              Urgence
-            </legend>
-            <div className="flex flex-wrap gap-2">
-              {URGENCY_OPTIONS.map((opt) => (
-                <label key={opt.value} className="cursor-pointer">
-                  <input
-                    type="radio"
-                    name="urgency"
-                    value={opt.value}
-                    checked={urgency === opt.value}
-                    onChange={(e) => setUrgency(e.target.value)}
-                    className="peer sr-only"
-                  />
-                  <span className="inline-block px-4 py-2.5 rounded-full text-sm font-medium border border-[var(--border-color)] text-[var(--text-secondary)] bg-[var(--bg-primary)] transition-all duration-250 peer-checked:bg-[var(--accent)] peer-checked:text-white peer-checked:border-[var(--accent)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--accent)]/40 hover:border-[var(--text-tertiary)]">
-                    {opt.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-            {state.errors?.urgency && (
-              <p className="mt-1.5 text-sm text-red-500">
-                {state.errors.urgency}
-              </p>
-            )}
-          </fieldset>
-
-          {/* Budget en pastilles, comme l'urgence juste au-dessus.
-              Avant : un menu déroulant, trois gestes (ouvrir, faire défiler,
-              choisir) là où l'urgence n'en demande qu'un, et un rythme cassé au
-              milieu de la même étape. « Je ne sais pas » est mis en avant comme
-              une réponse normale : c'est le cas le plus fréquent, et le
-              présenter comme un choix légitime évite qu'on renonce ici. */}
-          <fieldset>
-            <legend className="block text-sm font-medium text-[var(--text-primary)] mb-2">
-              Budget estimé
-            </legend>
-            <p className="text-[13px] text-[var(--text-secondary)] mb-3">
-              Une fourchette suffit. Ça aide l&apos;artisan à vous proposer
-              quelque chose de réaliste.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {BUDGET_OPTIONS.map((opt) => (
-                <label key={opt.value} className="cursor-pointer">
-                  <input
-                    type="radio"
-                    name="budget"
-                    value={opt.value}
-                    checked={budget === opt.value}
-                    onChange={(e) => setBudget(e.target.value)}
-                    className="peer sr-only"
-                  />
-                  <span className="inline-block px-4 py-2.5 rounded-full text-sm font-medium border border-[var(--border-color)] text-[var(--text-secondary)] bg-[var(--bg-primary)] transition-all duration-250 peer-checked:bg-[var(--accent)] peer-checked:text-white peer-checked:border-[var(--accent)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--accent)]/40 hover:border-[var(--text-tertiary)]">
-                    {opt.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-            {state.errors?.budget && (
-              <p className="mt-1.5 text-sm text-red-500">
-                {state.errors.budget}
-              </p>
-            )}
-          </fieldset>
-        </div>
       </div>
 
       {/* ============================================================ */}
-      {/* ÉTAPE 4 · Coordonnées + RGPD + Submit                         */}
+      {/* ÉCRAN 5b · Coordonnées + RGPD + Submit                        */}
       {/* ============================================================ */}
-      <div className={step === 3 ? "" : "hidden"}>
+      <div className={step === 4 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
           Vos coordonnées
         </label>
@@ -774,8 +899,18 @@ export default function ProjectForm({
         </p>
       )}
 
-      {/* Navigation entre étapes */}
-      <div className="flex items-center justify-between gap-3 pt-6 border-t border-[var(--border-color)]">
+      {/* Navigation entre étapes.
+          28/08/2026 : la barre ne s'affiche plus QUE sur les deux ecrans ou
+          l'on ECRIT (le chantier, puis les coordonnees). Sur les trois
+          premiers, la reponse est un choix : le clic valide et fait avancer,
+          un bouton « Continuer » y serait un geste de plus sur un ecran ou la
+          personne a deja repondu. Le retour y est un bouton en haut d'ecran,
+          visible sans defiler. */}
+      <div
+        className={`items-center justify-between gap-3 pt-6 border-t border-[var(--border-color)] ${
+          step >= 3 ? "flex" : "hidden"
+        }`}
+      >
         {step > 0 ? (
           <button
             type="button"

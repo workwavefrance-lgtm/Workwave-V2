@@ -13,7 +13,7 @@
  * domaines (workwave.fr BTP + workwaveai.co AI). Cette protection automatique
  * détecte sous 60min toute régression critique non vue par les tests.
  *
- * Auth : Bearer CRON_SECRET (Vercel cron set automatiquement le header).
+ * Auth : Bearer CRON_SECRET (envoye par le cron du VPS, cf. /opt/workwave/run-cron.sh).
  *
  * Endpoint : /api/cron/healthcheck, appele par le crontab du VPS (72.60.130.5).
  */
@@ -171,7 +171,7 @@ function buildAlertHtml(failures: CheckResult[], allResults: CheckResult[]): str
       </thead>
       <tbody>${failuresTable}</tbody>
     </table>
-    <p style="margin:18px 0 0;font-size:12px;color:#999;">Cron horaire · Vercel · /api/cron/healthcheck</p>
+    <p style="margin:18px 0 0;font-size:12px;color:#999;">Cron horaire · VPS Hostinger (Coolify) · /api/cron/healthcheck</p>
   </div>
 </div>
 </body></html>`;
@@ -181,7 +181,7 @@ export async function GET(req: Request) {
   // 1. AUTH
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
-  // Vercel cron envoie automatiquement Bearer CRON_SECRET. Le ping manuel (debug)
+  // Le cron du VPS envoie Bearer CRON_SECRET. Le ping manuel (debug)
   // doit aussi fournir ce header.
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

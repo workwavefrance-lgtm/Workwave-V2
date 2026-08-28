@@ -35,51 +35,20 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] mb-4">
           Décrivez votre projet
         </h1>
+        {/* 28/08/2026 : trois lignes ramenees a une. Sur un telephone, chaque
+            ligne d'introduction repousse d'autant la premiere question. */}
         <p className="text-[var(--text-secondary)] text-lg max-w-lg mx-auto">
-          Un professionnel adapté vous contactera rapidement. Vous comparez,
-          vous choisissez.
+          Un pro adapté vous rappelle. Vous comparez, vous choisissez.
         </p>
-        {/* Repères de confiance (tous vrais, tous vérifiables).
-            Avant le 08/08/2026 : une ligne grise en 14px, au même niveau visuel
-            qu'une note de bas de page, invisible au moment où le doute se joue.
-            Et « Coordonnées protégées » ne veut rien dire pour quelqu'un qui
-            n'est pas du métier : chaque promesse porte donc sa traduction en
-            français courant. */}
-        <ul className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-left">
-          {[
-            {
-              titre: "Gratuit",
-              detail: "Vous ne payez rien, ni maintenant ni plus tard.",
-            },
-            {
-              titre: "Sans engagement",
-              detail: "Vous choisissez, ou vous ne choisissez personne.",
-            },
-            {
-              titre: "Artisans vérifiés",
-              detail: "SIRET contrôlé au registre officiel des entreprises.",
-            },
-            {
-              titre: "Numéro protégé",
-              detail: "Jamais affiché sur le site, jamais revendu.",
-            },
-          ].map(({ titre, detail }) => (
-            <li
-              key={titre}
-              className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4"
-            >
-              <p className="flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
-                <span className="text-[var(--accent)]" aria-hidden>
-                  ✓
-                </span>
-                {titre}
-              </p>
-              <p className="mt-1 text-[13px] leading-snug text-[var(--text-secondary)]">
-                {detail}
-              </p>
-            </li>
-          ))}
-        </ul>
+        {/* Le titre reste : il porte le referencement de la page et annonce ce
+            qu'on va faire. C'est la hauteur des blocs SOUS lui qui repoussait
+            le formulaire hors de l'ecran, pas lui. */}
+        {/* 28/08/2026 : les quatre grandes cartes de confiance qui se trouvaient
+            ici ont ete DEPLACEES dans le formulaire, sur son premier ecran, en
+            pastilles. Elles occupaient 700 px sur un telephone, si bien
+            qu'AUCUN champ n'etait visible sans defiler ; et comme elles vivaient
+            dans la page et non dans une etape, elles etaient reaffichees
+            au-dessus des QUATRE etapes. Le fond est conserve, le volume non. */}
       </div>
 
       <ProjectForm

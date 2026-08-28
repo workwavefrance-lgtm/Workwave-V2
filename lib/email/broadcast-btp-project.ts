@@ -184,9 +184,13 @@ function humanBudget(value: string | null): string | null {
     "2000_5000": "2 000 à 5 000 €",
     "5000_15000": "5 000 à 15 000 €",
     gt15000: "Plus de 15 000 €",
-    unknown: "Non précisé",
   };
-  return m[value] ?? value;
+  // 28/08/2026 : la question du budget a ete retiree du formulaire (71 % de
+  // reponses inexploitables sur 132 projets). Les nouveaux projets arrivent
+  // donc avec « unknown », et la ligne Budget ne doit plus s'afficher du tout :
+  // « Non précisé » n'apporte rien a l'artisan qui decide de payer 9,90 €.
+  // Les anciens projets gardent leur valeur et restent affiches normalement.
+  return m[value] ?? null;
 }
 
 function humanUrgency(value: string | null): string | null {
