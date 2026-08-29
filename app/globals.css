@@ -192,7 +192,24 @@ body {
 
 /* Respect de l'accessibilite : si l'utilisateur a active "Reduire les
    animations" dans son OS, on coupe nos animations decoratives. */
+/* Chevron des trois « portes » du depot (29/08/2026).
+   Probleme : sur mobile, rien ne dit que ces trois cartes sont cliquables --
+   pas de survol pour le reveler, et une carte bordee ressemble a un simple
+   encadre d'information. Le chevron est le signal universel « ceci mene a un
+   ecran suivant » (c'est celui des reglages d'un telephone).
+   Il fait trois allers-retours puis s'arrete : une animation permanente a cote
+   d'un choix a faire finit par distraire de ce choix. */
+@keyframes chevron-invite {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+.animate-chevron-invite {
+  animation: chevron-invite 1100ms ease-in-out 3;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .animate-chevron-invite,
   .animate-accent-pulse,
   .animate-halo-respire,
   .animate-defile-exemples,

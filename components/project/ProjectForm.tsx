@@ -481,8 +481,18 @@ export default function ProjectForm({
           Gratuit, sans engagement.
         </p>
 
+        {/* 29/08/2026 : deux signaux pour dire que ces cartes se touchent.
+            Sur mobile il n'y a pas de survol pour le reveler, et une carte
+            bordee ressemble a un simple encadre d'information.
+            1. Le chevron, signal universel « ceci mene a un ecran suivant »
+               (celui des reglages d'un telephone). Il fait trois allers-retours
+               a l'arrivee puis s'arrete : une animation permanente a cote d'un
+               choix a faire finit par distraire de ce choix.
+            2. L'apparition en cascade, qui fait suivre les trois cartes du
+               regard et signale qu'elles forment une liste de choix.
+            Les deux se desactivent avec `prefers-reduced-motion`. */}
         <div className="space-y-3">
-          {(["btp", "domicile", "personne"] as const).map((v) =>
+          {(["btp", "domicile", "personne"] as const).map((v, index) =>
             grouped[v]?.length ? (
               <button
                 key={v}
@@ -491,18 +501,34 @@ export default function ProjectForm({
                   setVertical(v);
                   goTo(1);
                 }}
-                className="w-full text-left rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] px-5 py-4 transition-all duration-250 hover:border-[var(--accent)] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                style={{ animationDelay: `${index * 110}ms` }}
+                className="animate-slide-in-up group flex w-full items-center gap-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] px-5 py-4 text-left transition-all duration-250 hover:border-[var(--accent)] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
               >
-                <span className="block text-base font-semibold text-[var(--text-primary)]">
-                  {FAMILY_LABELS[v]}
+                <span className="min-w-0 flex-1">
+                  <span className="block text-base font-semibold text-[var(--text-primary)]">
+                    {FAMILY_LABELS[v]}
+                  </span>
+                  <span className="mt-1 block text-sm text-[var(--text-secondary)]">
+                    {grouped[v]
+                      .slice(0, 4)
+                      .map((c, i) => (i === 0 ? c.name : c.name.toLowerCase()))
+                      .join(", ")}
+                    … {grouped[v].length} métiers
+                  </span>
                 </span>
-                <span className="mt-1 block text-sm text-[var(--text-secondary)]">
-                  {grouped[v]
-                    .slice(0, 4)
-                    .map((c, i) => (i === 0 ? c.name : c.name.toLowerCase()))
-                    .join(", ")}
-                  … {grouped[v].length} métiers
-                </span>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="animate-chevron-invite h-5 w-5 shrink-0 text-[var(--accent)] transition-transform duration-250 group-hover:translate-x-1"
+                  style={{ animationDelay: `${600 + index * 110}ms` }}
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
               </button>
             ) : null
           )}
