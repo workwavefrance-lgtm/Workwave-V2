@@ -618,7 +618,12 @@ export default function ProjectForm({
             choisir plusieurs. Le bouton n'apparait qu'une fois un metier
             choisi, et dit combien de demandes vont partir. */}
         {categoryId !== null && (
-          <div className="mt-5">
+          /* Colle en bas de l'ecran (29/08/2026). Constate sur les captures de
+             production : la liste fait jusqu'a 25 metiers, donc quelqu'un qui
+             coche deux metiers en haut devait faire defiler toute la liste pour
+             trouver le bouton. Il reste desormais a portee de pouce, et le fond
+             opaque le garde lisible par-dessus les metiers qui defilent. */
+          <div className="sticky bottom-3 z-10 mt-5 rounded-2xl bg-[var(--bg-primary)]/95 p-3 shadow-lg ring-1 ring-[var(--border-color)] backdrop-blur">
             <button
               type="button"
               onClick={() => goTo(2)}
