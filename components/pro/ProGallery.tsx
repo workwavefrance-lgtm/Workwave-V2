@@ -99,6 +99,35 @@ export default function ProGallery({
 
   const active = ouverte !== null ? photos[ouverte] : null;
 
+  // Grand format QUAND LE PRO A ENVOYE SES PROPRES PHOTOS (30/08/2026).
+  //
+  // Pourquoi ne pas agrandir partout : sur 201 fiches qui ont des photos, 182
+  // n'affichent que des images d'enrichissement Google Places, deposees le plus
+  // souvent par des CLIENTS, sur des fiches que personne n'a reclamees. Les
+  // mettre en grand reviendrait a donner la vedette a des images dont on ne
+  // connait pas l'auteur. Meme raison que pour le texte alternatif plus haut.
+  //
+  // Les 19 fiches concernees sont TOUTES reclamees, et leurs 79 photos ont ete
+  // televersees par le pro. Pour un peintre ou un decorateur, ces photos sont
+  // l'argument de vente : les afficher en bandeau de 260 px les gaspille.
+  // C'est aussi le seul avantage visible qu'on offre a ceux qui prennent la
+  // peine de remplir leur fiche.
+  //
+  // `every` et pas `some` : une bande dont les vignettes n'ont pas la meme
+  // hauteur est illisible. La mesure montre zero fiche melangeant les deux
+  // origines, donc ce choix ne cree aucun cas particulier aujourd'hui.
+  const duProUniquement = photos.every((p) => p.duPro);
+  const hauteur = duProUniquement
+    ? "h-[320px] sm:h-[420px]"
+    : "h-[220px] sm:h-[260px]";
+  // Fourchette REELLE des largeurs rendues, a hauteur fixe : une photo portrait
+  // (720x1560, le format le plus frequent) fait environ 194 px de large en
+  // grand format, une 16/9 environ 747 px. Declarer trop large ferait demander
+  // des fichiers payes pour rien ; trop etroit donnerait des images floues.
+  const taillesImage = duProUniquement
+    ? "(max-width: 640px) 75vw, 760px"
+    : "(max-width: 640px) 45vw, 460px";
+
   return (
     <>
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
@@ -118,15 +147,10 @@ export default function ProGallery({
                 <Image
                   src={p.url}
                   alt={texteAlternatif(p, i)}
-                  width={520}
-                  height={390}
-                  /* Fourchette REELLE des largeurs rendues : a hauteur
-                     fixe, une photo portrait fait environ 120 px de large et
-                     une photo 16/9 environ 460 px. Declarer 70vw faisait
-                     demander des images de 640 px pour des vignettes de
-                     150 px, soit de l'octet paye pour rien sous le crawl. */
-                  sizes="(max-width: 640px) 45vw, 460px"
-                  className="h-[220px] sm:h-[260px] w-auto object-cover"
+                  width={duProUniquement ? 840 : 520}
+                  height={duProUniquement ? 630 : 390}
+                  sizes={taillesImage}
+                  className={`${hauteur} w-auto object-cover`}
                 />
               </button>
               {p.legende && (
