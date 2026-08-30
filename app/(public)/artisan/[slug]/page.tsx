@@ -480,7 +480,19 @@ export default async function ProPage({ params }: Props) {
           lieu d'un numero d'immatriculation. Sans, un fond calme, aucune
           image inventee ni photo d'agence. L'ecart entre les deux est ce qui
           donne envie de reclamer sa fiche. */}
-      <div className="relative h-40 sm:h-52 rounded-2xl overflow-hidden border border-[var(--card-border)] mb-4">
+      {/* Hauteur portee de 160/208 px a 224/320 px le 30/08/2026. A 208 px de
+          haut pour environ 1000 px de large, le bandeau etait un ratio 5:1 :
+          une photo de chantier y devenait une bande ou l'on ne distinguait
+          plus rien. C'est pourtant la premiere chose que voit un visiteur.
+          224/320 donne un ratio proche de 3:1 sur ordinateur, lisible, sans
+          repousser hors de l'ecran le nom, le metier et le bouton d'appel.
+          Aucune condition d'origine ici, contrairement a la galerie : le champ
+          `cover_url` n'est ecrit QUE par le tableau de bord du pro
+          (app/pro/dashboard/fiche/actions.ts). Aucun script d'enrichissement
+          n'y touche, donc une couverture ne peut venir que du pro lui-meme.
+          Verifie le 30/08 : les 8 couvertures existantes sont toutes stockees
+          chez nous, sur des fiches toutes reclamees. */}
+      <div className="relative h-56 sm:h-80 rounded-2xl overflow-hidden border border-[var(--card-border)] mb-4">
         {coverUrl ? (
           <Image
             src={coverUrl}
