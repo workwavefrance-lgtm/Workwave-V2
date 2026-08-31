@@ -35,6 +35,12 @@ C=$(docker ps --format '{{.Names}}' 2>/dev/null | grep '^l13fwu4rw15ksfq7bmy7jx0
 [ -z "$C" ] && exit 0
 
 echo "$(date '+%F %T') moteur a $RSS Mo (seuil $SEUIL_MO) : redemarrage preventif" >> "$JOURNAL"
+# Marqueur lu par le piege, pour qu il n alerte pas sur une coupure VOULUE.
+# Sans lui, chaque redemarrage preventif (toutes les 12 min au rythme actuel)
+# produit une alerte identique a une vraie panne. Une alerte qui se declenche
+# sans arret ne vaut pas mieux qu une alerte absente : la prochaine vraie sera
+# ignoree. Le marqueur expire seul au bout de 90 s.
+date +%s > /opt/workwave/.redemarrage-en-cours
 docker logs "$C" --tail 30 > "/opt/workwave/crashs/avant-redemarrage-$(date +%Y%m%d-%H%M%S).log" 2>&1
 docker restart "$C" >/dev/null 2>&1
 sleep 20

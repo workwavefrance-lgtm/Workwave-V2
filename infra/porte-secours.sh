@@ -105,7 +105,33 @@ http:
       rule: (Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)) && HeaderRegexp(\`User-Agent\`, \`(iPhone|iPad|Android|Mobile Safari)\`)
       priority: 150
       middlewares:
-        - workwave-limite-mobile
+        - workwave-secours-compression
+      service: workwave-secours-service
+      tls:
+        certResolver: letsencrypt
+    # LES ASPIRATEURS, ET EUX SEULS. Priorite 120.
+    # Mesure du 31/08 : 97 % du trafic vient de DEUX signatures, Chrome sur
+    # Windows et Chrome sur Mac, qui ne chargent aucune ressource (0 %, contre
+    # 40 % pour un vrai iPhone) et demandent 152 494 pages differentes par heure.
+    #
+    # Pourquoi cette voie plutot qu une limite globale : une limite commune
+    # arbitre mal quand 98 % du trafic est de l aspiration. A 90 places, la file
+    # etait pleine en permanence et de vrais visiteurs recevaient un refus. A
+    # 400, le site se noyait de nouveau (processeur a 278 %, /deposer-projet sans
+    # reponse). Il n existe pas de bon reglage global : il faut viser la source.
+    #
+    # Cout assume : un vrai visiteur sur Chrome de bureau porte la meme signature
+    # et peut etre refuse aux heures de pointe. Le trafic humain est d environ
+    # 200 visites par jour, majoritairement mobile, et les mobiles ont leur voie
+    # sans limite au-dessus. Refuser quelques visiteurs de bureau vaut mieux que
+    # laisser tomber le site pour tout le monde.
+    workwave-aspirateurs:
+      entryPoints:
+        - https
+      rule: (Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)) && HeaderRegexp(\`User-Agent\`, \`^Mozilla/5\\.0 \\((Windows NT 10\\.0; Win64; x64|Macintosh; Intel Mac OS X 10_15_7)\\) AppleWebKit/537\\.36 \\(KHTML, like Gecko\\) Chrome/[0-9]+\\.0\\.0\\.0 Safari/537\\.36$\`)
+      priority: 120
+      middlewares:
+        - workwave-limite-simultanee
         - workwave-secours-compression
       service: workwave-secours-service
       tls:
@@ -116,7 +142,6 @@ http:
       rule: Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)
       priority: 100
       middlewares:
-        - workwave-limite-simultanee
         - workwave-secours-compression
       service: workwave-secours-service
       tls:
@@ -151,7 +176,7 @@ http:
     # durablement au-dessus de 150 %, redescendre.
     workwave-limite-simultanee:
       inFlightReq:
-        amount: 400
+        amount: 60
     # File reservee aux telephones, independante de celle ci-dessus.
     workwave-limite-mobile:
       inFlightReq:

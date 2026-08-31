@@ -23,7 +23,14 @@ while true; do
   # VOULU depuis 17h16 : mieux vaut un refus immediat qu un site qui s etouffe.
   # Ne doivent alerter que les vraies pannes : pas de reponse (000), erreur du
   # proxy (502/503), ou erreur du site (500).
-  if [ "$CODE" != "200" ] && [ "$CODE" != "429" ]; then
+  # Une coupure pendant un redemarrage preventif est VOULUE (20 s), elle ne doit
+  # pas alerter. Le marqueur est pose par garde-memoire.sh et vaut 90 s.
+  VOULU=0
+  if [ -f /opt/workwave/.redemarrage-en-cours ]; then
+    T0=$(cat /opt/workwave/.redemarrage-en-cours 2>/dev/null || echo 0)
+    [ $(( $(date +%s) - T0 )) -lt 90 ] && VOULU=1
+  fi
+  if [ "$CODE" != "200" ] && [ "$CODE" != "429" ] && [ "$VOULU" = "0" ]; then
     T=$(date "+%F %T")
     echo "$T code=$CODE" >> "$JOURNAL"
     P=$(docker inspect coolify-proxy --format '{{.State.Pid}}' 2>/dev/null)
