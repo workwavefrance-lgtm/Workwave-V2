@@ -1,9 +1,9 @@
 /**
  * Cron horaire : healthcheck des routes critiques BTP + AI FR.
  *
- * Pingue ~20 URLs en parallèle. Si une route renvoie un code inattendu
- * (typiquement 500 ou 404 sur une route critique), envoie une alerte email
- * IMMÉDIATE à contact@workwave.fr.
+ * Pingue ~20 URLs UNE PAR UNE (jamais en parallele : cf. le commentaire du
+ * point 2 dans le GET). Si une route renvoie un code inattendu (typiquement
+ * 500 ou 404 sur une route critique), envoie une alerte email IMMEDIATE.
  *
  * NB (16/06/2026) : l'AI international EN (workwaveai.co) est EN PAUSE : tout
  * redirige en 301/308 vers le BTP. Le healthcheck ne teste plus le contenu IA
@@ -101,11 +101,15 @@ async function tenter(r: RouteCheck, t0: number): Promise<CheckResult> {
 /**
  * Un echec isole ne prouve rien : il faut DEUX echecs d'affilee pour alerter.
  *
- * Pourquoi : les 22 routes partent en parallele (Promise.all plus bas), donc le
- * serveur encaisse 22 regenerations ISR simultanees et devient momentanement tres
- * lent, au point de depasser les 20 s. Mesure du 03/08/2026 sur les deux routes
- * qui alertaient : 15,2 s au 1er appel, puis 0,65 s au second. La page allait
- * parfaitement bien ; c'est le healthcheck qui se mettait a genoux tout seul.
+ * Pourquoi : une page jamais visitee depuis la derniere purge du cache doit etre
+ * regeneree au premier appel, ce qui peut depasser les 20 s quand le serveur est
+ * deja charge. Mesure du 03/08/2026 sur les deux routes qui alertaient : 15,2 s
+ * au 1er appel, puis 0,65 s au second. La page allait parfaitement bien.
+ *
+ * (Ce commentaire a longtemps dit que les routes partaient en parallele. C'etait
+ * vrai jusqu'au 04/08/2026 ; la boucle est sequentielle depuis be71598. Le 31/08,
+ * ce commentaire perime m'a fait annoncer une cause fausse : la ligne qui compte
+ * est celle du point 2 dans le GET, pas celle-ci.)
  *
  * Le 2e essai retombe sur un cache desormais chaud. S'il echoue AUSSI, c'est une
  * vraie panne et l'alerte part. On ne masque donc rien : on supprime seulement le
