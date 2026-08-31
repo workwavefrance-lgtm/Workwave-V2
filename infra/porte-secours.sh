@@ -132,6 +132,17 @@ http:
     # memoire etait la consequence, pas la cause.
     # Au-dela de cette limite, le proxy refuse tout de suite au lieu de laisser
     # le site s etouffer.
+    # 🔴 ERREUR DU 31/08 A NE PAS REFAIRE : le seuil a ete regle sur le DEBIT
+    # (47 requetes par seconde) au lieu du nombre de places REELLEMENT occupees.
+    # Une place reste prise pendant toute la fabrication de la page. A 47 req/s
+    # et 5 s par page quand le site est charge, il faut 235 places, pas 90. Avec
+    # 90, la file etait pleine en permanence et le site renvoyait 429 a de VRAIS
+    # visiteurs : mesure a 18h20, cinq pages sur six en 429 depuis l exterieur.
+    # La limite doit empecher l etouffement, pas remplacer la panne par un refus.
+    # Regle de calcul : places = requetes par seconde x duree d une page, avec
+    # une marge. Verifier apres chaque changement qu une page ordinaire repond
+    # 200 DEPUIS L EXTERIEUR, pas seulement depuis le serveur.
+    #
     # Reglage : 40 d abord (le site est remonte : processeur de 154 a 78 %,
     # charge de 6,36 a 3,96, memoire stable a 1 636 Mo), mais 40 places etaient
     # toutes prises par les aspirateurs et les visiteurs etaient refuses aussi.
@@ -140,7 +151,7 @@ http:
     # durablement au-dessus de 150 %, redescendre.
     workwave-limite-simultanee:
       inFlightReq:
-        amount: 90
+        amount: 400
     # File reservee aux telephones, independante de celle ci-dessus.
     workwave-limite-mobile:
       inFlightReq:
