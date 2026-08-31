@@ -44,7 +44,7 @@ export default async function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-16">
         {/* Logo */}
         <div className="mb-12">
-          <Link href="/" className="text-2xl font-bold tracking-tight">
+          <Link prefetch={false} href="/" className="text-2xl font-bold tracking-tight">
             Workwave.fr
           </Link>
           <p className="text-sm text-zinc-400 mt-2 max-w-md">
@@ -61,6 +61,7 @@ export default async function Footer() {
               {btp.map((cat, i) => (
                 <li key={cat.id}>
                   <Link
+                    prefetch={false}
                     href={linkFor(cat.slug, i, OFFSET_BTP)}
                     className="text-zinc-400 hover:text-white transition-colors duration-250"
                   >
@@ -78,6 +79,7 @@ export default async function Footer() {
               {domicile.map((cat, i) => (
                 <li key={cat.id}>
                   <Link
+                    prefetch={false}
                     href={linkFor(cat.slug, i, OFFSET_DOMICILE)}
                     className="text-zinc-400 hover:text-white transition-colors duration-250"
                   >
@@ -95,6 +97,7 @@ export default async function Footer() {
               {personne.map((cat, i) => (
                 <li key={cat.id}>
                   <Link
+                    prefetch={false}
                     href={linkFor(cat.slug, i, OFFSET_PERSONNE)}
                     className="text-zinc-400 hover:text-white transition-colors duration-250"
                   >
@@ -109,6 +112,7 @@ export default async function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
+                  prefetch={false}
                   href="/pro"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -117,6 +121,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/trouver-des-chantiers"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -125,6 +130,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/trouver-des-clients"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -136,6 +142,7 @@ export default async function Footer() {
                     Lien INTERNE (le .co est en cours de sunset, redirigé .fr) :
                     garde l'autorité sur .fr + rend /ai visible sitewide. */}
                 <Link
+                  prefetch={false}
                   href="/ai"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -144,6 +151,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/pro#pricing"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -152,6 +160,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/pro/connexion"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -160,6 +169,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/recherche"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -168,6 +178,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/departements"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -176,6 +187,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/blog"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -184,6 +196,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/barometre-artisans"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -192,6 +205,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/barometre-prix-artisans"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -200,6 +214,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/barometre-penurie-artisans"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -208,6 +223,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/barometre-artisans-belgique"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -216,6 +232,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/a-propos"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -232,6 +249,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/feedback"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -250,6 +268,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/mentions-legales"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -258,6 +277,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/cgu"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >
@@ -266,6 +286,7 @@ export default async function Footer() {
               </li>
               <li>
                 <Link
+                  prefetch={false}
                   href="/cgv"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >

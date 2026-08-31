@@ -267,6 +267,7 @@ export default async function Home() {
           </ul>
           <div className="mt-6">
             <Link
+              prefetch={false}
               href="/deposer-projet"
               className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--accent)] text-white text-base font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
             >

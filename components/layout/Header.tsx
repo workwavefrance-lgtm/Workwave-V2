@@ -67,6 +67,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4 h-[72px] flex items-center justify-between">
         {/* Logo */}
         <Link
+          prefetch={false}
           href="/"
           className="text-xl font-bold tracking-tight text-[var(--text-primary)]"
         >
@@ -76,36 +77,42 @@ export default function Header() {
         {/* Nav desktop */}
         <nav className="hidden lg:flex items-center gap-8 text-sm">
           <Link
+            prefetch={false}
             href="/"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
             Accueil
           </Link>
           <Link
+            prefetch={false}
             href="/recherche"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
             Rechercher
           </Link>
           <Link
+            prefetch={false}
             href="/deposer-projet"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
             Déposer un projet
           </Link>
           <Link
+            prefetch={false}
             href="/blog"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
             Blog
           </Link>
           <Link
+            prefetch={false}
             href="/ai"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
             Freelances
           </Link>
           <Link
+            prefetch={false}
             href="/pro"
             className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
@@ -117,6 +124,7 @@ export default function Header() {
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
           <Link
+            prefetch={false}
             href={isPro ? "/pro/dashboard" : "/pro/connexion"}
             className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] link-underline transition-colors duration-250"
           >
@@ -180,6 +188,7 @@ export default function Header() {
       {menuOpen && (
         <nav className="lg:hidden border-t border-[var(--border-color)] bg-[var(--bg-primary)] px-4 pb-6 pt-4 space-y-1">
           <Link
+            prefetch={false}
             href="/"
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -187,6 +196,7 @@ export default function Header() {
             Accueil
           </Link>
           <Link
+            prefetch={false}
             href="/recherche"
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -194,6 +204,7 @@ export default function Header() {
             Rechercher
           </Link>
           <Link
+            prefetch={false}
             href="/deposer-projet"
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -201,6 +212,7 @@ export default function Header() {
             Déposer un projet
           </Link>
           <Link
+            prefetch={false}
             href="/blog"
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -208,6 +220,7 @@ export default function Header() {
             Blog
           </Link>
           <Link
+            prefetch={false}
             href="/ai"
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -215,6 +228,7 @@ export default function Header() {
             Freelances
           </Link>
           <Link
+            prefetch={false}
             href="/pro"
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -222,6 +236,7 @@ export default function Header() {
             Pro
           </Link>
           <Link
+            prefetch={false}
             href={isPro ? "/pro/dashboard" : "/pro/connexion"}
             onClick={() => setMenuOpen(false)}
             className="block py-3 text-[var(--text-primary)] font-medium"
@@ -229,6 +244,7 @@ export default function Header() {
             {isPro ? "Mon dashboard" : "Espace Pro"}
           </Link>
           <Link
+            prefetch={false}
             href="/recherche"
             onClick={() => setMenuOpen(false)}
             className="block mt-4 bg-[var(--accent)] text-white text-center px-5 py-3 rounded-full text-sm font-semibold"

@@ -84,6 +84,7 @@ export default function RecentProjectsSection({
             const Icon = getCategoryIcon(p.categorySlug);
             return (
               <Link
+              prefetch={false}
                 key={p.id}
                 href="/pro"
                 className="group block bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 shadow-sm transition-all duration-250 hover:-translate-y-1 hover:shadow-lg hover:border-[var(--accent)]"
@@ -177,6 +178,7 @@ export default function RecentProjectsSection({
 
         <div className="mt-10 text-center">
           <Link
+              prefetch={false}
             href="/pro"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[var(--accent)] text-white font-semibold text-base transition-all duration-250 hover:opacity-90 hover:-translate-y-0.5"
           >
