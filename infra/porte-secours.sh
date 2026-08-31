@@ -41,7 +41,12 @@
 CIBLE=/data/coolify/proxy/dynamic/zz-workwave-secours.yaml
 PREFIXE=l13fwu4rw15ksfq7bmy7jx0l
 
-C=$(docker ps --format '{{.Names}}' 2>/dev/null | grep "^${PREFIXE}" | head -1)
+# Pendant un deploiement, DEUX conteneurs tournent quelques minutes (Coolify
+# demarre le nouveau avant d arreter l ancien). `head -1` prenait celui que
+# docker listait en premier, sans garantie : le routage pouvait pointer vers la
+# version qu on est en train de remplacer. On prend donc explicitement le PLUS
+# RECEMMENT CREE, comme le fait deja un-seul-conteneur.sh.
+C=$(docker ps --format '{{.CreatedAt}}|{{.Names}}' 2>/dev/null | grep "|${PREFIXE}" | sort -r | head -1 | cut -d'|' -f2)
 [ -z "$C" ] && exit 0                                    # conteneur absent : ne rien toucher
 
 # ATTENTION, PIEGE DEJA TOMBE DEDANS (31/08, 17h11) : il y avait ici une
@@ -157,6 +162,16 @@ http:
     # memoire etait la consequence, pas la cause.
     # Au-dela de cette limite, le proxy refuse tout de suite au lieu de laisser
     # le site s etouffer.
+    # REGLAGE FINAL DU 31/08 : 20 places.
+    # 60 laissait encore le site saturer. Preuve : a 19h00 le piege a recu un
+    # code 000 alors que le site repondait {"ok":true} EN DIRECT a la meme
+    # seconde, avec le proxy a 22 % de processeur. Le site n etait pas mort, il
+    # etait sature : les demandes faisaient la queue derriere les pages en cours
+    # de fabrication. Le rendu est mono-file : au-dela d une dizaine de pages
+    # simultanees, tout le monde attend.
+    # 20 places pour les aspirateurs laisse le reste de la machine aux
+    # visiteurs, qui passent par une voie SANS limite.
+    #
     # 🔴 ERREUR DU 31/08 A NE PAS REFAIRE : le seuil a ete regle sur le DEBIT
     # (47 requetes par seconde) au lieu du nombre de places REELLEMENT occupees.
     # Une place reste prise pendant toute la fabrication de la page. A 47 req/s
@@ -176,7 +191,7 @@ http:
     # durablement au-dessus de 150 %, redescendre.
     workwave-limite-simultanee:
       inFlightReq:
-        amount: 60
+        amount: 20
     # File reservee aux telephones, independante de celle ci-dessus.
     workwave-limite-mobile:
       inFlightReq:
