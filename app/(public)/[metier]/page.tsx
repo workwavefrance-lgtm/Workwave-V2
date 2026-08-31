@@ -11,6 +11,7 @@ import {
 } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
 import { getCitiesByDepartment, getTotalCitiesCount } from "@/lib/queries/cities";
+import { createPublicClient } from "@/lib/supabase/public-client";
 import {
   generateDepartmentSlug,
   formatDepartmentLabel,
@@ -180,10 +181,67 @@ function Sources({ urls, retrievedAt }: { urls?: string[]; retrievedAt?: string 
   );
 }
 
+/**
+ * Distingue un slug de metier qui n'existe REELLEMENT pas (404 legitime) d'une
+ * panne de la base (500 a rejouer).
+ *
+ * Pourquoi : `getCategoryBySlug` (lib/queries/categories.ts) ignore l'erreur
+ * Supabase et renvoie `null` dans les DEUX cas. Un timeout de la base produisait
+ * donc un `notFound()`, et ce 404 partait en cache pour 30 jours
+ * (`revalidate = 2592000`, en tete de ce fichier). Une page metier parfaitement
+ * valide pouvait ainsi disparaitre de Google un mois entier a cause d'une
+ * seconde de latence, alors qu'une 500 n'est pas mise en cache et que Google la
+ * reessaie.
+ *
+ * Pourquoi une requete separee : on ne peut pas rappeler `getCategoryBySlug`
+ * pour trancher, elle est enveloppee dans `cache()` de React et rendrait le
+ * meme `null` deja memorise pendant ce rendu. D'ou ce SELECT minimal (une
+ * colonne, une ligne), qui ne part QUE sur le chemin d'echec, jamais sur une
+ * page qui s'affiche normalement.
+ *
+ * `.limit(1)` et pas `.single()` : avec `single()`, l'absence de ligne est elle
+ * aussi remontee comme une erreur, ce qui reintroduit exactement l'ambiguite
+ * qu'on cherche a lever. Ici, absence = tableau vide + `error` a null.
+ *
+ * Retourne normalement quand l'absence est reelle (l'appelant fait alors son
+ * 404). Leve une exception sinon.
+ */
+async function verifierAbsenceReelle(slug: string): Promise<void> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("slug", slug)
+    .limit(1);
+
+  // PGRST116 = "aucune ligne" cote PostgREST. Ne devrait pas arriver sans
+  // `single()`, mais s'il remonte c'est bien une absence, pas une panne.
+  if (error && error.code !== "PGRST116") {
+    throw new Error(
+      `Categorie "${slug}" : la base n'a pas repondu (${error.code || "sans code"}: ${error.message}). On leve une 500 plutot qu'un 404 mis en cache 30 jours.`
+    );
+  }
+
+  // Aucune erreur ici, mais la ligne EXISTE : c'est donc le premier appel qui a
+  // echoue en silence. Surtout pas de 404 sur une page valide.
+  if (!error && data && data.length > 0) {
+    throw new Error(
+      `Categorie "${slug}" : introuvable au premier appel alors qu'elle existe en base. Echec transitoire, on renvoie 500 pour que Google reessaie.`
+    );
+  }
+
+  // Ni erreur ni ligne : le slug n'existe vraiment pas, le 404 est legitime.
+}
+
 export default async function MetierProximityPage({ params }: Props) {
   const { metier } = await params;
   const category = await getCategoryBySlug(metier);
-  if (!category) notFound();
+  if (!category) {
+    // Un slug inconnu doit CONTINUER a repondre 404 : seule une panne de la
+    // base leve une 500. Cf. verifierAbsenceReelle juste au-dessus.
+    await verifierAbsenceReelle(metier);
+    notFound();
+  }
 
   // Anti-fuite vertical : AUCUNE catégorie tech ne doit s'afficher sur une route
   // BTP. On teste le VERTICAL (pas une liste d'ids) → couvre les 145 catégories

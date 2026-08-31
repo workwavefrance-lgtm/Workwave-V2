@@ -40,9 +40,12 @@ import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getPriceGuidesByMetier } from "@/lib/queries/price-guides";
 import { getCommuneData } from "@/lib/queries/commune-data";
 import { getSeoContent } from "@/lib/queries/seo-pages";
+// Lecture publique sans cookies (garde la page cachable en ISR). Sert au
+// contre-comptage avant la redirection permanente, cf. plus bas.
+import { createPublicClient } from "@/lib/supabase/public-client";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
-import { BASE_URL } from "@/lib/constants";
+import { BASE_URL, DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { buildListingFaq } from "@/lib/seo/listing-faq";
 import { toBreadcrumbSchema, getFaqSchema } from "@/lib/utils/schema";
@@ -317,6 +320,53 @@ export async function renderListing(
   // commit le status 200 avant que la page puisse throw permanentRedirect/notFound.
   // Cf. lecon apprise CLAUDE.md du 2026-04-18.
   if (resolved.type === "city" && totalProsCount === 0) {
+    // CONTRE-COMPTAGE AVANT DE REDIRIGER (ajoute le 31/08/2026).
+    //
+    // Les lectures ci-dessus (`getTopProsByCategoryAndCity*`,
+    // `getProsByCategoryAndCity*`) destructurent `{ data, count }` et IGNORENT
+    // le champ `error` de Supabase : elles renvoient donc `total = 0` aussi
+    // bien quand la ville est reellement vide que quand la requete a echoue
+    // (delai depasse, coupure reseau, `statement_timeout`). Or la redirection
+    // ci-dessous est PERMANENTE et mise en cache 30 jours (`revalidate`, ligne
+    // 61) : une micro-panne de quelques secondes pendant une generation ISR
+    // figeait la page en 308 pour un mois, et Google enregistrait une
+    // redirection sur une page qui a bel et bien des artisans.
+    //
+    // Ce comptage est en `head: true` : aucune ligne transferee (juste
+    // l'en-tete Content-Range), et il ne s'execute que sur le chemin
+    // "zero pro", donc au plus une fois par generation de la page.
+    // Memes filtres exactement que la lecture d'origine, y compris
+    // l'agregation des arrondissements (Marseille/Lyon/Paris) et de la zone
+    // frontaliere de Monaco.
+    const { count: recount, error: recountError } = await createPublicClient()
+      .from("pros")
+      .select("id", { count: "exact", head: true })
+      .eq("category_id", category.id)
+      .in("city_id", aggCityIds ?? [resolved.city.id])
+      .is("deleted_at", null)
+      .eq("is_active", true);
+
+    // Panne technique : on releve l'erreur. Next repond alors 500, que ni le
+    // cache ISR ni Google ne conservent (Google reessaie), et la page se
+    // regenere proprement au passage suivant. C'est strictement preferable a
+    // une redirection permanente gravee pour 30 jours.
+    if (recountError) {
+      throw new Error(
+        `Comptage des pros impossible pour /${metier}/${locationSlug} : ${recountError.message}`
+      );
+    }
+
+    // Le comptage contredit le "zero pro" : la premiere lecture a donc echoue
+    // en silence (elle ne peut pas renvoyer 0 quand des lignes existent, les
+    // deux chemins comptent en `exact` ou retombent sur `pros.length`). On
+    // refuse de rediriger sur une donnee fausse.
+    if ((recount ?? 0) > 0) {
+      throw new Error(
+        `Lecture incoherente pour /${metier}/${locationSlug} : ${recount} pros en base mais la liste est revenue vide.`
+      );
+    }
+
+    // Absence REELLE (comptage sain a zero) : comportement d'origine inchange.
     const cityDeptSlug = generateDepartmentSlug(resolved.city.department);
     permanentRedirect(`/${metier}/${cityDeptSlug}`);
   }
@@ -633,11 +683,30 @@ export async function renderListing(
               ))}
             </div>
 
-            {/* Lien vers la liste complète si on a plus de TOP_LIMIT pros */}
-            {totalProsCount > TOP_LIMIT && (
+            {/* Lien vers la liste complète si on a plus de TOP_LIMIT pros.
+                L'adresse doit etre `/page/2`, PAS `?page=2` : depuis le passage
+                a la pagination par chemin, cette route ne lit plus `searchParams`
+                (ses `Props` n'ont que `params`) et aucune redirection du
+                middleware ne rattrape l'ancien format. Un `?page=2` renvoyait
+                donc la page 1 en 200, et le reste de la liste n'etait atteignable
+                par aucun lien : mesure sur /plombier/marseille, 668 fiches sur
+                678 hors de portee de la navigation, donc invisibles pour Google
+                qui ne decouvre ces pages que par les liens internes (la
+                pagination n'est pas dans le sitemap). */}
+            {/* Le seuil est la TAILLE D'UNE PAGE, pas le nombre de fiches mises en
+                avant. Corrige le 01/09/2026 : la condition portait sur TOP_LIMIT
+                (10), alors qu'une page de pagination en contient DEFAULT_PAGE_SIZE
+                (20). Entre 11 et 20 fiches, le bouton s'affichait donc et menait a
+                une page 2 vide. Envoyer Google sur une page vide est pire que ne
+                pas lui proposer de lien du tout.
+                A noter : totalProsCount peut surestimer le total sur la page 1
+                (lib/queries/top-pros.ts compte en `estimated`), donc un cas
+                residuel de page 2 quasi vide reste possible. Le seuil a 20 le rend
+                rare la ou il etait systematique. */}
+            {totalProsCount > DEFAULT_PAGE_SIZE && (
               <div className="mt-8 flex justify-center">
                 <Link
-                  href={`${baseUrl}?page=2`}
+                  href={`${baseUrl}/page/2`}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] font-medium transition-all duration-200"
                 >
                   Voir tous les {totalProsCount} {pluralCategory} {preposition} {locationName}

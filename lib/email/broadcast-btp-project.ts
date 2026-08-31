@@ -193,6 +193,34 @@ function humanBudget(value: string | null): string | null {
   return m[value] ?? null;
 }
 
+/**
+ * Echappe le HTML avant insertion dans le corps du mail.
+ *
+ * 31/08/2026 : le titre et la description, ecrits librement par le
+ * particulier, etaient injectes bruts dans le HTML (les deux `${}` du bloc
+ * projet plus bas). N'importe qui pouvait donc glisser une balise, et donc un
+ * lien pirate, dans un mail signe workwave.fr et envoye aux artisans inscrits.
+ * C'est le pire vecteur possible : le mail est authentique, il vient de nous,
+ * et les artisans inscrits sont les ~52 pros qui ont reclame leur fiche, la
+ * ressource la plus rare du site.
+ *
+ * Le filtre anti-coordonnees (`lib/ai/detect-pii.ts`) ne remplace PAS cet
+ * echappement : il vise les tel/mail/liens, pas les balises, et il ne tourne
+ * que sur la description, jamais sur le titre.
+ *
+ * Meme implementation que `lib/email/send-review-thanks.ts` (fonction locale
+ * dupliquee dans chaque fichier d'email, convention deja en place dans
+ * send-review-request.ts et send-review-moderation-alert.ts).
+ */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function humanUrgency(value: string | null): string | null {
   if (!value) return null;
   const m: Record<string, string> = {
@@ -215,10 +243,17 @@ function humanUrgency(value: string | null): string | null {
  *   Ils voyaient un cout, jamais la gratuite.
  */
 export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postalCode?: string | null, freeRemaining?: number): string {
-  const previewDesc =
+  // On tronque le texte BRUT puis on echappe : dans l'autre sens, la coupe a
+  // 220 pourrait tomber au milieu d'une entite (`&amp;`) et produire du HTML
+  // casse a l'ecran.
+  const previewDescRaw =
     input.projectDescription.length > 220
       ? input.projectDescription.slice(0, 220).trim() + "..."
       : input.projectDescription;
+  const previewDesc = escapeHtml(previewDescRaw);
+  // Titre : ecrit par le particulier lui aussi (les appelants prennent la 1re
+  // ligne de sa description, cf. deposer-projet/actions.ts).
+  const projectTitleHtml = escapeHtml(input.projectTitle);
   const budgetLabel = humanBudget(input.projectBudget);
   const timelineLabel = humanUrgency(input.projectTimeline);
   const lieuLabel = input.projectCityName
@@ -272,7 +307,7 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
     ${suspiciousBanner}
 
     <div style="background:#FAFAFA;border-left:3px solid #FF6803;padding:20px;border-radius:8px;margin:0 0 24px 0;">
-      <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${input.projectTitle}</h2>
+      <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${projectTitleHtml}</h2>
       <p style="font-size:13px;color:#525252;line-height:1.6;margin:0 0 16px 0;white-space:pre-wrap;">${previewDesc}</p>
       <table style="font-size:12px;width:100%;border-collapse:collapse;">
         ${lieuLabel ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Lieu</td><td style="color:#0A0A0A;font-weight:600;">${lieuLabel}</td></tr>` : ""}

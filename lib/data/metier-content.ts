@@ -13,6 +13,24 @@ export type MetierContentEntry = {
   retrievedAt: string;
 };
 
+// 🔴 CE FICHIER EST RELU COMME DU JSON PUR par son propre generateur.
+// scripts/fetch-metier-content.ts capture l'objet ci-dessous avec la regex
+// /METIER_CONTENT[^=]*=\s*(\{[\s\S]*\});/ puis lui applique JSON.parse.
+// N'ECRIS DONC AUCUN COMMENTAIRE A L'INTERIEUR DU LITTERAL : le parse echouerait, le
+// script croirait le fichier vide et relancerait Perplexity sur les 52 metiers avant de
+// tout reecrire. Les commentaires vont ici, au-dessus de la declaration.
+//
+// CUISINISTE, correction manuelle du 31/08/2026 (seule entree retouchee a la main) :
+// ses 4 sources visaient le metier de CUISINIER (la restauration) et non le cuisiniste
+// (l'amenagement de cuisines) : fiche France Travail G1609 "cuisinier-cuisiniere",
+// RNCP 1891, CNED "devenir-cuisinier", Mon Compte Formation "devenir-cuisinier-cuisiniere".
+// Homonymie introduite par Perplexity le 26/07/2026. Le texte affiche (intro, conseils,
+// FAQ) parle bien du cuisiniste : lui est correct, seules les sources etaient fausses.
+// "sources" est laisse VIDE volontairement : aucune source verifiable sur l'amenagement
+// de cuisines n'a ete trouvee, et une source fausse est pire que pas de source. Le
+// composant <Sources> fait `if (!urls?.length) return null`, la ligne disparait donc.
+// Si ce fichier est regenere un jour, RE-VERIFIER cette entree : le generateur
+// reintroduira les sources "cuisinier" tant que son prompt ne leve pas l'homonymie.
 export const METIER_CONTENT: Record<string, MetierContentEntry> = {
   "accompagnement-handicap": {
     "intro": "En France, un professionnel de l’accompagnement handicap intervient pour aider une personne en situation de handicap à gagner ou maintenir de l’autonomie dans sa vie quotidienne, scolaire, sociale ou professionnelle. Ses interventions les plus courantes consistent à aider dans les actes de la vie quotidienne, à soutenir les déplacements, à faciliter l’accès aux droits et aux démarches, et à participer au suivi d’un projet individualisé. Dans le champ scolaire, l’AESH favorise l’autonomie de l’élève au sein de la classe, de l’école ou de l’établissement. Un particulier y fait appel lorsqu’il faut un soutien régulier, personnalisé et coordonné, à domicile, à l’école ou pour l’insertion dans l’emploi.",
@@ -800,12 +818,7 @@ export const METIER_CONTENT: Record<string, MetierContentEntry> = {
         "a": "Oui, il doit au minimum disposer d’une assurance responsabilité civile professionnelle, et d’une garantie décennale si les travaux relèvent du champ de cette garantie."
       }
     ],
-    "sources": [
-      "https://candidat.francetravail.fr/metierscope/fiche-metier/G1609/cuisinier-cuisiniere",
-      "https://www.francecompetences.fr/recherche/rncp/1891/",
-      "https://www.cned.fr/metiers/devenir-cuisinier-metier-formation-salaire",
-      "https://www.moncompteformation.gouv.fr/espace-public/devenir-cuisinier-cuisiniere"
-    ],
+    "sources": [],
     "retrievedAt": "2026-07-26"
   },
   "debarras": {

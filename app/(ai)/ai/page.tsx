@@ -284,48 +284,48 @@ const STEPS = [
   },
 ];
 
+// Ces cartes n'embarquent volontairement AUCUN compteur de pros. Le 31/08/2026,
+// les 14 valeurs ecrites a la main ici totalisaient 479 alors que la base en
+// comptait 508 812, avec 0 pro reel sur 4 des 14 categories : un chiffre fige
+// dans le code redevient faux des le scrape suivant. Si un compteur redevient
+// necessaire, le lire en base comme le fait app/(ai)/ai/freelances/page.tsx,
+// jamais le retaper ici.
 const CATEGORIES = [
   // ─── Tech (6 categories) ───
   {
     slug: "intelligence-artificielle",
     name: "Intelligence Artificielle",
     skills: "LLM, RAG, agents, fine-tuning, vision",
-    count: 18,
     group: "tech" as const,
   },
   {
     slug: "developpement-web",
     name: "Developpement Web",
     skills: "React, Next.js, Vue, full-stack, mobile",
-    count: 32,
     group: "tech" as const,
   },
   {
     slug: "cloud-devops",
     name: "Cloud & DevOps",
     skills: "AWS, GCP, Azure, Kubernetes, CI/CD",
-    count: 21,
     group: "tech" as const,
   },
   {
     slug: "no-code-automation",
     name: "No-Code & Automation",
     skills: "Bubble, Make, Zapier, Airtable, Webflow",
-    count: 14,
     group: "tech" as const,
   },
   {
     slug: "data-analytics",
     name: "Data & Analytics",
     skills: "BI, ETL, ML engineering, data science",
-    count: 19,
     group: "tech" as const,
   },
   {
     slug: "design-produit",
     name: "Design Produit",
     skills: "UX/UI, prototypage, design system, Figma",
-    count: 16,
     group: "tech" as const,
   },
   // ─── Business & Creatif (8 categories) ───
@@ -333,56 +333,48 @@ const CATEGORIES = [
     slug: "marketing-communication",
     name: "Marketing & Communication",
     skills: "SEO, SEA, social, growth, brand, content",
-    count: 18,
     group: "business" as const,
   },
   {
     slug: "strategie-management",
     name: "Strategie & Management",
     skills: "Consulting, transformation, ops, lean",
-    count: 121,
     group: "business" as const,
   },
   {
     slug: "finance-comptabilite",
     name: "Finance & Comptabilite",
     skills: "DAF a temps partage, controle de gestion, expertise comptable",
-    count: 14,
     group: "business" as const,
   },
   {
     slug: "juridique-conseil",
     name: "Juridique & Conseil",
     skills: "Avocats, contrats, RGPD, propriete intellectuelle",
-    count: 65,
     group: "business" as const,
   },
   {
     slug: "rh-recrutement",
     name: "RH & Recrutement",
     skills: "Talent acquisition, formation, paie, SIRH",
-    count: 1,
     group: "business" as const,
   },
   {
     slug: "redaction-copywriting",
     name: "Redaction & Copywriting",
     skills: "Ghostwriting, SEO, technique, scripts, edito",
-    count: 20,
     group: "creatif" as const,
   },
   {
     slug: "audiovisuel-medias",
     name: "Audiovisuel & Medias",
     skills: "Montage, motion, photo, podcasts, video",
-    count: 56,
     group: "creatif" as const,
   },
   {
     slug: "design-creation",
     name: "Design & Creation",
     skills: "Graphisme, branding, illustration, print",
-    count: 64,
     group: "creatif" as const,
   },
 ];
@@ -918,11 +910,36 @@ export default function AiHomePage() {
                     <div className="bg-[var(--ai-text)] rounded-[2px]" />
                     <div className="bg-[var(--ai-accent)] rounded-[2px]" />
                   </div>
+                  {/*
+                    31/08/2026 : ce micro-label affichait un compteur ecrit a
+                    la main dans CATEGORIES ("32 pros" pour Developpement Web,
+                    "21 pros" pour Cloud & DevOps). Mesure du jour en base,
+                    memes filtres que /ai/freelances (source sirene|ai_signup,
+                    is_active, non supprime) : Developpement Web 109 911,
+                    Strategie & Management 141 229, Intelligence Artificielle
+                    3, et 0 pour Cloud & DevOps, No-Code, Data & Analytics et
+                    Design Produit. Total reel des 14 categories : 508 812,
+                    quand les 14 constantes affichees totalisaient 479. Faux
+                    dans les deux sens, et faux a nouveau apres chaque scrape.
+                    Choix : afficher le groupe, deja porte par CATEGORIES,
+                    vrai par construction et jamais perime, plutot que de
+                    brancher un compteur sur la base. Raisons chiffrees :
+                    count "estimated" (le mode impose au-dela de 50k lignes)
+                    est mesure 16 a 17 % sous la verite (92 563 au lieu de
+                    109 911), donc encore un faux chiffre ; count "exact" est
+                    juste mais coute 8 s de COUNT sur les 1,9 M de lignes de
+                    pros, sur la seule page servie aujourd'hui en statique pur
+                    (s-maxage=31536000, aucune dependance base) ; et le
+                    chiffre ne promet rien au visiteur, puisque le broadcast
+                    part a TOUTES les categories AI et pas a celle de la carte
+                    (broadcast-tech-project.ts). Le titre "100 000+" juste
+                    au-dessus reste vrai : 508 812 mesures.
+                  */}
                   <span
                     className="text-[11px] font-medium text-[var(--ai-text-tertiary)] tracking-wider"
                     style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                   >
-                    {String(cat.count).padStart(2, "0")} pros
+                    {cat.group}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-[var(--ai-text)] mb-2 leading-tight tracking-tight">
@@ -1497,10 +1514,28 @@ export default function AiHomePage() {
                 Un projet
                 <br />a confier ?
               </h2>
+              {/*
+                31/08/2026 : cette carte promettait "les 3 freelances qui vous
+                correspondent". Ce 3 vient de l'ancien modele de routing
+                (lib/routing/route-project.ts), qui est du code mort jamais
+                appele. Le code reellement execute est broadcastTechProject
+                (lib/email/broadcast-tech-project.ts) : il envoie le projet a
+                TOUS les freelances inscrits eligibles des 14 categories AI,
+                sans selection ni plafond (filtre .in("category_id",
+                AI_CATEGORY_IDS) + compte reclame + actif + non en pause).
+                Meme erreur que celle corrigee en juin sur /pro : une
+                affirmation chiffree tiree d'un modele abandonne, intenable
+                face au produit reel. Le reste de la page disait deja vrai
+                (FAQ et etape 02 : "toute la communaute").
+                "sous 24h" est retire dans la foulee : le mail part a la
+                publication, mais la vitesse de reponse des freelances n'est
+                garantie par aucun code.
+              */}
               <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed mb-8">
-                Decrivez votre projet en 60 secondes. On vous propose les 3
-                freelances qui vous correspondent sous 24h. Gratuit, sans
-                engagement.
+                Decrivez votre projet en 60 secondes. Des sa publication, il
+                est envoye par mail a toute la communaute des freelances
+                inscrits : ceux que votre projet interesse vous contactent en
+                direct. Gratuit, sans engagement.
               </p>
               <Link
                 href="/ai/deposer"

@@ -12,8 +12,11 @@
  * grotesque). Le helper s'adapte automatiquement selon
  * categories.vertical.
  *
- * Stats par dept hardcodees depuis data.gouv.fr (INSEE 2026) pour
- * injecter de la data unique par page et eviter le duplicate content.
+ * Stats par dept hardcodees depuis data.gouv.fr (INSEE) pour injecter de la
+ * data unique par page et eviter le duplicate content. ATTENTION : la table
+ * DEPT_STATS ne couvre que 12 departements francais sur les 101 de la base.
+ * Pour tous les autres, AUCUN chiffre de population/logement n'est affiche
+ * (cf. le commentaire de localContext dans generateSeoContent).
  */
 
 import type {
@@ -526,12 +529,9 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const locationName = ctx.city ? ctx.city.name : ctx.department.name;
   const preposition = ctx.city ? "à" : "en";
   const deptCode = ctx.department.code;
-  const stats = DEPT_STATS[deptCode] ?? {
-    pop_k: 100,
-    logements_k: 60,
-    ancien_pct: 45,
-    res_principales_pct: 80,
-  };
+  // Pas de valeur de repli : un departement absent de DEPT_STATS n'a AUCUN
+  // chiffre de population/logement, et la page n'en affichera donc aucun.
+  const stats: DeptStats | null = DEPT_STATS[deptCode] ?? null;
   const works = getWorksList(cat.slug);
   const prices = getPriceRanges(cat.slug, isBE);
 
@@ -575,17 +575,65 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const beGeo = ctx.department.name === "Bruxelles-Capitale"
     ? "la Région de Bruxelles-Capitale"
     : `la province ${["Hainaut", "Brabant wallon", "Luxembourg belge"].includes(ctx.department.name) ? "du" : "de"} ${ctx.department.name.replace(" belge", "")}`;
-  const localContext = isBE
-    ? ctx.city
-      ? `${ctx.city.name} se situe dans ${beGeo} (Belgique), qui compte environ ${stats.pop_k} 000 habitants.`
-      : `${beGeo.charAt(0).toUpperCase() + beGeo.slice(1)} (Belgique) compte environ ${stats.pop_k} 000 habitants.`
-    : ctx.city
-    ? vertical === "personne"
-      ? `${ctx.city.name} fait partie de la ${ctx.department.name} (population du département : environ ${stats.pop_k} 000 habitants).`
-      : `${ctx.city.name} fait partie de la ${ctx.department.name} (${stats.pop_k} 000 habitants, ${stats.logements_k} 000 logements${vertical === "btp" ? ` dont ${stats.ancien_pct}% construits avant 1975` : ""}).`
-    : vertical === "personne"
-      ? `La ${ctx.department.name} compte environ ${stats.pop_k} 000 habitants.`
-      : `La ${ctx.department.name} compte environ ${stats.pop_k} 000 habitants et ${stats.logements_k} 000 logements${vertical === "btp" ? `, dont ${stats.ancien_pct}% construits avant 1975` : ""}.`;
+  //
+  // CORRECTIF DU 31/08/2026 : ZERO CHIFFRE INVENTE.
+  // Jusqu'a cette date, DEPT_STATS avait une valeur de repli
+  // { pop_k: 100, logements_k: 60, ancien_pct: 45 } appliquee a TOUT
+  // departement absent de la table. Mesure : la table couvre 12 departements
+  // francais, la base en compte 101 (cf. les 101 cles de
+  // lib/data/department-market.ts) ; 89 departements sur 101, soit 88 %,
+  // publiaient donc les memes chiffres faux. Verifie en prod le 31/08/2026 :
+  // /macon/rhone-69 et /plombier/nord-59 affichaient mot pour mot
+  // « compte environ 100 000 habitants et 60 000 logements, dont 45%
+  // construits avant 1975 », alors que le Rhone compte 1,88 million
+  // d'habitants et le Nord 2,6 millions. Double degat : credibilite (le
+  // lecteur local voit tout de suite que c'est faux, et deux departements
+  // voisins servaient la phrase identique = duplicate content) et risque
+  // juridique (information trompeuse au sens de L121-2 du code de la
+  // consommation).
+  //
+  // Desormais, un chiffre n'est affiche QUE s'il est reellement connu :
+  // 12 departements FR (INSEE) et 6 provinces BE (Statbel, population seule).
+  // Ailleurs, phrase sans aucun chiffre.
+  //
+  // Pourquoi ne PAS se brancher sur lib/data/department-market.ts (qui, lui,
+  // couvre les 101 departements avec de vraies donnees DVF/FiLoSoFi/LOVAC) :
+  // ces chiffres sont deja affiches quelques centimetres plus bas dans la meme
+  // page par DeptMarketBlock (« revenu median ... INSEE 2021 »), et il ne
+  // couvre ni la population ni le nombre de logements, qui sont precisement ce
+  // que cette phrase raconte. Les reprendre ici ferait un doublon dans la page
+  // sans combler le manque. On se contente donc de ne rien inventer.
+  let localContext = "";
+  if (isBE) {
+    if (stats) {
+      localContext = ctx.city
+        ? `${ctx.city.name} se situe dans ${beGeo} (Belgique), qui compte environ ${stats.pop_k} 000 habitants.`
+        : `${beGeo.charAt(0).toUpperCase() + beGeo.slice(1)} (Belgique) compte environ ${stats.pop_k} 000 habitants.`;
+    } else if (ctx.city) {
+      localContext = `${ctx.city.name} se situe dans ${beGeo} (Belgique).`;
+    }
+  } else if (stats) {
+    if (ctx.city) {
+      localContext =
+        vertical === "personne"
+          ? `${ctx.city.name} fait partie de la ${ctx.department.name} (population du département : environ ${stats.pop_k} 000 habitants).`
+          : `${ctx.city.name} fait partie de la ${ctx.department.name} (${stats.pop_k} 000 habitants, ${stats.logements_k} 000 logements${vertical === "btp" ? ` dont ${stats.ancien_pct}% construits avant 1975` : ""}).`;
+    } else {
+      localContext =
+        vertical === "personne"
+          ? `La ${ctx.department.name} compte environ ${stats.pop_k} 000 habitants.`
+          : `La ${ctx.department.name} compte environ ${stats.pop_k} 000 habitants et ${stats.logements_k} 000 logements${vertical === "btp" ? `, dont ${stats.ancien_pct}% construits avant 1975` : ""}.`;
+    }
+  } else if (ctx.city) {
+    // Departement sans stats : on garde le rattachement ville/departement, qui
+    // est un fait verifiable et un signal geographique utile, sans aucun
+    // chiffre. Formulation « le departement X (NN) » plutot que « la X » : elle
+    // reste correcte quel que soit le genre du nom (le Rhone, les Landes, le
+    // Val-d'Oise), contrairement au « la ... » cable en dur au-dessus.
+    localContext = `${ctx.city.name} fait partie du département ${ctx.department.name} (${deptCode}).`;
+  }
+  // Page departement sans stats : localContext reste vide, la phrase de
+  // contexte est remplacee plus bas par une formulation sans chiffre.
 
   // ─── Section 1 : Pourquoi
   const pourquoi: SeoSection = {
@@ -596,7 +644,14 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
         : vertical === "domicile"
           ? `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous fait gagner du temps avec un ${v.pro} ${v.qualif}, formé à ses prestations et accountable. ${v.garantie_phrase(catLower)}`
           : `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous garantit un ${v.pro} ${v.qualif}, attentif et déclaré, capable d'instaurer une relation de confiance avec votre famille. ${v.garantie_phrase(catLower)}`,
-      `${localContext} Cette zone génère une demande régulière en ${catPlural}, et Workwave référence ${ctx.prosCount} ${v.proPlural} actifs sur le secteur.`,
+      // localContext est vide sur les pages departement dont les chiffres de
+      // population ne sont pas connus (cf. ci-dessus). Dans ce cas « Cette
+      // zone » n'aurait plus d'antecedent : on nomme le lieu directement, avec
+      // la meme construction preposition + lieu que les H2 de la page. Le seul
+      // chiffre restant est prosCount, qui est compte en base, pas estime.
+      localContext
+        ? `${localContext} Cette zone génère une demande régulière en ${catPlural}, et Workwave référence ${ctx.prosCount} ${v.proPlural} actifs sur le secteur.`
+        : `La demande en ${catPlural} ${preposition} ${locationName} est régulière, et Workwave référence ${ctx.prosCount} ${v.proPlural} actifs sur le secteur.`,
       `Vous pouvez comparer leurs profils, leurs spécialités et (quand l'information est publique) leurs avis vérifiés, avant de prendre contact ou de demander plusieurs propositions.`,
     ],
   };

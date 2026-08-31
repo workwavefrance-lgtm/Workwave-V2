@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useActionState, useRef } from "react";
+import { useState, useActionState, useRef, useEffect } from "react";
+import { flushSync } from "react-dom";
 import Image from "next/image";
 import { useDashboard } from "@/components/pro/dashboard/DashboardProvider";
 import {
@@ -54,6 +55,19 @@ const DAYS = [
   { key: "dimanche", label: "Dimanche" },
 ];
 
+// Libelles montres au pro quand un champ empeche l'enregistrement. La cle est
+// l'attribut `name` de l'input, ce qui permet de retrouver le libelle en
+// parcourant form.elements sans dupliquer la liste des champs contraints.
+const LIBELLES_CHAMPS: Record<string, string> = {
+  name: "Nom commercial",
+  founded_year: "Année de création",
+  phone: "Téléphone",
+  email: "Email de contact",
+  website: "Site web",
+  hourly_rate: "Tarif horaire indicatif",
+  travel_fee: "Frais de déplacement",
+};
+
 // ============================================
 // Accordéon
 // ============================================
@@ -61,19 +75,34 @@ const DAYS = [
 function Accordion({
   title,
   defaultOpen = false,
+  open: ouvertImpose,
+  onOpenChange,
   children,
 }: {
   title: string;
   defaultOpen?: boolean;
+  /** Mode controle. Le parent doit pouvoir DEPLIER ce bloc de force quand un
+   *  champ obligatoire qu'il contient bloque l'envoi du formulaire : replie,
+   *  ce champ est en display:none, donc non focusable, donc le navigateur
+   *  refuse le submit SANS afficher son message (cf. revelerBloc plus bas). */
+  open?: boolean;
+  onOpenChange?: (ouvert: boolean) => void;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [ouvertInterne, setOuvertInterne] = useState(defaultOpen);
+  const open = ouvertImpose ?? ouvertInterne;
+
+  function basculer() {
+    const suivant = !open;
+    setOuvertInterne(suivant);
+    onOpenChange?.(suivant);
+  }
 
   return (
     <div className="border-b border-[var(--border-color)]">
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={basculer}
         className="flex items-center justify-between w-full py-4 text-left"
       >
         <span className="text-sm font-semibold text-[var(--text-primary)]">
@@ -257,6 +286,99 @@ export default function FicheEditor({ categories }: Props) {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const formTopRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // BLOCAGE MUET A L'ENREGISTREMENT, corrige le 31/08/2026.
+  //
+  // Telephone et email portent `required`, mais ils vivent dans le bloc
+  // « Contact », replie par defaut. Un accordeon replie garde ses champs
+  // montes en display:none (voir le commentaire du composant Accordion : les
+  // retirer du DOM les sortirait du FormData). Or la specification HTML dit
+  // qu'un champ invalide « not being rendered » n'est pas focusable : le
+  // navigateur interrompt l'envoi et RENONCE a afficher sa bulle. Chrome se
+  // contente d'un « An invalid form control with name='phone' is not
+  // focusable » en console, que personne n'ouvre. Resultat vu par le pro : il
+  // clique sur Enregistrer, il ne se passe rien, aucune explication nulle
+  // part. Meme piege sur le site web (type="url") qui refuse « www.monsite.fr »
+  // sans etre obligatoire, et sur le nom commercial si le pro a replie le bloc
+  // Identite. Sur 52 pros inscrits, en perdre un la-dessus est inacceptable.
+  //
+  // Les deux blocs qui contiennent des champs contraints passent donc en mode
+  // controle, et `revelerBloc` les deplie au moment precis ou ils bloquent.
+  const [identiteOuverte, setIdentiteOuverte] = useState(true);
+  // Deplie d'emblee pour un pro dont la fiche scrapee n'a ni telephone ni
+  // email : c'est exactement la population qui se fait bloquer, autant lui
+  // montrer les champs manquants avant qu'il clique.
+  const [contactOuvert, setContactOuvert] = useState(!pro.phone || !pro.email);
+  // « Services proposes » contient tarif horaire et frais de deplacement, deux
+  // champs number avec min=0 : coller « 45 € » ou « -10 » les rend invalides et
+  // bloque l'envoi exactement de la meme facon, depuis un bloc lui aussi replie.
+  const [servicesOuvert, setServicesOuvert] = useState(false);
+
+  // Message de blocage cote NAVIGATEUR (la validation serveur, elle, remplit
+  // profileState.error). Deplier le bloc et rendre la bulle native possible ne
+  // suffit pas : cette bulle disparait au premier clic ailleurs et ne laisse
+  // aucune trace. Ce message-ci reste affiche dans la barre d'enregistrement,
+  // qui est collee en bas de l'ecran, donc toujours sous les yeux du pro au
+  // moment ou il vient de cliquer sur Enregistrer.
+  const [blocageClient, setBlocageClient] = useState<string | null>(null);
+
+  // Empeche la boucle : reportValidity() redeclenche « invalid » sur le champ,
+  // donc ce meme gestionnaire, de facon synchrone.
+  const revelationEnCours = useRef(false);
+
+  /** Deplie le bloc du champ fautif, nomme les champs a corriger, puis
+   *  redemande au navigateur d'afficher sa bulle. flushSync (et pas un
+   *  setTimeout) parce que reportValidity doit s'executer sur un DOM deja mis a
+   *  jour : tant que le champ est cache, le navigateur reste muet, ce qui est
+   *  justement le defaut corrige. */
+  function revelerBloc(ouvrir: (v: boolean) => void) {
+    if (revelationEnCours.current) return;
+    revelationEnCours.current = true;
+    flushSync(() => ouvrir(true));
+
+    // On recompose le message a partir de TOUS les champs invalides, pas du
+    // seul champ qui a emis l'evenement : telephone et email vides produisent
+    // deux « invalid » distincts, et le pro doit voir les deux d'un coup.
+    // `validity.valid` et surtout pas `checkValidity()`, qui reemet lui-meme un
+    // evenement « invalid » et rappellerait donc cette fonction.
+    const form = formRef.current;
+    const fautifs = form
+      ? Array.from(form.elements)
+          .filter(
+            (el): el is HTMLInputElement =>
+              el instanceof HTMLInputElement &&
+              el.willValidate &&
+              !el.validity.valid
+          )
+          .map((el) => LIBELLES_CHAMPS[el.name] || el.name)
+      : [];
+
+    setBlocageClient(
+      fautifs.length === 0
+        ? null
+        : fautifs.length === 1
+          ? `Enregistrement impossible : le champ « ${fautifs[0]} » doit être corrigé. Il vient d'être déplié ci-dessus.`
+          : `Enregistrement impossible, champs à corriger : ${fautifs.join(", ")}. Ils viennent d'être dépliés ci-dessus.`
+    );
+
+    form?.reportValidity();
+    revelationEnCours.current = false;
+  }
+
+  // Meme raisonnement pour la validation SERVEUR (profileSchema dans
+  // app/pro/dashboard/fiche/actions.ts revalide nom, telephone et email) : le
+  // bandeau rouge annonce « corrigez : Telephone », mais le message precis et
+  // le champ encadre en rouge sont dans un bloc replie. On le deplie.
+  useEffect(() => {
+    // L'envoi est parti : le blocage navigateur n'a plus lieu d'etre affiche,
+    // sinon il resterait a l'ecran a cote de « Profil sauvegarde avec succes ».
+    if (profileState.success) setBlocageClient(null);
+    const champs = profileState.fieldErrors;
+    if (!champs) return;
+    if (champs.name || champs.description || champs.founded_year) setIdentiteOuverte(true);
+    if (champs.phone || champs.email) setContactOuvert(true);
+  }, [profileState]);
 
   // Scroll to error banner when validation fails
   const prevError = useRef(profileState.error);
@@ -522,8 +644,18 @@ export default function FicheEditor({ categories }: Props) {
         )}
       </div>
 
-      {/* Formulaire principal */}
-      <form action={profileAction}>
+      {/* Formulaire principal.
+          `ref` est indispensable : c'est la cible de reportValidity() dans
+          revelerBloc. Sans lui, deplier le bloc ne redemandait aucune bulle.
+          `onInput` efface le message de blocage des que le pro corrige quoi que
+          ce soit, sinon il resterait affiche apres correction et laisserait
+          croire que ca bloque encore. La forme fonctionnelle evite un rendu a
+          chaque frappe quand il n'y a aucun message a effacer. */}
+      <form
+        ref={formRef}
+        action={profileAction}
+        onInput={() => setBlocageClient((m) => (m ? null : m))}
+      >
         {/* Hidden fields for arrays and complex data */}
         {certs.map((c) => (
           <input key={c} type="hidden" name="certifications" value={c} />
@@ -550,7 +682,11 @@ export default function FicheEditor({ categories }: Props) {
 
         <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl overflow-hidden">
           {/* 1. Identité */}
-          <Accordion title="Identité" defaultOpen>
+          <Accordion
+            title="Identité"
+            open={identiteOuverte}
+            onOpenChange={setIdentiteOuverte}
+          >
             <Field
               label="Nom commercial"
               error={profileState.fieldErrors?.name}
@@ -560,6 +696,7 @@ export default function FicheEditor({ categories }: Props) {
                 defaultValue={pro.name}
                 className={profileState.fieldErrors?.name ? inputErrorClass : inputClass}
                 required
+                onInvalid={() => revelerBloc(setIdentiteOuverte)}
               />
             </Field>
 
@@ -600,12 +737,19 @@ export default function FicheEditor({ categories }: Props) {
                 max={new Date().getFullYear()}
                 placeholder="Ex : 2015"
                 className={inputClass}
+                onInvalid={() => revelerBloc(setIdentiteOuverte)}
               />
             </Field>
           </Accordion>
 
-          {/* 2. Contact */}
-          <Accordion title="Contact">
+          {/* 2. Contact. Mode controle : c'est ici que vivent les deux champs
+              obligatoires, et c'est ce bloc que revelerBloc doit pouvoir
+              deplier de force au moment ou ils bloquent l'enregistrement. */}
+          <Accordion
+            title="Contact"
+            open={contactOuvert}
+            onOpenChange={setContactOuvert}
+          >
             <Field
               label="Téléphone"
               error={profileState.fieldErrors?.phone}
@@ -618,6 +762,7 @@ export default function FicheEditor({ categories }: Props) {
                 placeholder="06 12 34 56 78"
                 className={profileState.fieldErrors?.phone ? inputErrorClass : inputClass}
                 required
+                onInvalid={() => revelerBloc(setContactOuvert)}
               />
             </Field>
 
@@ -633,6 +778,7 @@ export default function FicheEditor({ categories }: Props) {
                 placeholder="contact@monentreprise.fr"
                 className={profileState.fieldErrors?.email ? inputErrorClass : inputClass}
                 required
+                onInvalid={() => revelerBloc(setContactOuvert)}
               />
             </Field>
 
@@ -644,6 +790,12 @@ export default function FicheEditor({ categories }: Props) {
                 onChange={(e) => setWebsiteValue(e.target.value)}
                 placeholder="https://monentreprise.fr"
                 className={inputClass}
+                // Ce champ n'est pas obligatoire mais son type="url" refuse
+                // « www.monsite.fr » (pas de schema), une saisie tres naturelle.
+                // Il bloquait donc l'enregistrement du meme blocage muet que
+                // telephone et email, en etant encore plus deroutant puisque le
+                // pro ne le voit meme pas comme un champ requis.
+                onInvalid={() => revelerBloc(setContactOuvert)}
               />
             </Field>
 
@@ -1077,7 +1229,11 @@ export default function FicheEditor({ categories }: Props) {
           </Accordion>
 
           {/* 6. Services */}
-          <Accordion title="Services proposés">
+          <Accordion
+            title="Services proposés"
+            open={servicesOuvert}
+            onOpenChange={setServicesOuvert}
+          >
             {/* Metier principal MODIFIABLE depuis le 08/08/2026.
                 Il etait affiche grise, donc un pro mal classe au scraping
                 n'avait AUCUN moyen de se corriger : son seul recours etait
@@ -1149,6 +1305,7 @@ export default function FicheEditor({ categories }: Props) {
                   defaultValue={pro.hourly_rate || ""}
                   placeholder="Ex : 45"
                   className={inputClass}
+                  onInvalid={() => revelerBloc(setServicesOuvert)}
                 />
               </Field>
 
@@ -1161,6 +1318,7 @@ export default function FicheEditor({ categories }: Props) {
                   defaultValue={pro.travel_fee || ""}
                   placeholder="Ex : 30"
                   className={inputClass}
+                  onInvalid={() => revelerBloc(setServicesOuvert)}
                 />
               </Field>
             </div>
@@ -1197,15 +1355,19 @@ export default function FicheEditor({ categories }: Props) {
         <div className="sticky bottom-20 lg:bottom-4 z-10 mt-6">
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center justify-between gap-4 shadow-lg">
             <div className="min-w-0">
-              {profileState.success && (
+              {/* Le blocage cote navigateur passe AVANT les messages du
+                  serveur : c'est le seul cas ou rien n'est parti, donc le seul
+                  ou le pro n'a aucune autre explication a l'ecran. Les messages
+                  serveur, eux, s'affichent deja en haut de page. */}
+              {blocageClient ? (
+                <p className="text-sm text-red-500">{blocageClient}</p>
+              ) : profileState.success ? (
                 <p className="text-sm text-green-600 dark:text-green-400">
                   Profil sauvegardé avec succès
                 </p>
-              )}
-              {profileState.error && (
+              ) : profileState.error ? (
                 <p className="text-sm text-red-500">{profileState.error}</p>
-              )}
-              {!profileState.success && !profileState.error && (
+              ) : (
                 <a
                   href={`/artisan/${pro.slug}`}
                   target="_blank"

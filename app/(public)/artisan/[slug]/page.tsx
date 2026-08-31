@@ -22,15 +22,18 @@ import { getCategoryArticle } from "@/lib/utils/category-grammar";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import { formatEffectifRange, formatFoundingYear, formatAgeYears, formatDateCreation } from "@/lib/utils/sirene";
-import dynamic from "next/dynamic";
 import { libelleNaf } from "@/lib/data/naf-labels";
-// Chargement PARESSEUX explicite. La bande n'est rendue que sur les fiches
-// qui ont des photos, soit 17 sur 2 439 970 aujourd'hui : son code ne doit
-// pas peser sur les autres. `next/dynamic` garantit un morceau de code a part,
-// telecharge seulement quand le composant est reellement dans l'arbre, sans
-// dependre de l'analyse statique de Next. Le rendu serveur reste actif, donc
-// les figures, les legendes et les textes alternatifs sont bien dans le HTML
-// que Google recoit.
+// Import STATIQUE, et c'est exactement ce que fait le code.
+// 31/08/2026 : le commentaire qui occupait cette place annoncait un
+// "chargement paresseux" de la bande de photos via `next/dynamic`. C'etait
+// faux : `dynamic` etait bien importe depuis "next/dynamic", mais n'etait
+// JAMAIS appele nulle part dans le fichier. Il ne produisait donc aucun
+// decoupage de code et n'avait aucun effet. L'import mort est retire, et le
+// commentaire avec lui : mieux vaut pas de commentaire qu'un commentaire qui
+// decrit un mecanisme inexistant. On ne remplace PAS par un vrai
+// `dynamic(() => import(...))` ici : ce serait un changement de comportement
+// sur les 2,4 millions de fiches, a decider et a mesurer (poids envoye au
+// navigateur avant/apres) separement d'une correction de defaut.
 import ProGallery from "@/components/pro/ProGallery";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
@@ -123,6 +126,51 @@ export default async function ProPage({ params }: Props) {
   const { slug } = await params;
   const pro = await getProBySlug(slug);
   if (!pro) {
+    // 31/08/2026 : ON NE CONCLUT PLUS AU 404 SANS AVOIR VERIFIE QUE LA BASE A
+    // BIEN REPONDU "cette fiche n'existe pas".
+    // `getProBySlug` (lib/queries/pros.ts) ne lit que `data` et jette le champ
+    // `error` de Supabase : une fiche reellement absente et une base qui
+    // hoquette (delai depasse, 5xx PostgREST, coupure reseau) lui renvoient
+    // TOUTES DEUX `null`, sans aucun moyen de les distinguer. Or cette route
+    // revalide a 2 592 000 s : un `notFound()` declenche par une panne d'une
+    // seconde fige un 404 pendant TRENTE JOURS sur une fiche qui existe, et
+    // Google la desindexe. Le risque est asymetrique : une 500 est reessayee
+    // par Google et n'est pas mise en cache, un 404 cache ne l'est pas.
+    //
+    // La sonde ci-dessous repose la question la plus simple possible, sur le
+    // meme index (slug). Volontairement SANS `.single()` : avec `limit(1)`,
+    // zero ligne donne `data: []` et `error: null`. Il n'y a donc plus aucun
+    // code d'erreur ambigu a interpreter, la ou `PGRST116` de `.single()`
+    // signifie a la fois "aucune ligne" et "plusieurs lignes". Ici, toute
+    // erreur est une VRAIE panne, jamais une absence.
+    //
+    // Cout : une requete de plus, uniquement sur le chemin d'echec, jamais sur
+    // une fiche qui s'affiche. Ce chemin en declenche deja une a deux avec
+    // `getFicheRemplacante` juste apres.
+    const { data: sonde, error: erreurSonde } = await createPublicClient()
+      .from("pros")
+      .select("id")
+      .eq("slug", slug)
+      .is("deleted_at", null)
+      .eq("is_active", true)
+      .limit(1);
+
+    if (erreurSonde) {
+      // Pas de notFound() : on releve l'erreur pour que Next serve une 500,
+      // que le cache ISR ne conserve pas et que Google reessaiera.
+      throw new Error(
+        `Fiche pro "${slug}" : la base n'a pas repondu, on refuse de servir un 404 mis en cache 30 jours (${erreurSonde.message})`
+      );
+    }
+    if (sonde && sonde.length > 0) {
+      // La ligne EXISTE : c'est donc la premiere lecture qui a echoue en
+      // silence. Meme raisonnement, 500 plutot que 404 fige.
+      throw new Error(
+        `Fiche pro "${slug}" : lecture en echec alors que la ligne existe en base, on refuse de servir un 404 mis en cache 30 jours`
+      );
+    }
+
+    // A partir d'ici seulement, la base a CONFIRME que la fiche n'existe pas.
     // 18/08/2026 : la fiche a peut-etre ete retiree comme DOUBLON (meme
     // entreprise, meme commune, autre etablissement). Dans ce cas on renvoie
     // vers la fiche conservee au lieu d'afficher une erreur. Cette requete ne
@@ -156,8 +204,26 @@ export default async function ProPage({ params }: Props) {
           .from("categories")
           .select("id, name, slug")
           .in("id", secondaryIds)
-      : Promise.resolve({ data: [] as { id: number; name: string; slug: string }[] }),
+      // `error: null` explicite : sans lui, les deux branches du ternaire
+      // n'ont pas la meme forme et TypeScript interdit de lire `.error` sur
+      // le resultat (une propriete doit exister dans TOUS les membres d'une
+      // union pour etre lisible).
+      : Promise.resolve({ data: [] as { id: number; name: string; slug: string }[], error: null }),
   ]);
+  // 31/08/2026 : l'erreur etait purement et simplement jetee (`.data || []`),
+  // donc "ce pro n'a pas de categorie secondaire" et "la requete a echoue"
+  // produisaient exactement le meme rendu, sans la moindre trace. Ces
+  // categories alimentent les liens vers /[metier]/[ville] : un echec
+  // silencieux retire des liens du maillage interne sans que rien ne le
+  // signale. On ne bloque PAS la page pour autant (contrairement a la fiche
+  // elle-meme plus haut : ici le contenu reste juste, seulement moins bien
+  // maille), on trace pour que ce soit visible dans les journaux.
+  if (secondaryCategoriesRes.error) {
+    console.error(
+      `[artisan/${slug}] categories secondaires illisibles (ids: ${secondaryIds.join(", ")})`,
+      secondaryCategoriesRes.error
+    );
+  }
   const secondaryCategories = (secondaryCategoriesRes.data || []) as { id: number; name: string; slug: string }[];
 
   const cityName = pro.city?.name || "";
@@ -447,18 +513,36 @@ export default async function ProPage({ params }: Props) {
   const wwAvg = pro.workwave_reviews_avg ?? 0;
   const gRating = pro.google_rating ?? 0;
   const gCount = pro.google_reviews_count ?? 0;
-  if (wwCount > 0 || gCount > 0) {
-    // Moyenne ponderee par nb d'avis de chaque source
-    const totalCount = wwCount + gCount;
-    const weightedSum = wwAvg * wwCount + gRating * gCount;
+  // 31/08/2026 : la condition ne portait que sur le NOMBRE d'avis, jamais sur
+  // la note. Une fiche ayant des avis Google comptes mais sans note (colonne
+  // `google_rating` vide, donc `gRating = 0` par le `?? 0` ci-dessus) sortait
+  // une moyenne de 0, declaree deux lignes plus bas a cote de
+  // `worstRating: 1`. Une note hors de l'intervalle annonce rend TOUT le bloc
+  // AggregateRating invalide : Google l'ignore et n'affiche pas l'etoile dans
+  // les resultats. Le bloc produisait donc l'inverse de ce pour quoi il
+  // existe. Meme mecanique cote Workwave si un compteur d'avis est renseigne
+  // sans moyenne.
+  // On ne retient donc une source que si elle a A LA FOIS des avis ET une note
+  // exploitable, et on n'emet le bloc que si la moyenne tombe reellement dans
+  // l'intervalle [1 ; 5] declare.
+  const sourcesAvis = [
+    { note: wwAvg, nombre: wwCount },
+    { note: gRating, nombre: gCount },
+  ].filter((s) => s.nombre > 0 && s.note > 0);
+  const totalCount = sourcesAvis.reduce((n, s) => n + s.nombre, 0);
+  if (totalCount > 0) {
+    // Moyenne ponderee par nb d'avis de chaque source retenue
+    const weightedSum = sourcesAvis.reduce((n, s) => n + s.note * s.nombre, 0);
     const aggregateValue = Math.round((weightedSum / totalCount) * 10) / 10;
-    jsonLd.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: aggregateValue,
-      reviewCount: totalCount,
-      bestRating: 5,
-      worstRating: 1,
-    };
+    if (aggregateValue >= 1 && aggregateValue <= 5) {
+      jsonLd.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: aggregateValue,
+        reviewCount: totalCount,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
   }
 
   // BreadcrumbList schema

@@ -6,7 +6,10 @@ import { getAiProByUserId } from "@/lib/queries/pros";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { markProjectAsContacted, startTechUnlock } from "./actions";
-import { FREE_UNLOCK_COUNT } from "@/lib/billing/free-unlocks";
+import {
+  FREE_UNLOCK_COUNT,
+  getFreeUnlocksRemaining,
+} from "@/lib/billing/free-unlocks";
 
 export const metadata: Metadata = {
   title: "Tous les projets · Dashboard Workwave AI",
@@ -176,15 +179,17 @@ export default async function AiDashboardProjetsPage({
     (unlocksRaw || []).map((u) => u.project_id)
   );
 
-  // Offre de lancement : les 2 premiers déblocages sont offerts.
-  // On ne compte que les déblocages GRATUITS (amount_cents=0) : un unlock payé
-  // ne consomme pas l'offre.
-  const { count: freeUsed } = await service
-    .from("lead_unlocks")
-    .select("id", { count: "exact", head: true })
-    .eq("pro_id", pro.id)
-    .eq("amount_cents", 0);
-  const freeRemaining = Math.max(0, FREE_UNLOCK_COUNT - (freeUsed || 0));
+  // Offre de lancement : les 2 premiers déblocages sont offerts. On ne compte
+  // que les déblocages GRATUITS (amount_cents=0), un unlock payé ne consomme
+  // pas l'offre. Le comptage était recopié ici à la main, avec un repli INVERSE
+  // de celui de la fonction partagée : une erreur de lecture rendait `count`
+  // null, `null || 0` donnait 0 consommé, donc 2 restants, donc la page
+  // affichait "Débloquer gratuitement" alors que startTechUnlock, lui, appelle
+  // getFreeUnlocksRemaining (repli à 0 restant) et part sur Stripe à 9,90 €.
+  // Le pro cliquait sur "gratuit" et se retrouvait devant un paiement. On passe
+  // par la fonction partagée pour que l'affichage et l'action ne puissent plus
+  // diverger, et que le doute penche toujours du côté payant.
+  const freeRemaining = await getFreeUnlocksRemaining(service, pro.id);
 
   const projects = projectsRows.map((proj) => {
     const fullDesc = proj.description || "";

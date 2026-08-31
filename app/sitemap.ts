@@ -7,8 +7,12 @@ import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { BASE_URL } from "@/lib/constants";
 import { SPECIALTIES } from "@/lib/specialties";
-// TECH_CITIES n'est plus utilise : buildAiUrls charge maintenant TOUTES
-// les villes BDD avec >= 1 pro tech (vs 60 villes hardcodees).
+// TECH_CITIES est de nouveau la reference des villes /ai/* (cf. buildAiUrls,
+// etape 2). La page app/(ai)/ai/[skill]/[ville]/page.tsx resout la ville par
+// findTechCityBySlug UNIQUEMENT : toute commune absente de cette liste de 60
+// tombe en notFound(). Charger "toutes les villes BDD avec des pros tech"
+// annoncait donc a Google des dizaines de milliers d'adresses en 404.
+import { TECH_CITIES } from "@/lib/data/tech-cities";
 import { TECH_DEPARTMENTS } from "@/lib/data/tech-departments";
 import { TJM_REFERENCE } from "@/lib/data/tech-tjm-reference";
 import { INTL_SKILLS } from "@/lib/data/intl-skills";
@@ -158,8 +162,9 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     })
   );
 
-  // /ai/{category}/{ville} · extended : TOUTES les villes BDD avec >= 1 pro
-  // tech (vs 60 villes hardcodees auparavant). Charge depuis pros + cities.
+  // /ai/{category}/{ville} : les villes de TECH_CITIES (60) ou la categorie a
+  // au moins 3 pros tech. Le comptage vient de la base, la liste des villes
+  // vient de TECH_CITIES parce que c'est la seule que la page sache servir.
   const supabase = getAdminServiceClient();
 
   // 1) Map (category_id, city_id) -> count des pros tech, via RPC d'agrégat
@@ -167,45 +172,55 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
   // round-trips) et faisait planter tout buildAiUrls → sous-sitemap /ai VIDE.
   // Migration : migrations/2026-06-08_sitemap_count_rpcs.sql
   const countMap = new Map<string, number>(); // key = "cat_id-city_id"
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: aiCountRows, error: aiRpcErr } = await (supabase as any).rpc(
-    "sitemap_ai_city_cat_counts"
+  // 31/08/2026 : l'erreur etait seulement logguee, puis la fonction continuait
+  // avec un countMap vide. Comme `revalidate = 86400`, un sous-sitemap ampute
+  // de TOUTES ses pages categorie x ville partait chez Google et y restait 24 h,
+  // sans que rien ne le signale (meme famille de panne silencieuse que le cron
+  // d'audit aveugle du 20/08). withSitemapRetry retente 6 fois (il absorbe les
+  // timeouts passagers quand le crawl sature la base) puis RELANCE : Next sert
+  // alors une 500 et rejouera la generation a la requete suivante. Google
+  // repasse sur un sitemap en erreur ; il ne repasse pas sur un fichier vide
+  // qu'il vient de telecharger avec succes.
+  const aiCountRows = await withSitemapRetry<
+    { c: number; v: number; n: number }[] | null
+  >(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => (supabase as any).rpc("sitemap_ai_city_cat_counts"),
+    "RPC sitemap_ai_city_cat_counts (migration 2026-06-08 appliquee ?)"
   );
-  if (aiRpcErr) {
-    console.error(
-      "[sitemap] RPC sitemap_ai_city_cat_counts KO (migration 2026-06-08 appliquée ?):",
-      aiRpcErr.message
-    );
-  }
   // La RPC renvoie un jsonb : tableau [{ c: cat_id, v: city_id, n: count }].
-  // Seuil >= 3 pros tech par ville : sans lui, 70 483 combos (≥1) feraient
-  // exploser le sous-sitemap au-delà de la limite de 50 000 URLs/sitemap, avec
-  // des dizaines de milliers de pages ultra-fines (1 seul freelance). À >= 3 :
-  // ~21 800 combos = surface saine, sous la limite. (Le BTP applique le même
-  // seuil côté SQL ; ici on filtre en JS pour ne pas re-toucher la RPC.)
+  // Seuil >= 3 pros tech par ville, garde anti-pages-ultra-fines (1 seul
+  // freelance) : 70 483 combos a >= 1, 21 704 a >= 3. (Le BTP applique le meme
+  // seuil cote SQL ; ici on filtre en JS pour ne pas re-toucher la RPC.)
+  // Ce seuil ne suffisait PAS a lui seul : il filtre sur la donnee, pas sur ce
+  // que la page sait rendre. Le filtre qui compte est celui de l'etape 2
+  // (TECH_CITIES), qui ramene ces 21 704 aux 474 adresses reellement servies.
   for (const r of (aiCountRows || []) as { c: number; v: number; n: number }[]) {
     if (Number(r.n) < 3) continue;
     countMap.set(`${r.c}-${r.v}`, Number(r.n));
   }
 
-  // 2) Charger les slugs des villes referencees dans countMap
-  const cityIds = Array.from(
-    new Set(
-      Array.from(countMap.keys()).map((k) => Number(k.split("-")[1]))
-    )
-  );
+  // 2) Slugs des villes. On ne charge QUE les 60 communes de TECH_CITIES, la
+  // seule liste que la page /ai/[skill]/[ville] sache resoudre : elle appelle
+  // findTechCityBySlug et fait notFound() sur tout le reste (la ville ne vient
+  // pas de la base cote page). Cette requete tient donc lieu de filtre pour
+  // l'etape 4 : une commune absente de la liste n'aura pas de slug, donc pas
+  // d'URL. Mesure du 31/08/2026 sur /sitemap/4.xml avant correction : sur
+  // 21 704 couples categorie x ville annonces, 21 230 pointaient vers une
+  // commune inconnue de la page et repondaient 404 (97,8 %), du type
+  // /ai/developpement-web/antran. Annoncer massivement des 404 abime la
+  // confiance que Google accorde a l'ensemble du sitemap.
   const citySlugMap = new Map<number, string>();
-  if (cityIds.length > 0) {
-    // Charger par batchs de 1000 pour eviter le cap PostgREST
-    for (let i = 0; i < cityIds.length; i += 1000) {
-      const batch = cityIds.slice(i, i + 1000);
-      const { data } = await supabase
-        .from("cities")
-        .select("id, slug")
-        .in("id", batch);
-      const rows = (data || []) as { id: number; slug: string }[];
-      for (const row of rows) citySlugMap.set(row.id, row.slug);
-    }
+  {
+    const { data } = await supabase
+      .from("cities")
+      .select("id, slug")
+      .in(
+        "slug",
+        TECH_CITIES.map((c) => c.slug)
+      );
+    const rows = (data || []) as { id: number; slug: string }[];
+    for (const row of rows) citySlugMap.set(row.id, row.slug);
   }
 
   // 3) Charger le slug des categories tech (cat_id -> slug)
@@ -218,21 +233,30 @@ async function buildAiUrls(): Promise<MetadataRoute.Sitemap> {
     catRows.map((c) => [c.id, c.slug])
   );
 
-  // 4) Generer les URLs : 1 par (cat, ville) avec >= 1 pro tech
-  const aiCategoryCity: MetadataRoute.Sitemap = [];
+  // 4) Generer les URLs : 1 par (cat, ville) avec >= 3 pros tech, la ville
+  // devant faire partie de TECH_CITIES (sinon citySlugMap n'a rien pour elle
+  // et on saute : c'est le filtre anti-404 decrit a l'etape 2).
+  // Agregation par URL et non par city_id : plusieurs communes homonymes
+  // peuvent porter le meme slug, et deux city_id differents produiraient alors
+  // deux fois la meme adresse dans le fichier.
+  const aiCityCounts = new Map<string, number>();
   for (const [key, count] of countMap) {
     const [catId, cityId] = key.split("-").map(Number);
     const catSlug = catSlugMap.get(catId);
     const citySlug = citySlugMap.get(cityId);
     if (!catSlug || !citySlug) continue;
-    aiCategoryCity.push({
-      url: `${BASE_URL}/ai/${catSlug}/${citySlug}`,
+    const url = `${BASE_URL}/ai/${catSlug}/${citySlug}`;
+    aiCityCounts.set(url, (aiCityCounts.get(url) || 0) + count);
+  }
+  const aiCategoryCity: MetadataRoute.Sitemap = [...aiCityCounts].map(
+    ([url, count]) => ({
+      url,
       lastModified: now,
       changeFrequency: "weekly" as const,
       // Priorite ponderee par le nombre de pros tech dans la ville
-      priority: count >= 10 ? 0.75 : count >= 3 ? 0.7 : 0.6,
-    });
-  }
+      priority: count >= 10 ? 0.75 : 0.7,
+    })
+  );
 
   // /ai/{category}/dept/{dept-code} · 6 cat x 96 dept = 576 URLs
   const aiCategoryDept: MetadataRoute.Sitemap = AI_CATEGORIES.flatMap((catSlug) =>
@@ -584,17 +608,19 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
   // timeoutait, la boucle cassait sur data=null, et le sous-sitemap sortait VIDE.
   // Migration : migrations/2026-06-08_sitemap_count_rpcs.sql
   const countMap = new Map<string, number>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: countRows, error: rpcErr } = await (supabase as any).rpc(
-    "sitemap_city_cat_counts",
-    { p_city_ids: topCityIds }
+  // 31/08/2026 : meme correction qu'au sous-sitemap /ai. L'erreur etait
+  // seulement logguee, countMap restait vide, et /sitemap/2.xml partait a ZERO
+  // URL chez Google, garde 24 h par `revalidate = 86400`. C'est exactement la
+  // panne deja vecue le 08/06 (cat x ville a 0 URL) : elle ne doit plus pouvoir
+  // se produire en silence. withSitemapRetry retente 6 fois puis relance, et
+  // une 500 sera re-tentee par Next a la requete suivante.
+  const countRows = await withSitemapRetry<
+    { c: number; v: number; n: number }[] | null
+  >(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => (supabase as any).rpc("sitemap_city_cat_counts", { p_city_ids: topCityIds }),
+    "RPC sitemap_city_cat_counts (migration 2026-06-08 appliquee ?)"
   );
-  if (rpcErr) {
-    console.error(
-      "[sitemap] RPC sitemap_city_cat_counts KO (migration 2026-06-08 appliquée ?):",
-      rpcErr.message
-    );
-  }
   // La RPC renvoie un jsonb : tableau [{ c: cat_id, v: city_id, n: count }].
   for (const r of (countRows || []) as { c: number; v: number; n: number }[]) {
     countMap.set(`${r.c}-${r.v}`, Number(r.n));
@@ -701,18 +727,30 @@ async function buildSpecialtyUrls(): Promise<MetadataRoute.Sitemap> {
 
   const cityIds = topCities.map((c) => c.id);
   let offset = 0;
-  let hasMore = true;
   const countMap = new Map<string, number>();
 
-  while (hasMore) {
-    const { data } = await supabase
-      .from("pros")
-      .select("category_id, city_id")
-      .eq("is_active", true)
-      .is("deleted_at", null)
-      .in("category_id", specialtyCategoryIds)
-      .in("city_id", cityIds)
-      .range(offset, offset + SUPABASE_PAGE_SIZE - 1);
+  while (true) {
+    // 31/08/2026 : l'erreur n'etait meme pas destructuree. Une requete en echec
+    // rendait `data` a null, donc rows vide, donc sortie de boucle immediate et
+    // countMap vide : le sous-sitemap des sous-specialites etait publie SANS
+    // AUCUNE URL, puis garde 24 h (`revalidate = 86400`). Des milliers de pages
+    // disparaissaient des radars de Google pour une journee, en silence.
+    // withSitemapRetry retente 6 fois puis relance : mieux vaut une 500 que
+    // Next rejouera qu'un fichier vide telecharge avec succes.
+    const data = await withSitemapRetry<
+      { category_id: number; city_id: number }[] | null
+    >(
+      () =>
+        supabase
+          .from("pros")
+          .select("category_id, city_id")
+          .eq("is_active", true)
+          .is("deleted_at", null)
+          .in("category_id", specialtyCategoryIds)
+          .in("city_id", cityIds)
+          .range(offset, offset + SUPABASE_PAGE_SIZE - 1),
+      `buildSpecialtyUrls offset ${offset}`
+    );
 
     const rows = (data || []) as { category_id: number; city_id: number }[];
     for (const row of rows) {

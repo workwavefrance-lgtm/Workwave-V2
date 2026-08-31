@@ -55,6 +55,69 @@ async function getIp(): Promise<string> {
   );
 }
 
+// Nombre de numéros erronés tolérés pour un même email sur 7 jours. Une faute
+// de frappe ne se produit pas 15 fois : ce plafond n'existe que pour qu'un
+// robot ne puisse pas remplir la table indéfiniment (le formulaire est public
+// et sans authentification). Le vrai garde-fou anti-détournement est ailleurs :
+// il compte les SIRET qui désignent réellement une fiche (cf. submitClaim).
+const MAX_SIRET_ERRONES_7J = 15;
+
+type ClientDeService = Awaited<ReturnType<typeof getServiceClient>>;
+
+// Recherche un compte Supabase Auth par email, en parcourant TOUTES les pages.
+//
+// Corrigé le 31/08/2026. `listUsers()` sans argument ne renvoie que les 50
+// premiers comptes : au-delà, un pro qui possède déjà un compte (typiquement
+// parce qu'il a déjà réclamé une première fiche) n'était plus retrouvé, la
+// création échouait avec « already registered », et on lui répondait « Erreur
+// lors de la création du compte » sans qu'il puisse rien y faire. Le nombre de
+// comptes ne fait que croître : c'était une panne programmée.
+//
+// Leçon CLAUDE.md du 26/05 : `auth.admin.getUserByEmail` n'existe pas dans le
+// SDK et `sb.schema("auth").from("users")` est refusé par PostgREST
+// (« Invalid schema: auth »). Paginer puis filtrer côté application est la
+// seule voie.
+//
+// On s'arrête sur une page VIDE, jamais sur « page plus courte que demandée » :
+// GoTrue peut plafonner `perPage` en silence, et le même piège a déjà coûté
+// 97 % des URL du sitemap le 30/04 puis 225 000 pros le 09/05.
+async function trouverCompteAuthParEmail(
+  serviceClient: ClientDeService,
+  email: string
+): Promise<{ id: string } | null> {
+  const emailCherche = email.trim().toLowerCase();
+  const TAILLE_PAGE = 1000;
+  // Borne de sécurité : 100 pages. Elle n'est atteinte que si le compte est
+  // introuvable, ce qui ne devrait jamais arriver puisqu'on n'entre ici
+  // qu'après un refus « already registered ».
+  const PAGES_MAX = 100;
+
+  for (let page = 1; page <= PAGES_MAX; page++) {
+    const { data, error } = await serviceClient.auth.admin.listUsers({
+      page,
+      perPage: TAILLE_PAGE,
+    });
+
+    if (error) {
+      console.error(`listUsers page ${page} :`, error.message);
+      return null;
+    }
+
+    const comptes = data?.users ?? [];
+    if (comptes.length === 0) return null;
+
+    const trouve = comptes.find(
+      (u) => u.email?.trim().toLowerCase() === emailCherche
+    );
+    if (trouve) return trouve;
+  }
+
+  console.error(
+    `trouverCompteAuthParEmail : ${PAGES_MAX} pages parcourues sans trouver le compte`
+  );
+  return null;
+}
+
 // Alerte admin quand quelqu un valide un code prouvant le SIRET d une fiche
 // mais demande le rattachement d une AUTRE fiche.
 //
@@ -251,6 +314,46 @@ export async function submitClaim(
   const ip = await getIp();
   const serviceClient = await getServiceClient();
 
+  // Ménage des mots de passe laissés par les réclamations abandonnées.
+  //
+  // Le mot de passe choisi par le pro est écrit en clair dans
+  // `claim_attempts.temp_password` (plus bas) parce que le compte n'est créé
+  // qu'à la saisie du code : il DOIT survivre entre l'envoi du code et sa
+  // saisie, sinon le parcours ne peut pas aboutir. Tous les chemins de sortie
+  // le nullifient (succès, code expiré, trop d'essais, échec d'envoi du mail),
+  // sauf un : le pro qui ne revient jamais. Sa ligne gardait le mot de passe
+  // en clair indéfiniment, sans aucun ménage automatique.
+  //
+  // Purger ces lignes ne peut RIEN casser : `verifyClaim` refuse déjà tout code
+  // dont `code_expires_at` est dépassé (et nullifie alors le mot de passe). Une
+  // ligne expirée est donc déjà morte pour le parcours, on ne fait que retirer
+  // le secret qui y traînait.
+  //
+  // Limite assumée : le ménage se déclenche à la réclamation suivante, donc un
+  // mot de passe abandonné peut survivre plus de 15 minutes s'il ne se passe
+  // rien sur le site. Le correctif propre serait une tâche planifiée (pg_cron
+  // sur Supabase) ou, mieux, ne plus stocker le mot de passe du tout, ce qui
+  // demande de revoir l'ordre du parcours. Ni l'un ni l'autre ne se fait dans
+  // ce fichier.
+  // 🔴 On nullifie le mot de passe SANS toucher au statut. Corrige le 01/09/2026,
+  // avant tout deploiement : la premiere version passait aussi la ligne en
+  // "expired", ce qui rendait AVEUGLE le controle de delivrabilite
+  // `invariantCodes` de scripts/verif-invariants.ts (lignes 129-146). Celui-ci
+  // compte les lignes restees "pending" sans `error_reason` depuis plus de 2 h et
+  // alerte au-dela de 3 : c'est ce controle qui detecte qu'un lot de codes n'est
+  // jamais arrive (le cas Fabien du 14/06). En requalifiant les lignes en
+  // "expired", le menage effacait la trace meme que le controle cherche.
+  //
+  // Effet de bord evite au passage : un pro qui revient saisir son code apres
+  // 15 minutes lit "Ce code a expire" (branche expiration) et non "Ce code n'est
+  // plus valide" (branche statut), qui est le message des codes deja consommes.
+  await serviceClient
+    .from("claim_attempts")
+    .update({ temp_password: null })
+    .eq("status", "pending")
+    .not("temp_password", "is", null)
+    .lt("code_expires_at", new Date().toISOString());
+
   // Fetch pro par slug
   const { data: pro, error: proError } = await serviceClient
     .from("pros")
@@ -288,6 +391,29 @@ export async function submitClaim(
     };
   }
 
+  // Tentatives récentes de cet email, lues UNE seule fois : elles servent aux
+  // deux garde-fous ci-dessous. Le nombre de requêtes est inchangé par rapport
+  // à avant le 31/08/2026, cette lecture était juste faite plus bas.
+  const sevenDaysAgo = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000
+  ).toISOString();
+
+  const { data: tentativesRecentes } = await serviceClient
+    .from("claim_attempts")
+    .select("siret, type, error_reason")
+    .eq("email", data.email)
+    .gte("created_at", sevenDaysAgo);
+
+  // Les demandes de suppression RGPD vivent dans la même table (type
+  // "deletion", cf. app/(public)/artisan/[slug]/supprimer/actions.ts). Elles ne
+  // disent rien d'une intention de réclamer : elles ne comptent pas ici.
+  const tentativesReclamation = (tentativesRecentes ?? []).filter(
+    (t) => t.type !== "deletion"
+  );
+  const numerosErrones = tentativesReclamation.filter(
+    (t) => t.error_reason === "siret_mismatch"
+  );
+
   // Vérification SIRET
   if (data.siret !== pro.siret) {
     await serviceClient.from("claim_attempts").insert({
@@ -299,6 +425,22 @@ export async function submitClaim(
       status: "expired",
     });
 
+    // Corrigé le 31/08/2026. Cette ligne est enregistrée pour l'audit, mais un
+    // numéro qui ne correspond à AUCUNE fiche ne compte plus dans le garde-fou
+    // anti-détournement plus bas. Avant, il y comptait : deux fautes de frappe
+    // puis le BON numéro faisaient trois SIRET distincts en 7 jours, donc un
+    // blocage de 7 jours au moment précis où le pro rejoignait la plateforme.
+    // Sur 52 pros inscrits, on ne peut en perdre aucun de cette façon.
+    // Le plafond qui reste ici est volontairement très large : il ne vise que
+    // le remplissage automatisé de la table, pas l'artisan qui se trompe.
+    if (numerosErrones.length + 1 >= MAX_SIRET_ERRONES_7J) {
+      return {
+        success: false,
+        message:
+          "Trop d'essais infructueux avec cet email. Écrivez-nous à contact@workwave.fr en indiquant votre SIRET, nous rattachons la fiche manuellement.",
+      };
+    }
+
     return {
       success: false,
       errors: {
@@ -307,26 +449,22 @@ export async function submitClaim(
     };
   }
 
-  // Rate limiting : même email + 3+ SIRET différents en 7 jours
-  const sevenDaysAgo = new Date(
-    Date.now() - 7 * 24 * 60 * 60 * 1000
-  ).toISOString();
-
-  const { data: recentAttempts } = await serviceClient
-    .from("claim_attempts")
-    .select("siret")
-    .eq("email", data.email)
-    .gte("created_at", sevenDaysAgo);
-
-  if (recentAttempts) {
-    const distinctSirets = new Set(recentAttempts.map((a) => a.siret));
-    if (distinctSirets.size >= 3 && !distinctSirets.has(data.siret)) {
-      return {
-        success: false,
-        message:
-          "Trop de tentatives de réclamation avec cet email. Veuillez réessayer plus tard ou contacter le support.",
-      };
-    }
+  // Garde-fou anti-détournement : un même email qui demande un code pour 3
+  // entreprises DIFFÉRENTES en 7 jours. On ne compte que les numéros qui ont
+  // réellement désigné une fiche, c'est-à-dire ceux qui ont passé la
+  // vérification ci-dessus (les fautes de frappe en sont exclues). Un pro qui
+  // réessaie sur SA fiche n'est jamais bloqué, d'où le test `!has`.
+  const siretsDejaDemandes = new Set(
+    tentativesReclamation
+      .filter((t) => t.error_reason !== "siret_mismatch")
+      .map((t) => t.siret)
+  );
+  if (siretsDejaDemandes.size >= 3 && !siretsDejaDemandes.has(data.siret)) {
+    return {
+      success: false,
+      message:
+        "Trop de tentatives de réclamation avec cet email. Veuillez réessayer plus tard ou contacter le support.",
+    };
   }
 
   // Générer et hasher le code
@@ -557,11 +695,14 @@ export async function verifyClaim(
       email_confirm: true,
     });
 
-  // Si l'utilisateur existe déjà, mettre à jour son mot de passe
+  // Si l'utilisateur existe déjà, mettre à jour son mot de passe.
+  // La recherche pagine désormais sur tous les comptes : cf.
+  // trouverCompteAuthParEmail, qui explique pourquoi la version d'avant
+  // (`listUsers()` sans argument, donc 50 comptes) devenait une panne certaine.
   if (signUpError && signUpError.message.includes("already")) {
-    const { data: listData } = await serviceClient.auth.admin.listUsers();
-    const existingUser = listData?.users?.find(
-      (u) => u.email === attempt.email
+    const existingUser = await trouverCompteAuthParEmail(
+      serviceClient,
+      attempt.email
     );
     if (existingUser) {
       await serviceClient.auth.admin.updateUserById(existingUser.id, {
@@ -617,7 +758,21 @@ export async function verifyClaim(
       return { success: true, redirectUrl: "/pro/dashboard/fiche" };
     }
 
-    return { success: false, message: "Erreur lors de la création du compte" };
+    // Ici, Supabase a refusé la création en disant que l'email existe déjà,
+    // mais on n'a pas retrouvé le compte correspondant. Le message doit dire
+    // quoi faire (leçon du 13/05 : un cul-de-sac muet dans un parcours de code
+    // par email a déjà fait remonter une plainte CNIL), et le mot de passe en
+    // clair de cette tentative n'a plus de raison d'être conservé.
+    await serviceClient
+      .from("claim_attempts")
+      .update({ temp_password: null })
+      .eq("id", attempt.id);
+
+    return {
+      success: false,
+      message:
+        "Un compte existe déjà avec cet email, mais nous n'avons pas réussi à le retrouver. Écrivez-nous à contact@workwave.fr en indiquant votre SIRET, nous rattachons la fiche manuellement.",
+    };
   }
 
   if (signUpError || !signUpData?.user) {

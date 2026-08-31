@@ -1,7 +1,16 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Workwave · Trouvez un professionnel de confiance en Vienne";
+// Le texte de cette image de partage (et son alt) datait du lancement d'avril 2026,
+// quand le site ne couvrait que le departement de la Vienne : il annoncait
+// « Plus de 20 000 professionnels en Vienne ». Le site couvre aujourd'hui la France
+// entiere et la Belgique francophone (107 departements et provinces, 35 163 communes,
+// ~2,4 millions de fiches). Formulation volontairement SANS CHIFFRE : le nombre de
+// fiches bouge a chaque scrape, une image de partage ne se met pas a jour toute seule,
+// et un chiffre perime ici se propage dans tous les partages sociaux et les apercus de
+// lien. Le libelle de couverture repris est celui deja utilise dans app/layout.tsx.
+export const alt =
+  "Workwave · Trouvez un professionnel de confiance partout en France et en Belgique francophone";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -50,7 +59,7 @@ export default function OgImage() {
             fontWeight: 600,
           }}
         >
-          Plus de 20 000 professionnels en Vienne
+          Partout en France et en Belgique francophone
         </div>
       </div>
     ),

@@ -320,6 +320,44 @@ export default function ProjectForm({
     setExtraCategoryIds(apres.slice(1));
   }
 
+  /** Choix d'une famille a l'ecran 1.
+   *
+   *  30/08/2026 : sans la remise a zero ci-dessous, un metier coche puis
+   *  abandonne en changeant de famille restait enregistre pour toujours.
+   *  Parcours exact du defaut : « Bâtiment et travaux » puis Maçon coche, puis
+   *  « ← Changer de besoin », puis « Aide à la personne ». L'ecran 2 n'affiche
+   *  que les metiers de la famille COURANTE, donc le Maçon devenait invisible
+   *  et impossible a decocher, mais il restait dans `categoryId` : le bouton
+   *  annoncait « Continuer avec 2 métiers » alors qu'une seule case etait
+   *  cochee, et la demande partait quand meme aux maçons.
+   *
+   *  Revenir sur la MEME famille ne remet rien a zero : la selection y est
+   *  visible a l'ecran, donc coherente avec ce qui part au serveur. */
+  function choisirFamille(v: string) {
+    if (v !== vertical) {
+      setCategoryId(null);
+      setExtraCategoryIds([]);
+    }
+    setVertical(v);
+  }
+
+  /** Ouvre l'ecran 2 en s'assurant que la famille affichee est celle du metier
+   *  deja enregistre. Meme invariant que `choisirFamille` (ce qui part au
+   *  serveur doit etre visible a l'ecran), pour l'autre entree du formulaire :
+   *  integre dans une page metier/ville, il demarre a l'ecran « Quand » avec un
+   *  metier deja choisi et AUCUNE famille. Sans cette deduction, un retour en
+   *  arriere affichait une grille de metiers vide alors qu'un metier etait bien
+   *  enregistre et partait au serveur.
+   *  Si le metier est introuvable dans la liste, on ne force rien : l'ecran
+   *  reste tel qu'il etait avant ce correctif. */
+  function retourAuxMetiers() {
+    if (!vertical) {
+      const famille = categories.find((c) => c.id === categoryId)?.vertical;
+      if (famille) setVertical(famille);
+    }
+    goTo(1);
+  }
+
   /** Avance vers une etape precise. Utilise par les ecrans a choix, ou le clic
    *  sur la reponse vaut validation : on ne repasse pas par canProceed(), qui
    *  lirait un state pas encore commite par React. */
@@ -498,7 +536,7 @@ export default function ProjectForm({
                 key={v}
                 type="button"
                 onClick={() => {
-                  setVertical(v);
+                  choisirFamille(v);
                   goTo(1);
                 }}
                 style={{ animationDelay: `${index * 110}ms` }}
@@ -703,7 +741,7 @@ export default function ProjectForm({
       <div className={step === 2 ? "" : "hidden"}>
         <button
           type="button"
-          onClick={() => goTo(1)}
+          onClick={retourAuxMetiers}
           className="mb-4 rounded-full border border-[var(--border-color)] px-3 py-1.5 text-[13px] text-[var(--text-secondary)] transition-colors duration-250 hover:text-[var(--text-primary)]"
         >
           ← Retour
@@ -811,7 +849,20 @@ export default function ProjectForm({
               publiques ni vendues (cf. broadcast-btp-project.ts) ;
             - aucun démarchage Workwave ;
             - suppression via le lien du mail de confirmation (deletion_token,
-              cf. deposer-projet/actions.ts + sendProjectConfirmation). */}
+              cf. deposer-projet/actions.ts + sendProjectConfirmation).
+
+            30/08/2026 : la phrase disait « visibles uniquement par l'artisan
+            qui traite votre demande ». C'ETAIT FAUX, et le meme fichier le
+            prouvait : le `onSubmit` ci-dessus range l'email et le telephone
+            dans sessionStorage (`wwv:uet_em` / `wwv:uet_ph`), que
+            components/analytics/UETPixel.tsx transmet ensuite a Microsoft
+            Advertising sur la page /deposer-projet/merci (Enhanced
+            Conversions : Microsoft les hache en SHA-256 cote serveur, donc les
+            valeurs en clair sortent bien du navigateur). Un troisieme
+            destinataire non annonce, c'est un probleme legal autant que moral.
+            La phrase dit desormais ce qui est reellement fait.
+            REGLE : si le pixel change de destinataire ou disparait, cette
+            phrase doit changer dans le meme commit. */}
         <div className="mb-6 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
           <div className="flex items-center gap-2 mb-3">
             <svg
@@ -832,13 +883,16 @@ export default function ProjectForm({
               Vos données sont protégées
             </span>
           </div>
-          {/* Deux lignes, pas six. L'encadre disait trois fois la meme chose :
-              a l'endroit ou la personne hesite le plus, un mur de texte se
-              saute au lieu de se lire. */}
+          {/* Court, pas six lignes. A l'endroit ou la personne hesite le plus,
+              un mur de texte se saute au lieu de se lire. La ligne sur la
+              mesure publicitaire est le prix de l'honnetete : elle reste
+              factuelle et donne le pourquoi, sans jargon juridique. */}
           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Visibles uniquement par l&apos;artisan qui traite votre demande.
-            Jamais affichées, jamais revendues. Suppression en un clic depuis
-            l&apos;email de confirmation.
+            Elles vont aux artisans qui traitent votre demande. Jamais affichées
+            publiquement, jamais revendues. Votre email et votre téléphone sont
+            aussi transmis à Microsoft Advertising, uniquement pour mesurer si
+            nos publicités amènent de vraies demandes. Suppression en un clic
+            depuis l&apos;email de confirmation.
           </p>
         </div>
 

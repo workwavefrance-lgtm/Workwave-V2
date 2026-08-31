@@ -421,13 +421,14 @@ export async function POST(req: Request) {
   }
 
   // ============================================
-  // Idempotence : skip si event deja traite
+  // Idempotence : skip si event deja TRAITE (pas seulement deja recu)
   // ============================================
   // Stripe peut retry un event jusqu'a 24h en cas de 5xx ou timeout.
   // Sans dedup, le meme event.id est traite N fois (double notification,
   // double trial activation, etc.). On INSERT le event.id dans
   // stripe_webhook_events ; si conflit (PRIMARY KEY violation), c'est
-  // qu'on l'a deja vu → retour 200 OK immediat sans processing.
+  // qu'on l'a deja recu, et on relit la ligne pour savoir si la tentative
+  // precedente est allee au bout (cf. bloc `if (dedupError)` plus bas).
   const supabase = await getServiceClient();
   // Extraction defensive de pro_id depuis les metadata Stripe (utile pour
   // monitoring + jointure ulterieure, mais ne bloque pas si absent)
@@ -451,13 +452,80 @@ export async function POST(req: Request) {
     });
 
   if (dedupError) {
-    // Code 23505 = duplicate key violation = event deja traite
+    // Code 23505 = duplicate key violation = event deja RECU. Attention :
+    // "deja recu" ne veut pas dire "deja traite".
     if (dedupError.code === "23505") {
-      console.log(`[webhook] event ${event.id} (${event.type}) deja traite, skip`);
-      return NextResponse.json({ received: true, duplicate: true });
+      // ── POURQUOI CE BLOC EST PLUS COMPLIQUE QU'UN SIMPLE SKIP ────────────
+      // Avant le 31/08/2026 on renvoyait 200 ici, sans rien relire. Le rejeu
+      // Stripe declenche par un `StripeRetryableError` (paiement encaisse mais
+      // INSERT lead_unlocks echoue, cf. handleBtpLeadUnlock) etait donc bloque
+      // ICI, avant meme d'atteindre le handler : la ligne existait deja dans
+      // stripe_webhook_events depuis la 1re tentative, celle qui avait echoue.
+      // Resultat : le pro avait paye 9,90 EUR, la ligne lead_unlocks n'existait
+      // pas, et le mecanisme de rattrapage automatique ne pouvait JAMAIS
+      // aboutir. Seule une reparation manuelle sortait le pro de la, sur la
+      // seule source de revenus du site.
+      //
+      // On distingue donc les deux cas via `processed_at` :
+      //   - renseigne  : l'event est alle au bout, vrai doublon, on skip.
+      //     C'est CE test qui protege des effets de bord joues deux fois.
+      //   - NULL       : la tentative precedente n'a pas abouti, on laisse le
+      //     rejeu retraiter. Sans risque de double facturation : ce webhook
+      //     n'encaisse rien (Stripe a deja debite), il ENREGISTRE. Et les
+      //     handlers sont idempotents : UPDATE par cle pour les abonnements,
+      //     INSERT lead_unlocks protege par UNIQUE (project_id, pro_id) qui
+      //     retombe sur un 23505 traite en skip silencieux.
+      const { data: dejaVu, error: relectureError } = await supabase
+        .from("stripe_webhook_events")
+        .select("processed_at, processing_error, received_at")
+        .eq("stripe_event_id", event.id)
+        .maybeSingle();
+
+      if (dejaVu?.processed_at) {
+        console.log(`[webhook] event ${event.id} (${event.type}) deja traite, skip`);
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      // La tentative precedente n'a pas abouti. Reste a savoir si elle est
+      // TERMINEE ou encore EN COURS : Stripe peut livrer deux fois le meme
+      // event quasi simultanement, et retraiter en parallele rejouerait des
+      // effets de bord non proteges par une contrainte SQL (mail "paiement
+      // echoue" envoye deux fois au pro, par exemple).
+      // Elle est consideree terminee si elle a laisse une erreur, ou si elle
+      // est trop vieille pour tourner encore : Stripe coupe sa requete a 30 s,
+      // les 120 s ci-dessous laissent une marge large. Les rejeux Stripe
+      // arrivent a plusieurs minutes d'intervalle, donc le rattrapage passe
+      // toujours ce test ; seules les livraisons vraiment concurrentes sont
+      // arretees ici.
+      const DELAI_TENTATIVE_EN_COURS_MS = 120_000;
+      const recuLeMs = dejaVu?.received_at
+        ? new Date(dejaVu.received_at).getTime()
+        : 0;
+      const tentativeEncoreEnCours =
+        !relectureError &&
+        dejaVu != null &&
+        !dejaVu.processing_error &&
+        Date.now() - recuLeMs < DELAI_TENTATIVE_EN_COURS_MS;
+
+      if (tentativeEncoreEnCours) {
+        console.log(
+          `[webhook] event ${event.id} (${event.type}) deja en cours de traitement, skip`
+        );
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      // Si la relecture elle-meme a echoue (`relectureError`, ou ligne
+      // introuvable), on retraite : ne pas livrer un deblocage paye coute plus
+      // cher que de rejouer un handler idempotent.
+      console.warn(
+        `[webhook] event ${event.id} (${event.type}) deja recu mais jamais abouti` +
+          `${relectureError ? " (relecture KO)" : ""}, rattrapage du traitement`
+      );
+      // Pas de `return` : on tombe volontairement dans le switch ci-dessous.
+    } else {
+      // Autre erreur : log mais on continue (mieux vaut traiter 2x que rater)
+      console.error("[webhook] erreur insert stripe_webhook_events:", dedupError);
     }
-    // Autre erreur : log mais on continue (mieux vaut traiter 2x que rater)
-    console.error("[webhook] erreur insert stripe_webhook_events:", dedupError);
   }
 
   try {
@@ -537,11 +605,36 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true, error: "processing_error" });
   }
 
-  // Mark l'event comme traite avec succes (processed_at = NOW)
-  await supabase
+  // Mark l'event comme traite avec succes (processed_at = NOW).
+  // `processing_error` est remis a NULL : depuis que le rejeu Stripe peut
+  // rattraper une tentative ratee (cf. bloc 23505 plus haut), une ligne peut
+  // porter l'erreur d'un essai precedent alors que l'event a fini par aboutir.
+  // Or `scripts/verif-invariants.ts` compte TOUTE ligne avec un
+  // `processing_error` comme "erreur non resolue" : sans ce reset, chaque
+  // rattrapage reussi laisserait une alerte permanente, donc une alerte qu'on
+  // finit par ignorer. La trace de l'incident reste dans les logs et dans le
+  // mail d'alerte deja envoye a l'admin.
+  // L'erreur de cet UPDATE est LUE, et pas seulement par principe. Corrige le
+  // 01/09/2026 : sans ce controle, un echec ici (coupure reseau, delai depasse)
+  // laissait la ligne avec `processed_at` a NULL alors que le traitement avait
+  // REUSSI, pendant que la route repondait 200 a Stripe. Stripe ne rejoue pas un
+  // evenement acquitte : la ligne restait donc indefiniment "en cours" et
+  // `verif-invariants.ts` la signalait sans que personne ne puisse rien y faire.
+  // Un paiement livre mais jamais marque comme tel est exactement le genre
+  // d'incoherence qui fait perdre du temps a chaque audit suivant.
+  const { error: erreurMarquage } = await supabase
     .from("stripe_webhook_events")
-    .update({ processed_at: new Date().toISOString() })
+    .update({ processed_at: new Date().toISOString(), processing_error: null })
     .eq("stripe_event_id", event.id);
+
+  if (erreurMarquage) {
+    // On NE renvoie PAS d'erreur a Stripe : le travail metier est fait, le rejeu
+    // ne servirait a rien et risquerait une double livraison. On trace, c'est
+    // tout.
+    console.error(
+      `[stripe] evenement ${event.id} traite mais non marque en base : ${erreurMarquage.message}`,
+    );
+  }
 
   return NextResponse.json({ received: true });
 }
