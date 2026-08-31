@@ -12,7 +12,10 @@
 # fenetres d environ une minute, plusieurs fois par heure. Ni Traefik ni Docker
 # ne journalisent l evenement.
 #
-# CE QUE FAIT CE SCRIPT : il declare un SECOND routeur, de priorite 10.
+# CE QUE FAIT CE SCRIPT : il declare un routeur de priorite 100, donc DEVANT
+# celui de Coolify (priorite 38), portant la limite de fabrication simultanee.
+# (Il valait 10 dans sa premiere version, en simple secours ; la mesure a montre
+# que le probleme n etait pas l absence du routeur mais la saturation du site.)
 #   - Le routeur Docker a une priorite de 38 (Traefik la calcule sur la longueur
 #     de sa regle : "Host(`workwave.fr`) && PathPrefix(`/`)").
 #   - Le fourre-tout a une priorite de -1000.
@@ -41,8 +44,15 @@ PREFIXE=l13fwu4rw15ksfq7bmy7jx0l
 C=$(docker ps --format '{{.Names}}' 2>/dev/null | grep "^${PREFIXE}" | head -1)
 [ -z "$C" ] && exit 0                                    # conteneur absent : ne rien toucher
 
-# On ne declare la porte de secours QUE si elle mene vraiment quelque part.
-docker exec coolify-proxy wget -qO- --timeout=5 "http://$C:3000/api/health" >/dev/null 2>&1 || exit 0
+# ATTENTION, PIEGE DEJA TOMBE DEDANS (31/08, 17h11) : il y avait ici une
+# verification "le site repond-il en 5 s ?", et le script sortait sans rien
+# ecrire quand elle echouait. Or elle echoue precisement quand le site est
+# sature, c est-a-dire quand cette regle est le plus necessaire. Resultat : le
+# fichier n a pas ete recree, aucune erreur nulle part, et j ai teste pendant
+# quinze minutes une regle qui n existait pas. Un garde-fou qui se desarme au
+# moment du danger est pire que pas de garde-fou.
+# Le conteneur en marche suffit : le routeur de Coolify pointe deja au meme
+# endroit, on ne prend donc aucun risque supplementaire.
 
 grep -q "http://$C:3000" "$CIBLE" 2>/dev/null && exit 0  # deja a jour
 
@@ -51,17 +61,53 @@ cat > "$CIBLE" <<YAML
 # Prend le relais quand le routeur Docker du site s absente (voir le script).
 http:
   routers:
-    workwave-secours:
+    # VOIE RESERVEE AUX MOTEURS DE RECHERCHE ET AUX IA.
+    # Priorite 200, donc DEVANT la voie limitee. Aucune limite de simultaneite :
+    # Google et les IA ne doivent JAMAIS recevoir de refus, c'est la seule source
+    # d'acquisition du site. Mesure du 31/08 : Googlebot fait 44 passages par
+    # heure et les IA 685, contre 169 821 pour les aspirateurs. Les exempter ne
+    # coute donc presque rien, et les refuser couterait le referencement.
+    workwave-moteurs:
       entryPoints:
         - https
-      rule: Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)
-      priority: 10
+      rule: (Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)) && HeaderRegexp(\`User-Agent\`, \`(?i)(googlebot|google-inspectiontool|bingbot|applebot|gptbot|oai-searchbot|chatgpt-user|claudebot|claude-web|anthropic-ai|perplexitybot|duckduckbot|yandexbot|baiduspider)\`)
+      priority: 200
       middlewares:
         - workwave-secours-compression
       service: workwave-secours-service
       tls:
         certResolver: letsencrypt
+    workwave-secours:
+      entryPoints:
+        - https
+      rule: Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)
+      priority: 100
+      middlewares:
+        - workwave-limite-simultanee
+        - workwave-secours-compression
+      service: workwave-secours-service
+      tls:
+        certResolver: letsencrypt
   middlewares:
+    # Nombre maximum de pages fabriquees EN MEME TEMPS.
+    # Mesure du 31/08 : une page neuve coute 0,4 a 0,8 s de travail, et les
+    # aspirateurs en demandent 42 nouvelles par seconde. Cela represente environ
+    # 25 secondes de travail par seconde ecoulee, sur 8 coeurs. Le site accumule
+    # les requetes en attente, sa memoire gonfle jusqu a son plafond de 4 096 Mo,
+    # puis il cesse de repondre. Constate en direct : moteur a 4 592 Mo, trois
+    # appels sans reponse, redemarrage, et rechute en une minute a 801 Mo — la
+    # memoire etait la consequence, pas la cause.
+    # Au-dela de cette limite, le proxy refuse tout de suite au lieu de laisser
+    # le site s etouffer.
+    # Reglage : 40 d abord (le site est remonte : processeur de 154 a 78 %,
+    # charge de 6,36 a 3,96, memoire stable a 1 636 Mo), mais 40 places etaient
+    # toutes prises par les aspirateurs et les visiteurs etaient refuses aussi.
+    # Porte a 90, avec les moteurs de recherche exemptes par le routeur
+    # ci-dessus. A reajuster en surveillant le processeur du site : s il repasse
+    # durablement au-dessus de 150 %, redescendre.
+    workwave-limite-simultanee:
+      inFlightReq:
+        amount: 90
     workwave-secours-compression:
       compress: {}
   services:
