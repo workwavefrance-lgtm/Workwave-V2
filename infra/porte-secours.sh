@@ -77,6 +77,39 @@ http:
       service: workwave-secours-service
       tls:
         certResolver: letsencrypt
+    # FICHIERS STATIQUES (styles, polices, images, scripts). Priorite 250, aucune
+    # limite : les servir ne coute presque rien, et les refuser afficherait des
+    # pages cassees chez les visiteurs. C est aussi ce qui distingue un vrai
+    # navigateur d un aspirateur : mesure du 31/08, les vrais visiteurs chargent
+    # 40 % de ressources, les aspirateurs 0 %.
+    workwave-statique:
+      entryPoints:
+        - https
+      rule: (Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)) && (PathPrefix(\`/_next/static\`) || PathPrefix(\`/_next/image\`) || Path(\`/favicon.ico\`) || Path(\`/robots.txt\`) || PathPrefix(\`/sitemap\`))
+      priority: 250
+      middlewares:
+        - workwave-secours-compression
+      service: workwave-secours-service
+      tls:
+        certResolver: letsencrypt
+    # VISITEURS SUR TELEPHONE ET TABLETTE. Priorite 150, avec leur PROPRE file
+    # d attente de 30 places, separee de celle des aspirateurs.
+    # Pourquoi : mesure du 31/08 apres la pose de la limite unique, 40 % des
+    # visiteurs mobiles etaient refuses parce que les aspirateurs occupaient
+    # toutes les places. Une file commune donne la priorite au plus bruyant.
+    # Les aspirateurs se declarent Chrome sur Windows ou Mac (98 % du volume),
+    # jamais mobile : cette file leur est de fait inaccessible.
+    workwave-mobile:
+      entryPoints:
+        - https
+      rule: (Host(\`workwave.fr\`) || Host(\`www.workwave.fr\`)) && HeaderRegexp(\`User-Agent\`, \`(iPhone|iPad|Android|Mobile Safari)\`)
+      priority: 150
+      middlewares:
+        - workwave-limite-mobile
+        - workwave-secours-compression
+      service: workwave-secours-service
+      tls:
+        certResolver: letsencrypt
     workwave-secours:
       entryPoints:
         - https
@@ -108,6 +141,10 @@ http:
     workwave-limite-simultanee:
       inFlightReq:
         amount: 90
+    # File reservee aux telephones, independante de celle ci-dessus.
+    workwave-limite-mobile:
+      inFlightReq:
+        amount: 30
     workwave-secours-compression:
       compress: {}
   services:

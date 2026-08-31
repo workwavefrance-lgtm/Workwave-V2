@@ -19,7 +19,11 @@ JOURNAL=/opt/workwave/routeur-absent.log
 INSTANT=/opt/workwave/routeur-absent-details.log
 while true; do
   CODE=$(curl -sk -o /dev/null -w "%{http_code}" -m 8 --resolve workwave.fr:443:127.0.0.1 https://workwave.fr/api/health 2>/dev/null)
-  if [ "$CODE" != "200" ]; then
+  # 429 = la limite de fabrication simultanee a refuse, et c est le comportement
+  # VOULU depuis 17h16 : mieux vaut un refus immediat qu un site qui s etouffe.
+  # Ne doivent alerter que les vraies pannes : pas de reponse (000), erreur du
+  # proxy (502/503), ou erreur du site (500).
+  if [ "$CODE" != "200" ] && [ "$CODE" != "429" ]; then
     T=$(date "+%F %T")
     echo "$T code=$CODE" >> "$JOURNAL"
     P=$(docker inspect coolify-proxy --format '{{.State.Pid}}' 2>/dev/null)
