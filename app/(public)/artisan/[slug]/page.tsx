@@ -543,6 +543,13 @@ export default async function ProPage({ params }: Props) {
             <Link
               href={`/pro/reclamer/${slug}`}
               rel="nofollow"
+              // Sans ceci, Next precharge la page de reclamation des que le
+              // bouton entre dans le champ de vision : chaque fiche affichee
+              // en fabrique DEUX. Mesure du 31/08 : 128 795 requetes sur
+              // /pro/reclamer, dont 70,3 % portant sur une fiche visitee juste
+              // avant. Cette page est en noindex et ne sert qu'apres un clic
+              // volontaire : la precharger n'apporte rien.
+              prefetch={false}
               className="inline-flex items-center justify-center gap-1.5 bg-[#FF5A36] hover:bg-[#E63E1A] text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250 hover:scale-[1.02] shrink-0 self-start sm:self-auto whitespace-nowrap"
             >
               Réclamer ma fiche, gratuit

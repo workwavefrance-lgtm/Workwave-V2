@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ClaimForm from "@/components/pro/ClaimForm";
 import { BASE_URL } from "@/lib/constants";
 import { formatBce } from "@/lib/utils/bce";
-import { createClient } from "@supabase/supabase-js";
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-async function getProForClaim(slug: string) {
+// Mise en commun du resultat pour un meme rendu : cette fonction est appelee
+// DEUX fois par affichage (generateMetadata pour le titre, puis la page), et
+// faisait donc deux fois la meme requete en base. Avec 128 795 affichages par
+// jour, cela representait environ 257 000 requetes pour 128 795 necessaires.
+// `cache` de React deduplique a l'interieur d'un rendu, sans rien changer au
+// contenu produit.
+const getProForClaim = cache(async (slug: string) => {
   const supabase = getServiceClient();
 
   // On charge un peu plus de champs (adresse, ville, date de creation Sirene)
@@ -28,7 +34,7 @@ async function getProForClaim(slug: string) {
 
   if (error || !data) return null;
   return data;
-}
+});
 
 // Format SIRET en groupes de 3-3-3-5 chiffres pour la lisibilite humaine.
 function formatSiret(siret: string | null): string {

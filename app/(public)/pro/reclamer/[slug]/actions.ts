@@ -55,6 +55,29 @@ async function getIp(): Promise<string> {
   );
 }
 
+// Alerte admin quand quelqu un valide un code prouvant le SIRET d une fiche
+// mais demande le rattachement d une AUTRE fiche.
+//
+// Ce cas n arrive pas par accident : le slug vient d un champ du formulaire, il
+// faut donc l avoir modifie a la main. C etait la faille corrigee le 31/08/2026
+// (voir le commentaire dans verifyClaim). On ne bloque plus seulement : on
+// previent, parce qu une tentative signifie que quelqu un cherche activement a
+// prendre la fiche d un artisan inscrit.
+function notifyAdminOfClaimMismatch(
+  slugDemande: string,
+  siretProuve: string,
+  email: string,
+  ip: string | null,
+) {
+  sendClaimAlreadyClaimedAlert(
+    `[TENTATIVE DE DETOURNEMENT] fiche demandee : ${slugDemande}`,
+    slugDemande,
+    email,
+    siretProuve,
+    ip ?? "inconnue",
+  ).catch((err) => console.error("Alerte detournement de fiche :", err));
+}
+
 // Notification admin (fire-and-forget) apres une reclamation reussie.
 // Recupere les details du pro et envoie une alerte par email a ADMIN_EMAIL.
 async function notifyAdminOfClaimSuccess(params: {
@@ -323,6 +346,11 @@ export async function submitClaim(
       code_expires_at: expiresAt,
       attempts_count: 0,
       status: "pending",
+      // La table claim_attempts sert AUSSI aux demandes de suppression RGPD
+      // (app/(public)/artisan/[slug]/supprimer/actions.ts, type "deletion").
+      // Sans ce marquage, les deux parcours sont indiscernables et un code
+      // obtenu pour supprimer une fiche permettait de se l attribuer.
+      type: "claim",
       temp_password: data.password,
     })
     .select("id")
@@ -465,6 +493,62 @@ export async function verifyClaim(
     return { success: false, message: "Erreur interne. Veuillez recommencer le processus." };
   }
 
+  // Un code obtenu pour supprimer une fiche ne doit pas servir a la reclamer.
+  // Les anciennes lignes n'ont pas de type : on refuse ce qui est explicitement
+  // autre chose, plutot que d'exiger "claim" et de casser les demandes en cours.
+  if (attempt.type && attempt.type !== "claim") {
+    return {
+      success: false,
+      message:
+        "Ce code a été demandé pour une autre opération. Recommencez la réclamation depuis votre fiche.",
+    };
+  }
+
+  // ── La fiche visée est-elle bien celle dont le SIRET a été prouvé ? ──
+  //
+  // Faille corrigée le 31/08/2026, trouvée par la relecture intégrale du code.
+  // Le slug arrive du formulaire (`formData.get("slug")`), et les deux mises à
+  // jour plus bas faisaient `.eq("slug", slug)` sans plus de contrôle. Le refus
+  // d'une fiche déjà réclamée n'existait qu'à l'étape 1 (l.252), donc il
+  // suffisait de prouver le SIRET de SA fiche puis de changer ce champ pour
+  // s'attribuer CELLE D'UN AUTRE, même déjà réclamée. Les SIRET sont affichés
+  // en clair sur les fiches publiques : il n'y avait rien à deviner. Les 52
+  // fiches réclamées étaient exactement les cibles, avec leur tableau de bord,
+  // leurs leads déjà payés et les coordonnées des particuliers.
+  //
+  // Le contrôle est ici, entre la validation du code et les deux rattachements,
+  // pour couvrir les deux branches (compte existant et compte neuf) d'un seul
+  // endroit : deux contrôles jumeaux finissent toujours par diverger.
+  const { data: ficheVisee, error: erreurFiche } = await serviceClient
+    .from("pros")
+    .select("id, siret, claimed_by_user_id, name")
+    .eq("slug", slug)
+    .single();
+
+  if (erreurFiche || !ficheVisee) {
+    return { success: false, message: "Fiche introuvable" };
+  }
+
+  // Le SIRET prouvé par le code reçu par email doit être celui de cette fiche.
+  if (!ficheVisee.siret || ficheVisee.siret !== attempt.siret) {
+    notifyAdminOfClaimMismatch(slug, attempt.siret, attempt.email, attempt.ip);
+    return {
+      success: false,
+      message:
+        "Cette fiche ne correspond pas au SIRET vérifié. Recommencez depuis la fiche de votre entreprise.",
+    };
+  }
+
+  // Et elle doit toujours être libre : quelqu'un a pu la réclamer entre l'envoi
+  // du code et sa saisie.
+  if (ficheVisee.claimed_by_user_id) {
+    return {
+      success: false,
+      message:
+        "Cette fiche a déjà été réclamée. Si vous pensez qu'il y a une erreur, contactez le support à contact@workwave.fr.",
+    };
+  }
+
   // 1. Créer le user Supabase Auth avec email + mot de passe
   const { data: signUpData, error: signUpError } =
     await serviceClient.auth.admin.createUser({
@@ -500,7 +584,8 @@ export async function verifyClaim(
           // scrapee porte encore l'ancien defaut 20 km, jamais choisi par le pro.
           intervention_radius_km: 200,
         })
-        .eq("slug", slug);
+        .eq("id", ficheVisee.id)
+        .is("claimed_by_user_id", null);
 
       // Nullifier temp_password immédiatement
       await serviceClient
@@ -560,7 +645,8 @@ export async function verifyClaim(
       // Rayon par defaut 100 km a la reclamation (cf. branche ci-dessus).
       intervention_radius_km: 200,
     })
-    .eq("slug", slug);
+    .eq("id", ficheVisee.id)
+        .is("claimed_by_user_id", null);
 
   if (updateError) {
     await serviceClient
