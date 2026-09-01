@@ -1,3 +1,12 @@
+// PROMESSES DE DELAI, harmonisees le 01/09/2026.
+// La page annoncait « sous 24h » a huit endroits, dont un « 90 % des cas » qui ne repose
+// sur aucune mesure. Or le code fait MIEUX et de facon verifiable : le broadcast est
+// synchrone depuis le 06/06/2026 (lib/email/broadcast-tech-project.ts, appele avec await
+// avant la redirection), le projet part donc en quelques secondes.
+// Ce qui n'etait garanti par aucun code, c'est la vitesse de REPONSE des freelances.
+// On affirme donc ce que le code fait (« diffusion immediate ») et plus ce que des tiers
+// pourraient faire. Regle du projet : aucune affirmation chiffree qui ne soit verifiable
+// dans le code execute.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
@@ -60,7 +69,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "En combien de temps est-on contacte par les freelances ?",
-    a: "Sous 24h dans 90% des cas, souvent en quelques heures. Des qu'un freelance voit votre projet correspondant a son savoir-faire dans son dashboard, il peut debloquer vos coordonnees et vous contacter directement. Plus votre brief est clair (techno, budget, delai), plus les freelances pertinents repondent vite.",
+    a: "Votre projet part immediatement : des sa publication, il est envoye par mail aux freelances de votre vertical. Des qu'un freelance le voit dans son tableau de bord, il peut debloquer vos coordonnees et vous contacter directement. Plus votre brief est clair (techno, budget, delai), plus les freelances pertinents repondent vite.",
   },
   {
     q: "Quel est le TJM moyen d'un freelance tech en France en 2026 ?",
@@ -120,7 +129,7 @@ const PERSONAS = [
 const VS_COMPETITORS = [
   {
     feature: "Selection automatique IA",
-    workwave: "Oui (24h)",
+    workwave: "Oui (immediat)",
     malt: "Non (recherche manuelle)",
     comet: "Non (curation humaine)",
     freeWork: "Non (annonces)",
@@ -382,11 +391,11 @@ const CATEGORIES = [
 const WHY = [
   {
     title: "Broadcast a la communaute",
-    desc: "Votre projet est diffuse en temps reel a la communaute des freelances FR de votre vertical (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Reponse en moins de 24h, sans paperasse.",
+    desc: "Votre projet est diffuse en temps reel a la communaute des freelances FR de votre vertical (tech, marketing, finance, juridique, RH, design, creation, audiovisuel). Sans paperasse.",
   },
   {
     title: "Inscription gratuite",
-    desc: "Aucun frais cote porteur de projet. Vos briefs sont publies et matches en moins de 24h, sans engagement.",
+    desc: "Aucun frais cote porteur de projet. Vos briefs sont publies et diffuses immediatement, sans engagement.",
   },
   {
     title: "Sans credit, sans commission",
@@ -603,7 +612,7 @@ export default function AiHomePage() {
                       Decrivez votre projet
                     </p>
                     <p className="text-[12px] sm:text-[13px] text-[var(--ai-text-secondary)] mt-0.5">
-                      Matching IA en moins de 24h, gratuit, sans credit
+                      Diffusion immediate, gratuit, sans credit
                     </p>
                   </div>
                 </div>
@@ -679,7 +688,7 @@ export default function AiHomePage() {
                     className="text-4xl sm:text-5xl font-black text-[var(--ai-text)] tracking-tight"
                     style={{ fontFamily: "var(--font-geist-mono), monospace" }}
                   >
-                    &lt; 24h
+                    Immediat
                   </span>
                 </div>
                 <p
@@ -691,7 +700,7 @@ export default function AiHomePage() {
                 <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
                   On alerte en temps reel la communaute des freelances FR
                   (tech, marketing, finance, juridique, RH, design, creation).
-                  Reponse en moins de 24h, gratuit, sans engagement.
+                  Diffusion immediate, gratuit, sans engagement.
                 </p>
               </div>
 

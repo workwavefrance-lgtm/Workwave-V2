@@ -70,22 +70,47 @@ export async function getNearbyCities(
   const supabase = createPublicClient();
 
   // Récupérer la ville de référence
-  const { data: city } = await supabase
+  const { data: city, error: erreurVille } = await supabase
     .from("cities")
     .select("latitude, longitude, department_id")
     .eq("id", cityId)
     .single();
 
+  // 🔴 Les erreurs sont RELEVEES, elles ne sont pas converties en liste vide.
+  //
+  // Corrige le 01/09/2026, signale par la relecture croisee de l'audit integral.
+  // Cette fonction alimente le bloc « villes voisines » sur le chemin NOMINAL des
+  // fiches et des listings. En avalant l'erreur, un hoquet de base produisait une
+  // page complete en 200 mais privee de ces liens internes, et cette version
+  // amputee etait mise en cache par l'ISR pour 30 jours. Une seconde de base
+  // capricieuse coutait donc un mois de maillage interne, sans aucun signal.
+  //
+  // PGRST116 est la seule exception : ce code signifie « aucune ligne », donc une
+  // ville qui n'existe pas. C'est un cas legitime, il garde la liste vide.
+  if (erreurVille && erreurVille.code !== "PGRST116") {
+    throw new Error(
+      `getNearbyCities : lecture de la ville ${cityId} en echec : ${erreurVille.message}`,
+    );
+  }
+
   if (!city?.latitude || !city?.longitude) return [];
 
   // Chercher les villes proches dans le même département
-  const { data } = await supabase
+  const { data, error: erreurVoisines } = await supabase
     .from("cities")
     .select("*")
     .eq("department_id", city.department_id)
     .neq("id", cityId)
     .not("latitude", "is", null)
     .order("population", { ascending: false, nullsFirst: false });
+
+  // Meme raison que ci-dessus : un echec ici vidait le bloc des villes voisines
+  // et figeait la page amputee pour 30 jours.
+  if (erreurVoisines) {
+    throw new Error(
+      `getNearbyCities : lecture des voisines du departement ${city.department_id} en echec : ${erreurVoisines.message}`,
+    );
+  }
 
   if (!data) return [];
 

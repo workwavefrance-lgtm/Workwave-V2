@@ -273,7 +273,7 @@ export async function getSimilarPros(
   limit: number = 5
 ): Promise<ProCardData[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("pros")
     .select(PRO_SELECT_CARD)
     .eq("category_id", categoryId)
@@ -282,6 +282,28 @@ export async function getSimilarPros(
     .is("deleted_at", null)
     .eq("is_active", true)
     .limit(limit);
+
+  // 🔴 L'erreur est RELEVEE, elle n'est pas convertie en liste vide.
+  //
+  // Corrige le 01/09/2026, signale par la relecture croisee de l'audit integral.
+  // Cette fonction est appelee sur le chemin NOMINAL de chaque fiche artisan. En
+  // avalant l'erreur, un hoquet de base produisait une page complete en 200,
+  // mais privee de son bloc « pros similaires », donc de ses liens internes
+  // sortants. Et cette version amputee etait mise en cache par l'ISR pour
+  // 30 jours (`revalidate` de app/(public)/artisan/[slug]/page.tsx).
+  //
+  // Autrement dit : une seconde de base capricieuse coutait un mois de maillage
+  // interne sur la fiche concernee, sans que rien ne le signale. Sur 2,4 millions
+  // de fiches et un site qui vit de la decouverte par les liens, c'est cher paye.
+  //
+  // Relever l'erreur produit une 500, que le cache ISR ne conserve PAS et que
+  // Google reessaie. Une page absente une minute vaut mieux qu'une page amputee
+  // pendant un mois. C'est le meme arbitrage que pour la fiche elle-meme.
+  if (error) {
+    throw new Error(
+      `getSimilarPros a echoue (categorie ${categoryId}, ville ${cityId}) : ${error.message}`,
+    );
+  }
 
   return (data as unknown as ProCardData[]) || [];
 }
