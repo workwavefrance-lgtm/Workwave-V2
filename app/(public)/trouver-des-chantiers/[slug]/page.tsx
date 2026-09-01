@@ -43,11 +43,13 @@ const IMPRESSIONS_28J = "402 000"; // GSC, fenêtre 28 j, mesuré le 29/08/2026
 const COMMUNES = "35 163"; // count cities, mesuré le 08/08/2026
 const PROS_TOTAL = "2,4 millions"; // count pros actifs, mesuré le 31/08/2026
 
-// Comparatif concurrent : chiffre SOURCÉ uniquement (leçon pub comparative du
-// 07/06, L121-8 C. conso). 220 €/mois HT = borne haute de Habitatpresto dans
-// lib/data/competitor-offers.ts (price_text "70 € à 220 € / mois HT", sourcé).
-const CONCURRENT_MENSUEL_MAX = "220 €";
-const CONCURRENT_ANNUEL = "2 640 €"; // 220 x 12, dérivé du chiffre sourcé
+// Comparatif concurrent : 300 à 500 €/mois est le chiffre de Willy (décision
+// commerciale du 01/09/2026, confirmée deux fois). Il couvre la FACTURE TOTALE
+// mensuelle d'un artisan sur les plateformes à abonnement : l'abonnement seul
+// sourcé (Habitatpresto, lib/data/competitor-offers.ts : 70 à 220 €/mois HT)
+// plus les contacts factures en sus. Aucun concurrent n'est nommé sur la page.
+const CONCURRENT_MENSUEL_MAX = "500 €";
+const CONCURRENT_ANNUEL = "6 000 €"; // 500 x 12
 
 function formatCount(n: number): string {
   return n.toLocaleString("fr-FR");
@@ -181,7 +183,7 @@ export default async function Page({
       <section className="px-4 py-20 sm:py-28">
         <div className="max-w-3xl mx-auto text-center">
           <span className="inline-block text-sm font-semibold text-[var(--accent)] mb-4 tracking-wide uppercase">
-            Pour les artisans · {name}
+            {`Pour les artisans · ${name}`}
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-[1.1] mb-6">
             {h1}
@@ -227,7 +229,7 @@ export default async function Page({
         <section className="px-4 py-14 bg-[var(--bg-secondary)]">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
-              La demande en {nameLower} aujourd&apos;hui
+              {`La demande en ${nameLower} aujourd'hui`}
             </h2>
             <p className="text-[var(--text-secondary)] leading-relaxed mb-6">{proContent.marche}</p>
             {proContent.chantiersDemandes.length > 0 && (
@@ -303,7 +305,7 @@ export default async function Page({
                 par contact débloqué · les 2 premiers offerts · zéro abonnement
               </span>
               <span className="text-sm text-[var(--text-tertiary)] line-through">
-                jusqu&apos;à {CONCURRENT_MENSUEL_MAX}/mois HT ailleurs, soit {CONCURRENT_ANNUEL}/an
+                {`300 à ${CONCURRENT_MENSUEL_MAX}/mois ailleurs, jusqu'à ${CONCURRENT_ANNUEL}/an`}
               </span>
             </div>
           </div>
@@ -315,7 +317,7 @@ export default async function Page({
         <section className="px-4 py-14 bg-[var(--bg-secondary)]">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
-              Le gisement de chantiers en {r.dept.name}
+              {`Le gisement de chantiers en ${r.dept.name}`}
             </h2>
             <div className="grid sm:grid-cols-3 gap-4 mb-4">
               {market.logements_vacants && (
@@ -338,8 +340,7 @@ export default async function Page({
               )}
             </div>
             <p className="text-sm text-[var(--text-tertiary)]">
-              Données publiques officielles, agrégées sur les {market.nb_communes} communes du
-              département.
+              {`Données publiques officielles, agrégées sur les ${market.nb_communes} communes du département.`}
             </p>
           </div>
         </section>

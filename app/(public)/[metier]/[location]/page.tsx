@@ -828,7 +828,7 @@ export async function renderListing(
             <div className="flex flex-wrap items-center justify-between gap-4 border border-[var(--border-color)] rounded-2xl px-6 py-5 bg-[var(--bg-secondary)]">
               <p className="text-sm text-[var(--text-secondary)]">
                 <strong className="text-[var(--text-primary)]">
-                  Vous êtes {category.name.toLowerCase()} ?
+                  {`Vous êtes ${category.name.toLowerCase()} ?`}
                 </strong>{" "}
                 Votre fiche existe sûrement déjà : réclamez-la et recevez les demandes de votre
                 zone. 9,90 € le contact, les 2 premiers offerts, zéro abonnement.

@@ -16,7 +16,7 @@ export const CHANTIERS_FAQ: FaqItem[] = [
   },
   {
     q: "Y a-t-il un abonnement ou un engagement ?",
-    a: "Non. Contrairement aux plateformes à abonnement (souvent 100 à 250 € par mois), Workwave ne vous engage à rien. Vous créez votre fiche gratuitement et vous payez uniquement les contacts que vous décidez de débloquer, à l'unité.",
+    a: "Non. Contrairement aux plateformes à abonnement (souvent 300 à 500 € par mois, contacts facturés en plus), Workwave ne vous engage à rien. Vous créez votre fiche gratuitement et vous payez uniquement les contacts que vous décidez de débloquer, à l'unité.",
   },
   {
     q: "Workwave prend-il une commission sur mes chantiers ?",
@@ -47,7 +47,7 @@ export const CHANTIERS_COMPARISON: {
 }[] = [
   {
     feature: "Prix",
-    others: "Abonnement 100-250 €/mois ou 1-90 €/contact (opaque)",
+    others: "Abonnement 300 à 500 €/mois, contacts souvent factures en plus",
     workwave: "9,90 € le lead · affiché, fixe",
   },
   {
