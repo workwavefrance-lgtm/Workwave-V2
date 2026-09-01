@@ -816,6 +816,34 @@ export async function renderListing(
         />
       )}
 
+      {/* Maillage vers la page d'acquisition pro du métier (01/09/2026).
+          Les ~5 900 listings métier x lieu sont les pages les plus liées du
+          site : les faire pointer vers /trouver-des-chantiers/[metier] pousse
+          les 25 pages pro en autorité SANS créer une seule page nouvelle.
+          BTP uniquement : la page cible ne résout que ce vertical, un lien
+          domicile/personne mènerait sur un 404. */}
+      {category.vertical === "btp" && (
+        <section className="px-4 pb-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-wrap items-center justify-between gap-4 border border-[var(--border-color)] rounded-2xl px-6 py-5 bg-[var(--bg-secondary)]">
+              <p className="text-sm text-[var(--text-secondary)]">
+                <strong className="text-[var(--text-primary)]">
+                  Vous êtes {category.name.toLowerCase()} ?
+                </strong>{" "}
+                Votre fiche existe sûrement déjà : réclamez-la et recevez les demandes de votre
+                zone. 9,90 € le contact, les 2 premiers offerts, zéro abonnement.
+              </p>
+              <Link
+                href={`/trouver-des-chantiers/${category.slug}`}
+                className="shrink-0 inline-flex items-center px-5 py-2.5 rounded-full border border-[var(--accent)] text-[var(--accent)] text-sm font-semibold transition-all duration-250 hover:bg-[var(--accent)] hover:text-white"
+              >
+                Trouver des chantiers
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       <InternalLinks
         relatedCategories={relatedCategories}
         nearbyCities={nearbyCities}

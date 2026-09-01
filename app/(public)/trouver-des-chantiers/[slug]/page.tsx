@@ -13,6 +13,10 @@ import {
   getCategoryBySlugPublic,
 } from "@/lib/queries/home-public";
 import { generateDepartmentSlug, formatDepartmentLabel } from "@/lib/utils/slugs";
+import { METIER_STATS } from "@/lib/data/metier-stats";
+import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
+import { CHANTIERS_PRO_CONTENT } from "@/lib/data/chantiers-pro-content";
+import { DEPARTMENT_MARKET } from "@/lib/data/department-market";
 import type { Category, Department } from "@/lib/types/database";
 
 // ISR : revalide chaque jour → nouvelles catégories sans rebuild + purge d'un
@@ -20,12 +24,34 @@ import type { Category, Department } from "@/lib/types/database";
 // de 1h pour réduire l'egress sous crawl (0 impact SEO, données quasi-statiques).
 export const revalidate = 86400;
 
-// Programmatique pro-acquisition : décline /trouver-des-chantiers sur chaque
-// métier BTP (« trouver des chantiers plombier ») et chaque département
-// (« trouver des chantiers en Vienne »). Un SEUL param dynamique [slug] pour
-// éviter le conflit de noms de slug Next.js (leçon CLAUDE.md). Statique (SSG).
+// Machine à attraction pro (refonte 01/09/2026, maquette validée par Willy).
+// La v1 était un gabarit : même phrase sur les 132 pages, seul le nom changeait.
+// Cette version rend chaque page FACTUELLEMENT unique sans rien inventer :
+//   - compteur réel de pros du métier (lib/data/metier-stats.ts, base, daté) ;
+//   - prix sourcés du métier (lib/data/sourced-prices.ts, Perplexity cité) ;
+//   - contenu marché pro par métier (lib/data/chantiers-pro-content.ts, sourcé,
+//     affiché SEULEMENT si généré : rien ne casse pour un métier manquant) ;
+//   - données marché par département (lib/data/department-market.ts, INSEE/DVF).
+// Aucune requête base au rendu : tout est statique, ISR-safe.
 
 const BASE_URL = "https://workwave.fr";
+
+// Chiffres transverses AFFICHÉS, avec leur date de mesure. Règle du projet :
+// un chiffre écrit est daté et mesuré, et il vaut mieux le re-vérifier à chaque
+// gros scrape (cf. leçon des compteurs home du 08/06).
+const IMPRESSIONS_28J = "402 000"; // GSC, fenêtre 28 j, mesuré le 29/08/2026
+const COMMUNES = "35 163"; // count cities, mesuré le 08/08/2026
+const PROS_TOTAL = "2,4 millions"; // count pros actifs, mesuré le 31/08/2026
+
+// Comparatif concurrent : chiffre SOURCÉ uniquement (leçon pub comparative du
+// 07/06, L121-8 C. conso). 220 €/mois HT = borne haute de Habitatpresto dans
+// lib/data/competitor-offers.ts (price_text "70 € à 220 € / mois HT", sourcé).
+const CONCURRENT_MENSUEL_MAX = "220 €";
+const CONCURRENT_ANNUEL = "2 640 €"; // 220 x 12, dérivé du chiffre sourcé
+
+function formatCount(n: number): string {
+  return n.toLocaleString("fr-FR");
+}
 
 type Resolved =
   | { type: "metier"; cat: Category }
@@ -80,6 +106,18 @@ export async function generateMetadata({
   };
 }
 
+/** Carte de statistique du bandeau héro. */
+function Stat({ valeur, legende }: { valeur: string; legende: string }) {
+  return (
+    <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl p-5 text-left">
+      <span className="block text-2xl font-extrabold tracking-tight text-[var(--text-primary)] tabular-nums">
+        {valeur}
+      </span>
+      <span className="text-sm text-[var(--text-secondary)]">{legende}</span>
+    </div>
+  );
+}
+
 export default async function Page({
   params,
 }: {
@@ -89,25 +127,43 @@ export default async function Page({
   const r = await resolveSlug(slug);
   if (!r) notFound();
 
-  // Variables d'affichage selon métier ou département
   const isMetier = r.type === "metier";
   const name = isMetier ? r.cat.name : formatDepartmentLabel(r.dept);
   const nameLower = isMetier ? r.cat.name.toLowerCase() : r.dept.name;
 
+  // ── Données uniques du métier (toutes réelles, toutes optionnelles) ──
+  const count = isMetier ? METIER_STATS[r.cat.slug] : undefined;
+  const hasCount = typeof count === "number" && count > 0;
+  const prices = isMetier ? SOURCED_PRICES[r.cat.slug] : undefined;
+  const proContent = isMetier ? CHANTIERS_PRO_CONTENT[r.cat.slug] : undefined;
+  // Le chantier le plus cher du métier : c'est lui qui porte l'argument
+  // « un seul chantier rembourse des centaines de contacts à 9,90 € ».
+  const topPrice = prices?.ranges?.length
+    ? prices.ranges[prices.ranges.length - 1]
+    : null;
+
+  // ── Données uniques du département (gate de couverture, leçon du 07/06 :
+  // n'afficher une stat que si elle existe, jamais de repli inventé) ──
+  const market = !isMetier ? DEPARTMENT_MARKET[r.dept.code] : undefined;
+
+  // L'accroche « votre fiche existe déjà » (effet propriétaire, maquette
+  // validée) n'est servie que si on peut l'appuyer d'un compteur réel.
   const h1 = isMetier
-    ? `Vous êtes ${r.cat.name} ? Trouvez des chantiers près de chez vous.`
+    ? hasCount
+      ? `Votre fiche ${nameLower} existe déjà. Réclamez-la, les clients arrivent.`
+      : `Vous êtes ${r.cat.name} ? Trouvez des chantiers près de chez vous.`
     : `Trouvez des chantiers en ${r.dept.name}.`;
 
   const intro = isMetier
-    ? `Recevez les demandes des particuliers qui cherchent un ${nameLower} près de chez eux. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse : pas d'abonnement, pas de commission sur vos chantiers.`
+    ? hasCount
+      ? `Workwave référence déjà ${formatCount(count)} ${nameLower}s en France et en Belgique, à partir des registres officiels. La vôtre en fait sûrement partie : la réclamer est gratuit, prend 3 minutes, et vos 2 premiers contacts clients sont offerts.`
+      : `Recevez les demandes des particuliers qui cherchent un ${nameLower} près de chez eux. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse : pas d'abonnement, pas de commission sur vos chantiers.`
     : `Recevez les demandes de chantiers des particuliers du ${formatDepartmentLabel(r.dept)}, tous métiers du bâtiment. Vous ne payez 9,90 € que pour débloquer un contact qui vous intéresse, sans abonnement ni engagement.`;
 
-  // Maillage interne : vers la page listing correspondante + le hub
   const listingHref = isMetier ? `/${r.cat.slug}` : "/departements";
   const listingLabel = isMetier
-    ? `Voir les ${r.cat.name.toLowerCase()}s sur Workwave`
+    ? `Voir les ${nameLower}s sur Workwave`
     : `Voir tous les départements`;
-
   const ctaLabel = isMetier ? `de ${nameLower}` : `en ${r.dept.name}`;
 
   return (
@@ -121,7 +177,7 @@ export default async function Page({
       />
       <JsonLd data={getChantiersFaqSchema()} />
 
-      {/* ===================== HERO (dynamique) ===================== */}
+      {/* ===================== HERO ===================== */}
       <section className="px-4 py-20 sm:py-28">
         <div className="max-w-3xl mx-auto text-center">
           <span className="inline-block text-sm font-semibold text-[var(--accent)] mb-4 tracking-wide uppercase">
@@ -138,7 +194,7 @@ export default async function Page({
               href="/pro/retrouver-fiche"
               className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--accent)] text-white font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
             >
-              Trouver ma fiche avec mon SIRET
+              {hasCount ? "Retrouver ma fiche avec mon SIRET" : "Trouver ma fiche avec mon SIRET"}
             </Link>
             <Link
               href="/pro/creer-fiche"
@@ -148,10 +204,146 @@ export default async function Page({
             </Link>
           </div>
           <p className="mt-5 text-sm text-[var(--text-tertiary)]">
-            Inscription gratuite · 9,90 € le lead, sans abonnement
+            Inscription gratuite · 9,90 € le contact, les 2 premiers offerts · zéro abonnement
           </p>
+
+          {/* Bandeau de stats : chaque valeur est réelle, mesurée et datée dans
+              les constantes en tête de fichier. Le compteur métier vient de la
+              base (metier-stats). */}
+          <div className="grid sm:grid-cols-3 gap-4 mt-12">
+            {isMetier && hasCount ? (
+              <Stat valeur={formatCount(count)} legende={`${nameLower}s référencés sur Workwave`} />
+            ) : (
+              <Stat valeur={PROS_TOTAL} legende="professionnels référencés" />
+            )}
+            <Stat valeur={IMPRESSIONS_28J} legende="affichages Google en 28 jours" />
+            <Stat valeur={COMMUNES} legende="communes couvertes, France et Belgique" />
+          </div>
         </div>
       </section>
+
+      {/* ===================== MARCHÉ DU MÉTIER (sourcé, conditionnel) ===================== */}
+      {isMetier && proContent && (
+        <section className="px-4 py-14 bg-[var(--bg-secondary)]">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
+              La demande en {nameLower} aujourd&apos;hui
+            </h2>
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-6">{proContent.marche}</p>
+            {proContent.chantiersDemandes.length > 0 && (
+              <>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-3">
+                  Les chantiers les plus demandés
+                </h3>
+                <ul className="grid sm:grid-cols-2 gap-2 mb-6">
+                  {proContent.chantiersDemandes.map((c) => (
+                    <li
+                      key={c}
+                      className="text-sm text-[var(--text-secondary)] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3"
+                    >
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            {proContent.saisonnalite && (
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
+                {proContent.saisonnalite}
+              </p>
+            )}
+            {proContent.conseils.length > 0 && (
+              <>
+                <h3 className="font-semibold text-[var(--text-primary)] mb-3">
+                  Décrocher plus de chantiers
+                </h3>
+                <ol className="space-y-2 mb-6">
+                  {proContent.conseils.map((c, i) => (
+                    <li key={c} className="text-sm text-[var(--text-secondary)] leading-relaxed flex gap-3">
+                      <span className="text-[var(--accent)] font-bold shrink-0">{i + 1}.</span>
+                      {c}
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+            {proContent.sources.length > 0 && (
+              <p className="text-xs text-[var(--text-tertiary)]">
+                Sources ({proContent.retrievedAt}) :{" "}
+                {proContent.sources.slice(0, 3).map((s, i) => (
+                  <span key={s}>
+                    {i > 0 && " · "}
+                    <a href={s} rel="nofollow noopener" target="_blank" className="underline hover:text-[var(--accent)]">
+                      {new URL(s).hostname.replace("www.", "")}
+                    </a>
+                  </span>
+                ))}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ===================== CE QUE RAPPORTE UN CHANTIER (prix sourcés) ===================== */}
+      {isMetier && topPrice && (
+        <section className="px-4 py-14">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
+              Un seul chantier rembourse des dizaines de contacts
+            </h2>
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-6">
+              En France, « {topPrice.label.toLowerCase()} » se facture{" "}
+              <strong className="text-[var(--text-primary)]">{topPrice.range}</strong> (prix
+              sourcés, {prices!.retrievedAt.slice(0, 4)}). Un contact Workwave coûte 9,90 €,
+              et vous lisez le détail du projet avant de décider de le débloquer.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] rounded-2xl px-6 py-5">
+              <span className="text-2xl font-extrabold text-[var(--text-primary)]">9,90 €</span>
+              <span className="text-sm text-[var(--text-secondary)]">
+                par contact débloqué · les 2 premiers offerts · zéro abonnement
+              </span>
+              <span className="text-sm text-[var(--text-tertiary)] line-through">
+                jusqu&apos;à {CONCURRENT_MENSUEL_MAX}/mois HT ailleurs, soit {CONCURRENT_ANNUEL}/an
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ===================== MARCHÉ DU DÉPARTEMENT (INSEE/DVF, conditionnel) ===================== */}
+      {!isMetier && market && (market.logements_vacants || market.prix_m2_moyen) && (
+        <section className="px-4 py-14 bg-[var(--bg-secondary)]">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
+              Le gisement de chantiers en {r.dept.name}
+            </h2>
+            <div className="grid sm:grid-cols-3 gap-4 mb-4">
+              {market.logements_vacants && (
+                <Stat
+                  valeur={formatCount(market.logements_vacants)}
+                  legende={`logements vacants (LOVAC ${market.lovac_annee}) : autant de rénovations potentielles`}
+                />
+              )}
+              {market.prix_m2_moyen && (
+                <Stat
+                  valeur={`${formatCount(market.prix_m2_moyen)} €/m²`}
+                  legende={`prix immobilier moyen (DVF ${market.dvf_annee})`}
+                />
+              )}
+              {market.revenu_median && (
+                <Stat
+                  valeur={`${formatCount(market.revenu_median)} €`}
+                  legende={`revenu médian des ménages (INSEE ${market.filosofi_annee})`}
+                />
+              )}
+            </div>
+            <p className="text-sm text-[var(--text-tertiary)]">
+              Données publiques officielles, agrégées sur les {market.nb_communes} communes du
+              département.
+            </p>
+          </div>
+        </section>
+      )}
 
       <ChantiersSections contextLabel={ctaLabel} />
 
