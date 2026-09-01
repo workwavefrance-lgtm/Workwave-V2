@@ -336,8 +336,7 @@ export default async function FreelancePage({ params }: FreelancePageProps) {
                   </p>
                   <p className="text-sm text-[var(--ai-text-secondary)] leading-relaxed">
                     Cette fiche est une base SIRENE non revendiquee.{" "}
-                    {firstName} n&apos;a pas encore complete son profil (bio,
-                    competences detaillees, portfolio). Vous pouvez{" "}
+                    {`${firstName} n'a pas encore complete son profil (bio, competences detaillees, portfolio). Vous pouvez`}{" "}
                     <Link
                       href="/ai/deposer"
                       className="text-[var(--ai-text)] font-semibold underline decoration-[var(--ai-border)] underline-offset-2 hover:text-[var(--ai-accent)] transition-colors"
