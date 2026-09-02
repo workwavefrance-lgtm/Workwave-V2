@@ -376,7 +376,12 @@ type Enreg = {
  *     pour tout le lot. Reste utilise pour le garde-fou updated_at (une fiche).
  */
 type Lot = { patch: Patch; sirets: string[]; records?: Enreg[] };
-const LOT_RPC = 1000;
+// 200, pas 1 000 : a 1 000 fiches par appel, chaque appel depassait le delai
+// autorise par la base (mesure 02/09, 22 h 30 : lots 1, 2, 3, 10, 12 en
+// "statement timeout"). Le cout est par LIGNE ecrite (lignes larges, deux
+// triggers), pas par requete : 200 fiches tiennent sous le delai, et le lot
+// mixte garde l'essentiel du gain (une requete par 200 fiches au lieu de 5).
+const LOT_RPC = 200;
 
 /** Ecriture d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
 async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }> {
