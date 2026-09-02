@@ -484,13 +484,20 @@ export async function broadcastBtpProject(
   // risque : pay-per-lead, le pro lit le descriptif avant de payer et filtre lui-même.
   const matchCategoryIds = await getMatchCategoryIds(sb, input.projectCategoryId);
   const generalistIds = await getGeneralistCategoryIds(sb);
-  const targetCategoryIds = [...new Set([...matchCategoryIds, ...generalistIds])];
-  const categoryOrFilter = targetCategoryIds
-    .flatMap((id) => [
+  // Généraliste = métier PRINCIPAL uniquement. Le 26/08, une aide à domicile
+  // (aide-seniors, secondaires ménage/repassage/multiservice) a reçu un projet
+  // de CUISINISTE à 190 km parce que « multiservice » figurait dans ses
+  // catégories secondaires : la règle la traitait en homme toutes mains. Une
+  // catégorie secondaire cochée ne transforme personne en généraliste BTP.
+  const categoryOrFilter = [
+    ...matchCategoryIds.flatMap((id) => [
       `category_id.eq.${id}`,
       `secondary_category_ids.cs.{${id}}`,
-    ])
-    .join(",");
+    ]),
+    ...generalistIds
+      .filter((id) => !matchCategoryIds.includes(id))
+      .map((id) => `category_id.eq.${id}`),
+  ].join(",");
 
   let queryBuilder = sb
     .from("pros")
