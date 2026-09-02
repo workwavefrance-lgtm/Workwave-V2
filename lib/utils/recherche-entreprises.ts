@@ -89,22 +89,18 @@ function pickEtablissement(
   return candidats.find((e) => e && e.siret === siret) || null;
 }
 
-/**
- * Recherche un SIRET précis et renvoie l'unité légale ET l'établissement
- * correspondant. Distingue trois issues, parce qu'un script d'enrichissement
- * ne doit pas traiter de la même façon « l'API est en panne » (réessayer plus
- * tard) et « ce SIRET n'existe pas » (ne plus jamais le redemander).
- *
- * `cacheNext` : ajoute `next: { revalidate: 86400 }` pour le cache de Next.js
- * (côté application). Sans effet hors Next (scripts).
- */
-export async function rechercherParSiret(
-  siret: string,
-  options?: { signal?: AbortSignal; cacheNext?: boolean }
-): Promise<RechercheSiret> {
-  const clean = (siret || "").replace(/\D/g, "");
-  if (clean.length !== 14) return { statut: "non_trouve", raison: "siret_invalide" };
+type OptionsRecherche = { signal?: AbortSignal; cacheNext?: boolean };
 
+type ReponseApi =
+  | { statut: "ok"; results: UniteLegaleSirene[] }
+  | { statut: "vide" }
+  | { statut: "erreur_api"; http: number | null; detail: string };
+
+/**
+ * Un seul appel HTTP pour les deux recherches (SIRET et SIREN) : mêmes
+ * en-têtes, même gestion des pannes, même parsing. `q` doit déjà être nettoyé.
+ */
+async function appelerApi(q: string, options?: OptionsRecherche): Promise<ReponseApi> {
   const init: RequestInit & { next?: { revalidate: number } } = {
     headers: {
       "User-Agent": "Workwave/1.0 (+https://workwave.fr)",
@@ -116,7 +112,7 @@ export async function rechercherParSiret(
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}?q=${clean}&per_page=5`, init);
+    res = await fetch(`${API_URL}?q=${q}&per_page=5`, init);
   } catch (e) {
     return {
       statut: "erreur_api",
@@ -135,15 +131,62 @@ export async function rechercherParSiret(
     return { statut: "erreur_api", http: res.status, detail: "JSON invalide" };
   }
   const results = data?.results;
-  if (!Array.isArray(results) || results.length === 0) {
-    return { statut: "non_trouve", raison: "aucun_resultat" };
-  }
+  if (!Array.isArray(results) || results.length === 0) return { statut: "vide" };
+  return { statut: "ok", results: results as UniteLegaleSirene[] };
+}
 
-  for (const brut of results as UniteLegaleSirene[]) {
+/**
+ * Recherche un SIRET précis et renvoie l'unité légale ET l'établissement
+ * correspondant. Distingue trois issues, parce qu'un script d'enrichissement
+ * ne doit pas traiter de la même façon « l'API est en panne » (réessayer plus
+ * tard) et « ce SIRET n'existe pas » (ne plus jamais le redemander).
+ *
+ * `cacheNext` : ajoute `next: { revalidate: 86400 }` pour le cache de Next.js
+ * (côté application). Sans effet hors Next (scripts).
+ */
+export async function rechercherParSiret(
+  siret: string,
+  options?: OptionsRecherche
+): Promise<RechercheSiret> {
+  const clean = (siret || "").replace(/\D/g, "");
+  if (clean.length !== 14) return { statut: "non_trouve", raison: "siret_invalide" };
+
+  const reponse = await appelerApi(clean, options);
+  if (reponse.statut === "erreur_api") return reponse;
+  if (reponse.statut === "vide") return { statut: "non_trouve", raison: "aucun_resultat" };
+
+  for (const brut of reponse.results) {
     const etab = pickEtablissement(brut, clean);
     if (etab) return { statut: "ok", unite: brut, etablissement: etab };
   }
   return { statut: "non_trouve", raison: "etablissement_absent" };
+}
+
+/**
+ * Recherche par SIREN (9 chiffres) : renvoie l'unité légale et son SIÈGE.
+ * Vérifié le 02/09/2026 sur un appel réel : pour `q=<siren>` l'API renvoie
+ * l'unité avec `siege` renseigné et `matching_etablissements` vide. Le siège
+ * est donc le seul établissement disponible sans second appel, et c'est
+ * celui que le particulier trouve sur un devis quand il n'a que le SIREN.
+ *
+ * Utilisé par /verifier-artisan. Mêmes trois issues que rechercherParSiret.
+ */
+export async function rechercherParSiren(
+  siren: string,
+  options?: OptionsRecherche
+): Promise<RechercheSiret> {
+  const clean = (siren || "").replace(/\D/g, "");
+  if (clean.length !== 9) return { statut: "non_trouve", raison: "siret_invalide" };
+
+  const reponse = await appelerApi(clean, options);
+  if (reponse.statut === "erreur_api") return reponse;
+  if (reponse.statut === "vide") return { statut: "non_trouve", raison: "aucun_resultat" };
+
+  // La recherche plein texte peut renvoyer d'autres unités : on exige le SIREN exact.
+  const unite = reponse.results.find((u) => u.siren === clean);
+  if (!unite) return { statut: "non_trouve", raison: "aucun_resultat" };
+  if (!unite.siege) return { statut: "non_trouve", raison: "etablissement_absent" };
+  return { statut: "ok", unite, etablissement: unite.siege };
 }
 
 export type CompanyInfo = {

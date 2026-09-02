@@ -179,6 +179,15 @@ export default async function Footer() {
               <li>
                 <Link
                   prefetch={false}
+                  href="/verifier-artisan"
+                  className="text-zinc-400 hover:text-white transition-colors duration-250"
+                >
+                  Vérifier un artisan
+                </Link>
+              </li>
+              <li>
+                <Link
+                  prefetch={false}
                   href="/departements"
                   className="text-zinc-400 hover:text-white transition-colors duration-250"
                 >

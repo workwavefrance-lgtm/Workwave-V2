@@ -50,6 +50,13 @@ export default async function PriceGuidesHubPage() {
         prestation, basés sur des données du marché. Puis déposez votre projet
         gratuitement pour être mis en relation avec des artisans vérifiés près de chez vous.
       </p>
+      <p className="text-sm text-[var(--text-tertiary)] mb-8 leading-relaxed">
+        Vous avez déjà un devis en main ?{" "}
+        <Link href="/verifier-artisan" className="underline underline-offset-4 hover:text-[var(--text-primary)] transition-colors duration-200">
+          Vérifiez que l&apos;artisan est bien en activité
+        </Link>{" "}
+        au registre Sirene.
+      </p>
       <Link
         href="/deposer-projet"
         className="inline-flex items-center justify-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-7 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02] mb-12"
