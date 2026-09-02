@@ -22,6 +22,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { getCategoryBySlug, getAllCategories, getPopularCategoriesInCity } from "@/lib/queries/categories";
 import { resolveLocation } from "@/lib/queries/location";
 import {
+  FILTRE_OUVERTS,
   getProsByCategoryAndDepartment,
   getProsByCategoryAndCity,
   getProsByCategoryAndCityIds,
@@ -344,7 +345,8 @@ export async function renderListing(
       .eq("category_id", category.id)
       .in("city_id", aggCityIds ?? [resolved.city.id])
       .is("deleted_at", null)
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .or(FILTRE_OUVERTS);
 
     // Panne technique : on releve l'erreur. Next repond alors 500, que ni le
     // cache ISR ni Google ne conservent (Google reessaie), et la page se

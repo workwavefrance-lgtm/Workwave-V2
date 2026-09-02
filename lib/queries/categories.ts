@@ -3,6 +3,7 @@ import { cache } from "react";
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import type { Category } from "@/lib/types/database";
 
 // Regroupe les appels IDENTIQUES faits pendant le rendu d'une meme page
@@ -76,6 +77,7 @@ export async function getPopularCategoriesInCity(
     .eq("city_id", cityId)
     .eq("is_active", true)
     .is("deleted_at", null)
+    .or(FILTRE_OUVERTS) // le compte « (N) » affiché exclut les établissements fermés (02/09)
     .neq("category_id", excludeCategoryId);
 
   if (!pros || pros.length === 0) return [];

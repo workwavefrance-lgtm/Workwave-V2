@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getAllCategories } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
+// Comptages cat x ville / piliers / Monaco : mêmes règles que les pages qu'ils
+// annoncent (établissements fermés exclus, 02/09). Les sous-sitemaps de FICHES
+// (/artisan, /ai/freelance) gardent TOUTES les fiches : une page fermée reste
+// en ligne et indexable.
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import { getTopCities } from "@/lib/queries/cities";
 import { getBeAlias, BE_ALIAS_SLUGS } from "@/lib/data/be-aliases";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
@@ -458,6 +463,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
           .eq("category_id", cat.id)
           .eq("is_active", true)
           .is("deleted_at", null)
+          .or(FILTRE_OUVERTS)
           .not("city_id", "is", null)
           .order("id")
           .range(offset, offset + PAGE - 1);
@@ -687,6 +693,7 @@ async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
         .select("category_id")
         .eq("is_active", true)
         .is("deleted_at", null)
+        .or(FILTRE_OUVERTS)
         .in("city_id", borderIds)
         .range(mOffset, mOffset + SUPABASE_PAGE_SIZE - 1);
       const rows = (data || []) as { category_id: number }[];
@@ -747,6 +754,7 @@ async function buildSpecialtyUrls(): Promise<MetadataRoute.Sitemap> {
           .select("category_id, city_id")
           .eq("is_active", true)
           .is("deleted_at", null)
+          .or(FILTRE_OUVERTS)
           .in("category_id", specialtyCategoryIds)
           .in("city_id", cityIds)
           .range(offset, offset + SUPABASE_PAGE_SIZE - 1),

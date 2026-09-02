@@ -42,6 +42,32 @@ export const PRO_SELECT_CARD: string =
   "has_decennale, has_rc_pro, photos, profile_completion, " +
   "category:categories(id, slug, name, vertical), city:cities(id, name, slug)";
 
+/**
+ * Filtre « établissement OUVERT » d'après le registre Sirene.
+ *
+ * POURQUOI (mesure du 02/09/2026, décision Willy) : 45 % des fiches actives
+ * sont des établissements FERMÉS (`etat_admin = 'F'`, écrit par
+ * scripts/classer-etablissements.ts). La page d'une fiche fermée reste en
+ * ligne et dit la vérité, mais un établissement fermé ne doit plus être
+ * PROPOSÉ comme un pro disponible : ni dans les listings métier × lieu, ni
+ * dans les comptes affichés, ni dans les pros similaires, ni dans le sitemap.
+ *
+ * COMMENT : `etat_admin` vaut 'A' OU n'a jamais été renseigné (null). Un
+ * simple `.neq("etat_admin", "F")` ne suffit pas : en PostgREST, `neq`
+ * EXCLUT les lignes à null, ce qui ferait disparaître toutes les fiches
+ * jamais vérifiées (la majorité tant que le classement n'est pas passé
+ * partout). D'où le `or` : `.or(FILTRE_OUVERTS)`.
+ *
+ * Équivalent SQL (RPC du sitemap, migrations/2026-09-02_sitemap_rpcs_ouverts.sql) :
+ *   AND (etat_admin IS NULL OR etat_admin <> 'F')
+ *
+ * NE PAS l'appliquer : à la lecture d'une fiche par slug (la page fermée
+ * existe), aux dashboards d'un pro connecté, ni au broadcast des projets
+ * (lib/email/broadcast-btp-project.ts : un pro réclamé dont l'établissement a
+ * déménagé reste une vraie personne qui veut des projets).
+ */
+export const FILTRE_OUVERTS = "etat_admin.is.null,etat_admin.neq.F";
+
 // NB : le param `query` est volontairement non-générique : le type-parser de
 // supabase-js ne sait pas parser les longs selects concaténés (TS2589) et le
 // résultat est de toute façon casté en ProCardData[] au retour.
@@ -93,7 +119,8 @@ export async function getProsByCategoryAndCityIds(
     .eq("category_id", categoryId)
     .in("city_id", cityIds)
     .is("deleted_at", null)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .or(FILTRE_OUVERTS);
 
   return paginatedQuery(query, page, pageSize);
 }
@@ -128,7 +155,8 @@ export async function countProsByCategoryAndCityIds(
     .eq("category_id", categoryId)
     .in("city_id", cityIds)
     .is("deleted_at", null)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .or(FILTRE_OUVERTS);
   return count || 0;
 }
 
@@ -151,6 +179,7 @@ export async function getProMiniCardsByCategoryAndCityIds(
     .in("city_id", cityIds)
     .is("deleted_at", null)
     .eq("is_active", true)
+    .or(FILTRE_OUVERTS)
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("name")
     .limit(limit);
@@ -169,7 +198,8 @@ export async function getProsByCategoryAndCity(
     .eq("category_id", categoryId)
     .eq("city_id", cityId)
     .is("deleted_at", null)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .or(FILTRE_OUVERTS);
 
   return paginatedQuery(query, page, pageSize);
 }
@@ -281,6 +311,8 @@ export async function getSimilarPros(
     .neq("slug", excludeSlug)
     .is("deleted_at", null)
     .eq("is_active", true)
+    // Une fiche ouverte ne propose jamais un établissement fermé en voisin.
+    .or(FILTRE_OUVERTS)
     .limit(limit);
 
   // 🔴 L'erreur est RELEVEE, elle n'est pas convertie en liste vide.
@@ -307,15 +339,6 @@ export async function getSimilarPros(
 
   return (data as unknown as ProCardData[]) || [];
 }
-
-/**
- * Filtre « en activité » d'après le registre : `etat_admin` vaut 'A' OU n'a
- * jamais été renseigné (null). Un simple `.neq("etat_admin", "F")` ne suffit
- * pas : en PostgREST, `neq` EXCLUT les lignes à null, ce qui ferait
- * disparaître toutes les fiches jamais vérifiées (la majorité tant que le
- * script de classement n'est pas passé partout).
- */
-const FILTRE_EN_ACTIVITE = "etat_admin.is.null,etat_admin.neq.F";
 
 export type ProsEnActiviteProches = {
   /** Jusqu'à `limit` fiches en activité, même métier, la commune d'abord. */
@@ -357,7 +380,7 @@ export async function getProsEnActiviteProches(
     .neq("slug", excludeSlug)
     .is("deleted_at", null)
     .eq("is_active", true)
-    .or(FILTRE_EN_ACTIVITE)
+    .or(FILTRE_OUVERTS)
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("name")
     .limit(limit);
@@ -383,7 +406,7 @@ export async function getProsEnActiviteProches(
     .neq("slug", excludeSlug)
     .is("deleted_at", null)
     .eq("is_active", true)
-    .or(FILTRE_EN_ACTIVITE)
+    .or(FILTRE_OUVERTS)
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("name")
     .limit(manque);
@@ -424,7 +447,7 @@ export async function getFicheActiveMemeSiren(
     .neq("slug", excludeSlug)
     .is("deleted_at", null)
     .eq("is_active", true)
-    .or(FILTRE_EN_ACTIVITE)
+    .or(FILTRE_OUVERTS)
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("id")
     .limit(1)
@@ -451,6 +474,7 @@ export async function searchPros(
     .ilike("name", `%${query}%`)
     .is("deleted_at", null)
     .eq("is_active", true)
+    .or(FILTRE_OUVERTS)
     // Anti-fuite vertical : la recherche BTP exclut les freelances AI
     // (leur fiche /artisan/[slug] redirige vers /ai/freelance, incoherent
     // dans un contexte BTP). Audit separation 29/05/2026.

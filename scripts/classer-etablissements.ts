@@ -312,12 +312,20 @@ async function lireEtats(
       );
     }
     // Decoupe rapide : le parseur complet ne sert que pour nos lignes.
-    const cle = ligne.split(",", iCle + 1)[iCle];
-    if (!cle || !cles.has(cle)) continue;
+    const cleTranche = ligne.split(",", iCle + 1)[iCle];
+    if (!cleTranche || !cles.has(cleTranche)) continue;
+    // 🔴 COPIER ce qu'on garde. En V8, une sous-chaine (split, slice) n'est
+    // qu'un POINTEUR vers la chaine d'origine : ici le morceau de fichier
+    // d'environ 1 Mo dont la ligne est issue. Garder 2,2 millions de cles
+    // tranchees revenait a garder en vie chaque morceau du fichier de 10 Go.
+    // C'est ce qui a tue les deux premiers passages du 02/09 (tas a 5,8 Go
+    // vers 20 M de lignes, memoire pourtant plate avant). Buffer.from copie
+    // les octets : la cle ne retient plus rien d'autre qu'elle-meme.
+    const cle = Buffer.from(cleTranche, "utf8").toString();
     c.matchs++;
     const ch = champs(ligne);
     const etat = (ch[iEtat] || "").trim();
-    const date = (ch[iDate] || "").trim();
+    const date = Buffer.from((ch[iDate] || "").trim(), "utf8").toString();
     if (etat === codeOuvert) {
       c.ouverts++;
       etats.set(cle, codeOuvert);

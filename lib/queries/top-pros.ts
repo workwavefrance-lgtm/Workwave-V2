@@ -23,7 +23,7 @@
 import { getCityIdsByDepartment } from "@/lib/queries/cities";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Pro, ProCardData } from "@/lib/types/database";
-import { PRO_SELECT_CARD } from "@/lib/queries/pros";
+import { FILTRE_OUVERTS, PRO_SELECT_CARD } from "@/lib/queries/pros";
 
 // Réduction egress (11/06/2026) : on fetch jusqu'à MAX_FETCH=500 rows par
 // page listing → l'ancien select fat "*, categories(*), cities(*,
@@ -193,6 +193,7 @@ export async function getTopProsByCategoryAndCityIds(
     .in("city_id", cityIds)
     .is("deleted_at", null)
     .eq("is_active", true)
+    .or(FILTRE_OUVERTS) // établissements fermés exclus du Top et du compte (02/09)
     // Charger les meilleurs candidats EN PREMIER (réclamés, puis profil complet)
     // pour que le top scoré reste juste même avec MAX_FETCH réduit (egress).
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
@@ -226,6 +227,7 @@ export async function getTopProsByCategoryAndCity(
     .eq("city_id", cityId)
     .is("deleted_at", null)
     .eq("is_active", true)
+    .or(FILTRE_OUVERTS) // établissements fermés exclus du Top et du compte (02/09)
     // Charger les meilleurs candidats EN PREMIER (réclamés, puis profil complet)
     // pour que le top scoré reste juste même avec MAX_FETCH réduit (egress).
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })

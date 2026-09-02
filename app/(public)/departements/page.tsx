@@ -4,6 +4,7 @@ import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
@@ -58,6 +59,7 @@ export default async function DepartmentsHubPage() {
         })
         .eq("is_active", true)
         .is("deleted_at", null)
+        .or(FILTRE_OUVERTS) // établissements fermés exclus du compte par département (02/09)
         .eq("cities.department_id", dept.id);
       return { deptId: dept.id, count: count || 0 };
     })

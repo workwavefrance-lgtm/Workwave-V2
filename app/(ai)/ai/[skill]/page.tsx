@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
@@ -147,6 +148,7 @@ export default async function SkillPage({ params, searchParams }: SkillPageProps
     .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)
+    .or(FILTRE_OUVERTS) // établissements fermés exclus (02/09)
     // Sprint 13 : les freelances reclames (compte cree) sortent en premier
     // avant les fiches signups non encore activees. Boost commercial fort.
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })

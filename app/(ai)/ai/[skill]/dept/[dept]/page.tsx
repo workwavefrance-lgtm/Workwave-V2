@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import {
@@ -126,6 +127,7 @@ export default async function SkillDeptPage({ params }: Props) {
     .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
     .is("deleted_at", null)
+    .or(FILTRE_OUVERTS) // établissements fermés exclus (02/09)
     .like("postal_code", `${department.code}%`)
     // Sprint 13 : claimed en premier (boost commercial)
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })

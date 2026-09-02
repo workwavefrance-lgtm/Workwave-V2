@@ -6,6 +6,7 @@ import { Watermark } from "@/components/ai/ui/Watermark";
 import { TJM_REFERENCE, TJM_SOURCES, getTjmReference } from "@/lib/data/tech-tjm-reference";
 import { TECH_CITIES } from "@/lib/data/tech-cities";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
 const CURRENT_YEAR = new Date().getFullYear();
@@ -46,7 +47,8 @@ export default async function BarometreSkillPage({ params }: Props) {
   let proCount = 0;
   if (filterCategoryId) {
     const { count } = await sb.from("pros").select("*", { count: "estimated", head: true })
-      .eq("category_id", filterCategoryId).in("source", ["sirene", "ai_signup"]).eq("is_active", true).is("deleted_at", null);
+      .eq("category_id", filterCategoryId).in("source", ["sirene", "ai_signup"]).eq("is_active", true).is("deleted_at", null)
+      .or(FILTRE_OUVERTS); // établissements fermés exclus (02/09)
     proCount = count || 0;
   }
 

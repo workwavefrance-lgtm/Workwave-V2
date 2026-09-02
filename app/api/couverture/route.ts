@@ -19,6 +19,7 @@
  */
 import { NextResponse } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +65,9 @@ export async function GET(req: Request) {
     .eq("category_id", categoryId)
     .in("city_id", villeIds)
     .eq("is_active", true)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    // Un établissement fermé n'est pas « référencé » au sens utile : exclu (02/09).
+    .or(FILTRE_OUVERTS);
 
   const dept = Array.isArray(ville.departments)
     ? ville.departments[0]

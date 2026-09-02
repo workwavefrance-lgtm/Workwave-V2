@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
@@ -70,7 +71,8 @@ export default async function FreelancesHubPage() {
         .eq("category_id", cat.id)
         .in("source", ["sirene", "ai_signup"])
         .eq("is_active", true)
-        .is("deleted_at", null);
+        .is("deleted_at", null)
+        .or(FILTRE_OUVERTS); // établissements fermés exclus (02/09)
       return { ...cat, count: count || 0 };
     })
   );

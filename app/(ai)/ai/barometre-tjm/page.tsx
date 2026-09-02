@@ -4,6 +4,7 @@ import { SectionLabel } from "@/components/ai/ui/SectionLabel";
 import { Watermark } from "@/components/ai/ui/Watermark";
 import { TJM_REFERENCE, TJM_SOURCES } from "@/lib/data/tech-tjm-reference";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { FILTRE_OUVERTS } from "@/lib/queries/pros";
 import { AiFaqSection, type FaqItem } from "@/components/ai/AiFaqSection";
 
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
@@ -56,7 +57,8 @@ export default async function BarometreTjmHubPage() {
     .in("category_id", [43, 44, 45, 46, 47, 48])
     .in("source", ["sirene", "ai_signup"])
     .eq("is_active", true)
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .or(FILTRE_OUVERTS); // établissements fermés exclus (02/09)
 
   // Skills avec TJM disponible
   const skillsWithTjm = Object.entries(TJM_REFERENCE).map(([slug, ref]) => ({
