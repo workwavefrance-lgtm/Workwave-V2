@@ -355,11 +355,36 @@ type Patch = {
   etat_verifie_at: string;
 };
 
-/** Un lot d'ecriture : des SIRET qui recoivent exactement les memes valeurs. */
-type Lot = { patch: Patch; sirets: string[] };
+/** Une fiche et ses valeurs, pour l'ecriture par tableau JSON (RPC). */
+type Enreg = {
+  siret: string;
+  etat_admin: "A" | "F";
+  date_fermeture: string | null;
+  entreprise_etat: "A" | "C" | null;
+  entreprise_date_fermeture: string | null;
+};
 
-/** UPDATE d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
+/**
+ * Un lot d'ecriture. Deux formes :
+ *   - `records` present : lot MIXTE de LOT_RPC fiches aux valeurs quelconques,
+ *     ecrit en UNE requete par la fonction SQL classer_etats_lot (migration
+ *     2026-09-02_classer_etats_lot.sql). C'est la forme normale depuis le 02/09
+ *     22 h : le regroupement par valeurs identiques faisait ~176 000 requetes
+ *     de 5 fiches pour les fermees (une date de fermeture distincte = un
+ *     groupe), a 3 ou 4 requetes par seconde. Ici ~1 100 requetes.
+ *   - sans `records` : UPDATE ... WHERE siret IN (...) avec les memes valeurs
+ *     pour tout le lot. Reste utilise pour le garde-fou updated_at (une fiche).
+ */
+type Lot = { patch: Patch; sirets: string[]; records?: Enreg[] };
+const LOT_RPC = 1000;
+
+/** Ecriture d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
 async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }> {
+  if (lot.records) {
+    const { data, error } = await sb.rpc("classer_etats_lot", { lot: lot.records, verifie_at: lot.patch.etat_verifie_at });
+    if (error) return { n: 0, erreur: error.message };
+    return { n: typeof data === "number" ? data : Number(data) || 0, erreur: null };
+  }
   const { error, count } = await sb
     .from("pros")
     .update(lot.patch, { count: "exact" })
@@ -516,12 +541,27 @@ async function compter(horodatage: string, etatAdmin?: "A" | "F"): Promise<numbe
   // ---------------------------------------------------------------- ecriture
   const horodatage = new Date().toISOString();
   for (const g of groupes.values()) g.patch.etat_verifie_at = horodatage;
+  // Lots MIXTES de LOT_RPC fiches, quelles que soient leurs valeurs (cf. type Lot).
   const lots: Lot[] = [];
+  let courant: Lot | null = null;
   for (const g of [...groupes.values()].sort((a, b) => b.sirets.length - a.sirets.length)) {
-    for (let i = 0; i < g.sirets.length; i += LOT_ECRITURE) {
-      lots.push({ patch: g.patch, sirets: g.sirets.slice(i, i + LOT_ECRITURE) });
+    for (const siret of g.sirets) {
+      if (!courant) courant = { patch: g.patch, sirets: [], records: [] };
+      courant.sirets.push(siret);
+      courant.records!.push({
+        siret,
+        etat_admin: g.patch.etat_admin,
+        date_fermeture: g.patch.date_fermeture,
+        entreprise_etat: g.patch.entreprise_etat,
+        entreprise_date_fermeture: g.patch.entreprise_date_fermeture,
+      });
+      if (courant.sirets.length >= LOT_RPC) {
+        lots.push(courant);
+        courant = null;
+      }
     }
   }
+  if (courant) lots.push(courant);
   groupes.clear();
 
   console.log(`\n6. Ecriture de ${fmt(lots.length)} lots (etat_verifie_at = ${horodatage})...`);
@@ -544,6 +584,7 @@ async function compter(horodatage: string, etatAdmin?: "A" | "F"): Promise<numbe
   }
   console.log(`   garde-fou updated_at : inchange sur ${cobaye}, on continue.`);
   premier.sirets = premier.sirets.slice(1);
+  if (premier.records) premier.records = premier.records.filter((r) => r.siret !== cobaye);
 
   let ecrites = 1;
   let ecritesA = premier.patch.etat_admin === "A" ? 1 : 0;
@@ -571,7 +612,12 @@ async function compter(horodatage: string, etatAdmin?: "A" | "F"): Promise<numbe
       return r;
     }
     ecrites += r.n;
-    if (lot.patch.etat_admin === "A") ecritesA += r.n;
+    if (lot.records) {
+      // Lot mixte : on compte ce qu'on a ENVOYE par etat (r.n ne distingue pas).
+      const a = lot.records.filter((x) => x.etat_admin === "A").length;
+      ecritesA += a;
+      ecritesF += lot.records.length - a;
+    } else if (lot.patch.etat_admin === "A") ecritesA += r.n;
     else ecritesF += r.n;
     if (r.n !== lot.sirets.length && erreursAffichees < 5) {
       erreursAffichees++;
