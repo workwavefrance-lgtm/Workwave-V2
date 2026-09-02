@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import Providers from "@/app/providers";
 import UETPixel from "@/components/analytics/UETPixel";
+import UmamiHumain from "@/components/analytics/UmamiHumain";
 import "./globals.css";
 
 const GTM_ID = "GTM-W65L4PJD";
@@ -111,8 +112,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <Script
           src="https://stats.workwave.fr/script.js"
           data-website-id="9c549ae7-0e89-4a48-ae74-db764a51a239"
+          data-auto-track="false"
           strategy="afterInteractive"
         />
+        {/* Vue envoyee seulement apres un signe de vie humain : les aspirateurs
+            executent le JavaScript et seraient comptes sinon (mesure : 77 vues,
+            77 sessions d'une page en 10 min). Cf. UmamiHumain.tsx. */}
+        <UmamiHumain />
         <Providers>{children}</Providers>
       </body>
     </html>
