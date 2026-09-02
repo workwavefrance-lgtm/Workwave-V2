@@ -4,7 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import JsonLd from "@/components/seo/JsonLd";
-import { getProBySlug, getSimilarPros, getFicheRemplacante } from "@/lib/queries/pros";
+import {
+  getProBySlug,
+  getSimilarPros,
+  getFicheRemplacante,
+  getProsEnActiviteProches,
+  getFicheActiveMemeSiren,
+} from "@/lib/queries/pros";
 import { getPublishedReviewsForPro } from "@/lib/queries/reviews";
 import { getNearbyCities } from "@/lib/queries/cities";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule la
@@ -18,7 +24,7 @@ import ProGuidesLinks from "@/components/pro/ProGuidesLinks";
 import { buildProContent } from "@/lib/seo/pro-seo-sections";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { truncateDescription } from "@/lib/utils/seo";
-import { getCategoryArticle } from "@/lib/utils/category-grammar";
+import { getCategoryArticle, getCategoryListing } from "@/lib/utils/category-grammar";
 import { BASE_URL } from "@/lib/constants";
 import { toOpeningHoursSpecification, toBreadcrumbSchema } from "@/lib/utils/schema";
 import { formatEffectifRange, formatFoundingYear, formatAgeYears, formatDateCreation } from "@/lib/utils/sirene";
@@ -78,6 +84,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonicalUrl = isTechPro
     ? `${BASE_URL}/ai/freelance/${slug}`
     : `${BASE_URL}/artisan/${slug}`;
+
+  // ÉTABLISSEMENT FERMÉ (02/09/2026) : le titre dit la vérité et annonce ce
+  // que la page apporte encore (les pros en activité à proximité). Canonical
+  // inchangée, AUCUN noindex (règle du 27/04 : jamais sur /artisan/*).
+  // `date_fermeture` peut être absente tant que la migration n'est pas
+  // appliquée : formatDateCreation(undefined) renvoie null, la phrase s'adapte.
+  if (pro.etat_admin === "F") {
+    const listing = getCategoryListing(pro.category.slug, pro.category.name);
+    const dateFermeture = formatDateCreation(pro.date_fermeture);
+    const ou = cityName ? ` à ${cityName}` : "";
+    const titreFerme = `${pro.name}${ou} : établissement fermé, ${listing.plural} en activité à proximité`;
+    const descFerme =
+      `${pro.name}, ${listing.singular}${ou}, est un établissement fermé${dateFermeture ? ` depuis le ${dateFermeture}` : ""} d'après le registre Sirene. ` +
+      `Retrouvez les ${listing.plural} en activité${ou} et déposez votre projet gratuitement sur Workwave.`;
+    return {
+      title: titreFerme,
+      description: descFerme,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        type: "profile",
+        title: titreFerme,
+        description: descFerme,
+        url: canonicalUrl,
+      },
+      twitter: {
+        card: "summary",
+        title: titreFerme,
+        description: descFerme,
+      },
+    };
+  }
 
   // Toutes les fiches actives sont indexables : chaque fiche a un titre unique,
   // un H1, un schema LocalBusiness (SIRET + adresse + géoloc), un breadcrumb,
@@ -195,8 +234,17 @@ export default async function ProPage({ params }: Props) {
   // plusieurs listings /[metier]/[ville] et boostent le maillage interne SEO).
   const secondaryIds = (pro.secondary_category_ids || []) as number[];
   const supabaseForCats = createPublicClient();
+  // ÉTABLISSEMENT FERMÉ d'après Sirene (02/09/2026, 45 % des fiches). La page
+  // reste en ligne et indexable, dit la vérité, et renvoie le visiteur vers
+  // des pros en activité et vers le dépôt de projet. Tout ce qui suit est
+  // conditionné à `estFerme` : une fiche ouverte ('A' ou null, colonne
+  // absente comprise) garde STRICTEMENT le même rendu qu'avant.
+  const estFerme = pro.etat_admin === "F";
+  const listing = getCategoryListing(pro.category.slug, pro.category.name);
   const [similarPros, nearbyCities, reviews, secondaryCategoriesRes] = await Promise.all([
-    pro.city ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
+    // Sur une fiche fermée, le bloc « Autres X à ville » est remplacé par les
+    // pros EN ACTIVITÉ (requête dédiée plus bas) : on ne charge pas les deux.
+    pro.city && !estFerme ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
     pro.city ? getNearbyCities(pro.city.id, 5) : Promise.resolve([]),
     getPublishedReviewsForPro(pro.id, 20),
     secondaryIds.length > 0
@@ -225,6 +273,29 @@ export default async function ProPage({ params }: Props) {
     );
   }
   const secondaryCategories = (secondaryCategoriesRes.data || []) as { id: number; name: string; slug: string }[];
+
+  // Fiche FERMÉE uniquement : pros en activité (commune puis voisines, dont
+  // les ids viennent de `nearbyCities` déjà chargé) et, si l'entreprise
+  // existe encore ailleurs (`entreprise_etat = 'A'`), sa fiche actuelle.
+  // Les deux colonnes `entreprise_etat` et `date_fermeture` peuvent être
+  // absentes tant que la migration n'est pas appliquée : `undefined` se
+  // comporte alors exactement comme `null`.
+  const [prosActifs, ficheActuelle] = estFerme
+    ? await Promise.all([
+        pro.city
+          ? getProsEnActiviteProches(
+              pro.category_id,
+              pro.city.id,
+              slug,
+              nearbyCities.map((c) => c.id),
+              10
+            )
+          : Promise.resolve(null),
+        pro.entreprise_etat === "A" && pro.siret
+          ? getFicheActiveMemeSiren(pro.siret, slug)
+          : Promise.resolve(null),
+      ])
+    : [null, null];
 
   const cityName = pro.city?.name || "";
   const deptSlug = pro.city?.department
@@ -548,13 +619,70 @@ export default async function ProPage({ params }: Props) {
   // BreadcrumbList schema
   const breadcrumbJsonLd = toBreadcrumbSchema(breadcrumbItems, BASE_URL);
 
+  // ── ÉTABLISSEMENT FERMÉ : données structurées et textes du bandeau ──
+  // Pas de LocalBusiness pour un commerce qui n'existe plus : un Organization
+  // minimal (nom, adresse si présente, dissolutionDate si connue). Le
+  // BreadcrumbList est conservé. Tout vient d'une colonne en base.
+  const dateFermetureIso =
+    typeof pro.date_fermeture === "string" && /^\d{4}-\d{2}-\d{2}/.test(pro.date_fermeture)
+      ? pro.date_fermeture.slice(0, 10)
+      : null;
+  const jsonLdFerme: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: pro.name,
+    url: `${BASE_URL}/artisan/${slug}`,
+    ...(pro.address || cityName
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            ...(pro.address ? { streetAddress: pro.address } : {}),
+            ...(cityName ? { addressLocality: cityName } : {}),
+            ...(pro.postal_code ? { postalCode: pro.postal_code } : {}),
+            addressCountry: pro.city?.country === "BE" ? "BE" : "FR",
+          },
+        }
+      : {}),
+    ...(dateFermetureIso ? { dissolutionDate: dateFermetureIso } : {}),
+  };
+  const jsonLdPrincipal = estFerme ? jsonLdFerme : jsonLd;
+
+  // Phrases du bandeau construites en STRING (pas en JSX interpolé) : évite
+  // les espaces avalés aux frontières {expr}/saut-de-ligne.
+  const dateFermetureTexte = formatDateCreation(pro.date_fermeture);
+  const phraseFermeture = dateFermetureTexte
+    ? `Établissement fermé depuis le ${dateFermetureTexte} d'après le registre officiel Sirene.`
+    : "Établissement fermé d'après le registre officiel Sirene.";
+  const phrasePoursuite =
+    pro.entreprise_etat === "A"
+      ? "L'entreprise poursuit son activité dans un autre établissement."
+      : null;
+  const hrefDepotProjet = `/deposer-projet?categorie=${pro.category.slug}${pro.city ? `&ville=${pro.city.slug}` : ""}`;
+  const aDesProsActifs = !!prosActifs && prosActifs.pros.length > 0;
+  // Titre du bloc « pros en activité » : le nombre affiché est TOUJOURS un
+  // vrai compte (exact, renvoyé par la requête), sinon on ne l'affiche pas.
+  const nomSelonNombre = (n: number) => (n > 1 ? listing.plural : listing.singular);
+  let titreActifs = "";
+  let sousTitreActifs: string | null = null;
+  if (prosActifs && aDesProsActifs) {
+    if (!prosActifs.completeAvecVoisines) {
+      titreActifs = `${prosActifs.totalVille} ${nomSelonNombre(prosActifs.totalVille)} en activité à ${cityName}`;
+    } else {
+      titreActifs = `${listing.plural.charAt(0).toUpperCase()}${listing.plural.slice(1)} en activité à ${cityName} et alentours`;
+      sousTitreActifs =
+        prosActifs.totalVille > 0
+          ? `À ${cityName} même : ${prosActifs.totalVille} ${nomSelonNombre(prosActifs.totalVille)} en activité. Les autres sont dans les communes voisines.`
+          : `${listing.article === "une" ? "Aucune" : "Aucun"} ${listing.singular} en activité n'est référencé${listing.article === "une" ? "e" : ""} à ${cityName} : voici les plus proches.`;
+    }
+  }
+
   const initial = (pro.name || "?").charAt(0).toUpperCase();
   const certifications = Array.isArray(pro.certifications) ? pro.certifications : [];
   const paymentMethods = Array.isArray(pro.payment_methods) ? pro.payment_methods : [];
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-12">
-      <JsonLd data={jsonLd} />
+      <JsonLd data={jsonLdPrincipal} />
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
 
@@ -609,7 +737,7 @@ export default async function ProPage({ params }: Props) {
           SEO arrive sur /artisan/[slug] via recherches navigationnelles).
           Le pro qui visite sa fiche la voit toujours immediatement, mais
           l'espace principal de la fiche est rendu au visiteur particulier. */}
-      {!isClaimed && pro.siret && (
+      {!isClaimed && pro.siret && !estFerme && (
         <section className="mb-6 bg-[#FF5A36]/5 dark:bg-[#FF5A36]/10 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-xl px-4 py-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
             <p className="text-sm text-[var(--text-secondary)] leading-snug">
@@ -722,7 +850,7 @@ export default async function ProPage({ params }: Props) {
                     RGE certifié
                   </span>
                 )}
-                {pro.free_quote && isClaimed && (
+                {pro.free_quote && isClaimed && !estFerme && (
                   <span className="inline-block bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-sm font-medium px-3 py-1 rounded-full">
                     Devis gratuit
                   </span>
@@ -731,6 +859,45 @@ export default async function ProPage({ params }: Props) {
             </div>
           </div>
 
+          {/* BANDEAU ÉTABLISSEMENT FERMÉ (02/09/2026), sous le titre. Sobre :
+              une phrase factuelle tirée du registre, et les deux sorties
+              utiles au visiteur (la fiche actuelle de l'entreprise si elle a
+              déménagé, les pros en activité plus bas). Le nom reste le H1 :
+              les gens cherchent l'entreprise par son nom. */}
+          {estFerme && (
+            <section
+              aria-label="État de l'établissement"
+              className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-xl px-4 py-3"
+            >
+              <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                <span className="font-semibold">{phraseFermeture}</span>
+                {phrasePoursuite && <span className="text-[var(--text-secondary)]">{" " + phrasePoursuite}</span>}
+              </p>
+              {(ficheActuelle || aDesProsActifs) && (
+                <p className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                  {ficheActuelle && (
+                    <Link
+                      href={`/artisan/${ficheActuelle.slug}`}
+                      className="text-[var(--accent)] font-medium hover:underline"
+                    >
+                      {ficheActuelle.cityName
+                        ? `Voir la fiche actuelle (${ficheActuelle.cityName})`
+                        : "Voir la fiche actuelle"}
+                    </Link>
+                  )}
+                  {aDesProsActifs && (
+                    <a
+                      href="#pros-en-activite"
+                      className="text-[var(--accent)] font-medium hover:underline"
+                    >
+                      {`Voir les ${listing.plural} en activité à ${cityName}`}
+                    </a>
+                  )}
+                </p>
+              )}
+            </section>
+          )}
+
           {/* CTA particulier mid-page (Levier D, mai 2026).
               Remplace l'ancien gros bloc orange "Reclamer cette fiche"
               qui dominait l'experience particulier en mid-page. Ici on
@@ -738,7 +905,10 @@ export default async function ProPage({ params }: Props) {
               les coordonnees du pro plus haut, on lui offre l'alternative
               "comparer plusieurs devis" au moment ou il scrolle.
               Texte HONNETE : le lead n'est pas garanti pour CE pro
-              precis (routing automatique parmi les abonnes). */}
+              precis (routing automatique parmi les abonnes).
+              Fiche FERMÉE : masqué (la phrase propose de contacter CE pro).
+              Le bloc de la colonne droite prend le relais. */}
+          {!estFerme && (
           <section className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 sm:p-7">
             <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] mb-2 leading-snug">
               Vous cherchez {getCategoryArticle(pro.category.name)}{" "}
@@ -777,11 +947,16 @@ export default async function ProPage({ params }: Props) {
               Réponse rapide · 100 % gratuit · Sans création de compte
             </p>
           </section>
+          )}
 
           {/* Description : priorite a la description manuelle du pro, fallback
               vers description_ai (Sprint 14 : enrichit les pages thin content
-              pour debloquer l'indexation Google). */}
-          {(() => {
+              pour debloquer l'indexation Google).
+              Fiche FERMÉE : masquée. Ce texte présente l'entreprise comme
+              disponible (description_ai est une présentation générée, la
+              description manuelle une présentation écrite par le pro) et
+              contredirait le bandeau juste au-dessus. */}
+          {!estFerme && (() => {
             const proAi = pro as typeof pro & { description_ai?: string | null };
             const text = pro.description || proAi.description_ai;
             if (!text) return null;
@@ -901,7 +1076,9 @@ export default async function ProPage({ params }: Props) {
                       <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">{libelle.titre}</p>
                       <p className="text-sm font-semibold text-[var(--text-primary)]">
                         {libelle.valeur}
-                        {age !== null && age >= 1 && (
+                        {/* « N ans d'activité » compte jusqu'à aujourd'hui :
+                            faux pour un établissement fermé, donc omis. */}
+                        {age !== null && age >= 1 && !estFerme && (
                           <span className="text-[var(--text-secondary)] font-normal"> · {age} {age > 1 ? "ans" : "an"} d&apos;activité</span>
                         )}
                       </p>
@@ -1044,8 +1221,11 @@ export default async function ProPage({ params }: Props) {
             {/* Coordonnées : floutées si la fiche n'est PAS réclamée. Le
                 particulier doit déposer un projet pour être mis en relation
                 (= lead capté), et le pro est incité à réclamer sa fiche pour
-                récupérer ses clients. Affichées normalement si réclamée. */}
-            {blurCoords ? (
+                récupérer ses clients. Affichées normalement si réclamée.
+                Fiche FERMÉE : ni téléphone, ni email, ni site (on ne propose
+                plus de contacter cette entreprise). L'adresse reste : c'est
+                un fait du registre, pas une invitation. */}
+            {estFerme ? null : blurCoords ? (
               <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-5 flex flex-col">
                 <h2 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
                   Coordonnées
@@ -1175,8 +1355,8 @@ export default async function ProPage({ params }: Props) {
             </div>
           )}
 
-          {/* Tarifs (fiches réclamées) */}
-          {isClaimed && (pro.hourly_rate || pro.travel_fee) && (
+          {/* Tarifs (fiches réclamées ; jamais sur un établissement fermé) */}
+          {isClaimed && !estFerme && (pro.hourly_rate || pro.travel_fee) && (
             <div>
               <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
                 Tarifs indicatifs
@@ -1217,8 +1397,8 @@ export default async function ProPage({ params }: Props) {
             </div>
           )}
 
-          {/* Horaires d'ouverture (fiches réclamées) */}
-          {isClaimed && openingHours && (
+          {/* Horaires d'ouverture (fiches réclamées ; jamais sur un établissement fermé) */}
+          {isClaimed && !estFerme && openingHours && (
             <div>
               <h2 className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">
                 Horaires d&apos;ouverture
@@ -1242,8 +1422,8 @@ export default async function ProPage({ params }: Props) {
             </div>
           )}
 
-          {/* Garanties (fiches réclamées) */}
-          {isClaimed && (pro.has_rc_pro || pro.has_decennale) && (
+          {/* Garanties (fiches réclamées ; jamais sur un établissement fermé) */}
+          {isClaimed && !estFerme && (pro.has_rc_pro || pro.has_decennale) && (
             <div className="flex flex-wrap gap-3">
               {pro.has_rc_pro && (
                 <span className="inline-flex items-center gap-1.5 bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400 text-sm font-medium px-3 py-1.5 rounded-full">
@@ -1297,6 +1477,28 @@ export default async function ProPage({ params }: Props) {
               Texte ajuste (Levier D) : "Appeler ce pro" est plus direct
               que "Contacter", et "Demander un devis (gratuit)" est plus
               clair que "Deposer un projet" (jargon plateforme). */}
+          {/* Fiche FERMÉE : la colonne de contact devient une réorientation
+              honnête vers les pros en activité, via le dépôt de projet
+              pré-rempli (métier + ville), comme sur les autres pages. */}
+          {estFerme ? (
+            <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
+              <h3 className="font-semibold text-[var(--text-primary)] mb-2">
+                Cette entreprise n&apos;est plus en activité.
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
+                {`Décrivez votre projet, les ${listing.plural} en activité${cityName ? ` à ${cityName}` : " près de chez vous"} vous répondent.`}
+              </p>
+              <Link
+                href={hrefDepotProjet}
+                className="block text-center bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+              >
+                Déposer mon projet
+              </Link>
+              <p className="mt-3 text-xs text-[var(--text-tertiary)] text-center">
+                Gratuit · Sans engagement
+              </p>
+            </div>
+          ) : (
           <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 text-center">
             <h3 className="font-semibold text-[var(--text-primary)] mb-3">
               {blurCoords ? "Quel est votre projet ?" : "Besoin de ce professionnel ?"}
@@ -1320,6 +1522,7 @@ export default async function ProPage({ params }: Props) {
               Sans engagement
             </p>
           </div>
+          )}
 
           {/* Note : l'ancien encart sidebar "Reclamer cette fiche" a ete
               supprime. Le CTA est desormais double : (1) banniere haute
@@ -1377,7 +1580,7 @@ export default async function ProPage({ params }: Props) {
                 {pro.category.name}
               </p>
             </div>
-            {isClaimed && pro.intervention_radius_km && (
+            {isClaimed && !estFerme && pro.intervention_radius_km && (
               <div>
                 <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wide mb-1">
                   Zone d&apos;intervention
@@ -1387,7 +1590,7 @@ export default async function ProPage({ params }: Props) {
                 </p>
               </div>
             )}
-            {isClaimed && pro.urgency_available && (
+            {isClaimed && !estFerme && pro.urgency_available && (
               <div>
                 <span className="inline-flex items-center gap-1.5 text-[var(--accent)] text-sm font-medium">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1409,6 +1612,52 @@ export default async function ProPage({ params }: Props) {
         googleRating={pro.google_rating ?? null}
         googleReviewsCount={pro.google_reviews_count ?? null}
       />
+
+      {/* PROS EN ACTIVITÉ (fiche fermée). Remplace « Autres X à ville », qui
+          mélangerait des fiches fermées. Jusqu'à 10 fiches en activité, la
+          commune d'abord puis les voisines ; le nombre du titre est un compte
+          exact renvoyé par la base, sinon il n'est pas affiché. */}
+      {estFerme && prosActifs && aDesProsActifs && (
+        <section id="pros-en-activite" className="mt-16 pt-8 border-t border-[var(--border-color)] scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                {titreActifs}
+              </h2>
+              {sousTitreActifs && (
+                <p className="text-sm text-[var(--text-secondary)] mt-1">{sousTitreActifs}</p>
+              )}
+            </div>
+            {pro.city && (
+              <Link
+                href={`/${pro.category.slug}/${pro.city.slug}`}
+                className="text-sm text-[var(--accent)] hover:underline shrink-0"
+              >
+                {`Voir tous les ${listing.plural} à ${cityName}`}
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {prosActifs.pros.map((p) => (
+              <ProCard key={p.id} pro={p} />
+            ))}
+          </div>
+          <div className="mt-8">
+            <Link
+              href={hrefDepotProjet}
+              className="inline-flex items-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-6 py-3 rounded-full text-sm transition-all duration-250 hover:scale-[1.02]"
+            >
+              Déposer mon projet
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+            <p className="mt-3 text-xs text-[var(--text-tertiary)]">
+              {`Votre demande est transmise aux ${listing.plural} en activité de votre zone. Gratuit, sans engagement.`}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Pros similaires */}
       {similarPros.length > 0 && (
@@ -1448,6 +1697,10 @@ export default async function ProPage({ params }: Props) {
           77% du trafic SEO arrive sur ces fiches (recherches navigationnelles
           type "nom de l'entreprise") -> on offre une alternative non bloquante
           aux visiteurs dont le pro ne convient pas / est indisponible. */}
+      {/* Fiche FERMÉE : masqué. Son titre (« X ne vous convient pas, ou est
+          indisponible ? ») suppose une entreprise joignable ; la réorientation
+          est déjà faite par la colonne droite et le bloc des pros en activité. */}
+      {!estFerme && (
       <ProjectCTABlock
         proName={pro.name}
         categorySlug={pro.category.slug}
@@ -1455,6 +1708,7 @@ export default async function ProPage({ params }: Props) {
         citySlug={pro.city?.slug ?? null}
         cityName={pro.city?.name ?? null}
       />
+      )}
 
       {/* RGPD */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-xs text-[var(--text-tertiary)]">

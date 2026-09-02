@@ -1,3 +1,4 @@
+import Link from "next/link";
 import JsonLd from "@/components/seo/JsonLd";
 import type { ProContent } from "@/lib/seo/pro-seo-sections";
 
@@ -57,6 +58,22 @@ export default function ProSeoSections({
                 <p className="mt-3 text-[14px] text-[var(--text-secondary)] leading-relaxed">
                   {faq.answer}
                 </p>
+                {/* Liens sous la réponse : uniquement quand le contenu en
+                    fournit (fiche d'établissement fermé). Une fiche ouverte
+                    n'en a pas, son rendu est inchangé. */}
+                {faq.links && faq.links.length > 0 && (
+                  <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                    {faq.links.map((l) => (
+                      <Link
+                        key={l.href}
+                        href={l.href}
+                        className="text-[14px] text-[var(--accent)] hover:underline"
+                      >
+                        {l.label}
+                      </Link>
+                    ))}
+                  </p>
+                )}
               </details>
             ))}
           </div>

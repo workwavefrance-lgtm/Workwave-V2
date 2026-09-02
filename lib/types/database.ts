@@ -165,6 +165,19 @@ export type Pro = {
   effectif_range: string | null;
   etat_admin: "A" | "C" | "F" | null;
   sirene_synced_at: string | null;
+  // Etat reel de l'etablissement et de l'entreprise, fichiers Stock Sirene
+  // (scripts/classer-etablissements.ts, migration 2026-09-02_pros_etat_etablissements).
+  // Mesure du 02/09 : 45 % des fiches sont des etablissements FERMES (etat_admin = F),
+  // dont 34 % d'entreprises disparues (entreprise_etat = C). Decision Willy : la page
+  // reste, dit la verite, et renvoie vers des pros en activite.
+  /** Date de fermeture de l'etablissement (debut de sa periode "F"), null si ouvert. */
+  date_fermeture: string | null;
+  /** Etat de l'unite legale : A = active (a demenage ou a d'autres etablissements), C = cessee. */
+  entreprise_etat: "A" | "C" | null;
+  /** Date de cessation de l'entreprise, null si active. */
+  entreprise_date_fermeture: string | null;
+  /** Date du dernier controle d'etat (fichiers Stock). Null = jamais verifie. */
+  etat_verifie_at: string | null;
   // Annuaire des entreprises, API recherche-entreprises (scripts/enrichir-fiches-sirene.ts,
   // migration 2026-09-02). Marqueur de reprise propre a cette chaine.
   sirene_enrichi_at: string | null;

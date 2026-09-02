@@ -11,6 +11,7 @@ import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
 import { libelleNaf } from "@/lib/data/naf-labels";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
 import { formatDateCreation } from "@/lib/utils/sirene";
+import { getCategoryListing } from "@/lib/utils/category-grammar";
 
 type ProForContent = {
   name: string;
@@ -24,11 +25,27 @@ type ProForContent = {
   /** Adresse de l'établissement (rue), telle que fournie par le registre. */
   address?: string | null;
   phone?: string | null;
+  /** État de l'établissement au registre : 'F' = fermé. Colonne absente = ouvert. */
+  etat_admin?: string | null;
+  /** Date de fermeture de l'établissement (YYYY-MM-DD), null ou absente si inconnue. */
+  date_fermeture?: string | null;
+  /** État de l'unité légale : 'A' = existe encore ailleurs, 'C' = cessée. */
+  entreprise_etat?: string | null;
+  entreprise_date_fermeture?: string | null;
   category?: { name?: string | null; slug?: string | null } | null;
-  city?: { name?: string | null; department?: { name?: string | null; country?: string | null } | null } | null;
+  city?: {
+    name?: string | null;
+    slug?: string | null;
+    department?: { name?: string | null; country?: string | null } | null;
+  } | null;
 };
 
-export type ProFaq = { question: string; answer: string };
+export type ProFaq = {
+  question: string;
+  answer: string;
+  /** Liens affichés sous la réponse (fiche fermée : listing + dépôt de projet). Absents sur une fiche ouverte. */
+  links?: { label: string; href: string }[];
+};
 export type ProContent = { about: string; faqs: ProFaq[]; sourcesNote: string };
 
 function getYear(pro: ProForContent): number | null {
@@ -112,6 +129,76 @@ export function buildProContent(pro: ProForContent): ProContent | null {
       ? `exerce depuis ${quand}, soit ${anc} ${anc > 1 ? "ans" : "an"} d'activité`
       : `exerce depuis ${quand}`
     : null;
+
+  // ── ÉTABLISSEMENT FERMÉ (02/09/2026) ──
+  // 45 % des fiches sont des établissements fermés d'après Sirene. La page
+  // reste en ligne et dit la vérité : ici, plus aucune phrase qui invite à
+  // contacter CETTE entreprise ou à lui demander un devis. Le texte reste
+  // factuel (création, fermeture, métier, ville) et renvoie vers les pros
+  // en activité. Tout ce qui s'affiche vient d'une colonne en base.
+  if (pro.etat_admin === "F") {
+    const listing = getCategoryListing(pro.category?.slug || "", catName);
+    const dateFermeture = formatDateCreation(pro.date_fermeture);
+    const depuisFermeture = dateFermeture ? ` depuis le ${dateFermeture}` : "";
+    // "créée le 12 mars 2009" ou "créée en 2009".
+    const creation = dateCreation ? `le ${dateCreation}` : year ? `en ${year}` : null;
+    const dateCessation = formatDateCreation(pro.entreprise_date_fermeture);
+    const entreprise =
+      pro.entreprise_etat === "A"
+        ? " L'entreprise poursuit son activité dans un autre établissement."
+        : pro.entreprise_etat === "C"
+          ? ` L'entreprise elle-même a cessé son activité${dateCessation ? ` le ${dateCessation}` : ""}.`
+          : "";
+    const citySlug = pro.city?.slug || null;
+    const hrefListing = pro.category?.slug && citySlug ? `/${pro.category.slug}/${citySlug}` : null;
+    const hrefDepot =
+      `/deposer-projet` +
+      (pro.category?.slug
+        ? `?categorie=${pro.category.slug}${citySlug ? `&ville=${citySlug}` : ""}`
+        : "");
+
+    const aboutFerme: string[] = [
+      `${name} est référencé sur Workwave comme ${catLower} à ${cityName}${deptName ? ` (${deptName})` : ""}.`,
+      `D'après ${registreNom}, cet établissement est fermé${depuisFermeture}${creation ? ` ; il avait été créé ${creation}` : ""}.`,
+    ];
+    if (pro.siret) aboutFerme.push(`Son ${numLabel} est le ${pro.siret}.`);
+    if (activite) aboutFerme.push(`Son activité déclarée était : ${activite}.`);
+    if (entreprise) aboutFerme.push(entreprise.trim());
+    aboutFerme.push(
+      `Les ${listing.plural} en activité à ${cityName} sont référencés sur Workwave, où vous pouvez déposer votre projet gratuitement.`
+    );
+
+    const faqsFerme: ProFaq[] = [
+      {
+        question: `Cette entreprise est-elle toujours en activité ?`,
+        answer:
+          `Non. D'après ${registreNom}, l'établissement ${name} à ${cityName}${pro.siret ? ` (${numLabel} ${pro.siret})` : ""} est fermé${depuisFermeture}.` +
+          entreprise,
+      },
+      {
+        question: `Comment trouver ${listing.article} ${listing.singular} en activité à ${cityName} ?`,
+        answer:
+          `Consultez la liste des ${listing.plural} à ${cityName} sur Workwave, ou déposez votre projet gratuitement : ` +
+          `les ${listing.plural} en activité à ${cityName} et alentours le reçoivent et vous répondent.`,
+        links: [
+          ...(hrefListing ? [{ label: `Voir les ${listing.plural} à ${cityName}`, href: hrefListing }] : []),
+          { label: "Déposer mon projet", href: hrefDepot },
+        ],
+      },
+      {
+        question: `${name} est-elle une entreprise vérifiée ?`,
+        answer:
+          `${name} était inscrite ${registreAvecPrep}${pro.siret ? ` (${numLabel} ${pro.siret})` : ""}${creation ? `, créée ${creation}` : ""}${activite ? `, sous l'activité « ${activite} »` : ""}. ` +
+          `Le registre indique aujourd'hui un établissement fermé${depuisFermeture}. Workwave affiche cet état tel qu'il figure au registre.`,
+      },
+    ];
+
+    const sourcesNoteFerme = isBE
+      ? `Informations société et état de l'établissement issus de la Banque-Carrefour des Entreprises (BCE, SPF Économie).`
+      : `Informations société et état de l'établissement issus du répertoire Sirene (INSEE).`;
+
+    return { about: aboutFerme.join(" "), faqs: faqsFerme, sourcesNote: sourcesNoteFerme };
+  }
 
   // ── « À propos » : prose factuelle, unique par pro (nom/métier/ville/SIRET/année) ──
   const aboutParts: string[] = [

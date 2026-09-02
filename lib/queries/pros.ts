@@ -308,6 +308,138 @@ export async function getSimilarPros(
   return (data as unknown as ProCardData[]) || [];
 }
 
+/**
+ * Filtre « en activité » d'après le registre : `etat_admin` vaut 'A' OU n'a
+ * jamais été renseigné (null). Un simple `.neq("etat_admin", "F")` ne suffit
+ * pas : en PostgREST, `neq` EXCLUT les lignes à null, ce qui ferait
+ * disparaître toutes les fiches jamais vérifiées (la majorité tant que le
+ * script de classement n'est pas passé partout).
+ */
+const FILTRE_EN_ACTIVITE = "etat_admin.is.null,etat_admin.neq.F";
+
+export type ProsEnActiviteProches = {
+  /** Jusqu'à `limit` fiches en activité, même métier, la commune d'abord. */
+  pros: ProCardData[];
+  /** Vrai compte (exact) des fiches en activité de ce métier dans la commune. */
+  totalVille: number;
+  /** true si la commune n'a pas suffi et qu'on a complété avec les voisines. */
+  completeAvecVoisines: boolean;
+};
+
+/**
+ * Fiches EN ACTIVITÉ du même métier, pour une fiche d'établissement FERMÉ
+ * (02/09/2026 : 45 % des fiches sont fermées d'après Sirene ; la page reste
+ * en ligne, dit la vérité, et renvoie vers des pros qui répondent encore).
+ *
+ * La commune d'abord, en une seule requête qui ramène AUSSI le compte exact
+ * (`count: "exact"` + `limit` : PostgREST renvoie le total dans Content-Range
+ * sans transférer les lignes au-delà de la limite). Si la commune ne suffit
+ * pas, on complète avec les communes voisines déjà calculées par la page
+ * (getNearbyCities), sans nouvelle requête sur `cities`.
+ *
+ * Erreurs RELEVÉES, jamais converties en liste vide : même arbitrage que
+ * getSimilarPros ci-dessus, une 500 non mise en cache vaut mieux qu'une page
+ * amputée figée 30 jours.
+ */
+export async function getProsEnActiviteProches(
+  categoryId: number,
+  cityId: number,
+  excludeSlug: string,
+  villesVoisinesIds: number[],
+  limit: number = 10
+): Promise<ProsEnActiviteProches> {
+  const supabase = createPublicClient();
+  const { data, count, error } = await supabase
+    .from("pros")
+    .select(PRO_SELECT_CARD, { count: "exact" })
+    .eq("category_id", categoryId)
+    .eq("city_id", cityId)
+    .neq("slug", excludeSlug)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .or(FILTRE_EN_ACTIVITE)
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
+    .order("name")
+    .limit(limit);
+
+  if (error) {
+    throw new Error(
+      `getProsEnActiviteProches a echoue (categorie ${categoryId}, ville ${cityId}) : ${error.message}`,
+    );
+  }
+
+  const pros = ((data as unknown as ProCardData[]) || []).slice();
+  const totalVille = count || 0;
+  const manque = limit - pros.length;
+  if (manque <= 0 || villesVoisinesIds.length === 0) {
+    return { pros, totalVille, completeAvecVoisines: false };
+  }
+
+  const { data: voisins, error: erreurVoisins } = await supabase
+    .from("pros")
+    .select(PRO_SELECT_CARD)
+    .eq("category_id", categoryId)
+    .in("city_id", villesVoisinesIds)
+    .neq("slug", excludeSlug)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .or(FILTRE_EN_ACTIVITE)
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
+    .order("name")
+    .limit(manque);
+
+  if (erreurVoisins) {
+    throw new Error(
+      `getProsEnActiviteProches (voisines) a echoue (categorie ${categoryId}, ville ${cityId}) : ${erreurVoisins.message}`,
+    );
+  }
+
+  const ajout = (voisins as unknown as ProCardData[]) || [];
+  return {
+    pros: pros.concat(ajout),
+    totalVille,
+    completeAvecVoisines: ajout.length > 0,
+  };
+}
+
+/**
+ * Pour une fiche d'établissement FERMÉ dont l'entreprise existe encore
+ * (`entreprise_etat = 'A'`) : la fiche EN ACTIVITÉ d'un autre établissement
+ * de la même entreprise, s'il y en a une en base. Même clé que
+ * getFicheRemplacante : les 9 premiers chiffres du SIRET (le SIREN).
+ * Toutes communes confondues, puisque l'entreprise a précisément déménagé.
+ */
+export async function getFicheActiveMemeSiren(
+  siret: string,
+  excludeSlug: string
+): Promise<{ slug: string; name: string; cityName: string | null } | null> {
+  const siren = String(siret).slice(0, 9);
+  if (siren.length !== 9) return null;
+
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("pros")
+    .select("slug, name, city:cities(name)")
+    .like("siret", `${siren}%`)
+    .neq("slug", excludeSlug)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .or(FILTRE_EN_ACTIVITE)
+    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
+    .order("id")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(
+      `getFicheActiveMemeSiren a echoue (SIREN ${siren}) : ${error.message}`,
+    );
+  }
+  if (!data) return null;
+  const row = data as unknown as { slug: string; name: string; city: { name: string } | null };
+  return { slug: row.slug, name: row.name, cityName: row.city?.name ?? null };
+}
+
 export async function searchPros(
   query: string,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
