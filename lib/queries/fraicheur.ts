@@ -49,6 +49,13 @@ async function pagesChantiers(): Promise<PageFraiche[]> {
 // (leçon du 09/05), et au-delà le fichier perdrait son sens de « fraîcheur ».
 export const getFichesFraiches = cache(
   async (jours: number, limite: number): Promise<PageFraiche[]> => {
+    // 🔴 JAMAIS pendant le build. Next pré-calcule les routes ISR au build,
+    // et cette requête (tri de 2,4 millions de lignes par updated_at) a fait
+    // échouer le déploiement du 02/09 en dépassant le délai de la base. Un
+    // déploiement ne doit dépendre d'aucune requête lourde : au build on rend
+    // le flux sans les fiches, et l'ISR le complète à la première
+    // régénération (6 h pour les flux, 1 h pour la home).
+    if (process.env.NEXT_PHASE === "phase-production-build") return [];
     const sb = createPublicClient();
     const depuis = new Date(Date.now() - jours * 86400e3).toISOString();
     const { data, error } = await sb
