@@ -165,6 +165,29 @@ export type Pro = {
   effectif_range: string | null;
   etat_admin: "A" | "C" | "F" | null;
   sirene_synced_at: string | null;
+  // Annuaire des entreprises, API recherche-entreprises (scripts/enrichir-fiches-sirene.ts,
+  // migration 2026-09-02). Marqueur de reprise propre a cette chaine.
+  sirene_enrichi_at: string | null;
+  /** Coordonnees de l'adresse exacte de l'etablissement (pas le centre de la commune). */
+  etab_latitude: number | null;
+  etab_longitude: number | null;
+  /** Code NAFA du metier declare a la Chambre des metiers, ex. "4322AZ". */
+  activite_registre_metier: string | null;
+  /** Codes de qualification RGE renvoyes par l'annuaire. Distinct de rge_qualifications (ADEME). */
+  liste_rge: string[] | null;
+  enseignes: string[] | null;
+  nom_commercial: string | null;
+  /** Debut de la periode actuelle dans Sirene : pour un etablissement ferme, c'est la fermeture. */
+  date_debut_activite: string | null;
+  caractere_employeur: "O" | "N" | null;
+  /** Identifiants de convention collective (IDCC). */
+  liste_idcc: string[] | null;
+  nombre_etablissements: number | null;
+  categorie_entreprise: "PME" | "ETI" | "GE" | null;
+  /** Comptes deposes par annee : {"2024": {"ca": 123, "resultat_net": 45}}. */
+  finances: Record<string, { ca: number | null; resultat_net: number | null }> | null;
+  /** Drapeaux officiels a true uniquement, ex. {"est_rge": true}. {} si aucun. */
+  labels_officiels: Record<string, true> | null;
   has_rc_pro: boolean;
   has_decennale: boolean;
   payment_methods: PaymentMethod[];
