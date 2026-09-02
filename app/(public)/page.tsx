@@ -7,6 +7,8 @@ import ProCtaSection from "@/components/home/ProCtaSection";
 import SearchForm from "@/components/search/SearchForm";
 import CountUp from "@/components/ui/CountUp";
 import RecentProjectsSection from "@/components/home/RecentProjectsSection";
+import MisesAJourSection from "@/components/home/MisesAJourSection";
+import { getFichesFraiches } from "@/lib/queries/fraicheur";
 import JsonLd from "@/components/seo/JsonLd";
 // Imports publics (sans cookies) pour permettre le caching ISR de la home.
 // Ne PAS remplacer par `lib/queries/categories` ou `lib/queries/cities` :
@@ -73,7 +75,7 @@ const homeFaqs = [
 ];
 
 export default async function Home() {
-  const [btp, domicile, personne, topCities, departments, recentProjects] =
+  const [btp, domicile, personne, topCities, departments, recentProjects, fichesFraiches] =
     await Promise.all([
       getCategoriesByVerticalPublic("btp"),
       getCategoriesByVerticalPublic("domicile"),
@@ -81,6 +83,10 @@ export default async function Home() {
       getTopCitiesPublic(30),
       getAllDepartmentsPublic(),
       getRecentProjectsForHome(10),
+      // 24 fiches modifiees ces 7 jours, pour l'entonnoir de decouverte. En
+      // cas d'echec de cette seule lecture, la home ne doit pas tomber : le
+      // bloc se masque simplement.
+      getFichesFraiches(7, 24).catch(() => []),
     ]);
 
   // Catégories pour le sélecteur de recherche, avec leur vertical (le
@@ -324,6 +330,11 @@ export default async function Home() {
       {/* Projets déposés récemment : double CTA (particulier dépose / pro reçoit).
           Modulable : 1→10 vrais projets anonymisés, se masque si 0. */}
       <RecentProjectsSection projects={recentProjects} />
+
+      {/* Entonnoir de decouverte pour Google (01/09/2026) : la home est relue
+          chaque jour, les 24 fiches les plus recemment modifiees y sont liees
+          pour etre decouvertes en 24 h. Cf. components/home/MisesAJourSection. */}
+      <MisesAJourSection pages={fichesFraiches} />
 
       {/* Categories par vertical : CTA pro inséré juste après le BTP (demande
           Willy 14/07 : visibilité max pour le recrutement de pros). */}

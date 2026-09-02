@@ -29,6 +29,10 @@ export async function GET() {
   // lecture a l'autre et reste vraie : le parc bouge tous les jours.
   const jour = new Date().toISOString().slice(0, 10);
 
+  // Le sitemap « fraicheur » (ajoute le 01/09/2026) est le SEUL enfant dont
+  // les dates par page sont reelles (updated_at) : c'est la file prioritaire
+  // qu'on tend a Google. Cf. lib/queries/fraicheur.ts.
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${tousLesIdsDeSitemap()
@@ -37,6 +41,7 @@ ${tousLesIdsDeSitemap()
       `  <sitemap><loc>${BASE_URL}/sitemap/${id}.xml</loc><lastmod>${jour}</lastmod></sitemap>`
   )
   .join("\n")}
+  <sitemap><loc>${BASE_URL}/sitemap-fraicheur.xml</loc><lastmod>${jour}</lastmod></sitemap>
 </sitemapindex>`;
 
   return new Response(xml, {
