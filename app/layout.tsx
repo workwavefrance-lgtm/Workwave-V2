@@ -101,6 +101,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         {/* Microsoft Advertising UET pixel · track conversions /deposer-projet/merci.
             S'active si NEXT_PUBLIC_UET_TAG_ID est défini en env. Sinon : skip silencieux. */}
         <UETPixel />
+        {/* Umami, mesure d'audience auto-hebergee sur le VPS (02/09/2026).
+            Pourquoi : GA4 ne se declenche qu'apres le clic Accepter et ne voit
+            que 4 % des visites (496 sessions en 28 j contre 12 500 clics
+            Google). Umami ne pose aucun cookie et ne stocke aucune donnee
+            personnelle : il voit toutes les visites. L'identifiant du site
+            est public par nature (il figure dans le HTML), pas un secret.
+            Tableau de bord : https://stats.workwave.fr */}
+        <Script
+          src="https://stats.workwave.fr/script.js"
+          data-website-id="9c549ae7-0e89-4a48-ae74-db764a51a239"
+          strategy="afterInteractive"
+        />
         <Providers>{children}</Providers>
       </body>
     </html>
