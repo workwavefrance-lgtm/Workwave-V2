@@ -386,7 +386,14 @@ const LOT_RPC = 200;
 /** Ecriture d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
 async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }> {
   if (lot.records) {
-    const { data, error } = await sb.rpc("classer_etats_lot", { lot: lot.records, verifie_at: lot.patch.etat_verifie_at });
+    // Delai de 90 s : sans lui, un appel dont la reponse ne revient jamais
+    // bloque tout le passage (03/09, 0 h 20 : processus a 0 % de CPU pendant
+    // 20 minutes au lot 2 800, 32 connexions ouvertes, aucune erreur). Un
+    // appel expire est compte en erreur, rejoue a la fin, et sinon repris au
+    // passage suivant (--reprendre).
+    const { data, error } = await sb
+      .rpc("classer_etats_lot", { lot: lot.records, verifie_at: lot.patch.etat_verifie_at })
+      .abortSignal(AbortSignal.timeout(90_000));
     if (error) return { n: 0, erreur: error.message };
     return { n: typeof data === "number" ? data : Number(data) || 0, erreur: null };
   }
