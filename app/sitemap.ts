@@ -866,6 +866,62 @@ async function findBatchStartId(
   return data === null ? -1 : Number(data);
 }
 
+/**
+ * Une page de fiches (id > lastId, ordre id) en DEUX requetes au lieu d'une.
+ *
+ * Pourquoi (03/09/2026, cinq deploiements echoues sur /sitemap/104.xml,
+ * "canceling statement due to statement timeout") : la requete d'une seule
+ * piece selectionnait slug/updated_at/claimed_by_user_id, donc Postgres devait
+ * lire la LIGNE de chaque fiche rencontree, y compris les ~500 000 fiches tech
+ * a sauter entre les id 394 442 et 1 434 229. Tant que ces lignes etaient
+ * rangees dans l'ordre des id, ca passait ; le classement du 02-03/09 a reecrit
+ * 2,3 M de lignes (deplacees en fin de fichier), la lecture est devenue
+ * aleatoire : 8 s, delai depasse, systematiquement sur la 32e page du lot 4.
+ *
+ * Ici : (1) les id seuls, servis par l'index partiel idx_pros_active_id_cat
+ * (id, category_id) sans toucher aux lignes, 0,1 a 0,6 s mesures sur la page
+ * fautive ; (2) les colonnes voulues par id, 1 000 acces directs, 0,1 a 0,3 s.
+ * Deux allers-retours, mais aucun ne depend de l'ordre physique des lignes.
+ */
+async function lirePageFiches(
+  supabase: ReturnType<typeof getAdminServiceClient>,
+  lastId: number,
+  limit: number,
+  mode: "exclude" | "include",
+  label: string
+): Promise<ProSitemapRow[]> {
+  const ids = await withSitemapRetry<{ id: number }[] | null>(
+    () => {
+      let q = supabase
+        .from("pros")
+        .select("id")
+        .eq("is_active", true)
+        .is("deleted_at", null)
+        .gt("id", lastId)
+        .order("id", { ascending: true })
+        .limit(limit);
+      q =
+        mode === "include"
+          ? q.in("category_id", AI_CATEGORY_IDS)
+          : q.not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`);
+      return q;
+    },
+    `${label} (ids)`
+  );
+  const liste = (ids || []).map((r) => r.id);
+  if (liste.length === 0) return [];
+  const rows = await withSitemapRetry<ProSitemapRow[] | null>(
+    () =>
+      supabase
+        .from("pros")
+        .select("slug, updated_at, claimed_by_user_id, id")
+        .in("id", liste)
+        .order("id", { ascending: true }),
+    `${label} (lignes)`
+  );
+  return (rows || []) as ProSitemapRow[];
+}
+
 async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap> {
   const supabase = getAdminServiceClient();
   const skipCount = batchIndex * PROS_PER_SITEMAP;
@@ -882,22 +938,15 @@ async function buildProsUrls(batchIndex: number): Promise<MetadataRoute.Sitemap>
       SUPABASE_PAGE_SIZE,
       PROS_PER_SITEMAP - allPros.length
     );
-    // THROW (après 4 retries) : un batch tronqué en silence serait caché 24h
-    // (cf. 12/06). Le retry absorbe les timeouts passagers sous crawl (14/06).
-    const data = await withSitemapRetry<ProSitemapRow[] | null>(
-      () =>
-        supabase
-          .from("pros")
-          .select("slug, updated_at, claimed_by_user_id, id")
-          .eq("is_active", true)
-          .is("deleted_at", null)
-          .not("category_id", "in", `(${AI_CATEGORY_IDS.join(",")})`)
-          .gt("id", lastId)
-          .order("id", { ascending: true })
-          .limit(limit),
+    // THROW (après les retries) : un batch tronqué en silence serait caché 24h
+    // (cf. 12/06). Lecture en deux temps : cf. lirePageFiches (03/09).
+    const rows = await lirePageFiches(
+      supabase,
+      lastId,
+      limit,
+      "exclude",
       `buildProsUrls batch ${batchIndex}`
     );
-    const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
     allPros.push(...rows);
     lastId = rows[rows.length - 1].id;
@@ -936,22 +985,15 @@ async function buildAiProsUrls(batchIndex: number): Promise<MetadataRoute.Sitema
       SUPABASE_PAGE_SIZE,
       PROS_PER_SITEMAP - allPros.length
     );
-    // THROW (après 4 retries) : un batch tronqué en silence serait caché 24h
-    // (cf. 12/06). Le retry absorbe les timeouts passagers sous crawl (14/06).
-    const data = await withSitemapRetry<ProSitemapRow[] | null>(
-      () =>
-        supabase
-          .from("pros")
-          .select("slug, updated_at, claimed_by_user_id, id")
-          .in("category_id", AI_CATEGORY_IDS)
-          .eq("is_active", true)
-          .is("deleted_at", null)
-          .gt("id", lastId)
-          .order("id", { ascending: true })
-          .limit(limit),
+    // THROW (après les retries) : un batch tronqué en silence serait caché 24h
+    // (cf. 12/06). Lecture en deux temps : cf. lirePageFiches (03/09).
+    const rows = await lirePageFiches(
+      supabase,
+      lastId,
+      limit,
+      "include",
       `buildAiProsUrls batch ${batchIndex}`
     );
-    const rows = (data || []) as ProSitemapRow[];
     if (rows.length === 0) break;
     allPros.push(...rows);
     lastId = rows[rows.length - 1].id;
