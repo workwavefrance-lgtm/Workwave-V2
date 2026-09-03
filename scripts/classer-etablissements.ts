@@ -386,7 +386,11 @@ type Lot = { patch: Patch; sirets: string[]; records?: Enreg[] };
 // crawl et des aspirateurs, un paquet sur quatre depassait le delai de la
 // base. A 50 lignes (~1 s), la marge est large ; 379 000 fiches restantes =
 // ~7 600 appels, environ 2 h 30. Lent mais sans erreur.
-const LOT_RPC = 50;
+// Puis 100 (03/09, 8 h 15) : le vrai coupable etait le trigger updated_at v1
+// (to_jsonb de la ligne entiere, 180 ms sur les fiches lourdes), remplace par
+// la v2 (test sur etat_verifie_at seul). Avec lui, 100 lignes tiennent
+// largement sous le delai.
+const LOT_RPC = 100;
 
 /** Ecriture d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
 async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }> {
