@@ -10,14 +10,39 @@ import { SOURCED_PRICES } from "@/lib/data/sourced-prices";
 import { SOURCED_PRICES_BE } from "@/lib/data/sourced-prices-be";
 import { libelleNaf } from "@/lib/data/naf-labels";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
-import { formatDateCreation } from "@/lib/utils/sirene";
+import { formatDateCreation, formatEffectifRange } from "@/lib/utils/sirene";
 import { getCategoryListing } from "@/lib/utils/category-grammar";
+import {
+  dateSireneFaitFoi,
+  derniersComptes,
+  estEnrichieSirene,
+  formatDistanceKm,
+  formatMontantEuros,
+  labelsOfficiels,
+  libelleCategorieEntreprise,
+  nomsAlternatifs,
+  ordinalFr,
+} from "@/lib/seo/pro-registre";
+import type { ReperesFiche } from "@/lib/queries/pros";
 
 type ProForContent = {
+  /** Sert uniquement a varier la tournure des phrases d'une fiche a l'autre. */
+  id?: number | null;
   name: string;
   siret?: string | null;
+  claimed_by_user_id?: string | null;
   founded_year?: number | null;
   founding_date?: string | null;
+  // Annuaire des entreprises (migration 2026-09-02). Absentes = pas de donnee.
+  sirene_enrichi_at?: string | null;
+  effectif_range?: string | null;
+  enseignes?: string[] | null;
+  nom_commercial?: string | null;
+  caractere_employeur?: string | null;
+  nombre_etablissements?: number | null;
+  categorie_entreprise?: string | null;
+  finances?: Record<string, { ca: number | null; resultat_net: number | null }> | null;
+  labels_officiels?: Record<string, true> | null;
   /** Code d'activité principale (NAF rév. 2), tel que stocké par le scrape. */
   naf_code?: string | null;
   /** Code de catégorie juridique INSEE à 4 chiffres (1000 = entreprise individuelle). */
@@ -36,6 +61,7 @@ type ProForContent = {
   city?: {
     name?: string | null;
     slug?: string | null;
+    country?: string | null;
     department?: { name?: string | null; country?: string | null } | null;
   } | null;
 };
@@ -49,15 +75,22 @@ export type ProFaq = {
 export type ProContent = { about: string; faqs: ProFaq[]; sourcesNote: string };
 
 function getYear(pro: ProForContent): number | null {
+  // Fiche enrichie par l'annuaire et non reclamee : la date de creation de
+  // l'entreprise (founding_date) fait foi, meme si founded_year (date de
+  // l'etablissement, backfill Stock) en differe. Cf. lib/seo/pro-registre.ts.
+  const anneeSirene = pro.founding_date ? Number(String(pro.founding_date).slice(0, 4)) : NaN;
+  if (dateSireneFaitFoi(pro) && !Number.isNaN(anneeSirene) && anneeSirene > 1800) return anneeSirene;
   if (pro.founded_year && pro.founded_year > 1800) return pro.founded_year;
-  if (pro.founding_date) {
-    const y = new Date(pro.founding_date).getFullYear();
-    if (!Number.isNaN(y) && y > 1800) return y;
-  }
+  if (!Number.isNaN(anneeSirene) && anneeSirene > 1800) return anneeSirene;
   return null;
 }
 
-export function buildProContent(pro: ProForContent): ProContent | null {
+/**
+ * @param reperes  Reperes calcules en base pour une fiche enrichie
+ *                 (getReperesFiche). Absents ou null : aucune phrase ajoutee,
+ *                 le texte est identique a celui d'avant le 03/09/2026.
+ */
+export function buildProContent(pro: ProForContent, reperes?: ReperesFiche | null): ProContent | null {
   const name = (pro.name || "").trim();
   const catName = pro.category?.name || null;
   const cityName = pro.city?.name || null;
@@ -216,6 +249,131 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   if (forme) {
     aboutParts.push(`Elle est enregistrée sous la forme juridique : ${forme}.`);
   }
+
+  // ── FAITS DE L'ANNUAIRE DES ENTREPRISES + REPÈRES CALCULÉS (03/09/2026) ──
+  // Uniquement sur une fiche enrichie (sirene_enrichi_at) : une fiche non
+  // enrichie garde mot pour mot le texte d'avant. Chaque phrase n'existe que
+  // si la donnée existe ; la tournure alterne selon la parité de l'id pour
+  // que deux voisines enrichies ne produisent pas la même phrase avec deux
+  // nombres différents. Aucun chiffre ici n'est estimé : colonnes en base
+  // ou comptes faits en base (lib/queries/pros.ts, getReperesFiche).
+  const enrichie = estEnrichieSirene(pro);
+  const variante = Math.abs(Number(pro.id) || 0) % 2;
+  const listing = getCategoryListing(pro.category?.slug || "", catName);
+  const feminin = listing.article === "une";
+  const { enseignes, nomCommercial } = enrichie ? nomsAlternatifs(pro) : { enseignes: [], nomCommercial: null };
+  const comptes = enrichie ? derniersComptes(pro.finances) : null;
+  const labels = enrichie ? labelsOfficiels(pro.labels_officiels) : [];
+  const effectif = enrichie ? formatEffectifRange(pro.effectif_range) : null;
+  const categorieEntreprise = enrichie ? libelleCategorieEntreprise(pro) : null;
+  const nbEtab = enrichie && typeof pro.nombre_etablissements === "number" ? pro.nombre_etablissements : 0;
+  const guillemets = (s: string) => `« ${s} »`;
+
+  if (enrichie) {
+    if (enseignes.length > 0 && nomCommercial) {
+      aboutParts.push(
+        `Elle exerce sous l'enseigne ${enseignes.map(guillemets).join(" et ")} et le nom commercial ${guillemets(nomCommercial)}.`
+      );
+    } else if (enseignes.length > 1) {
+      aboutParts.push(`Elle exerce sous les enseignes ${enseignes.map(guillemets).join(" et ")}.`);
+    } else if (enseignes.length === 1) {
+      aboutParts.push(
+        variante === 0
+          ? `Elle exerce sous l'enseigne ${guillemets(enseignes[0])}.`
+          : `Son enseigne déclarée est ${guillemets(enseignes[0])}.`
+      );
+    } else if (nomCommercial) {
+      aboutParts.push(
+        variante === 0
+          ? `Elle est connue sous le nom commercial ${guillemets(nomCommercial)}.`
+          : `Son nom commercial déclaré est ${guillemets(nomCommercial)}.`
+      );
+    }
+
+    if (effectif) {
+      aboutParts.push(
+        effectif.startsWith("0 ")
+          ? `Elle n'a pas de salarié d'après l'INSEE.`
+          : `Elle compte ${effectif} d'après l'INSEE.`
+      );
+    } else if (pro.caractere_employeur === "O") {
+      aboutParts.push(`Sirene la classe parmi les établissements employeurs.`);
+    }
+    if (nbEtab > 1) {
+      aboutParts.push(
+        variante === 0
+          ? `L'entreprise compte ${nbEtab} établissements au total.`
+          : `Au total, l'entreprise regroupe ${nbEtab} établissements.`
+      );
+    }
+    if (categorieEntreprise) {
+      aboutParts.push(
+        categorieEntreprise === "PME"
+          ? `L'INSEE la classe parmi les PME.`
+          : categorieEntreprise === "Grande entreprise"
+            ? `L'INSEE la classe parmi les grandes entreprises.`
+            : `L'INSEE la classe parmi les entreprises de taille intermédiaire (ETI).`
+      );
+    }
+    if (comptes) {
+      const ca = comptes.ca !== null ? `d'un chiffre d'affaires de ${formatMontantEuros(comptes.ca)}` : null;
+      const res = comptes.resultat !== null ? `d'un résultat net de ${formatMontantEuros(comptes.resultat)}` : null;
+      aboutParts.push(
+        `Ses derniers comptes déposés (exercice ${comptes.annee}) font état ${[ca, res].filter(Boolean).join(" et ")}.`
+      );
+    }
+    if (labels.length > 0) {
+      aboutParts.push(
+        labels.length > 1
+          ? `Le registre officiel lui reconnaît les labels ${labels.join(", ")}.`
+          : `Le registre officiel lui reconnaît le label ${labels[0]}.`
+      );
+    }
+  }
+
+  const rang = reperes?.rangAnciennete ?? null;
+  const confreres = reperes?.confreres ?? null;
+  if (rang) {
+    // Si toutes les fiches de la commune ne sont pas datées (80 à 99 %), le
+    // dénominateur est nommé pour ce qu'il est : les fiches datées.
+    const exact = rang.total === rang.totalCommune;
+    const denominateur = exact
+      ? `${rang.total} ${listing.plural} en activité de ${cityName}`
+      : `${rang.total} ${listing.plural} de ${cityName} dont la date de création est connue (sur ${rang.totalCommune} en activité)`;
+    if (rang.rang === 1) {
+      aboutParts.push(
+        `Par sa date de création, c'est ${feminin ? "la plus ancienne" : "le plus ancien"} des ${denominateur}.`
+      );
+    } else {
+      aboutParts.push(
+        variante === 0
+          ? `Par sa date de création, elle se classe ${ordinalFr(rang.rang, feminin)} sur les ${denominateur}, du plus ancien au plus récent.`
+          : `Parmi les ${denominateur}, c'est ${feminin ? "la" : "le"} ${ordinalFr(rang.rang, feminin)} plus ${feminin ? "ancienne" : "ancien"}.`
+      );
+    }
+  }
+  if (confreres) {
+    const n = confreres.total;
+    const proches = confreres.plusProches
+      .map((p) => `${p.name} (${formatDistanceKm(p.distanceKm)})`)
+      .join(", ");
+    if (n === 0) {
+      aboutParts.push(
+        `Aucun${feminin ? "e" : ""} autre ${listing.singular} en activité n'est référencé${feminin ? "e" : ""} sur Workwave dans les communes à moins de 10 km.`
+      );
+    } else {
+      const nom = n > 1 ? listing.plural : listing.singular;
+      const tete =
+        variante === 0
+          ? `${n} autre${n > 1 ? "s" : ""} ${nom} ${n > 1 ? "sont" : "est"} en activité dans les communes à moins de 10 km`
+          : `Dans les communes à moins de 10 km, Workwave référence ${n} autre${n > 1 ? "s" : ""} ${nom} en activité`;
+      aboutParts.push(proches ? `${tete}, dont ${proches}.` : `${tete}.`);
+    }
+  }
+  if (reperes?.distanceCentreKm != null) {
+    aboutParts.push(`Son adresse se situe à ${formatDistanceKm(reperes.distanceCentreKm)} du centre de ${cityName}.`);
+  }
+
   aboutParts.push(
     `Pour comparer les ${catLower}s à ${cityName} et recevoir des devis gratuits, déposez votre projet sur Workwave : la mise en relation est gratuite et sans engagement.`
   );
@@ -268,6 +426,57 @@ export function buildProContent(pro: ProForContent): ProContent | null {
     });
   }
 
+  // ── Questions propres à une fiche enrichie (03/09/2026). Chacune n'existe
+  // que si la donnée existe ; une fiche non enrichie n'en reçoit aucune. ──
+  if (enseignes.length > 0 || nomCommercial) {
+    const autre = enseignes[0] || (nomCommercial as string);
+    const nature = enseignes.length > 0 ? "l'enseigne déclarée" : "le nom commercial déclaré";
+    faqs.push({
+      question: `${autre} et ${name}, est-ce la même entreprise ?`,
+      answer:
+        `Oui. ${guillemets(autre)} est ${nature} de l'établissement de ${name} à ${cityName}` +
+        `${pro.siret ? ` (${numLabel} ${pro.siret})` : ""}, d'après le registre Sirene. ` +
+        `Les deux noms désignent la même entreprise.`,
+    });
+  }
+  if (comptes) {
+    const ca = comptes.ca !== null ? `un chiffre d'affaires de ${formatMontantEuros(comptes.ca)}` : null;
+    const res = comptes.resultat !== null ? `un résultat net de ${formatMontantEuros(comptes.resultat)}` : null;
+    faqs.push({
+      question:
+        comptes.ca !== null
+          ? `Quel est le chiffre d'affaires de ${name} ?`
+          : `${name} publie-t-elle ses comptes ?`,
+      answer:
+        `D'après les comptes déposés au Registre national des entreprises pour l'exercice ${comptes.annee}, ` +
+        `${name} affiche ${[ca, res].filter(Boolean).join(" et ")}. ` +
+        `Ces chiffres sont ceux du dépôt officiel, pas une estimation de Workwave.`,
+    });
+  }
+  if (confreres && confreres.total > 0) {
+    const n = confreres.total;
+    const nom = n > 1 ? listing.plural : listing.singular;
+    const proches = confreres.plusProches;
+    faqs.push({
+      // La question ne promet « les plus proches » que si la réponse les nomme.
+      question:
+        proches.length > 0
+          ? `Quels sont les ${listing.plural} les plus proches de ${name} ?`
+          : `Combien de ${listing.plural} exercent près de ${name} ?`,
+      answer:
+        `Dans les communes à moins de 10 km de ${name}, Workwave référence ${n} autre${n > 1 ? "s" : ""} ${nom} en activité` +
+        (proches.length > 0
+          ? `. Parmi les adresses géolocalisées, ${proches.length > 1 ? "les plus proches sont" : "la plus proche est"} ${proches
+              .map((p) => `${p.name}${p.cityName ? ` à ${p.cityName}` : ""} (${formatDistanceKm(p.distanceKm)})`)
+              .join(", ")}. `
+          : ". ") +
+        `Déposez votre projet sur Workwave pour les comparer gratuitement.`,
+      ...(proches.length > 0
+        ? { links: proches.map((p) => ({ label: p.name, href: `/artisan/${p.slug}` })) }
+        : {}),
+    });
+  }
+
   faqs.push({
     question: `Comment obtenir un devis de ${name} ?`,
     answer:
@@ -279,7 +488,12 @@ export function buildProContent(pro: ProForContent): ProContent | null {
   const sourcesNote =
     (isBE
       ? `Informations société issues de la Banque-Carrefour des Entreprises (BCE, SPF Économie)`
-      : `Informations société issues du répertoire Sirene (INSEE)`) +
+      : enrichie
+        ? `Informations société issues du répertoire Sirene (INSEE) et du Registre national des entreprises`
+        : `Informations société issues du répertoire Sirene (INSEE)`) +
+    (reperes && (reperes.rangAnciennete || reperes.confreres)
+      ? ` · rang et voisinage calculés sur les fiches en activité référencées sur Workwave`
+      : "") +
     (sourced ? ` · tarifs indicatifs d'après des sources web (${sourced.retrievedAt})` : "") +
     `.`;
 

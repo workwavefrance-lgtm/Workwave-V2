@@ -4,6 +4,7 @@
 import { cache } from "react";
 import { getCityIdsByDepartment } from "@/lib/queries/cities";
 import { createPublicClient } from "@/lib/supabase/public-client";
+import { haversineKm } from "@/lib/utils/haversine";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants";
 import type {
   PaginatedResult,
@@ -426,6 +427,17 @@ export async function getProsEnActiviteProches(
 }
 
 /**
+ * Borne haute d'un encadrement `siret >= SIREN AND siret < sirenSuivant(SIREN)`,
+ * qui laisse Postgres utiliser l'index de `siret` la ou `like 'SIREN%'` seul
+ * balayait toute la table (collation non C). "392639928" -> "392639929".
+ * Un SIREN de neuf 9 donne une borne a dix chiffres, donc un encadrement vide :
+ * ce numero n'existe pas.
+ */
+function sirenSuivant(siren: string): string {
+  return String(Number(siren) + 1).padStart(siren.length, "0");
+}
+
+/**
  * Pour une fiche d'établissement FERMÉ dont l'entreprise existe encore
  * (`entreprise_etat = 'A'`) : la fiche EN ACTIVITÉ d'un autre établissement
  * de la même entreprise, s'il y en a une en base. Même clé que
@@ -443,6 +455,13 @@ export async function getFicheActiveMemeSiren(
   const { data, error } = await supabase
     .from("pros")
     .select("slug, name, city:cities(name)")
+    // 03/09/2026 : `like 'SIREN%'` seul ne passait pas par l'index de siret
+    // (collation non C) et balayait 2,4 M de lignes : 7 s mesurees, soit un
+    // depassement du delai PostgREST et une 500 sur chaque fiche fermee dont
+    // l'entreprise existe encore. L'encadrement gte/lt utilise l'index
+    // (140 ms) ; le `like` conserve exactement la semantique d'avant.
+    .gte("siret", siren)
+    .lt("siret", sirenSuivant(siren))
     .like("siret", `${siren}%`)
     .neq("slug", excludeSlug)
     .is("deleted_at", null)
@@ -527,6 +546,9 @@ export async function getFicheRemplacante(slug: string): Promise<string | null> 
   const { data: gardee } = await sb
     .from("pros")
     .select("slug")
+    // Meme encadrement que getFicheActiveMemeSiren : index au lieu d'un balayage.
+    .gte("siret", siren)
+    .lt("siret", sirenSuivant(siren))
     .like("siret", `${siren}%`)
     .eq("city_id", retiree.city_id)
     .eq("is_active", true)
@@ -535,3 +557,223 @@ export async function getFicheRemplacante(slug: string): Promise<string | null> 
     .maybeSingle();
   return gardee?.slug || null;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REPÈRES CALCULÉS d'une fiche enrichie (03/09/2026)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// POURQUOI. Mesure du 02/09 : deux fiches voisines partagent 71 % de leur
+// texte, dont 28 points imputables au couple métier x ville. Un fait CALCULÉ
+// à partir de la position de cette fiche parmi ses voisines (rang
+// d'ancienneté, confrères à 10 km, distance au centre) est unique par
+// construction : deux voisines n'ont jamais le même rang ni les mêmes plus
+// proches. Rien n'est inventé : tout est compté en base ou dérivé de
+// coordonnées enregistrées.
+//
+// PÉRIMÈTRE. Appelé UNIQUEMENT pour les fiches qui ont `sirene_enrichi_at`
+// (2 000 au 03/09, 2,3 M à terme) : la page ne paie ces requêtes que là où
+// elles produisent quelque chose. Requêtes légères : comptes `head` (aucune
+// ligne transférée), une lecture de `cities` bornée par une boîte de 10 km,
+// et une lecture de pros limitée à 5 colonnes et 300 lignes.
+//
+// ERREURS RELEVÉES, jamais converties en « rien à afficher » : même
+// arbitrage que getSimilarPros (une 500 non mise en cache vaut mieux qu'une
+// page amputée figée 30 jours).
+
+export type ProcheFiche = {
+  slug: string;
+  name: string;
+  cityName: string | null;
+  distanceKm: number;
+};
+
+export type ReperesFiche = {
+  /** Rang par date de création parmi les fiches ouvertes de même métier dans
+   *  la commune (1 = la plus ancienne). `total` = fiches dont la date est
+   *  connue, `totalCommune` = toutes les fiches ouvertes du métier dans la
+   *  commune. Null si moins de 3 dates connues, ou si moins de 80 % des
+   *  fiches de la commune ont une date (mesure du 03/09 : Bordeaux,
+   *  architectes, 11 datées sur 172 ouvertes ; un « 7e sur 11 » y serait
+   *  faux). */
+  rangAnciennete: { rang: number; total: number; totalCommune: number } | null;
+  /** Fiches ouvertes de même métier dans les communes dont le centre est à
+   *  moins de 10 km (la commune de la fiche comprise), fiche exclue. Null si
+   *  aucune coordonnée. `plusProches` : parmi les adresses GÉOLOCALISÉES
+   *  (etab_latitude) à moins de 10 km, distance exacte ; vide si aucune ou
+   *  si la lecture a été tronquée (on n'affirme pas « les plus proches » sur
+   *  un échantillon). */
+  confreres: { total: number; plusProches: ProcheFiche[] } | null;
+  /** Distance entre l'adresse de l'établissement et le centre de sa commune,
+   *  en km. Null sans coordonnées d'établissement, ou si elles tombent à
+   *  moins de 300 m du centre (géocodage au centre de la commune, rien à dire),
+   *  ou à plus de 30 km (coordonnées douteuses). */
+  distanceCentreKm: number | null;
+};
+
+const RAYON_CONFRERES_KM = 10;
+const PLAFOND_LIGNES_PROCHES = 300;
+/** Au-delà, les coordonnées de l'établissement contredisent sa commune : on
+ *  ne s'en sert pas (ni pour le point de référence, ni pour la distance). */
+const ECART_MAX_ETAB_COMMUNE_KM = 30;
+
+function boite(lat: number, lng: number, rayonKm: number): { latMin: number; latMax: number; lngMin: number; lngMax: number } {
+  const dLat = rayonKm / 111.2;
+  const dLng = rayonKm / (111.2 * Math.max(0.2, Math.cos((lat * Math.PI) / 180)));
+  return { latMin: lat - dLat, latMax: lat + dLat, lngMin: lng - dLng, lngMax: lng + dLng };
+}
+
+export const getReperesFiche = cache(async function getReperesFiche(pro: {
+  id: number;
+  category_id: number;
+  city_id: number | null;
+  founding_date: string | null;
+  etab_latitude: number | null;
+  etab_longitude: number | null;
+  city: { id: number; name: string; latitude: number | null; longitude: number | null } | null;
+}): Promise<ReperesFiche> {
+  const supabase = createPublicClient();
+
+  // ── Point de référence : l'adresse exacte si elle est cohérente avec la
+  // commune, sinon le centre de la commune. ──
+  const villeLat = pro.city?.latitude ?? null;
+  const villeLng = pro.city?.longitude ?? null;
+  let refLat = villeLat;
+  let refLng = villeLng;
+  let distanceCentreKm: number | null = null;
+  if (pro.etab_latitude != null && pro.etab_longitude != null) {
+    const ecart =
+      villeLat != null && villeLng != null
+        ? haversineKm(pro.etab_latitude, pro.etab_longitude, villeLat, villeLng)
+        : null;
+    if (ecart === null || ecart <= ECART_MAX_ETAB_COMMUNE_KM) {
+      refLat = pro.etab_latitude;
+      refLng = pro.etab_longitude;
+      if (ecart !== null && ecart >= 0.3) distanceCentreKm = Math.round(ecart * 10) / 10;
+    }
+  }
+
+  // ── Rang d'ancienneté : deux comptes `head`, en parallèle avec la lecture
+  // des communes voisines (indépendants). ──
+  const calculRang = async (): Promise<ReperesFiche["rangAnciennete"]> => {
+    const dateIso = pro.founding_date ? String(pro.founding_date).slice(0, 10) : null;
+    if (!dateIso || !/^\d{4}-\d{2}-\d{2}$/.test(dateIso) || pro.city_id == null) return null;
+    const base = () =>
+      supabase
+        .from("pros")
+        .select("id", { count: "exact", head: true })
+        .eq("category_id", pro.category_id)
+        .eq("city_id", pro.city_id as number)
+        .is("deleted_at", null)
+        .eq("is_active", true)
+        .or(FILTRE_OUVERTS);
+    const [plusAnciennes, avecDate, commune] = await Promise.all([
+      base().lt("founding_date", dateIso),
+      base().not("founding_date", "is", null),
+      base(),
+    ]);
+    if (plusAnciennes.error) {
+      throw new Error(`getReperesFiche (rang) a échoué (pro ${pro.id}) : ${plusAnciennes.error.message}`);
+    }
+    if (avecDate.error) {
+      throw new Error(`getReperesFiche (total datées) a échoué (pro ${pro.id}) : ${avecDate.error.message}`);
+    }
+    if (commune.error) {
+      throw new Error(`getReperesFiche (total commune) a échoué (pro ${pro.id}) : ${commune.error.message}`);
+    }
+    const total = avecDate.count ?? 0;
+    const totalCommune = commune.count ?? 0;
+    if (total < 3 || total < 0.8 * totalCommune) return null;
+    return { rang: (plusAnciennes.count ?? 0) + 1, total, totalCommune };
+  };
+
+  // ── Confrères à 10 km. ──
+  const calculConfreres = async (): Promise<ReperesFiche["confreres"]> => {
+    if (refLat == null || refLng == null) return null;
+    const b = boite(refLat, refLng, RAYON_CONFRERES_KM);
+    // `cities` : 35 163 lignes, la boîte en garde quelques dizaines.
+    const { data: villes, error: erreurVilles } = await supabase
+      .from("cities")
+      .select("id, name, latitude, longitude")
+      .gte("latitude", b.latMin)
+      .lte("latitude", b.latMax)
+      .gte("longitude", b.lngMin)
+      .lte("longitude", b.lngMax)
+      .limit(1000);
+    if (erreurVilles) {
+      throw new Error(`getReperesFiche (communes) a échoué (pro ${pro.id}) : ${erreurVilles.message}`);
+    }
+    const communes = new Map<number, { name: string; latitude: number; longitude: number }>();
+    for (const v of (villes || []) as { id: number; name: string; latitude: number | null; longitude: number | null }[]) {
+      if (v.latitude == null || v.longitude == null) continue;
+      if (haversineKm(refLat, refLng, v.latitude, v.longitude) <= RAYON_CONFRERES_KM) {
+        communes.set(v.id, { name: v.name, latitude: v.latitude, longitude: v.longitude });
+      }
+    }
+    // La commune de la fiche compte toujours, même si son centre est loin de
+    // l'adresse (grandes communes rurales).
+    if (pro.city && pro.city.latitude != null && pro.city.longitude != null && !communes.has(pro.city.id)) {
+      communes.set(pro.city.id, { name: pro.city.name, latitude: pro.city.latitude, longitude: pro.city.longitude });
+    }
+    const ids = [...communes.keys()];
+    if (ids.length === 0) return { total: 0, plusProches: [] };
+
+    const [compte, geolocalises] = await Promise.all([
+      supabase
+        .from("pros")
+        .select("id", { count: "exact", head: true })
+        .eq("category_id", pro.category_id)
+        .in("city_id", ids)
+        .neq("id", pro.id)
+        .is("deleted_at", null)
+        .eq("is_active", true)
+        .or(FILTRE_OUVERTS),
+      supabase
+        .from("pros")
+        .select("slug, name, city_id, etab_latitude, etab_longitude")
+        .eq("category_id", pro.category_id)
+        .in("city_id", ids)
+        .neq("id", pro.id)
+        .is("deleted_at", null)
+        .eq("is_active", true)
+        .or(FILTRE_OUVERTS)
+        .gte("etab_latitude", b.latMin)
+        .lte("etab_latitude", b.latMax)
+        .gte("etab_longitude", b.lngMin)
+        .lte("etab_longitude", b.lngMax)
+        .limit(PLAFOND_LIGNES_PROCHES),
+    ]);
+    if (compte.error) {
+      throw new Error(`getReperesFiche (compte à 10 km) a échoué (pro ${pro.id}) : ${compte.error.message}`);
+    }
+    if (geolocalises.error) {
+      throw new Error(`getReperesFiche (plus proches) a échoué (pro ${pro.id}) : ${geolocalises.error.message}`);
+    }
+    const lignes = (geolocalises.data || []) as {
+      slug: string;
+      name: string;
+      city_id: number | null;
+      etab_latitude: number | null;
+      etab_longitude: number | null;
+    }[];
+    let plusProches: ProcheFiche[] = [];
+    // Lecture tronquée = on ne sait pas si les plus proches sont dedans : on
+    // n'affirme rien. Le compte, lui, reste exact.
+    if (lignes.length < PLAFOND_LIGNES_PROCHES) {
+      plusProches = lignes
+        .filter((l) => l.etab_latitude != null && l.etab_longitude != null)
+        .map((l) => ({
+          slug: l.slug,
+          name: l.name,
+          cityName: (l.city_id != null && communes.get(l.city_id)?.name) || null,
+          distanceKm: haversineKm(refLat as number, refLng as number, l.etab_latitude as number, l.etab_longitude as number),
+        }))
+        .filter((p) => p.distanceKm <= RAYON_CONFRERES_KM)
+        .sort((a, c) => a.distanceKm - c.distanceKm)
+        .slice(0, 3);
+    }
+    return { total: compte.count ?? 0, plusProches };
+  };
+
+  const [rangAnciennete, confreres] = await Promise.all([calculRang(), calculConfreres()]);
+  return { rangAnciennete, confreres, distanceCentreKm };
+});

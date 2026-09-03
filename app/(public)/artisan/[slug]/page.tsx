@@ -10,7 +10,16 @@ import {
   getFicheRemplacante,
   getProsEnActiviteProches,
   getFicheActiveMemeSiren,
+  getReperesFiche,
 } from "@/lib/queries/pros";
+import ProReperes from "@/components/pro/ProReperes";
+import {
+  dateSireneFaitFoi,
+  estEnrichieSirene,
+  faitsRegistre,
+  formatDateMaj,
+  nomsAlternatifs,
+} from "@/lib/seo/pro-registre";
 import { getPublishedReviewsForPro } from "@/lib/queries/reviews";
 import { getNearbyCities } from "@/lib/queries/cities";
 // Client SANS cookies : `supabase/server` appelle cookies(), ce qui bascule la
@@ -42,6 +51,7 @@ import { libelleNaf } from "@/lib/data/naf-labels";
 // navigateur avant/apres) separement d'une correction de defaut.
 import ProGallery from "@/components/pro/ProGallery";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
+import { haversineKm } from "@/lib/utils/haversine";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
 // l'URL canonique est /ai/freelance/[slug] (design Workwave AI). Évite le
@@ -124,21 +134,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // internes. C'est largement au-dessus du seuil thin content de Google.
   // NB : les fiches sans contenu enrichi gardent une priority sitemap dégradée
   // (0.3 vs 0.5/0.8), voir app/sitemap.ts.
+  // ENSEIGNE DANS LE TITRE (03/09/2026), fiche enrichie par l'annuaire
+  // uniquement : les gens cherchent « Saint Sylvain Chauffage », pas
+  // « Dominique Welker ». Mesure du 03/09 : 139 enseignes et 615 noms
+  // commerciaux distincts du nom sur 1 998 fiches enrichies. Une fiche non
+  // enrichie garde son titre d'avant, mot pour mot.
+  const { enseignes, nomCommercial } = estEnrichieSirene(pro)
+    ? nomsAlternatifs(pro)
+    : { enseignes: [] as string[], nomCommercial: null };
+  const autreNom = enseignes[0] || nomCommercial;
+  const titre = `${pro.name}${autreNom ? ` (${autreNom})` : ""} - ${pro.category.name} à ${cityName}`;
   return {
-    title: `${pro.name} - ${pro.category.name} à ${cityName}`,
+    title: titre,
     description: desc,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       type: "profile",
-      title: `${pro.name} - ${pro.category.name} à ${cityName}`,
+      title: titre,
       description: desc,
       url: canonicalUrl,
     },
     twitter: {
       card: "summary",
-      title: `${pro.name} - ${pro.category.name} à ${cityName}`,
+      title: titre,
       description: desc,
     },
   };
@@ -241,7 +261,12 @@ export default async function ProPage({ params }: Props) {
   // absente comprise) garde STRICTEMENT le même rendu qu'avant.
   const estFerme = pro.etat_admin === "F";
   const listing = getCategoryListing(pro.category.slug, pro.category.name);
-  const [similarPros, nearbyCities, reviews, secondaryCategoriesRes] = await Promise.all([
+  // FICHE ENRICHIE par l'annuaire des entreprises (03/09/2026,
+  // sirene_enrichi_at : 2 000 fiches au 03/09, 2,3 M à terme). Tout ce qui en
+  // dépend est conditionnel : une fiche non enrichie garde EXACTEMENT le
+  // rendu d'avant, et une fiche fermée garde le sien (commit bcd66d9).
+  const enrichie = estEnrichieSirene(pro) && !estFerme;
+  const [similarPros, nearbyCities, reviews, secondaryCategoriesRes, reperes] = await Promise.all([
     // Sur une fiche fermée, le bloc « Autres X à ville » est remplacé par les
     // pros EN ACTIVITÉ (requête dédiée plus bas) : on ne charge pas les deux.
     pro.city && !estFerme ? getSimilarPros(pro.category_id, pro.city.id, slug, 5) : Promise.resolve([]),
@@ -257,6 +282,21 @@ export default async function ProPage({ params }: Props) {
       // le resultat (une propriete doit exister dans TOUS les membres d'une
       // union pour etre lisible).
       : Promise.resolve({ data: [] as { id: number; name: string; slug: string }[], error: null }),
+    // Repères calculés (rang d'ancienneté, confrères à 10 km, distance au
+    // centre) : requêtes légères, payées UNIQUEMENT par les fiches enrichies.
+    enrichie
+      ? getReperesFiche({
+          id: pro.id,
+          category_id: pro.category_id,
+          city_id: pro.city?.id ?? null,
+          founding_date: pro.founding_date ?? null,
+          etab_latitude: pro.etab_latitude ?? null,
+          etab_longitude: pro.etab_longitude ?? null,
+          city: pro.city
+            ? { id: pro.city.id, name: pro.city.name, latitude: pro.city.latitude, longitude: pro.city.longitude }
+            : null,
+        })
+      : Promise.resolve(null),
   ]);
   // 31/08/2026 : l'erreur etait purement et simplement jetee (`.data || []`),
   // donc "ce pro n'a pas de categorie secondaire" et "la requete a echoue"
@@ -361,8 +401,21 @@ export default async function ProPage({ params }: Props) {
     emailAt > 2 ? emailStr.slice(0, 3) : emailStr.slice(0, Math.max(1, emailAt));
   const emailTeaserMasked = emailStr.slice(emailTeaserVisible.length);
   // Contenu SEO/AEO unique par fiche (À propos + FAQ sourcés, zéro invention).
-  const proContent = buildProContent(pro);
+  // `reperes` est null sur une fiche non enrichie : texte inchangé.
+  const proContent = buildProContent(pro, reperes);
   const openingHours = pro.opening_hours as OpeningHours | null;
+  // Cartes « Ce que dit le registre » (enseigne, employeur, établissements,
+  // catégorie, comptes déposés, labels) : liste vide hors fiche enrichie.
+  const faits = enrichie ? faitsRegistre(pro) : [];
+  const dateMaj = enrichie ? formatDateMaj(pro.sirene_enrichi_at) : null;
+  // Date de création : sur une fiche enrichie NON réclamée, la date de
+  // l'entreprise (founding_date, annuaire) fait foi sur founded_year (date
+  // de l'établissement, backfill Stock). 569 des 1 998 fiches du pilote
+  // diffèrent. Une fiche réclamée garde l'année saisie par le pro.
+  const dateFaitFoi = enrichie && dateSireneFaitFoi(pro);
+  const { enseignes: enseignesFiche, nomCommercial: nomCommercialFiche } = enrichie
+    ? nomsAlternatifs(pro)
+    : { enseignes: [] as string[], nomCommercial: null };
 
   // Realisations envoyees par le pro. `photos` GARDE sa forme de tableau de
   // chaines : la cartographie du 21/08 a recense 34 endroits qui la lisent,
@@ -457,6 +510,17 @@ export default async function ProPage({ params }: Props) {
   // Un melange rendrait la phrase fausse pour une partie d'entre elles.
   const toutesDuPro = photos.length > 0 && photos.every(estDuPro);
 
+  // Coordonnées exactes de l'établissement (annuaire) : utilisées seulement
+  // si elles tombent à moins de 30 km du centre de la commune. Au-delà, elles
+  // contredisent l'adresse et on garde le centre de la commune.
+  const etabCoherent =
+    enrichie &&
+    pro.etab_latitude != null &&
+    pro.etab_longitude != null &&
+    (pro.city?.latitude == null ||
+      pro.city?.longitude == null ||
+      haversineKm(pro.etab_latitude, pro.etab_longitude, pro.city.latitude, pro.city.longitude) <= 30);
+
   const photosPourSchema = photos
     .filter(estDuPro)
     .map((url) => ({ url, legende: legendeDe(url) }));
@@ -497,15 +561,37 @@ export default async function ProPage({ params }: Props) {
         : {}),
       addressCountry: pro.city?.country === "BE" ? "BE" : "FR",
     },
-    ...(pro.city?.latitude && pro.city?.longitude
+    // ENSEIGNE / NOM COMMERCIAL (annuaire, fiche enrichie) : alternateName
+    // est le champ Schema.org prévu pour ça. Rien si identique au nom.
+    ...(enseignesFiche.length > 0 || nomCommercialFiche
+      ? {
+          alternateName:
+            enseignesFiche.length + (nomCommercialFiche ? 1 : 0) > 1
+              ? [...enseignesFiche, ...(nomCommercialFiche ? [nomCommercialFiche] : [])]
+              : enseignesFiche[0] || nomCommercialFiche,
+        }
+      : {}),
+    // GEO : l'adresse exacte de l'établissement (annuaire) quand elle existe
+    // et reste cohérente avec sa commune (moins de 30 km), sinon le centre
+    // de la commune comme avant. Une adresse exacte est une donnée
+    // structurée plus forte et distingue deux voisins.
+    ...(etabCoherent
       ? {
           geo: {
             "@type": "GeoCoordinates",
-            latitude: pro.city.latitude,
-            longitude: pro.city.longitude,
+            latitude: pro.etab_latitude,
+            longitude: pro.etab_longitude,
           },
         }
-      : {}),
+      : pro.city?.latitude && pro.city?.longitude
+        ? {
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: pro.city.latitude,
+              longitude: pro.city.longitude,
+            },
+          }
+        : {}),
     ...(pro.hourly_rate ? { priceRange: `${pro.hourly_rate} EUR/h` } : {}),
   };
 
@@ -526,7 +612,11 @@ export default async function ProPage({ params }: Props) {
   // une donnee structuree plus forte qu'une simple annee, et elle differencie
   // deux etablissements voisins.
   const dateSireneIso = pro.founding_date ? String(pro.founding_date).slice(0, 10) : null;
-  if (pro.founded_year && pro.founded_year > 1800) {
+  if (dateFaitFoi && dateSireneIso) {
+    // Fiche enrichie non réclamée : la date de création de l'entreprise
+    // (annuaire) fait foi, même si founded_year (établissement) en diffère.
+    jsonLd.foundingDate = dateSireneIso;
+  } else if (pro.founded_year && pro.founded_year > 1800) {
     jsonLd.foundingDate =
       dateSireneIso && dateSireneIso.slice(0, 4) === String(pro.founded_year)
         ? dateSireneIso
@@ -1041,19 +1131,33 @@ export default async function ProPage({ params }: Props) {
               plus rien pour le code "NN" (92 % des fiches), donc la carte
               "Taille de l'equipe" disparait quand la donnee manque au lieu
               d'afficher "Effectif inconnu" a l'identique partout. */}
-          {(pro.founded_year || pro.founding_date || pro.effectif_range || libelleNaf(pro.naf_code) || formeJuridiqueDistinctive(pro.forme_juridique)) && (
+          {/* CE QUE DIT LE REGISTRE (03/09/2026). Sur une fiche enrichie par
+              l'annuaire des entreprises, la grille reçoit un titre, des
+              cartes supplémentaires (enseigne, employeur, établissements,
+              catégorie, comptes déposés, labels officiels) et une ligne de
+              source datée. Sur une fiche non enrichie, la grille est rendue
+              telle quelle, sans le moindre octet de plus. */}
+          {(() => {
+            const grilleDeBase =
+              pro.founded_year || pro.founding_date || pro.effectif_range || libelleNaf(pro.naf_code) || formeJuridiqueDistinctive(pro.forme_juridique);
+            if (!grilleDeBase && faits.length === 0) return null;
+            const grille = (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(pro.founded_year || pro.founding_date) && (() => {
-                // founded_year (édité par le pro) prime sur founding_date Sirene.
-                const year =
-                  pro.founded_year && pro.founded_year > 1800
-                    ? String(pro.founded_year)
-                    : formatFoundingYear(pro.founding_date);
+                // founded_year (édité par le pro) prime sur founding_date Sirene,
+                // SAUF sur une fiche enrichie non réclamée (dateFaitFoi) où la
+                // date de création de l'entreprise, plus complète, fait foi.
+                const anneeSirene = formatFoundingYear(pro.founding_date);
+                const anneePro =
+                  pro.founded_year && pro.founded_year > 1800 ? String(pro.founded_year) : null;
+                const year = dateFaitFoi && anneeSirene ? anneeSirene : anneePro || anneeSirene;
                 if (!year) return null;
                 const age =
-                  pro.founded_year && pro.founded_year > 1800
-                    ? new Date().getFullYear() - pro.founded_year
-                    : formatAgeYears(pro.founding_date);
+                  dateFaitFoi && anneeSirene
+                    ? formatAgeYears(pro.founding_date)
+                    : anneePro
+                      ? new Date().getFullYear() - (pro.founded_year as number)
+                      : formatAgeYears(pro.founding_date);
                 // Date COMPLETE quand elle ne contredit pas l'année saisie par
                 // le pro. Deux voisins partagent souvent l'année, presque
                 // jamais le jour : c'est ce qui distingue leurs deux pages.
@@ -1145,7 +1249,71 @@ export default async function ProPage({ params }: Props) {
                   </div>
                 </div>
               )}
+              {/* Cartes de l'annuaire des entreprises (fiche enrichie).
+                  Chaque carte vient d'une colonne en base ; la liste est
+                  vide pour toute fiche non enrichie (lib/seo/pro-registre.ts). */}
+              {faits.map((fait) => (
+                <div
+                  key={fait.cle}
+                  className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>
+                    <svg className="w-5 h-5 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      {fait.cle === "enseigne" || fait.cle === "nom_commercial" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 7v10a2 2 0 002 2h12a2 2 0 002-2V7M4 7l2-3h12l2 3M9 12h6" />
+                      ) : fait.cle === "employeur" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 11a4 4 0 10-8 0 4 4 0 008 0zM4 21v-1a5 5 0 015-5h6a5 5 0 015 5v1" />
+                      ) : fait.cle === "etablissements" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 21h18M5 21V5a1 1 0 011-1h6a1 1 0 011 1v16M13 9h5a1 1 0 011 1v11M8 8h2M8 12h2M8 16h2M16 13h1M16 17h1" />
+                      ) : fait.cle === "categorie" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h10M4 18h6" />
+                      ) : fait.cle === "comptes" ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 19h16M6 16V10M10 16V6M14 16v-4M18 16V8" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9L9.5 8z" />
+                      )}
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide">{fait.titre}</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      {fait.valeur}
+                      {fait.detail && (
+                        <span className="text-[var(--text-tertiary)] font-normal text-xs">{` · ${fait.detail}`}</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
+            );
+            if (!enrichie) return grille;
+            return (
+              <section aria-labelledby="titre-registre">
+                <div className="flex items-center gap-2 mb-3">
+                  <h2
+                    id="titre-registre"
+                    className="text-sm font-semibold text-[var(--text-tertiary)] uppercase tracking-wide"
+                  >
+                    Ce que dit le registre
+                  </h2>
+                  <span className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider px-2 py-0.5 rounded-full border border-[var(--card-border)]">
+                    Source officielle
+                  </span>
+                </div>
+                {grille}
+                <p className="text-[12px] text-[var(--text-tertiary)] mt-3">
+                  {`Source : Sirene (INSEE) et Registre national des entreprises${dateMaj ? `, mis à jour le ${dateMaj}` : ""}.`}
+                </p>
+              </section>
+            );
+          })()}
+
+          {/* REPÈRES CALCULÉS (fiche enrichie) : rang d'ancienneté, confrères
+              à 10 km, distance au centre. Rien si aucun calcul n'a de base
+              suffisante ; jamais sur une fiche non enrichie ni fermée. */}
+          {enrichie && reperes && cityName && (
+            <ProReperes reperes={reperes} listing={listing} cityName={cityName} />
           )}
 
           {/* Section RGE officielle ADEME : affichee uniquement si rge_certified.
