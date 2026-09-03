@@ -1,0 +1,91 @@
+{
+  "slug": "projets-30j-2",
+  "premierFond": "blanc",
+  "meta": {
+    "titre": "30 derniers jours sur",
+    "sousTitre": "déposés par des particuliers qui cherchent un pro",
+    "total": 44
+  },
+  "projets": [
+    {
+      "id": 202,
+      "date": "2026-08-20",
+      "metier": "Électricien",
+      "ville": "Vielsalm",
+      "dept": "Belgique",
+      "urgence": "Pas pressé",
+      "budget": "5 000 à 15 000 €",
+      "besoin": "Remise en conformité de l'électricité, nouveau compteur intelligent, câblage d'une nouvelle cuisine et préparation du panneau électrique."
+    },
+    {
+      "id": 197,
+      "date": "2026-08-19",
+      "metier": "Élagueur",
+      "ville": "Gaillan-en-Médoc",
+      "dept": "Gironde (33)",
+      "urgence": "Cette semaine",
+      "budget": "2 000 à 5 000 €",
+      "besoin": "Débroussaillage de fougères sur 25 000 m² pour y installer des chevaux et pouvoir clôturer."
+    },
+    {
+      "id": 178,
+      "date": "2026-08-10",
+      "metier": "Entreprise de nettoyage",
+      "ville": "Lille",
+      "dept": "Nord (59)",
+      "urgence": "Cette semaine",
+      "budget": null,
+      "besoin": "Nettoyage urgent d'une ancienne boulangerie d'environ 400 m², avec débarras des déchets."
+    },
+    {
+      "id": 182,
+      "date": "2026-08-11",
+      "metier": "Terrassier",
+      "ville": "Bidache",
+      "dept": "Pyrénées-Atlantiques (64)",
+      "urgence": "Cette semaine",
+      "budget": null,
+      "besoin": "Terrassement et mise en place d'une fosse septique pour une maison à construire."
+    },
+    {
+      "id": 192,
+      "date": "2026-08-17",
+      "metier": "Carreleur",
+      "ville": "La Trinité",
+      "dept": "Martinique (972)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Terrasse de 31 m² à l'étage : dépose de deux couches de carreaux, étanchéité à refaire et carrelage neuf, plus 15 m² de flanc."
+    },
+    {
+      "id": 200,
+      "date": "2026-08-20",
+      "metier": "Petit bricolage",
+      "ville": "Curnier",
+      "dept": "Drôme (26)",
+      "urgence": "Cette semaine",
+      "budget": "500 à 2 000 €",
+      "besoin": "Salle de bain à repeindre."
+    },
+    {
+      "id": 176,
+      "date": "2026-08-10",
+      "metier": "Cuisiniste",
+      "ville": "Argelès-Gazost",
+      "dept": "Hautes-Pyrénées (65)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Installation d'une hotte aspirante dans une cuisine."
+    },
+    {
+      "id": 172,
+      "date": "2026-08-10",
+      "metier": "Débarras",
+      "ville": "Saint-Romans",
+      "dept": "Isère (38)",
+      "urgence": "Pas pressé",
+      "budget": null,
+      "besoin": "Débarras de ferraille, cartons, bois, bidons et petit électroménager."
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "slug": "projets-30j-3",
+  "premierFond": "noir",
+  "meta": {
+    "titre": "30 derniers jours sur",
+    "sousTitre": "déposés par des particuliers qui cherchent un pro",
+    "total": 44
+  },
+  "projets": [
+    {
+      "id": 198,
+      "date": "2026-08-19",
+      "metier": "Couvreur",
+      "ville": "Objat",
+      "dept": "Corrèze (19)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Maçonnerie de cheminée, reprise de bavette et solin, suivi d'une couverture en ardoise ancienne et pose d'un Velux."
+    },
+    {
+      "id": 177,
+      "date": "2026-08-10",
+      "metier": "Maçon",
+      "ville": "Vendat",
+      "dept": "Allier (03)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Fissures importantes sur un mur après la sécheresse : linteau à sécuriser, puis semelle béton sous la fondation."
+    },
+    {
+      "id": 184,
+      "date": "2026-08-11",
+      "metier": "Carreleur",
+      "ville": "L'Isle-Jourdain",
+      "dept": "Gers (32)",
+      "urgence": "Cette semaine",
+      "budget": null,
+      "besoin": "Dépose du parquet et pose d'un travertin avec plinthes au rez-de-chaussée, dossier assurance."
+    },
+    {
+      "id": 211,
+      "date": "2026-08-27",
+      "metier": "Plaquiste",
+      "ville": "Le Barcarès",
+      "dept": "Pyrénées-Orientales (66)",
+      "urgence": "Ce mois-ci",
+      "budget": "500 à 2 000 €",
+      "besoin": "Plafond de cuisine à réparer, zone effondrée d'environ 2 m sur 1 m."
+    },
+    {
+      "id": 188,
+      "date": "2026-08-17",
+      "metier": "Maçon",
+      "ville": "Apchon",
+      "dept": "Cantal (15)",
+      "urgence": "Pas pressé",
+      "budget": "500 à 2 000 €",
+      "besoin": "Chape de 3,5 cm sur 29 m², sur dalle neuve, dans une petite maison en rénovation."
+    },
+    {
+      "id": 166,
+      "date": "2026-08-05",
+      "metier": "Chauffagiste",
+      "ville": "Orpierre",
+      "dept": "Hautes-Alpes (05)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Entretien d'une chaudière au fioul."
+    },
+    {
+      "id": 206,
+      "date": "2026-08-25",
+      "metier": "Nettoyage vitres",
+      "ville": "Hulluch",
+      "dept": "Pas-de-Calais (62)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Nettoyage mensuel des vitres et des volets, dont certains à l'étage."
+    },
+    {
+      "id": 168,
+      "date": "2026-08-06",
+      "metier": "Livraison de courses",
+      "ville": "Touques",
+      "dept": "Calvados (14)",
+      "urgence": "Ce mois-ci",
+      "budget": null,
+      "besoin": "Courses à faire à Deauville et à livrer à domicile."
+    }
+  ]
+}

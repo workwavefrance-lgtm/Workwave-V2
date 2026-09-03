@@ -6,7 +6,7 @@
 # d'images est complete AVANT d'encoder, et que la duree finale correspond
 # APRES. Sans ca, on livre une video coupee sans le savoir.
 #
-# Usage : bash scripts/rendre-reel.sh projet|bienvenue|page-pro <json>
+# Usage : bash scripts/rendre-reel.sh projet|bienvenue|page-pro|projets-30j <json>
 #         bash scripts/rendre-reel.sh 3d <nom-du-reel>
 set -u
 TYPE="$1"; JSON="$2"
@@ -22,6 +22,9 @@ case "$TYPE" in
   page-pro)  SCRIPT=scripts/render-reel-page-pro.mjs;   DIR="${TMPDIR:-/tmp}/workwave-frames-page-pro";   PREFIXE=Workwave-page-pro ;;
   3d)        SCRIPT=scripts/render-reel-3d.mjs;         DIR="${TMPDIR:-/tmp}/workwave-frames-3d";         PREFIXE=Workwave-3d ;;
   film)      SCRIPT=scripts/render-reel-film.mjs;       DIR="${TMPDIR:-/tmp}/workwave-frames-film";       PREFIXE=Workwave-film ;;
+  # Montage noir/blanc des projets des 30 derniers jours : le slug du JSON est
+  # deja "projets-30j-N", d'ou le prefixe court -> marketing/Workwave-projets-30j-N.mp4
+  projets-30j) SCRIPT=scripts/render-reel-projets-30j.mjs; DIR="${TMPDIR:-/tmp}/workwave-frames-projets-30j"; PREFIXE=Workwave ;;
   *) echo "type inconnu : $TYPE"; exit 1 ;;
 esac
 
