@@ -395,16 +395,49 @@ const LOT_RPC = 100;
 /** Ecriture d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
 async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }> {
   if (lot.records) {
-    // Delai de 90 s : sans lui, un appel dont la reponse ne revient jamais
-    // bloque tout le passage (03/09, 0 h 20 : processus a 0 % de CPU pendant
-    // 20 minutes au lot 2 800, 32 connexions ouvertes, aucune erreur). Un
-    // appel expire est compte en erreur, rejoue a la fin, et sinon repris au
-    // passage suivant (--reprendre).
-    const { data, error } = await sb
-      .rpc("classer_etats_lot", { lot: lot.records, verifie_at: lot.patch.etat_verifie_at })
-      .abortSignal(AbortSignal.timeout(90_000));
-    if (error) return { n: 0, erreur: error.message };
-    return { n: typeof data === "number" ? data : Number(data) || 0, erreur: null };
+    // Une requete PAR FICHE, 8 en parallele, et non plus la fonction SQL
+    // classer_etats_lot. Mesure du 03/09 (8 h 30) : un UPDATE direct de 100
+    // lignes par siret prend 1,2 s (l'index siret sert), alors que la fonction
+    // SQL depassait le delai de la base des 50 lignes, meme apres allegement
+    // du trigger : sa jointure jsonb_to_recordset ne passe pas par l'index
+    // (parcours complet des 2,5 M de lignes a chaque appel, confiance ~80 %).
+    // Une ligne par requete = plan indexe garanti, jamais de delai depasse ;
+    // 8 en parallele = ~15 000 fiches par minute. Chaque requete a son propre
+    // delai de 30 s (un appel muet a bloque tout un passage la nuit derniere).
+    let n = 0;
+    let erreur: string | null = null;
+    let i = 0;
+    const records = lot.records;
+    const verifieAt = lot.patch.etat_verifie_at;
+    await Promise.all(
+      Array.from({ length: 8 }, async () => {
+        while (i < records.length && !erreur) {
+          const r = records[i++];
+          const { error, count } = await sb
+            .from("pros")
+            .update(
+              {
+                etat_admin: r.etat_admin,
+                date_fermeture: r.date_fermeture,
+                entreprise_etat: r.entreprise_etat,
+                entreprise_date_fermeture: r.entreprise_date_fermeture,
+                etat_verifie_at: verifieAt,
+              },
+              { count: "exact" }
+            )
+            .eq("siret", r.siret)
+            .eq("is_active", true)
+            .is("deleted_at", null)
+            .abortSignal(AbortSignal.timeout(30_000));
+          if (error) erreur = error.message;
+          else n += count || 0;
+        }
+      })
+    );
+    // En cas d'erreur, le lot entier est rejoue : les fiches deja ecrites le
+    // sont a l'identique (idempotent), rien n'est perdu ni compte deux fois
+    // en base (le recompte final lit la base, pas ce compteur).
+    return erreur ? { n: 0, erreur } : { n, erreur: null };
   }
   const { error, count } = await sb
     .from("pros")
