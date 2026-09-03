@@ -409,8 +409,13 @@ async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }
     let i = 0;
     const records = lot.records;
     const verifieAt = lot.patch.etat_verifie_at;
+    // 3 en parallele (03/09, 9 h) : EXPLAIN ANALYZE d'une ecriture d'UNE ligne
+    // = 259 ms, 25 pages modifiees, 50 pages lues sur disque : la table a 30
+    // index, chaque ecriture les met tous a jour, et le disque de l'instance
+    // sature. A 8 en parallele, la base calait et depassait son delai ; a 3,
+    // elle suit. Le vrai remede est de retirer les index inutiles (voir wiki).
     await Promise.all(
-      Array.from({ length: 8 }, async () => {
+      Array.from({ length: 3 }, async () => {
         while (i < records.length && !erreur) {
           const r = records[i++];
           const { error, count } = await sb
