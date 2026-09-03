@@ -6,7 +6,8 @@
 # d'images est complete AVANT d'encoder, et que la duree finale correspond
 # APRES. Sans ca, on livre une video coupee sans le savoir.
 #
-# Usage : bash scripts/rendre-reel.sh projet|bienvenue <chemin-du-json>
+# Usage : bash scripts/rendre-reel.sh projet|bienvenue|page-pro <json>
+#         bash scripts/rendre-reel.sh 3d <nom-du-reel>
 set -u
 TYPE="$1"; JSON="$2"
 cd "$(dirname "$0")/.."
@@ -18,17 +19,25 @@ cd "$(dirname "$0")/.."
 case "$TYPE" in
   projet)    SCRIPT=scripts/render-reel-projet.mjs;      DIR="${TMPDIR:-/tmp}/workwave-frames-projet";      PREFIXE=Workwave-projet ;;
   bienvenue) SCRIPT=scripts/render-reel-nouveau-pro.mjs; DIR="${TMPDIR:-/tmp}/workwave-frames-nouveau-pro"; PREFIXE=Workwave-nouveau-pro ;;
+  page-pro)  SCRIPT=scripts/render-reel-page-pro.mjs;   DIR="${TMPDIR:-/tmp}/workwave-frames-page-pro";   PREFIXE=Workwave-page-pro ;;
+  3d)        SCRIPT=scripts/render-reel-3d.mjs;         DIR="${TMPDIR:-/tmp}/workwave-frames-3d";         PREFIXE=Workwave-3d ;;
+  film)      SCRIPT=scripts/render-reel-film.mjs;       DIR="${TMPDIR:-/tmp}/workwave-frames-film";       PREFIXE=Workwave-film ;;
   *) echo "type inconnu : $TYPE"; exit 1 ;;
 esac
 
-SLUG=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['slug'])" "$JSON")
+if [ "$TYPE" = "3d" ] || [ "$TYPE" = "film" ]; then
+  SLUG="$JSON"          # pour la 3D, le 2e argument EST le nom du reel
+else
+  SLUG=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['slug'])" "$JSON")
+fi
 SORTIE="marketing/${PREFIXE}-${SLUG}.mp4"
 
 if ! curl -sf -o /dev/null http://localhost:8877/ ; then
   echo "ECHEC $SLUG : le serveur local du port 8877 ne repond pas"; exit 1
 fi
 
-ATTENDU=$(node "$SCRIPT" "$JSON" 2>&1 | tee /tmp/reel-$SLUG.log | grep -oE "OK · [0-9]+ frames" | grep -oE "[0-9]+")
+if [ "$TYPE" = "3d" ] || [ "$TYPE" = "film" ]; then ARGS=""; else ARGS="$JSON"; fi
+ATTENDU=$(node "$SCRIPT" $ARGS 2>&1 | tee /tmp/reel-$SLUG.log | grep -oE "OK · [0-9]+ frames" | grep -oE "[0-9]+")
 if [ -z "${ATTENDU:-}" ]; then
   echo "ECHEC $SLUG : le rendu n'a pas abouti"; tail -3 /tmp/reel-$SLUG.log; exit 1
 fi

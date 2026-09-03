@@ -24,7 +24,8 @@ export const CHANTIERS_FAQ: FaqItem[] = [
   },
   {
     q: "Comment recevoir des demandes de chantiers ?",
-    a: "Votre fiche existe peut-être déjà : Workwave référence plus de 2,5 millions d'artisans à partir des registres officiels SIRENE (France) et BCE (Belgique). Retrouvez-la avec votre SIRET (ou numéro d'entreprise belge) et réclamez-la gratuitement en 2 minutes. Si elle n'existe pas encore, vous pouvez la créer. Vous recevez ensuite les demandes des particuliers de votre zone et de votre métier.",
+    // 1,2 million = fiches OUVERTES, 1 233 038 mesuré le 03/09/2026 en SQL (fermés exclus).
+    a: "Votre fiche existe peut-être déjà : Workwave référence plus de 1,2 million d'artisans à partir des registres officiels SIRENE (France) et BCE (Belgique). Retrouvez-la avec votre SIRET (ou numéro d'entreprise belge) et réclamez-la gratuitement en 2 minutes. Si elle n'existe pas encore, vous pouvez la créer. Vous recevez ensuite les demandes des particuliers de votre zone et de votre métier.",
   },
   {
     q: "Quand est-ce que je paie ?",

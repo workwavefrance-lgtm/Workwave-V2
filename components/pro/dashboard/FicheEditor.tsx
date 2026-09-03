@@ -1240,7 +1240,8 @@ export default function FicheEditor({ categories }: Props) {
                 d'ecrire a l'equipe. Cas reel : Aicha SANGARE, classee « Garde
                 animaux » alors qu'elle fait de l'accompagnement sante, a
                 ecrit deux fois puis demande la suppression de sa fiche.
-                Sur 2,5 M de fiches issues d'un scraping ou les codes NAF sont
+                Sur 2,4 M de fiches issues d'un scraping (dont 1 233 038
+                ouvertes au 03/09/2026) ou les codes NAF sont
                 ambigus (cf. les lecons du 18/04), le mauvais metier est
                 frequent : c'est donc un blocage systemique, pas un cas isole.
                 Le backend acceptait deja `category_id` : il ne manquait que ce

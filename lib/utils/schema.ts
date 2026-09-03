@@ -71,7 +71,7 @@ export function getOrganizationSchema(baseUrl: string): Record<string, unknown> 
     url: baseUrl,
     logo: `${baseUrl}/logo.png`,
     description:
-      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France et en Belgique francophone. 2 560 000+ artisans référencés dans 107 départements et provinces et 35 163 communes (France métropole et outre-mer + Wallonie et Bruxelles). Pour les particuliers : dépôt de projet gratuit et mise en relation avec les professionnels qualifiés de votre zone, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
+      "Annuaire gratuit de professionnels (BTP, services à domicile, aide à la personne) en France et en Belgique francophone. 1 230 000+ artisans référencés (établissements ouverts, comptés le 03/09/2026) dans 107 départements et provinces et 35 163 communes (France métropole et outre-mer + Wallonie et Bruxelles). Pour les particuliers : dépôt de projet gratuit et mise en relation avec les professionnels qualifiés de votre zone, qualifiés par IA. Pour les pros : fiche gratuite à vie + paiement à la demande de 9,90 € par lead débloqué, sans abonnement.",
     slogan: "Tout le savoir-faire local, enfin accessible",
     foundingDate: "2025-03-28",
     sameAs: [

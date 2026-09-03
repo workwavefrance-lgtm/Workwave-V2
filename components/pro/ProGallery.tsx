@@ -24,7 +24,8 @@ export type PhotoRealisation = {
  *
  * Cout sur les fiches sans photo : NUL. Le composant n'est rendu que si
  * `photos.length > 0`, donc son morceau de code n'est meme pas telecharge sur
- * les 2,4 millions de fiches qui n'en ont pas.
+ * les quelque 2,4 millions de pages de fiche (ouvertes et fermees) qui n'en ont
+ * pas. Compteur public au 03/09/2026 : 1 233 038 fiches ouvertes.
  *
  * La hauteur est FIXE (260 px) : la largeur s'ajuste au ratio de chaque image,
  * donc aucun decalage VERTICAL de la page pendant le chargement. Le leger

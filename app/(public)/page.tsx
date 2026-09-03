@@ -33,6 +33,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+// Compteur public de la home : fiches OUVERTES uniquement (etat_admin IS NULL
+// OR etat_admin <> 'F', regle FILTRE_OUVERTS de lib/queries/pros.ts).
+// Mesure le 03/09/2026 en SQL par Willy, fiches ouvertes : 1 233 038, sur
+// 2 439 976 fiches actives dont 1 206 938 etablissements fermes d'apres les
+// fichiers Stock Sirene. L'ancien chiffre (2 560 292) comptait les fermes.
+// A re-mesurer apres chaque scrape ou classement (dette : compteur en dur,
+// lecon du 08/06).
+const PROS_OUVERTS = "1 233 038";
+
 // FAQ affichee en bas de la home (section visible) + injectee en JSON-LD
 // FAQPage. Contenu strictement factuel : tout est verifiable dans le
 // projet (cf. lecon CLAUDE.md sur les inventions a bannir du contenu).
@@ -40,7 +49,8 @@ const homeFaqs = [
   {
     question: "Qu'est-ce que Workwave ?",
     answer:
-      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France et la Belgique francophone. La plateforme référence plus de 2,5 millions de professionnels dans 35 163 communes et met en relation les particuliers avec des artisans locaux.",
+      // « plus de 1,2 million » = PROS_OUVERTS arrondi (1 233 038 le 03/09/2026).
+      "Workwave est un annuaire en ligne de professionnels du BTP, des services à domicile et de l'aide à la personne, couvrant toute la France et la Belgique francophone. La plateforme référence plus de 1,2 million de professionnels dans 35 163 communes et met en relation les particuliers avec des artisans locaux.",
   },
   {
     question: "Workwave est-il gratuit pour les particuliers ?",
@@ -199,7 +209,7 @@ export default async function Home() {
               en dessous, demesure au-dela). */}
           <h1 className="flex flex-col items-center xl:items-start tracking-tight leading-[1.08] mb-6">
             <span className="order-2 mt-3 font-extrabold text-[var(--text-secondary)] text-[clamp(1.5rem,2vw,2.5rem)]">
-              2 560 292 artisans référencés
+              {PROS_OUVERTS} artisans référencés
             </span>
             <span className="order-1 font-extrabold text-[var(--text-primary)] text-[clamp(1.875rem,3.6vw,4.25rem)]">
               Trouvez gratuitement un artisan, près de chez vous

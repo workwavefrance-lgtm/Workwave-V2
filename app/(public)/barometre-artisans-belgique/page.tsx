@@ -55,7 +55,7 @@ export default async function BarometreBePage() {
 
   const faq = [
     { q: `Quelle province belge compte le plus d'artisans par habitant ?`, a: `Le ${top.name} arrive en tête avec ${dec(top.densite)} entreprises artisanales pour 10 000 habitants, devant ${rows[1].name}. Le ${bottom.name} ferme le classement (${dec(bottom.densite)}).` },
-    { q: `Combien d'artisans en Belgique francophone ?`, a: `Workwave référence ${grp(BAROMETRE_BE_META.totalPros)} entreprises artisanales actives en Wallonie et à Bruxelles (source : Banque-Carrefour des Entreprises).` },
+    { q: `Combien d'artisans en Belgique francophone ?`, a: `Workwave référence ${grp(BAROMETRE_BE_META.totalPros)} entreprises artisanales en Wallonie et à Bruxelles (source : Banque-Carrefour des Entreprises). L'état de ces établissements (ouvert ou fermé) n'est pas vérifié, contrairement aux fiches françaises.` },
     { q: `Ce baromètre couvre-t-il toute la Belgique ?`, a: `Il couvre la Belgique francophone : les 5 provinces wallonnes et la Région de Bruxelles-Capitale. La Flandre n'est pas incluse.` },
   ];
 
@@ -107,7 +107,9 @@ export default async function BarometreBePage() {
             dans les 5 provinces wallonnes et la Région de Bruxelles-Capitale.
           </p>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard value={grp(BAROMETRE_BE_META.totalPros)} label="entreprises artisanales référencées" />
+            {/* 03/09/2026 : les fiches belges (BCE) ne sont pas couvertes par les
+                fichiers Stock Sirene, leur etat n'est donc pas verifie ; on le dit. */}
+            <StatCard value={grp(BAROMETRE_BE_META.totalPros)} label="entreprises artisanales référencées (état non vérifié)" />
             <StatCard value="6" label="provinces & régions analysées" />
             <StatCard value={`${ecart}×`} label={`plus d'artisans/hab. entre le 1ᵉʳ (${top.name}) et le dernier (${bottom.name})`} />
           </div>
@@ -193,8 +195,10 @@ export default async function BarometreBePage() {
         <section className="mb-16 max-w-2xl rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">Méthodologie &amp; sources</h2>
           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Entreprises = établissements actifs des métiers du bâtiment, des services et de l&apos;aide à la personne,
+            Entreprises = établissements des métiers du bâtiment, des services et de l&apos;aide à la personne,
             référencés depuis la <strong className="text-[var(--text-primary)]">Banque-Carrefour des Entreprises (BCE)</strong>.
+            Leur état (ouvert ou fermé) n&apos;est pas vérifié : les fichiers Stock Sirene (INSEE) qui servent à classer
+            les fiches françaises ne couvrent pas la Belgique.
             Population = somme des communes (<strong className="text-[var(--text-primary)]">Statbel</strong>). Densité =
             entreprises ÷ population × 10 000. Périmètre : Belgique francophone (Wallonie + Bruxelles). Relevé : {BAROMETRE_BE_META.generatedAt}.
           </p>

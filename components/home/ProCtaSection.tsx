@@ -21,7 +21,9 @@ export default function ProCtaSection() {
             Votre fiche est peut-être déjà sur Workwave.
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
-            2,5&nbsp;millions+ de professionnels sont déjà référencés via les registres officiels SIRENE (France) et BCE (Belgique).
+            {/* 1,2 million = fiches OUVERTES, 1 233 038 mesure le 03/09/2026 en SQL
+                (etablissements fermes exclus). */}
+            Plus de 1,2&nbsp;million de professionnels sont déjà référencés via les registres officiels SIRENE (France) et BCE (Belgique).
             Réclamez votre fiche gratuitement et sans engagement.
           </p>
         </div>
@@ -57,8 +59,9 @@ export default function ProCtaSection() {
               </h3>
             </div>
             <p className="text-sm text-[var(--text-secondary)] mb-5 leading-relaxed">
-              Plombier, électricien, peintre, maçon, paysagiste… 2,5&nbsp;millions de fiches
-              créées à partir des registres officiels SIRENE (France) et BCE (Belgique).
+              {/* 1,2 million = fiches OUVERTES (1 233 038 le 03/09/2026 en SQL). */}
+              Plombier, électricien, peintre, maçon, paysagiste… plus de 1,2&nbsp;million de fiches
+              d&apos;établissements ouverts, créées à partir des registres officiels SIRENE (France) et BCE (Belgique).
             </p>
             <Link
               href="/pro/retrouver-fiche"

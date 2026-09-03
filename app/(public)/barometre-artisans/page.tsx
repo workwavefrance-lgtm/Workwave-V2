@@ -15,14 +15,21 @@ export const revalidate = 2592000; // 30j : données statiques (regénérées vi
 const PATH = "/barometre-artisans";
 const YEAR = 2026;
 
+// « 1,03 million » : accord au singulier sous 2 millions.
+const millions = (n: number) =>
+  `${(n / 1_000_000).toFixed(2).replace(".", ",")} million${n >= 2_000_000 ? "s" : ""}`;
+// Taux en % ; « n.d. » quand le departement a moins de BAROMETRE_META.seuilTaux
+// fiches verifiees (lecon du 07/06 : pas de taux sur une couverture trop faible).
+const pct = (n: number | null) => (n === null ? "n.d." : `${String(n).replace(".", ",")} %`);
+
 export const metadata: Metadata = {
   title: `Baromètre des artisans en France ${YEAR} · densité par département`,
-  description: `Où trouve-t-on le plus d'artisans en France ? ${(BAROMETRE_META.totalPros / 1_000_000).toFixed(2)} millions d'entreprises artisanales analysées, département par département. La France rurale compte jusqu'à 6× plus d'artisans par habitant que les métropoles. Données SIRENE + INSEE.`,
+  description: `Où trouve-t-on le plus d'artisans en France ? ${millions(BAROMETRE_META.totalActifs)} d'entreprises artisanales analysées, département par département, avec la part d'établissements fermés. La France rurale compte jusqu'à 6× plus d'artisans par habitant que les métropoles. Données SIRENE + INSEE.`,
   alternates: { canonical: `${BASE_URL}${PATH}` },
   openGraph: {
     type: "article",
     title: `Baromètre des artisans en France ${YEAR}`,
-    description: `${(BAROMETRE_META.totalPros / 1_000_000).toFixed(2)} M d'entreprises artisanales, la densité département par département. Données SIRENE + INSEE.`,
+    description: `${millions(BAROMETRE_META.totalPros)} d'établissements artisanaux ouverts, la densité département par département et la part d'établissements fermés. Données SIRENE + INSEE.`,
     url: `${BASE_URL}${PATH}`,
   },
 };
@@ -58,6 +65,16 @@ export default async function BarometreArtisansPage() {
     .sort((a, b) => b.densite - a.densite);
   const regMax = regions[0].densite;
 
+  // Etat Sirene (fichiers Stock, classement du 03/09/2026) : departements avec
+  // un taux publie (>= seuilTaux fiches verifiees), classes par part de fermes.
+  const avecTaux = rows.flatMap((r) =>
+    r.partFermes !== null && r.partDisparus !== null
+      ? [{ ...r, partFermes: r.partFermes, partDisparus: r.partDisparus }]
+      : []
+  );
+  const plusFermes = [...avecTaux].sort((a, b) => b.partFermes - a.partFermes).slice(0, 5);
+  const moinsFermes = [...avecTaux].sort((a, b) => a.partFermes - b.partFermes).slice(0, 5);
+
   // Analyse « pourquoi » : points FACTUELS sourcés (Perplexity/sonar, 27/07/2026).
   const ANALYSE = [
     { titre: "Un secteur de proximité calqué sur la population", texte: "L'artisanat est un secteur de proximité : l'ISM et Bpifrance Création décrivent un tissu « en correspondance quasi parfaite avec la répartition de la population », d'où une densité par habitant souvent plus forte dans les territoires peu denses que dans les métropoles." },
@@ -72,7 +89,8 @@ export default async function BarometreArtisansPage() {
 
   const FAQ = [
     { q: "Quel département compte le plus d'artisans par habitant en France ?", a: `${top.name} arrive en tête avec ${dec(top.densite)} entreprises artisanales pour 10 000 habitants, devant ${rows[1].name} et ${rows[2].name}. À l'opposé, ${bottom.name} ferme le classement avec ${dec(bottom.densite)}.` },
-    { q: "Combien y a-t-il d'entreprises artisanales en France ?", a: `Workwave référence ${grp(BAROMETRE_META.totalPros)} entreprises artisanales actives (bâtiment, services à domicile, aide à la personne) réparties dans les 100 départements analysés, d'après le répertoire SIRENE de l'INSEE.` },
+    { q: "Combien y a-t-il d'entreprises artisanales en France ?", a: `Workwave référence ${grp(BAROMETRE_META.totalPros)} établissements artisanaux ouverts (bâtiment, services à domicile, aide à la personne) répartis dans les 100 départements analysés, d'après le répertoire SIRENE de l'INSEE, sur ${grp(BAROMETRE_META.totalActifs)} fiches analysées. Les établissements fermés d'après les fichiers Stock Sirene (classement du 03/09/2026) ne sont pas comptés.` },
+    { q: "Quelle part des entreprises artisanales référencées est fermée ?", a: `${pct(BAROMETRE_META.partFermes)} des établissements dont l'état est vérifié dans les fichiers Stock Sirene (INSEE, classement du 03/09/2026) sont fermés, et ${pct(BAROMETRE_META.partDisparus)} correspondent à des entreprises disparues (établissement fermé et entreprise cessée). La part varie de ${pct(moinsFermes[0]?.partFermes ?? null)} (${moinsFermes[0]?.name ?? "n.d."}) à ${pct(plusFermes[0]?.partFermes ?? null)} (${plusFermes[0]?.name ?? "n.d."}) selon le département.` },
     { q: "Pourquoi y a-t-il moins d'artisans par habitant dans les grandes villes ?", a: "L'artisanat suit la répartition de la population, mais les grandes métropoles concentrent surtout de grandes entreprises et des salariés : la part d'indépendants y est plus faible. Les zones rurales et de montagne comptent davantage de petites entreprises artisanales par habitant." },
     { q: "Comment la densité artisanale est-elle calculée ?", a: `Densité = nombre d'entreprises artisanales référencées ÷ population du département × 10 000. Les entreprises viennent du répertoire SIRENE (INSEE) et la population de l'INSEE (population municipale 2021). Relevé de ${BAROMETRE_META.generatedAt}.` },
   ];
@@ -91,7 +109,7 @@ export default async function BarometreArtisansPage() {
     "@context": "https://schema.org",
     "@type": "Dataset",
     name: `Baromètre des artisans en France ${YEAR} · densité par département`,
-    description: `Densité d'entreprises artisanales (bâtiment, services à domicile, aide à la personne) pour 10 000 habitants, dans les 100 départements français. ${BAROMETRE_META.totalPros.toLocaleString("fr-FR")} entreprises analysées.`,
+    description: `Densité d'entreprises artisanales (bâtiment, services à domicile, aide à la personne) pour 10 000 habitants, dans les 100 départements français, avec la part d'établissements fermés et d'entreprises disparues par département. ${BAROMETRE_META.totalActifs.toLocaleString("fr-FR")} fiches analysées, dont ${BAROMETRE_META.totalPros.toLocaleString("fr-FR")} établissements ouverts.`,
     creator: { "@type": "Organization", name: "Workwave", url: BASE_URL },
     // Google reclame le champ "license" sur tout Dataset (avertissement dans
     // la Search Console). CC BY 4.0 : reutilisation libre, y compris
@@ -110,6 +128,15 @@ export default async function BarometreArtisansPage() {
         description:
           "Répertoire officiel des entreprises et de leurs établissements, tenu par l'INSEE et publié en Licence Ouverte.",
         url: "https://www.insee.fr/fr/information/3591226",
+        license: "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
+        creator: { "@type": "Organization", name: "INSEE" },
+      },
+      {
+        "@type": "Dataset",
+        name: "Base Sirene des entreprises et de leurs établissements (fichiers Stock)",
+        description:
+          "Fichiers Stock mensuels du répertoire Sirene (StockEtablissement, StockUniteLegale) publiés par l'INSEE sur data.gouv.fr : état administratif de chaque établissement et de chaque unité légale.",
+        url: "https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/",
         license: "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
         creator: { "@type": "Organization", name: "INSEE" },
       },
@@ -162,14 +189,16 @@ export default async function BarometreArtisansPage() {
           </h1>
           <p className="text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
             Où trouve-t-on le plus d&apos;artisans, et où en manque-t-il le plus ? Nous avons
-            analysé <strong className="text-[var(--text-primary)]">{grp(BAROMETRE_META.totalPros)} entreprises
+            analysé <strong className="text-[var(--text-primary)]">{grp(BAROMETRE_META.totalActifs)} entreprises
             artisanales</strong> (bâtiment, services à domicile, aide à la personne) dans
-            les 100 départements français.
+            les 100 départements français, dont{" "}
+            <strong className="text-[var(--text-primary)]">{grp(BAROMETRE_META.totalPros)} établissements ouverts</strong>.
           </p>
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard value={`${(BAROMETRE_META.totalPros / 1_000_000).toFixed(2).replace(".", ",")} M`} label="entreprises artisanales référencées" />
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard value={grp(BAROMETRE_META.totalPros)} label="établissements artisanaux ouverts" />
             <StatCard value="100" label="départements analysés" />
             <StatCard value={`${ecart}×`} label={`plus d'artisans/hab. entre le 1ᵉʳ (${top.name}) et le dernier (${bottom.name})`} />
+            <StatCard value={pct(BAROMETRE_META.partFermes)} label="d'établissements fermés (fichiers Stock Sirene, 03/09/2026)" />
           </div>
         </section>
 
@@ -231,6 +260,49 @@ export default async function BarometreArtisansPage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Etat Sirene : etablissements fermes et entreprises disparues, par
+            departement. Donnee unique (fichiers Stock Sirene appliques a notre
+            base le 03/09/2026), affichee sobrement : deux listes de 5. */}
+        <section className="mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
+            Combien d&apos;entreprises artisanales ont fermé ?
+          </h2>
+          <p className="text-[var(--text-secondary)] mb-6 max-w-3xl leading-relaxed">
+            Les fichiers Stock Sirene de l&apos;INSEE donnent l&apos;état réel de chaque établissement.
+            Sur {grp(BAROMETRE_META.verifies)} fiches vérifiées en France,{" "}
+            <strong className="text-[var(--text-primary)]">{pct(BAROMETRE_META.partFermes)} sont des établissements fermés</strong>,
+            et {pct(BAROMETRE_META.partDisparus)} correspondent à des entreprises disparues (établissement fermé et
+            entreprise cessée). Ces établissements sont exclus des comptes et des densités de cette page.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {[
+              { titre: "Les départements où la part d'établissements fermés est la plus forte", liste: plusFermes },
+              { titre: "Les départements où elle est la plus faible", liste: moinsFermes },
+            ].map((bloc) => (
+              <div key={bloc.titre} className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-5">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-3">{bloc.titre}</h3>
+                <ul className="space-y-2">
+                  {bloc.liste.map((r) => (
+                    <li key={r.code} className="flex items-baseline justify-between gap-3 text-sm">
+                      <span className="text-[var(--text-primary)] truncate">
+                        {r.name} <span className="text-[var(--text-tertiary)]">({r.code})</span>
+                      </span>
+                      <span className="shrink-0 font-semibold text-[var(--text-primary)]">
+                        {pct(r.partFermes)}{" "}
+                        <span className="font-normal text-[var(--text-tertiary)]">· disparues {pct(r.partDisparus)}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-[var(--text-tertiary)]">
+            Source : {BAROMETRE_META.etatsSource}. Part = établissements fermés (puis entreprises disparues) ÷ fiches
+            dont l&apos;état est vérifié ; aucun taux publié sous {BAROMETRE_META.seuilTaux} fiches vérifiées.
+          </p>
         </section>
 
         {/* CTA intermédiaire (conversion en cours de lecture) */}
@@ -319,8 +391,9 @@ export default async function BarometreArtisansPage() {
                     <th className="px-4 py-3 font-medium">#</th>
                     <th className="px-4 py-3 font-medium">Département</th>
                     <th className="px-4 py-3 font-medium">Région</th>
-                    <th className="px-4 py-3 font-medium text-right">Entreprises</th>
+                    <th className="px-4 py-3 font-medium text-right">Ouverts</th>
                     <th className="px-4 py-3 font-medium text-right">/ 10k hab.</th>
+                    <th className="px-4 py-3 font-medium text-right whitespace-nowrap">Fermés · disparues</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -331,11 +404,17 @@ export default async function BarometreArtisansPage() {
                       <td className="px-4 py-2.5 text-[var(--text-secondary)]">{r.region}</td>
                       <td className="px-4 py-2.5 text-right text-[var(--text-secondary)]">{r.pros.toLocaleString("fr-FR")}</td>
                       <td className="px-4 py-2.5 text-right font-semibold text-[var(--text-primary)]">{dec(r.densite)}</td>
+                      <td className="px-4 py-2.5 text-right text-[var(--text-secondary)] whitespace-nowrap">{pct(r.partFermes)} · {pct(r.partDisparus)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            <p className="px-5 py-3 text-xs text-[var(--text-tertiary)] border-t border-[var(--card-border)]">
+              Ouverts : établissements non fermés au registre Sirene. Fermés · disparues : part des établissements
+              fermés, puis part des entreprises disparues, sur les fiches vérifiées ({BAROMETRE_META.etatsSource}) ;
+              n.d. sous {BAROMETRE_META.seuilTaux} fiches vérifiées.
+            </p>
           </details>
         </section>
 
@@ -358,9 +437,10 @@ export default async function BarometreArtisansPage() {
         <section className="mb-16 max-w-2xl rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">Méthodologie &amp; sources</h2>
           <ul className="space-y-2 text-sm text-[var(--text-secondary)] leading-relaxed">
-            <li><strong className="text-[var(--text-primary)]">Entreprises</strong> : établissements actifs des métiers du bâtiment, des services à domicile et de l&apos;aide à la personne, référencés par Workwave depuis le <strong className="text-[var(--text-primary)]">répertoire SIRENE (INSEE)</strong>. Il s&apos;agit d&apos;entreprises immatriculées, pas nécessairement toutes en activité à temps plein.</li>
+            <li><strong className="text-[var(--text-primary)]">Entreprises</strong> : établissements <strong className="text-[var(--text-primary)]">ouverts</strong> des métiers du bâtiment, des services à domicile et de l&apos;aide à la personne, référencés par Workwave depuis le <strong className="text-[var(--text-primary)]">répertoire SIRENE (INSEE)</strong>. Il s&apos;agit d&apos;entreprises immatriculées, pas nécessairement toutes en activité à temps plein. Les établissements fermés d&apos;après les {BAROMETRE_META.etatsSource} sont exclus du compte et de la densité.</li>
+            <li><strong className="text-[var(--text-primary)]">Fermés et disparues</strong> : part des établissements fermés, et part des entreprises disparues (établissement fermé et unité légale cessée), rapportées aux fiches dont l&apos;état est vérifié dans les fichiers Stock Sirene. Aucun taux publié sous {BAROMETRE_META.seuilTaux} fiches vérifiées.</li>
             <li><strong className="text-[var(--text-primary)]">Population</strong> : population municipale 2021, <strong className="text-[var(--text-primary)]">INSEE</strong> (via data.gouv.fr).</li>
-            <li><strong className="text-[var(--text-primary)]">Densité</strong> = entreprises référencées ÷ population × 10 000. Mayotte exclu (population non disponible dans la source).</li>
+            <li><strong className="text-[var(--text-primary)]">Densité</strong> = établissements ouverts ÷ population × 10 000. Mayotte exclu (population non disponible dans la source).</li>
             <li>Relevé : {BAROMETRE_META.generatedAt}. Réutilisation libre avec lien vers cette page.</li>
           </ul>
         </section>

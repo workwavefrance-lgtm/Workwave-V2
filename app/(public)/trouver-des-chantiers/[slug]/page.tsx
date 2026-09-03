@@ -41,7 +41,10 @@ const BASE_URL = "https://workwave.fr";
 // gros scrape (cf. leçon des compteurs home du 08/06).
 const IMPRESSIONS_28J = "402 000"; // GSC, fenêtre 28 j, mesuré le 29/08/2026
 const COMMUNES = "35 163"; // count cities, mesuré le 08/08/2026
-const PROS_TOTAL = "2,4 millions"; // count pros actifs, mesuré le 31/08/2026
+// Fiches OUVERTES (etat_admin IS NULL OR etat_admin <> 'F') : 1 233 038, mesuré le
+// 03/09/2026 en SQL par Willy. L'ancien « 2,4 millions » comptait les 1 206 938
+// établissements fermés (fichiers Stock Sirene).
+const PROS_TOTAL = "1,2 million";
 
 // Comparatif concurrent : 300 à 500 €/mois est le chiffre de Willy (décision
 // commerciale du 01/09/2026, confirmée deux fois). Il couvre la FACTURE TOTALE

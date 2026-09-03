@@ -30,7 +30,9 @@ const FEATURED_CATEGORIES: { slug: string; name: string }[] = [
 export const metadata: Metadata = {
   title: "Professionnels par département en France et en Belgique - Workwave",
   description:
-    "Annuaire des artisans et professionnels par département en France et en Belgique francophone. Plus de 2,5 millions de pros référencés dans 107 départements et provinces et 35 163 communes (France métropole et outre-mer + Wallonie et Bruxelles).",
+    // 1,2 million = fiches OUVERTES (1 233 038, mesure le 03/09/2026 en SQL,
+    // etablissements fermes exclus). A re-mesurer apres chaque scrape.
+    "Annuaire des artisans et professionnels par département en France et en Belgique francophone. Plus de 1,2 million de pros référencés dans 107 départements et provinces et 35 163 communes (France métropole et outre-mer + Wallonie et Bruxelles).",
   alternates: {
     canonical: `${BASE_URL}/departements`,
   },
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     type: "website",
     title: "Professionnels par département en France et en Belgique",
     description:
-      "Annuaire des artisans par département en France et en Belgique francophone. 2 500 000+ pros référencés dans 107 départements et provinces.",
+      "Annuaire des artisans par département en France et en Belgique francophone. 1 200 000+ pros référencés dans 107 départements et provinces.",
     url: `${BASE_URL}/departements`,
   },
 };
@@ -82,7 +84,7 @@ export default async function DepartmentsHubPage() {
           Professionnels par département
         </h1>
         <p className="text-lg text-[var(--text-secondary)] max-w-3xl">
-          Plus de 2,5 millions d&apos;artisans et professionnels référencés dans les 101
+          Plus de 1,2 million d&apos;artisans et professionnels référencés dans les 101
           départements français et les 6 provinces belges. Choisissez votre territoire pour
           découvrir les pros près de chez vous.
         </p>
@@ -160,7 +162,7 @@ export default async function DepartmentsHubPage() {
           Pourquoi Workwave ?
         </h2>
         <p className="text-[var(--text-secondary)] max-w-3xl leading-relaxed">
-          Workwave référence gratuitement plus de 2,5 millions de professionnels
+          Workwave référence gratuitement plus de 1,2 million de professionnels
           en France et en Belgique francophone, issus des registres SIRENE (France) et BCE (Belgique). Notre annuaire
           couvre les 101 départements français et les 6 provinces belges avec les principaux corps de métier
           du BTP, des services à domicile et de l&apos;aide à la personne. Les

@@ -154,8 +154,9 @@ export default async function BarometrePenuriePage() {
         <section className="mb-16 max-w-2xl rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-6">
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">Méthodologie</h2>
           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Densité = entreprises artisanales référencées (répertoire SIRENE, INSEE) ÷ population du département
-            (INSEE, population municipale 2021) × 10 000. France métropolitaine ; seuls les métiers présents dans
+            Densité = établissements artisanaux ouverts référencés (répertoire SIRENE, INSEE ; les établissements
+            fermés d&apos;après les fichiers Stock Sirene, classement du {PENURIE_META.classementDu}, sont exclus) ÷ population
+            du département (INSEE, population municipale 2021) × 10 000. France métropolitaine ; seuls les métiers présents dans
             au moins 85 départements sont retenus pour une comparaison juste. Relevé : {PENURIE_META.generatedAt}.
           </p>
         </section>

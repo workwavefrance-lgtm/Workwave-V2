@@ -5,7 +5,7 @@ export const runtime = "edge";
 // quand le site ne couvrait que le departement de la Vienne : il annoncait
 // « Plus de 20 000 professionnels en Vienne ». Le site couvre aujourd'hui la France
 // entiere et la Belgique francophone (107 departements et provinces, 35 163 communes,
-// ~2,4 millions de fiches). Formulation volontairement SANS CHIFFRE : le nombre de
+// 1 233 038 fiches ouvertes au 03/09/2026). Formulation volontairement SANS CHIFFRE : le nombre de
 // fiches bouge a chaque scrape, une image de partage ne se met pas a jour toute seule,
 // et un chiffre perime ici se propage dans tous les partages sociaux et les apercus de
 // lien. Le libelle de couverture repris est celui deja utilise dans app/layout.tsx.
