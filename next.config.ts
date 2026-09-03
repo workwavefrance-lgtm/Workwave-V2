@@ -37,6 +37,16 @@ const nextConfig: NextConfig = {
     // requete mesuree seule met 204 ms par millier de lignes, soit 9 s pour
     // les 45 000. Ce n'est pas la requete qui est lente, c'est la rafale.
     cpus: 2,
+    // 03/09/2026 : quatre builds echoues de suite au meme endroit
+    // (/sitemap/104.xml, "canceling statement due to statement timeout") alors
+    // que chaque requete mesuree seule prend 0,2 a 1,3 s. Chaque processus
+    // genere jusqu'a 8 pages EN MEME TEMPS par defaut : 2 x 8 sous-sitemaps
+    // qui enchainent chacun 45 lectures de 1 000 lignes, sur une table que le
+    // classement du jour venait de reecrire (2,3 M de lignes deplacees dans le
+    // fichier, lectures devenues aleatoires). Une page a la fois par processus :
+    // le build dure quelques minutes de plus, la base ne s'etrangle plus.
+    staticGenerationMaxConcurrency: 1,
+    staticGenerationRetryCount: 3,
   },
   staticPageGenerationTimeout: 180,
   // Compression deleguee au proxy (Caddy/Traefik de Coolify), qui sait faire du
