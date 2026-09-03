@@ -39,14 +39,44 @@ const METIERS_PRIORITAIRES = [
   "chauffagiste", "carreleur", "serrurier", "paysagiste", "plaquiste", "charpentier",
 ];
 
+// --liste fichier : adresses prioritaires, une par ligne, servies AVANT les
+// hubs. Celles deja envoyees (fichier .envoyees.txt a cote) sont sautees,
+// donc une liste de 584 adresses s'ecoule en 3 jours a 195 par jour.
+// Pourquoi (03/09/2026) : les 584 pages qui recevaient des clics en juillet et
+// n'apparaissent plus (scripts/_gsc-chute-index.ts) sont celles a faire
+// relire en premier, maintenant qu'elles disent vrai (fermees) ou sont
+// enrichies ; les hubs, Google les relit deja tous les jours.
+const LISTE = (() => {
+  const i = process.argv.indexOf("--liste");
+  return i >= 0 ? process.argv[i + 1] : null;
+})();
+
+function lireListePrioritaire(): { urls: string[]; marquer: (envoyees: string[]) => void } {
+  if (!LISTE) return { urls: [], marquer: () => {} };
+  const fs = require("fs") as typeof import("fs");
+  const dejaFichier = LISTE.replace(/\.txt$/, "") + ".envoyees.txt";
+  const deja = new Set(fs.existsSync(dejaFichier) ? fs.readFileSync(dejaFichier, "utf8").split("\n").filter(Boolean) : []);
+  const urls = fs.readFileSync(LISTE, "utf8").split("\n").map((l) => l.trim()).filter((u) => u && !deja.has(u));
+  console.log(`liste prioritaire ${LISTE} : ${urls.length} adresses restantes (${deja.size} deja envoyees)`);
+  return {
+    urls,
+    marquer: (envoyees) => fs.appendFileSync(dejaFichier, envoyees.join("\n") + "\n"),
+  };
+}
+
 async function construireListe(): Promise<string[]> {
   const sb = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
+  // 0. Liste prioritaire (--liste), avant tout le reste.
+  const prioritaires = lireListePrioritaire().urls;
+  if (prioritaires.length >= QUOTA) return prioritaires.slice(0, QUOTA);
+
   // 1. Hubs.
   const urls: string[] = [
+    ...prioritaires,
     `${BASE}/`,
     `${BASE}/deposer-projet`,
     `${BASE}/guide-des-prix`,
@@ -111,12 +141,15 @@ async function main() {
   google.options({ auth: (await auth.getClient()) as never });
 
   let envoyes = 0;
+  const pingees: string[] = [];
+  const { marquer } = lireListePrioritaire();
   for (const u of valides) {
     try {
       await google.indexing("v3").urlNotifications.publish({
         requestBody: { url: u, type: "URL_UPDATED" },
       });
       envoyes++;
+      pingees.push(u);
     } catch (e) {
       const msg = (e as Error).message || "";
       if (msg.includes("Quota")) {
@@ -129,6 +162,10 @@ async function main() {
     await new Promise((r) => setTimeout(r, 120));
   }
   console.log(`${envoyes} URL pingees sur ${valides.length}`);
+  // Les adresses de la liste prioritaire pingees, ET celles ecartees au
+  // pre-vol (redirection, 404 : inutile de les representer), sont marquees.
+  const ecartees = liste.filter((u) => !valides.includes(u));
+  marquer([...pingees, ...ecartees]);
 }
 
 main();
