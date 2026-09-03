@@ -381,7 +381,12 @@ type Lot = { patch: Patch; sirets: string[]; records?: Enreg[] };
 // "statement timeout"). Le cout est par LIGNE ecrite (lignes larges, deux
 // triggers), pas par requete : 200 fiches tiennent sous le delai, et le lot
 // mixte garde l'essentiel du gain (une requete par 200 fiches au lieu de 5).
-const LOT_RPC = 200;
+// Puis 50 (03/09, 7 h 20) : mesure sur des lignes deja classees, reecrites a
+// l'identique, RPC de 200 lignes = 3,1 a 3,7 s a vide ; sous la charge du
+// crawl et des aspirateurs, un paquet sur quatre depassait le delai de la
+// base. A 50 lignes (~1 s), la marge est large ; 379 000 fiches restantes =
+// ~7 600 appels, environ 2 h 30. Lent mais sans erreur.
+const LOT_RPC = 50;
 
 /** Ecriture d'un lot. Retourne le nombre de lignes modifiees, ou une erreur. */
 async function ecrireLot(lot: Lot): Promise<{ n: number; erreur: string | null }> {
