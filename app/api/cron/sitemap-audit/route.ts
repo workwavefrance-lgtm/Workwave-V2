@@ -231,6 +231,27 @@ suivant non déclaré : /sitemap/${dernierBtp + 1}.xml → ${orphelinBtp} · /si
     }
   }
 
+  // Rafraichissement de la vue des pages metier x ville (migration
+  // 2026-09-04_vue_listings). Sans lui, la vue reste l instantane du jour de
+  // sa creation : un artisan ajoute ou une fiche classee fermee ne changerait
+  // jamais le sitemap, et les nouvelles pages n y entreraient jamais.
+  // CONCURRENTLY : ne bloque aucune lecture pendant le rafraichissement.
+  let listings: number | null = null;
+  let listingsErreur: string | null = null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any).rpc("rafraichir_listings");
+    if (error) listingsErreur = error.message;
+    else listings = Number(data);
+  } catch (e) {
+    listingsErreur = (e as Error).message;
+  }
+  if (listingsErreur) {
+    issues.push(
+      `Vue des listings non rafraichie : ${listingsErreur}. Le sitemap metier x ville sert un instantane fige.`
+    );
+  }
+
   return NextResponse.json(
     {
       ok: issues.length === 0,
@@ -246,6 +267,7 @@ suivant non déclaré : /sitemap/${dernierBtp + 1}.xml → ${orphelinBtp} · /si
         ai: { declared: declaredAiSubs, expected: expectedAiSubs },
       },
       builders: { catCity, aiUrls },
+      listings: { pages: listings, erreur: listingsErreur },
       issues,
       alertSent,
     },
