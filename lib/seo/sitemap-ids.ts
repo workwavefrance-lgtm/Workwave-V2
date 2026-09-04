@@ -37,7 +37,7 @@ export const SITEMAP_IDS_FIXES = [0, 1, 2, 3, 4] as const;
 // inoffensif alors qu un sous-sitemap non declare rend ses pages invisibles
 // (lecon du 20/08).
 export const SITEMAP_CAT_CITY_OFFSET = 300;
-export const NB_SITEMAPS_CAT_CITY = 4;
+export const NB_SITEMAPS_CAT_CITY = 3;
 export const CAT_CITY_PAR_SITEMAP = 45000;
 
 export const SITEMAP_PROS_OFFSET = 100;
