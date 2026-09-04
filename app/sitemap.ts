@@ -44,7 +44,12 @@ export const maxDuration = 300;
 // Limites :
 // - Google : 50 000 URLs max par sitemap, 50 MB max
 // - On split tous les types pour rester confortablement sous la limite
-import { tousLesIdsDeSitemap } from "@/lib/seo/sitemap-ids";
+import {
+  tousLesIdsDeSitemap,
+  SITEMAP_CAT_CITY_OFFSET,
+  NB_SITEMAPS_CAT_CITY,
+  CAT_CITY_PAR_SITEMAP,
+} from "@/lib/seo/sitemap-ids";
 
 const PROS_PER_SITEMAP = 45000;
 const TOP_CITIES_FOR_LISTINGS = 300; // top villes par population pour cat x ville
@@ -124,6 +129,13 @@ export default async function sitemap(props: {
   if (numId === SITEMAP_CAT_CITY) return buildCategoryCityUrls();
   if (numId === SITEMAP_SPECIALTY) return buildSpecialtyUrls();
   if (numId === SITEMAP_AI) return buildAiUrls();
+  // 300+N : metier x ville, TOUTES les communes. A tester AVANT la plage 200+,
+  // sinon 300 tombe dans les pros tech (300 >= 200).
+  if (
+    numId >= SITEMAP_CAT_CITY_OFFSET &&
+    numId < SITEMAP_CAT_CITY_OFFSET + NB_SITEMAPS_CAT_CITY
+  )
+    return buildCategoryCityBatchUrls(numId - SITEMAP_CAT_CITY_OFFSET);
   // 200+N : pros tech au format /ai/freelance/[slug]
   if (numId >= SITEMAP_AI_PROS_OFFSET)
     return buildAiProsUrls(numId - SITEMAP_AI_PROS_OFFSET);
@@ -595,6 +607,51 @@ async function buildCategoryDeptUrls(): Promise<MetadataRoute.Sitemap> {
 // ============================================================================
 // 2. Cat x Ville (top N villes, >= 3 pros)
 // ============================================================================
+/**
+ * Metier x ville sur TOUTES les communes, par tranches de 45 000.
+ *
+ * Pourquoi (mesure du 04/09/2026) : buildCategoryCityUrls ci-dessous ne
+ * regarde que les 300 communes les plus peuplees sur 35 163, un plafond pose
+ * quand la base comptait 226 000 fiches et jamais rouvert depuis qu elle en
+ * compte 2,4 millions. Resultat mesure : 83 406 pages metier x ville existent
+ * avec au moins 3 artisans ouverts, sur 13 665 communes, et le sitemap n en
+ * declarait que 8 405. 75 001 pages repondaient en HTTP 200 sans etre
+ * annoncees nulle part.
+ *
+ * L agregat et la traduction en slugs se font en base (RPC
+ * sitemap_city_cat_page, migrations du 04/09) : un seul aller-retour par
+ * tranche, aucun chargement des 35 163 communes en JS pendant le build.
+ * Le jsonb scalaire echappe au plafond PostgREST de 1 000 lignes (lecon du
+ * 08/06), et l ordre (category_id, city_id) est stable, sans quoi deux
+ * tranches successives ne decouperaient pas le meme ensemble.
+ *
+ * La fonction ci-dessous (id 2) est conservee telle quelle : elle porte les
+ * alias belges et la zone Monaco, qui ont leur propre logique. Les quelques
+ * milliers d adresses en double entre les deux ne posent pas de probleme,
+ * Google les dedoublonne.
+ */
+async function buildCategoryCityBatchUrls(
+  batch: number
+): Promise<MetadataRoute.Sitemap> {
+  const supabase = getAdminServiceClient();
+  const rows = await withSitemapRetry<
+    { m: string; v: string; n: number }[] | null
+  >(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () =>
+      (supabase as any).rpc("sitemap_listings_page", {
+        p_offset: batch * CAT_CITY_PAR_SITEMAP,
+        p_limit: CAT_CITY_PAR_SITEMAP,
+      }),
+    `RPC sitemap_listings_page (tranche ${batch}, migration 2026-09-04_vue_listings appliquee ?)`
+  );
+  return ((rows || []) as { m: string; v: string; n: number }[]).map((r) => ({
+    url: `${BASE_URL}/${r.m}/${r.v}`,
+    changeFrequency: "weekly" as const,
+    priority: Number(r.n) >= 10 ? 0.8 : 0.7,
+  }));
+}
+
 async function buildCategoryCityUrls(): Promise<MetadataRoute.Sitemap> {
   const supabase = getAdminServiceClient();
   const [allCategories, topCities] = await Promise.all([

@@ -29,6 +29,17 @@
 
 /** 0 statique + guides + blog, 1 metier x dept, 2 metier x ville, 3 specialites, 4 Workwave AI. */
 export const SITEMAP_IDS_FIXES = [0, 1, 2, 3, 4] as const;
+// Sous-sitemaps des pages metier x ville. Mesure du 04/09/2026 : 83 406 de
+// ces pages existent avec au moins 3 artisans ouverts, sur 13 665 communes,
+// alors que le sitemap n en declarait que 8 405 (plafond TOP_CITIES = 300 des
+// 35 163 communes). Une page de sitemap ne peut pas depasser 50 000 adresses :
+// il en faut donc plusieurs. Marge volontaire, un sous-sitemap vide est
+// inoffensif alors qu un sous-sitemap non declare rend ses pages invisibles
+// (lecon du 20/08).
+export const SITEMAP_CAT_CITY_OFFSET = 300;
+export const NB_SITEMAPS_CAT_CITY = 4;
+export const CAT_CITY_PAR_SITEMAP = 45000;
+
 export const SITEMAP_PROS_OFFSET = 100;
 export const SITEMAP_PROS_AI_OFFSET = 200;
 export const NB_SITEMAPS_PROS = 48;
@@ -38,6 +49,7 @@ export const NB_SITEMAPS_PROS_AI = 14;
 export function tousLesIdsDeSitemap(): number[] {
   return [
     ...SITEMAP_IDS_FIXES,
+    ...Array.from({ length: NB_SITEMAPS_CAT_CITY }, (_, i) => SITEMAP_CAT_CITY_OFFSET + i),
     ...Array.from({ length: NB_SITEMAPS_PROS }, (_, i) => SITEMAP_PROS_OFFSET + i),
     ...Array.from({ length: NB_SITEMAPS_PROS_AI }, (_, i) => SITEMAP_PROS_AI_OFFSET + i),
   ];
