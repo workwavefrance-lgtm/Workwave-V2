@@ -1,0 +1,800 @@
+[
+ {
+  "m": "peintre",
+  "dept": "93",
+  "nom": "Seine-Saint-Denis",
+  "nous": 276,
+  "sirene": 4520
+ },
+ {
+  "m": "plombier",
+  "dept": "93",
+  "nom": "Seine-Saint-Denis",
+  "nous": 336,
+  "sirene": 2423
+ },
+ {
+  "m": "menuisier",
+  "dept": "93",
+  "nom": "Seine-Saint-Denis",
+  "nous": 619,
+  "sirene": 1708
+ },
+ {
+  "m": "couvreur",
+  "dept": "93",
+  "nom": "Seine-Saint-Denis",
+  "nous": 413,
+  "sirene": 1097
+ },
+ {
+  "m": "couvreur",
+  "dept": "67",
+  "nom": "Bas-Rhin",
+  "nous": 442,
+  "sirene": 472
+ },
+ {
+  "m": "couvreur",
+  "dept": "34",
+  "nom": "Hérault",
+  "nous": 362,
+  "sirene": 383
+ },
+ {
+  "m": "couvreur",
+  "dept": "92",
+  "nom": "Hauts-de-Seine",
+  "nous": 405,
+  "sirene": 426
+ },
+ {
+  "m": "couvreur",
+  "dept": "31",
+  "nom": "Haute-Garonne",
+  "nous": 657,
+  "sirene": 691
+ },
+ {
+  "m": "couvreur",
+  "dept": "44",
+  "nom": "Loire-Atlantique",
+  "nous": 923,
+  "sirene": 970
+ },
+ {
+  "m": "plombier",
+  "dept": "67",
+  "nom": "Bas-Rhin",
+  "nous": 574,
+  "sirene": 598
+ },
+ {
+  "m": "couvreur",
+  "dept": "69",
+  "nom": "Rhône",
+  "nous": 469,
+  "sirene": 488
+ },
+ {
+  "m": "couvreur",
+  "dept": "83",
+  "nom": "Var",
+  "nous": 427,
+  "sirene": 444
+ },
+ {
+  "m": "couvreur",
+  "dept": "35",
+  "nom": "Ille-et-Vilaine",
+  "nous": 573,
+  "sirene": 595
+ },
+ {
+  "m": "couvreur",
+  "dept": "33",
+  "nom": "Gironde",
+  "nous": 1198,
+  "sirene": 1240
+ },
+ {
+  "m": "macon",
+  "dept": "67",
+  "nom": "Bas-Rhin",
+  "nous": 1326,
+  "sirene": 1371
+ },
+ {
+  "m": "peintre",
+  "dept": "67",
+  "nom": "Bas-Rhin",
+  "nous": 1295,
+  "sirene": 1335
+ },
+ {
+  "m": "couvreur",
+  "dept": "06",
+  "nom": "Alpes-Maritimes",
+  "nous": 350,
+  "sirene": 360
+ },
+ {
+  "m": "peintre",
+  "dept": "92",
+  "nom": "Hauts-de-Seine",
+  "nous": 1802,
+  "sirene": 1852
+ },
+ {
+  "m": "plombier",
+  "dept": "76",
+  "nom": "Seine-Maritime",
+  "nous": 781,
+  "sirene": 802
+ },
+ {
+  "m": "couvreur",
+  "dept": "13",
+  "nom": "Bouches-du-Rhône",
+  "nous": 480,
+  "sirene": 492
+ },
+ {
+  "m": "couvreur",
+  "dept": "75",
+  "nom": "Paris",
+  "nous": 602,
+  "sirene": 616
+ },
+ {
+  "m": "peintre",
+  "dept": "95",
+  "nom": "Val-d'Oise",
+  "nous": 1928,
+  "sirene": 1972
+ },
+ {
+  "m": "electricien",
+  "dept": "67",
+  "nom": "Bas-Rhin",
+  "nous": 1603,
+  "sirene": 1639
+ },
+ {
+  "m": "couvreur",
+  "dept": "38",
+  "nom": "Isère",
+  "nous": 349,
+  "sirene": 356
+ },
+ {
+  "m": "electricien",
+  "dept": "33",
+  "nom": "Gironde",
+  "nous": 2948,
+  "sirene": 3002
+ },
+ {
+  "m": "peintre",
+  "dept": "76",
+  "nom": "Seine-Maritime",
+  "nous": 1147,
+  "sirene": 1168
+ },
+ {
+  "m": "macon",
+  "dept": "76",
+  "nom": "Seine-Maritime",
+  "nous": 1320,
+  "sirene": 1344
+ },
+ {
+  "m": "macon",
+  "dept": "95",
+  "nom": "Val-d'Oise",
+  "nous": 2516,
+  "sirene": 2560
+ },
+ {
+  "m": "electricien",
+  "dept": "35",
+  "nom": "Ille-et-Vilaine",
+  "nous": 1079,
+  "sirene": 1097
+ },
+ {
+  "m": "couvreur",
+  "dept": "77",
+  "nom": "Seine-et-Marne",
+  "nous": 1270,
+  "sirene": 1289
+ },
+ {
+  "m": "plombier",
+  "dept": "44",
+  "nom": "Loire-Atlantique",
+  "nous": 1081,
+  "sirene": 1097
+ },
+ {
+  "m": "peintre",
+  "dept": "13",
+  "nom": "Bouches-du-Rhône",
+  "nous": 3091,
+  "sirene": 3136
+ },
+ {
+  "m": "electricien",
+  "dept": "59",
+  "nom": "Nord",
+  "nous": 2893,
+  "sirene": 2932
+ },
+ {
+  "m": "macon",
+  "dept": "44",
+  "nom": "Loire-Atlantique",
+  "nous": 1661,
+  "sirene": 1683
+ },
+ {
+  "m": "couvreur",
+  "dept": "94",
+  "nom": "Val-de-Marne",
+  "nous": 607,
+  "sirene": 615
+ },
+ {
+  "m": "peintre",
+  "dept": "83",
+  "nom": "Var",
+  "nous": 2281,
+  "sirene": 2310
+ },
+ {
+  "m": "peintre",
+  "dept": "94",
+  "nom": "Val-de-Marne",
+  "nous": 2050,
+  "sirene": 2076
+ },
+ {
+  "m": "electricien",
+  "dept": "44",
+  "nom": "Loire-Atlantique",
+  "nous": 1667,
+  "sirene": 1688
+ },
+ {
+  "m": "macon",
+  "dept": "92",
+  "nom": "Hauts-de-Seine",
+  "nous": 1238,
+  "sirene": 1253
+ },
+ {
+  "m": "couvreur",
+  "dept": "95",
+  "nom": "Val-d'Oise",
+  "nous": 921,
+  "sirene": 932
+ },
+ {
+  "m": "couvreur",
+  "dept": "59",
+  "nom": "Nord",
+  "nous": 1556,
+  "sirene": 1574
+ },
+ {
+  "m": "plombier",
+  "dept": "31",
+  "nom": "Haute-Garonne",
+  "nous": 1213,
+  "sirene": 1227
+ },
+ {
+  "m": "plombier",
+  "dept": "69",
+  "nom": "Rhône",
+  "nous": 1851,
+  "sirene": 1871
+ },
+ {
+  "m": "couvreur",
+  "dept": "76",
+  "nom": "Seine-Maritime",
+  "nous": 763,
+  "sirene": 771
+ },
+ {
+  "m": "plombier",
+  "dept": "92",
+  "nom": "Hauts-de-Seine",
+  "nous": 1148,
+  "sirene": 1160
+ },
+ {
+  "m": "plombier",
+  "dept": "75",
+  "nom": "Paris",
+  "nous": 2875,
+  "sirene": 2905
+ },
+ {
+  "m": "electricien",
+  "dept": "95",
+  "nom": "Val-d'Oise",
+  "nous": 2817,
+  "sirene": 2846
+ },
+ {
+  "m": "peintre",
+  "dept": "33",
+  "nom": "Gironde",
+  "nous": 2763,
+  "sirene": 2791
+ },
+ {
+  "m": "peintre",
+  "dept": "59",
+  "nom": "Nord",
+  "nous": 1679,
+  "sirene": 1696
+ },
+ {
+  "m": "macon",
+  "dept": "35",
+  "nom": "Ille-et-Vilaine",
+  "nous": 1191,
+  "sirene": 1203
+ },
+ {
+  "m": "peintre",
+  "dept": "78",
+  "nom": "Yvelines",
+  "nous": 1492,
+  "sirene": 1507
+ },
+ {
+  "m": "macon",
+  "dept": "75",
+  "nom": "Paris",
+  "nous": 5095,
+  "sirene": 5146
+ },
+ {
+  "m": "couvreur",
+  "dept": "78",
+  "nom": "Yvelines",
+  "nous": 908,
+  "sirene": 917
+ },
+ {
+  "m": "peintre",
+  "dept": "75",
+  "nom": "Paris",
+  "nous": 5538,
+  "sirene": 5592
+ },
+ {
+  "m": "peintre",
+  "dept": "69",
+  "nom": "Rhône",
+  "nous": 2264,
+  "sirene": 2286
+ },
+ {
+  "m": "electricien",
+  "dept": "06",
+  "nom": "Alpes-Maritimes",
+  "nous": 3198,
+  "sirene": 3228
+ },
+ {
+  "m": "macon",
+  "dept": "13",
+  "nom": "Bouches-du-Rhône",
+  "nous": 6701,
+  "sirene": 6758
+ },
+ {
+  "m": "peintre",
+  "dept": "06",
+  "nom": "Alpes-Maritimes",
+  "nous": 3199,
+  "sirene": 3226
+ },
+ {
+  "m": "plombier",
+  "dept": "13",
+  "nom": "Bouches-du-Rhône",
+  "nous": 2391,
+  "sirene": 2410
+ },
+ {
+  "m": "plombier",
+  "dept": "94",
+  "nom": "Val-de-Marne",
+  "nous": 1651,
+  "sirene": 1664
+ },
+ {
+  "m": "macon",
+  "dept": "69",
+  "nom": "Rhône",
+  "nous": 2570,
+  "sirene": 2589
+ },
+ {
+  "m": "macon",
+  "dept": "34",
+  "nom": "Hérault",
+  "nous": 4684,
+  "sirene": 4718
+ },
+ {
+  "m": "electricien",
+  "dept": "31",
+  "nom": "Haute-Garonne",
+  "nous": 2385,
+  "sirene": 2402
+ },
+ {
+  "m": "electricien",
+  "dept": "83",
+  "nom": "Var",
+  "nous": 3117,
+  "sirene": 3139
+ },
+ {
+  "m": "peintre",
+  "dept": "44",
+  "nom": "Loire-Atlantique",
+  "nous": 1776,
+  "sirene": 1788
+ },
+ {
+  "m": "macon",
+  "dept": "78",
+  "nom": "Yvelines",
+  "nous": 2074,
+  "sirene": 2088
+ },
+ {
+  "m": "peintre",
+  "dept": "77",
+  "nom": "Seine-et-Marne",
+  "nous": 1489,
+  "sirene": 1499
+ },
+ {
+  "m": "macon",
+  "dept": "06",
+  "nom": "Alpes-Maritimes",
+  "nous": 7511,
+  "sirene": 7560
+ },
+ {
+  "m": "plombier",
+  "dept": "59",
+  "nom": "Nord",
+  "nous": 1367,
+  "sirene": 1375
+ },
+ {
+  "m": "macon",
+  "dept": "33",
+  "nom": "Gironde",
+  "nous": 3619,
+  "sirene": 3640
+ },
+ {
+  "m": "electricien",
+  "dept": "75",
+  "nom": "Paris",
+  "nous": 4515,
+  "sirene": 4538
+ },
+ {
+  "m": "peintre",
+  "dept": "34",
+  "nom": "Hérault",
+  "nous": 2173,
+  "sirene": 2184
+ },
+ {
+  "m": "macon",
+  "dept": "83",
+  "nom": "Var",
+  "nous": 5182,
+  "sirene": 5208
+ },
+ {
+  "m": "macon",
+  "dept": "31",
+  "nom": "Haute-Garonne",
+  "nous": 2830,
+  "sirene": 2844
+ },
+ {
+  "m": "electricien",
+  "dept": "77",
+  "nom": "Seine-et-Marne",
+  "nous": 2649,
+  "sirene": 2662
+ },
+ {
+  "m": "plombier",
+  "dept": "95",
+  "nom": "Val-d'Oise",
+  "nous": 1651,
+  "sirene": 1659
+ },
+ {
+  "m": "plombier",
+  "dept": "78",
+  "nom": "Yvelines",
+  "nous": 1396,
+  "sirene": 1402
+ },
+ {
+  "m": "plombier",
+  "dept": "83",
+  "nom": "Var",
+  "nous": 1917,
+  "sirene": 1925
+ },
+ {
+  "m": "electricien",
+  "dept": "13",
+  "nom": "Bouches-du-Rhône",
+  "nous": 4346,
+  "sirene": 4361
+ },
+ {
+  "m": "electricien",
+  "dept": "38",
+  "nom": "Isère",
+  "nous": 2507,
+  "sirene": 2515
+ },
+ {
+  "m": "macon",
+  "dept": "38",
+  "nom": "Isère",
+  "nous": 2542,
+  "sirene": 2550
+ },
+ {
+  "m": "peintre",
+  "dept": "31",
+  "nom": "Haute-Garonne",
+  "nous": 1948,
+  "sirene": 1954
+ },
+ {
+  "m": "electricien",
+  "dept": "76",
+  "nom": "Seine-Maritime",
+  "nous": 1333,
+  "sirene": 1337
+ },
+ {
+  "m": "electricien",
+  "dept": "69",
+  "nom": "Rhône",
+  "nous": 3438,
+  "sirene": 3446
+ },
+ {
+  "m": "electricien",
+  "dept": "78",
+  "nom": "Yvelines",
+  "nous": 1926,
+  "sirene": 1930
+ },
+ {
+  "m": "macon",
+  "dept": "59",
+  "nom": "Nord",
+  "nous": 2202,
+  "sirene": 2206
+ },
+ {
+  "m": "peintre",
+  "dept": "35",
+  "nom": "Ille-et-Vilaine",
+  "nous": 1115,
+  "sirene": 1117
+ },
+ {
+  "m": "electricien",
+  "dept": "92",
+  "nom": "Hauts-de-Seine",
+  "nous": 1856,
+  "sirene": 1859
+ },
+ {
+  "m": "electricien",
+  "dept": "34",
+  "nom": "Hérault",
+  "nous": 2890,
+  "sirene": 2892
+ },
+ {
+  "m": "plombier",
+  "dept": "77",
+  "nom": "Seine-et-Marne",
+  "nous": 1630,
+  "sirene": 1631
+ },
+ {
+  "m": "electricien",
+  "dept": "94",
+  "nom": "Val-de-Marne",
+  "nous": 2100,
+  "sirene": 2100
+ },
+ {
+  "m": "plombier",
+  "dept": "38",
+  "nom": "Isère",
+  "nous": 1402,
+  "sirene": 1401
+ },
+ {
+  "m": "peintre",
+  "dept": "38",
+  "nom": "Isère",
+  "nous": 1921,
+  "sirene": 1916
+ },
+ {
+  "m": "plombier",
+  "dept": "06",
+  "nom": "Alpes-Maritimes",
+  "nous": 2112,
+  "sirene": 2105
+ },
+ {
+  "m": "plombier",
+  "dept": "34",
+  "nom": "Hérault",
+  "nous": 1563,
+  "sirene": 1554
+ },
+ {
+  "m": "plombier",
+  "dept": "33",
+  "nom": "Gironde",
+  "nous": 1792,
+  "sirene": 1777
+ },
+ {
+  "m": "menuisier",
+  "dept": "76",
+  "nom": "Seine-Maritime",
+  "nous": 1330,
+  "sirene": 1156
+ },
+ {
+  "m": "menuisier",
+  "dept": "44",
+  "nom": "Loire-Atlantique",
+  "nous": 1896,
+  "sirene": 1603
+ },
+ {
+  "m": "menuisier",
+  "dept": "59",
+  "nom": "Nord",
+  "nous": 2287,
+  "sirene": 1906
+ },
+ {
+  "m": "menuisier",
+  "dept": "33",
+  "nom": "Gironde",
+  "nous": 2533,
+  "sirene": 2012
+ },
+ {
+  "m": "menuisier",
+  "dept": "67",
+  "nom": "Bas-Rhin",
+  "nous": 1479,
+  "sirene": 1137
+ },
+ {
+  "m": "menuisier",
+  "dept": "78",
+  "nom": "Yvelines",
+  "nous": 1434,
+  "sirene": 1058
+ },
+ {
+  "m": "menuisier",
+  "dept": "38",
+  "nom": "Isère",
+  "nous": 1854,
+  "sirene": 1346
+ },
+ {
+  "m": "menuisier",
+  "dept": "34",
+  "nom": "Hérault",
+  "nous": 1857,
+  "sirene": 1342
+ },
+ {
+  "m": "menuisier",
+  "dept": "83",
+  "nom": "Var",
+  "nous": 2046,
+  "sirene": 1468
+ },
+ {
+  "m": "menuisier",
+  "dept": "31",
+  "nom": "Haute-Garonne",
+  "nous": 1631,
+  "sirene": 1135
+ },
+ {
+  "m": "menuisier",
+  "dept": "95",
+  "nom": "Val-d'Oise",
+  "nous": 1515,
+  "sirene": 1052
+ },
+ {
+  "m": "menuisier",
+  "dept": "69",
+  "nom": "Rhône",
+  "nous": 2455,
+  "sirene": 1701
+ },
+ {
+  "m": "menuisier",
+  "dept": "77",
+  "nom": "Seine-et-Marne",
+  "nous": 1834,
+  "sirene": 1260
+ },
+ {
+  "m": "menuisier",
+  "dept": "13",
+  "nom": "Bouches-du-Rhône",
+  "nous": 2449,
+  "sirene": 1602
+ },
+ {
+  "m": "menuisier",
+  "dept": "92",
+  "nom": "Hauts-de-Seine",
+  "nous": 1058,
+  "sirene": 683
+ },
+ {
+  "m": "menuisier",
+  "dept": "94",
+  "nom": "Val-de-Marne",
+  "nous": 1524,
+  "sirene": 969
+ },
+ {
+  "m": "menuisier",
+  "dept": "06",
+  "nom": "Alpes-Maritimes",
+  "nous": 2096,
+  "sirene": 1324
+ },
+ {
+  "m": "menuisier",
+  "dept": "75",
+  "nom": "Paris",
+  "nous": 2802,
+  "sirene": 1640
+ }
+]
