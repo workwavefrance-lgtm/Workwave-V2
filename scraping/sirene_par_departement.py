@@ -14,6 +14,7 @@ import os
 import re
 import sys
 import time
+from datetime import datetime, timezone
 import unicodedata
 
 import requests
@@ -146,10 +147,22 @@ def query_sirene(naf_code, dept_code, cursor=None):
     cp_min = f"{postal_prefix}000"
     cp_max = f"{postal_prefix}999"
 
+    # 🔴 `periode(... etatAdministratifEtablissement:A)` matche N'IMPORTE QUELLE
+    # periode historique : un etablissement ferme en 2011 mais actif en 2009 y
+    # repond. Mesure du 02/09/2026 : 45 % des fiches de la base etaient des
+    # etablissements FERMES, 56 % parmi les plus vues par Google. C'est le
+    # premier defaut de qualite vu par Google, avant la duplication.
+    #
+    # `-periode(etatAdministratifEtablissement:F)` exclut tout etablissement
+    # ayant connu une periode fermee, donc ne laisse que les ouverts.
+    # Verifie le 05/09 : plombiers Montpellier, 1022 sans le filtre, 323 avec.
+    #
+    # Ne JAMAIS retirer ce `-periode(...)`.
     q = (
         f"periode(activitePrincipaleEtablissement:{naf_formatted} "
         f"AND etatAdministratifEtablissement:A) "
-        f"AND codePostalEtablissement:[{cp_min} TO {cp_max}]"
+        f"AND codePostalEtablissement:[{cp_min} TO {cp_max}] "
+        f"AND -periode(etatAdministratifEtablissement:F)"
     )
 
     # 🔴 `curseur` OBLIGATOIRE DES LE 1er APPEL, avec la valeur "*".
@@ -250,6 +263,18 @@ def scrape_departement(supabase, dept_code, categories, city_map):
 
                     name = extract_name(etab)
 
+                    # Faits du registre renvoyes dans LA MEME reponse, gratuits.
+                    # Regle du 07/06/2026 : enrichir chaque fiche avec de la
+                    # vraie donnee officielle. Sans eux, une fiche neuve n'a ni
+                    # anciennete ni forme juridique, donc ni titre ni
+                    # description utiles (lib/seo/pro-registre.ts), et son etat
+                    # ouvert/ferme est inconnu (elle passerait pour ouverte).
+                    unite = etab.get("uniteLegale") or {}
+                    periodes = etab.get("periodesEtablissement") or []
+                    # La periode courante est celle sans date de fin ; l'API les
+                    # renvoie de la plus recente a la plus ancienne.
+                    courante = next((p for p in periodes if not p.get("dateFin")), periodes[0] if periodes else {})
+
                     rows.append({
                         "slug": make_unique_slug(name, siret),
                         "name": name,
@@ -261,6 +286,12 @@ def scrape_departement(supabase, dept_code, categories, city_map):
                         "postal_code": postal_code or None,
                         "source": "sirene",
                         "naf_code": naf,
+                        "founding_date": etab.get("dateCreationEtablissement") or None,
+                        "forme_juridique": unite.get("categorieJuridiqueUniteLegale") or None,
+                        "effectif_range": etab.get("trancheEffectifsEtablissement") or None,
+                        "etat_admin": courante.get("etatAdministratifEtablissement") or None,
+                        "entreprise_etat": unite.get("etatAdministratifUniteLegale") or None,
+                        "etat_verifie_at": datetime.now(timezone.utc).isoformat(),
                     })
 
                 # Dedup slugs dans le batch
