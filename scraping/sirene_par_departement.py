@@ -419,14 +419,30 @@ def scrape_departement(supabase, dept_code, categories, city_map):
         print(f"  {name:32s} : {count:5d}")
     print(f"\n  TOTAL upsert : {total_inserted}")
 
-    # Vraie verification : count net en base pour ce departement
-    # On compte les pros lies aux villes du departement
-    dept_cities = supabase.table("cities").select("id").eq("department_id", get_dept_id(supabase, dept_code)).execute()
-    city_ids = [c["id"] for c in dept_cities.data]
-    if city_ids:
-        # Supabase limite a 1000 in() values, mais 545 villes max = OK
-        net_count = supabase.table("pros").select("id", count="exact").in_("city_id", city_ids).execute()
-        print(f"  TOTAL net en base : {net_count.count}")
+    # Verification indicative : combien de fiches sont liees aux villes du
+    # departement. Elle NE DOIT PAS faire echouer le departement : le scrape
+    # est deja termine et ecrit quand on arrive ici. Le 05/09, ce comptage a
+    # commence a depasser le delai (57014) une fois la table passee a 2,7 M de
+    # lignes, ce qui faisait rejouer trois fois un departement pourtant reussi,
+    # puis le marquait « EN ECHEC » alors que ses donnees etaient en base.
+    try:
+        dept_id = get_dept_id(supabase, dept_code)
+        dept_cities = (
+            supabase.table("cities").select("id").eq("department_id", dept_id).execute()
+        )
+        city_ids = [c["id"] for c in dept_cities.data]
+        if city_ids:
+            # `in_()` plafonne a 1 000 valeurs. Le Nord compte 648 communes,
+            # Paris 21 : on reste dessous, mais on tronque par securite.
+            net_count = (
+                supabase.table("pros")
+                .select("id", count="exact")
+                .in_("city_id", city_ids[:1000])
+                .execute()
+            )
+            print(f"  TOTAL net en base : {net_count.count}")
+    except Exception as e:
+        print(f"  (comptage de controle indisponible : {e})")
 
     return total_inserted
 
