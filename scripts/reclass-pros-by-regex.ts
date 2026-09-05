@@ -58,6 +58,27 @@ const RULES: Rule[] = [
     regex: /\b(CLIM|FROID)/i,
     label: "CLIM|FROID",
   },
+  // Ajoutee le 05/09/2026. Le NAF 4329B est declare a la fois sur pisciniste
+  // et sur ascensoriste ; le scraper traite pisciniste en premier et rafle
+  // tout. Mesure du jour : ascensoriste = 0 fiche dans TOUTE la France, alors
+  // que ses 102 pages departement sont en ligne et liees depuis l'accueil, et
+  // 1 629 des 15 620 piscinistes portent un nom d'ascensoriste.
+  //
+  // Chaque motif a ete compte separement avant d'etre retenu :
+  //   ASCENS 1 189 · MONTE-CHARGE 15 · ELEVATEUR 31 · NACELLE 0
+  //   OTIS 141 · KONE 119 · SCHINDLER 139 · THYSSEN 4
+  // Les marques ont ete verifiees une a une parce qu'un patronyme peut les
+  // porter : les 119 « KONE » sont TOUS exactement l'entreprise, aucun n'est
+  // une personne, et les 8 SCHINDLER qui ne commencent pas par la marque sont
+  // ses filiales historiques (Roux Combaluzier Schindler, Dutreix Schindler).
+  // NACELLE a ete ecarte : 0 correspondance, et le mot designe aussi une
+  // nacelle de montgolfiere.
+  {
+    target: "ascensoriste",
+    sources: ["pisciniste"],
+    regex: /\b(ASCENS|MONTE[- ]?CHARGE|ELEVATEUR|OTIS|KONE|SCHINDLER|THYSSEN)/i,
+    label: "ASCENS|MONTE-CHARGE|ELEVATEUR|marques",
+  },
 ];
 
 async function main() {
@@ -113,20 +134,28 @@ async function main() {
 
     // Paginer les pros sources
     let allPros: { id: number; name: string; category_id: number; claimed_by_user_id: string | null }[] = [];
-    let offset = 0;
+    // Lecture par CURSEUR, pas par decalage. Un `.range(offset, ...)` sur une
+    // table de 2,7 M de lignes filtree oblige Postgres a parcourir toutes les
+    // lignes a sauter : au-dela de quelques dizaines de milliers, la requete
+    // depasse le delai. C'est exactement ce qui se passait ici, en silence,
+    // parce que l'erreur n'etait pas testee (lecon du 26/05).
     const PAGE = 1000;
+    let dernierId = 0;
     while (true) {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("pros")
         .select("id, name, category_id, claimed_by_user_id")
         .in("category_id", sourceIds)
         .eq("is_active", true)
         .is("deleted_at", null)
-        .range(offset, offset + PAGE - 1);
-      if (!data || data.length === 0) break;
-      allPros = allPros.concat(data as typeof allPros);
-      if (data.length < PAGE) break;
-      offset += PAGE;
+        .gt("id", dernierId)
+        .order("id")
+        .limit(PAGE);
+      if (error) throw new Error(`lecture des pros source : ${error.message}`);
+      const rows = (data || []) as typeof allPros;
+      if (rows.length === 0) break;
+      allPros = allPros.concat(rows);
+      dernierId = rows[rows.length - 1].id;
     }
 
     const matches = allPros
