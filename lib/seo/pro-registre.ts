@@ -27,6 +27,7 @@
  *                                     est_rge porte deja l'information RGE)
  */
 import { formatEffectifRange } from "@/lib/utils/sirene";
+import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
 
 /** Sous-ensemble de `Pro` lu par ce module. Toutes les cles sont optionnelles :
  *  une colonne absente (migration non appliquee) vaut « pas de donnee ». */
@@ -262,4 +263,115 @@ export function formatDistanceKm(km: number): string {
   if (km < 0.1) return "moins de 100 m";
   if (km < 1) return `${Math.round(km * 100) * 10} m`;
   return `${km.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km`;
+}
+
+/**
+ * Le titre et la description que Google affiche pour une fiche OUVERTE.
+ *
+ * POURQUOI (mesure du 04/09/2026, 148 868 affichages) : les fiches
+ * d'etablissements FERMES, refaites le 02/09, recoivent 43 % de clics en plus
+ * que les fiches ouvertes, a position egale. Elles annoncent des faits, les
+ * ouvertes servaient « Untel, Plombier a Tulle. Contactez ce professionnel
+ * gratuitement. », qui ne dit rien de plus que le titre. On aligne l'ouvert sur
+ * ce qui convertit, avec les memes sources : le registre, rien d'autre.
+ *
+ * Ce que la fonction NE fait PAS : elle ne remplace jamais la description
+ * ecrite par le professionnel lui-meme, ni celle generee pour sa fiche. Elle
+ * ne sert que de repli, la ou il n'y avait qu'une phrase vide.
+ *
+ * Le titre porte l'annee de creation quand elle tient : Google coupe au-dela
+ * d'environ 65 caracteres, et un nom long mangerait deja la ville.
+ */
+export type FaitsFicheOuverte = {
+  nom: string;
+  metierSingulier: string;
+  ville: string;
+  codePostal?: string | null;
+  pays?: string | null;
+  dateCreation?: string | null;
+  formeJuridiqueCode?: string | null;
+};
+
+const LONGUEUR_TITRE_MAX = 65;
+const LONGUEUR_DESC_MAX = 158;
+
+/**
+ * Espaces normalises. 4 185 noms en base portent un double espace herite du
+ * registre ("Bureau d'architectes  DOYEN") : on ne touche pas a la colonne
+ * (une reecriture de masse reordonne la table, cf. lecon du 03/09), on
+ * nettoie a l'affichage.
+ */
+function nettoyer(t: string): string {
+  return t.replace(/\s+/g, " ").trim();
+}
+
+/** Coupe a la derniere phrase entiere, jamais en plein mot. */
+function couperPhrase(texte: string, max: number): string {
+  if (texte.length <= max) return texte;
+  const bout = texte.slice(0, max);
+  const point = bout.lastIndexOf(". ");
+  if (point > max * 0.6) return bout.slice(0, point + 1);
+  const espace = bout.lastIndexOf(" ");
+  return `${bout.slice(0, espace > 0 ? espace : max)}...`;
+}
+
+/** "13 juillet 2007", avec "1er" au lieu de "1" pour le premier du mois. */
+export function dateEnToutesLettres(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const jour = d.getUTCDate();
+  const mois = d.toLocaleDateString("fr-FR", { month: "long", timeZone: "UTC" });
+  return `${jour === 1 ? "1er" : jour} ${mois} ${d.getUTCFullYear()}`;
+}
+
+export function titreFicheOuverte(
+  f: FaitsFicheOuverte,
+  metierAffiche: string,
+  autreNom?: string | null
+): string {
+  const base = `${nettoyer(f.nom)}${autreNom ? ` (${nettoyer(autreNom)})` : ""} - ${metierAffiche}${f.ville ? ` à ${f.ville}` : ""}`;
+  const d = f.dateCreation ? new Date(f.dateCreation) : null;
+  const annee = d && !Number.isNaN(d.getTime()) ? d.getUTCFullYear() : null;
+  if (!annee) return base;
+  const avecAnnee = `${base}, depuis ${annee}`;
+  return avecAnnee.length <= LONGUEUR_TITRE_MAX ? avecAnnee : base;
+}
+
+export function descriptionFicheOuverte(f: FaitsFicheOuverte): string {
+  const ou = f.ville ? ` à ${f.ville}` : "";
+  const cp = f.codePostal ? ` (${f.codePostal})` : "";
+  const tete = `${nettoyer(f.nom)}, ${f.metierSingulier}${ou}${cp}.`;
+
+  // Ordre de valeur decroissante : ce qui saute en premier a la troncature est
+  // ce qui compte le moins. Un nom long ne doit jamais couter l'appel a
+  // l'action, seul bout de la phrase qui fait cliquer.
+  const milieu: string[] = [];
+  const creation = dateEnToutesLettres(f.dateCreation);
+  if (creation) {
+    const d = new Date(f.dateCreation as string);
+    const ans = new Date().getUTCFullYear() - d.getUTCFullYear();
+    milieu.push(
+      ans >= 1
+        ? `Entreprise créée le ${creation}, ${ans} ${ans > 1 ? "ans" : "an"} d'activité.`
+        : `Entreprise créée le ${creation}.`
+    );
+  }
+  const forme = formeJuridiqueDistinctive(f.formeJuridiqueCode);
+  if (forme) milieu.push(`${forme}.`);
+  // Belgique : ces entreprises ont un numero BCE, pas un SIRET. L'annoncer
+  // faux serait une erreur de fait sur 100 % des fiches belges.
+  milieu.push(
+    f.pays === "BE"
+      ? "Numéro d'entreprise vérifié à la BCE."
+      : "SIRET vérifié au registre officiel."
+  );
+
+  const queue = "Demandez un devis gratuitement.";
+  const garde = [...milieu];
+  while (garde.length && [tete, ...garde, queue].join(" ").length > LONGUEUR_DESC_MAX) {
+    garde.pop();
+  }
+  const phrase = [tete, ...garde, queue].join(" ");
+  return phrase.length <= LONGUEUR_DESC_MAX ? phrase : couperPhrase(phrase, LONGUEUR_DESC_MAX);
 }

@@ -73,7 +73,7 @@ export const CATEGORIES_JURIDIQUES: Record<string, string> = {
   "5460": "Autre SARL coopérative",
   "5470": "Société de Participations Financières de Profession Libérale Société à responsabilité limitée (SPFPL SARL)",
   "5485": "Société d'exercice libéral à responsabilité limitée",
-  "5499": "Société à responsabilité limitée (sans autre indication)",
+  "5499": "SARL, société à responsabilité limitée",
   "5505": "SA à participation ouvrière à conseil d'administration",
   "5510": "SA nationale à conseil d'administration",
   "5515": "SA d'économie mixte à conseil d'administration",

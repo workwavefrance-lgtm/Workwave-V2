@@ -51,6 +51,7 @@ import { libelleNaf } from "@/lib/data/naf-labels";
 // navigateur avant/apres) separement d'une correction de defaut.
 import ProGallery from "@/components/pro/ProGallery";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
+import { descriptionFicheOuverte, titreFicheOuverte } from "@/lib/seo/pro-registre";
 import { haversineKm } from "@/lib/utils/haversine";
 import type { OpeningHours, DaySchedule } from "@/lib/types/database";
 // IDs des catégories Workwave AI (tech + business + créatif) : pour ces pros,
@@ -84,9 +85,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // contenu enrichi qui passe le seuil thin content de Google.
   const proAi = pro as typeof pro & { description_ai?: string | null };
   const effectiveDescription = pro.description || proAi.description_ai || null;
+  // Repli quand le professionnel n'a pas ecrit sa description, soit la quasi
+  // totalite des fiches. L'ancienne phrase, « Untel, Plombier a Tulle.
+  // Contactez ce professionnel gratuitement. », ne disait rien que le titre ne
+  // disait deja. Mesure du 04/09 sur 148 868 affichages : les fiches fermees,
+  // qui annoncent des faits du registre, prennent 43 % de clics en plus a
+  // position egale. On sert les memes faits, aux memes sources.
+  const faitsFiche = {
+    nom: pro.name,
+    metierSingulier: getCategoryListing(pro.category.slug, pro.category.name).singular,
+    ville: cityName,
+    codePostal: pro.city?.postal_code,
+    pays: pro.city?.country,
+    dateCreation: pro.founding_date,
+    formeJuridiqueCode: pro.forme_juridique,
+  };
   const desc =
-    truncateDescription(effectiveDescription) ||
-    `${pro.name}, ${pro.category.name} à ${cityName}. Contactez ce professionnel gratuitement.`;
+    truncateDescription(effectiveDescription) || descriptionFicheOuverte(faitsFiche);
 
   // Canonical : si pro tech, pointer vers /ai/freelance/[slug] (Workwave AI).
   // Sinon, /artisan/[slug] (Workwave BTP standard).
@@ -143,9 +158,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? nomsAlternatifs(pro)
     : { enseignes: [] as string[], nomCommercial: null };
   const autreNom = enseignes[0] || nomCommercial;
-  const titre = `${pro.name}${autreNom ? ` (${autreNom})` : ""} - ${pro.category.name} à ${cityName}`;
+  // L'annee de creation entre dans le titre quand elle tient sous la coupure de
+  // Google, et le suffixe « | Workwave.fr » du gabarit est retire ici : il
+  // mangeait 14 caracteres, au point que 7,6 % des affichages perdaient le nom
+  // de la ville. Le listing procede deja ainsi (title absolute).
+  const titre = titreFicheOuverte(faitsFiche, pro.category.name, autreNom);
   return {
-    title: titre,
+    title: { absolute: `${titre} | Workwave.fr`.length <= 65 ? `${titre} | Workwave.fr` : titre },
     description: desc,
     alternates: {
       canonical: canonicalUrl,
