@@ -1,5 +1,5 @@
 // Barometre densite d'entreprises artisanales par departement + etat Sirene.
-// Genere le 2026-09-03 par scripts/build-barometre.ts (donnees : extraction). NE PAS editer a la main.
+// Genere le 2026-09-05 par scripts/build-barometre.ts (donnees : extraction). NE PAS editer a la main.
 // pros = fiches OUVERTES de notre base (source SIRENE, etablissements non fermes).
 // actifs / verifies / fermes / disparus = fichiers Stock Sirene (INSEE), classement du 03/09/2026.
 // partFermes = fermes / verifies, partDisparus = disparus / verifies (en %, null sous 200 fiches verifiees).
@@ -14,6 +14,22 @@ export type BarometreDept = {
 
 export const BAROMETRE_ARTISANS: BarometreDept[] = [
   {
+    "code": "06",
+    "name": "Alpes-Maritimes",
+    "region": "Provence-Alpes-Côte d'Azur",
+    "pros": 33174,
+    "actifs": 50256,
+    "verifies": 50255,
+    "fermes": 17082,
+    "disparus": 11247,
+    "partFermes": 34,
+    "partDisparus": 22.4,
+    "population": 1103941,
+    "superficie": 4298.58,
+    "densite": 300.5,
+    "rank": 1
+  },
+  {
     "code": "23",
     "name": "Creuse",
     "region": "Nouvelle-Aquitaine",
@@ -27,7 +43,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 115702,
     "superficie": 5565.38,
     "densite": 280.3,
-    "rank": 1
+    "rank": 2
   },
   {
     "code": "05",
@@ -43,7 +59,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 140976,
     "superficie": 5548.68,
     "densite": 278.3,
-    "rank": 2
+    "rank": 3
+  },
+  {
+    "code": "83",
+    "name": "Var",
+    "region": "Provence-Alpes-Côte d'Azur",
+    "pros": 29375,
+    "actifs": 46446,
+    "verifies": 46445,
+    "fermes": 17071,
+    "disparus": 11368,
+    "partFermes": 36.8,
+    "partDisparus": 24.5,
+    "population": 1095337,
+    "superficie": 5972.54,
+    "densite": 268.2,
+    "rank": 4
   },
   {
     "code": "2A",
@@ -59,23 +91,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 162942,
     "superficie": 4014.22,
     "densite": 258.4,
-    "rank": 3
+    "rank": 5
   },
   {
     "code": "04",
     "name": "Alpes-de-Haute-Provence",
     "region": "Provence-Alpes-Côte d'Azur",
-    "pros": 4255,
-    "actifs": 10561,
-    "verifies": 10561,
+    "pros": 4257,
+    "actifs": 10563,
+    "verifies": 10563,
     "fermes": 6306,
     "disparus": 4415,
     "partFermes": 59.7,
     "partDisparus": 41.8,
     "population": 166077,
     "superficie": 6925.22,
-    "densite": 256.2,
-    "rank": 4
+    "densite": 256.3,
+    "rank": 6
   },
   {
     "code": "19",
@@ -91,7 +123,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 239784,
     "superficie": 5856.83,
     "densite": 245.7,
-    "rank": 5
+    "rank": 7
   },
   {
     "code": "46",
@@ -107,7 +139,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 174942,
     "superficie": 5216.53,
     "densite": 244.3,
-    "rank": 6
+    "rank": 8
   },
   {
     "code": "09",
@@ -123,7 +155,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 154596,
     "superficie": 4889.92,
     "densite": 243,
-    "rank": 7
+    "rank": 9
   },
   {
     "code": "32",
@@ -139,7 +171,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 192437,
     "superficie": 6256.82,
     "densite": 238,
-    "rank": 8
+    "rank": 10
   },
   {
     "code": "65",
@@ -155,7 +187,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 230956,
     "superficie": 4464.04,
     "densite": 233.2,
-    "rank": 9
+    "rank": 11
+  },
+  {
+    "code": "75",
+    "name": "Paris",
+    "region": "Île-de-France",
+    "pros": 49028,
+    "actifs": 66419,
+    "verifies": 66418,
+    "fermes": 17391,
+    "disparus": 11076,
+    "partFermes": 26.2,
+    "partDisparus": 16.7,
+    "population": 2133111,
+    "superficie": 105.4,
+    "densite": 229.8,
+    "rank": 12
   },
   {
     "code": "43",
@@ -171,23 +219,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 227284,
     "superficie": 4977.14,
     "densite": 220.6,
-    "rank": 10
+    "rank": 13
   },
   {
     "code": "48",
     "name": "Lozère",
     "region": "Occitanie",
-    "pros": 1667,
-    "actifs": 3729,
-    "verifies": 3729,
+    "pros": 1668,
+    "actifs": 3730,
+    "verifies": 3730,
     "fermes": 2062,
     "disparus": 1452,
     "partFermes": 55.3,
     "partDisparus": 38.9,
     "population": 76519,
     "superficie": 5166.88,
-    "densite": 217.9,
-    "rank": 11
+    "densite": 218,
+    "rank": 14
   },
   {
     "code": "47",
@@ -203,7 +251,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 331229,
     "superficie": 5360.91,
     "densite": 217.1,
-    "rank": 12
+    "rank": 15
+  },
+  {
+    "code": "34",
+    "name": "Hérault",
+    "region": "Occitanie",
+    "pros": 25830,
+    "actifs": 42180,
+    "verifies": 42177,
+    "fermes": 16350,
+    "disparus": 10737,
+    "partFermes": 38.8,
+    "partDisparus": 25.5,
+    "population": 1201883,
+    "superficie": 6101.01,
+    "densite": 214.9,
+    "rank": 16
   },
   {
     "code": "2B",
@@ -219,7 +283,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 184655,
     "superficie": 4665.57,
     "densite": 212.9,
-    "rank": 13
+    "rank": 17
+  },
+  {
+    "code": "33",
+    "name": "Gironde",
+    "region": "Nouvelle-Aquitaine",
+    "pros": 34997,
+    "actifs": 53702,
+    "verifies": 53702,
+    "fermes": 18705,
+    "disparus": 12120,
+    "partFermes": 34.8,
+    "partDisparus": 22.6,
+    "population": 1654970,
+    "superficie": 10000.14,
+    "densite": 211.5,
+    "rank": 18
   },
   {
     "code": "58",
@@ -235,7 +315,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 202417,
     "superficie": 6816.71,
     "densite": 210.1,
-    "rank": 14
+    "rank": 19
   },
   {
     "code": "15",
@@ -251,7 +331,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 144226,
     "superficie": 5725.98,
     "densite": 206.8,
-    "rank": 15
+    "rank": 20
   },
   {
     "code": "82",
@@ -267,23 +347,39 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 263377,
     "superficie": 3718.28,
     "densite": 203.8,
-    "rank": 16
+    "rank": 21
   },
   {
     "code": "24",
     "name": "Dordogne",
     "region": "Nouvelle-Aquitaine",
-    "pros": 8394,
-    "actifs": 19650,
-    "verifies": 19648,
+    "pros": 8415,
+    "actifs": 19671,
+    "verifies": 19669,
     "fermes": 11256,
     "disparus": 7978,
-    "partFermes": 57.3,
+    "partFermes": 57.2,
     "partDisparus": 40.6,
     "population": 413730,
     "superficie": 9060.01,
-    "densite": 202.9,
-    "rank": 17
+    "densite": 203.4,
+    "rank": 22
+  },
+  {
+    "code": "93",
+    "name": "Seine-Saint-Denis",
+    "region": "Île-de-France",
+    "pros": 33561,
+    "actifs": 51861,
+    "verifies": 51858,
+    "fermes": 18300,
+    "disparus": 12984,
+    "partFermes": 35.3,
+    "partDisparus": 25,
+    "population": 1668670,
+    "superficie": 236.2,
+    "densite": 201.1,
+    "rank": 23
   },
   {
     "code": "12",
@@ -299,7 +395,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 279649,
     "superficie": 8735.12,
     "densite": 199.4,
-    "rank": 18
+    "rank": 24
   },
   {
     "code": "40",
@@ -315,7 +411,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 422976,
     "superficie": 9242.6,
     "densite": 198.5,
-    "rank": 19
+    "rank": 25
   },
   {
     "code": "39",
@@ -331,7 +427,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 258555,
     "superficie": 4999.18,
     "densite": 197.9,
-    "rank": 20
+    "rank": 26
   },
   {
     "code": "07",
@@ -347,7 +443,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 331415,
     "superficie": 5528.64,
     "densite": 188.2,
-    "rank": 21
+    "rank": 27
   },
   {
     "code": "70",
@@ -363,7 +459,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 234296,
     "superficie": 5360.08,
     "densite": 187.4,
-    "rank": 22
+    "rank": 28
   },
   {
     "code": "03",
@@ -379,7 +475,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 334872,
     "superficie": 7340.11,
     "densite": 184.5,
-    "rank": 23
+    "rank": 29
   },
   {
     "code": "16",
@@ -395,7 +491,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 350867,
     "superficie": 5955.99,
     "densite": 183.3,
-    "rank": 24
+    "rank": 30
+  },
+  {
+    "code": "38",
+    "name": "Isère",
+    "region": "Auvergne-Rhône-Alpes",
+    "pros": 23556,
+    "actifs": 39986,
+    "verifies": 39982,
+    "fermes": 16430,
+    "disparus": 10861,
+    "partFermes": 41.1,
+    "partDisparus": 27.2,
+    "population": 1284948,
+    "superficie": 7431.49,
+    "densite": 183.3,
+    "rank": 31
   },
   {
     "code": "73",
@@ -411,7 +523,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 442468,
     "superficie": 6028.25,
     "densite": 183.2,
-    "rank": 25
+    "rank": 32
   },
   {
     "code": "61",
@@ -427,7 +539,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 276973,
     "superficie": 6103.38,
     "densite": 182.5,
-    "rank": 26
+    "rank": 33
   },
   {
     "code": "81",
@@ -443,7 +555,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 393572,
     "superficie": 5757.89,
     "densite": 180.3,
-    "rank": 27
+    "rank": 34
   },
   {
     "code": "10",
@@ -459,7 +571,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 311329,
     "superficie": 6004.16,
     "densite": 179.5,
-    "rank": 28
+    "rank": 35
   },
   {
     "code": "36",
@@ -475,7 +587,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 217228,
     "superficie": 6790.63,
     "densite": 178.8,
-    "rank": 29
+    "rank": 36
   },
   {
     "code": "89",
@@ -491,7 +603,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 333385,
     "superficie": 7427.35,
     "densite": 177.8,
-    "rank": 30
+    "rank": 37
   },
   {
     "code": "55",
@@ -507,7 +619,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 181919,
     "superficie": 6211.44,
     "densite": 177.1,
-    "rank": 31
+    "rank": 38
+  },
+  {
+    "code": "13",
+    "name": "Bouches-du-Rhône",
+    "region": "Provence-Alpes-Côte d'Azur",
+    "pros": 36274,
+    "actifs": 55037,
+    "verifies": 55037,
+    "fermes": 18763,
+    "disparus": 12429,
+    "partFermes": 34.1,
+    "partDisparus": 22.6,
+    "population": 2056943,
+    "superficie": 5087.49,
+    "densite": 176.3,
+    "rank": 39
   },
   {
     "code": "08",
@@ -523,7 +651,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 268859,
     "superficie": 5229.41,
     "densite": 174.6,
-    "rank": 32
+    "rank": 40
   },
   {
     "code": "90",
@@ -539,7 +667,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 139654,
     "superficie": 609.44,
     "densite": 172.3,
-    "rank": 33
+    "rank": 41
+  },
+  {
+    "code": "95",
+    "name": "Val-d'Oise",
+    "region": "Île-de-France",
+    "pros": 21643,
+    "actifs": 37674,
+    "verifies": 37674,
+    "fermes": 16031,
+    "disparus": 10823,
+    "partFermes": 42.6,
+    "partDisparus": 28.7,
+    "population": 1256607,
+    "superficie": 1245.91,
+    "densite": 172.2,
+    "rank": 42
   },
   {
     "code": "18",
@@ -555,7 +699,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 299573,
     "superficie": 7234.99,
     "densite": 169.9,
-    "rank": 34
+    "rank": 43
   },
   {
     "code": "87",
@@ -571,7 +715,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 371691,
     "superficie": 5520.13,
     "densite": 169.7,
-    "rank": 35
+    "rank": 44
   },
   {
     "code": "41",
@@ -587,7 +731,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 328504,
     "superficie": 6343.44,
     "densite": 169.7,
-    "rank": 36
+    "rank": 45
   },
   {
     "code": "11",
@@ -603,7 +747,39 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 376028,
     "superficie": 6138.98,
     "densite": 167.4,
-    "rank": 37
+    "rank": 46
+  },
+  {
+    "code": "69",
+    "name": "Rhône",
+    "region": "Auvergne-Rhône-Alpes",
+    "pros": 30886,
+    "actifs": 49286,
+    "verifies": 49285,
+    "fermes": 18400,
+    "disparus": 11507,
+    "partFermes": 37.3,
+    "partDisparus": 23.3,
+    "population": 1893692,
+    "superficie": 3249.12,
+    "densite": 163.1,
+    "rank": 47
+  },
+  {
+    "code": "31",
+    "name": "Haute-Garonne",
+    "region": "Occitanie",
+    "pros": 23283,
+    "actifs": 40311,
+    "verifies": 40311,
+    "fermes": 17028,
+    "disparus": 11056,
+    "partFermes": 42.2,
+    "partDisparus": 27.4,
+    "population": 1434367,
+    "superficie": 6309.34,
+    "densite": 162.3,
+    "rank": 48
   },
   {
     "code": "28",
@@ -619,7 +795,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 431277,
     "superficie": 5879.95,
     "densite": 162.3,
-    "rank": 38
+    "rank": 49
   },
   {
     "code": "88",
@@ -635,7 +811,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 360673,
     "superficie": 5873.78,
     "densite": 161.9,
-    "rank": 39
+    "rank": 50
   },
   {
     "code": "52",
@@ -651,7 +827,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 171042,
     "superficie": 6210.6,
     "densite": 161.2,
-    "rank": 40
+    "rank": 51
   },
   {
     "code": "26",
@@ -667,7 +843,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 519458,
     "superficie": 6529.95,
     "densite": 158.7,
-    "rank": 41
+    "rank": 52
+  },
+  {
+    "code": "77",
+    "name": "Seine-et-Marne",
+    "region": "Île-de-France",
+    "pros": 22526,
+    "actifs": 39027,
+    "verifies": 39027,
+    "fermes": 16501,
+    "disparus": 11207,
+    "partFermes": 42.3,
+    "partDisparus": 28.7,
+    "population": 1438100,
+    "superficie": 5915.29,
+    "densite": 156.6,
+    "rank": 53
   },
   {
     "code": "71",
@@ -683,7 +875,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 549288,
     "superficie": 8574.69,
     "densite": 153.9,
-    "rank": 42
+    "rank": 54
+  },
+  {
+    "code": "67",
+    "name": "Bas-Rhin",
+    "region": "Grand Est",
+    "pros": 17323,
+    "actifs": 31731,
+    "verifies": 31729,
+    "fermes": 14408,
+    "disparus": 9465,
+    "partFermes": 45.4,
+    "partDisparus": 29.8,
+    "population": 1152662,
+    "superficie": 4755.03,
+    "densite": 150.3,
+    "rank": 55
   },
   {
     "code": "66",
@@ -699,7 +907,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 487307,
     "superficie": 4116.02,
     "densite": 148.8,
-    "rank": 43
+    "rank": 56
   },
   {
     "code": "84",
@@ -715,7 +923,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 564566,
     "superficie": 3567.26,
     "densite": 148.6,
-    "rank": 44
+    "rank": 57
   },
   {
     "code": "53",
@@ -731,7 +939,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 305933,
     "superficie": 5175.21,
     "densite": 148.3,
-    "rank": 45
+    "rank": 58
   },
   {
     "code": "79",
@@ -747,7 +955,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 374587,
     "superficie": 5999.35,
     "densite": 146.4,
-    "rank": 46
+    "rank": 59
   },
   {
     "code": "25",
@@ -763,7 +971,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 547096,
     "superficie": 5233.64,
     "densite": 144.6,
-    "rank": 47
+    "rank": 60
+  },
+  {
+    "code": "94",
+    "name": "Val-de-Marne",
+    "region": "Île-de-France",
+    "pros": 20154,
+    "actifs": 36657,
+    "verifies": 36655,
+    "fermes": 16503,
+    "disparus": 11395,
+    "partFermes": 45,
+    "partDisparus": 31.1,
+    "population": 1415367,
+    "superficie": 245.03,
+    "densite": 142.4,
+    "rank": 61
   },
   {
     "code": "21",
@@ -779,7 +1003,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 535503,
     "superficie": 8763.21,
     "densite": 141.7,
-    "rank": 48
+    "rank": 62
+  },
+  {
+    "code": "44",
+    "name": "Loire-Atlantique",
+    "region": "Pays de la Loire",
+    "pros": 20615,
+    "actifs": 35771,
+    "verifies": 35767,
+    "fermes": 15156,
+    "disparus": 10047,
+    "partFermes": 42.4,
+    "partDisparus": 28.1,
+    "population": 1457806,
+    "superficie": 6815.38,
+    "densite": 141.4,
+    "rank": 63
   },
   {
     "code": "27",
@@ -795,7 +1035,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 598934,
     "superficie": 6039.85,
     "densite": 140.5,
-    "rank": 49
+    "rank": 64
   },
   {
     "code": "86",
@@ -811,7 +1051,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 439385,
     "superficie": 6990.44,
     "densite": 139.8,
-    "rank": 50
+    "rank": 65
   },
   {
     "code": "17",
@@ -827,7 +1067,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 661404,
     "superficie": 6863.75,
     "densite": 137.6,
-    "rank": 51
+    "rank": 66
   },
   {
     "code": "63",
@@ -843,14 +1083,14 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 662285,
     "superficie": 7969.66,
     "densite": 136.9,
-    "rank": 52
+    "rank": 67
   },
   {
     "code": "64",
     "name": "Pyrénées-Atlantiques",
     "region": "Nouvelle-Aquitaine",
-    "pros": 9446,
-    "actifs": 22824,
+    "pros": 9447,
+    "actifs": 22825,
     "verifies": 22821,
     "fermes": 13378,
     "disparus": 8811,
@@ -859,7 +1099,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 693027,
     "superficie": 7644.76,
     "densite": 136.3,
-    "rank": 53
+    "rank": 68
+  },
+  {
+    "code": "78",
+    "name": "Yvelines",
+    "region": "Île-de-France",
+    "pros": 19698,
+    "actifs": 35466,
+    "verifies": 35464,
+    "fermes": 15768,
+    "disparus": 10476,
+    "partFermes": 44.5,
+    "partDisparus": 29.5,
+    "population": 1456365,
+    "superficie": 2284.43,
+    "densite": 135.3,
+    "rank": 69
   },
   {
     "code": "22",
@@ -875,7 +1131,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 605917,
     "superficie": 6877.55,
     "densite": 135,
-    "rank": 54
+    "rank": 70
   },
   {
     "code": "971",
@@ -891,7 +1147,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 384315,
     "superficie": 1628.4,
     "densite": 132.3,
-    "rank": 55
+    "rank": 71
+  },
+  {
+    "code": "35",
+    "name": "Ille-et-Vilaine",
+    "region": "Bretagne",
+    "pros": 14457,
+    "actifs": 27811,
+    "verifies": 27811,
+    "fermes": 13354,
+    "disparus": 8903,
+    "partFermes": 48,
+    "partDisparus": 32,
+    "population": 1098325,
+    "superficie": 6774.72,
+    "densite": 131.6,
+    "rank": 72
   },
   {
     "code": "01",
@@ -907,7 +1179,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 663202,
     "superficie": 5762.39,
     "densite": 130.7,
-    "rank": 56
+    "rank": 73
   },
   {
     "code": "37",
@@ -923,7 +1195,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 612160,
     "superficie": 6126.7,
     "densite": 130.1,
-    "rank": 57
+    "rank": 74
   },
   {
     "code": "50",
@@ -939,7 +1211,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 495508,
     "superficie": 5938.02,
     "densite": 126.7,
-    "rank": 58
+    "rank": 75
   },
   {
     "code": "51",
@@ -955,7 +1227,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 565292,
     "superficie": 8161.58,
     "densite": 124.7,
-    "rank": 59
+    "rank": 76
   },
   {
     "code": "72",
@@ -971,7 +1243,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 566058,
     "superficie": 6205.99,
     "densite": 124,
-    "rank": 60
+    "rank": 77
   },
   {
     "code": "42",
@@ -987,7 +1259,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 769029,
     "superficie": 4780.59,
     "densite": 122.8,
-    "rank": 61
+    "rank": 78
   },
   {
     "code": "80",
@@ -1003,7 +1275,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 566252,
     "superficie": 6170.12,
     "densite": 121.6,
-    "rank": 62
+    "rank": 79
   },
   {
     "code": "02",
@@ -1019,7 +1291,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 527468,
     "superficie": 7369.12,
     "densite": 120.8,
-    "rank": 63
+    "rank": 80
   },
   {
     "code": "45",
@@ -1035,7 +1307,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 684561,
     "superficie": 6775.23,
     "densite": 120.7,
-    "rank": 64
+    "rank": 81
+  },
+  {
+    "code": "76",
+    "name": "Seine-Maritime",
+    "region": "Normandie",
+    "pros": 15034,
+    "actifs": 29709,
+    "verifies": 29707,
+    "fermes": 14675,
+    "disparus": 9926,
+    "partFermes": 49.4,
+    "partDisparus": 33.4,
+    "population": 1255918,
+    "superficie": 6277.57,
+    "densite": 119.7,
+    "rank": 82
   },
   {
     "code": "30",
@@ -1051,7 +1339,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 756543,
     "superficie": 5852.77,
     "densite": 118.5,
-    "rank": 65
+    "rank": 83
   },
   {
     "code": "74",
@@ -1067,7 +1355,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 841482,
     "superficie": 4387.8,
     "densite": 118.3,
-    "rank": 66
+    "rank": 84
   },
   {
     "code": "68",
@@ -1083,7 +1371,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 767083,
     "superficie": 3525.17,
     "densite": 117,
-    "rank": 67
+    "rank": 85
   },
   {
     "code": "14",
@@ -1099,7 +1387,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 700633,
     "superficie": 5539.18,
     "densite": 116.5,
-    "rank": 68
+    "rank": 86
   },
   {
     "code": "85",
@@ -1115,7 +1403,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 699459,
     "superficie": 6719.59,
     "densite": 115.9,
-    "rank": 69
+    "rank": 87
   },
   {
     "code": "56",
@@ -1131,7 +1419,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 768687,
     "superficie": 6822.64,
     "densite": 115.3,
-    "rank": 70
+    "rank": 88
   },
   {
     "code": "54",
@@ -1147,7 +1435,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 732486,
     "superficie": 5245.91,
     "densite": 114,
-    "rank": 71
+    "rank": 89
   },
   {
     "code": "972",
@@ -1163,7 +1451,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 360749,
     "superficie": 1128,
     "densite": 110.5,
-    "rank": 72
+    "rank": 90
+  },
+  {
+    "code": "92",
+    "name": "Hauts-de-Seine",
+    "region": "Île-de-France",
+    "pros": 17629,
+    "actifs": 34679,
+    "verifies": 34677,
+    "fermes": 17050,
+    "disparus": 11500,
+    "partFermes": 49.2,
+    "partDisparus": 33.2,
+    "population": 1635291,
+    "superficie": 175.61,
+    "densite": 107.8,
+    "rank": 91
   },
   {
     "code": "60",
@@ -1179,7 +1483,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 828838,
     "superficie": 5860.22,
     "densite": 104,
-    "rank": 73
+    "rank": 92
   },
   {
     "code": "49",
@@ -1195,39 +1499,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 824743,
     "superficie": 7165.6,
     "densite": 101.6,
-    "rank": 74
+    "rank": 93
   },
   {
-    "code": "06",
-    "name": "Alpes-Maritimes",
-    "region": "Provence-Alpes-Côte d'Azur",
-    "pros": 11135,
-    "actifs": 28217,
-    "verifies": 28216,
-    "fermes": 17082,
-    "disparus": 11247,
-    "partFermes": 60.5,
-    "partDisparus": 39.9,
-    "population": 1103941,
-    "superficie": 4298.58,
-    "densite": 100.9,
-    "rank": 75
-  },
-  {
-    "code": "83",
-    "name": "Var",
-    "region": "Provence-Alpes-Côte d'Azur",
-    "pros": 10862,
-    "actifs": 27933,
-    "verifies": 27932,
-    "fermes": 17071,
-    "disparus": 11368,
-    "partFermes": 61.1,
-    "partDisparus": 40.7,
-    "population": 1095337,
-    "superficie": 5972.54,
-    "densite": 99.2,
-    "rank": 76
+    "code": "59",
+    "name": "Nord",
+    "region": "Hauts-de-France",
+    "pros": 26275,
+    "actifs": 43630,
+    "verifies": 43630,
+    "fermes": 17355,
+    "disparus": 11481,
+    "partFermes": 39.8,
+    "partDisparus": 26.3,
+    "population": 2611293,
+    "superficie": 5738.33,
+    "densite": 100.6,
+    "rank": 94
   },
   {
     "code": "29",
@@ -1243,7 +1531,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 921638,
     "superficie": 6733,
     "densite": 97.7,
-    "rank": 77
+    "rank": 95
   },
   {
     "code": "57",
@@ -1259,87 +1547,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 1049942,
     "superficie": 6216.27,
     "densite": 93.5,
-    "rank": 78
-  },
-  {
-    "code": "67",
-    "name": "Bas-Rhin",
-    "region": "Grand Est",
-    "pros": 10736,
-    "actifs": 25144,
-    "verifies": 25142,
-    "fermes": 14408,
-    "disparus": 9465,
-    "partFermes": 57.3,
-    "partDisparus": 37.6,
-    "population": 1152662,
-    "superficie": 4755.03,
-    "densite": 93.1,
-    "rank": 79
-  },
-  {
-    "code": "95",
-    "name": "Val-d'Oise",
-    "region": "Île-de-France",
-    "pros": 11194,
-    "actifs": 27225,
-    "verifies": 27225,
-    "fermes": 16031,
-    "disparus": 10823,
-    "partFermes": 58.9,
-    "partDisparus": 39.8,
-    "population": 1256607,
-    "superficie": 1245.91,
-    "densite": 89.1,
-    "rank": 80
-  },
-  {
-    "code": "38",
-    "name": "Isère",
-    "region": "Auvergne-Rhône-Alpes",
-    "pros": 11125,
-    "actifs": 27555,
-    "verifies": 27551,
-    "fermes": 16430,
-    "disparus": 10861,
-    "partFermes": 59.6,
-    "partDisparus": 39.4,
-    "population": 1284948,
-    "superficie": 7431.49,
-    "densite": 86.6,
-    "rank": 81
-  },
-  {
-    "code": "34",
-    "name": "Hérault",
-    "region": "Occitanie",
-    "pros": 10391,
-    "actifs": 26741,
-    "verifies": 26738,
-    "fermes": 16350,
-    "disparus": 10737,
-    "partFermes": 61.1,
-    "partDisparus": 40.2,
-    "population": 1201883,
-    "superficie": 6101.01,
-    "densite": 86.5,
-    "rank": 82
-  },
-  {
-    "code": "35",
-    "name": "Ille-et-Vilaine",
-    "region": "Bretagne",
-    "pros": 9316,
-    "actifs": 22670,
-    "verifies": 22670,
-    "fermes": 13354,
-    "disparus": 8903,
-    "partFermes": 58.9,
-    "partDisparus": 39.3,
-    "population": 1098325,
-    "superficie": 6774.72,
-    "densite": 84.8,
-    "rank": 83
+    "rank": 96
   },
   {
     "code": "973",
@@ -1355,7 +1563,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 286618,
     "superficie": 83533.9,
     "densite": 83,
-    "rank": 84
+    "rank": 97
   },
   {
     "code": "91",
@@ -1371,135 +1579,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 1313768,
     "superficie": 1804.4,
     "densite": 81.7,
-    "rank": 85
-  },
-  {
-    "code": "33",
-    "name": "Gironde",
-    "region": "Nouvelle-Aquitaine",
-    "pros": 13031,
-    "actifs": 31736,
-    "verifies": 31736,
-    "fermes": 18705,
-    "disparus": 12120,
-    "partFermes": 58.9,
-    "partDisparus": 38.2,
-    "population": 1654970,
-    "superficie": 10000.14,
-    "densite": 78.7,
-    "rank": 86
-  },
-  {
-    "code": "76",
-    "name": "Seine-Maritime",
-    "region": "Normandie",
-    "pros": 9848,
-    "actifs": 24523,
-    "verifies": 24521,
-    "fermes": 14675,
-    "disparus": 9926,
-    "partFermes": 59.8,
-    "partDisparus": 40.5,
-    "population": 1255918,
-    "superficie": 6277.57,
-    "densite": 78.4,
-    "rank": 87
-  },
-  {
-    "code": "77",
-    "name": "Seine-et-Marne",
-    "region": "Île-de-France",
-    "pros": 11192,
-    "actifs": 27693,
-    "verifies": 27693,
-    "fermes": 16501,
-    "disparus": 11207,
-    "partFermes": 59.6,
-    "partDisparus": 40.5,
-    "population": 1438100,
-    "superficie": 5915.29,
-    "densite": 77.8,
-    "rank": 88
-  },
-  {
-    "code": "44",
-    "name": "Loire-Atlantique",
-    "region": "Pays de la Loire",
-    "pros": 10862,
-    "actifs": 26018,
-    "verifies": 26014,
-    "fermes": 15156,
-    "disparus": 10047,
-    "partFermes": 58.3,
-    "partDisparus": 38.6,
-    "population": 1457806,
-    "superficie": 6815.38,
-    "densite": 74.5,
-    "rank": 89
-  },
-  {
-    "code": "78",
-    "name": "Yvelines",
-    "region": "Île-de-France",
-    "pros": 10803,
-    "actifs": 26571,
-    "verifies": 26569,
-    "fermes": 15768,
-    "disparus": 10476,
-    "partFermes": 59.3,
-    "partDisparus": 39.4,
-    "population": 1456365,
-    "superficie": 2284.43,
-    "densite": 74.2,
-    "rank": 90
-  },
-  {
-    "code": "31",
-    "name": "Haute-Garonne",
-    "region": "Occitanie",
-    "pros": 10387,
-    "actifs": 27415,
-    "verifies": 27415,
-    "fermes": 17028,
-    "disparus": 11056,
-    "partFermes": 62.1,
-    "partDisparus": 40.3,
-    "population": 1434367,
-    "superficie": 6309.34,
-    "densite": 72.4,
-    "rank": 91
-  },
-  {
-    "code": "94",
-    "name": "Val-de-Marne",
-    "region": "Île-de-France",
-    "pros": 10217,
-    "actifs": 26720,
-    "verifies": 26718,
-    "fermes": 16503,
-    "disparus": 11395,
-    "partFermes": 61.8,
-    "partDisparus": 42.6,
-    "population": 1415367,
-    "superficie": 245.03,
-    "densite": 72.2,
-    "rank": 92
-  },
-  {
-    "code": "93",
-    "name": "Seine-Saint-Denis",
-    "region": "Île-de-France",
-    "pros": 11561,
-    "actifs": 29861,
-    "verifies": 29858,
-    "fermes": 18300,
-    "disparus": 12984,
-    "partFermes": 61.3,
-    "partDisparus": 43.5,
-    "population": 1668670,
-    "superficie": 236.2,
-    "densite": 69.3,
-    "rank": 93
+    "rank": 98
   },
   {
     "code": "62",
@@ -1515,71 +1595,7 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 1461441,
     "superficie": 6671.35,
     "densite": 68.8,
-    "rank": 94
-  },
-  {
-    "code": "69",
-    "name": "Rhône",
-    "region": "Auvergne-Rhône-Alpes",
-    "pros": 12545,
-    "actifs": 30945,
-    "verifies": 30944,
-    "fermes": 18400,
-    "disparus": 11507,
-    "partFermes": 59.5,
-    "partDisparus": 37.2,
-    "population": 1893692,
-    "superficie": 3249.12,
-    "densite": 66.2,
-    "rank": 95
-  },
-  {
-    "code": "92",
-    "name": "Hauts-de-Seine",
-    "region": "Île-de-France",
-    "pros": 9697,
-    "actifs": 26747,
-    "verifies": 26745,
-    "fermes": 17050,
-    "disparus": 11500,
-    "partFermes": 63.8,
-    "partDisparus": 43,
-    "population": 1635291,
-    "superficie": 175.61,
-    "densite": 59.3,
-    "rank": 96
-  },
-  {
-    "code": "13",
-    "name": "Bouches-du-Rhône",
-    "region": "Provence-Alpes-Côte d'Azur",
-    "pros": 11590,
-    "actifs": 30353,
-    "verifies": 30353,
-    "fermes": 18763,
-    "disparus": 12429,
-    "partFermes": 61.8,
-    "partDisparus": 40.9,
-    "population": 2056943,
-    "superficie": 5087.49,
-    "densite": 56.3,
-    "rank": 97
-  },
-  {
-    "code": "75",
-    "name": "Paris",
-    "region": "Île-de-France",
-    "pros": 11996,
-    "actifs": 29387,
-    "verifies": 29386,
-    "fermes": 17391,
-    "disparus": 11076,
-    "partFermes": 59.2,
-    "partDisparus": 37.7,
-    "population": 2133111,
-    "superficie": 105.4,
-    "densite": 56.2,
-    "rank": 98
+    "rank": 99
   },
   {
     "code": "974",
@@ -1595,39 +1611,23 @@ export const BAROMETRE_ARTISANS: BarometreDept[] = [
     "population": 871157,
     "superficie": 2503.72,
     "densite": 53.6,
-    "rank": 99
-  },
-  {
-    "code": "59",
-    "name": "Nord",
-    "region": "Hauts-de-France",
-    "pros": 11996,
-    "actifs": 29351,
-    "verifies": 29351,
-    "fermes": 17355,
-    "disparus": 11481,
-    "partFermes": 59.1,
-    "partDisparus": 39.1,
-    "population": 2611293,
-    "superficie": 5738.33,
-    "densite": 45.9,
     "rank": 100
   }
 ];
 
 export const BAROMETRE_META = {
-  totalPros: 736212, // fiches ouvertes, 100 departements
-  totalActifs: 1802905,
-  verifies: 1802796,
+  totalPros: 1031071, // fiches ouvertes, 100 departements
+  totalActifs: 2097764,
+  verifies: 2097654,
   fermes: 1066693,
   disparus: 732836,
-  partFermes: 59.2,
-  partDisparus: 40.6,
+  partFermes: 50.9,
+  partDisparus: 34.9,
   nbDepts: 100,
   popSource: "INSEE, population municipale 2021",
   prosSource: "Répertoire SIRENE (INSEE), établissements ouverts",
   etatsSource: "fichiers Stock Sirene (INSEE), classement du 03/09/2026",
   classementDu: "2026-09-03",
   seuilTaux: 200,
-  generatedAt: "2026-09-03",
+  generatedAt: "2026-09-05",
 };
