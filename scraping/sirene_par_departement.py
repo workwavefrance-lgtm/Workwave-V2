@@ -214,6 +214,94 @@ def query_sirene(naf_code, dept_code, cursor=None):
     return etabs, next_cursor, total
 
 
+def _upsert_unitaire(supabase, rows):
+    """Repli ligne par ligne, en RALLONGEANT le slug au lieu de jeter la ligne.
+
+    Le slug est `nom-NIC` (5 derniers chiffres du SIRET). Deux entreprises
+    homonymes portant le meme NIC dans deux departements differents entrent
+    donc en collision : « daouda-kamara-00011 » existe deja, la nouvelle est
+    refusee. L'ancien code faisait `except Exception: pass` et la perdait en
+    silence. Mesure du 05/09 sur la Seine-Maritime : 382 etablissements perdus
+    sur 16 706, soit 2,29 %, environ 4 600 sur l'ensemble du rattrapage.
+
+    Le SIRET est unique par construction : `nom-SIRET` ne peut pas collisionner.
+    """
+    ok = 0
+    perdus = []
+    for row in rows:
+        insere = False
+        for variante in (row["slug"], f"{make_slug(row['name'])}-{row['siret']}"):
+            row["slug"] = variante
+            try:
+                supabase.table("pros").upsert(
+                    row, on_conflict="siret", ignore_duplicates=True
+                ).execute()
+                ok += 1
+                insere = True
+                break
+            except Exception:
+                continue
+        if not insere:
+            perdus.append(row.get("siret", "?"))
+    if perdus:
+        # Rendre la perte VISIBLE. Un script qui annonce un succes alors qu'il
+        # a jete des lignes est le mode de defaillance recurrent de ce projet.
+        print(f"    !!! {len(perdus)} ligne(s) PERDUE(S) : {', '.join(perdus[:5])}")
+    return ok
+
+
+def upsert_lot(supabase, rows):
+    """Envoie un lot, en resolvant les collisions de slug au lieu de les subir.
+
+    Chemin rapide : un seul appel. En cas de collision de slug, on demande a la
+    base quels slugs du lot existent deja, on rallonge ceux-la avec le SIRET
+    complet, et on rejoue le lot. Cela remplace 1 000 appels unitaires par une
+    poignee de lectures : sur la Seine-Maritime, 37 lots etaient repartis ligne
+    par ligne, soit environ 37 000 allers-retours inutiles.
+    """
+    try:
+        supabase.table("pros").upsert(
+            rows, on_conflict="siret", ignore_duplicates=True
+        ).execute()
+        return len(rows)
+    except Exception as e:
+        if "pros_slug_key" not in str(e):
+            print(f"    Erreur batch non liee au slug ({e}), repli unitaire...")
+            return _upsert_unitaire(supabase, rows)
+
+        existants = set()
+        slugs = [r["slug"] for r in rows]
+        # 150 par lecture : `in_()` plafonne a 1 000 valeurs et une URL trop
+        # longue est rejetee avant meme d'atteindre ce plafond.
+        for i in range(0, len(slugs), 150):
+            try:
+                res = (
+                    supabase.table("pros")
+                    .select("slug")
+                    .in_("slug", slugs[i : i + 150])
+                    .execute()
+                )
+                existants.update(x["slug"] for x in (res.data or []))
+            except Exception:
+                pass
+
+        renommes = 0
+        for r in rows:
+            if r["slug"] in existants:
+                r["slug"] = f"{make_slug(r['name'])}-{r['siret']}"
+                renommes += 1
+        print(f"    {renommes} slug(s) en collision, rallonges avec le SIRET complet")
+
+        try:
+            supabase.table("pros").upsert(
+                rows, on_conflict="siret", ignore_duplicates=True
+            ).execute()
+            return len(rows)
+        except Exception as e2:
+            print(f"    lot toujours en echec ({e2}), repli unitaire...")
+            return _upsert_unitaire(supabase, rows)
+
+
 def scrape_departement(supabase, dept_code, categories, city_map):
     print(f"\n{'='*60}")
     print(f"DEPARTEMENT {dept_code}")
@@ -283,7 +371,12 @@ def scrape_departement(supabase, dept_code, categories, city_map):
                         "category_id": cat["id"],
                         "address": extract_address(adresse),
                         "city_id": city_map.get(insee_code),
-                        "postal_code": postal_code or None,
+                        # `pros.postal_code` est en varchar(5). Sirene renvoie
+                        # parfois un code postal etranger plus long, ce qui fait
+                        # echouer le lot entier en 22001 (4 lignes perdues sur le
+                        # run du 05/09, departements 06, 44 et 59). Un code non
+                        # francais n'a de toute facon pas de commune rattachee.
+                        "postal_code": postal_code if (postal_code or "").isdigit() and len(postal_code) == 5 else None,
                         "source": "sirene",
                         "naf_code": naf,
                         "founding_date": etab.get("dateCreationEtablissement") or None,
@@ -306,25 +399,7 @@ def scrape_departement(supabase, dept_code, categories, city_map):
                     unique_rows.append(row)
 
                 if unique_rows:
-                    try:
-                        supabase.table("pros").upsert(
-                            unique_rows,
-                            on_conflict="siret",
-                            ignore_duplicates=True,
-                        ).execute()
-                        naf_count += len(unique_rows)
-                    except Exception as e:
-                        print(f"    Erreur batch ({e}), fallback unitaire...")
-                        for row in unique_rows:
-                            try:
-                                supabase.table("pros").upsert(
-                                    row,
-                                    on_conflict="siret",
-                                    ignore_duplicates=True,
-                                ).execute()
-                                naf_count += 1
-                            except Exception:
-                                pass
+                    naf_count += upsert_lot(supabase, unique_rows)
 
                 if not next_cursor:
                     break
