@@ -1,0 +1,11 @@
+import puppeteer from "puppeteer-core"; import os from "os"; import path from "path";
+const CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const b=await puppeteer.launch({executablePath:CHROME,headless:"new",args:["--no-sandbox","--hide-scrollbars"]});
+const p=await b.newPage(); const errs=[];
+p.on("pageerror",e=>errs.push(e.message)); p.on("console",m=>m.type()==="error"&&errs.push(m.text()));
+await p.setViewport({width:1100,height:1500,deviceScaleFactor:2});
+await p.goto("http://localhost:3000/barometre-artisans-belgique",{waitUntil:"domcontentloaded",timeout:60000});
+await new Promise(r=>setTimeout(r,2000));
+await p.screenshot({path:path.join(os.homedir(),"Desktop","barometre-be.png"),clip:{x:0,y:0,width:1100,height:1300}});
+console.log("erreurs:",errs.length?errs.slice(0,3):"AUCUNE");
+await b.close();

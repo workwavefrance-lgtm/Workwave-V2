@@ -1,0 +1,40 @@
+import dotenv from "dotenv"; import path from "path";
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+import { getServiceClient } from "../lib/supabase/service-client";
+const sb = getServiceClient();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const c = async (t: string, f?: (q: any) => any) => {
+  let q = sb.from(t).select("id", { count: "exact", head: true });
+  if (f) q = f(q);
+  const { count, error } = await q;
+  return error ? `ERR ${error.message.slice(0,90)}` : count;
+};
+(async () => {
+  console.log("== SEO_PAGES ==");
+  console.log("total                :", await c("seo_pages"));
+  console.log("content non null     :", await c("seo_pages", q => q.not("content","is",null)));
+  console.log("type=metier_dept     :", await c("seo_pages", q => q.eq("type","metier_dept")));
+  console.log("type=metier_ville    :", await c("seo_pages", q => q.eq("type","metier_ville")));
+  console.log("\n== PRICE_GUIDES ==");
+  console.log("total                :", await c("price_guides"));
+  console.log("published            :", await c("price_guides", q => q.eq("status","published")));
+  console.log("scope=metier pub     :", await c("price_guides", q => q.eq("status","published").eq("scope","metier")));
+  console.log("scope=prestation pub :", await c("price_guides", q => q.eq("status","published").eq("scope","prestation")));
+  const { data: st } = await sb.from("price_guides").select("status").limit(2000);
+  const ms = new Map<string,number>(); for (const r of st||[]) ms.set((r as any).status, (ms.get((r as any).status)||0)+1);
+  console.log("statuts              :", [...ms].map(([k,v])=>`${k}=${v}`).join(" "));
+  console.log("\n== BLOG_POSTS ==");
+  console.log("total                :", await c("blog_posts"));
+  console.log("published            :", await c("blog_posts", q => q.eq("status","published")));
+  console.log("pub + published_at   :", await c("blog_posts", q => q.eq("status","published").not("published_at","is",null)));
+  const { data: bs } = await sb.from("blog_posts").select("status").limit(2000);
+  const mb = new Map<string,number>(); for (const r of bs||[]) mb.set((r as any).status, (mb.get((r as any).status)||0)+1);
+  console.log("statuts              :", [...mb].map(([k,v])=>`${k}=${v}`).join(" "));
+  console.log("\n== SEO_GUIDES ==");
+  console.log("total                :", await c("seo_guides"));
+  console.log("\n== BLOG_QUEUE ==");
+  console.log("total                :", await c("blog_queue"));
+  const { data: qs } = await sb.from("blog_queue").select("status").limit(3000);
+  const mq = new Map<string,number>(); for (const r of qs||[]) mq.set((r as any).status, (mq.get((r as any).status)||0)+1);
+  console.log("statuts              :", [...mq].map(([k,v])=>`${k}=${v}`).join(" "));
+})();

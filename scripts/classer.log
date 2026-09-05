@@ -1,0 +1,126 @@
+◇ injected env (45) from .env.local // tip: ⌘ suppress logs { quiet: true }
+=== Classement des etablissements depuis les fichiers Stock Sirene (ECRITURE) ===
+
+  etab.zip : 2.87 Go, fichier du 2026-09-02, contient StockEtablissement_utf8.csv
+  unite.zip : 0.97 Go, fichier du 2026-09-02, contient StockUniteLegale_utf8.csv
+
+0. Colonnes cibles en base...
+   presentes.
+
+1. Lecture de nos SIRET...
+   200 000 fiches lues...
+   400 000 fiches lues...
+   600 000 fiches lues...
+   800 000 fiches lues...
+   1 000 000 fiches lues...
+   1 200 000 fiches lues...
+   1 400 000 fiches lues...
+   1 600 000 fiches lues...
+   1 800 000 fiches lues...
+   2 000 000 fiches lues...
+   2 200 000 fiches lues...
+   2 400 000 fiches lues...
+   2 439 970 fiches dans le perimetre, 334 183 SIRET retenus
+   120 743 identifiants hors format Sirene (pas 14 chiffres : numeros BCE belges), hors perimetre
+   1 985 044 fiches deja verifiees, sautees (--reprendre)
+
+2. Etablissements (etab.zip, rattachement par SIRET)...
+   colonnes trouvees : siret (2), etatAdministratifEtablissement (45), dateDebut (44) sur 54
+   2 000 000 lignes lues, 3 093 matchs (A 0 / F 3 093), 1 s, rss 227 Mo
+   4 000 000 lignes lues, 10 931 matchs (A 0 / F 10 931), 2 s, rss 227 Mo
+   6 000 000 lignes lues, 19 931 matchs (A 0 / F 19 931), 3 s, rss 263 Mo
+   8 000 000 lignes lues, 29 105 matchs (A 0 / F 29 105), 4 s, rss 262 Mo
+   10 000 000 lignes lues, 39 192 matchs (A 0 / F 39 192), 6 s, rss 264 Mo
+   12 000 000 lignes lues, 50 163 matchs (A 0 / F 50 163), 7 s, rss 264 Mo
+   14 000 000 lignes lues, 61 634 matchs (A 0 / F 61 634), 8 s, rss 261 Mo
+   16 000 000 lignes lues, 76 720 matchs (A 0 / F 76 720), 9 s, rss 265 Mo
+   18 000 000 lignes lues, 97 533 matchs (A 0 / F 97 533), 10 s, rss 266 Mo
+   20 000 000 lignes lues, 127 704 matchs (A 1 / F 127 703), 11 s, rss 262 Mo
+   22 000 000 lignes lues, 163 629 matchs (A 1 / F 163 628), 12 s, rss 249 Mo
+   24 000 000 lignes lues, 199 004 matchs (A 1 / F 199 003), 14 s, rss 251 Mo
+   26 000 000 lignes lues, 221 581 matchs (A 1 / F 221 580), 15 s, rss 252 Mo
+   28 000 000 lignes lues, 239 313 matchs (A 2 / F 239 311), 16 s, rss 267 Mo
+   30 000 000 lignes lues, 263 942 matchs (A 2 / F 263 940), 17 s, rss 283 Mo
+   32 000 000 lignes lues, 283 096 matchs (A 2 / F 283 094), 19 s, rss 263 Mo
+   34 000 000 lignes lues, 297 619 matchs (A 2 / F 297 617), 20 s, rss 258 Mo
+   36 000 000 lignes lues, 309 396 matchs (A 2 / F 309 394), 21 s, rss 260 Mo
+   38 000 000 lignes lues, 319 696 matchs (A 2 / F 319 694), 22 s, rss 259 Mo
+   40 000 000 lignes lues, 327 181 matchs (A 2 / F 327 179), 24 s, rss 251 Mo
+   42 000 000 lignes lues, 330 574 matchs (A 2 / F 330 572), 25 s, rss 247 Mo
+   44 000 000 lignes lues, 333 983 matchs (A 2 / F 333 981), 26 s, rss 245 Mo
+   termine : 44 064 115 lignes lues, 334 026 matchs, A 2 / F 334 024, 26 s, rss 247 Mo
+
+3. Unites legales (unite.zip, rattachement par SIREN)...
+   304 816 SIREN distincts
+   colonnes trouvees : siren (0), etatAdministratifUniteLegale (20), dateDebut (19) sur 35
+   2 000 000 lignes lues, 4 943 matchs (A 871 / C 4 072), 1 s, rss 299 Mo
+   4 000 000 lignes lues, 16 149 matchs (A 2 882 / C 13 267), 2 s, rss 316 Mo
+   6 000 000 lignes lues, 29 841 matchs (A 6 199 / C 23 642), 2 s, rss 310 Mo
+   8 000 000 lignes lues, 45 549 matchs (A 10 862 / C 34 687), 3 s, rss 324 Mo
+   10 000 000 lignes lues, 64 790 matchs (A 16 418 / C 48 372), 4 s, rss 317 Mo
+   12 000 000 lignes lues, 97 923 matchs (A 25 144 / C 72 779), 5 s, rss 333 Mo
+   14 000 000 lignes lues, 149 769 matchs (A 36 469 / C 113 300), 6 s, rss 347 Mo
+   16 000 000 lignes lues, 190 483 matchs (A 44 996 / C 145 487), 7 s, rss 350 Mo
+   18 000 000 lignes lues, 219 634 matchs (A 51 737 / C 167 897), 7 s, rss 349 Mo
+   20 000 000 lignes lues, 251 075 matchs (A 59 232 / C 191 843), 8 s, rss 348 Mo
+   22 000 000 lignes lues, 271 619 matchs (A 64 365 / C 207 254), 9 s, rss 381 Mo
+   24 000 000 lignes lues, 286 157 matchs (A 67 417 / C 218 740), 10 s, rss 377 Mo
+   26 000 000 lignes lues, 297 030 matchs (A 69 512 / C 227 518), 11 s, rss 378 Mo
+   28 000 000 lignes lues, 300 620 matchs (A 70 477 / C 230 143), 12 s, rss 379 Mo
+   30 000 000 lignes lues, 304 649 matchs (A 71 413 / C 233 236), 13 s, rss 384 Mo
+   termine : 30 020 346 lignes lues, 304 666 matchs, A 71 416 / C 233 250, 13 s, rss 384 Mo
+
+4. Assemblage...
+
+5. Resultat
+   fiches du perimetre                 334 183
+   trouvees dans StockEtablissement    334 026  (100.0 %)
+   absentes du Stock (non touchees)        157
+   etablissement ouvert  (A)                 2  (0.0 % des trouvees)
+   etablissement ferme   (F)           334 024  (100.0 % des trouvees)  attendu ~45 % +/- 7 (mesure du 02/09)
+      dont entreprise cessee (C)       259 164  (77.6 %)  attendu ~34 %
+      dont entreprise active (A)        74 860  (22.4 %)  attendu ~11 %
+   ouverts mais entreprise cessee            2  (incoherence Sirene, ecrite telle quelle)
+   groupes de valeurs distincts        169 429  -> 169 429 requetes UPDATE de 300 SIRET max
+   temps ecoule 507 s, memoire residente 459 Mo
+
+6. Ecriture de 3 341 lots (etat_verifie_at = 2026-09-03T07:09:36.297Z)...
+   garde-fou updated_at : inchange sur 42319821700063, on continue.
+   lot 77 en erreur : canceling statement due to statement timeout
+   lot 78 en erreur : canceling statement due to statement timeout
+   lot 79 en erreur : canceling statement due to statement timeout
+   lot 80 en erreur : canceling statement due to statement timeout
+   lot 81 en erreur : canceling statement due to statement timeout
+   lot 200/3 341 : 19 200 fiches ecrites, 8 lots en erreur, 1 084 fiches/min, rss 106 Mo
+   lot 400/3 341 : 38 700 fiches ecrites, 13 lots en erreur, 1 100 fiches/min, rss 241 Mo
+   lot 600/3 341 : 57 700 fiches ecrites, 23 lots en erreur, 1 080 fiches/min, rss 237 Mo
+   lot 800/3 341 : 77 400 fiches ecrites, 26 lots en erreur, 1 085 fiches/min, rss 245 Mo
+   lot 1 000/3 341 : 96 300 fiches ecrites, 37 lots en erreur, 1 078 fiches/min, rss 183 Mo
+   lot 1 200/3 341 : 115 400 fiches ecrites, 46 lots en erreur, 1 063 fiches/min, rss 241 Mo
+   lot 1 400/3 341 : 135 000 fiches ecrites, 50 lots en erreur, 1 066 fiches/min, rss 201 Mo
+   lot 1 600/3 341 : 153 900 fiches ecrites, 61 lots en erreur, 1 049 fiches/min, rss 200 Mo
+   lot 1 800/3 341 : 172 800 fiches ecrites, 72 lots en erreur, 1 044 fiches/min, rss 198 Mo
+   lot 2 000/3 341 : 192 400 fiches ecrites, 76 lots en erreur, 1 053 fiches/min, rss 212 Mo
+   lot 2 200/3 341 : 211 400 fiches ecrites, 86 lots en erreur, 1 067 fiches/min, rss 229 Mo
+   lot 2 400/3 341 : 230 900 fiches ecrites, 91 lots en erreur, 1 084 fiches/min, rss 185 Mo
+   lot 2 600/3 341 : 250 100 fiches ecrites, 99 lots en erreur, 1 091 fiches/min, rss 140 Mo
+   lot 2 800/3 341 : 269 300 fiches ecrites, 107 lots en erreur, 1 104 fiches/min, rss 197 Mo
+   lot 3 000/3 341 : 288 900 fiches ecrites, 111 lots en erreur, 1 114 fiches/min, rss 219 Mo
+   lot 3 200/3 341 : 308 100 fiches ecrites, 119 lots en erreur, 1 117 fiches/min, rss 212 Mo
+   lot 3 341/3 341 : 321 526 fiches ecrites, 125 lots en erreur, 1 119 fiches/min, rss 228 Mo
+
+7. Rejeu des 125 lots en erreur...
+   120 recuperes, 5 toujours en erreur
+
+8. Recompte en base (etat_verifie_at >= horodatage du passage)...
+   comptage impossible (total) : 
+   comptage impossible (A) : 
+   comptage impossible (F) : 
+   total    base            ?   ecrit      333 526   COMPTAGE IMPOSSIBLE
+   A        base            ?   ecrit            2   COMPTAGE IMPOSSIBLE
+   F        base            ?   ecrit      333 524   COMPTAGE IMPOSSIBLE
+
+NON VERIFIE : 333 526 fiches classees en 17899 s (18406 s au total).
+   Un comptage n'a pas repondu (delai de la base). Verifier en SQL :
+   select etat_admin, count(*) from pros where is_active and deleted_at is null and etat_verifie_at >= '2026-09-03T07:09:36.297Z' group by 1;
+   5 lots toujours en erreur : relancer avec --appliquer --reprendre.

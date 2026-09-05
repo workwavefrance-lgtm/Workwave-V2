@@ -1,0 +1,509 @@
+◇ injected env (45) from .env.local // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+=== Enrichissement annuaire des entreprises : ECRITURE (--apply) ===
+
+2000 slug(s) demande(s)
+2000 fiche(s) a traiter, debit 5 req/s, duree estimee 400 s
+
+
+#10883 aurelien-masse-00018 (94343472000018) AURELIEN MASSE
+   date_creation 2025-04-04 (UL 2025-04-04, etab 2025-04-04) | founded_year en base 2025
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8130Z (en base 8130Z, UL 81.30Z) | registre_metier - | employeur N | debut_activite 2025-04-04
+   lat/lng 46.4715817539106, 1.03851640408449 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : founding_date, effectif_range, etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#65782 dylan-tindiliere-00016 (93532604100016) DYLAN TINDILIERE
+   date_creation 2024-10-21 (UL 2024-10-21, etab 2024-10-21) | founded_year en base 2024
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8130Z (en base 8130Z, UL 81.30Z) | registre_metier - | employeur N | debut_activite 2024-10-21
+   lat/lng 45.6416569744963, 2.40431901053882 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#1593 mathieu-lecomte-00014 (93512864500014) MATHIEU LECOMTE
+   date_creation 2024-11-01 (UL 2024-11-01, etab 2024-11-01) | founded_year en base 2024
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4322A (en base 4322A, UL 43.22A) | registre_metier - | employeur N | debut_activite 2024-11-01
+   lat/lng 47.0008994377824, 0.290598660935366 | liste_rge null | enseignes null | nom_commercial MSL PLOMBERIE
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : founding_date, effectif_range, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#1679 cyril-bourbonnais-dutry-00012 (97987053200012) CYRIL BOURBONNAIS-DUTRY
+   date_creation 2023-10-01 (UL 2023-10-01, etab 2023-10-01) | founded_year en base 2023
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4322A (en base 4322A, UL 43.22A) | registre_metier - | employeur N | debut_activite 2023-10-01
+   lat/lng 46.482866727, 0.6525318703 | liste_rge null | enseignes null | nom_commercial BPC RENOV
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : founding_date, effectif_range, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#52346 samuel-soules-00014 (95120889100014) SAMUEL SOULES
+   date_creation 2023-04-03 (UL 2023-04-03, etab 2023-04-03) | founded_year en base 2023
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8121Z (en base 8121Z, UL 81.21Z) | registre_metier - | employeur N | debut_activite 2023-04-03
+   lat/lng 46.216800359, 1.490546555 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#46959 frederic-grandeau-00027 (75308325200027) FREDERIC GRANDEAU
+   date_creation 2012-08-01 (UL 2012-08-01, etab 2015-06-01) | founded_year en base 2015
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4322A (en base 4322A, UL 43.22A) | registre_metier 4322AZ | employeur N | debut_activite 2015-06-01
+   lat/lng 45.84292228, 1.9094915171 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, activite_registre_metier, etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#68672 franck-beyne-00026 (39750549600026) FRANCK BEYNE
+   date_creation 1994-07-04 (UL 1994-07-04, etab 2025-02-13) | founded_year en base 2025
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8121Z (en base 8121Z, UL 81.21Z) | registre_metier - | employeur N | debut_activite 2025-02-13
+   lat/lng 45.1663602588944, 2.17556343058763 | liste_rge null | enseignes null | nom_commercial FRANCKY MULTISERVICES
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#69527 vincent-courbes-00016 (98768107900016) VINCENT COURBES
+   date_creation 2024-04-02 (UL 2024-04-02, etab 2024-04-02) | founded_year en base 2024
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4339Z (en base 4339Z, UL 43.39Z) | registre_metier - | employeur N | debut_activite 2024-04-02
+   lat/lng 45.162010892, 1.4154082337 | liste_rge null | enseignes null | nom_commercial 2 AVI BTP
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#72811 julie-bersillon-00028 (82287106700028) JULIE BERSILLON
+   date_creation 2016-11-01 (UL 2016-11-01, etab 2023-10-01) | founded_year en base 2023
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 9609Z (en base 9609Z, UL 96.09Z) | registre_metier - | employeur N | debut_activite 2023-10-01
+   lat/lng 45.415832988, 1.5927582676 | liste_rge null | enseignes null | nom_commercial JULIE BERSILLON
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#72979 michele-goigoux-00024 (90184992700024) MICHELE GOIGOUX
+   date_creation 2021-07-15 (UL 2021-07-15, etab 2023-12-12) | founded_year en base 2023
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 9609Z (en base 9609Z, UL 96.09Z) | registre_metier - | employeur N | debut_activite 2023-12-12
+   lat/lng 45.317575255, 1.3208252427 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#81081 adnan-aksoy-00037 (39365803400037) ADNAN AKSOY
+   date_creation 1994-01-17 (UL 1994-01-17, etab 2023-05-01) | founded_year en base 2023
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4322A (en base 4322A, UL 43.22A) | registre_metier - | employeur N | debut_activite 2023-05-01
+   lat/lng 46.110200865, 1.0857648093 | liste_rge null | enseignes null | nom_commercial A.A RENOV EI
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#89817 martial-de-sousa-00028 (53375716700028) MARTIAL DE SOUSA
+   date_creation 2011-07-26 (UL 2011-07-26, etab 2021-11-10) | founded_year en base 2021
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4391A (en base 4391A, UL 43.91A) | registre_metier 4391AZ | employeur N | debut_activite 2021-11-10
+   lat/lng 45.707976473, 1.1695657137 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, activite_registre_metier, etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#95169 robert-boutaud-00050 (32418497700050) ROBERT BOUTAUD
+   date_creation 1982-03-02 (UL 1982-03-02, etab 2024-09-15) | founded_year en base 2024
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8121Z (en base 8121Z, UL 81.21Z) | registre_metier - | employeur N | debut_activite 2024-09-15
+   lat/lng 45.9374591072534, 1.03542518225634 | liste_rge null | enseignes null | nom_commercial GESTRA
+   finances null | idcc null | labels {} | nb_etab 4 | categorie PME
+   -> ecrit : founding_date, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#149744 clare-anne-duiker-00026 (90344841300026) CLARE ANNE DUIKER
+   date_creation 2021-10-03 (UL 2021-10-03, etab 2021-10-08) | founded_year en base 2021
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8559B (en base 8121Z, UL 85.59B) | registre_metier 8121ZZ | employeur N | debut_activite 2026-07-01
+   lat/lng 45.478362027, -0.098074212 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 2 | categorie PME
+   -> ecrit : founding_date, naf_code, activite_registre_metier, etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#114497 benoit-rochette-00025 (92036638200025) BENOIT ROCHETTE
+   date_creation 2022-09-01 (UL 2022-09-01, etab 2026-01-26) | founded_year en base 2026
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4399C (en base 4399C, UL 43.99C) | registre_metier - | employeur N | debut_activite 2026-01-26
+   lat/lng 46.3837668324947, -0.412518710723252 | liste_rge null | enseignes null | nom_commercial BENOIT ROCHETTE
+   finances null | idcc null | labels {} | nb_etab 2 | categorie -
+   -> ecrit : founding_date, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#181609 chantal-zaniolo-00010 (87973594200010) CHANTAL ZANIOLO
+   date_creation 2019-01-01 (UL 2019-01-01, etab 2019-01-01) | founded_year en base 2019
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 0210Z (en base 0210Z, UL 02.10Z) | registre_metier - | employeur N | debut_activite 2019-01-01
+   lat/lng - | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#219812 david-merchadou-00010 (95115975500010) DAVID MERCHADOU
+   date_creation 2023-05-01 (UL 2023-05-01, etab 2023-05-01) | founded_year en base 2023
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8121Z (en base 8130Z, UL 81.21Z) | registre_metier - | employeur N | debut_activite 2025-02-05
+   lat/lng 44.868615007, 1.2401920325 | liste_rge null | enseignes null | nom_commercial DAVID MERCHADOU
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : naf_code, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#220195 monique-nawrot-00016 (84953486200016) MONIQUE NAWROT
+   date_creation 2018-03-01 (UL 2018-03-01, etab 2018-03-01) | founded_year en base 2018
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 0210Z (en base 0210Z, UL 02.10Z) | registre_metier - | employeur N | debut_activite 2018-03-01
+   lat/lng 45.279874881, 0.6905282876 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#190098 commune-de-saujon-00075 (21170421800075) COMMUNE DE SAUJON
+   date_creation 1978-01-01 (UL 1978-01-01, etab 1992-11-13) | founded_year en base 1992
+   nature_juridique 7210 (en base 7210) | tranche_effectif 11 (etab) / 22 (UL) | etat etab A / UL A
+   NAF etab 8559B (en base 8559B, UL 84.11Z) | registre_metier - | employeur N | debut_activite 2008-01-01
+   lat/lng 45.672024617, -0.926261218 | liste_rge null | enseignes ["COURS MUNICIPAUX DE MUSIQUE"] | nom_commercial -
+   finances null | idcc ["5021"] | labels {} | nb_etab 12 | categorie PME
+   -> ecrit : founding_date, etab_latitude, etab_longitude, enseignes, date_debut_activite, caractere_employeur, liste_idcc, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#246566 denis-fidelis-00025 (51050304800025) DENIS FIDELIS
+   date_creation 2009-03-13 (UL 2009-03-13, etab 2011-05-06) | founded_year en base 2011
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4331Z (en base 4331Z, UL 43.31Z) | registre_metier 4331ZB | employeur N | debut_activite 2017-02-01
+   lat/lng 44.113029043, 0.5268632621 | liste_rge null | enseignes null | nom_commercial DENIS FIDELIS
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : founding_date, activite_registre_metier, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#250995 patrice-lalo-00014 (51771031500014) PATRICE LALO
+   date_creation 2009-10-19 (UL 2009-10-19, etab 2009-10-19) | founded_year en base 2009
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8130Z (en base 8130Z, UL 81.30Z) | registre_metier - | employeur N | debut_activite 2009-10-19
+   lat/lng 44.318517543, 0.8526160623 | liste_rge null | enseignes null | nom_commercial -
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#221908 atelier-d-architecture-projets-et-realisations-00016 (43782893200016) ATELIER D'ARCHITECTURE - PROJETS ET REALISATIONS
+   date_creation 2001-05-15 (UL 2001-05-15, etab 2001-05-15) | founded_year en base 2001
+   nature_juridique 5499 (en base 5499) | tranche_effectif 01 (etab) / 01 (UL) | etat etab A / UL A
+   NAF etab 7111Z (en base 7111Z, UL 71.11Z) | registre_metier - | employeur O | debut_activite 2008-01-01
+   lat/lng 44.867339267, 0.3751339069 | liste_rge null | enseignes null | nom_commercial -
+   finances {"2020":{"ca":295858,"resultat_net":19801}} | idcc ["2332"] | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : etab_latitude, etab_longitude, date_debut_activite, caractere_employeur, liste_idcc, nombre_etablissements, categorie_entreprise, finances, labels_officiels + updated_at
+
+#267851 cyril-cochet-00013 (98507522500013) CYRIL COCHET
+   date_creation 2024-03-23 (UL 2024-03-23, etab 2024-03-23) | founded_year en base 2024
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8129A (en base 8129A, UL 81.29A) | registre_metier - | employeur N | debut_activite 2024-03-23
+   lat/lng 44.38817451, 0.8180825424 | liste_rge null | enseignes null | nom_commercial FRELON GUEPES VALLEE DU LOT
+   finances null | idcc null | labels {} | nb_etab 1 | categorie -
+   -> ecrit : etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, labels_officiels + updated_at
+
+#289322 remy-baraton-00013 (90936115600013) REMY BARATON
+   date_creation 2022-02-01 (UL 2022-02-01, etab 2022-02-01) | founded_year en base 2022
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 8122Z (en base 8122Z, UL 81.22Z) | registre_metier 8122ZZ | employeur N | debut_activite 2022-02-01
+   lat/lng 44.505294799, -1.084761612 | liste_rge null | enseignes null | nom_commercial VITR' AND CO
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : activite_registre_metier, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+
+#281426 renaud-della-valle-00013 (82511956300013) RENAUD DELLA VALLE
+   date_creation 2017-01-20 (UL 2017-01-20, etab 2017-01-20) | founded_year en base 2017
+   nature_juridique 1000 (en base 1000) | tranche_effectif NN (etab) / NN (UL) | etat etab A / UL A
+   NAF etab 4312A (en base 4312A, UL 43.12A) | registre_metier 4312AZ | employeur N | debut_activite 2017-01-20
+   lat/lng 44.219042218, -1.101885238 | liste_rge null | enseignes null | nom_commercial RENOTEK-TP
+   finances null | idcc null | labels {} | nb_etab 1 | categorie PME
+   -> ecrit : activite_registre_metier, etab_latitude, etab_longitude, nom_commercial, date_debut_activite, caractere_employeur, nombre_etablissements, categorie_entreprise, labels_officiels + updated_at
+[100/2000] enrichies 100 (dont sans changement 0) | non trouvees 0 | err API 0 | err base 0 | 22 s | 4.55 fiches/s
+   non trouve (siret_invalide) : trimmo-78571 (0442778571)
+   non trouve (siret_invalide) : otmani-william-87402 (0468587402)
+   non trouve (siret_invalide) : petitfrere-yvan-51485 (0546751485)
+   non trouve (siret_invalide) : duvinage-nicolas-04596 (0553404596)
+   non trouve (siret_invalide) : plouette-paul-50218 (0602950218)
+   non trouve (siret_invalide) : poitoux-cedric-10987 (0648610987)
+   non trouve (siret_invalide) : ninane-bertrand-25145 (0651525145)
+   non trouve (siret_invalide) : aliahmadi-hamid-88582 (0656788582)
+   non trouve (siret_invalide) : bellery-bernard-94840 (0657694840)
+   non trouve (siret_invalide) : koc-isa-02402 (0681502402)
+   non trouve (siret_invalide) : debaiffe-philippe-86664 (0695386664)
+   non trouve (siret_invalide) : doica-ioan-florin-20124 (0721920124)
+   non trouve (siret_invalide) : lequeux-laurent-15089 (0722515089)
+   non trouve (siret_invalide) : dessart-jean-francois-99645 (0725099645)
+   non trouve (siret_invalide) : sneyers-philippe-17754 (0747117754)
+   non trouve (siret_invalide) : dreze-stephane-15689 (0757415689)
+   non trouve (siret_invalide) : brixhe-pascal-18824 (0774018824)
+   non trouve (siret_invalide) : loic-soete-57080 (0780357080)
+   non trouve (siret_invalide) : dache-pascal-10103 (0786010103)
+   non trouve (siret_invalide) : alexandre-vivian-63202 (0800463202)
+   non trouve (siret_invalide) : destrais-pascal-77329 (0807677329)
+   non trouve (siret_invalide) : magerotte-xavier-88268 (0866688268)
+   non trouve (siret_invalide) : desorne-samuel-53283 (0875853283)
+   non trouve (siret_invalide) : da-silva-almeida-ricardo-84694 (1008984694)
+   non trouve (siret_invalide) : dhaussy-eva-23454 (1015623454)
+   non trouve (siret_invalide) : delsipee-eliott-84911 (1022184911)
+   non trouve (siret_invalide) : delahaut-jennifer-39148 (1029039148)
+   non trouve (siret_invalide) : degreve-theo-21742 (1029621742)
+   non trouve (siret_invalide) : de-laet-pascal-14740 (0688414740)
+   non trouve (siret_invalide) : libois-richard-57374 (0690157374)
+[200/2000] enrichies 171 (dont sans changement 0) | non trouvees 30 | err API 0 | err base 0 | 47 s | 4.30 fiches/s
+[300/2000] enrichies 271 (dont sans changement 0) | non trouvees 30 | err API 0 | err base 0 | 74 s | 4.08 fiches/s
+   non trouve (siret_invalide) : salsac-entreprises-89440 (0421189440)
+   non trouve (siret_invalide) : pittia-philippe-95274 (0603895274)
+   non trouve (siret_invalide) : chauffage-ramboux-19503 (0666719503)
+   non trouve (siret_invalide) : bradfer-mael-29571 (0673929571)
+   non trouve (siret_invalide) : home-concept-et-services-84059 (0749484059)
+   non trouve (siret_invalide) : centi-carrelage-freres-93489 (0775593489)
+   non trouve (siret_invalide) : daniaux-hugues-62063 (0783162063)
+   non trouve (siret_invalide) : ardoises-toi-t-91284 (0797991284)
+   non trouve (siret_invalide) : olivier-biets-17580 (0799417580)
+   non trouve (siret_invalide) : boone-alexandre-18118 (0806718118)
+   non trouve (siret_invalide) : vd-chauffage-16790 (0807816790)
+   non trouve (siret_invalide) : berlengee-jean-philippe-13173 (0866513173)
+   non trouve (siret_invalide) : bastin-gregory-49419 (0874249419)
+   non trouve (siret_invalide) : gregor-wilfart-92728 (0877992728)
+   non trouve (siret_invalide) : mohimont-guillaume-22544 (1003722544)
+   non trouve (siret_invalide) : persillon-pascal-00412 (1017800412)
+   non trouve (siret_invalide) : roulet-gregory-09238 (1031009238)
+   non trouve (siret_invalide) : lbl-toiture-et-renovation-56949 (1033956949)
+[400/2000] enrichies 352 (dont sans changement 0) | non trouvees 48 | err API 0 | err base 0 | 96 s | 4.16 fiches/s
+[500/2000] enrichies 452 (dont sans changement 0) | non trouvees 48 | err API 0 | err base 0 | 123 s | 4.08 fiches/s
+   non trouve (siret_invalide) : acm-clima-92255 (0427192255)
+   non trouve (siret_invalide) : m-a-trans-89430 (0437389430)
+   non trouve (siret_invalide) : barracato-ivan-plafonnage-14252 (0455914252)
+   non trouve (siret_invalide) : atelier-dr-societe-d-architectes-94909 (0473494909)
+   non trouve (siret_invalide) : vincent-a-p-62013 (0476162013)
+   non trouve (siret_invalide) : belche-francois-92688 (0543792688)
+   non trouve (siret_invalide) : andrianne-christophe-35559 (0545735559)
+   non trouve (siret_invalide) : tibermont-cedric-22755 (0553922755)
+   non trouve (siret_invalide) : la-bulle-a-22293 (0556722293)
+   non trouve (siret_invalide) : bouvy-loic-41528 (0628741528)
+   non trouve (siret_invalide) : godfroid-daniel-29457 (0659429457)
+   non trouve (siret_invalide) : casa-design-92119 (0737392119)
+   non trouve (siret_invalide) : pira-arton-78776 (0743778776)
+   non trouve (siret_invalide) : masse-christophe-72374 (0747872374)
+   non trouve (siret_invalide) : bigare-benjamin-17677 (0761917677)
+   non trouve (siret_invalide) : bourguignon-emmanuelle-94778 (0793694778)
+   non trouve (siret_invalide) : cocktail-party-sprl-71468 (0810971468)
+   non trouve (siret_invalide) : verstraelen-olivier-12713 (0820812713)
+   non trouve (siret_invalide) : capodici-29289 (0872729289)
+   non trouve (siret_invalide) : m-h-toitures-07785 (0874407785)
+   non trouve (siret_invalide) : nch-construct-sprl-14734 (0876614734)
+   non trouve (siret_invalide) : de-bruyn-hugo-63319 (0885763319)
+   non trouve (siret_invalide) : cee-engineering-38272 (0898038272)
+   non trouve (siret_invalide) : olcauz-kenan-78838 (0898778838)
+   non trouve (siret_invalide) : mhf-services-50623 (1028750623)
+[600/2000] enrichies 527 (dont sans changement 0) | non trouvees 73 | err API 0 | err base 0 | 144 s | 4.15 fiches/s
+[700/2000] enrichies 628 (dont sans changement 0) | non trouvees 73 | err API 0 | err base 0 | 169 s | 4.15 fiches/s
+   non trouve (siret_invalide) : mariakis-georgios-09051 (0504909051)
+   non trouve (siret_invalide) : dac-concept-04559 (0533804559)
+   non trouve (siret_invalide) : de-wee-fabian-25687 (0538525687)
+   non trouve (siret_invalide) : dinant-kyrian-90830 (0544690830)
+   non trouve (siret_invalide) : rixhon-didier-72178 (0601072178)
+   non trouve (siret_invalide) : wanlin-gregory-86617 (0643486617)
+   non trouve (siret_invalide) : dequidt-carine-95126 (0679395126)
+   non trouve (siret_invalide) : marchal-frederic-46414 (0688446414)
+   non trouve (siret_invalide) : vandermotten-elise-77512 (0705877512)
+   non trouve (siret_invalide) : wayaffe-lionel-26053 (0722926053)
+   non trouve (siret_invalide) : spina-frederic-25054 (0723925054)
+   non trouve (siret_invalide) : pans-lindekens-stoffel-09086 (0729509086)
+   non trouve (siret_invalide) : warlop-amaury-21488 (0734921488)
+   non trouve (siret_invalide) : lejeune-francois-89528 (0811489528)
+   non trouve (siret_invalide) : malburny-joffrey-80255 (0825280255)
+   non trouve (siret_invalide) : lionel-merveille-toiture-37014 (0836837014)
+   non trouve (siret_invalide) : gerday-gregory-07368 (0873507368)
+   non trouve (siret_invalide) : david-didier-24448 (0877224448)
+   non trouve (siret_invalide) : dandoy-benjamin-65796 (0892865796)
+   non trouve (siret_invalide) : deruisseau-daniel-74494 (0823074494)
+   non trouve (siret_invalide) : derome-marc-electromecanique-48609 (0885948609)
+[800/2000] enrichies 706 (dont sans changement 0) | non trouvees 94 | err API 0 | err base 0 | 190 s | 4.21 fiches/s
+[900/2000] enrichies 806 (dont sans changement 0) | non trouvees 94 | err API 0 | err base 0 | 212 s | 4.25 fiches/s
+   non trouve (siret_invalide) : dimo-42474 (0413542474)
+   non trouve (siret_invalide) : b-t-i-tassoul-freres-77091 (0434677091)
+   non trouve (siret_invalide) : bureau-d-architecture-pierre-juckler-84285 (0449984285)
+   non trouve (siret_invalide) : gonzalez-san-andres-jesus-96849 (0604896849)
+   non trouve (siret_invalide) : dubourg-yves-31787 (0629831787)
+   non trouve (siret_invalide) : lambillon-thierry-91523 (0631991523)
+   non trouve (siret_invalide) : corduant-cedric-39190 (0652539190)
+   non trouve (siret_invalide) : buissart-benedicte-34654 (0661534654)
+   non trouve (siret_invalide) : clerfeyt-francois-49651 (0745449651)
+   non trouve (siret_invalide) : gathot-eric-62232 (0748662232)
+   non trouve (siret_invalide) : gilsoul-quentin-99581 (0755699581)
+   non trouve (siret_invalide) : hose-geoffrey-89290 (0807089290)
+   non trouve (siret_invalide) : atelier-d-architecture-nathalie-dame-55892 (0838555892)
+   non trouve (siret_invalide) : gramtine-patrick-67475 (0866367475)
+   non trouve (siret_invalide) : dpl-construction-02781 (1016202781)
+   non trouve (siret_invalide) : coquelet-david-91118 (1020991118)
+   non trouve (siret_invalide) : lantremange-charles-62296 (0881662296)
+   non trouve (siret_invalide) : entreprise-agri-monjoie-96939 (0887196939)
+[1000/2000] enrichies 888 (dont sans changement 0) | non trouvees 112 | err API 0 | err base 0 | 233 s | 4.30 fiches/s
+[1100/2000] enrichies 988 (dont sans changement 0) | non trouvees 112 | err API 0 | err base 0 | 254 s | 4.33 fiches/s
+   non trouve (siret_invalide) : atelier-d-architecture-michel-dive-67993 (0477967993)
+   non trouve (siret_invalide) : raquet-nicolas-08723 (0500808723)
+   non trouve (siret_invalide) : morel-dimitri-41967 (0508641967)
+   non trouve (siret_invalide) : yernaux-jeremy-48012 (0659948012)
+   non trouve (siret_invalide) : vandereecken-geoffrey-68546 (0664668546)
+   non trouve (siret_invalide) : malizia-sebastien-42217 (0679842217)
+   non trouve (siret_invalide) : turpin-gaetan-88616 (0713588616)
+   non trouve (siret_invalide) : toubon-philippe-22001 (0714822001)
+   non trouve (siret_invalide) : belenger-ludovic-75389 (0723475389)
+   non trouve (siret_invalide) : adamczyk-marcin-99413 (0737499413)
+   non trouve (siret_invalide) : paulus-pierre-jean-57941 (0751357941)
+   non trouve (siret_invalide) : sanitaire-braele-alain-87233 (0764987233)
+   non trouve (siret_invalide) : scholz-damien-charles-49370 (0832049370)
+   non trouve (siret_invalide) : sablon-michael-37013 (0842337013)
+   non trouve (siret_invalide) : rebegea-nicolae-mihai-11462 (0845911462)
+   non trouve (siret_invalide) : quenon-jean-marie-64069 (0872964069)
+   non trouve (siret_invalide) : pierard-eric-16026 (0878216026)
+   non trouve (siret_invalide) : baticarre-68893 (0884368893)
+   non trouve (siret_invalide) : al-musawi-furqan-05457 (1019105457)
+   non trouve (siret_invalide) : mj-concept-09244 (1036809244)
+   non trouve (siret_invalide) : nahon-raphael-43028 (0827543028)
+   non trouve (siret_invalide) : servaty-stephan-51966 (0875951966)
+   non trouve (siret_invalide) : aiera-michele-44540 (0882744540)
+[1200/2000] enrichies 1065 (dont sans changement 0) | non trouvees 135 | err API 0 | err base 0 | 274 s | 4.39 fiches/s
+[1300/2000] enrichies 1165 (dont sans changement 0) | non trouvees 135 | err API 0 | err base 0 | 297 s | 4.38 fiches/s
+   non trouve (siret_invalide) : ernst-et-fils-61974 (0408061974)
+   non trouve (siret_invalide) : brouwir-mawet-technique-refrigeration-36605 (0423336605)
+   non trouve (siret_invalide) : fallyer-73270 (0429373270)
+   non trouve (siret_invalide) : gilbar-et-cie-25839 (0452025839)
+   non trouve (siret_invalide) : d-a-construct-35917 (0463735917)
+   non trouve (siret_invalide) : green-energy-et-inspiration-71690 (0475271690)
+   non trouve (siret_invalide) : bernard-wallon-14388 (0475514388)
+   non trouve (siret_invalide) : de-vitto-gaetana-63847 (0500563847)
+   non trouve (siret_invalide) : gouders-flavio-97497 (0501897497)
+   non trouve (siret_invalide) : davaux-mathieu-86060 (0507886060)
+   non trouve (siret_invalide) : dobbelaere-samuel-56659 (0539556659)
+   non trouve (siret_invalide) : bosse-gilles-frederic-99286 (0550699286)
+   non trouve (siret_invalide) : hervas-fernandez-juan-13133 (0562713133)
+   non trouve (siret_invalide) : haguinet-sebastien-51720 (0567651720)
+   non trouve (siret_invalide) : henrotay-alain-88838 (0571888838)
+   non trouve (siret_invalide) : imm-o-l-c-55881 (0578955881)
+   non trouve (siret_invalide) : hainaut-christine-62185 (0598462185)
+   non trouve (siret_invalide) : de-sousa-da-silva-david-79344 (0634579344)
+   non trouve (siret_invalide) : degimbe-jerome-75936 (0642475936)
+   non trouve (siret_invalide) : depas-simon-72225 (0644572225)
+   non trouve (siret_invalide) : frigo-maintenance-79685 (0644779685)
+   non trouve (siret_invalide) : graux-ludovic-57165 (0653657165)
+   non trouve (siret_invalide) : di-murro-michele-33273 (0663133273)
+   non trouve (siret_invalide) : devos-maxime-17982 (0669417982)
+   non trouve (siret_invalide) : darras-gregory-23151 (0670323151)
+   non trouve (siret_invalide) : gidel-kevyn-35258 (0674435258)
+   non trouve (siret_invalide) : capelle-raphael-99349 (0690499349)
+   non trouve (siret_invalide) : haid-ludovic-37348 (0691537348)
+   non trouve (siret_invalide) : gelaesen-renaud-29790 (0742729790)
+   non trouve (siret_invalide) : gcb-toitures-22112 (0755522112)
+   non trouve (siret_invalide) : di-tullio-nicola-12421 (0764212421)
+   non trouve (siret_invalide) : cappe-sylvain-55154 (0765955154)
+   non trouve (siret_invalide) : godelet-charles-19569 (0769319569)
+   non trouve (siret_invalide) : cocx-sam-56938 (0774356938)
+   non trouve (siret_invalide) : hubert-emile-97030 (0775997030)
+   non trouve (siret_invalide) : hannecart-fabrice-42809 (0778142809)
+   non trouve (siret_invalide) : godart-matthieu-68247 (0782368247)
+   non trouve (siret_invalide) : de-rauw-cedric-83805 (0863483805)
+   non trouve (siret_invalide) : chas-d-renovation-10897 (0880410897)
+   non trouve (siret_invalide) : champagne-christophe-05619 (0897005619)
+   non trouve (siret_invalide) : bodarwe-estelle-08050 (1001908050)
+   non trouve (siret_invalide) : detry-simon-72009 (1005472009)
+   non trouve (siret_invalide) : demeffe-david-04634 (1024704634)
+   non trouve (siret_invalide) : dv-menuiserie-72356 (1031172356)
+   non trouve (siret_invalide) : gavray-simon-66684 (1035466684)
+   non trouve (siret_invalide) : bodrog-nicolae-88838 (0503988838)
+   non trouve (siret_invalide) : boucq-isaie-59277 (0656459277)
+   non trouve (siret_invalide) : benzar-alin-60068 (0817160068)
+   non trouve (siret_invalide) : charlier-stephane-93832 (0892493832)
+[1400/2000] enrichies 1216 (dont sans changement 0) | non trouvees 184 | err API 0 | err base 0 | 316 s | 4.43 fiches/s
+[1500/2000] enrichies 1316 (dont sans changement 0) | non trouvees 184 | err API 0 | err base 0 | 337 s | 4.45 fiches/s
+   non trouve (siret_invalide) : la-parqueterie-s-a-r-l-30030 (0454830030)
+   non trouve (siret_invalide) : joackim-legrand-construction-40601 (0506640601)
+   non trouve (siret_invalide) : marechal-sebastien-62889 (0537962889)
+   non trouve (siret_invalide) : lecocq-stephane-92287 (0542192287)
+   non trouve (siret_invalide) : marullo-renaud-74066 (0552874066)
+   non trouve (siret_invalide) : merens-cedric-11753 (0558811753)
+   non trouve (siret_invalide) : lekeu-sebastien-88551 (0652688551)
+   non trouve (siret_invalide) : lefebvre-kevin-15611 (0652915611)
+   non trouve (siret_invalide) : my-sun-energie-75083 (0753575083)
+   non trouve (siret_invalide) : neumers-john-25793 (0761925793)
+   non trouve (siret_invalide) : moors-jose-17774 (0782617774)
+   non trouve (siret_invalide) : lalaymia-fatah-72104 (0794672104)
+   non trouve (siret_invalide) : lorent-renaud-42782 (0799242782)
+   non trouve (siret_invalide) : naessens-giovanni-70286 (0836170286)
+   non trouve (siret_invalide) : lannoy-michael-95802 (0860195802)
+   non trouve (siret_invalide) : lourtioux-philippe-27803 (0879527803)
+   non trouve (siret_invalide) : muratore-giovanni-23553 (0889523553)
+   non trouve (siret_invalide) : orban-gil-57412 (1025657412)
+   non trouve (siret_invalide) : masy-olivier-21131 (0667221131)
+[1600/2000] enrichies 1399 (dont sans changement 0) | non trouvees 203 | err API 0 | err base 0 | 360 s | 4.45 fiches/s
+[1700/2000] enrichies 1499 (dont sans changement 0) | non trouvees 203 | err API 0 | err base 0 | 381 s | 4.46 fiches/s
+   non trouve (siret_invalide) : vitrerie-athoise-69315 (0432269315)
+   non trouve (siret_invalide) : a-atelier-d-architecture-dachy-nihoul-preat-17879 (0439217879)
+   non trouve (siret_invalide) : abeco-22487 (0442922487)
+   non trouve (siret_invalide) : a-z-servipro-02668 (0462702668)
+   non trouve (siret_invalide) : s-g-a-electricite-52933 (0478652933)
+   non trouve (siret_invalide) : thome-fabien-17680 (0502917680)
+   non trouve (siret_invalide) : agj-renovation-86278 (0543386278)
+   non trouve (siret_invalide) : alessi-salvatore-09602 (0547409602)
+   non trouve (siret_invalide) : vandamme-raphael-07912 (0556807912)
+   non trouve (siret_invalide) : tremouroux-jean-luc-72825 (0601872825)
+   non trouve (siret_invalide) : saive-henri-75430 (0605975430)
+   non trouve (siret_invalide) : vanderstichelen-tom-99777 (0640599777)
+   non trouve (siret_invalide) : rodberg-michael-22868 (0651522868)
+   non trouve (siret_invalide) : ahmetaj-adam-80367 (0666480367)
+   non trouve (siret_invalide) : aldea-costica-19574 (0673919574)
+   non trouve (siret_invalide) : theis-gregory-69672 (0674569672)
+   non trouve (siret_invalide) : robaye-christian-22840 (0689122840)
+   non trouve (siret_invalide) : alexandre-morgan-99774 (0695899774)
+   non trouve (siret_invalide) : a-e-s-all-electric-services-68867 (0697568867)
+   non trouve (siret_invalide) : stabel-thierry-63323 (0747363323)
+   non trouve (siret_invalide) : van-malcot-alain-24464 (0750424464)
+   non trouve (siret_invalide) : robert-frebel-entreprise-23270 (0793123270)
+   non trouve (siret_invalide) : petronio-nicola-88475 (0807488475)
+   non trouve (siret_invalide) : agence-titres-services-de-durbuy-56310 (0815856310)
+   non trouve (siret_invalide) : picarella-kevin-58446 (0832158446)
+   non trouve (siret_invalide) : troisfontaine-raoul-56322 (0837156322)
+   non trouve (siret_invalide) : perez-nunez-jose-53368 (0894653368)
+   non trouve (siret_invalide) : vanhecke-services-welding-88750 (1025488750)
+   non trouve (siret_invalide) : renson-gilles-srl-93871 (1036893871)
+   non trouve (siret_invalide) : tararuj-roza-43108 (1038743108)
+[1800/2000] enrichies 1567 (dont sans changement 0) | non trouvees 233 | err API 0 | err base 0 | 401 s | 4.49 fiches/s
+[1900/2000] enrichies 1667 (dont sans changement 0) | non trouvees 233 | err API 0 | err base 0 | 421 s | 4.51 fiches/s
+   non trouve (siret_invalide) : centre-d-etudes-et-de-recherches-urbaines-74593 (0415674593)
+   non trouve (siret_invalide) : art-de-l-espace-10868 (0428810868)
+   non trouve (siret_invalide) : ateliers-d-architecture-g-insalaco-68283 (0448568283)
+   non trouve (siret_invalide) : argos-atelier-d-architecture-55981 (0457055981)
+   non trouve (siret_invalide) : andre-fabrice-76542 (0527976542)
+   non trouve (siret_invalide) : bilali-kuza-benakazi-sans-72886 (0537972886)
+   non trouve (siret_invalide) : boudabza-majid-97815 (0542897815)
+   non trouve (siret_invalide) : carlier-gilles-15115 (0551715115)
+   non trouve (siret_invalide) : amironoaie-ovidiu-12651 (0597912651)
+   non trouve (siret_invalide) : barnabe-jacques-49378 (0603749378)
+   non trouve (siret_invalide) : amajod-jamal-40175 (0650940175)
+   non trouve (siret_invalide) : baudhuin-julien-22356 (0657722356)
+   non trouve (siret_invalide) : begert-simon-27108 (0657727108)
+   non trouve (siret_invalide) : bourdon-priscille-69956 (0687869956)
+   non trouve (siret_invalide) : bonhomme-ghislain-22390 (0713222390)
+   non trouve (siret_invalide) : bc-facility-services-06691 (0785506691)
+   non trouve (siret_invalide) : cammisuli-fabio-70062 (0794870062)
+   non trouve (siret_invalide) : capone-cedric-07696 (0829107696)
+   non trouve (siret_invalide) : bertoni-emmanuel-aldo-46218 (0832646218)
+   non trouve (siret_invalide) : boucha-raymond-81892 (0873281892)
+   non trouve (siret_invalide) : c-b-construction-21190 (0876221190)
+   non trouve (siret_invalide) : blum-sebastien-25496 (0888025496)
+   non trouve (siret_invalide) : anciens-etablissements-brassart-materiaux-86528 (0452686528)
+   non trouve (siret_invalide) : bouron-roger-59411 (0571959411)
+   non trouve (siret_invalide) : barthol-fabien-37174 (0695337174)
+   non trouve (siret_invalide) : association-momentanee-lambert-freres-s-a-deumer-s-a-mathieu-17247 (0764617247)
+[2000/2000] enrichies 1741 (dont sans changement 0) | non trouvees 259 | err API 0 | err base 0 | 443 s | 4.52 fiches/s
+
+=== Bilan ===
+   traitees            2000
+   enrichies           1741  (dont sans aucun changement : 0)
+   non trouvees        259
+   erreurs API         0  (rien d'ecrit, reprises au prochain passage)
+   erreurs base        0
+   duree 442.7 s, debit 4.52 fiches/s
+
+=== Qualite des donnees (sur les fiches trouvees) ===
+   etablissements FERMES (etat F)        2   <- seulement enregistres, jamais desactives ici
+   NAF different de la base              91
+   annee de creation != founded_year     569
+   effectif NN (non employeur)           1562
+   avec coordonnees exactes              1660
+   avec metier registre des metiers      575
+   avec liste_rge (annuaire)             21
+   avec enseigne ou nom commercial       738
+   avec comptes deposes (finances)       90
+   avec au moins un label officiel       114
+
+=== Preuve en base (recomptage sirene_enrichi_at IS NOT NULL sur le perimetre) ===
+   avant 0 | ecrites par ce passage 2000 | attendu 2000 | mesure 2000
+   OK : le compte en base correspond.

@@ -1,0 +1,13 @@
+import puppeteer from "puppeteer-core";
+const OUT = "/private/tmp/claude-501/-Users-willygauvrit-Desktop-Workwave-V2/7e7a312b-ad81-47aa-837b-91f556f9fefa/scratchpad/captures";
+const p1 = (ms) => new Promise((r) => setTimeout(r, ms));
+const b = await puppeteer.launch({ executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", headless: "new", args: ["--no-sandbox"] });
+const p = await b.newPage();
+await p.setViewport({ width: 1280, height: 820, deviceScaleFactor: 2 });
+await p.goto("https://workwave.fr/artisan/dawalls-00015", { waitUntil: "domcontentloaded", timeout: 30000 });
+await p1(3000);
+await p.evaluate(() => { const x=[...document.querySelectorAll("button")].find(e=>/refuser/i.test(e.textContent)); if(x) x.click(); });
+await p1(600);
+await p.screenshot({ path: `${OUT}/cv-avant-d.png` });
+console.log("avant desktop ok");
+await b.close();

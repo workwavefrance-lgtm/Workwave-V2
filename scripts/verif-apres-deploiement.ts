@@ -77,13 +77,13 @@ const dire = (ok: boolean, texte: string) => {
   const ouverte = await get("/artisan/alternatif-ac-dc-continue-00011");
   dire(ouverte.code === 200 && /depuis \d{4}/.test(titre(ouverte.corps)),
     `fiche ouverte : « ${titre(ouverte.corps).slice(0, 70)} »`);
-  dire(/Entreprise créée le/.test(meta(ouverte.corps)),
+  dire(/Établissement ouvert le/.test(meta(ouverte.corps)),
     `sa description : « ${meta(ouverte.corps).slice(0, 90)} »`);
   const fermee = await get("/artisan/garnier-renovation-00013");
   dire(fermee.code === 200 && /établissement fermé/.test(titre(fermee.corps)),
     `fiche fermee inchangee : « ${titre(fermee.corps).slice(0, 70)} »`);
   const propre = await get("/artisan/go-renov-00026");
-  dire(propre.code === 200 && !/Entreprise créée le/.test(meta(propre.corps)),
+  dire(propre.code === 200 && !/Établissement ouvert le/.test(meta(propre.corps)),
     `fiche a description propre : la sienne est conservee`);
 
   console.log("\n5. Pages temoins");

@@ -1,0 +1,75 @@
+/**
+ * Rendu d'un reel "Nouveau projet" → frames PNG (puis ffmpeg → MP4).
+ *
+ * Usage :
+ *   node scripts/render-reel-page-pro.mjs marketing/projets/<projet>.json
+ *
+ * Le JSON projet :
+ *   { "slug": "macon-marsolan", "theme": "light"|"dark", "metier": "Maçon",
+ *     "ville": "Marsolan", "dept": "Gers (32)", "budget": "500 € à 2 000 €",
+ *     "urgence": "Ce mois-ci", "description": "..." }
+ *
+ * Pré-requis : serveur local `python3 -m http.server 8877 --directory marketing`.
+ * Sortie : marketing/frames-projet/ (frames), encoder ensuite avec ffmpeg.
+ * RÈGLE : JAMAIS de PII client (nom/tél/email) dans le JSON.
+ */
+import puppeteer from "puppeteer-core";
+import fs from "fs";
+import path from "path";
+import os from "os";
+
+const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const dataPath = process.argv[2];
+if (!dataPath) { console.error("Usage: node scripts/render-reel-page-pro.mjs <projet.json>"); process.exit(1); }
+const project = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+if (!project.slug) { console.error("JSON invalide: slug requis"); process.exit(1); }
+
+// Injecte les données pour le template
+fs.writeFileSync(
+  path.resolve("marketing/reel-page-pro-data.js"),
+  "window.REEL = " + JSON.stringify(project, null, 2) + ";\n"
+);
+
+// Les images NE DOIVENT PAS etre ecrites sous ~/Desktop : ce dossier est
+// synchronise par iCloud, qui recree des copies "f00419 2.png" pendant que
+// le script vide le dossier. D ou l echec ENOTEMPTY du nettoyage, puis des
+// videos TRONQUEES en silence (5,9 s au lieu de 14 s le 17/08 : ffmpeg
+// s arrete a la premiere image manquante). Mesure du 20/08 : 644 fichiers
+// dans le dossier pour 420 images reelles, soit 224 doublons iCloud.
+const OUT = process.env.REEL_FRAMES_DIR || path.join(os.tmpdir(), "workwave-frames-page-pro");
+const FPS = 30;
+// maxRetries : sur macOS, rmSync recursif echoue par intermittence en
+// ENOTEMPTY quand le dossier contient les 420 images du rendu precedent.
+// C'est ce qui produisait des videos TRONQUEES en silence le 17/08 : le
+// nettoyage echouait, ffmpeg s'arretait a la premiere image manquante et
+// sortait une video de 5,9 s au lieu de 14 s, sans erreur.
+fs.rmSync(OUT, { recursive: true, force: true, maxRetries: 20, retryDelay: 150 });
+fs.mkdirSync(OUT, { recursive: true });
+
+const browser = await puppeteer.launch({
+  executablePath: CHROME,
+  headless: "new",
+  args: ["--no-sandbox", "--force-device-scale-factor=1", "--hide-scrollbars"],
+});
+const page = await browser.newPage();
+await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
+await page.goto("http://localhost:8877/reel-page-pro-render.html", { waitUntil: "networkidle0" });
+
+const total = await page.evaluate(() => window.TOTAL);
+const nFrames = Math.ceil(total / (1000 / FPS));
+console.log(`[${project.slug}] theme=${project.theme || "dark"} · ${total}ms → ${nFrames} frames`);
+
+for (let i = 0; i < nFrames; i++) {
+  await page.evaluate((tt) => window.renderFrame(tt), i * (1000 / FPS));
+  await page.screenshot({
+    path: path.join(OUT, "f" + String(i).padStart(5, "0") + ".png"),
+    clip: { x: 0, y: 0, width: 1080, height: 1920 },
+  });
+  if (i % 150 === 0) console.log(`  ${i}/${nFrames}`);
+}
+await browser.close();
+console.log(`OK · ${nFrames} frames dans ${OUT}`);
+// Sortie forcee : apres browser.close(), le processus Chrome garde parfois le
+// boucle d evenements de Node en vie et le script ne rend jamais la main.
+// Le rendu est termine et les images sont sur le disque : on sort.
+process.exit(0);

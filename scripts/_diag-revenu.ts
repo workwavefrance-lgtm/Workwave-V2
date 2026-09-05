@@ -1,0 +1,21 @@
+import { config } from "dotenv";
+import path from "path";
+import { createClient } from "@supabase/supabase-js";
+config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+const TESTS = [4393, 99999, 1432477];
+(async () => {
+  const { data, error } = await sb.from("lead_unlocks").select("*").order("created_at", { ascending: false });
+  if (error) return console.log("ERR", error.message);
+  const all = data || [];
+  console.log("colonnes :", Object.keys(all[0] || {}).join(", "));
+  const vrais = all.filter((u: any) => !TESTS.includes(u.pro_id));
+  const payes = vrais.filter((u: any) => (u.amount_cents ?? 0) > 0);
+  console.log(`\nTOTAL deblocages      : ${all.length}`);
+  console.log(`dont comptes de test  : ${all.length - vrais.length}`);
+  console.log(`VRAIS pros            : ${vrais.length}`);
+  console.log(`dont PAYANTS (>0 c)   : ${payes.length}`);
+  console.log(`REVENU REEL           : ${(payes.reduce((s: number, u: any) => s + (u.amount_cents || 0), 0) / 100).toFixed(2)} EUR`);
+  console.log("\ndetail des vrais deblocages :");
+  vrais.forEach((u: any) => console.log(`  ${String(u.created_at).slice(0,10)}  pro ${String(u.pro_id).padEnd(9)} projet ${String(u.project_id).padEnd(5)} ${((u.amount_cents||0)/100).toFixed(2)} EUR`));
+})();
