@@ -320,6 +320,22 @@ export async function renderListing(
   // ATTENTION : pas de loading.tsx dans cette route ! Le streaming Suspense
   // commit le status 200 avant que la page puisse throw permanentRedirect/notFound.
   // Cf. lecon apprise CLAUDE.md du 2026-04-18.
+  // PAGE DE PAGINATION AU-DELA DE LA DERNIERE (ajoute le 05/09/2026).
+  //
+  // /garde-animaux/epinay-sur-seine/page/2 rendait un 500 en boucle : la
+  // commune a 6 pros, la page 2 est donc legitimement vide, le total revenait
+  // a zero, on entrait dans le bloc « aucun pro » ci-dessous, et son
+  // contre-comptage voyait les 6 pros et levait « Lecture incoherente ».
+  // Mesure du 05/09 : 30 erreurs 5xx sur des pages /page/N dans la journee.
+  //
+  // Une page de pagination qui n'existe pas doit repondre 404, pas 500 et pas
+  // une redirection permanente gravee 30 jours. `notFound()` fonctionne ici
+  // parce que cette route n'a PAS de loading.tsx (cf. le commentaire
+  // ci-dessous et la lecon du 18/04 sur le streaming Suspense).
+  if (!isFirstPage && (paginatedResult?.data?.length ?? 0) === 0) {
+    notFound();
+  }
+
   if (resolved.type === "city" && totalProsCount === 0) {
     // CONTRE-COMPTAGE AVANT DE REDIRIGER (ajoute le 31/08/2026).
     //

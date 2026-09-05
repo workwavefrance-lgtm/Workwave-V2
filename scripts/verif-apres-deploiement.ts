@@ -86,7 +86,16 @@ const dire = (ok: boolean, texte: string) => {
   dire(propre.code === 200 && !/Établissement ouvert le/.test(meta(propre.corps)),
     `fiche a description propre : la sienne est conservee`);
 
-  console.log("\n5. Pages temoins");
+  console.log("\n5. Une page de pagination inexistante repond 404, pas 500");
+  // /garde-animaux/epinay-sur-seine a 6 pros : sa page 2 n'existe pas. Elle
+  // rendait un 500 en boucle jusqu'au 05/09 (30 erreurs 5xx par jour sur les
+  // pages /page/N). Une page qui n'existe pas doit repondre 404.
+  const p2 = await get("/garde-animaux/epinay-sur-seine/page/2");
+  dire(p2.code === 404, `page 2 d'une commune a 6 pros : ${p2.code} (on attend 404)`);
+  const p1 = await get("/plombier/montpellier/page/2");
+  dire(p1.code === 200, `page 2 d'une commune bien fournie : ${p1.code} (on attend 200)`);
+
+  console.log("\n6. Pages temoins");
   for (const c of ["/", "/plombier/montpellier", "/plombier/herault-34", "/deposer-projet", "/guide-des-prix", "/pro", "/robots.txt", "/llms.txt"]) {
     const r = await get(c);
     dire(r.code === 200, `${c} repond ${r.code} (${r.ms} ms)`);
