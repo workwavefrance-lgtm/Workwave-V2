@@ -20,14 +20,26 @@ import { tousLesIdsDeSitemap } from "@/lib/seo/sitemap-ids";
 export const revalidate = 86400; // 24 h
 
 export async function GET() {
-  // Date a la JOURNEE, pas a la milliseconde. Elle valait
-  // `new Date().toISOString()` : a chaque regeneration du cache, les 58
-  // enfants annoncaient tous "modifie a l'instant" (mesure : 17h20 la veille,
-  // 17h45 puis 18h23 le meme jour). Google ignore une date qu'il juge peu
-  // fiable, et on perd alors le seul moyen de lui signaler qu'un lot de
-  // fiches a reellement change. A la journee, la valeur est stable d'une
-  // lecture a l'autre et reste vraie : le parc bouge tous les jours.
-  const jour = new Date().toISOString().slice(0, 10);
+  // PLUS DE `lastmod` SUR LES ENFANTS (05/09/2026).
+  //
+  // Il valait la date du JOUR, identique pour les 83 enfants, renouvelee
+  // chaque matin. C'etait faux et Google le voit : le contenu de
+  // /sitemap/100.xml s'etale du 07/06 au 03/09, il ne change pas tous les
+  // jours. La documentation de Google est explicite : il n'utilise `lastmod`
+  // que s'il le juge fiable, et il vaut mieux ne PAS en mettre que d'en
+  // mettre un faux, parce qu'un faux lui apprend a ignorer le champ pour tout
+  // le domaine.
+  //
+  // Ce que la mesure du 05/09 a etabli, et ce qu'elle n'a PAS etabli. Etabli :
+  // Google telecharge l'index (30/08, puis 05/09 apres resoumission) mais n'a
+  // enregistre qu'UN SEUL de ses 83 enfants, le flux de fraicheur. Non
+  // etabli : que le `lastmod` en soit la cause. Ce qui est certain, c'est que
+  // la valeur etait fausse ; on arrete donc de la produire, sans pretendre
+  // que cela resoudra le non-telechargement.
+  //
+  // Ne pas remettre un `lastmod` ici sans pouvoir le calculer VRAIMENT, par
+  // exemple le max(updated_at) des fiches de chaque lot. Une date inventee
+  // vaut moins que pas de date.
 
   // Le sitemap « fraicheur » (ajoute le 01/09/2026) est le SEUL enfant dont
   // les dates par page sont reelles (updated_at) : c'est la file prioritaire
@@ -38,10 +50,10 @@ export async function GET() {
 ${tousLesIdsDeSitemap()
   .map(
     (id) =>
-      `  <sitemap><loc>${BASE_URL}/sitemap/${id}.xml</loc><lastmod>${jour}</lastmod></sitemap>`
+      `  <sitemap><loc>${BASE_URL}/sitemap/${id}.xml</loc></sitemap>`
   )
   .join("\n")}
-  <sitemap><loc>${BASE_URL}/sitemap-fraicheur.xml</loc><lastmod>${jour}</lastmod></sitemap>
+  <sitemap><loc>${BASE_URL}/sitemap-fraicheur.xml</loc></sitemap>
 </sitemapindex>`;
 
   return new Response(xml, {
