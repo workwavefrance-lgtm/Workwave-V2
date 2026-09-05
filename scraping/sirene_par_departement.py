@@ -230,17 +230,29 @@ def _upsert_unitaire(supabase, rows):
     perdus = []
     for row in rows:
         insere = False
+        # Deux variantes de slug (le NIC, puis le SIRET complet), et pour
+        # chacune trois essais espaces : un lot peut echouer sur un
+        # depassement de delai de la base (57014) quand elle est chargee, et
+        # ce n'est pas une raison de perdre la ligne. Vu le 05/09 sur la
+        # Seine-Saint-Denis : 2 lignes perdues pour cette seule raison.
         for variante in (row["slug"], f"{make_slug(row['name'])}-{row['siret']}"):
             row["slug"] = variante
-            try:
-                supabase.table("pros").upsert(
-                    row, on_conflict="siret", ignore_duplicates=True
-                ).execute()
-                ok += 1
-                insere = True
+            for essai in range(3):
+                try:
+                    supabase.table("pros").upsert(
+                        row, on_conflict="siret", ignore_duplicates=True
+                    ).execute()
+                    ok += 1
+                    insere = True
+                    break
+                except Exception as e:
+                    # Une violation d'unicite ne se repare pas en attendant :
+                    # on passe tout de suite a la variante suivante.
+                    if "23505" in str(e) or "duplicate key" in str(e):
+                        break
+                    time.sleep(2 * (essai + 1))
+            if insere:
                 break
-            except Exception:
-                continue
         if not insere:
             perdus.append(row.get("siret", "?"))
     if perdus:

@@ -28,6 +28,7 @@
  */
 import { formatEffectifRange } from "@/lib/utils/sirene";
 import { formeJuridiqueDistinctive } from "@/lib/data/formes-juridiques";
+import { dateSireneUtilisable } from "@/lib/utils/sirene";
 
 /** Sous-ensemble de `Pro` lu par ce module. Toutes les cles sont optionnelles :
  *  une colonne absente (migration non appliquee) vaut « pas de donnee ». */
@@ -317,8 +318,8 @@ function couperPhrase(texte: string, max: number): string {
 
 /** "13 juillet 2007", avec "1er" au lieu de "1" pour le premier du mois. */
 export function dateEnToutesLettres(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
+  if (!dateSireneUtilisable(iso)) return null;
+  const d = new Date(iso as string);
   if (Number.isNaN(d.getTime())) return null;
   const jour = d.getUTCDate();
   const mois = d.toLocaleDateString("fr-FR", { month: "long", timeZone: "UTC" });
@@ -353,8 +354,8 @@ export function descriptionFicheOuverte(f: FaitsFicheOuverte): string {
     const ans = new Date().getUTCFullYear() - d.getUTCFullYear();
     milieu.push(
       ans >= 1
-        ? `Entreprise créée le ${creation}, ${ans} ${ans > 1 ? "ans" : "an"} d'activité.`
-        : `Entreprise créée le ${creation}.`
+        ? `Établissement ouvert le ${creation}, ${ans} ${ans > 1 ? "ans" : "an"} d'activité.`
+        : `Établissement ouvert le ${creation}.`
     );
   }
   const forme = formeJuridiqueDistinctive(f.formeJuridiqueCode);

@@ -1183,8 +1183,8 @@ export default async function ProPage({ params }: Props) {
                 const dateComplete = formatDateCreation(pro.founding_date);
                 const libelle =
                   dateComplete && formatFoundingYear(pro.founding_date) === year
-                    ? { titre: "Entreprise créée le", valeur: dateComplete }
-                    : { titre: "Entreprise créée en", valeur: year };
+                    ? { titre: "Établissement ouvert le", valeur: dateComplete }
+                    : { titre: "Établissement ouvert en", valeur: year };
                 return (
                   <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--accent-muted)" }}>

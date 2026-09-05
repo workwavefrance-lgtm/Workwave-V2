@@ -41,7 +41,8 @@ export function formatEffectifRange(code: string | null | undefined): string | n
  * ou null si pas de date. Utilise pour afficher "Entreprise creee en 2008".
  */
 export function formatFoundingYear(date: string | null | undefined): string | null {
-  if (!date) return null;
+  if (!dateSireneUtilisable(date)) return null;
+  date = date as string;
   const year = date.slice(0, 4);
   if (!/^\d{4}$/.test(year)) return null;
   return year;
@@ -51,9 +52,23 @@ export function formatFoundingYear(date: string | null | undefined): string | nu
  * Retourne le nombre d'annees depuis la creation, pour afficher
  * "Entreprise active depuis 17 ans" (signal d'experience).
  */
+/**
+ * 1900-01-01 est la date bouchon « inconnue » de l'INSEE. Mesure du
+ * 05/09/2026 : 10 391 fiches actives la portent, dont 290 ecrites le jour
+ * meme. Affichee telle quelle, elle produit « 126 ans d'activite », un fait
+ * faux et visible. Une date anterieure a 1901 est donc traitee comme absente.
+ */
+const ANNEE_MINIMUM = 1901;
+
+export function dateSireneUtilisable(date: string | null | undefined): boolean {
+  if (!date) return false;
+  const annee = parseInt(date.slice(0, 4), 10);
+  return !isNaN(annee) && annee >= ANNEE_MINIMUM;
+}
+
 export function formatAgeYears(date: string | null | undefined): number | null {
-  if (!date) return null;
-  const year = parseInt(date.slice(0, 4), 10);
+  if (!dateSireneUtilisable(date)) return null;
+  const year = parseInt(date!.slice(0, 4), 10);
   if (isNaN(year)) return null;
   const currentYear = new Date().getFullYear();
   const age = currentYear - year;
