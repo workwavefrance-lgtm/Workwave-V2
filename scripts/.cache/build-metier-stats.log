@@ -1,0 +1,78 @@
+◇ injected env (45) from .env.local // tip: ⌘ enable debugging { debug: true }
+RPC stats_etats_cat_dept_json absente (migration 2026-09-03_stats_ouverts_rpcs.sql non appliquee) : extraction directe.
+Extraction : 202 categories · 107 departements · 35163 communes
+  200 pages · 200 000 fiches · 24 s
+  400 pages · 400 000 fiches · 41 s
+  600 pages · 600 000 fiches · 57 s
+  800 pages · 800 000 fiches · 75 s
+  1000 pages · 1 000 000 fiches · 95 s
+  1200 pages · 1 200 000 fiches · 116 s
+  1400 pages · 1 400 000 fiches · 137 s
+  1600 pages · 1 600 000 fiches · 161 s
+  1800 pages · 1 800 000 fiches · 186 s
+  2000 pages · 1 999 605 fiches · 208 s
+  2200 pages · 2 199 605 fiches · 227 s
+  2400 pages · 2 399 602 fiches · 253 s
+Extraction terminee : 2 439 976 fiches en 272 s · 4811 lignes (metier x dept)
+  actifs 2 439 976 (SQL 03/09 : 2 439 976) · ouverts 1 233 038 (1 233 038) · fermes 1 206 938 (1 206 938) · disparues 785 154 (785 154) · verifiees 2 319 071
+Cache ecrit : scripts/.cache/stats-etats-extraction.json
+  accompagnement-handicap        ouverts    3369 · actifs    6489 · fermes  48.1 %
+  accompagnement-post-partum     ouverts       0 · actifs       0 · fermes    n/a
+  aide-administrative            ouverts   38601 · actifs   66325 · fermes  41.8 %
+  aide-seniors                   ouverts   15326 · actifs   37593 · fermes  59.2 %
+  architecte                     ouverts   26989 · actifs   61188 · fermes  65.7 %
+  ascensoriste                   ouverts       0 · actifs       0 · fermes    n/a
+  assistance-informatique        ouverts       1 · actifs       1 · fermes    n/a
+  carreleur                      ouverts   23586 · actifs   62762 · fermes  65.2 %
+  charpentier                    ouverts   13545 · actifs   32144 · fermes  57.9 %
+  chauffagiste                   ouverts   26227 · actifs   56738 · fermes  59.2 %
+  climaticien                    ouverts    2703 · actifs    5453 · fermes  50.4 %
+  coach-sportif                  ouverts       0 · actifs       0 · fermes    n/a
+  coiffure-domicile              ouverts       0 · actifs       0 · fermes    n/a
+  cours-musique                  ouverts       0 · actifs       0 · fermes    n/a
+  cours-particuliers             ouverts    3794 · actifs    9034 · fermes    58 %
+  couture-retouches              ouverts       0 · actifs       0 · fermes    n/a
+  couvreur                       ouverts   29121 · actifs   58614 · fermes  54.7 %
+  cuisinier-a-domicile           ouverts       0 · actifs       0 · fermes    n/a
+  cuisiniste                     ouverts   10182 · actifs   33883 · fermes  69.9 %
+  debarras                       ouverts   16490 · actifs   37193 · fermes  55.7 %
+  decorateur-interieur           ouverts    9348 · actifs   47465 · fermes  80.3 %
+  demenagement                   ouverts    7073 · actifs   13058 · fermes    64 %
+  depannage-electromenager       ouverts    2984 · actifs    7865 · fermes  62.1 %
+  diagnostic-immobilier          ouverts    7970 · actifs   21085 · fermes  62.2 %
+  elagueur                       ouverts   24916 · actifs   30356 · fermes  17.9 %
+  electricien                    ouverts   48259 · actifs  103389 · fermes  62.1 %
+  esthetique-domicile            ouverts       0 · actifs       0 · fermes    n/a
+  facadier                       ouverts    9474 · actifs   21496 · fermes    63 %
+  garde-animaux                  ouverts   35134 · actifs   85831 · fermes  59.1 %
+  garde-enfants                  ouverts   19636 · actifs   30187 · fermes    35 %
+  livraison-de-courses           ouverts   28384 · actifs   76904 · fermes  63.1 %
+  macon                          ouverts   47840 · actifs  107489 · fermes    65 %
+  manutention                    ouverts       0 · actifs       0 · fermes    n/a
+  massage-bien-etre              ouverts       0 · actifs       0 · fermes    n/a
+  menage                         ouverts   48881 · actifs   90362 · fermes    50 %
+  menuisier                      ouverts   57492 · actifs  133593 · fermes  61.2 %
+  montage-meubles                ouverts       0 · actifs       0 · fermes    n/a
+  multiservice                   ouverts       2 · actifs       2 · fermes    n/a
+  naturopathe                    ouverts       1 · actifs       1 · fermes    n/a
+  nettoyage-pro                  ouverts    5581 · actifs   10964 · fermes  49.1 %
+  nettoyage-vitres               ouverts   13402 · actifs   32677 · fermes    59 %
+  paysagiste                     ouverts   53329 · actifs   93685 · fermes  53.8 %
+  peintre                        ouverts   30720 · actifs   84250 · fermes  65.3 %
+  petit-bricolage                ouverts   15761 · actifs   45962 · fermes  65.7 %
+  pisciniste                     ouverts    5869 · actifs   15465 · fermes    62 %
+  plaquiste                      ouverts   33554 · actifs   75939 · fermes    64 %
+  plombier                       ouverts   30701 · actifs   78156 · fermes  62.7 %
+  promenade-animaux              ouverts       0 · actifs       0 · fermes    n/a
+  psychopraticien                ouverts       5 · actifs       7 · fermes    n/a
+  ramoneur                       ouverts    5606 · actifs   13873 · fermes  59.6 %
+  repassage                      ouverts   11038 · actifs   27888 · fermes  60.4 %
+  serrurier                      ouverts    1110 · actifs    2343 · fermes  52.6 %
+  soutien-scolaire               ouverts   51939 · actifs  127226 · fermes  59.2 %
+  terrassier                     ouverts   38425 · actifs   71159 · fermes  55.6 %
+  traitement-nuisibles           ouverts       0 · actifs       0 · fermes    n/a
+  videosurveillance-installateur ouverts    5253 · actifs   13479 · fermes    61 %
+  vitrier                        ouverts    1036 · actifs    1591 · fermes  65.2 %
+
+/Users/willygauvrit/Desktop/Workwave-V2/lib/data/metier-stats.ts
+   57 metiers · 860 657 fiches ouvertes (1 931 164 actives) · France verifiees 1 810 312 · fermes 59.1 % · disparues 40.6 % · 107 depts · 35163 communes · 272 s
