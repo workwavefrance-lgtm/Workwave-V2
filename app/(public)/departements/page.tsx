@@ -84,7 +84,7 @@ export default async function DepartmentsHubPage() {
           Professionnels par département
         </h1>
         <p className="text-lg text-[var(--text-secondary)] max-w-3xl">
-          Plus de 1,2 million d&apos;artisans et professionnels référencés dans les 101
+          Plus de 1,5 million d&apos;artisans et professionnels référencés dans les 101
           départements français et les 6 provinces belges. Choisissez votre territoire pour
           découvrir les pros près de chez vous.
         </p>
@@ -93,7 +93,14 @@ export default async function DepartmentsHubPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {departments.map((dept) => {
           const deptSlug = generateDepartmentSlug(dept);
-          const count = countByDeptId.get(dept.id) || 0;
+          // `undefined` quand le comptage a echoue, PAS zero. Mesure du
+          // 05/09/2026 : 18 departements affichaient « 0 pros » en production
+          // alors qu'ils comptaient 89 247 fiches ouvertes, parce que 107
+          // comptages lances en parallele depassaient le delai, renvoyaient
+          // null, et que le `|| 0` transformait l'echec en zero. Annoncer
+          // « 0 pros » sur un departement plein est une erreur de fait sur une
+          // page publique, et un signal de page vide envoye a Google.
+          const count = countByDeptId.get(dept.id);
           // Lien principal de la carte : page departement avec la categorie
           // la plus generique (plombier, presente partout). Permet a l'user
           // d'arriver sur une page liste riche, pas juste sur l'index dept.
@@ -113,12 +120,14 @@ export default async function DepartmentsHubPage() {
                     Département {dept.code}
                   </p>
                 </div>
-                <span
-                  className="inline-block text-[var(--accent-badge-text)] text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
-                  style={{ backgroundColor: "var(--accent-muted)" }}
-                >
-                  {count.toLocaleString("fr-FR")} pros
-                </span>
+                {typeof count === "number" && count > 0 && (
+                  <span
+                    className="inline-block text-[var(--accent-badge-text)] text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+                    style={{ backgroundColor: "var(--accent-muted)" }}
+                  >
+                    {count.toLocaleString("fr-FR")} pros
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2 mb-5">
