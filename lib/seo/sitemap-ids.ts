@@ -42,7 +42,17 @@ export const CAT_CITY_PAR_SITEMAP = 45000;
 
 export const SITEMAP_PROS_OFFSET = 100;
 export const SITEMAP_PROS_AI_OFFSET = 200;
-export const NB_SITEMAPS_PROS = 48;
+// 05/09/2026 : releve de 48 a 60 AVANT le rattrapage des departements denses.
+// Mesure du jour : les fiches occupent /sitemap/100 a 142 (142 contient
+// 41 164 adresses sur 45 000), 143 a 147 sont servies et vides, 148 repond
+// 404. Il restait donc 228 836 places. Le rattrapage porte sur tous les
+// metiers BTP de 19 departements denses, et la mesure de couverture ne portait
+// que sur 6 metiers (184 160 manquants) : le volume reel peut depasser cette
+// marge. 60 porte la capacite a 2 700 000 fiches non tech, soit 768 836
+// places libres. Une tranche au-dela des donnees renvoie -1 depuis
+// findBatchStartId et sert un urlset vide, ce que /sitemap/143 a 147 font
+// deja en production sans le moindre effet.
+export const NB_SITEMAPS_PROS = 60;
 export const NB_SITEMAPS_PROS_AI = 14;
 
 /** Tous les identifiants, dans l'ordre. C'est la liste que sert l'index. */
