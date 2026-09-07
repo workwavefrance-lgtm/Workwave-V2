@@ -95,7 +95,23 @@ const dire = (ok: boolean, texte: string) => {
   const p1 = await get("/plombier/montpellier/page/2");
   dire(p1.code === 200, `page 2 d'une commune bien fournie : ${p1.code} (on attend 200)`);
 
-  console.log("\n6. Pages temoins");
+  console.log("\n6. L'accueil ne renvoie vers aucune page vide");
+  // Le 06/09, l'accueil renvoyait vers /montage-meubles/calvados-14,
+  // /coach-sportif/bouches-du-rhone-13 et /cours-musique/cantal-15, trois
+  // pages sans le moindre professionnel, parce qu'il choisissait le
+  // departement par rotation sans verifier qu'il y avait quelqu'un.
+  const accueil = await get("/");
+  const liens = [...new Set((accueil.corps.match(/href="\/[a-z0-9-]+\/[a-z0-9-]+-[0-9ab]{2,3}"/gi) || []))]
+    .map((h) => h.replace(/^href="|"$/g, ""));
+  let vides = 0;
+  for (const l of liens.slice(0, 25)) {
+    const r = await get(l);
+    // La page annonce elle-meme qu'elle n'a personne a montrer.
+    if (/aucun professionnel|aucun artisan/i.test(r.corps)) { vides++; console.log(`       VIDE : ${l}`); }
+  }
+  dire(vides === 0, `${liens.length} liens metier x departement sur l'accueil, ${vides} menent a une page vide`);
+
+  console.log("\n7. Pages temoins");
   for (const c of ["/", "/plombier/montpellier", "/plombier/herault-34", "/deposer-projet", "/guide-des-prix", "/pro", "/robots.txt", "/llms.txt"]) {
     const r = await get(c);
     dire(r.code === 200, `${c} repond ${r.code} (${r.ms} ms)`);

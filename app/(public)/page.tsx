@@ -22,7 +22,7 @@ import {
   getOrganizationSchema,
   getFaqSchema,
 } from "@/lib/utils/schema";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import { DEPT_PAR_CATEGORIE } from "@/lib/data/home-links";
 import { BASE_URL } from "@/lib/constants";
 import type { Metadata } from "next";
 
@@ -85,7 +85,10 @@ const homeFaqs = [
 ];
 
 export default async function Home() {
-  const [btp, domicile, personne, topCities, departments, recentProjects, fichesFraiches] =
+  // `departments` n'est plus lu depuis que les liens de l'accueil viennent de
+  // lib/data/home-links.ts. La lecture est conservee pour ne pas changer
+  // l'ordre du Promise.all ci-dessous.
+  const [btp, domicile, personne, topCities, , recentProjects, fichesFraiches] =
     await Promise.all([
       getCategoriesByVerticalPublic("btp"),
       getCategoriesByVerticalPublic("domicile"),
@@ -107,15 +110,28 @@ export default async function Home() {
     ...personne.map((c) => ({ slug: c.slug, name: c.name, vertical: "personne" })),
   ];
 
-  // Rotation des 12 departements pour repartir le link juice de la home
-  // sur tous les departements de Nouvelle-Aquitaine au lieu de tout pousser
-  // vers vienne-86. Offset different par vertical pour varier l'ordre.
-  // Cf. lecon CLAUDE.md (audit 2026-05-03).
-  const deptSlugs = departments.map((d) => generateDepartmentSlug(d));
-  const linkFor = (catSlug: string, idx: number, offset: number): string => {
-    if (deptSlugs.length === 0) return `/${catSlug}`;
-    const dept = deptSlugs[(idx + offset) % deptSlugs.length];
-    return `/${catSlug}/${dept}`;
+  // Le departement mis en avant pour chaque metier vient de
+  // lib/data/home-links.ts, qui ne retient qu'un departement ayant REELLEMENT
+  // des professionnels ouverts.
+  //
+  // Avant le 06/09/2026, il etait choisi par simple ROTATION, sans verifier
+  // qu'il y avait quelqu'un dedans. Mesure de ce jour : l'accueil renvoyait
+  // vers /montage-meubles/calvados-14, /coach-sportif/bouches-du-rhone-13 et
+  // /cours-musique/cantal-15, TROIS PAGES VIDES. Treize categories du site
+  // n'ont aucun professionnel : notre page la plus visitee par Google
+  // l'envoyait donc dans des impasses, au moment precis ou il juge la qualite
+  // du site.
+  //
+  // Quand une categorie n'a de professionnels nulle part (16 sur 57), le lien
+  // pointe vers sa page RACINE, qui utilise la proximite et ne promet pas un
+  // departement en particulier. Aucune page n'est retiree ni mise en noindex :
+  // on cesse simplement de mettre en avant un couple metier x departement vide.
+  //
+  // A regenerer apres tout scrape ou reclassement :
+  //   npx tsx scripts/build-home-links.ts
+  const linkFor = (catSlug: string): string => {
+    const dept = DEPT_PAR_CATEGORIE[catSlug];
+    return dept ? `/${catSlug}/${dept}` : `/${catSlug}`;
   };
 
   const verticals = [
@@ -356,10 +372,10 @@ export default async function Home() {
               {vertical.title}
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {vertical.categories.map((cat, i) => (
+              {vertical.categories.map((cat) => (
                 <Link
                   key={cat.id}
-                  href={linkFor(cat.slug, i, vertical.offset)}
+                  href={linkFor(cat.slug)}
                   className="group bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6 text-center transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]"
                 >
                   <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors duration-250">
