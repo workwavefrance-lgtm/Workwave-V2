@@ -439,26 +439,6 @@ export default function ProjectForm({
         // avant le re-render. Marche identiquement sur Chrome.
         setHasAttemptedSubmit(true);
         setDismissedErrors(new Set());
-        // Enhanced Conversions Microsoft Ads : on stocke email + phone dans
-        // sessionStorage pour que le UETPixel les push à MS Ads sur la page
-        // /deposer-projet/merci (= meilleur matching cross-device, +15-30% conv).
-        // Normalisation conforme aux specs MS Ads (E.164 phone, lowercase email
-        // sans accents). Cleanup auto par le pixel après push. sessionStorage =
-        // RGPD-friendly : nettoyé à la fermeture de l'onglet.
-        try {
-          if (typeof window !== "undefined") {
-            const cleanEmail = email
-              .trim()
-              .toLowerCase()
-              .normalize("NFD")
-              .replace(/[̀-ͯ]/g, ""); // retire les accents
-            const cleanPhone = phone.trim().replace(/[^\d+]/g, ""); // garde + et chiffres
-            if (cleanEmail) sessionStorage.setItem("wwv:uet_em", cleanEmail);
-            if (cleanPhone) sessionStorage.setItem("wwv:uet_ph", cleanPhone);
-          }
-        } catch {
-          /* sessionStorage peut être bloqué (mode privé Safari, etc.), pas critique */
-        }
       }}
       className="space-y-8"
     >
@@ -844,57 +824,24 @@ export default function ProjectForm({
         </p>
 
         {/* Réassurance données, pile au moment où l'utilisateur hésite à
-            laisser email + téléphone. Tous les points sont VRAIS :
-            - coordonnées derrière un paywall pro (9,90€ à l'unlock), jamais
-              publiques ni vendues (cf. broadcast-btp-project.ts) ;
-            - aucun démarchage Workwave ;
-            - suppression via le lien du mail de confirmation (deletion_token,
-              cf. deposer-projet/actions.ts + sendProjectConfirmation).
+            laisser email + téléphone. Une seule phrase, en grand : à l'endroit
+            ou la personne hésite le plus, un pavé se saute au lieu de se lire.
+            Les deux points sont VRAIS : coordonnées derrière le paiement pro
+            (9,90 € à l'unlock), jamais publiques ni vendues (cf.
+            lib/email/broadcast-btp-project.ts).
 
-            30/08/2026 : la phrase disait « visibles uniquement par l'artisan
-            qui traite votre demande ». C'ETAIT FAUX, et le meme fichier le
-            prouvait : le `onSubmit` ci-dessus range l'email et le telephone
-            dans sessionStorage (`wwv:uet_em` / `wwv:uet_ph`), que
-            components/analytics/UETPixel.tsx transmet ensuite a Microsoft
-            Advertising sur la page /deposer-projet/merci (Enhanced
-            Conversions : Microsoft les hache en SHA-256 cote serveur, donc les
-            valeurs en clair sortent bien du navigateur). Un troisieme
-            destinataire non annonce, c'est un probleme legal autant que moral.
-            La phrase dit desormais ce qui est reellement fait.
-            REGLE : si le pixel change de destinataire ou disparait, cette
-            phrase doit changer dans le meme commit. */}
-        <div className="mb-6 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-4 h-4 text-[var(--accent)] shrink-0"
-              aria-hidden
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            <span className="text-sm font-semibold text-[var(--text-primary)]">
-              Vos données sont protégées
-            </span>
-          </div>
-          {/* Court, pas six lignes. A l'endroit ou la personne hesite le plus,
-              un mur de texte se saute au lieu de se lire. La ligne sur la
-              mesure publicitaire est le prix de l'honnetete : elle reste
-              factuelle et donne le pourquoi, sans jargon juridique. */}
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Elles vont aux artisans qui traitent votre demande. Jamais affichées
-            publiquement, jamais revendues. Votre email et votre téléphone sont
-            aussi transmis à Microsoft Advertising, uniquement pour mesurer si
-            nos publicités amènent de vraies demandes. Suppression en un clic
-            depuis l&apos;email de confirmation.
-          </p>
-        </div>
+            09/09/2026 (décision Willy) : la carte encadrée, son titre, la
+            mention Microsoft Advertising et celle du lien de suppression sont
+            retirés. La mention Microsoft n'a plus lieu d'être : le pixel UET a
+            été supprimé le même jour (plus de campagnes payantes), donc email
+            et téléphone ne sortent plus vers aucun tiers. La phrase ci-dessous
+            est de nouveau exacte au mot près.
+            RÈGLE : si un pixel publicitaire revient un jour, cette phrase doit
+            redire où partent les données, dans le même commit. */}
+        <p className="mb-6 text-base leading-relaxed text-[var(--text-secondary)]">
+          Vos coordonnées vont aux artisans qui traitent votre demande. Jamais
+          affichées publiquement, jamais revendues.
+        </p>
 
         <div className="space-y-5">
           <div>

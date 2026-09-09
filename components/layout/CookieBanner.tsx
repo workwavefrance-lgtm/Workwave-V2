@@ -27,20 +27,6 @@ export default function CookieBanner() {
     if (!consent) setVisible(true);
   }, []);
 
-  function pushUetConsent(state: "granted" | "denied") {
-    // Propage le choix au pixel Microsoft Ads (UET) sans attendre un reload.
-    // Sans ce signal, UET reste en ad_storage=denied (EEE) et les conversions
-    // ne sont jamais attribuées aux clics. Cf. components/analytics/UETPixel.tsx.
-    try {
-      (window as unknown as { uetq?: { push: (...a: unknown[]) => void } }).uetq?.push(
-        "consent",
-        "update",
-        { ad_storage: state }
-      );
-    } catch {
-      /* uetq absent (tag non chargé) : le consent default lira le cookie au prochain load */
-    }
-  }
 
   function pushGoogleConsent(state: "granted" | "denied") {
     // Met à jour Google Consent Mode (GA via GTM) sans attendre un reload.
@@ -69,14 +55,12 @@ export default function CookieBanner() {
   function accept() {
     setCookie(COOKIE_NAME, "accepted", COOKIE_MAX_AGE);
     pushGoogleConsent("granted");
-    pushUetConsent("granted");
     setVisible(false);
   }
 
   function refuse() {
     setCookie(COOKIE_NAME, "refused", COOKIE_MAX_AGE);
     pushGoogleConsent("denied");
-    pushUetConsent("denied");
     setVisible(false);
   }
 
@@ -86,7 +70,7 @@ export default function CookieBanner() {
     <div className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:max-w-xs z-50 animate-in slide-in-from-bottom-4">
       <div className="bg-white dark:bg-[#111111] border border-[#E5E7EB] dark:border-[#27272A] rounded-xl px-3.5 py-2.5 shadow-lg flex items-center gap-2.5">
         <p className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF] leading-snug flex-1">
-          Cookies de mesure d&apos;audience et de publicité (Microsoft Ads).
+          Cookies de mesure d&apos;audience.
         </p>
         <button
           onClick={accept}

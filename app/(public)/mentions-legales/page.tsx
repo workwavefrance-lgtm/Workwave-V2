@@ -62,7 +62,6 @@ const SECTIONS: LegalSection[] = [
       {
         ul: [
           "**Mesure d'audience · Google Analytics** (via Google Tag Manager) : statistiques de fréquentation du site.",
-          "**Publicité · Microsoft Advertising (pixel UET)** : mesure de la performance des campagnes publicitaires.",
         ],
       },
       { p: "Vous pouvez à tout moment retirer votre consentement et modifier vos préférences via le lien de gestion des cookies présent sur le site." },
