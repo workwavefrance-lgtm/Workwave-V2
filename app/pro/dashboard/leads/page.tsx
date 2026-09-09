@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import { haversineKm } from "@/lib/utils/haversine";
-import { projetTropAncien, ageEnJours } from "@/lib/matching/fraicheur";
+import { projetTropAncien } from "@/lib/matching/fraicheur";
 import { startBtpUnlock } from "./actions";
 import SubmitButton from "@/components/ai/SubmitButton";
 import {
@@ -158,9 +158,19 @@ export default async function LeadsPage({
 
   const projects: ProjectRow[] = ((projectsRaw || []) as unknown as ProjectRow[])
     .filter((p) => {
-      // Chantier clos par l'admin (trop ancien) : on ne le PROPOSE plus, mais on
-      // le laisse au pro qui l'a deja debloque.
-      if (p.status === "closed" && !unlockedMap.has(p.id)) return false;
+      // Chantier clos par l'admin, OU vieux de plus de 30 jours (regle de Willy,
+      // 09/09/2026 : « les leads, on doit les garder 30 jours max, ensuite ils ne
+      // servent plus a rien, les gens ont trouve entre temps ») : on ne le
+      // PROPOSE plus. On le laisse au pro qui l'a deja debloque, parce qu'on ne
+      // retire jamais a un pro ce qu'il a obtenu. La cloture en base reste
+      // manuelle (scripts/cloturer-projets-anciens.ts) : ce filtre applique la
+      // regle meme les jours ou elle n'a pas tourne (6 projets de plus de 30
+      // jours encore ouverts le 09/09).
+      if (
+        (p.status === "closed" || projetTropAncien(p.created_at)) &&
+        !unlockedMap.has(p.id)
+      )
+        return false;
       const c = Array.isArray(p.cities) ? p.cities[0] : p.cities;
       const cLat = c?.latitude ?? null;
       const cLng = c?.longitude ?? null;
@@ -170,14 +180,10 @@ export default async function LeadsPage({
       // Fallback (coordonnées manquantes) : on retombe sur le département du pro.
       return proDeptId != null && (c?.department_id ?? null) === proDeptId;
     })
-    .sort((a, b) => {
-      // Les projets de plus de 30 jours passent en fin de liste : ils restent
-      // disponibles (le pro decide) mais ne masquent plus les frais.
-      const va = projetTropAncien(a.created_at) ? 1 : 0;
-      const vb = projetTropAncien(b.created_at) ? 1 : 0;
-      if (va !== vb) return va - vb;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    })
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
     .slice(0, PROJECTS_LIMIT);
 
   // Offre de lancement : les 2 premiers déblocages sont offerts. On ne compte
@@ -290,35 +296,23 @@ export default async function LeadsPage({
             const aiSummary = aiQual?.summary?.trim() || "";
             const budgetComment = aiQual?.budget_comment?.trim() || "";
 
-            // Un chantier de plus de 30 jours a tres probablement trouve son
-            // artisan. On ne le retire pas (les dashboards sont deja peu
-            // remplis) mais on previent franchement avant de faire payer.
-            const perime = projetTropAncien(p.created_at);
-            const jours = ageEnJours(p.created_at);
+            // 09/09/2026 : la pancarte rouge « projet depose il y a N jours,
+            // debloquez-le en connaissance de cause » est retiree. Elle
+            // s'affichait AUSSI sur les leads deja debloques (constate sur le
+            // compte de test : lead du 27/06 debloque le 07/07, pancarte a
+            // 74 jours), ou elle n'avait aucun sens. Et depuis le filtre
+            // ci-dessus, un lead de plus de 30 jours non debloque n'est plus
+            // affiche du tout : il ne reste donc aucun cas ou elle servait.
 
             return (
               <li
                 key={p.id}
                 className={`p-6 rounded-2xl border transition-colors ${
-                  perime
-                    ? "bg-red-50/50 border-red-300 dark:bg-red-950/20 dark:border-red-900"
-                    : isSuspicious
-                      ? "bg-amber-50/50 border-amber-300"
-                      : "bg-[var(--bg-secondary)] border-[var(--border)]"
+                  isSuspicious
+                    ? "bg-amber-50/50 border-amber-300"
+                    : "bg-[var(--bg-secondary)] border-[var(--border)]"
                 }`}
               >
-                {perime && (
-                  <div className="mb-4 p-4 rounded-lg bg-red-600 text-white">
-                    <p className="text-sm font-bold uppercase tracking-wide">
-                      Projet déposé il y a {jours} jours
-                    </p>
-                    <p className="text-sm mt-1 text-red-50">
-                      Au-delà d&apos;un mois, le client a le plus souvent déjà
-                      trouvé son artisan. Débloquez-le en connaissance de cause.
-                    </p>
-                  </div>
-                )}
-
                 {isSuspicious && (
                   <div className="mb-4 p-3 bg-amber-100/70 border border-amber-300 rounded-lg">
                     <p className="text-xs font-semibold text-amber-900">
