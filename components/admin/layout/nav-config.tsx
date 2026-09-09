@@ -44,6 +44,8 @@ export const ADMIN_NAV: AdminNavItem[] = [
     icon: I("M8 10.5h8|M8 14h5|M4 20l3.5-3.5H18a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z") },
   { key: "analytics", label: "Analytics", href: "/admin/analytics",
     icon: I("M4 20V4|M4 20h16|M8 16l3-4 3 2 4-6") },
+  { key: "statistiques", label: "Statistiques", href: "/admin/statistiques",
+    icon: I("M3 4v16h18|M7 15l3.5-4 3 2.5L18 8") },
   { key: "alerts", label: "Alertes", href: "/admin/alerts",
     icon: I("M12 3a6 6 0 00-6 6v3l-2 3h16l-2-3V9a6 6 0 00-6-6z|M10 20a2 2 0 004 0") },
   { key: "logs", label: "Logs", href: "/admin/logs",

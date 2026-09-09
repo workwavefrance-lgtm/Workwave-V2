@@ -18,6 +18,7 @@ export const STATIC_COMMANDS: CommandItem[] = [
   { id: "nav-reviews", label: "Avis", href: "/admin/reviews", group: "Navigation", icon: "nav" },
   { id: "nav-finances", label: "Finances", href: "/admin/finances", group: "Navigation", icon: "nav" },
   { id: "nav-analytics", label: "Analytics", href: "/admin/analytics", group: "Navigation", icon: "nav" },
+  { id: "nav-statistiques", label: "Statistiques", href: "/admin/statistiques", group: "Navigation", icon: "nav" },
   { id: "nav-alerts", label: "Alertes", href: "/admin/alerts", group: "Navigation", icon: "nav" },
   { id: "nav-logs", label: "Logs", href: "/admin/logs", group: "Navigation", icon: "nav" },
   { id: "nav-settings", label: "Settings", href: "/admin/settings", group: "Navigation", icon: "nav" },

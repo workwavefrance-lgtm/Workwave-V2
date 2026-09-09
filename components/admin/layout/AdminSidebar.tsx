@@ -88,6 +88,17 @@ const NAV_ITEMS = [
     ),
   },
   {
+    // Entonnoir complet (Umami + Search Console + robots), ajoute le 09/09/2026.
+    // Analytics reste : elle ne lit que la table events.
+    label: "Statistiques",
+    href: "/admin/statistiques",
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 4v16h18M7 15l3.5-4 3 2.5L18 8" />
+      </svg>
+    ),
+  },
+  {
     label: "Alertes",
     href: "/admin/alerts",
     icon: (
