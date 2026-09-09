@@ -24,7 +24,12 @@ export type KpiSet = {
   unlocksPaid: Delta; // nb d'unlocks payés
   unlocksFree: Delta; // nb d'unlocks offerts (offre 2 premiers)
   projectsSubmitted: Delta; // nb project_form_submitted
-  formStarted: Delta; // nb project_form_started
+  // 09/09/2026 : « vu » (affichage, sans intention, y compris les pages
+  // listing qui embarquent le formulaire) et « commencé » (première
+  // interaction) sont deux nombres distincts. Avant, project_form_started
+  // partait au montage et mélangeait les deux.
+  formViewed: Delta; // nb project_form_viewed
+  formStarted: Delta; // nb project_form_started (= commencé)
   claimsStarted: Delta; // nb claim_started
   claimsCompleted: Delta; // nb claim_completed
   activePros: Delta; // pros distincts actifs (dashboard_visit / profil modifié)
@@ -36,8 +41,8 @@ export type VerticalBundle = {
   revenueByDay: RevenuePoint[];
   eventsByDay: EventsByDayPoint[];
   topEvents: TopEvent[];
-  conversionFunnel: FunnelStep[]; // ouvert → soumis → contact débloqué (le cash)
-  formFunnel: FunnelStep[]; // progression dans les 4 étapes du formulaire
+  conversionFunnel: FunnelStep[]; // commencé → soumis → contact débloqué (le cash)
+  formFunnel: FunnelStep[]; // vu → écrans (un par couple numéro x nom observé) → soumis
   claimFunnel: FunnelStep[]; // claim_started → claim_completed
   byCategory: Breakdown[]; // top métiers demandés
   byUrgency: Breakdown[]; // répartition urgence
@@ -67,7 +72,10 @@ type RawEvent = {
   metadata:
     | {
         vertical?: string;
-        step?: number;
+        step?: number; // project_step_reached : écran 1..4 depuis le 09/09/2026 (1..5 du 28/08 au 08/09)
+        name?: string; // project_step_reached : Métier|Quand|Projet|Coordonnées (autres noms avant le 09/09/2026)
+        initialStep?: number; // project_form_viewed / started : écran de départ 1..4
+        inline?: boolean; // project_form_viewed / started : intégré dans une page listing
         category?: string;
         city?: string;
         urgency?: string;
@@ -271,6 +279,10 @@ function computeKpis(
       countName(evCur, "project_form_submitted"),
       countName(evPrev, "project_form_submitted")
     ),
+    formViewed: delta(
+      countName(evCur, "project_form_viewed"),
+      countName(evPrev, "project_form_viewed")
+    ),
     formStarted: delta(
       countName(evCur, "project_form_started"),
       countName(evPrev, "project_form_started")
@@ -322,10 +334,26 @@ function computeTop(evs: RawEvent[]): TopEvent[] {
     .slice(0, 10);
 }
 
-/** Entonnoir cash : formulaire ouvert → projet soumis → contact débloqué. */
+/** Entonnoir cash : formulaire commencé → projet soumis → contact débloqué.
+ *
+ *  09/09/2026 : la première marche s'appuie sur project_form_started, qui
+ *  signifie désormais « commencé » (première interaction), plus « affiché ».
+ *  Le nombre d'affichages (project_form_viewed) est donné en indice sur cette
+ *  marche et NON comme une marche au-dessus : AnalyticsClient.tsx lit
+ *  conversionFunnel[0] et [2] par INDICE pour son taux « ouvert → débloqué »,
+ *  une marche insérée en tête décalerait tout en silence. Les indices 0, 1, 2
+ *  gardent donc exactement le même sens qu'avant. La marche « Formulaire vu »
+ *  vit dans formFunnel, qui n'est lu par indice nulle part. */
 function computeConversionFunnel(evs: RawEvent[], us: RawUnlock[]): FunnelStep[] {
+  const vus = countName(evs, "project_form_viewed");
   return [
-    { label: "Formulaire ouvert", count: countName(evs, "project_form_started") },
+    {
+      label: "Formulaire commencé",
+      count: countName(evs, "project_form_started"),
+      // Absent tant que l'événement n'existe pas sur la période (données
+      // antérieures au 09/09/2026) : « sur 0 affichés » serait un faux signal.
+      ...(vus > 0 ? { hint: `sur ${vus.toLocaleString("fr-FR")} affichés` } : {}),
+    },
     { label: "Projet soumis", count: countName(evs, "project_form_submitted") },
     {
       label: "Contact débloqué",
@@ -335,17 +363,59 @@ function computeConversionFunnel(evs: RawEvent[], us: RawUnlock[]): FunnelStep[]
   ];
 }
 
-/** Progression dans les 4 étapes du formulaire (event project_step_reached). */
+// Écrans du formulaire EN LIGNE (components/project/ProjectForm.tsx, STEPS) :
+// quatre écrans depuis le 09/09/2026. Sert de nom de repli quand metadata.name
+// manque, et garantit une ligne par écran actuel même quand il est à zéro.
+const ECRANS_ACTUELS: ReadonlyArray<readonly [number, string]> = [
+  [1, "Métier"],
+  [2, "Quand"],
+  [3, "Projet"],
+  [4, "Coordonnées"],
+];
+
+/** Progression dans le formulaire : vu → chaque écran → soumis
+ *  (events project_form_viewed, project_step_reached, project_form_submitted).
+ *
+ *  Le formulaire a changé deux fois de découpage : 4 écrans jusqu'au 27/08/2026
+ *  (Métier, Ville, Projet, Contact), 5 écrans du 28/08 au 08/09 (Besoin, Métier,
+ *  Quand, Projet, Coordonnées), 4 écrans depuis le 09/09 (Métier, Quand, Projet,
+ *  Coordonnées). Un même numéro désigne donc des écrans différents selon
+ *  l'époque : regrouper par numéro seul additionnerait « Métier » (ancien step 2)
+ *  et « Quand » (nouveau step 2) sur toute période à cheval, et les taux écran
+ *  à écran seraient faux pendant un mois. On regroupe par COUPLE (numéro, nom) :
+ *  une ligne par couple observé, les époques ne se mélangent jamais, et une
+ *  ligne d'un ancien découpage disparaît d'elle-même quand la période ne le
+ *  couvre plus. */
 function computeFormFunnel(evs: RawEvent[]): FunnelStep[] {
-  const stepCount = (n: number) =>
-    evs.reduce(
-      (c, e) => (e.event_name === "project_step_reached" && e.metadata?.step === n ? c + 1 : c),
-      0
-    );
+  const nomDeRepli = new Map<number, string>(ECRANS_ACTUELS);
+  const parCouple = new Map<string, { step: number; nom: string; count: number }>();
+  for (const e of evs) {
+    if (e.event_name !== "project_step_reached") continue;
+    const step = e.metadata?.step;
+    if (typeof step !== "number" || !Number.isInteger(step) || step < 1) continue;
+    const nom = e.metadata?.name || nomDeRepli.get(step) || "sans nom";
+    const cle = `${step}:${nom}`;
+    const entree = parCouple.get(cle) ?? { step, nom, count: 0 };
+    entree.count += 1;
+    parCouple.set(cle, entree);
+  }
+  // Les écrans du formulaire actuel apparaissent toujours, même à zéro : un
+  // entonnoir sans sa dernière marche se lirait comme « personne n'arrive au
+  // bout » alors que la période est simplement vide.
+  for (const [step, nom] of ECRANS_ACTUELS) {
+    const cle = `${step}:${nom}`;
+    if (!parCouple.has(cle)) parCouple.set(cle, { step, nom, count: 0 });
+  }
+  const ecrans: FunnelStep[] = [...parCouple.values()]
+    .sort((a, b) => a.step - b.step || b.count - a.count || a.nom.localeCompare(b.nom, "fr"))
+    .map((c) => ({ label: `Écran ${c.step} · ${c.nom}`, count: c.count }));
   return [
-    { label: "Étape ville", count: stepCount(2) },
-    { label: "Étape projet", count: stepCount(3) },
-    { label: "Étape contact", count: stepCount(4) },
+    {
+      label: "Formulaire vu",
+      count: countName(evs, "project_form_viewed"),
+      hint: "affiché, sans intention",
+    },
+    ...ecrans,
     { label: "Projet soumis", count: countName(evs, "project_form_submitted") },
   ];
 }

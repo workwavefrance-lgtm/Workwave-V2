@@ -5,6 +5,7 @@ import { EVENTS, type EventName } from "@/lib/analytics/events";
 
 const ALLOWED_EVENTS = new Set<string>([
   EVENTS.PAGE_VIEW,
+  EVENTS.PROJECT_FORM_VIEWED,
   EVENTS.PROJECT_FORM_STARTED,
   EVENTS.PROJECT_FORM_ABANDONED,
   EVENTS.PROJECT_STEP_REACHED,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { submitProject, type FormState } from "@/app/(public)/deposer-projet/actions";
 import CityAutocomplete from "@/components/project/CityAutocomplete";
 import { trackClient } from "@/lib/analytics/client-track";
@@ -102,7 +102,16 @@ const BUDGET_ABSENT = "unknown";
 // ou l'on ECRIT (projet, coordonnees), sinon on ne sait pas quand la personne
 // a fini de taper. Mesure qui a declenche la refonte : 408 formulaires
 // commences sur 60 jours, 117 termines, soit 71 % d'abandon.
-const STEPS = ["Besoin", "Métier", "Quand", "Projet", "Coordonnées"];
+// 09/09/2026 : retour a QUATRE ecrans. La famille de metiers n'est plus un
+// ecran a part avant le metier : elle devient trois onglets SUR l'ecran du
+// metier (voir le commentaire de l'ecran 1 pour la mesure qui l'a decide).
+const STEPS = ["Métier", "Quand", "Projet", "Coordonnées"];
+// Libelles courts des onglets : trois colonnes sur un telephone de 375 px.
+const FAMILY_TABS: Record<string, string> = {
+  btp: "Bâtiment",
+  domicile: "Maison",
+  personne: "Personne",
+};
 const initialState: FormState = { success: false };
 
 // Validation client des coordonnées (étape 4), alignée sur le schéma Zod serveur
@@ -145,10 +154,10 @@ export default function ProjectForm({
   // props (cas embed sur pages listing où catégorie+ville sont connues).
   // Comportement par défaut (sans pré-remplissage) inchangé = step 0.
   // Le formulaire integre dans une page metier/ville arrive deja rempli : on
-  // saute alors les deux ecrans de choix et on demarre a « Quand ». La ville
+  // saute alors l'ecran du metier et on demarre a « Quand ». La ville
   // n'avance plus le depart : elle est passee au DERNIER ecran, avec les
   // coordonnees, donc un defaultCity ne fait que pre-remplir un champ.
-  const initialStep = defaultCategoryId ? 2 : 0;
+  const initialStep = defaultCategoryId ? 1 : 0;
   const [step, setStep] = useState(initialStep);
   const [categoryId, setCategoryId] = useState<number | null>(
     defaultCategoryId ?? null
@@ -158,7 +167,12 @@ export default function ProjectForm({
   // Famille de metiers choisie a l'ecran 1 (btp / domicile / personne). Sert a
   // n'afficher a l'ecran 2 que les metiers de cette famille, au lieu des 57
   // d'un seul menu deroulant.
-  const [vertical, setVertical] = useState<string>("");
+  // 09/09/2026 : l'onglet ouvert au depart est celui du metier pre-rempli
+  // (formulaire integre dans une page metier/ville), sinon « Bâtiment », la
+  // famille la plus demandee. Il n'y a plus d'etat « aucune famille ».
+  const familleInitiale =
+    categories.find((c) => c.id === defaultCategoryId)?.vertical ?? "btp";
+  const [vertical, setVertical] = useState<string>(familleInitiale);
   // 28/08/2026 : un particulier qui renove a souvent besoin de PLUSIEURS corps
   // de metier (« un plombier, un macon et un electricien »). L'ecran 2 accepte
   // donc plusieurs metiers, et le serveur cree un projet DISTINCT par metier :
@@ -255,49 +269,103 @@ export default function ProjectForm({
   };
 
 
-  // ── SUIVI DE L'ENTONNOIR · cinq nombres, rien de plus ────────────────────
+  // ── SUIVI DE L'ENTONNOIR · trois evenements, rien de plus ────────────────
   //
-  // Ce qu'on veut savoir : sur les gens qui ouvrent le formulaire, combien
-  // atteignent chaque etape. Cinq nombres (etapes 1 a 4 + envoye), une
+  // Ce qu'on veut savoir : sur les gens qui COMMENCENT le formulaire, combien
+  // atteignent chaque ecran. Un evenement par ecran devenu visible, une
   // soustraction entre chaque, et on voit ou ca coupe. C'est tout.
   //
   // Deux defauts corriges le 08/08/2026 :
   //
-  // 1. L'ETAPE 1 N'ETAIT JAMAIS ENREGISTREE. `next()` ne tire qu'au clic sur
-  //    « Continuer », donc on ne mesurait que les etapes 2, 3 et 4. Le premier
+  // 1. L'ETAPE 1 N'ETAIT JAMAIS ENREGISTREE. `next()` ne tirait qu'au clic sur
+  //    « Continuer », donc on ne mesurait que les etapes suivantes. Le premier
   //    trou (ceux qui ouvrent et ne choisissent meme pas un metier) etait
-  //    invisible. On la tire donc a l'ouverture, comme les autres.
+  //    invisible.
   //
   // 2. L'ABANDON VIA `beforeunload` MENTAIT. Les navigateurs modernes ignorent
   //    cet evenement la plupart du temps, surtout sur mobile : 3 abandons
   //    enregistres pour ~189 reels sur 30 jours. Un signal faux est pire que
   //    pas de signal : il donne l'illusion de mesurer. Supprime.
   //    L'abandon se DEDUIT : (etape N) - (etape N+1).
+  //
+  // Deux defauts corriges le 09/09/2026 :
+  //
+  // 3. L'AFFICHAGE N'EST PAS UNE INTENTION. `project_form_started` partait au
+  //    MONTAGE du composant. Or ce composant est aussi integre dans les pages
+  //    metier x ville (InlineProjectForm, ecran de depart « Quand ») : chaque
+  //    chargement d'une page listing comptait comme un « formulaire ouvert »
+  //    sans que personne n'ait rien touche. Mesure du 09/09/2026 : 5
+  //    « ouvertures » sur la journee, dont 3 etaient de simples chargements de
+  //    listing par une meme personne. Le taux « soumis / ouvert » de l'admin
+  //    etait donc faux, dans le sens le plus trompeur (il minorait la
+  //    conversion reelle). Desormais : `project_form_viewed` au montage (sans
+  //    intention, avec l'ecran de depart et le mode inline), et
+  //    `project_form_started` UNE fois par montage, a la PREMIERE interaction
+  //    (clic sur une porte, un metier, une urgence, un bouton de navigation,
+  //    frappe dans un champ, coche du consentement) via `marquerCommence()`.
+  //
+  // 4. LE DERNIER ECRAN AVAIT DES TROUS. `project_step_reached` etait tire a
+  //    la main dans `next()` et `goTo()`, jamais dans `prev()`, et l'ecran
+  //    « Coordonnées » n'etait compte qu'en passant par « Continuer » : sur 11
+  //    jours, 1 seul step=5 pour 3 formulaires soumis. Il part maintenant d'un
+  //    effet sur `step` : CHAQUE ecran devenu visible est compte, quel que
+  //    soit le chemin (suivant, retour, saut, ecran de depart), et jamais deux
+  //    fois de suite pour le meme ecran.
+
+  // Vu : au montage, une seule fois. `initialStep` est un ecran 0-base, on
+  // l'expose 1-base comme `step` dans project_step_reached.
+  const vueTiree = useRef(false);
   useEffect(() => {
-    trackClient(EVENTS.PROJECT_FORM_STARTED);
-    // L'etape de depart n'est pas toujours la 1re : integre dans une page
-    // metier/ville, le formulaire demarre deja rempli (etape 2 ou 3). On
-    // enregistre donc l'etape REELLE, sinon l'entonnoir compterait des gens
-    // a une etape qu'ils n'ont jamais vue.
-    trackClient(EVENTS.PROJECT_STEP_REACHED, {
-      step: initialStep + 1,
-      name: STEPS[initialStep],
+    if (vueTiree.current) return;
+    vueTiree.current = true;
+    trackClient(EVENTS.PROJECT_FORM_VIEWED, {
+      initialStep: initialStep + 1,
+      inline: initialStep > 0,
     });
-  }, []);
+  }, [initialStep]);
+
+  // Ecran visible : a chaque changement de `step`, y compris le premier rendu
+  // (ce qui enregistre l'ecran de depart REEL : integre dans une page
+  // metier/ville, le formulaire demarre a « Quand », pas a « Besoin »). La ref
+  // ecarte le doublon immediat (double execution des effets en developpement,
+  // re-rendu sans changement d'ecran) mais PAS un vrai aller-retour 2 → 3 → 2,
+  // qui est deux affichages distincts.
+  const derniereEtapeTiree = useRef<number | null>(null);
+  useEffect(() => {
+    if (derniereEtapeTiree.current === step) return;
+    derniereEtapeTiree.current = step;
+    trackClient(EVENTS.PROJECT_STEP_REACHED, {
+      step: step + 1,
+      name: STEPS[step],
+    });
+  }, [step]);
+
+  // Commence : a la premiere interaction, une seule fois par montage. Branche
+  // sur la navigation (goTo / next / prev), le choix d'un metier, chaque
+  // onChange des champs, la frappe dans la ville, et le submit en filet.
+  // `useRef` et non `useState` : on ne veut pas de re-rendu pour un compteur.
+  const commenceRef = useRef(false);
+  function marquerCommence() {
+    if (commenceRef.current) return;
+    commenceRef.current = true;
+    trackClient(EVENTS.PROJECT_FORM_STARTED, {
+      initialStep: initialStep + 1,
+      inline: initialStep > 0,
+    });
+  }
 
   // Validation client minimale pour permettre "Continuer".
   // (la validation serveur Zod reste le filet de sécurité)
   function canProceed(): boolean {
-    if (step === 0) return vertical !== "";
-    if (step === 1) return categoryId !== null;
-    if (step === 2) return urgency !== "";
+    if (step === 0) return categoryId !== null;
+    if (step === 1) return urgency !== "";
     // 19/08/2026 : la description est OBLIGATOIRE, et le blocage se fait ICI,
     // sur le bouton "Continuer", jamais a l'envoi final. Raison : le formulaire
     // est en plusieurs etapes ; une erreur serveur sur un champ d'une etape
     // MASQUEE produisait un echec silencieux (l'utilisateur cliquait "Envoyer"
     // et il ne se passait rien). En bloquant a l'etape, il voit tout de suite
     // ce qui manque, sous les yeux.
-    if (step === 3) return description.trim().length >= 20;
+    if (step === 2) return description.trim().length >= 20;
     return true;
   }
 
@@ -312,6 +380,7 @@ export default function ProjectForm({
    *  le retire, le suivant prend sa place, pour que `categoryId` ne soit jamais
    *  vide tant qu'il reste au moins un metier. */
   function basculerMetier(id: number) {
+    marquerCommence();
     const actuels = metiersChoisis();
     const apres = actuels.includes(id)
       ? actuels.filter((x) => x !== id)
@@ -355,17 +424,18 @@ export default function ProjectForm({
       const famille = categories.find((c) => c.id === categoryId)?.vertical;
       if (famille) setVertical(famille);
     }
-    goTo(1);
+    goTo(0);
   }
 
   /** Avance vers une etape precise. Utilise par les ecrans a choix, ou le clic
    *  sur la reponse vaut validation : on ne repasse pas par canProceed(), qui
    *  lirait un state pas encore commite par React. */
   function goTo(target: number) {
+    marquerCommence();
     const t = Math.min(Math.max(target, 0), STEPS.length - 1);
     setStep(t);
     remonterAuFormulaire();
-    trackClient(EVENTS.PROJECT_STEP_REACHED, { step: t + 1, name: STEPS[t] });
+    // L'ecran atteint est enregistre par l'effet sur `step`, pas ici.
   }
 
   /** Ramene la barre de progression en haut de l'ecran a chaque changement
@@ -385,17 +455,16 @@ export default function ProjectForm({
   }
 
   function next() {
+    marquerCommence();
     if (canProceed()) {
       const target = Math.min(step + 1, STEPS.length - 1);
       setStep(target);
       remonterAuFormulaire();
-      trackClient(EVENTS.PROJECT_STEP_REACHED, {
-        step: target + 1,
-        name: STEPS[target],
-      });
+      // L'ecran atteint est enregistre par l'effet sur `step`, pas ici.
     }
   }
   function prev() {
+    marquerCommence();
     setStep((s) => Math.max(s - 1, 0));
     remonterAuFormulaire();
   }
@@ -439,6 +508,9 @@ export default function ProjectForm({
         // avant le re-render. Marche identiquement sur Chrome.
         setHasAttemptedSubmit(true);
         setDismissedErrors(new Set());
+        // Filet : on ne peut pas soumettre sans avoir tape, mais un submit
+        // est une interaction a coup sur, et l'appel est idempotent.
+        marquerCommence();
       }}
       className="space-y-8"
     >
@@ -473,12 +545,22 @@ export default function ProjectForm({
       )}
 
       {/* ============================================================ */}
-      {/* ÉCRAN 1 · La famille de métiers                               */}
+      {/* ÉCRAN 1 · Le métier, les trois familles en onglets            */}
       {/* ============================================================ */}
-      {/* Avant le 28/08/2026 : un menu deroulant de 57 metiers, sans recherche,
-          en toute premiere question. Sur un telephone c'est un rouleau
-          interminable. Trois portes guident sans noyer, et le clic vaut
-          validation : on passe directement aux metiers de la famille. */}
+      {/* 09/09/2026 : retour a quatre ecrans. Du 28/08 au 09/09, la famille
+          (batiment / maison / personne) etait un ecran a part, AVANT le metier,
+          avec un lien « Changer de besoin » qui ramenait en arriere. Mesure :
+          28,4 % des formulaires commences etaient envoyes avant le 28/08,
+          5,7 % apres (72 commences, 4 envoyes en 13 jours) ; 26,6 projets pour
+          1 000 clics de listing avant, 7,4 apres, a trafic comparable
+          (p < 0,001). Clarity a filme le mecanisme le 01/09 : trois
+          allers-retours entre les deux ecrans, puis abandon sans jamais voir
+          l'ecran suivant. Les familles deviennent donc des ONGLETS sur l'ecran
+          du metier : changer de famille ne change pas d'ecran. Tout le reste du
+          28/08 est conserve (clic qui valide, plusieurs metiers, budget retire,
+          ville avec les coordonnees, metiers par popularite). Critere de
+          reussite ecrit AVANT : sur 10 jours, plus de 20 projets pour 1 000
+          clics de listing et plus de 20 % de formulaires commences envoyes. */}
       <div className={step === 0 ? "" : "hidden"}>
         {defaultDescription && (
           <div className="mb-6 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
@@ -495,114 +577,48 @@ export default function ProjectForm({
         <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
           Quel type de travaux ?
         </label>
+        {/* L'invitation au choix multiple doit etre lisible AVANT le premier
+            clic : sinon personne ne devine qu'on peut en cocher plusieurs, et
+            la fonctionnalite ne sert a rien. */}
         <p className="text-sm text-[var(--text-secondary)] mb-4">
-          Gratuit, sans engagement.
+          Gratuit, sans engagement. Touchez{" "}
+          <strong className="text-[var(--text-primary)] font-semibold">un ou plusieurs métiers</strong>
+          , une demande partira pour chacun.
         </p>
 
-        {/* 29/08/2026 : deux signaux pour dire que ces cartes se touchent.
-            Sur mobile il n'y a pas de survol pour le reveler, et une carte
-            bordee ressemble a un simple encadre d'information.
-            1. Le chevron, signal universel « ceci mene a un ecran suivant »
-               (celui des reglages d'un telephone). Il fait trois allers-retours
-               a l'arrivee puis s'arrete : une animation permanente a cote d'un
-               choix a faire finit par distraire de ce choix.
-            2. L'apparition en cascade, qui fait suivre les trois cartes du
-               regard et signale qu'elles forment une liste de choix.
-            Les deux se desactivent avec `prefers-reduced-motion`. */}
-        <div className="space-y-3">
-          {(["btp", "domicile", "personne"] as const).map((v, index) =>
+        {/* Les trois familles en onglets. Un seul ecran : on change de famille
+            sans quitter la question, et sans lien de retour. `choisirFamille`
+            garde sa remise a zero (30/08/2026) : un metier coche dans une
+            famille puis abandonne pour une autre ne part pas au serveur. */}
+        <div
+          role="tablist"
+          aria-label="Famille de métiers"
+          className="mb-4 grid grid-cols-3 gap-1 rounded-xl bg-[var(--bg-secondary)] p-1"
+        >
+          {(["btp", "domicile", "personne"] as const).map((v) =>
             grouped[v]?.length ? (
               <button
                 key={v}
                 type="button"
+                role="tab"
+                aria-selected={vertical === v}
+                title={FAMILY_LABELS[v]}
                 onClick={() => {
+                  marquerCommence();
                   choisirFamille(v);
-                  goTo(1);
                 }}
-                style={{ animationDelay: `${index * 110}ms` }}
-                className="animate-slide-in-up group flex w-full items-center gap-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-primary)] px-5 py-4 text-left transition-all duration-250 hover:border-[var(--accent)] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                className={`rounded-lg px-2 py-2.5 text-sm font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
+                  vertical === v
+                    ? "bg-[var(--bg-primary)] text-[var(--text-primary)] shadow-sm ring-1 ring-[var(--border-color)]"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
               >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-base font-semibold text-[var(--text-primary)]">
-                    {FAMILY_LABELS[v]}
-                  </span>
-                  <span className="mt-1 block text-sm text-[var(--text-secondary)]">
-                    {grouped[v]
-                      .slice(0, 4)
-                      .map((c, i) => (i === 0 ? c.name : c.name.toLowerCase()))
-                      .join(", ")}
-                    … {grouped[v].length} métiers
-                  </span>
-                </span>
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="animate-chevron-invite h-5 w-5 shrink-0 text-[var(--accent)] transition-transform duration-250 group-hover:translate-x-1"
-                  style={{ animationDelay: `${600 + index * 110}ms` }}
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
+                {FAMILY_TABS[v]}
               </button>
             ) : null
           )}
         </div>
 
-        {/* Reassurance affichee UNE SEULE FOIS, ici. Avant le 28/08/2026 elle
-            occupait quatre grandes cartes AU-DESSUS du formulaire, reaffichees
-            a chaque etape : sur mobile, aucun champ n'etait visible sans
-            defiler, a aucune etape. Le fond est conserve, le volume non. */}
-        <ul className="mt-6 flex flex-wrap gap-2">
-          {[
-            "Gratuit",
-            "Sans engagement",
-            "SIRET vérifié",
-            "Numéro jamais affiché",
-          ].map((t) => (
-            <li
-              key={t}
-              className="rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-medium text-[var(--text-primary)]"
-            >
-              <span className="text-[var(--accent)] font-bold" aria-hidden>
-                ✓
-              </span>{" "}
-              {t}
-            </li>
-          ))}
-        </ul>
-
-        {state.errors?.categoryId && (
-          <p className="mt-1.5 text-sm text-red-500">
-            {state.errors.categoryId}
-          </p>
-        )}
-      </div>
-
-      {/* ============================================================ */}
-      {/* ÉCRAN 2 · Le métier, dans la famille choisie                  */}
-      {/* ============================================================ */}
-      <div className={step === 1 ? "" : "hidden"}>
-        <button
-          type="button"
-          onClick={() => goTo(0)}
-          className="mb-4 rounded-full border border-[var(--border-color)] px-3 py-1.5 text-[13px] text-[var(--text-secondary)] transition-colors duration-250 hover:text-[var(--text-primary)]"
-        >
-          ← Changer de besoin
-        </button>
-        <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
-          {vertical ? FAMILY_LABELS[vertical] : "Choisissez votre métier"}
-        </label>
-        {/* L'invitation au choix multiple doit etre lisible AVANT le premier
-            clic : sinon personne ne devine qu'on peut en cocher plusieurs, et
-            la fonctionnalite ne sert a rien. Elle est donc dans l'aide, et
-            repetee sous le bouton une fois un metier choisi. */}
-        <p className="text-sm text-[var(--text-secondary)] mb-4">
-          Touchez <strong className="text-[var(--text-primary)] font-semibold">un ou plusieurs métiers</strong>. Une demande partira pour chacun.
-        </p>
         <div className="grid grid-cols-2 gap-2">
           {(grouped[vertical] ?? []).map((cat) => (
             <button
@@ -644,7 +660,7 @@ export default function ProjectForm({
           <div className="sticky bottom-3 z-10 mt-5 rounded-2xl bg-[var(--bg-primary)]/95 p-3 shadow-lg ring-1 ring-[var(--border-color)] backdrop-blur">
             <button
               type="button"
-              onClick={() => goTo(2)}
+              onClick={() => goTo(1)}
               className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white font-semibold px-6 py-3.5 rounded-full text-sm transition-all duration-250 hover:scale-[1.01]"
             >
               {metiersChoisis().length > 1
@@ -658,10 +674,39 @@ export default function ProjectForm({
             </p>
           </div>
         )}
+
+        {/* Reassurance affichee UNE SEULE FOIS, ici. Avant le 28/08/2026 elle
+            occupait quatre grandes cartes AU-DESSUS du formulaire, reaffichees
+            a chaque etape : sur mobile, aucun champ n'etait visible sans
+            defiler, a aucune etape. Le fond est conserve, le volume non. */}
+        <ul className="mt-6 flex flex-wrap gap-2">
+          {[
+            "Gratuit",
+            "Sans engagement",
+            "SIRET vérifié",
+            "Numéro jamais affiché",
+          ].map((t) => (
+            <li
+              key={t}
+              className="rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-medium text-[var(--text-primary)]"
+            >
+              <span className="text-[var(--accent)] font-bold" aria-hidden>
+                ✓
+              </span>{" "}
+              {t}
+            </li>
+          ))}
+        </ul>
+
+        {state.errors?.categoryId && (
+          <p className="mt-1.5 text-sm text-red-500">
+            {state.errors.categoryId}
+          </p>
+        )}
       </div>
 
       {/* ============================================================ */}
-      {/* ÉCRAN 5a · La ville, réunie avec les coordonnées               */}
+      {/* ÉCRAN 4a · La ville, réunie avec les coordonnées               */}
       {/* ============================================================ */}
       {/* 28/08/2026 : la ville passe de l'ecran 2 au dernier ecran, avec les
           coordonnees. Deux effets : le clavier ne s'ouvre qu'a partir de
@@ -669,18 +714,28 @@ export default function ProjectForm({
           référencés en Vienne ») arrive juste au-dessus du champ telephone,
           c'est-a-dire pile au moment ou la personne se demande si donner son
           numero sert a quelque chose. */}
-      <div className={step === 4 ? "" : "hidden"}>
+      <div className={step === 3 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
           Dans quelle ville ?
         </label>
         <p className="text-sm text-[var(--text-secondary)] mb-4">
           Lieu de l&apos;intervention. Tapez les premières lettres.
         </p>
-        <CityAutocomplete
-          onSelect={(id) => setCityId(id)}
-          error={state.errors?.cityId}
-          defaultCity={defaultCity}
-        />
+        {/* 09/09/2026 : CityAutocomplete ne remonte que la selection (onSelect)
+            et il l'appelle AUSSI au montage pour la ville pre-remplie : y
+            brancher marquerCommence() recreerait le defaut (chaque page
+            listing compterait comme un formulaire commence). On ecoute donc la
+            frappe, qui remonte par bouillonnement jusqu'ici et qui precede
+            toujours une selection (la liste ne s'ouvre qu'a partir de deux
+            lettres tapees). La div est neutre : aucun style, aucun effet sur
+            le positionnement de la liste deroulante (relative a sa racine). */}
+        <div onInput={marquerCommence}>
+          <CityAutocomplete
+            onSelect={(id) => setCityId(id)}
+            error={state.errors?.cityId}
+            defaultCity={defaultCity}
+          />
+        </div>
         <input type="hidden" name="cityId" value={cityId ?? ""} />
 
         {/* Confirmation de couverture : le seul moment du formulaire où le site
@@ -714,11 +769,11 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉCRAN 3 · Quand                                               */}
+      {/* ÉCRAN 2 · Quand                                               */}
       {/* ============================================================ */}
       {/* Le clic vaut validation : la reponse fait avancer, sans bouton a
           presser derriere sur un ecran ou l'on a deja repondu. */}
-      <div className={step === 2 ? "" : "hidden"}>
+      <div className={step === 1 ? "" : "hidden"}>
         <button
           type="button"
           onClick={retourAuxMetiers}
@@ -739,7 +794,7 @@ export default function ProjectForm({
               type="button"
               onClick={() => {
                 setUrgency(opt.value);
-                goTo(3);
+                goTo(2);
               }}
               className={`rounded-full border px-5 py-3 text-sm font-medium transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 ${
                 urgency === opt.value
@@ -763,9 +818,9 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉCRAN 4 · Le chantier (description obligatoire)               */}
+      {/* ÉCRAN 3 · Le chantier (description obligatoire)               */}
       {/* ============================================================ */}
-      <div className={step === 3 ? "" : "hidden"}>
+      <div className={step === 2 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-1">
           Décrivez votre chantier
         </label>
@@ -787,6 +842,7 @@ export default function ProjectForm({
               placeholder={"Exemple : refaire le carrelage de la salle de bain, environ 8 m\u00b2, l\u0027ancien carrelage est \u00e0 d\u00e9poser. Logement occup\u00e9."}
               value={description}
               onChange={(e) => {
+                marquerCommence();
                 setDescription(e.target.value);
                 dismissError("description");
               }}
@@ -812,9 +868,9 @@ export default function ProjectForm({
       </div>
 
       {/* ============================================================ */}
-      {/* ÉCRAN 5b · Coordonnées + RGPD + Submit                        */}
+      {/* ÉCRAN 4b · Coordonnées + RGPD + Submit                        */}
       {/* ============================================================ */}
-      <div className={step === 4 ? "" : "hidden"}>
+      <div className={step === 3 ? "" : "hidden"}>
         <label className="block text-base font-medium text-[var(--text-primary)] mb-3">
           Vos coordonnées
         </label>
@@ -860,6 +916,7 @@ export default function ProjectForm({
               value={firstName}
               onBlur={() => handleBlur("firstName")}
               onChange={(e) => {
+                marquerCommence();
                 setFirstName(e.target.value);
                 dismissError("firstName");
               }}
@@ -892,6 +949,7 @@ export default function ProjectForm({
               value={email}
               onBlur={() => handleBlur("email")}
               onChange={(e) => {
+                marquerCommence();
                 setEmail(e.target.value);
                 dismissError("email");
               }}
@@ -929,6 +987,7 @@ export default function ProjectForm({
               value={phone}
               onBlur={() => handleBlur("phone")}
               onChange={(e) => {
+                marquerCommence();
                 setPhone(e.target.value);
                 dismissError("phone");
               }}
@@ -950,6 +1009,7 @@ export default function ProjectForm({
                 name="consent"
                 checked={consent}
                 onChange={(e) => {
+                  marquerCommence();
                   setConsent(e.target.checked);
                   dismissError("consent");
                 }}
@@ -1010,14 +1070,19 @@ export default function ProjectForm({
 
       {/* Navigation entre étapes.
           28/08/2026 : la barre ne s'affiche plus QUE sur les deux ecrans ou
-          l'on ECRIT (le chantier, puis les coordonnees). Sur les trois
-          premiers, la reponse est un choix : le clic valide et fait avancer,
+          l'on ECRIT (le chantier, puis les coordonnees). Sur les ecrans
+          precedents, la reponse est un choix : le clic valide et fait avancer,
           un bouton « Continuer » y serait un geste de plus sur un ecran ou la
           personne a deja repondu. Le retour y est un bouton en haut d'ecran,
-          visible sans defiler. */}
+          visible sans defiler.
+          09/09/2026 : avec quatre ecrans, le chantier est l'ecran 3 (index 2).
+          Le seuil etait reste a 3 apres la fusion des deux premiers ecrans, et
+          le parcours de test l'a attrape : plus aucun bouton « Continuer » sur
+          l'ecran du chantier. Toute condition sur l'INDEX d'un ecran doit etre
+          relue quand la liste STEPS change. */}
       <div
         className={`items-center justify-between gap-3 pt-6 border-t border-[var(--border-color)] ${
-          step >= 3 ? "flex" : "hidden"
+          step >= 2 ? "flex" : "hidden"
         }`}
       >
         {step > 0 ? (
