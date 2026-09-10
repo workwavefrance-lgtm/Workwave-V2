@@ -59,7 +59,7 @@ export async function sendReviewRequest(params: {
       </h1>
 
       <p style="margin:0 0 24px;color:#374151;font-size:15px;line-height:1.6;">
-        Vous avez déposé un projet sur Workwave il y a une semaine et nous avons mis en relation${proCityLabel} <strong>${escapeHtml(params.proName)}</strong>. Votre retour aide d'autres particuliers à faire le bon choix.
+        Vous avez déposé un projet sur Workwave.fr et nous avons mis en relation${proCityLabel} <strong>${escapeHtml(params.proName)}</strong>. Votre retour aide d'autres particuliers à faire le bon choix.
       </p>
 
       <!-- CTA principal -->
@@ -91,7 +91,7 @@ export async function sendReviewRequest(params: {
         <strong style="color:#0A0A0A;">Artisan contacté :</strong> ${escapeHtml(params.proName)}${proCityLabel}
       </p>
       <p style="margin:0 0 4px;color:#0A0A0A;font-size:14px;line-height:1.5;">
-        <strong style="color:#0A0A0A;">Sa fiche Workwave :</strong>
+        <strong style="color:#0A0A0A;">Sa fiche Workwave.fr :</strong>
         <a href="${proPageUrl}" style="color:#FF5A36;text-decoration:none;font-weight:500;">${proPageUrl.replace("https://", "")}</a>
       </p>
     </div>
@@ -117,7 +117,7 @@ export async function sendReviewRequest(params: {
   const text = `
 Bonjour${firstName ? ` ${firstName}` : ""},
 
-Comment s'est passée votre mise en relation avec ${params.proName}${proCityLabel} via Workwave ?
+Comment s'est passée votre mise en relation avec ${params.proName}${proCityLabel} via Workwave.fr ?
 
 Votre avis aide d'autres particuliers à faire le bon choix.
 
@@ -130,7 +130,7 @@ Confidentiel : seul votre prénom et la première lettre de votre nom seront aff
 
 Récapitulatif
 - Artisan contacté : ${params.proName}${proCityLabel}
-- Sa fiche Workwave : ${proPageUrl}
+- Sa fiche Workwave.fr : ${proPageUrl}
 
 Vous n'avez pas été en contact avec cet artisan ? Ignorez cet email.
 
