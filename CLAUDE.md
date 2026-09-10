@@ -110,7 +110,7 @@ BTP + services à domicile + aide à la personne sur `workwave.fr`, **France ent
 
 ## 0 bis. Leçons apprises : INDEX (Règle 3)
 
-**97 leçons. Le détail complet est dans `docs/lecons-detail.md`** (le symptôme, la
+**98 leçons. Le détail complet est dans `docs/lecons-detail.md`** (le symptôme, la
 mesure, la cause, le correctif, les extraits de code). Ce fichier-ci n'en garde
 que la règle, une ligne chacune.
 
@@ -231,6 +231,7 @@ dans le même mouvement.** Jamais l'un sans l'autre.
 | L95 | 03/09 | `mesure` | Tester un formulaire critique = le soumettre pour de vrai, puis lire la base et le journal. |
 | L96 | 03/09 | `supabase` | Une réécriture de masse change l'ordre physique : rejouer la requête du build hors build avant toute hypothèse. |
 | L97 | 10/09 | `vps` | Coolify tue un déploiement au-delà de 3 600 s (en dur dans son code) et nos builds durent 55 à 70 min : limites montées à 7 200 s, à refaire après chaque mise à jour de Coolify. Les commandes serveur se donnent à Willy enveloppées dans `ssh`. |
+| L98 | 10/09 | `mesure` | Un cron qui répond 200 en ne trouvant jamais rien est une panne silencieuse : les demandes d'avis filtraient un statut de l'ancien modèle, 0 envoi depuis mai. Tout cron doit exposer son nombre d'envois. |
 
 ---
 
