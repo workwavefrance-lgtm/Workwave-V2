@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | Workwave.fr",
   },
   description:
-    "Décrivez votre projet et recevez gratuitement des devis d'artisans de confiance près de chez vous : plombier, électricien, peintre et plus de 50 métiers, partout en France et en Belgique francophone. Sans engagement.",
+    "Trouvez un artisan près de chez vous : plus d'un million de fiches vérifiées au registre officiel. Déposez votre projet gratuitement, sans engagement.",
   openGraph: {
     type: "website",
     locale: "fr_FR",

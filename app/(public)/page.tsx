@@ -40,7 +40,11 @@ export const metadata: Metadata = {
 // fichiers Stock Sirene. L'ancien chiffre (2 560 292) comptait les fermes.
 // A re-mesurer apres chaque scrape ou classement (dette : compteur en dur,
 // lecon du 08/06).
-const PROS_OUVERTS = "1 233 038";
+// Fiches OUVERTES en base, mesurees le 05/09/2026 apres le rattrapage Sirene
+// (1 233 039 avant). Chiffre ecrit en dur : a remettre a jour dans la
+// procedure d'apres-scrape (avec la vue des listings et les barometres), cf.
+// lecon L65. Le 11/09/2026 l'accueil affichait encore l'ancien.
+const PROS_OUVERTS = "1 523 855";
 
 // FAQ affichee en bas de la home (section visible) + injectee en JSON-LD
 // FAQPage. Contenu strictement factuel : tout est verifiable dans le
@@ -136,8 +140,8 @@ export default async function Home() {
 
   const verticals = [
     { title: "BTP et artisanat", categories: btp, offset: 0 },
-    { title: "Services a domicile", categories: domicile, offset: 4 },
-    { title: "Aide a la personne", categories: personne, offset: 8 },
+    { title: "Services à domicile", categories: domicile, offset: 4 },
+    { title: "Aide à la personne", categories: personne, offset: 8 },
   ];
 
   return (
@@ -173,7 +177,7 @@ export default async function Home() {
         <div className="pointer-events-none absolute inset-y-0 right-0 w-full xl:w-[46%] opacity-[0.12] xl:opacity-100">
           <Image
             src="/photos/hero-metiers.webp"
-            alt=""
+            alt="Artisans au travail : charpentier, électricien, plombier, couvreur, peintre et menuisier"
             aria-hidden="true"
             fill
             priority
@@ -223,17 +227,22 @@ export default async function Home() {
               l'ecran EN CONTINU, sans palier : 30 px sur petit mobile, 84 px
               sur tres grand ecran. Les bornes evitent les deux exces (illisible
               en dessous, demesure au-dela). */}
-          <h1 className="flex flex-col items-center xl:items-start tracking-tight leading-[1.08] mb-6">
-            <span className="order-2 mt-3 font-extrabold text-[var(--text-secondary)] text-[clamp(1.5rem,2vw,2.5rem)]">
-              {PROS_OUVERTS} artisans référencés
-            </span>
-            <span className="order-1 font-extrabold text-[var(--text-primary)] text-[clamp(1.875rem,3.6vw,4.25rem)]">
+          {/* 11/09/2026 : le compteur sort du H1. Il y etait dans un second
+              <span>, si bien que Google lisait « 1 233 038 artisans
+              référencésTrouvez gratuitement un artisan… » d'un seul tenant. Le
+              H1 ne porte plus que la phrase ; le chiffre est un paragraphe
+              juste dessous, au meme endroit visuel. */}
+          <h1 className="flex flex-col items-center xl:items-start tracking-tight leading-[1.08]">
+            <span className="font-extrabold text-[var(--text-primary)] text-[clamp(1.875rem,3.6vw,4.25rem)]">
               Trouvez gratuitement un artisan, près de chez vous
               {/* Point coral anime en pulse subtil. Pas d'opacity:0 a l'init
                   = le point est rendu serveur-side, LCP intact. */}
               <span className="text-[var(--accent)] animate-accent-pulse">.</span>
             </span>
           </h1>
+          <p className="mt-3 mb-6 text-center xl:text-left font-extrabold tracking-tight text-[var(--text-secondary)] text-[clamp(1.5rem,2vw,2.5rem)]">
+            {PROS_OUVERTS} artisans référencés
+          </p>
           {/* BLOC D'ACTION (13/08, choix Willy sur 4 demos capturees du site).
               Un seul objet contient tout le parcours : la promesse, la
               recherche, la reassurance, et le depot de projet.

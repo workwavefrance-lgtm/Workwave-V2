@@ -18,7 +18,7 @@ export default function ProCtaSection() {
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mb-4">
-            Votre fiche est peut-être déjà sur Workwave.
+            Votre fiche est peut-être déjà sur Workwave.fr.
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
             {/* 1,2 million = fiches OUVERTES, 1 233 038 mesure le 03/09/2026 en SQL
