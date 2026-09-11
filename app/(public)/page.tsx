@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Fragment } from "react";
 import ProCtaSection from "@/components/home/ProCtaSection";
 import SearchForm from "@/components/search/SearchForm";
-import CountUp from "@/components/ui/CountUp";
+import DepotSection from "@/components/home/DepotSection";
 import RecentProjectsSection from "@/components/home/RecentProjectsSection";
 import MisesAJourSection from "@/components/home/MisesAJourSection";
 import { getFichesFraiches } from "@/lib/queries/fraicheur";
@@ -260,9 +260,15 @@ export default async function Home() {
                  soi-meme / decrire son projet) sont maintenant dans le meme
                  objet.
 
-              La barre du HAUT mene au DEPOT, pas au listing (decision Willy,
-              11/08) : on fait ENTRER dans l'entonnoir. Celle qui mene aux
-              fiches est plus bas dans la page.
+              11/09/2026 (decision Willy sur maquette) : la barre du HAUT mene
+              a nouveau aux LISTES d'artisans (metier + ville -> page metier x
+              ville, metier seul -> page metier). Du 11/08 au 11/09 elle menait
+              au depot ; le visiteur ne savait plus s'il cherchait un artisan
+              ou deposait un projet, et le bouton de depot entasse dessous
+              brouillait encore. Le depot a maintenant SA section juste apres
+              le hero (components/home/DepotSection.tsx). Un texte libre sans
+              metier reconnu (« fuite d'eau ») continue d'aller au depot, texte
+              repris : ce cas est gere dans SearchForm, pas ici.
 
               `animate-halo-respire` : halo qui respire 3 cycles puis s'arrete,
               coupe par prefers-reduced-motion. */}
@@ -272,11 +278,11 @@ export default async function Home() {
               le cadre se stabilise bien a 880 et ne suit pas l'ecran. */}
           <div className="max-w-[880px] mx-auto xl:mx-0 rounded-3xl bg-[color-mix(in_srgb,var(--accent)_7%,var(--bg-secondary))] p-6 sm:p-8 animate-halo-respire">
             <p className="text-lg sm:text-xl font-bold text-[var(--text-primary)] leading-snug mb-6 max-w-xl mx-auto xl:mx-0">
-              Décrivez votre projet, des artisans près de chez vous vous
-              recontacteront{" "}
-              <span className="text-[var(--accent)]">gratuitement</span>.
+              Un métier, une ville : la liste des artisans près de chez vous,
+              avec leurs coordonnées.{" "}
+              <span className="text-[var(--accent)]">Gratuit</span>, sans compte.
             </p>
-            <SearchForm categories={allCategories} destination="depot" />
+            <SearchForm categories={allCategories} destination="listing" />
           {/* Réassurance QUALITÉ : uniquement des signaux VRAIS (pub honnête + RGPD) :
               SIRET vérifiable au registre officiel (annuaire-entreprises.data.gouv.fr),
               données publiques SIRENE, gratuité réelle. PAS de "décennale validée"
@@ -306,15 +312,6 @@ export default async function Home() {
               </li>
             ))}
           </ul>
-          <div className="mt-6">
-            <Link
-              prefetch={false}
-              href="/deposer-projet"
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--accent)] text-white text-base font-semibold transition-all duration-250 hover:bg-[var(--accent-hover)] hover:scale-[1.02]"
-            >
-              Déposer mon projet (gratuit)
-            </Link>
-          </div>
           </div>
           {/* Barre de reassurance (maquette Willy). Trois signaux VRAIS et
               verifiables, aucun chiffre invente : le SIRET est controlable au
@@ -364,6 +361,10 @@ export default async function Home() {
           macon en pleine largeur au milieu de la page faisait doublon. */}
       {/* Projets déposés récemment : double CTA (particulier dépose / pro reçoit).
           Modulable : 1→10 vrais projets anonymisés, se masque si 0. */}
+      {/* Le depot de projet a sa propre section (11/09/2026), juste apres le
+          hero : voir components/home/DepotSection.tsx. */}
+      <DepotSection />
+
       <RecentProjectsSection projects={recentProjects} />
 
       {/* Entonnoir de decouverte pour Google (01/09/2026) : la home est relue

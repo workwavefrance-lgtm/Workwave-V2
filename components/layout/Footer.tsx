@@ -9,307 +9,227 @@ import {
 } from "@/lib/queries/home-public";
 import { generateDepartmentSlug } from "@/lib/utils/slugs";
 
+/**
+ * Pied de page, reorganise le 11/09/2026 (maquette validee par Willy).
+ *
+ * Avant : la colonne « BTP et artisanat » listait les 9 premieres categories
+ * par ordre alphabetique, donc Architecte, Ascensoriste, Carreleur... jusqu'a
+ * Decorateur : plombier, electricien, macon, peintre, les metiers que les gens
+ * cherchent, n'y etaient pas. Et une colonne « Entreprise » de 21 liens
+ * melangeait l'espace pro, les barometres, le blog et les mentions legales.
+ * Le pied de page est present sur chaque page du site : ses liens pesent pour
+ * Google, autant les donner aux pages qui comptent.
+ *
+ * Apres : un bloc de marque avec deux actions (deposer un projet, reclamer sa
+ * fiche), puis quatre colonnes de meme hauteur : les dix metiers les plus
+ * demandes, la maison et la personne, ce qui sert au particulier, ce qui sert
+ * au professionnel. Une ligne basse pour le legal. Les titres de colonnes sont
+ * des <p>, pas des balises de titre : ils ne polluent pas le plan de chaque
+ * page.
+ *
+ * Decision Willy : AUCUNE coordonnee de l'editeur ici (ni SIREN ni adresse),
+ * elles restent sur /mentions-legales. Seule la source des donnees est citee.
+ */
+
+// Ordre voulu par Willy. Une categorie absente de la base est simplement sautee.
+const METIERS_LES_PLUS_DEMANDES = [
+  "plombier",
+  "electricien",
+  "macon",
+  "peintre",
+  "menuisier",
+  "carreleur",
+  "couvreur",
+  "chauffagiste",
+  "plaquiste",
+  "paysagiste",
+];
+const MAISON_ET_PERSONNE = [
+  "menage",
+  "nettoyage-vitres",
+  "debarras",
+  "demenagement",
+  "aide-seniors",
+  "garde-enfants",
+  "soutien-scolaire",
+  "aide-administrative",
+];
+
+const PARTICULIERS = [
+  { href: "/deposer-projet", label: "Déposer un projet" },
+  { href: "/recherche", label: "Rechercher un artisan" },
+  { href: "/verifier-artisan", label: "Vérifier un artisan" },
+  { href: "/departements", label: "Tous les départements" },
+  { href: "/barometre-artisans", label: "Baromètre des artisans" },
+  { href: "/barometre-prix-artisans", label: "Baromètre des prix" },
+  { href: "/barometre-penurie-artisans", label: "Les déserts d'artisans" },
+  { href: "/blog", label: "Blog" },
+];
+const PROFESSIONNELS = [
+  { href: "/pro", label: "Espace pro" },
+  { href: "/pro/retrouver-fiche", label: "Réclamer ma fiche" },
+  { href: "/trouver-des-chantiers", label: "Trouver des chantiers" },
+  { href: "/trouver-des-clients", label: "Trouver des clients" },
+  { href: "/pro#pricing", label: "Tarifs : 9,90 € le contact" },
+  { href: "/pro/connexion", label: "Connexion" },
+  { href: "/ai", label: "Freelances et services digitaux" },
+  { href: "/barometre-artisans-belgique", label: "Baromètre Belgique" },
+];
+const LIGNE_BASSE = [
+  { href: "/a-propos", label: "À propos" },
+  { href: "mailto:contact@workwave.fr", label: "Contact", externe: true },
+  { href: "/feedback", label: "Améliorer Workwave.fr" },
+  { href: "/mentions-legales", label: "Mentions légales" },
+  { href: "/cgu", label: "CGU" },
+  { href: "/cgv", label: "CGV" },
+  { href: "https://www.instagram.com/workwave.fr/", label: "Instagram", externe: true },
+];
+
+const LIEN = "text-zinc-400 hover:text-white transition-colors duration-250";
+const TITRE = "text-xs font-bold uppercase tracking-wider text-white mb-4";
+// Sur telephone la liste passe sur deux colonnes (rien de tronque, moins de
+// defilement) ; sur grand ecran, une colonne classique.
+const LISTE = "grid grid-cols-2 gap-x-4 gap-y-2 lg:block lg:space-y-2";
+
 export default async function Footer() {
   const [categories, departments] = await Promise.all([
     getAllCategoriesPublic(),
     getAllDepartmentsPublic(),
   ]);
+  const parSlug = new Map(categories.map((c) => [c.slug, c]));
+  const metiers = METIERS_LES_PLUS_DEMANDES.map((s) => parSlug.get(s)).filter(
+    (c): c is NonNullable<typeof c> => Boolean(c)
+  );
+  const maison = MAISON_ET_PERSONNE.map((s) => parSlug.get(s)).filter(
+    (c): c is NonNullable<typeof c> => Boolean(c)
+  );
 
-  const btp = categories.filter((c) => c.vertical === "btp").slice(0, 9);
-  const domicile = categories
-    .filter((c) => c.vertical === "domicile")
-    .slice(0, 9);
-  const personne = categories
-    .filter((c) => c.vertical === "personne")
-    .slice(0, 8);
-
-  // Rotation des 12 departements pour repartir le link juice du footer
-  // (present sur 200k+ pages) sur tous les departements de Nouvelle-Aquitaine,
-  // au lieu de tout pousser vers vienne-86 (situation pre-fix qui limitait
-  // la decouvrabilite de 92,7% des pros par Google). Offset different par
-  // colonne pour qu'aucune colonne ne demarre sur le meme dept.
-  // Cf. lecon CLAUDE.md (audit 2026-05-03).
+  // Rotation des departements sur les liens metier, conservee (audit du
+  // 03/05/2026) : le pied de page est sur 2 M de pages, faire pointer chaque
+  // metier vers un departement different repartit la decouverte par Google
+  // sur toute la France au lieu de tout pousser vers un seul departement.
   const deptSlugs = departments.map((d) => generateDepartmentSlug(d));
   const linkFor = (catSlug: string, idx: number, offset: number): string => {
     if (deptSlugs.length === 0) return `/${catSlug}`;
     const dept = deptSlugs[(idx + offset) % deptSlugs.length];
     return `/${catSlug}/${dept}`;
   };
-  const OFFSET_BTP = 0;
-  const OFFSET_DOMICILE = 4; // decale d'1/3 de la liste
-  const OFFSET_PERSONNE = 8; // decale d'2/3 de la liste
 
   return (
     <footer className="bg-[#0A0A0A] dark:bg-[#111111] text-white mt-auto">
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        {/* Logo */}
-        <div className="mb-12">
-          <Link prefetch={false} href="/" className="text-2xl font-bold tracking-tight">
-            Workwave.fr
-          </Link>
-          <p className="text-sm text-zinc-400 mt-2 max-w-md">
-            Trouvez les meilleurs professionnels près de chez vous. Annuaire
-            gratuit en France et en Belgique francophone.
-          </p>
-        </div>
+      <div className="max-w-6xl mx-auto px-4 py-14 sm:py-16">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.3fr_repeat(4,1fr)] lg:gap-8">
+          {/* Bloc de marque : l'accroche et les deux actions */}
+          <div className="md:col-span-2 lg:col-span-1">
+            <Link prefetch={false} href="/" className="text-2xl font-bold tracking-tight">
+              Workwave.fr
+            </Link>
+            <p className="text-sm text-zinc-400 mt-3 max-w-xs">
+              Annuaire gratuit d&apos;artisans et de services, vérifié au registre
+              officiel. France et Belgique francophone.
+            </p>
+            <Link
+              prefetch={false}
+              href="/deposer-projet"
+              className="mt-5 inline-flex items-center justify-center rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-250"
+            >
+              Déposer un projet (gratuit)
+            </Link>
+            <Link
+              prefetch={false}
+              href="/pro/retrouver-fiche"
+              className="mt-3 block text-sm font-semibold text-white hover:text-zinc-300 transition-colors duration-250"
+            >
+              Vous êtes artisan ? Réclamez votre fiche →
+            </Link>
+          </div>
 
-        {/* Colonnes de liens */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
           <div>
-            <h4 className="font-semibold text-white mb-4">BTP et artisanat</h4>
-            <ul className="space-y-2">
-              {btp.map((cat, i) => (
+            <p className={TITRE}>Métiers les plus demandés</p>
+            <ul className={LISTE}>
+              {metiers.map((cat, i) => (
                 <li key={cat.id}>
-                  <Link
-                    prefetch={false}
-                    href={linkFor(cat.slug, i, OFFSET_BTP)}
-                    className="text-zinc-400 hover:text-white transition-colors duration-250"
-                  >
+                  <Link prefetch={false} href={linkFor(cat.slug, i, 0)} className={LIEN}>
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
+              <li className="col-span-2 pt-1">
+                <Link prefetch={false} href="/recherche" className="font-semibold text-white hover:text-zinc-300 transition-colors duration-250">
+                  Tous les métiers →
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className={TITRE}>Maison et personne</p>
+            <ul className={LISTE}>
+              {maison.map((cat, i) => (
+                <li key={cat.id}>
+                  <Link prefetch={false} href={linkFor(cat.slug, i, 5)} className={LIEN}>
                     {cat.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
           <div>
-            <h4 className="font-semibold text-white mb-4">
-              Services à domicile
-            </h4>
-            <ul className="space-y-2">
-              {domicile.map((cat, i) => (
-                <li key={cat.id}>
-                  <Link
-                    prefetch={false}
-                    href={linkFor(cat.slug, i, OFFSET_DOMICILE)}
-                    className="text-zinc-400 hover:text-white transition-colors duration-250"
-                  >
-                    {cat.name}
+            <p className={TITRE}>Particuliers</p>
+            <ul className={LISTE}>
+              {PARTICULIERS.map((l) => (
+                <li key={l.href}>
+                  <Link prefetch={false} href={l.href} className={LIEN}>
+                    {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
           <div>
-            <h4 className="font-semibold text-white mb-4">
-              Aide à la personne
-            </h4>
-            <ul className="space-y-2">
-              {personne.map((cat, i) => (
-                <li key={cat.id}>
-                  <Link
-                    prefetch={false}
-                    href={linkFor(cat.slug, i, OFFSET_PERSONNE)}
-                    className="text-zinc-400 hover:text-white transition-colors duration-250"
-                  >
-                    {cat.name}
+            <p className={TITRE}>Professionnels</p>
+            <ul className={LISTE}>
+              {PROFESSIONNELS.map((l) => (
+                <li key={l.href}>
+                  <Link prefetch={false} href={l.href} className={LIEN}>
+                    {l.label}
                   </Link>
                 </li>
               ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-white mb-4">Entreprise</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/pro"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Espace Pro
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/trouver-des-chantiers"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Trouver des chantiers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/trouver-des-clients"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Trouver des clients
-                </Link>
-              </li>
-              <li>
-                {/* Vertical freelance désormais intégré à workwave.fr (/ai).
-                    Lien INTERNE (le .co est en cours de sunset, redirigé .fr) :
-                    garde l'autorité sur .fr + rend /ai visible sitewide. */}
-                <Link
-                  prefetch={false}
-                  href="/ai"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Freelances &amp; services digitaux
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/pro#pricing"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Tarifs
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/pro/connexion"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Connexion pro
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/recherche"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Rechercher
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/verifier-artisan"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Vérifier un artisan
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/departements"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Tous les départements
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/blog"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/barometre-artisans"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Baromètre des artisans
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/barometre-prix-artisans"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Baromètre des prix
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/barometre-penurie-artisans"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Les déserts d&apos;artisans
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/barometre-artisans-belgique"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Baromètre Belgique
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/a-propos"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  À propos
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="mailto:contact@workwave.fr"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Contact
-                </a>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/feedback"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Améliorer Workwave.fr
-                </Link>
-              </li>
-              <li>
-                <a
-                  href="https://www.instagram.com/workwave.fr/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/mentions-legales"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  Mentions légales
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/cgu"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  CGU
-                </Link>
-              </li>
-              <li>
-                <Link
-                  prefetch={false}
-                  href="/cgv"
-                  className="text-zinc-400 hover:text-white transition-colors duration-250"
-                >
-                  CGV
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-zinc-800 text-xs text-zinc-400 text-center">
-          &copy; {new Date().getFullYear()} Workwave.fr. Tous droits réservés.
+        {/* Ligne basse : legal et contact. Pas de coordonnees de l'editeur. */}
+        <div className="mt-12 pt-6 border-t border-zinc-800 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-zinc-400">
+          <ul className="flex flex-wrap gap-x-5 gap-y-2">
+            {LIGNE_BASSE.map((l) =>
+              l.externe ? (
+                <li key={l.href}>
+                  <a
+                    href={l.href}
+                    className={LIEN}
+                    {...(l.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ) : (
+                <li key={l.href}>
+                  <Link prefetch={false} href={l.href} className={LIEN}>
+                    {l.label}
+                  </Link>
+                </li>
+              )
+            )}
+          </ul>
+          <p className="m-0">© {new Date().getFullYear()} Workwave.fr</p>
         </div>
+        <p className="mt-3 text-xs text-zinc-500">
+          Données d&apos;entreprises issues du registre Sirene de l&apos;INSEE.
+        </p>
       </div>
     </footer>
   );
