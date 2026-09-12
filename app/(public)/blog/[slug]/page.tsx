@@ -1,3 +1,5 @@
+import { blogSearchTitle } from "@/lib/seo/editorial";
+import { getBlogRelatedLinks } from "@/lib/queries/blog-related";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -29,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {};
 
   return {
-    title: post.title,
+    title: { absolute: blogSearchTitle(post.title) },
     description: post.meta_description,
     alternates: { canonical: `${BASE_URL}/blog/${slug}` },
     openGraph: {
@@ -58,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * construction (fond leger, pas de gros bouton plein ecran) : au milieu d'une
  * lecture, un encart trop voyant est percu comme une interruption.
  */
-function AppelDansArticle({ rang, tag }: { rang: number; tag?: string }) {
+function AppelDansArticle({ rang, tag, href }: { rang: number; tag?: string; href: string }) {
   // Elision obligatoire : « de aide administrative » ne se dit pas. Les tags
   // couvrent 197 metiers, dont « aide aux seniors », « electricien »,
   // « accompagnement handicap » : le cas voyelle est frequent, pas marginal.
@@ -89,7 +91,7 @@ function AppelDansArticle({ rang, tag }: { rang: number; tag?: string }) {
       <p className="text-base font-semibold text-[var(--text-primary)]">{v.titre}</p>
       <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{v.texte}</p>
       <Link
-        href="/deposer-projet"
+        href={href}
         className="mt-4 inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
       >
         {v.bouton}
@@ -105,6 +107,7 @@ export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params;
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
+  const related = await getBlogRelatedLinks(post);
 
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
@@ -156,7 +159,7 @@ export default async function BlogArticlePage({ params }: Props) {
             : ""}
         </p>
         <div className="flex flex-wrap gap-2">
-          {post.tags.map((tag) => (
+          {related.tags.map((tag) => (
             <span
               key={tag}
               className="text-xs font-medium px-2 py-0.5 rounded-full"
@@ -191,7 +194,7 @@ export default async function BlogArticlePage({ params }: Props) {
               <div key={i}>
                 <SeoContent content={bloc} nu />
                 {positions.has(i + 1) && (
-                  <AppelDansArticle rang={[...positions].indexOf(i + 1)} tag={post.tags?.[0]} />
+                  <AppelDansArticle rang={[...positions].indexOf(i + 1)} tag={post.tags?.[0]} href={related.projectHref} />
                 )}
               </div>
             ))}
@@ -199,13 +202,24 @@ export default async function BlogArticlePage({ params }: Props) {
         );
       })()}
 
+      <section className="mt-12 rounded-2xl border border-[var(--border-color)] p-6">
+        <h2 className="text-xl font-semibold mb-4">Professionnels et tarifs pour votre projet</h2>
+        <ul className="space-y-3">
+          {related.links.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href} className="text-[var(--accent)] hover:underline">{link.label}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {/* CTA */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-center">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
+        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
           Besoin d&apos;un professionnel ?
-        </h3>
+        </h2>
         <Link
-          href="/deposer-projet"
+          href={related.projectHref}
           className="inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-8 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
         >
           Deposer un projet gratuitement

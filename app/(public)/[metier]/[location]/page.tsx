@@ -1,3 +1,4 @@
+import { synchronizeListingCount } from "@/lib/seo/editorial";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -111,16 +112,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : "à";
   const currentYear = new Date().getFullYear();
 
-  const locationId =
-    resolved.type === "department"
-      ? resolved.department.id
-      : resolved.city.id;
-  const seo = await getSeoContent(
-    category.id,
-    locationId,
-    resolved.type === "department" ? "department" : "city"
-  );
-
   // Compter les pros pour cette combinaison. Ville "parent" agrégée
   // (Marseille → arrondissements, Monaco → communes frontalières) : on agrège
   // (null pour toute autre ville → aucune query en plus).
@@ -134,7 +125,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : await getProsByCategoryAndCity(category.id, resolved.city.id, { page: 1, pageSize: 1 });
 
   const prosCount = result.count;
-  const displayCount = Math.min(prosCount, TOP_LIMIT);
   const baseListing = getCategoryListing(parentCategory.slug, parentCategory.name);
   // Pour un alias belge, on affiche le pluriel/singulier/article belges tout en
   // gardant la grammaire du parent (article accordé au genre du displayName).
@@ -146,7 +136,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         article: alias.article,
       }
     : baseListing;
-  const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
   // Belgicisme (Belgique) : "couvreurs & toituriers", "plaquistes & plafonneurs"…
   // pour capter la requête belge en plus du terme français standard. Pour un
   // ALIAS, le nom belge est déjà le displayName → pas de suffixe (éviterait
@@ -158,37 +147,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : null;
   const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
 
-  // Title plus court, optimise CTR SERP (sans « | Devis gratuit | Workwave »).
-  // "Top 10 entreprises de ménage les mieux notées à Poitiers · 2026"
-  // Si peu de pros, on adapte le nombre.
+  // Décrire le métier et le lieu sans présenter le score composite comme une note.
   let dynamicTitle: string;
   if (prosCount === 0) {
     dynamicTitle = `${category.name} ${preposition} ${locationName}`;
   } else if (prosCount === 1) {
     dynamicTitle = `${listing.singular.charAt(0).toUpperCase() + listing.singular.slice(1)} ${preposition} ${locationName} · ${currentYear}`;
   } else {
-    dynamicTitle = `Top ${displayCount} ${listing.plural}${belgPlural} les mieux ${listing.notes} ${preposition} ${locationName} · ${currentYear}`;
+    dynamicTitle = `${listing.plural.charAt(0).toUpperCase() + listing.plural.slice(1)}${belgPlural} ${preposition} ${locationName} : profils et devis`;
   }
 
-  // PRIORITE au nouveau title (sprint 25/05/2026).
-  // L'ancien seo.title du sprint 3 est en format "X à Y · N pros"
-  // qui n'est PAS optimise CTR. On force le nouveau format meme sur les
-  // 588 pages avec seo_pages rempli. `absolute` pour ne PAS suffixer
-  // « | Workwave » (template du root layout) : titre court = meilleur CTR.
+  // Titre absolu pour éviter de rallonger les combinaisons métier/lieu.
   const title = dynamicTitle;
 
-  // Meta description enrichie : case un MAXIMUM de secondaires naturels
-  // (devis gratuits, intervention rapide, avis vérifiés, tarifs transparents)
-  // tout en restant ≤ 160 caractères. Fallback raccourci pour les noms longs.
+  // Décrire les informations disponibles et adapter les noms de lieux longs.
   let description: string;
   if (prosCount > 0) {
-    const full = `Comparez les ${displayCount} ${meilleurs} ${listing.plural} ${preposition} ${locationName} : devis gratuits, intervention rapide, avis vérifiés et tarifs transparents.`;
+    const full = `Comparez ${prosCount} ${listing.plural} ${preposition} ${locationName} : profils, prestations et avis disponibles. Déposez votre projet gratuitement.`;
     description =
       full.length <= 160
         ? full
-        : `Comparez les ${displayCount} ${meilleurs} ${listing.plural} ${preposition} ${locationName} : devis gratuits, intervention rapide, avis vérifiés.`;
+        : `Trouvez ${listing.article} ${listing.singular} ${preposition} ${locationName}. Comparez les fiches et déposez votre projet gratuitement.`;
   } else {
-    description = `Trouvez ${listing.article} ${listing.singular} ${preposition} ${locationName}. Devis gratuits, intervention rapide.`;
+    description = `Trouvez ${listing.article} ${listing.singular} ${preposition} ${locationName}. Déposez votre projet gratuitement.`;
   }
 
   return {
@@ -378,16 +359,6 @@ export async function renderListing(
         article: alias.article,
       }
     : baseListing;
-  const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
-  // Belgicisme (Belgique) : "couvreurs & toituriers", "plaquistes & plafonneurs"…
-  // pour capter la requête belge. Pour un ALIAS, le nom belge est déjà affiché →
-  // pas de suffixe (éviterait « plafonneurs & plafonneurs »).
-  const metaBelg = alias
-    ? null
-    : (resolved.type === "department" ? resolved.department : resolved.city.department)?.country === "BE"
-      ? getBelgicisme(category.slug)
-      : null;
-  const belgPlural = metaBelg ? ` & ${metaBelg.synPlural}` : "";
   const pluralCategory = listing.plural;
   const citySlug = resolved.type === "city" ? resolved.city.slug : null;
   // Pays de la page (BE vs FR) pour les mentions de registre (BCE vs Sirene).
@@ -461,7 +432,7 @@ export async function renderListing(
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: isFirstPage
-      ? `Les ${displayCount} ${meilleurs} ${pluralCategory} ${preposition} ${locationName}`
+      ? `${displayCount} ${pluralCategory} ${preposition} ${locationName}`
       : `${category.name} ${preposition} ${locationName}`,
     numberOfItems: totalProsCount,
     itemListElement: itemsForSchema.map((pro, i) => {
@@ -733,7 +704,7 @@ export async function renderListing(
           → Si seo.content existe : on garde seulement le contenu custom Claude
           → Sinon : on injecte les sections programmatiques (6 H2 + FAQ) */}
       {seo && stripIntro(seo.content) ? (
-        <SeoContent content={stripIntro(seo.content)} />
+        <SeoContent content={synchronizeListingCount(stripIntro(seo.content), totalProsCount)} />
       ) : (
         seoSectionsContent && (
           <ProgrammaticSeoSections content={seoSectionsContent} />

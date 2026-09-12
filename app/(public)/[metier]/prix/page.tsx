@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import PriceGuide from "@/components/seo/PriceGuide";
 import { getMetierPriceGuide, getPriceGuidesByMetier } from "@/lib/queries/price-guides";
 import { getCategoryBySlug } from "@/lib/queries/categories";
-import { getAllDepartments } from "@/lib/queries/departments";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 
 /**
@@ -46,10 +44,6 @@ export default async function MetierPriceGuidePage({ params }: Props) {
 
   const related = (await getPriceGuidesByMetier(metier, 12));
 
-  const departments = await getAllDepartments();
-  const dept = departments[0];
-  const deptSlug = dept ? generateDepartmentSlug(dept) : "vienne-86";
-  const deptName = dept?.name || "Vienne";
 
   return (
     <PriceGuide
@@ -57,8 +51,6 @@ export default async function MetierPriceGuidePage({ params }: Props) {
       categoryName={category.name}
       metierSlug={metier}
       related={related.map((r) => ({ slug: r.slug, h1: r.h1 }))}
-      deptSlug={deptSlug}
-      deptName={deptName}
     />
   );
 }

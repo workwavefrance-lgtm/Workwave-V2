@@ -1,3 +1,4 @@
+import { debarrasContent } from "./debarras-content";
 /**
  * Generateur de sections SEO programmatiques pour les pages listing
  * /[metier]/[location] (cat × ville et cat × dept).
@@ -517,6 +518,9 @@ export type SeoContext = {
 
 export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
   const cat = ctx.category;
+  if (cat.slug === "debarras") {
+    return debarrasContent(ctx.city ? `à ${ctx.city.name}` : `en ${ctx.department.name}`, ctx.prosCount);
+  }
   const vertical = (cat.vertical ?? "btp") as Vertical;
   const v = VERTICAL_TERMS[vertical];
   const isBE = ctx.department.country === "BE";
@@ -642,7 +646,7 @@ export function generateSeoContent(ctx: SeoContext): SeoContentBundle {
       vertical === "btp"
         ? `Faire appel à ${artInst} ${catLower} professionnel ${preposition} ${locationName} vous garantit un travail conforme aux normes en vigueur, réalisé par un ${v.pro} ${v.qualif} disposant des assurances obligatoires. ${v.garantie_phrase(catLower)}`
         : vertical === "domicile"
-          ? `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous fait gagner du temps avec un ${v.pro} ${v.qualif}, formé à ses prestations et accountable. ${v.garantie_phrase(catLower)}`
+          ? `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous fait gagner du temps avec un ${v.pro} ${v.qualif}, dont les prestations correspondent à votre besoin. ${v.garantie_phrase(catLower)}`
           : `Faire appel à ${artInst} ${catLower} ${preposition} ${locationName} vous garantit un ${v.pro} ${v.qualif}, attentif et déclaré, capable d'instaurer une relation de confiance avec votre famille. ${v.garantie_phrase(catLower)}`,
       // localContext est vide sur les pages departement dont les chiffres de
       // population ne sont pas connus (cf. ci-dessus). Dans ce cas « Cette

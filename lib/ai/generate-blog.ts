@@ -50,8 +50,8 @@ export async function generateBlogArticle(
   const client = getClient();
 
   const locationContext = input.cityName
-    ? `a ${input.cityName} (Vienne, 86)`
-    : "en Vienne (86)";
+    ? `à ${input.cityName}`
+    : "pour les particuliers";
 
   const topicInstruction = TOPIC_PROMPTS[input.topicType] || TOPIC_PROMPTS.guide;
 
@@ -65,13 +65,15 @@ ${topicInstruction}
 ${input.titleSuggestion ? `**Titre suggere :** ${input.titleSuggestion}` : ""}
 
 **Format obligatoire :**
-- 800-1200 mots
-- Un H1 accrocheur et SEO-friendly (commence le texte par "# Titre")
+- La longueur nécessaire pour répondre au sujet, sans remplissage ni répétition
+- Un H1 descriptif et concis, sans promesse non vérifiable (commence le texte par "# Titre")
 - 3-5 sections H2
 - Intro engageante de 2-3 phrases
 - Paragraphe de conclusion avec CTA
 - Ton expert mais accessible
-- Donnees chiffrees concretes (prix, delais)
+- Ne pas inventer de prix locaux, de délais, de disponibilité, de certification ou de source. Sans donnée vérifiée fournie, expliquer les facteurs à comparer plutôt qu'annoncer un chiffre.
+- Ne pas généraliser le CESU, les avantages fiscaux ou une règle française à toutes les prestations ou aux villes belges.
+- Ne pas attribuer un département à une ville si cette information n'est pas fournie.
 - Pas d'emojis
 - Markdown uniquement (H1, H2, H3, **gras**, listes)
 - Ne mentionne pas Workwave dans le corps (seulement en conclusion)
@@ -118,7 +120,6 @@ ${input.titleSuggestion ? `**Titre suggere :** ${input.titleSuggestion}` : ""}
   const tags = [input.categoryName.toLowerCase()];
   if (input.cityName) tags.push(input.cityName.toLowerCase());
   tags.push(input.topicType);
-  tags.push("vienne");
 
   return {
     title,

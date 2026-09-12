@@ -1,3 +1,4 @@
+import { REDIRECTED_BLOG_PATHS } from "@/lib/seo/content-redirects";
 import type { MetadataRoute } from "next";
 import { getAllCategories } from "@/lib/queries/categories";
 import { getAllDepartments } from "@/lib/queries/departments";
@@ -378,7 +379,7 @@ async function buildStaticAndContentUrls(): Promise<MetadataRoute.Sitemap> {
     published_at: string;
     updated_at: string;
   }[];
-  const blogUrls: MetadataRoute.Sitemap = posts.map((p) => ({
+  const blogUrls: MetadataRoute.Sitemap = posts.filter((p) => !REDIRECTED_BLOG_PATHS.has(`/blog/${p.slug}`)).map((p) => ({
     url: `${BASE_URL}/blog/${p.slug}`,
     lastModified: new Date(p.updated_at || p.published_at),
     changeFrequency: "monthly" as const,
@@ -637,8 +638,8 @@ async function buildCategoryCityBatchUrls(
   const rows = await withSitemapRetry<
     { m: string; v: string; n: number }[] | null
   >(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any).rpc("sitemap_listings_page", {
         p_offset: batch * CAT_CITY_PAR_SITEMAP,
         p_limit: CAT_CITY_PAR_SITEMAP,
@@ -913,6 +914,7 @@ async function findBatchStartId(
   // Google ; un sitemap vide caché 24h fait disparaître 45k fiches en silence.
   const data = await withSitemapRetry<number | null>(
     () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any).rpc("sitemap_batch_start_id", {
         skip_count: skipCount,
         tech_mode: techFilterMode === "include",

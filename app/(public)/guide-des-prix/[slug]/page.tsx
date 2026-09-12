@@ -7,8 +7,6 @@ import {
   getPriceGuidesByMetier,
 } from "@/lib/queries/price-guides";
 import { getCategoryBySlug } from "@/lib/queries/categories";
-import { getAllDepartments } from "@/lib/queries/departments";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
 import { BASE_URL } from "@/lib/constants";
 
 export const revalidate = 2592000; // 30j (15/07) : cache long sur toutes les routes SEO pour couper le cout ISR Vercel sous crawl ; donnees Sirene/prix statiques, 0 impact SEO.
@@ -47,17 +45,13 @@ export default async function PriceGuidePrestationPage({ params }: Props) {
   const categoryName = category?.name || "Artisan";
 
   // Maillage : guides connexes déclarés, sinon autres prestations du métier.
-  let related = guide.related_slugs?.length ? await getPriceGuidesBySlugs(guide.related_slugs) : [];
+  const related = guide.related_slugs?.length ? await getPriceGuidesBySlugs(guide.related_slugs) : [];
   if (related.length < 4 && metierSlug) {
     const more = (await getPriceGuidesByMetier(metierSlug, 8)).filter((g) => g.slug !== slug);
     const seen = new Set(related.map((r) => r.slug));
     for (const m of more) if (!seen.has(m.slug) && related.length < 6) { related.push(m); seen.add(m.slug); }
   }
 
-  const departments = await getAllDepartments();
-  const dept = departments[0];
-  const deptSlug = dept ? generateDepartmentSlug(dept) : "vienne-86";
-  const deptName = dept?.name || "Vienne";
 
   return (
     <PriceGuide
@@ -65,8 +59,6 @@ export default async function PriceGuidePrestationPage({ params }: Props) {
       categoryName={categoryName}
       metierSlug={metierSlug}
       related={related.map((r) => ({ slug: r.slug, h1: r.h1 }))}
-      deptSlug={deptSlug}
-      deptName={deptName}
     />
   );
 }

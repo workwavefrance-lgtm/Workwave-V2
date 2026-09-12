@@ -54,18 +54,13 @@ export default function PriceGuide({
   categoryName,
   metierSlug,
   related,
-  deptSlug,
-  deptName,
 }: {
   guide: PriceGuide;
   categoryName: string;
   metierSlug: string;
   related: RelatedLink[];
-  deptSlug: string;
-  deptName: string;
 }) {
   const isMetier = guide.scope === "metier";
-  const canonical = isMetier ? `${BASE_URL}/${metierSlug}/prix` : `${BASE_URL}/guide-des-prix/${guide.slug}`;
 
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
@@ -237,11 +232,11 @@ export default function PriceGuide({
       <div className="mt-14 pt-8 border-t border-[var(--border-color)]">
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <Link
-            href={`/${metierSlug}/${deptSlug}`}
+            href={metierSlug ? `/${metierSlug}` : "/recherche"}
             className="flex-1 rounded-2xl border border-[var(--card-border)] p-5 hover:border-[var(--accent)] transition-colors duration-200"
           >
-            <span className="text-sm font-semibold text-[var(--text-primary)]">Voir les {categoryName.toLowerCase()}s en {deptName}</span>
-            <span className="block text-xs text-[var(--text-tertiary)] mt-1">Artisans vérifiés près de chez vous</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">Trouver un professionnel près de chez vous</span>
+            <span className="block text-xs text-[var(--text-tertiary)] mt-1">Choisissez votre ville et comparez les fiches</span>
           </Link>
           {!isMetier && (
             <Link
@@ -282,8 +277,7 @@ export default function PriceGuide({
         sub="Workwave vous met en relation avec des artisans près de chez vous, gratuitement."
         cta="Décrire mon projet gratuitement →"
       />
-      {/* canonical via metadata côté page */}
-      <link rel="canonical" href={canonical} />
+
     </main>
   );
 }
