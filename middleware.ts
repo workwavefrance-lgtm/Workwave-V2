@@ -77,14 +77,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    const adminVerified = request.cookies.get("admin_verified")?.value;
-    const now = Date.now();
-
-    // Cache de 5 minutes pour éviter un check DB à chaque requête
-    if (adminVerified && now - parseInt(adminVerified, 10) < 5 * 60 * 1000) {
-      return supabaseResponse;
-    }
-
     // Verification DIRECTE dans la table admins.
     //
     // AVANT : le middleware appelait /api/admin/auth/check par un fetch sur
@@ -116,14 +108,8 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
       }
 
-      // Marquer comme vérifié pendant 5 minutes
-      supabaseResponse.cookies.set("admin_verified", String(now), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 5 * 60,
-        path: "/",
-      });
+      // Un cookie du navigateur ne constitue jamais une preuve de rôle admin.
+      supabaseResponse.cookies.delete("admin_verified");
     } catch {
       const url = request.nextUrl.clone();
       url.pathname = "/admin/login";

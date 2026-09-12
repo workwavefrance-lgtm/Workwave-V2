@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getLeadPreviewCount } from "@/lib/queries/leads";
 import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import PreferencesEditor from "@/components/pro/dashboard/PreferencesEditor";
+import { getBtpCategoryRules } from "@/lib/matching/btp-categories";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const metadata: Metadata = {
   title: "Zone d'intervention · Workwave Pro",
@@ -17,7 +19,8 @@ export default async function PreferencesPage() {
   // Aperçu basé sur TOUTES les catégories du pro (principale + secondaires) :
   // le pro reçoit les leads de l'ensemble de ses métiers (le broadcast diffuse
   // sur category_id + secondary_category_ids).
-  const allCatIds = [pro.category_id, ...(pro.secondary_category_ids || [])];
+  const matching = await getBtpCategoryRules(getServiceClient());
+  const allCatIds = matching.projectCategoryIdsForPro(pro);
   // Zone = rayon Haversine (comme le broadcast + la page Leads), fallback dépt.
   const previewCount = await getLeadPreviewCount(
     allCatIds,

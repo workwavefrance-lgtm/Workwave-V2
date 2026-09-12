@@ -6,9 +6,11 @@ import { submitDeletionRequest, type DeletionRequestState } from "./actions";
 export default function DeletionRequestForm({
   slug,
   hasSiret,
+  accountEmail,
 }: {
   slug: string;
   hasSiret: boolean;
+  accountEmail: string;
 }) {
   const [state, formAction, isPending] = useActionState<
     DeletionRequestState,
@@ -49,14 +51,15 @@ export default function DeletionRequestForm({
           htmlFor="siret"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          SIRET de l&apos;entreprise
+          SIRET ou numéro BCE de l&apos;entreprise
         </label>
         <input
           id="siret"
           name="siret"
           type="text"
           inputMode="numeric"
-          maxLength={14}
+          maxLength={18}
+          required
           placeholder="12345678901234"
           className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
         />
@@ -70,18 +73,19 @@ export default function DeletionRequestForm({
           htmlFor="email"
           className="block text-sm font-medium text-[var(--text-primary)] mb-2"
         >
-          Adresse email
+          Adresse email de votre compte
         </label>
         <input
           id="email"
           name="email"
           type="email"
-          placeholder="votre.email@exemple.fr"
+          value={accountEmail}
+          readOnly
           className="w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
         />
         <p className="text-xs text-[var(--text-tertiary)] mt-1.5 leading-relaxed">
-          Le code de vérification sera envoyé à cette adresse. Vous devez
-          pouvoir y accéder pour finaliser la suppression.
+          Le code sera envoyé à l’adresse de votre compte propriétaire.
+          Si vous n’y avez plus accès, contactez le support.
         </p>
         {state.errors?.email && (
           <p className="text-xs text-red-500 mt-1">{state.errors.email}</p>

@@ -34,6 +34,8 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { key: "finances", label: "Finance", href: "/admin/finances", primary: true,
     icon: I("M4 19V5|M8 19V9|M12 19V7|M16 19v-8|M20 19V4") },
   // ── secondaires (feuille « Plus » sur mobile) ──
+  { key: "reclamations", label: "Rattachements", href: "/admin/reclamations",
+    icon: I("M9 12l2 2 4-4|M12 3l8 4v6c0 4-8 8-8 8s-8-4-8-8V7z") },
   { key: "reviews", label: "Avis", href: "/admin/reviews",
     icon: I("M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 22l-5.2-2.9 1-5.8L3.5 9.2l5.9-.9z") },
   { key: "enquete", label: "Enquête", href: "/admin/enquete",

@@ -11,7 +11,7 @@ export function getAdminServiceClient() {
       // Meme raison que pour le client public : sans signal, Next dedouble le
       // corps de chaque reponse et la branche non lue attend le ramasse-miettes.
       // Cf. lib/supabase/fetch-supabase.ts.
-      { global: { fetch: fetchSupabase } }
+      { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }, global: { fetch: fetchSupabase } }
     );
   }
   return serviceClient;

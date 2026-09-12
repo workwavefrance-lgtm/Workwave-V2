@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import AdminDatePicker, { PERIODS_WITH_TODAY } from "@/components/admin/forms/AdminDatePicker";
 import AdminAreaChart from "@/components/admin/charts/AdminAreaChart";
 import AdminKPICard from "@/components/admin/data-display/AdminKPICard";
@@ -8,9 +8,8 @@ import type { DatePeriod } from "@/lib/types/admin";
 import type {
   AdminAnalytics,
   VerticalBundle,
-  FunnelStep,
+  ActivityCount,
   Breakdown,
-  Delta,
   Vertical,
 } from "@/lib/queries/admin-events";
 
@@ -25,10 +24,6 @@ function eur(cents: number): string {
     maximumFractionDigits: 2,
   });
 }
-function rate(num: number, den: number): number {
-  return den > 0 ? Math.round((num / den) * 100) : 0;
-}
-
 const TABS: { key: Tab; label: string }[] = [
   { key: "all", label: "Tous" },
   { key: "btp", label: "BTP" },
@@ -99,18 +94,14 @@ function Card({
   );
 }
 
-// ── entonnoir ────────────────────────────────────────────
-function FunnelViz({ steps }: { steps: FunnelStep[] }) {
-  const max = steps[0]?.count || 1;
+// Volumes indépendants : les barres comparent leur taille, sans taux entre lignes.
+function ActivityBars({ steps }: { steps: ActivityCount[] }) {
+  const max = Math.max(1, ...steps.map((step) => step.count));
   if (steps.every((s) => s.count === 0)) return <Empty message="Aucune donnée sur la période" />;
   return (
     <div className="space-y-2.5">
       {steps.map((step, i) => {
         const pct = max > 0 ? Math.round((step.count / max) * 100) : 0;
-        const convPct =
-          i > 0 && steps[i - 1].count > 0
-            ? Math.round((step.count / steps[i - 1].count) * 100)
-            : null;
         return (
           <div key={step.label}>
             <div className="flex items-center justify-between mb-1">
@@ -123,17 +114,6 @@ function FunnelViz({ steps }: { steps: FunnelStep[] }) {
                 )}
               </span>
               <div className="flex items-center gap-2">
-                {convPct !== null && (
-                  <span
-                    className="text-[10px] tabular-nums px-1 rounded"
-                    style={{
-                      color: convPct >= 50 ? "#10B981" : convPct >= 20 ? "var(--admin-text-tertiary)" : "#EF4444",
-                      backgroundColor: "var(--admin-hover)",
-                    }}
-                  >
-                    {convPct}%
-                  </span>
-                )}
                 <span className="text-xs font-semibold tabular-nums" style={{ color: "var(--admin-text)" }}>
                   {step.count.toLocaleString("fr-FR")}
                 </span>
@@ -142,7 +122,7 @@ function FunnelViz({ steps }: { steps: FunnelStep[] }) {
             <div className="h-7 rounded-md overflow-hidden" style={{ backgroundColor: "var(--admin-hover)" }}>
               <div
                 className="h-full rounded-md transition-all duration-500"
-                style={{ width: `${Math.max(pct, step.count > 0 ? 3 : 0)}%`, backgroundColor: "var(--admin-accent)", opacity: 1 - i * 0.13 }}
+                style={{ width: `${Math.max(pct, step.count > 0 ? 3 : 0)}%`, backgroundColor: "var(--admin-accent)", opacity: Math.max(0.4, 1 - i * 0.08) }}
               />
             </div>
           </div>
@@ -205,30 +185,36 @@ export default function AnalyticsClient({
   const [tab, setTab] = useState<Tab>("all");
   const [analytics, setAnalytics] = useState<AdminAnalytics>(initialAnalytics);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const latestRequest = useRef(0);
 
   const fetchData = useCallback(async (newPeriod: DatePeriod) => {
+    const requestId = ++latestRequest.current;
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch(`/api/admin/analytics/kpis?period=${newPeriod}`);
-      if (res.ok) setAnalytics((await res.json()) as AdminAnalytics);
+      if (!res.ok) throw new Error("analytics_unavailable");
+      const data = (await res.json()) as AdminAnalytics;
+      if (requestId !== latestRequest.current) return;
+      setAnalytics(data);
+      setPeriod(newPeriod);
     } catch {
-      // fail silently: stale data stays visible
+      if (requestId === latestRequest.current) {
+        setLoadError("Chargement impossible. Les chiffres de la dernière période chargée restent affichés.");
+      }
     } finally {
-      setLoading(false);
+      if (requestId === latestRequest.current) setLoading(false);
     }
   }, []);
 
   const handlePeriodChange = (newPeriod: DatePeriod) => {
-    setPeriod(newPeriod);
     fetchData(newPeriod);
   };
 
   const b: VerticalBundle = analytics[tab];
   const k = b.kpis;
 
-  // dérivations d'affichage (deltas)
-  const formRateCur = rate(k.projectsSubmitted.current, k.formStarted.current);
-  const formRatePrev = rate(k.projectsSubmitted.previous, k.formStarted.previous);
   const revSpark = b.revenueByDay.map((r) => r.revenue);
   const unlockSpark = b.revenueByDay.map((r) => r.unlocks);
 
@@ -246,6 +232,10 @@ export default function AnalyticsClient({
         </div>
         <AdminDatePicker value={period} onChange={handlePeriodChange} periods={PERIODS_WITH_TODAY} />
       </div>
+
+      {loadError && (
+        <p role="alert" className="text-sm mb-4" style={{ color: "var(--admin-danger)" }}>{loadError}</p>
+      )}
 
       {/* Tabs vertical */}
       <div
@@ -298,22 +288,21 @@ export default function AnalyticsClient({
             icon={I.gift}
           />
           <AdminKPICard
-            title="Projets déposés"
-            value={k.projectsSubmitted.current}
-            delta={k.projectsSubmitted.pct ?? undefined}
+            title="Projets valides"
+            value={k.projectsValid.current}
+            delta={k.projectsValid.pct ?? undefined}
             icon={I.doc}
           />
           <AdminKPICard
-            title="Complétion formulaire"
-            value={`${formRateCur}%`}
-            delta={formRateCur - formRatePrev}
-            deltaSuffix=" pts"
+            title="Validations BTP"
+            value={tab === "ai" ? "—" : k.claimsCompleted.current}
+            delta={tab === "ai" ? undefined : k.claimsCompleted.pct ?? undefined}
             icon={I.funnel}
           />
           <AdminKPICard
-            title="Pros actifs"
-            value={k.activePros.current}
-            delta={k.activePros.pct ?? undefined}
+            title="Pros actifs BTP"
+            value={tab === "ai" ? "—" : k.activePros.current}
+            delta={tab === "ai" ? undefined : k.activePros.pct ?? undefined}
             icon={I.users}
           />
         </div>
@@ -344,13 +333,10 @@ export default function AnalyticsClient({
               )}
             </Card>
           </div>
-          <Card title="Entonnoir de conversion" subtitle="Du formulaire au contact débloqué">
-            <FunnelViz steps={b.conversionFunnel} />
+          <Card title="Activité commerciale" subtitle="Volumes enregistrés sur la période">
+            <ActivityBars steps={b.businessActivity} />
             <p className="text-[11px] mt-3 pt-3 tabular-nums" style={{ color: "var(--admin-text-secondary)", borderTop: "1px solid var(--admin-border)" }}>
-              Taux global ouvert → débloqué :{" "}
-              <span className="font-semibold" style={{ color: "var(--admin-text)" }}>
-                {rate(b.conversionFunnel[2]?.count || 0, b.conversionFunnel[0]?.count || 0)}%
-              </span>
+              Un projet peut être débloqué par plusieurs pros, y compris après sa période de dépôt.
             </p>
           </Card>
         </div>
@@ -371,27 +357,41 @@ export default function AnalyticsClient({
               />
             )}
           </Card>
-          <Card title="Réclamations de fiche" subtitle="Les pros qui prennent la main sur leur fiche">
-            <FunnelViz steps={b.claimFunnel} />
-            <p className="text-[11px] mt-3 pt-3 tabular-nums" style={{ color: "var(--admin-text-secondary)", borderTop: "1px solid var(--admin-border)" }}>
-              Taux de validation :{" "}
-              <span className="font-semibold" style={{ color: "var(--admin-text)" }}>
-                {rate(k.claimsCompleted.current, k.claimsStarted.current)}%
-              </span>{" "}
-              · {k.claimsCompleted.current} validée(s) sur {k.claimsStarted.current} démarrée(s)
-            </p>
+          <Card title="Réclamations de fiche BTP" subtitle="Démarrages et validations enregistrés sur la période">
+            {tab === "ai" ? <Empty message="Cette mesure couvre les fiches BTP." /> : (
+              <>
+                <ActivityBars steps={b.claimActivity} />
+                <p className="text-[11px] mt-3" style={{ color: "var(--admin-text-secondary)" }}>
+                  Une validation peut correspondre à une demande commencée avant cette période.
+                </p>
+              </>
+            )}
+          </Card>
+        </div>
+
+        <div className="mb-4">
+          <Card title="Formulaires BTP observés" subtitle="Visiteurs ayant accepté les cookies de mesure">
+            {tab === "ai" ? <Empty message="Cette mesure couvre les formulaires BTP." /> : (
+              <>
+                <ActivityBars steps={b.formActivity} />
+                <p className="text-[11px] mt-3" style={{ color: "var(--admin-text-secondary)" }}>
+                  Chaque affichage d’écran compte, retours inclus. Les envois de projets sont comptés séparément
+                  pour tous les visiteurs. Ces volumes ne suivent pas les mêmes personnes d’une étape à l’autre.
+                </p>
+              </>
+            )}
           </Card>
         </div>
 
         {/* Répartitions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-          <Card title="Top métiers demandés" subtitle="Projets soumis par catégorie">
+          <Card title="Top métiers demandés" subtitle="Dépôts BTP enregistrés par catégorie">
             <RankedBars items={b.byCategory} />
           </Card>
-          <Card title="Top villes" subtitle="Projets soumis par ville">
+          <Card title="Top villes" subtitle="Dépôts BTP enregistrés par ville">
             <RankedBars items={b.byCity} />
           </Card>
-          <Card title="Urgence des projets" subtitle="Répartition des demandes">
+          <Card title="Urgence des projets" subtitle="Dépôts BTP enregistrés">
             <RankedBars items={b.byUrgency} />
           </Card>
         </div>
@@ -402,7 +402,9 @@ export default function AnalyticsClient({
         </Card>
 
         <p className="text-[11px] mt-5" style={{ color: "var(--admin-text-tertiary)" }}>
-          Données 100 % issues de la base Workwave (events + lead_unlocks). Les vues de page sont dans GA4.
+          Projets valides et déblocages : BTP et freelances. Activité des pros et formulaires : événements BTP
+          enregistrés. Comptes de test identifiés exclus des événements et des déblocages. Les données anonymes
+          sans lien avec un compte restent comptées.
         </p>
       </div>
     </div>

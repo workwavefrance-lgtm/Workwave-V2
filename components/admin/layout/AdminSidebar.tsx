@@ -6,6 +6,11 @@ import { useAdmin } from "@/components/admin/shell/AdminProvider";
 
 const NAV_ITEMS = [
   {
+    label: "Rattachements",
+    href: "/admin/reclamations",
+    icon: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 12l2 2 4-4M12 3l8 4v6c0 4-8 8-8 8s-8-4-8-8V7z" /></svg>,
+  },
+  {
     label: "Overview",
     href: "/admin",
     icon: (

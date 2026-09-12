@@ -13,10 +13,10 @@ import {
 } from "@/lib/queries/stats-jour";
 
 /**
- * /admin/statistiques : l'entonnoir complet de Workwave.fr, du visiteur réel
+ * /admin/statistiques : les volumes de Workwave.fr, du visiteur mesuré
  * (Umami) aux coordonnées débloquées (lead_unlocks), avec les clics Google et
  * les robots à part. Créée le 09/09/2026, à côté de /admin/analytics qui ne
- * lit que la table `events` et reste en place.
+ * présente les événements et l'activité commerciale.
  *
  * Server Component pur : la période se choisit par lien (?periode=7|28|90),
  * aucun état client. Tout le calcul vit dans lib/queries/stats-jour.ts.
@@ -271,9 +271,9 @@ function Entonnoir({ marches, erreurs }: { marches: Marche[]; erreurs: Erreurs }
       <table className="w-full min-w-[720px] border-collapse">
         <thead>
           <tr>
-            {celluleTh("Marche", false)}
+            {celluleTh("Mesure", false)}
             {celluleTh("Période")}
-            {celluleTh("Conversion")}
+            {celluleTh("Part")}
             {celluleTh("Période précédente")}
             {celluleTh("Écart")}
           </tr>
@@ -397,9 +397,8 @@ export default async function StatistiquesPage({
       >
         <p className="font-semibold">Comment lire cette page</p>
         <p>
-          Les visiteurs réels sont des sessions Umami : un navigateur qui a exécuté le JavaScript du site. Les
-          robots, les aspirateurs et les requêtes sans JavaScript n&apos;y figurent jamais, ils sont comptés à part en
-          bas de page.
+          Les visiteurs mesurés sont des sessions Umami : des navigateurs qui exécutent le JavaScript du site.
+          Le trafic des robots identifié dans les journaux du serveur figure à part, en bas de page.
         </p>
         <p>
           « Formulaire vu » n&apos;est pas une intention : le formulaire est intégré dans les pages métier x ville, un
@@ -407,11 +406,14 @@ export default async function StatistiquesPage({
           interaction.
         </p>
         <p>
-          Les lignes Formulaire vu, commencé, écrans et envoyé viennent de la table events, qui ne reçoit que les
-          visiteurs ayant accepté les cookies (app/api/track). Les visiteurs réels et les sessions listing (Umami)
-          comptent tout le monde. Une conversion listing vers formulaire vu serait donc minorée du taux de refus des
-          cookies : elle n&apos;est pas calculée. Lire les conversions ENTRE marches events (vu, commencé, envoyé),
-          jamais depuis Umami.
+          Les vues, débuts et écrans des formulaires BTP sont mesurés après acceptation des cookies.
+          Les envois BTP sont enregistrés côté serveur, avec ou sans cette acceptation. Les projets valides
+          et les déblocages couvrent aussi les freelances.
+        </p>
+        <p>
+          Ces lignes présentent des volumes indépendants : un écran peut être revu, une validation arriver
+          plus tard et plusieurs pros débloquer le même projet. La part affichée pour les projets diffusés
+          porte uniquement sur les projets valides créés pendant la période.
         </p>
         <p>
           « pas encore » signifie que la mesure n&apos;existe pas encore en base (NULL) : Search Console a 2 jours de
@@ -471,15 +473,15 @@ export default async function StatistiquesPage({
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
         <div className="xl:col-span-2">
           <Carte
-            titre="Entonnoir"
-            sousTitre="Du visiteur réel aux coordonnées débloquées, une marche par ligne. La conversion se lit depuis la marche chiffrée juste au-dessus."
+            titre="Trafic, formulaires et activité commerciale"
+            sousTitre="Volumes par source, comparés à la période précédente."
           >
             <Entonnoir marches={s.entonnoir} erreurs={e} />
           </Carte>
         </div>
         <Carte
-          titre="Le ratio clé"
-          sousTitre="Projets valides pour 1 000 clics Google sur un listing"
+          titre="Projets et clics Google"
+          sousTitre="Projets valides toutes sources pour 1 000 clics Google sur un listing"
           erreur={e.statsJour ?? e.projets}
         >
           <p className="text-4xl font-semibold tracking-tight tabular-nums" style={{ color: "var(--admin-accent)" }}>
@@ -511,9 +513,8 @@ export default async function StatistiquesPage({
             <Ecart pct={ratio.ecartPct} />
           </div>
           <p className="text-sm mt-3" style={{ color: "var(--admin-text)" }}>
-            C&apos;est le seul chiffre qui sépare un problème de trafic d&apos;un problème de formulaire : s&apos;il
-            tient alors que les projets baissent, c&apos;est le trafic qui manque ; s&apos;il baisse à clics égaux,
-            c&apos;est la page ou le formulaire qui a changé.
+            Ces deux volumes couvrent les mêmes jours. Les projets viennent de toutes les sources de trafic :
+            ce rapport ne mesure pas la conversion des visiteurs Google.
           </p>
         </Carte>
       </div>
@@ -532,7 +533,7 @@ export default async function StatistiquesPage({
                   {celluleTh("Visiteurs")}
                   {celluleTh("Sessions listing")}
                   {celluleTh("Formulaire commencé")}
-                  {celluleTh("Envoyés")}
+                  {celluleTh("Envois BTP")}
                   {celluleTh("Projets valides")}
                   {celluleTh("Clics Google")}
                 </tr>

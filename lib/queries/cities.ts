@@ -53,13 +53,14 @@ export const getCityBySlug = cache(async function getCityBySlug(
   slug: string
 ): Promise<CityWithDepartment | null> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("cities")
     .select("*, department:departments(*)")
     .eq("slug", slug)
     .order("population", { ascending: false, nullsFirst: false })
     .limit(1)
-    .single();
+    .maybeSingle();
+  if (error) throw new Error(`Lecture de la commune impossible : ${error.message}`);
   return data as CityWithDepartment | null;
 })
 
@@ -159,6 +160,15 @@ export function isBorderZoneSlug(slug: string | null | undefined): boolean {
   return !!slug && slug in BORDER_ZONE_CHILD_SLUGS;
 }
 
+/** Inverse des regroupements ci-dessous, pour rafraîchir leurs pages publiques. */
+export function getParentListingCitySlugs(city: { name: string; slug: string }): string[] {
+  const metro = /^(Paris|Marseille|Lyon) .+Arrondissement$/i.exec(city.name)?.[1].toLowerCase();
+  const border = Object.entries(BORDER_ZONE_CHILD_SLUGS)
+    .filter(([, children]) => children.includes(city.slug))
+    .map(([parent]) => parent);
+  return [...(metro ? [metro] : []), ...border];
+}
+
 /**
  * Retourne les city_id à AGRÉGER pour une "ville parent", ou `null` quand la
  * ville n'agrège rien (cas normal : 1 ville = 1 city_id, aucune query en plus).
@@ -179,18 +189,20 @@ export const getAggregatedCityIds = cache(async function getAggregatedCityIds(ci
   const zoneSlugs = BORDER_ZONE_CHILD_SLUGS[city.slug];
   if (zoneSlugs) {
     const supabase = createPublicClient();
-    const { data } = await supabase.from("cities").select("id").in("slug", zoneSlugs);
+    const { data, error } = await supabase.from("cities").select("id").in("slug", zoneSlugs);
+    if (error) throw new Error(`Lecture des communes frontalières impossible : ${error.message}`);
     const ids = (data || []).map((c: { id: number }) => c.id);
     return ids.length > 0 ? ids : null;
   }
   // 2. Métropole à arrondissements (Marseille/Lyon/Paris)
   if (!isMetroParentInsee(city.insee_code)) return null;
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("cities")
     .select("id")
     .eq("department_id", city.department_id)
     .ilike("name", `${city.name} %Arrondissement`);
+  if (error) throw new Error(`Lecture des arrondissements impossible : ${error.message}`);
   const ids = (data || []).map((c: { id: number }) => c.id);
   return [city.id, ...ids];
 })
@@ -203,9 +215,10 @@ export const getCityIdsByDepartment = cache(async function getCityIdsByDepartmen
   departmentId: number
 ): Promise<number[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("cities")
     .select("id")
     .eq("department_id", departmentId);
+  if (error) throw new Error(`Lecture des communes du département impossible : ${error.message}`);
   return (data || []).map((c: { id: number }) => c.id);
 });

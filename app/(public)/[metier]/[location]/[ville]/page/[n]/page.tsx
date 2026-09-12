@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { renderSpecialtyCity } from "../../page";
 import { BASE_URL } from "@/lib/constants";
+import { parseListingPage } from "@/lib/queries/listing-pros";
 
 export const revalidate = 2592000;
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SpecialtyCityPaginated({ params }: Props) {
   const { metier, location, ville, n } = await params;
-  const page = parseInt(n, 10);
-  if (!Number.isFinite(page) || page < 2 || page > 500) notFound();
+  const page = parseListingPage(n);
+  if (page === null) notFound();
   return renderSpecialtyCity(metier, location, ville, page);
 }

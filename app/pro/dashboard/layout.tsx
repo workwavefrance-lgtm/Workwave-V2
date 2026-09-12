@@ -7,6 +7,7 @@ import Sidebar from "@/components/pro/dashboard/Sidebar";
 import BottomBar from "@/components/pro/dashboard/BottomBar";
 import DashboardHeader from "@/components/pro/dashboard/DashboardHeader";
 import ImpersonationBanner from "@/components/admin/shell/ImpersonationBanner";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export default async function DashboardLayout({
   children,
@@ -31,6 +32,9 @@ export default async function DashboardLayout({
     if (aiPro) {
       redirect("/ai/dashboard");
     }
+    const { data: request } = await getServiceClient().from("pro_claim_requests")
+      .select("id").eq("requester_user_id", user.id).limit(1).maybeSingle();
+    if (request) redirect("/pro/reclamations");
     redirect("/pro/retrouver-fiche");
   }
 

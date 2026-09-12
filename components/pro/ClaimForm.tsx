@@ -110,7 +110,7 @@ export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Prop
           className={`${inputBase} font-mono tracking-wide ${state.errors?.siret && !isPending ? inputError : inputNormal}`}
         />
         <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
-          On l&apos;affiche au-dessus : recopiez-le, c&apos;est votre preuve d&apos;identité.
+          Ce numéro permet d&apos;identifier la fiche de votre entreprise.
         </p>
         {state.errors?.siret && !isPending && (
           <p className="mt-1.5 text-sm text-red-500">{state.errors.siret}</p>
@@ -140,8 +140,7 @@ export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Prop
           <p className="mt-1.5 text-sm text-red-500">{state.errors.email}</p>
         )}
         <p className="mt-1.5 text-xs text-[var(--text-tertiary)] leading-relaxed">
-          Pour recevoir le code de vérification + vous connecter. Boîte pro qui
-          filtre (OVH, Orange…)&nbsp;? Une adresse Gmail passe le mieux.
+          Après validation, cette adresse sera affichée sur votre fiche et utilisée pour recevoir les demandes de clients. Utilisez votre adresse professionnelle.
         </p>
       </div>
 
@@ -225,13 +224,13 @@ export default function ClaimForm({ slug, maskedSiret, isBelgian = false }: Prop
 
       <div className="text-center space-y-2">
         <p className="text-xs text-[var(--text-tertiary)]">
-          Gratuit · 2 min · sans engagement
+          Demande gratuite · vérification manuelle avant accès
         </p>
         <p className="text-[11px] text-[var(--text-secondary)] flex items-center justify-center gap-1.5">
           <svg className="w-3.5 h-3.5 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
-          Téléphone, photos, description… à compléter juste après dans votre espace.
+          Vous pourrez modifier la fiche après validation par notre équipe.
         </p>
       </div>
     </form>

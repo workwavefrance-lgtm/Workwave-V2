@@ -8,9 +8,7 @@
  * commence a reduire son rythme. En passant le numero de page dans le CHEMIN,
  * la page redevient cachable.
  *
- * SEO : aucun impact. Ces pages ne sont pas dans le sitemap et leur canonical
- * pointe deja vers la page 1, Google ne les indexe pas. Les anciens liens
- * `?page=N` sont rediriges en 301 par le middleware.
+ * Ces pages restent hors sitemap et conservent leur canonical vers la page 1.
  *
  * Le segment litteral `page` prime sur le segment dynamique `[ville]` du meme
  * niveau (regle Next.js : statique > dynamique), donc /plombier/vienne-86/page/2
@@ -20,6 +18,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { renderListing } from "../../page";
 import { BASE_URL } from "@/lib/constants";
+import { parseListingPage } from "@/lib/queries/listing-pros";
 
 export const revalidate = 2592000;
 
@@ -45,9 +44,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ListingPaginatedPage({ params }: Props) {
   const { metier, location, n } = await params;
-  const page = parseInt(n, 10);
+  const page = parseListingPage(n);
   // Page 1 = l'URL canonique, pas ici. Numero invalide = 404 (evite les URLs
   // fantomes type /page/abc ou /page/-3 qui pollueraient le crawl).
-  if (!Number.isFinite(page) || page < 2 || page > 500) notFound();
+  if (page === null) notFound();
   return renderListing(metier, location, page);
 }

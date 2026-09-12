@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import VerificationForm from "@/components/pro/VerificationForm";
-import { getServiceClient } from "@/lib/supabase/service-client";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -14,39 +13,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Obfusque l'email pour rassurer l'utilisateur sans rien leaker (f***@domaine.fr).
-function obfuscateEmail(email: string | null | undefined): string | null {
-  if (!email || !email.includes("@")) return null;
-  const [local, domain] = email.split("@");
-  if (!local || !domain) return null;
-  return `${local.slice(0, 1)}***@${domain}`;
-}
-
-// Récupère l'email destinataire du code (depuis la tentative) pour l'afficher obfusqué.
-async function getAttemptEmail(attemptId: string): Promise<string | null> {
-  const id = Number(attemptId);
-  if (!Number.isFinite(id)) return null;
-  try {
-    const { createClient } = await import("@supabase/supabase-js");
-    const sb = getServiceClient();
-    const { data } = await sb
-      .from("claim_attempts")
-      .select("email")
-      .eq("id", id)
-      .single();
-    return obfuscateEmail((data as { email?: string } | null)?.email);
-  } catch {
-    return null;
-  }
-}
-
 export default async function VerificationPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { attempt } = await searchParams;
 
-  if (!attempt) notFound();
-
-  const destinationEmail = await getAttemptEmail(attempt);
+  if (!attempt || !Number.isSafeInteger(Number(attempt)) || Number(attempt) <= 0) notFound();
 
   return (
     <main className="max-w-md mx-auto px-4 py-16">
@@ -70,7 +41,7 @@ export default async function VerificationPage({ params, searchParams }: Props) 
           </svg>
         </div>
 
-        <VerificationForm attemptId={attempt} slug={slug} destinationEmail={destinationEmail} />
+        <VerificationForm attemptId={attempt} slug={slug} />
       </div>
     </main>
   );

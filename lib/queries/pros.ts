@@ -84,10 +84,16 @@ async function paginatedQuery(
   // Sprint 13 : boost claimed pour mettre en premier les pros qui ont
   // reclame leur fiche (engagement reel) avant les fiches scrapees Sirene.
   // Incite les pros a reclamer leur fiche pour gagner en visibilite.
-  const { data, count } = await query
+  const { data, count, error, status } = await query
     .range(from, to)
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
-    .order("name");
+    .order("name")
+    .order("id");
+
+  // PostgREST peut répondre 416/PGRST103 quand l'offset dépasse le compte
+  // exact. Ce cas est une page inexistante ; toute autre erreur reste levée.
+  const beyondLastPage = status === 416 && error?.code === "PGRST103" && from >= 0 && to >= from;
+  if (error && !beyondLastPage) throw new Error(`Lecture des professionnels impossible : ${error.message}`);
 
   const total = count || 0;
 
@@ -108,7 +114,11 @@ async function paginatedQuery(
 export async function getProsByCategoryAndCityIds(
   categoryId: number,
   cityIds: number[],
-  { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
+  { page = 1, pageSize = DEFAULT_PAGE_SIZE, excludeIds = [] }: {
+    page?: number;
+    pageSize?: number;
+    excludeIds?: readonly number[];
+  } = {}
 ): Promise<PaginatedResult<ProCardData>> {
   if (cityIds.length === 0) {
     return { data: [], count: 0, page, pageSize, totalPages: 0 };
@@ -123,6 +133,10 @@ export async function getProsByCategoryAndCityIds(
     .eq("is_active", true)
     .or(FILTRE_OUVERTS);
 
+  // Les mises en avant occupent la page 1 ; les suivantes parcourent
+  // uniquement les autres fiches, sans sauter les vingt premières.
+  if (excludeIds.length > 0) query.not("id", "in", `(${excludeIds.join(",")})`);
+
   return paginatedQuery(query, page, pageSize);
 }
 
@@ -131,8 +145,6 @@ export async function getProsByCategoryAndDepartment(
   departmentId: number,
   { page = 1, pageSize = DEFAULT_PAGE_SIZE } = {}
 ): Promise<PaginatedResult<ProCardData>> {
-  const supabase = createPublicClient();
-
   // Récupérer les city_ids du département
   const cityIds = await getCityIdsByDepartment(departmentId);
 
@@ -150,7 +162,7 @@ export async function countProsByCategoryAndCityIds(
 ): Promise<number> {
   if (cityIds.length === 0) return 0;
   const supabase = createPublicClient();
-  const { count } = await supabase
+  const { count, error } = await supabase
     .from("pros")
     .select("id", { count: "exact", head: true })
     .eq("category_id", categoryId)
@@ -158,6 +170,7 @@ export async function countProsByCategoryAndCityIds(
     .is("deleted_at", null)
     .eq("is_active", true)
     .or(FILTRE_OUVERTS);
+  if (error) throw new Error(`Comptage des professionnels impossible : ${error.message}`);
   return count || 0;
 }
 

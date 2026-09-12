@@ -1,10 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { haversineKm } from "@/lib/utils/haversine";
 import { dateLimiteProjet } from "@/lib/matching/fraicheur";
-import {
-  getGeneralistCategoryIds,
-  getAllBtpCategoryIds,
-} from "@/lib/matching/generalist";
+import { getBtpCategoryRules } from "@/lib/matching/btp-categories";
 
 /**
  * Projets DÉJÀ disponibles pour un pro dans sa zone, au moment T.
@@ -81,14 +78,8 @@ export async function getAvailableProjectsForPro(
   const radiusKm = pro.intervention_radius_km ?? 200;
 
   // Catégories = principale + secondaires, + expansion généraliste éventuelle.
-  const categoryIds = new Set<number>([
-    pro.category_id,
-    ...((pro.secondary_category_ids as number[] | null) || []),
-  ]);
-  const generalistIds = await getGeneralistCategoryIds(sb);
-  if (generalistIds.some((id) => categoryIds.has(id))) {
-    (await getAllBtpCategoryIds(sb)).forEach((id) => categoryIds.add(id));
-  }
+  const rules = await getBtpCategoryRules(sb);
+  const categoryIds = rules.projectCategoryIdsForPro(pro);
 
   // Table projects petite → on charge les projets des métiers du pro puis on
   // filtre par distance côté JS (comme le dashboard). Limite large de sécurité.
@@ -98,7 +89,7 @@ export async function getAvailableProjectsForPro(
       "id, urgency, category_id, cities(name, latitude, longitude, department_id), categories(name)"
     )
     .eq("vertical", "btp")
-    .in("category_id", Array.from(categoryIds))
+    .in("category_id", categoryIds)
     // Un projet "closed" est un chantier que l'admin a clos (trop ancien, ou
     // resolu ailleurs) : il ne doit plus etre propose ni relance. Les leads DEJA
     // PAYES restent visibles pour le pro (cf. lib/queries/leads.ts, volontairement

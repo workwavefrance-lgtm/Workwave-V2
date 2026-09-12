@@ -23,6 +23,7 @@ import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { sendReviewThanks } from "@/lib/email/send-review-thanks";
 import { sendReviewModerationAlert } from "@/lib/email/send-review-moderation-alert";
 import type { ProReview } from "@/lib/types/database";
+import { revalidateProPublicPages } from "@/lib/pro/revalidate-public";
 
 /**
  * Token unique pour /avis/[token]. Cryptographiquement secure, 32 chars
@@ -121,7 +122,7 @@ export async function submitReview(params: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existing } = await (sb.from("pro_reviews") as any)
     .select(
-      "id, status, particulier_email, particulier_name, pro:pros(name, slug)"
+      "id, pro_id, status, particulier_email, particulier_name, pro:pros(name, slug)"
     )
     .eq("token", params.token)
     .single();
@@ -157,6 +158,8 @@ export async function submitReview(params: {
     console.error("[reviews] submitReview erreur :", error.message);
     return { ok: false, error: "Erreur lors de l'enregistrement." };
   }
+
+  if (newStatus === "published") await revalidateProPublicPages(e.pro_id, e.pro?.slug);
 
   // ─── Side-effects : awaited pour garantir l'envoi avant fin function ─
   // IMPORTANT : pas de "fire-and-forget" via .then() sans await dans une

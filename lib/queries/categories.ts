@@ -55,11 +55,12 @@ export const getCategoryBySlug = cache(async function getCategoryBySlug(
   slug: string
 ): Promise<Category | null> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("categories")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
+  if (error) throw new Error(`Lecture de la catégorie impossible : ${error.message}`);
   return data as Category | null;
 })
 

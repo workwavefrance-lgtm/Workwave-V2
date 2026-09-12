@@ -21,6 +21,7 @@
 // TOUTE page qui l'utilise en rendu DYNAMIQUE (ISR/cache CDN inactif).
 // Ces requetes sont des lectures publiques -> client leger obligatoire.
 import { getCityIdsByDepartment } from "@/lib/queries/cities";
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import type { Pro, ProCardData } from "@/lib/types/database";
 import { FILTRE_OUVERTS, PRO_SELECT_CARD } from "@/lib/queries/pros";
@@ -166,7 +167,7 @@ function scoreAndSelectTop(
       const bClaimed = !!b.pro.claimed_by_user_id;
       if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
       if (b.score !== a.score) return b.score - a.score;
-      return (a.pro.name ?? "").localeCompare(b.pro.name ?? "");
+      return (a.pro.name ?? "").localeCompare(b.pro.name ?? "") || a.pro.id - b.pro.id;
     })
     .slice(0, limit)
     .map((s) => s.pro);
@@ -183,10 +184,21 @@ export async function getTopProsByCategoryAndCityIds(
   cityIds: number[],
   limit = 10
 ): Promise<{ tops: ProCardData[]; total: number }> {
+  // Une clé primitive permet à React de réutiliser la sélection même si les
+  // appelants construisent deux tableaux de communes distincts dans un rendu.
+  return getTopProsForCityKey(categoryId, [...new Set(cityIds)].sort((a, b) => a - b).join(","), limit);
+}
+
+const getTopProsForCityKey = cache(async function getTopProsForCityKey(
+  categoryId: number,
+  cityKey: string,
+  limit: number
+): Promise<{ tops: ProCardData[]; total: number }> {
+  const cityIds = cityKey ? cityKey.split(",").map(Number) : [];
   if (cityIds.length === 0) return { tops: [], total: 0 };
   const supabase = createPublicClient();
 
-  const { data, count } = await supabase
+  const { data, count, error } = await supabase
     .from("pros")
     .select(PRO_SELECT_CARD, { count: "estimated" })
     .eq("category_id", categoryId)
@@ -198,7 +210,11 @@ export async function getTopProsByCategoryAndCityIds(
     // pour que le top scoré reste juste même avec MAX_FETCH réduit (egress).
     .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
     .order("profile_completion", { ascending: false, nullsFirst: false })
+    .order("name")
+    .order("id")
     .limit(MAX_FETCH);
+
+  if (error) throw new Error(`Lecture de la sélection de professionnels impossible : ${error.message}`);
 
   const pros = (data as unknown as ProCardData[] | null) ?? [];
   // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré,
@@ -206,9 +222,11 @@ export async function getTopProsByCategoryAndCityIds(
   // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
   // leçon "estimated ignore/sous-estime les filtres" : ici pros.length est la
   // source fiable pour les petites zones (arrondissements, zone Monaco).
-  const total = Math.max(count ?? 0, pros.length);
+  // En dessous du plafond, on possède toute la liste : une estimation ne
+  // doit pas inventer une page suivante sur une commune de dix artisans.
+  const total = pros.length < MAX_FETCH ? pros.length : Math.max(count ?? 0, pros.length);
   return { tops: scoreAndSelectTop(pros, limit), total };
-}
+});
 
 /**
  * Top N pros d'une catégorie dans une ville donnee.
@@ -218,30 +236,7 @@ export async function getTopProsByCategoryAndCity(
   cityId: number,
   limit = 10
 ): Promise<{ tops: ProCardData[]; total: number }> {
-  const supabase = createPublicClient();
-
-  const { data, count } = await supabase
-    .from("pros")
-    .select(PRO_SELECT_CARD, { count: "estimated" })
-    .eq("category_id", categoryId)
-    .eq("city_id", cityId)
-    .is("deleted_at", null)
-    .eq("is_active", true)
-    .or(FILTRE_OUVERTS) // établissements fermés exclus du Top et du compte (02/09)
-    // Charger les meilleurs candidats EN PREMIER (réclamés, puis profil complet)
-    // pour que le top scoré reste juste même avec MAX_FETCH réduit (egress).
-    .order("claimed_by_user_id", { ascending: false, nullsFirst: false })
-    .order("profile_completion", { ascending: false, nullsFirst: false })
-    .limit(MAX_FETCH);
-
-  const pros = (data as unknown as ProCardData[] | null) ?? [];
-  // count:"estimated" peut renvoyer 0 (faux) sur un petit ensemble filtré,
-  // ce qui déclencherait à tort le redirect 308 "0 pro". On retombe sur le
-  // nombre RÉELLEMENT récupéré (exact pour <= MAX_FETCH), via max(). Cf. la
-  // leçon "estimated ignore/sous-estime les filtres" : ici pros.length est la
-  // source fiable pour les petites zones (arrondissements, zone Monaco).
-  const total = Math.max(count ?? 0, pros.length);
-  return { tops: scoreAndSelectTop(pros, limit), total };
+  return getTopProsByCategoryAndCityIds(categoryId, [cityId], limit);
 }
 
 /**
@@ -253,8 +248,6 @@ export async function getTopProsByCategoryAndDepartment(
   departmentId: number,
   limit = 10
 ): Promise<{ tops: ProCardData[]; total: number }> {
-  const supabase = createPublicClient();
-
   const cityIds = await getCityIdsByDepartment(departmentId);
 
   return getTopProsByCategoryAndCityIds(categoryId, cityIds, limit);

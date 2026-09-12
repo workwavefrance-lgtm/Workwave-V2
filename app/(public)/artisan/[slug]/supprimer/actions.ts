@@ -7,6 +7,8 @@ import { z } from "zod";
 import { createHash, randomInt } from "crypto";
 import { sendVerificationCode } from "@/lib/email/send-verification-code";
 import { getServiceClient } from "@/lib/supabase/service-client";
+import { createClient } from "@/lib/supabase/server";
+import { deletionAttemptMatches, normalizeEmail, ownsPro } from "@/lib/pro/ownership";
 
 // ============================================
 // Types
@@ -97,7 +99,7 @@ export async function submitDeletionRequest(
   // Fetch pro
   const { data: pro, error: proError } = await serviceClient
     .from("pros")
-    .select("id, name, siret, deleted_at")
+    .select("id, name, siret, deleted_at, claimed_by_user_id")
     .eq("slug", slug)
     .single();
 
@@ -107,6 +109,15 @@ export async function submitDeletionRequest(
 
   if (pro.deleted_at) {
     return { success: false, message: "Cette fiche a déjà été supprimée." };
+  }
+
+  const session = await createClient();
+  const { data: { user } } = await session.auth.getUser();
+  if (!ownsPro(user?.id, pro.claimed_by_user_id) || !user?.email) {
+    return { success: false, message: "Connectez-vous au compte propriétaire de cette fiche. Si elle n’est pas rattachée à votre compte, écrivez à contact@workwave.fr : nous vérifierons votre demande avant sa suppression." };
+  }
+  if (normalizeEmail(data.email) !== normalizeEmail(user.email)) {
+    return { success: false, errors: { email: "Utilisez l’adresse email de votre compte propriétaire." } };
   }
 
   if (!pro.siret) {
@@ -142,6 +153,7 @@ export async function submitDeletionRequest(
   const { data: attempt, error: attemptError } = await serviceClient
     .from("claim_attempts")
     .insert({
+      target_pro_id: pro.id,
       siret: data.siret,
       email: data.email,
       ip,
@@ -160,7 +172,7 @@ export async function submitDeletionRequest(
   }
 
   try {
-    await sendVerificationCode(data.email, code, pro.name);
+    await sendVerificationCode(data.email, code, pro.name, "deletion");
   } catch {
     await serviceClient
       .from("claim_attempts")
@@ -191,6 +203,9 @@ export async function verifyDeletion(
   if (!attemptId || !code || !slug) {
     return { success: false, message: "Données manquantes" };
   }
+  if (!Number.isSafeInteger(Number(attemptId)) || Number(attemptId) <= 0) {
+    return { success: false, message: "Tentative invalide." };
+  }
 
   if (!/^\d{6}$/.test(code)) {
     return {
@@ -210,6 +225,23 @@ export async function verifyDeletion(
 
   if (attemptError || !attempt) {
     return { success: false, message: "Tentative introuvable ou expirée" };
+  }
+
+  // Récupérer le pro pour vérification et infos Stripe
+  const { data: pro } = await serviceClient
+    .from("pros")
+    .select("id, name, siret, claimed_by_user_id, deleted_at, stripe_subscription_id, subscription_status")
+    .eq("slug", slug)
+    .single();
+
+  if (!pro) {
+    return { success: false, message: "Fiche introuvable" };
+  }
+
+  const session = await createClient();
+  const { data: { user } } = await session.auth.getUser();
+  if (pro.deleted_at || !deletionAttemptMatches(attempt, pro, user)) {
+    return { success: false, message: "Cette vérification ne permet pas de supprimer cette fiche. Connectez-vous à son compte propriétaire ou contactez le support." };
   }
 
   if (attempt.status !== "pending") {
@@ -270,19 +302,6 @@ export async function verifyDeletion(
     };
   }
 
-  // Code correct : soft-delete la fiche
-
-  // Récupérer le pro pour vérification et infos Stripe
-  const { data: pro } = await serviceClient
-    .from("pros")
-    .select("id, name, stripe_subscription_id, subscription_status")
-    .eq("slug", slug)
-    .single();
-
-  if (!pro) {
-    return { success: false, message: "Fiche introuvable" };
-  }
-
   // 1. Soft-delete COMPLET.
   //
   // Avant le 08/08/2026 cette etape n'ecrivait QUE `deleted_at`. Constate sur la
@@ -295,7 +314,7 @@ export async function verifyDeletion(
   // C'est le "pattern suppression complete" deja documente dans CLAUDE.md
   // (cas Freddy DURAND) : il n'etait applique que par script, jamais par le
   // parcours libre-service que les pros utilisent reellement.
-  const { error: deleteError } = await serviceClient
+  const { data: deletedPro, error: deleteError } = await serviceClient
     .from("pros")
     .update({
       deleted_at: new Date().toISOString(),
@@ -305,14 +324,19 @@ export async function verifyDeletion(
       phone: null,
       website: null,
     })
-    .eq("id", pro.id);
+    .eq("id", pro.id)
+    .eq("claimed_by_user_id", user!.id)
+    .eq("siret", attempt.siret)
+    .is("deleted_at", null)
+    .select("id")
+    .maybeSingle();
 
   // Une mutation Supabase qui echoue renvoie { error } SANS lever d'exception.
   // Sans ce controle, on annoncait la suppression au pro ET a l'admin alors que
   // la fiche etait toujours en ligne, le pire des cas en RGPD : la personne
   // croit sa demande traitee et ne relance pas. On s'arrete net.
-  if (deleteError) {
-    console.error("[verifyDeletion] soft-delete KO:", deleteError.message);
+  if (deleteError || !deletedPro) {
+    console.error("[verifyDeletion] soft-delete KO:", deleteError?.message ?? "Autorisation modifiée");
     return {
       success: false,
       message:

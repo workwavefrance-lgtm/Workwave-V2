@@ -14,7 +14,6 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { createClient } from "@supabase/supabase-js";
 import { sendFeedbackAlert } from "@/lib/email/send-feedback-alert";
 import { getServiceClient } from "@/lib/supabase/service-client";
 
@@ -107,11 +106,21 @@ async function checkDailyBudget(): Promise<boolean> {
 function isAllowedOrigin(req: NextRequest): boolean {
   const origin = req.headers.get("origin") || req.headers.get("referer") || "";
   if (!origin) return true; // certains navigateurs strippent, ne pas casser les vrais users
-  // `vercel.app` retire le 12/08/2026 : le compte Vercel est supprime, le site
-  // tourne sur le VPS. La regle laissait passer N'IMPORTE QUEL sous-domaine
-  // vercel.app, donc n'importe qui pouvant deployer chez Vercel, sur une route
-  // qui consomme des credits Anthropic.
-  return origin.includes("workwave.fr") || origin.includes("localhost");
+  try {
+    const source = new URL(origin);
+    const allowedOrigins = new Set(["https://workwave.fr", "https://www.workwave.fr"]);
+    // En développement, seule l'origine exacte du serveur local est admise,
+    // quel que soit son port. Aucun domaine contenant « localhost » ne suffit.
+    if (process.env.NODE_ENV !== "production") {
+      const local = new URL(req.url);
+      if (local.hostname === "localhost" || local.hostname === "127.0.0.1") {
+        allowedOrigins.add(local.origin);
+      }
+    }
+    return !source.username && !source.password && allowedOrigins.has(source.origin);
+  } catch {
+    return false;
+  }
 }
 
 const SAV_PROMPT = `Tu es l'agent d'écoute de Workwave (workwave.fr), plateforme de mise en relation entre particuliers et artisans en France. Ta mission : recueillir le retour de l'utilisateur pour améliorer la plateforme. Tu parles à la première personne, comme un humain de l'équipe : chaleureux, direct, reconnaissant.
@@ -167,6 +176,9 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
+    return NextResponse.json({ error: "Body invalide" }, { status: 400 });
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     return NextResponse.json({ error: "Body invalide" }, { status: 400 });
   }
 

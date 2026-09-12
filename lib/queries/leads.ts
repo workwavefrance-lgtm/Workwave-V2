@@ -3,6 +3,7 @@ import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { getServiceClient } from "@/lib/supabase/service-client";
 import { haversineKm } from "@/lib/utils/haversine";
 import { dateLimiteProjet } from "@/lib/matching/fraicheur";
+import { toLeadDetailData, type LeadDetailData } from "@/lib/pro/lead-detail-data";
 import type {
   ProjectLead,
   ProjectLeadStatus,
@@ -181,12 +182,12 @@ export async function getLeadsForPro(
 export async function getLeadForPro(
   leadId: number,
   proId: number
-): Promise<{ lead: LeadWithProject; unlocked: boolean } | null> {
+): Promise<{ lead: LeadDetailData; unlocked: boolean } | null> {
   // Service client pour bypass RLS sur la table projects (pas de SELECT policy)
   const supabase = getAdminServiceClient();
   const { data } = await supabase
     .from("project_leads")
-    .select(LEAD_WITH_PROJECT_SELECT)
+    .select("id, status, sent_at, contacted_at, project:projects(id, status, created_at, first_name, email, phone, description, cleaned_description, has_contact_in_description, urgency, budget, ai_qualification, category:categories(name), city:cities(name, department:departments(code)))")
     .eq("id", leadId)
     .eq("pro_id", proId)
     .single();
@@ -204,28 +205,13 @@ export async function getLeadForPro(
     .eq("project_id", lead.project.id)
     .maybeSingle();
 
-  if (unlock) return { lead, unlocked: true };
+  if (unlock) return { lead: toLeadDetailData(lead, true), unlocked: true };
 
   // Pas payé : les coordonnées ne quittent pas cette fonction. Chaînes vides
   // (le type Project les déclare non-nullables) + description nettoyée, comme
   // sur la liste, un particulier laisse parfois son numéro dans le texte libre.
-  const p = lead.project as typeof lead.project & {
-    cleaned_description: string | null;
-    has_contact_in_description: boolean | null;
-  };
   return {
-    lead: {
-      ...lead,
-      project: {
-        ...lead.project,
-        first_name: "",
-        email: "",
-        phone: "",
-        description: p.has_contact_in_description
-          ? p.cleaned_description || ""
-          : lead.project.description,
-      },
-    },
+    lead: toLeadDetailData(lead, false),
     unlocked: false,
   };
 }

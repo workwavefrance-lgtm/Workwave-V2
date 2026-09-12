@@ -28,13 +28,13 @@ export async function processGlobalUnsubscribe(
   }
 
   // Marquer le pro
-  await supabase
+  const { error: proError } = await supabase
     .from("pros")
     .update({ do_not_contact: true })
     .eq("id", proId);
 
   // Ajouter a la blacklist globale
-  await supabase
+  const { error: blacklistError } = await supabase
     .from("email_blacklist")
     .upsert(
       { email: pro.email, reason: "global_unsubscribe" },
@@ -42,11 +42,17 @@ export async function processGlobalUnsubscribe(
     );
 
   // Stopper toutes les sequences actives
-  await supabase
+  const { error: sequencesError } = await supabase
     .from("email_sequences")
     .update({ status: "unsubscribed" })
     .eq("pro_id", proId)
     .in("status", ["pending", "active"]);
+
+  // Conserver chaque opposition réussie même si une autre écriture échoue.
+  // Ces opérations sont idempotentes : une nouvelle tentative les complète.
+  if (proError || blacklistError || sequencesError) {
+    return { success: false, error: "La désinscription n’a pas pu être entièrement enregistrée. Veuillez réessayer." };
+  }
 
   return { success: true };
 }

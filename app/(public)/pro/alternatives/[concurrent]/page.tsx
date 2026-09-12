@@ -47,7 +47,7 @@ function buildFaqs(c: PublishableOffer): { question: string; answer: string }[] 
   const faqs: { question: string; answer: string }[] = [
     {
       question: `Workwave est-il vraiment sans abonnement, contrairement à ${c.name} ?`,
-      answer: `Oui. Sur Workwave, vous réclamez votre fiche gratuitement (vérification SIRET, 2 minutes) et recevez automatiquement les projets de votre zone par email. Vous ne payez que 9,90 € TTC pour débloquer les coordonnées d'un client qui vous intéresse : paiement unique, sans abonnement ni carte bancaire à l'inscription. ${c.name} fonctionne, lui, sur un modèle de type « ${c.model.toLowerCase()} ».`,
+      answer: `Oui. Sur Workwave, vous demandez gratuitement le rattachement de votre fiche. Après vérification de votre email et validation de votre lien avec l’entreprise par notre équipe, vous recevez les projets de votre zone par email. Vous ne payez que 9,90 € TTC pour débloquer les coordonnées d'un client qui vous intéresse : paiement unique, sans abonnement ni carte bancaire à l'inscription. ${c.name} fonctionne, lui, sur un modèle de type « ${c.model.toLowerCase()} ».`,
     },
     {
       question: `Combien coûte un lead sur Workwave par rapport à ${c.name} ?`,
@@ -62,7 +62,7 @@ function buildFaqs(c: PublishableOffer): { question: string; answer: string }[] 
   }
   faqs.push({
     question: `Comment m'inscrire sur Workwave ?`,
-    answer: `Saisissez votre numéro SIRET sur la page « Retrouver ma fiche », confirmez votre identité par email, et vous recevez immédiatement les projets de votre catégorie et de votre département. C'est gratuit, sans engagement et sans carte bancaire.`,
+    answer: `Saisissez votre numéro SIRET sur la page « Retrouver ma fiche », vérifiez votre email, puis attendez la validation de votre lien avec l’entreprise par notre équipe. Vous pourrez ensuite recevoir les projets correspondant à vos métiers et à votre zone. C'est gratuit, sans engagement et sans carte bancaire.`,
   });
   return faqs;
 }

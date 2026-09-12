@@ -1,14 +1,13 @@
 /**
  * Requetes de la page admin /admin/statistiques.
  *
- * POURQUOI (09/09/2026) : la page Analytics ne voit que la table `events`,
- * c'est-a-dire les visiteurs qui ont accepte les cookies ET touche le
- * formulaire. Elle ne dit rien du trafic reel, ni des clics Google, ni des
+ * Cette page rapproche les volumes de plusieurs sources : événements du
+ * formulaire, dépôts serveur, trafic, clics Google et
  * robots. La table `stats_jour` (une ligne par jour, alimentee par trois
  * producteurs independants : Umami + journal Traefik sur le VPS, Search
  * Console sur le Mac) rassemble tout cela. Cette page la croise avec `events`,
- * `projects` et `lead_unlocks` pour donner UN entonnoir complet, du visiteur
- * reel jusqu'aux coordonnees debloquees.
+ * `projects` et `lead_unlocks`. Ces sources ne suivent pas une même cohorte :
+ * elles ne permettent pas de calculer une conversion de visiteur en paiement.
  *
  * CONVENTIONS :
  *   - toutes les fenetres sont en jours UTC, comme `stats_jour.jour` (les
@@ -26,6 +25,7 @@
  *     pagine par curseur sur `id` (PostgREST plafonne a 1000 lignes).
  */
 import { getServiceClient } from "@/lib/supabase/service-client";
+import { ANALYTICS_TEST_PRO_IDS, getAnalyticsTestUserIds, isAnalyticsTestActivity } from "@/lib/analytics/test-accounts";
 
 // ============================================================
 // Periode
@@ -92,7 +92,7 @@ export type Marche = {
   actuel: number | null;
   precedent: number | null;
   ecartPct: number | null;
-  /** Conversion depuis la marche precedente de la chaine, periode actuelle. */
+  /** Part calculable dans un même ensemble (diffusés parmi les projets valides). */
   conversionPct: number | null;
   /** Meme conversion sur la periode precedente. */
   conversionPrecPct: number | null;
@@ -216,7 +216,9 @@ type LigneEvent = {
   id: number;
   event_name: string;
   created_at: string;
-  metadata: { step?: number; name?: string } | null;
+  pro_id?: number | null;
+  user_id?: string | null;
+  metadata: { step?: number; name?: string; pro_id?: number | string; proId?: number | string } | null;
 };
 
 type LigneProjet = {
@@ -233,9 +235,6 @@ type LigneUnlock = {
 };
 
 type Resultat<T> = { ok: true; lignes: T[] } | { ok: false; erreur: string };
-
-/** Comptes de TEST : exclus de tout calcul metier (ATSAF = 4393, 99999, et 1432477). */
-const PROS_TEST = [4393, 99999, 1432477];
 
 const EVENTS_ENTONNOIR = [
   "project_form_viewed",
@@ -280,12 +279,18 @@ async function chargerStatsJour(debut: string, fin: string): Promise<Resultat<Li
 
 async function chargerEvents(debutIso: string, finExcluIso: string): Promise<Resultat<LigneEvent>> {
   const db = getServiceClient();
+  let testUserIds: ReadonlySet<string>;
+  try {
+    testUserIds = await getAnalyticsTestUserIds();
+  } catch {
+    return { ok: false, erreur: "events : impossible de vérifier les comptes de test." };
+  }
   const lignes: LigneEvent[] = [];
   let dernier = 0;
   while (true) {
     const { data, error } = await db
       .from("events")
-      .select("id, event_name, created_at, metadata")
+      .select("id, event_name, created_at, pro_id, user_id, metadata")
       .in("event_name", EVENTS_ENTONNOIR)
       .gte("created_at", debutIso)
       .lt("created_at", finExcluIso)
@@ -295,7 +300,7 @@ async function chargerEvents(debutIso: string, finExcluIso: string): Promise<Res
     if (error) return { ok: false, erreur: `events : ${error.message}` };
     const page = (data ?? []) as LigneEvent[];
     if (page.length === 0) break;
-    lignes.push(...page);
+    lignes.push(...page.filter((event) => !isAnalyticsTestActivity(event, testUserIds)));
     dernier = page[page.length - 1].id;
   }
   return { ok: true, lignes };
@@ -335,16 +340,14 @@ async function chargerUnlocks(debutIso: string, finExcluIso: string): Promise<Re
       .select("id, created_at, pro_id, amount_cents")
       .gte("created_at", debutIso)
       .lt("created_at", finExcluIso)
-      .not("pro_id", "in", `(${PROS_TEST.join(",")})`)
+      .or(`pro_id.is.null,pro_id.not.in.(${ANALYTICS_TEST_PRO_IDS.join(",")})`)
       .gt("id", dernier)
       .order("id", { ascending: true })
       .limit(PAGE);
     if (error) return { ok: false, erreur: `lead_unlocks : ${error.message}` };
     const page = (data ?? []) as LigneUnlock[];
     if (page.length === 0) break;
-    // Ceinture et bretelles : le filtre SQL suffit, mais un compte de test
-    // qui passerait quand meme (pro_id null, par exemple) ne doit jamais compter.
-    lignes.push(...page.filter((u) => u.pro_id === null || !PROS_TEST.includes(u.pro_id)));
+    lignes.push(...page.filter((u) => !isAnalyticsTestActivity(u)));
     dernier = page[page.length - 1].id;
   }
   return { ok: true, lignes };
@@ -366,7 +369,7 @@ function jourEventsVide(): JourEvents {
   return { vus: 0, commences: 0, envoyes: 0, ecrans: new Map() };
 }
 
-function agregerEvents(lignes: LigneEvent[]): Map<string, JourEvents> {
+export function agregerEvents(lignes: LigneEvent[]): Map<string, JourEvents> {
   const parJour = new Map<string, JourEvents>();
   for (const e of lignes) {
     const jour = e.created_at.slice(0, 10);
@@ -399,7 +402,7 @@ function agregerEvents(lignes: LigneEvent[]): Map<string, JourEvents> {
 
 type JourProjets = { valides: number; diffuses: number };
 
-function agregerProjets(lignes: LigneProjet[]): Map<string, JourProjets> {
+export function agregerProjets(lignes: LigneProjet[]): Map<string, JourProjets> {
   const parJour = new Map<string, JourProjets>();
   for (const p of lignes) {
     const jour = p.created_at.slice(0, 10);
@@ -413,7 +416,7 @@ function agregerProjets(lignes: LigneProjet[]): Map<string, JourProjets> {
 
 type JourUnlocks = { total: number; payes: number; offerts: number };
 
-function agregerUnlocks(lignes: LigneUnlock[]): Map<string, JourUnlocks> {
+export function agregerUnlocks(lignes: LigneUnlock[]): Map<string, JourUnlocks> {
   const parJour = new Map<string, JourUnlocks>();
   for (const u of lignes) {
     const jour = u.created_at.slice(0, 10);
@@ -485,7 +488,7 @@ function indiceCouverture(t: Total, nbJours: number): string | undefined {
 // Entonnoir
 // ============================================================
 
-type Contexte = {
+export type Contexte = {
   fA: Fenetre;
   fP: Fenetre;
   statsJour: Map<string, LigneStatsJour> | null;
@@ -575,7 +578,7 @@ function nomEcran(events: Map<string, JourEvents>, step: number, fA: Fenetre, fP
   return "sans nom";
 }
 
-function construireEntonnoir(ctx: Contexte): Marche[] {
+export function construireEntonnoir(ctx: Contexte): Marche[] {
   const visiteurs = marcheStatsJour(ctx, "visiteurs", "Visiteurs réels", "sessions", "sessions Umami, JS exécuté");
   const listing = marcheStatsJour(
     ctx,
@@ -606,8 +609,6 @@ function construireEntonnoir(ctx: Contexte): Marche[] {
   const sous: Marche[] = [];
   if (ctx.events) {
     const events = ctx.events;
-    let precedentA: number | null = vu.actuel;
-    let precedentP: number | null = vu.precedent;
     for (const step of ecransObserves(events, ctx.fA, ctx.fP)) {
       const m = marcheCalculee(
         ctx,
@@ -617,10 +618,6 @@ function construireEntonnoir(ctx: Contexte): Marche[] {
         `Écran ${step} · ${nomEcran(events, step, ctx.fA, ctx.fP)}`,
         (j) => j.ecrans.get(step)?.count ?? 0
       );
-      m.conversionPct = pct(m.actuel, precedentA);
-      m.conversionPrecPct = pct(m.precedent, precedentP);
-      precedentA = m.actuel;
-      precedentP = m.precedent;
       sous.push(m);
     }
   }
@@ -634,11 +631,14 @@ function construireEntonnoir(ctx: Contexte): Marche[] {
     conversionPct: null,
     conversionPrecPct: null,
     indice:
-      "chaque affichage compte, retours inclus · conversion depuis l'écran précédent · une page métier x ville démarre directement à un écran avancé, d'où des taux au-dessus de 100 %",
+      "formulaires BTP · chaque affichage compte, retours inclus · certaines pages démarrent directement à un écran avancé",
     sous,
   };
 
-  const envoye = marcheCalculee(ctx, ctx.events, "events", "envoye", "Envoyé", (j) => j.envoyes);
+  const envoye = marcheCalculee(
+    ctx, ctx.events, "events", "envoye", "Envois BTP enregistrés", (j) => j.envoyes,
+    "événements serveur · tous les visiteurs, avec ou sans cookies acceptés"
+  );
   const valides = marcheCalculee(
     ctx,
     ctx.projets,
@@ -646,16 +646,16 @@ function construireEntonnoir(ctx: Contexte): Marche[] {
     "valides",
     "Projets valides",
     (j) => j.valides,
-    "hors supprimés et suspects"
+    "BTP et freelances · hors supprimés et suspects"
   );
   const diffuses = marcheCalculee(
     ctx,
     ctx.projets,
     "projects",
     "diffuses",
-    "Diffusés aux artisans",
+    "Projets diffusés",
     (j) => j.diffuses,
-    "broadcast_count > 0"
+    "parmi les projets valides créés sur la période · BTP et freelances"
   );
 
   const payes = ctx.unlocks ? totalCalcule(ctx.unlocks, ctx.fA, (j) => j.payes).valeur : null;
@@ -672,23 +672,12 @@ function construireEntonnoir(ctx: Contexte): Marche[] {
       : "comptes de test exclus"
   );
 
-  // Chaine de conversion : chaque marche par rapport a la marche chiffree
-  // juste avant elle. « Envoye » se compare a « commence » (le groupe ecrans
-  // n'a pas de nombre propre).
-  const chaine = [visiteurs, listing, vu, commence, envoye, valides, diffuses, debloques];
-  for (let i = 1; i < chaine.length; i++) {
-    chaine[i].conversionPct = pct(chaine[i].actuel, chaine[i - 1].actuel);
-    chaine[i].conversionPrecPct = pct(chaine[i].precedent, chaine[i - 1].precedent);
-  }
-  // Pas de conversion « listing → formulaire vu » : les sessions listing
-  // viennent d'Umami (tous les humains, sans cookie), « vu » vient de la table
-  // events, que /api/track n'alimente QUE pour les visiteurs ayant accepte
-  // les cookies (consent_analytics=accepted). Deux populations differentes :
-  // le taux serait minore du refus des cookies, dans le sens le plus trompeur.
-  // Les conversions entre marches events (vu → commence → envoye) restent
-  // justes, elles comparent la meme population.
-  vu.conversionPct = null;
-  vu.conversionPrecPct = null;
+  // Seule part démontrable : la diffusion d'un sous-ensemble des mêmes
+  // projets. Les événements sont répétés et sans cohorte ; les envois serveur
+  // ne dépendent pas du consentement ; les achats peuvent viser d'anciens
+  // projets ou plusieurs pros. Aucun ratio entre ces populations.
+  diffuses.conversionPct = pct(diffuses.actuel, valides.actuel);
+  diffuses.conversionPrecPct = pct(diffuses.precedent, valides.precedent);
 
   return [visiteurs, listing, vu, commence, ecrans, envoye, valides, diffuses, debloques];
 }

@@ -56,7 +56,7 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
     pausedUntil = d.toISOString();
   }
 
-  await service
+  const { error } = await service
     .from("pros")
     .update({
       available_for_remote: availableForRemote,
@@ -65,6 +65,10 @@ export async function updateAiPreferences(formData: FormData): Promise<void> {
       updated_at: new Date().toISOString(),
     })
     .eq("id", pro.id);
+
+  if (error) {
+    redirect(localizeAiPath("/ai/dashboard/preferences", locale) + "?error=save_failed");
+  }
 
   // NOTE : pas de revalidatePath sur cette meme page (cf. lecon 28/04 CLAUDE.md).
   // Le redirect cause un re-fetch RSC propre, et les inputs uncontrolled prennent

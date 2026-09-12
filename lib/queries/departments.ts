@@ -35,11 +35,12 @@ export const getDepartmentBySlug = cache(async function getDepartmentBySlug(
   // parsed.code est en minuscules (ex. "2a"). La BDD stocke les codes Corse en
   // majuscules ("2A"/"2B"). toUpperCase() : numérique inchangé ("86"->"86"),
   // Corse re-majusculée pour matcher.
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("departments")
     .select("*")
     .eq("code", parsed.code.toUpperCase())
-    .single();
+    .maybeSingle();
+  if (error) throw new Error(`Lecture du département impossible : ${error.message}`);
   const dept = data as Department | null;
   if (!dept) return null;
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sameOriginRedirect } from "@/lib/auth/safe-redirect";
 
 /**
  * GET /api/auth/signout : déconnecte l'utilisateur courant et redirige.
@@ -13,6 +14,5 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const redirectTo = url.searchParams.get("redirect") || "/ai";
-
-  return NextResponse.redirect(new URL(redirectTo, req.url));
+  return NextResponse.redirect(sameOriginRedirect(redirectTo, url.origin, "/ai"));
 }

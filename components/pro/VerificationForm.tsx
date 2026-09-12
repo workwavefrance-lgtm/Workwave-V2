@@ -191,7 +191,7 @@ export default function VerificationForm({ attemptId, slug, destinationEmail }: 
       </button>
 
       <p className="text-xs text-[var(--text-tertiary)] text-center">
-        Le code est valable 15 minutes. Vous disposez de 3 tentatives.
+        Le code est valable 15 minutes. Vous disposez de 3 tentatives. La validation de l’entreprise intervient ensuite, avant tout accès à la fiche.
       </p>
 
       {/* Pas reçu ? Anti-spam + solution boîtes filtrantes (OVH, Orange, pro…) */}
@@ -206,8 +206,7 @@ export default function VerificationForm({ attemptId, slug, destinationEmail }: 
           </li>
           <li>
             • Certaines messageries professionnelles (OVH, Orange…) filtrent fortement.
-            Le plus simple : <strong>recommencez avec une adresse Gmail</strong> : votre SIRET
-            reste le même, c&apos;est lui qui valide la fiche.
+            Vous pouvez recommencer avec une autre adresse accessible. Le lien avec votre entreprise sera ensuite vérifié par notre équipe.
           </li>
           <li>• Le code arrive en général en moins de 2 minutes.</li>
         </ul>

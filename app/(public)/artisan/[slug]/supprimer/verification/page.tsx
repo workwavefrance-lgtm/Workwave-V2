@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { createClient } from "@supabase/supabase-js";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import DeletionVerifyForm from "./DeletionVerifyForm";
 import { getServiceClient } from "@/lib/supabase/service-client";
+import { deletionAttemptMatches } from "@/lib/pro/ownership";
 
 export const metadata: Metadata = {
   title: "Vérification · Suppression de fiche · Workwave",
@@ -9,10 +11,7 @@ export const metadata: Metadata = {
 };
 
 
-/**
- * Obfusque un email pour affichage public.
- * Exemple : "marie.dupont@gmail.com" -> "m***@gmail.com"
- */
+/** Affichage limité à l'adresse du propriétaire déjà authentifié. */
 function obfuscateEmail(email: string): string {
   const at = email.indexOf("@");
   if (at <= 0) return email;
@@ -20,6 +19,25 @@ function obfuscateEmail(email: string): string {
   const domain = email.slice(at);
   const first = local[0] ?? "";
   return `${first}***${domain}`;
+}
+
+function VerificationUnavailable({ slug }: { slug: string }) {
+  return (
+    <main className="min-h-screen flex items-center justify-center px-4 py-16">
+      <div className="text-center max-w-md">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-4">Vérification indisponible</h1>
+        <p className="text-[var(--text-secondary)] mb-6">
+          Ce lien est invalide, a expiré ou appartient à un autre compte.
+          Connectez-vous au compte propriétaire puis demandez un nouveau code depuis la fiche.
+        </p>
+        <div className="flex flex-col gap-3">
+          <Link href="/pro/connexion" className="text-[var(--accent)] font-semibold hover:underline">Me connecter</Link>
+          <Link href={`/artisan/${slug}/supprimer`} className="text-[var(--accent)] font-semibold hover:underline">Revenir à la demande de suppression</Link>
+          <a href="mailto:contact@workwave.fr?subject=Demande%20de%20suppression%20de%20fiche" className="text-[var(--text-secondary)] hover:underline">Contacter le support</a>
+        </div>
+      </div>
+    </main>
+  );
 }
 
 export default async function DeletionVerificationPage({
@@ -32,34 +50,45 @@ export default async function DeletionVerificationPage({
   const { slug } = await params;
   const { attempt } = await searchParams;
 
-  if (!attempt) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-4">
-            Lien invalide
-          </h1>
-          <p className="text-[var(--text-secondary)]">
-            Ce lien de vérification est invalide ou expiré.
-          </p>
-        </div>
-      </div>
-    );
+  if (!attempt || !/^[1-9]\d*$/.test(attempt) || !Number.isSafeInteger(Number(attempt))) {
+    return <VerificationUnavailable slug={slug} />;
   }
 
-  // Recupere l'email de la tentative pour l'afficher en obfusque
-  // (rassure l'utilisateur : il sait exactement ou chercher son code).
-  const supabase = getServiceClient();
-  const { data: attemptRow } = await supabase
-    .from("claim_attempts")
-    .select("email")
-    .eq("id", parseInt(attempt))
-    .eq("type", "deletion")
-    .single();
+  const session = await createClient();
+  const { data: { user } } = await session.auth.getUser();
+  if (!user?.email) return <VerificationUnavailable slug={slug} />;
 
-  const obfuscatedEmail = attemptRow?.email
-    ? obfuscateEmail(attemptRow.email)
-    : null;
+  // Le droit sur la fiche est vérifié avant de lire la tentative : un lien
+  // forgé ne doit jamais afficher même une partie de l'email d'un tiers.
+  const supabase = getServiceClient();
+  const { data: pro, error: proError } = await supabase
+    .from("pros")
+    .select("id, siret, claimed_by_user_id")
+    .eq("slug", slug)
+    .eq("claimed_by_user_id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (proError || !pro) return <VerificationUnavailable slug={slug} />;
+
+  const { data: attemptRow, error: attemptError } = await supabase
+    .from("claim_attempts")
+    .select("email, siret, target_pro_id, type, status, code_expires_at, attempts_count")
+    .eq("id", Number(attempt))
+    .eq("type", "deletion")
+    .maybeSingle();
+  if (
+    attemptError || !attemptRow ||
+    !deletionAttemptMatches(attemptRow, pro, user) ||
+    attemptRow.status !== "pending" ||
+    // Page serveur dynamique (session) : le lien doit encore être valide à cette requête.
+    // eslint-disable-next-line react-hooks/purity
+    !(new Date(attemptRow.code_expires_at).getTime() > Date.now()) ||
+    typeof attemptRow.attempts_count !== "number" || attemptRow.attempts_count >= 3
+  ) {
+    return <VerificationUnavailable slug={slug} />;
+  }
+
+  const obfuscatedEmail = obfuscateEmail(user.email);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-16">

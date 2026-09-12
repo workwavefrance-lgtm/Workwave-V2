@@ -97,7 +97,7 @@ export default function SansAbonnementPage() {
             Tapez votre SIRET pour commencer
           </Link>
           <p className="text-xs text-[var(--text-tertiary)] mt-3">
-            Gratuit · Sans carte bancaire · 2 minutes
+            Gratuit · Sans carte bancaire · Validation par notre équipe
           </p>
         </div>
       </section>

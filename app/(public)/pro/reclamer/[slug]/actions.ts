@@ -9,11 +9,11 @@ import { cookies } from "next/headers";
 import {
   sendVerificationCode,
   sendClaimAlreadyClaimedAlert,
-  sendClaimSuccessAlert,
 } from "@/lib/email/send-verification-code";
-import { sendClaimWelcomeEmail } from "@/lib/email/send-claim-welcome";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
+import { after } from "next/server";
+import { notifyClaimPending } from "@/lib/pro/claim-review-email";
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 // ============================================
@@ -118,152 +118,19 @@ async function trouverCompteAuthParEmail(
   return null;
 }
 
-// Alerte admin quand quelqu un valide un code prouvant le SIRET d une fiche
-// mais demande le rattachement d une AUTRE fiche.
-//
-// Ce cas n arrive pas par accident : le slug vient d un champ du formulaire, il
-// faut donc l avoir modifie a la main. C etait la faille corrigee le 31/08/2026
-// (voir le commentaire dans verifyClaim). On ne bloque plus seulement : on
-// previent, parce qu une tentative signifie que quelqu un cherche activement a
-// prendre la fiche d un artisan inscrit.
-function notifyAdminOfClaimMismatch(
-  slugDemande: string,
-  siretProuve: string,
-  email: string,
-  ip: string | null,
-) {
-  sendClaimAlreadyClaimedAlert(
-    `[TENTATIVE DE DETOURNEMENT] fiche demandee : ${slugDemande}`,
-    slugDemande,
-    email,
-    siretProuve,
-    ip ?? "inconnue",
-  ).catch((err) => console.error("Alerte detournement de fiche :", err));
-}
-
-// Notification admin (fire-and-forget) apres une reclamation reussie.
-// Recupere les details du pro et envoie une alerte par email a ADMIN_EMAIL.
-async function notifyAdminOfClaimSuccess(params: {
-  slug: string;
-  claimEmail: string;
-  ip?: string;
-}) {
-  try {
-    const serviceClient = await getServiceClient();
-    const { data: pro } = await serviceClient
-      .from("pros")
-      .select(
-        "id, slug, name, siret, cities(name), categories(name)"
-      )
-      .eq("slug", params.slug)
-      .single();
-
-    if (!pro) return;
-
-    // cities et categories peuvent etre objets ou tableaux selon le shape
-    type Joined = { name?: string } | { name?: string }[] | null;
-    const pickName = (v: Joined): string | null => {
-      if (!v) return null;
-      if (Array.isArray(v)) return v[0]?.name ?? null;
-      return v.name ?? null;
-    };
-
-    await sendClaimSuccessAlert({
-      proId: pro.id,
-      proName: pro.name,
-      proSlug: pro.slug,
-      proSiret: pro.siret,
-      proCity: pickName(pro.cities as Joined),
-      proCategory: pickName(pro.categories as Joined),
-      claimEmail: params.claimEmail,
-      ip: params.ip,
-    });
-  } catch (err) {
-    console.error("notifyAdminOfClaimSuccess error :", err);
-  }
-}
-
-// Notification PRO (fire-and-forget) apres une reclamation reussie.
-// Envoie un mail de bienvenue au pro avec recap trial + avantages
-// Workwave Pro + 3 conseils pour demarrer.
-async function notifyProOfClaimSuccess(params: {
-  slug: string;
-  claimEmail: string;
-}) {
-  try {
-    const serviceClient = await getServiceClient();
-    const { data: pro } = await serviceClient
-      .from("pros")
-      .select(
-        "name, category_id, secondary_category_ids, intervention_radius_km, cities(latitude, longitude, department_id)"
-      )
-      .eq("slug", params.slug)
-      .single();
-
-    if (!pro) return;
-
-    // Projets DÉJÀ disponibles dans la zone du pro (hook « X projets vous
-    // attendent déjà » dans le mail). Isolé dans son propre try/catch : si le
-    // calcul échoue, le mail de bienvenue part quand même, sans le bloc.
-    let availableProjects;
-    try {
-      const { getAvailableProjectsForPro } = await import(
-        "@/lib/queries/available-projects"
-      );
-      const city = Array.isArray(pro.cities) ? pro.cities[0] : pro.cities;
-      availableProjects = await getAvailableProjectsForPro(serviceClient, {
-        category_id: pro.category_id,
-        secondary_category_ids: pro.secondary_category_ids,
-        intervention_radius_km: pro.intervention_radius_km,
-        city: city ?? null,
-      });
-    } catch (e) {
-      console.error("getAvailableProjectsForPro error :", e);
-    }
-
-    await sendClaimWelcomeEmail({
-      email: params.claimEmail,
-      proName: pro.name,
-      availableProjects,
-    });
-  } catch (err) {
-    console.error("notifyProOfClaimSuccess error :", err);
-  }
-}
-
-// Notifs claim (mail admin + mail pro) : awaitées pour GARANTIR l'envoi (leçon
-// 24/05 : une promesse détachée dans un Server Action est tuée au return ; le
-// mail pro fait des requêtes DB → 06/06 : await le business-critique), MAIS
-// bornées à 8 s par Promise.race : Resend n'a pas de timeout par défaut, un hang
-// provider ne doit JAMAIS geler l'auto-login + le redirect du claim. Les 2
-// fonctions notify* catchent déjà leurs erreurs → jamais de throw ici.
-async function sendClaimNotifications(params: {
-  slug: string;
-  claimEmail: string;
-  ip?: string;
-}) {
-  await Promise.race([
-    Promise.all([
-      notifyAdminOfClaimSuccess(params),
-      notifyProOfClaimSuccess({ slug: params.slug, claimEmail: params.claimEmail }),
-    ]),
-    new Promise((resolve) => setTimeout(resolve, 8000)),
-  ]);
-}
-
 // ============================================
 // Validation
 // ============================================
 
 // Formulaire de réclamation allégé (refonte 15/06, variante A) : on ne demande
-// que l'identité (SIRET = preuve) + email (où recevoir le code) + mot de passe.
+// que le numéro de fiche + email (où recevoir le code) + mot de passe.
 // managerName/phone étaient collectés mais JAMAIS stockés (le pro les complète
 // dans son espace après) ; passwordConfirm retiré au profit de l'œil afficher.
 const claimSchema = z.object({
-  email: z.string().email("Adresse email invalide"),
+  email: z.string().email("Adresse email invalide").transform((email) => email.trim().toLowerCase()),
   // France : SIRET 14 chiffres. Belgique : numéro d'entreprise BCE 10 chiffres
-  // (stocké dans pros.siret). La preuve de propriété reste identique : le
-  // numéro saisi doit matcher EXACTEMENT celui de la fiche.
+  // (stocké dans pros.siret). Ce numéro identifie la fiche ; seul un examen
+  // manuel permet ensuite d'autoriser le rattachement.
   siret: z
     .string()
     .regex(
@@ -359,6 +226,7 @@ export async function submitClaim(
     .from("pros")
     .select("id, name, siret, claimed_by_user_id")
     .eq("slug", slug)
+    .is("deleted_at", null)
     .single();
 
   if (proError || !pro) {
@@ -476,6 +344,7 @@ export async function submitClaim(
   const { data: attempt, error: attemptError } = await serviceClient
     .from("claim_attempts")
     .insert({
+      target_pro_id: pro.id,
       siret: data.siret,
       email: data.email,
       ip,
@@ -495,6 +364,12 @@ export async function submitClaim(
     .single();
 
   if (attemptError || !attempt) {
+    if (attemptError?.message.includes("claim_rate_limited")) {
+      return {
+        success: false,
+        message: "Trop de codes demandés. Patientez au moins 15 minutes avant de réessayer. Si le blocage persiste, contactez contact@workwave.fr.",
+      };
+    }
     return { success: false, message: "Erreur interne, veuillez réessayer" };
   }
 
@@ -531,315 +406,64 @@ export async function verifyClaim(
   _prevState: VerifyFormState,
   formData: FormData
 ): Promise<VerifyFormState> {
-  const attemptId = formData.get("attemptId") as string;
-  const code = formData.get("code") as string;
-  const slug = formData.get("slug") as string;
-
-  if (!attemptId || !code || !slug) {
-    return { success: false, message: "Données manquantes" };
+  const attemptId = Number(formData.get("attemptId"));
+  const code = String(formData.get("code") ?? "");
+  const slug = String(formData.get("slug") ?? "");
+  if (!Number.isSafeInteger(attemptId) || attemptId <= 0 || !slug) {
+    return { success: false, message: "Lien de vérification invalide." };
   }
-
   if (!/^\d{6}$/.test(code)) {
     return { success: false, errors: { code: "Le code doit contenir 6 chiffres" } };
   }
-
-  const serviceClient = await getServiceClient();
-
-  // Récupérer la tentative
-  const { data: attempt, error: attemptError } = await serviceClient
-    .from("claim_attempts")
-    .select("*")
-    .eq("id", parseInt(attemptId))
-    .single();
-
-  if (attemptError || !attempt) {
-    return { success: false, message: "Tentative introuvable ou expirée" };
+  const serviceClient = getServiceClient();
+  // Un seul appel transactionnel : aucun rejeu du code ni contournement du
+  // plafond par requêtes simultanées. L'email vérifié ne rattache AUCUNE fiche.
+  const { data: verification, error: verificationError } = await serviceClient.rpc("consume_pro_claim_code", {
+    p_attempt_id: attemptId, p_slug: slug, p_code_hash: hashCode(code),
+  });
+  if (verificationError || !verification) {
+    console.error("[claim] verification unavailable", verificationError?.code);
+    return { success: false, message: "Vérification indisponible. Réessayez ou contactez contact@workwave.fr." };
   }
-
-  // Vérifier le statut
-  if (attempt.status !== "pending") {
-    if (attempt.status === "blocked") {
-      return {
-        success: false,
-        message: "Cette tentative a été bloquée après trop d'essais. Veuillez recommencer le processus.",
-      };
-    }
-    return {
-      success: false,
-      message: "Ce code n'est plus valide. Veuillez recommencer le processus.",
+  if (verification.error) {
+    const messages: Record<string, string> = {
+      invalid: "Ce code n'est plus valide. Recommencez la demande.",
+      expired: "Ce code a expiré. Recommencez la demande.",
+      blocked: "Les trois essais sont épuisés. Recommencez la demande.",
+      unavailable: "Cette fiche n'est plus disponible ou ne correspond pas à la demande. Contactez contact@workwave.fr.",
+      code: `Code incorrect. ${verification.remaining ?? 0} essai(s) restant(s).`,
     };
+    return { success: false, message: messages[verification.error] ?? messages.invalid };
   }
-
-  // Vérifier l'expiration
-  if (new Date(attempt.code_expires_at) < new Date()) {
-    await serviceClient
-      .from("claim_attempts")
-      .update({ status: "expired", temp_password: null })
-      .eq("id", attempt.id);
-
-    return {
-      success: false,
-      message: "Ce code a expiré. Veuillez recommencer le processus.",
-    };
-  }
-
-  // Vérifier le nombre de tentatives
-  if (attempt.attempts_count >= 3) {
-    await serviceClient
-      .from("claim_attempts")
-      .update({ status: "blocked", temp_password: null })
-      .eq("id", attempt.id);
-
-    return {
-      success: false,
-      message:
-        "Trop de tentatives échouées. Veuillez recommencer le processus dans 1 heure.",
-    };
-  }
-
-  // Comparer le hash
-  const submittedHash = hashCode(code);
-  if (submittedHash !== attempt.verification_code_hash) {
-    const newCount = attempt.attempts_count + 1;
-    const updates: Record<string, unknown> = {
-      attempts_count: newCount,
-    };
-    if (newCount >= 3) {
-      updates.status = "blocked";
-      updates.temp_password = null;
-    }
-    await serviceClient
-      .from("claim_attempts")
-      .update(updates)
-      .eq("id", attempt.id);
-
-    const remaining = 3 - newCount;
-    return {
-      success: false,
-      errors: {
-        code:
-          remaining > 0
-            ? `Code incorrect. ${remaining} tentative${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}.`
-            : "Code incorrect. Tentatives épuisées.",
-      },
-    };
-  }
-
-  // Code correct : créer le compte avec mot de passe et connecter
-
-  if (!attempt.temp_password) {
-    return { success: false, message: "Erreur interne. Veuillez recommencer le processus." };
-  }
-
-  // Un code obtenu pour supprimer une fiche ne doit pas servir a la reclamer.
-  // Les anciennes lignes n'ont pas de type : on refuse ce qui est explicitement
-  // autre chose, plutot que d'exiger "claim" et de casser les demandes en cours.
-  if (attempt.type && attempt.type !== "claim") {
-    return {
-      success: false,
-      message:
-        "Ce code a été demandé pour une autre opération. Recommencez la réclamation depuis votre fiche.",
-    };
-  }
-
-  // ── La fiche visée est-elle bien celle dont le SIRET a été prouvé ? ──
-  //
-  // Faille corrigée le 31/08/2026, trouvée par la relecture intégrale du code.
-  // Le slug arrive du formulaire (`formData.get("slug")`), et les deux mises à
-  // jour plus bas faisaient `.eq("slug", slug)` sans plus de contrôle. Le refus
-  // d'une fiche déjà réclamée n'existait qu'à l'étape 1 (l.252), donc il
-  // suffisait de prouver le SIRET de SA fiche puis de changer ce champ pour
-  // s'attribuer CELLE D'UN AUTRE, même déjà réclamée. Les SIRET sont affichés
-  // en clair sur les fiches publiques : il n'y avait rien à deviner. Les 52
-  // fiches réclamées étaient exactement les cibles, avec leur tableau de bord,
-  // leurs leads déjà payés et les coordonnées des particuliers.
-  //
-  // Le contrôle est ici, entre la validation du code et les deux rattachements,
-  // pour couvrir les deux branches (compte existant et compte neuf) d'un seul
-  // endroit : deux contrôles jumeaux finissent toujours par diverger.
-  const { data: ficheVisee, error: erreurFiche } = await serviceClient
-    .from("pros")
-    .select("id, siret, claimed_by_user_id, name")
-    .eq("slug", slug)
-    .single();
-
-  if (erreurFiche || !ficheVisee) {
-    return { success: false, message: "Fiche introuvable" };
-  }
-
-  // Le SIRET prouvé par le code reçu par email doit être celui de cette fiche.
-  if (!ficheVisee.siret || ficheVisee.siret !== attempt.siret) {
-    notifyAdminOfClaimMismatch(slug, attempt.siret, attempt.email, attempt.ip);
-    return {
-      success: false,
-      message:
-        "Cette fiche ne correspond pas au SIRET vérifié. Recommencez depuis la fiche de votre entreprise.",
-    };
-  }
-
-  // Et elle doit toujours être libre : quelqu'un a pu la réclamer entre l'envoi
-  // du code et sa saisie.
-  if (ficheVisee.claimed_by_user_id) {
-    return {
-      success: false,
-      message:
-        "Cette fiche a déjà été réclamée. Si vous pensez qu'il y a une erreur, contactez le support à contact@workwave.fr.",
-    };
-  }
-
-  // 1. Créer le user Supabase Auth avec email + mot de passe
-  const { data: signUpData, error: signUpError } =
-    await serviceClient.auth.admin.createUser({
-      email: attempt.email,
-      password: attempt.temp_password,
-      email_confirm: true,
-    });
-
-  // Si l'utilisateur existe déjà, mettre à jour son mot de passe.
-  // La recherche pagine désormais sur tous les comptes : cf.
-  // trouverCompteAuthParEmail, qui explique pourquoi la version d'avant
-  // (`listUsers()` sans argument, donc 50 comptes) devenait une panne certaine.
-  if (signUpError && signUpError.message.includes("already")) {
-    const existingUser = await trouverCompteAuthParEmail(
-      serviceClient,
-      attempt.email
-    );
+  const email = String(verification.email);
+  const password = String(verification.password);
+  const { data: created, error: createError } = await serviceClient.auth.admin.createUser({
+    email, password, email_confirm: true,
+  });
+  let userId = created?.user?.id;
+  if (createError && (createError.code === "email_exists" || createError.message.includes("already"))) {
+    const existingUser = await trouverCompteAuthParEmail(serviceClient, email);
     if (existingUser) {
-      await serviceClient.auth.admin.updateUserById(existingUser.id, {
-        password: attempt.temp_password,
+      // L'OTP à usage unique prouve l'accès à CET email, jamais à l'entreprise.
+      const { error } = await serviceClient.auth.admin.updateUserById(existingUser.id, {
+        password, email_confirm: true,
       });
-      // Continue avec l'ID existant
-      const userId = existingUser.id;
-
-      // Lier la fiche au user. Modele BTP Sprint 13 : pay-per-lead 9,90€ par
-      // lead debloque, fiche gratuite a vie. Pas d'essai gratuit / pas de CB
-      // requise. Le subscription_status reste "none" jusqu'au premier paiement.
-      await serviceClient
-        .from("pros")
-        .update({
-          claimed_by_user_id: userId,
-          claimed_at: new Date().toISOString(),
-          subscription_status: "none",
-          trial_ends_at: null,
-          // Rayon par defaut 100 km a la reclamation (decision 11/06) : la fiche
-          // scrapee porte encore l'ancien defaut 20 km, jamais choisi par le pro.
-          intervention_radius_km: 200,
-        })
-        .eq("id", ficheVisee.id)
-        .is("claimed_by_user_id", null);
-
-      // Nullifier temp_password immédiatement
-      await serviceClient
-        .from("claim_attempts")
-        .update({
-          status: "verified",
-          success: true,
-          verification_code_hash: null,
-          temp_password: null,
-        })
-        .eq("id", attempt.id);
-
-      // Tracking claim_completed (fire-and-forget)
-      track(EVENTS.CLAIM_COMPLETED, {
-        userId: userId,
-        metadata: { slug },
-      });
-
-      // Notifications admin + pro (awaitées, bornées 8s, cf. sendClaimNotifications)
-      await sendClaimNotifications({
-        slug,
-        claimEmail: attempt.email,
-        ip: attempt.ip ?? undefined,
-      });
-
-      // Connecter l'utilisateur côté serveur
-      await signInAndSetCookies(attempt.email, attempt.temp_password);
-
-      return { success: true, redirectUrl: "/pro/dashboard/fiche" };
+      if (!error) userId = existingUser.id;
     }
-
-    // Ici, Supabase a refusé la création en disant que l'email existe déjà,
-    // mais on n'a pas retrouvé le compte correspondant. Le message doit dire
-    // quoi faire (leçon du 13/05 : un cul-de-sac muet dans un parcours de code
-    // par email a déjà fait remonter une plainte CNIL), et le mot de passe en
-    // clair de cette tentative n'a plus de raison d'être conservé.
-    await serviceClient
-      .from("claim_attempts")
-      .update({ temp_password: null })
-      .eq("id", attempt.id);
-
-    return {
-      success: false,
-      message:
-        "Un compte existe déjà avec cet email, mais nous n'avons pas réussi à le retrouver. Écrivez-nous à contact@workwave.fr en indiquant votre SIRET, nous rattachons la fiche manuellement.",
-    };
   }
-
-  if (signUpError || !signUpData?.user) {
-    // Nullifier temp_password en cas d'erreur
-    await serviceClient
-      .from("claim_attempts")
-      .update({ temp_password: null })
-      .eq("id", attempt.id);
-
-    return { success: false, message: "Erreur lors de la création du compte" };
+  if (!userId) {
+    return { success: false, message: "L'email a été vérifié, mais le compte n'a pas pu être préparé. Recommencez ou contactez contact@workwave.fr." };
   }
-
-  const userId = signUpData.user.id;
-
-  // 2. Lier la fiche au user. Modele BTP Sprint 13 : pay-per-lead 9,90€ par
-  // lead debloque, fiche gratuite a vie. Pas d'essai gratuit / pas de CB
-  // requise. Le subscription_status reste "none" jusqu'au premier paiement.
-  const { error: updateError } = await serviceClient
-    .from("pros")
-    .update({
-      claimed_by_user_id: userId,
-      claimed_at: new Date().toISOString(),
-      subscription_status: "none",
-      trial_ends_at: null,
-      // Rayon par defaut 100 km a la reclamation (cf. branche ci-dessus).
-      intervention_radius_km: 200,
-    })
-    .eq("id", ficheVisee.id)
-        .is("claimed_by_user_id", null);
-
-  if (updateError) {
-    await serviceClient
-      .from("claim_attempts")
-      .update({ temp_password: null })
-      .eq("id", attempt.id);
-
-    return { success: false, message: "Erreur lors de la réclamation de la fiche" };
-  }
-
-  // 3. Nullifier temp_password immédiatement
-  await serviceClient
-    .from("claim_attempts")
-    .update({
-      status: "verified",
-      success: true,
-      verification_code_hash: null,
-      temp_password: null,
-    })
-    .eq("id", attempt.id);
-
-  // 4. Tracking claim_completed (fire-and-forget)
-  track(EVENTS.CLAIM_COMPLETED, {
-    userId,
-    metadata: { slug },
+  const { data: requestId, error: requestError } = await serviceClient.rpc("enqueue_pro_claim", {
+    p_attempt_id: attemptId, p_pro_id: verification.pro_id, p_user_id: userId,
   });
-
-  // 5. Notifications admin + pro (awaitées, bornées 8s, cf. sendClaimNotifications)
-  await sendClaimNotifications({
-    slug,
-    claimEmail: attempt.email,
-    ip: attempt.ip ?? undefined,
-  });
-
-  // 6. Connecter l'utilisateur côté serveur (écrire les cookies de session)
-  await signInAndSetCookies(attempt.email, attempt.temp_password);
-
-  return { success: true, redirectUrl: "/pro/dashboard/fiche" };
+  if (requestError || !requestId) {
+    console.error("[claim] queue failed", requestError?.code);
+    return { success: false, message: "Votre demande n'a pas pu être enregistrée. Contactez contact@workwave.fr : aucun accès à la fiche n'a été accordé." };
+  }
+  after(() => notifyClaimPending({ requestId, slug, email }));
+  const signedIn = await signInAndSetCookies(email, password);
+  return { success: true, redirectUrl: signedIn ? "/pro/reclamations" : "/pro/connexion" };
 }
 
 // ============================================
@@ -870,5 +494,6 @@ async function signInAndSetCookies(email: string, password: string) {
     }
   );
 
-  await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return !error;
 }

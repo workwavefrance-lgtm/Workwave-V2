@@ -33,6 +33,9 @@ export type UpdateProResult = {
 export async function updateProByAdmin(
   input: UpdateProInput,
 ): Promise<UpdateProResult> {
+  const admin = await verifyAdmin();
+  if (!admin) return { ok: false, error: "Non autorisé" };
+
   if (!input.proId || isNaN(input.proId)) {
     return { ok: false, error: "ID pro invalide" };
   }

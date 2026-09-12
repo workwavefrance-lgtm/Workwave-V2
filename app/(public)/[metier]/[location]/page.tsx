@@ -27,15 +27,12 @@ import {
   getProsByCategoryAndCity,
   getProsByCategoryAndCityIds,
 } from "@/lib/queries/pros";
-import {
-  getTopProsByCategoryAndCity,
-  getTopProsByCategoryAndCityIds,
-  getTopProsByCategoryAndDepartment,
-} from "@/lib/queries/top-pros";
+import { getListingPros } from "@/lib/queries/listing-pros";
 import {
   getNearbyCities,
   getCitiesByDepartment,
   getAggregatedCityIds,
+  getCityIdsByDepartment,
 } from "@/lib/queries/cities";
 import { getAllDepartmentsPublic } from "@/lib/queries/home-public";
 import { getPriceGuidesByMetier } from "@/lib/queries/price-guides";
@@ -46,7 +43,7 @@ import { getSeoContent } from "@/lib/queries/seo-pages";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import SeoContent from "@/components/seo/SeoContent";
 import FaqAccordion from "@/components/seo/FaqAccordion";
-import { BASE_URL, DEFAULT_PAGE_SIZE } from "@/lib/constants";
+import { BASE_URL } from "@/lib/constants";
 import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { buildListingFaq } from "@/lib/seo/listing-faq";
 import { toBreadcrumbSchema, getFaqSchema } from "@/lib/utils/schema";
@@ -280,12 +277,6 @@ export async function renderListing(
       : "à";
   const currentYear = new Date().getFullYear();
 
-  // Page 1 : fetch les TOP N tries par score + total.
-  // Pages 2+ : pagination classique sur tous les pros (ordre alpha).
-  let topPros: Awaited<ReturnType<typeof getTopProsByCategoryAndCity>>["tops"] = [];
-  let totalProsCount = 0;
-  let paginatedResult: Awaited<ReturnType<typeof getProsByCategoryAndCity>> | null = null;
-
   // Ville "parent" agrégée : Marseille/Lyon/Paris → arrondissements (page
   // "plombier marseille" = la plus volumineuse) ; Monaco → communes françaises
   // frontalières qui interviennent à Monaco (mise en relation transfrontalière).
@@ -293,24 +284,11 @@ export async function renderListing(
   const aggCityIds =
     resolved.type === "city" ? await getAggregatedCityIds(resolved.city) : null;
 
-  if (isFirstPage) {
-    const topResult =
-      resolved.type === "department"
-        ? await getTopProsByCategoryAndDepartment(category.id, resolved.department.id, TOP_LIMIT)
-        : aggCityIds
-          ? await getTopProsByCategoryAndCityIds(category.id, aggCityIds, TOP_LIMIT)
-          : await getTopProsByCategoryAndCity(category.id, resolved.city.id, TOP_LIMIT);
-    topPros = topResult.tops;
-    totalProsCount = topResult.total;
-  } else {
-    paginatedResult =
-      resolved.type === "department"
-        ? await getProsByCategoryAndDepartment(category.id, resolved.department.id, { page })
-        : aggCityIds
-          ? await getProsByCategoryAndCityIds(category.id, aggCityIds, { page })
-          : await getProsByCategoryAndCity(category.id, resolved.city.id, { page });
-    totalProsCount = paginatedResult.count;
-  }
+  const cityIds = resolved.type === "department"
+    ? await getCityIdsByDepartment(resolved.department.id)
+    : aggCityIds ?? [resolved.city.id];
+  const { tops: topPros, total: totalProsCount, pagination: paginatedResult } =
+    await getListingPros(category.id, cityIds, page, TOP_LIMIT);
 
   // 308 vers la page département de la VILLE concernée si aucun pro dans cette
   // ville pour ce métier. Évite les URLs noindex pollutives en GSC, transmet le
@@ -339,11 +317,11 @@ export async function renderListing(
   if (resolved.type === "city" && totalProsCount === 0) {
     // CONTRE-COMPTAGE AVANT DE REDIRIGER (ajoute le 31/08/2026).
     //
-    // Les lectures ci-dessus (`getTopProsByCategoryAndCity*`,
-    // `getProsByCategoryAndCity*`) destructurent `{ data, count }` et IGNORENT
-    // le champ `error` de Supabase : elles renvoient donc `total = 0` aussi
-    // bien quand la ville est reellement vide que quand la requete a echoue
-    // (delai depasse, coupure reseau, `statement_timeout`). Or la redirection
+    // Historiquement, les lectures de pros ignoraient `error` et renvoyaient
+    // `total = 0` aussi bien quand la ville était réellement vide que quand
+    // la requête avait échoué. Elles lèvent désormais les erreurs ; on garde
+    // cette dernière vérification avant une redirection permanente.
+    // La redirection
     // ci-dessous est PERMANENTE et mise en cache 30 jours (`revalidate`, ligne
     // 61) : une micro-panne de quelques secondes pendant une generation ISR
     // figeait la page en 308 pour un mois, et Google enregistrait une
@@ -478,7 +456,7 @@ export async function renderListing(
   const itemsForSchema = isFirstPage ? topPros : (paginatedResult?.data ?? []);
   const schemaStartPos = isFirstPage
     ? 1
-    : (page - 1) * (paginatedResult?.pageSize ?? 20) + 1;
+    : topPros.length + (page - 2) * (paginatedResult?.pageSize ?? 20) + 1;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -701,27 +679,9 @@ export async function renderListing(
               ))}
             </div>
 
-            {/* Lien vers la liste complète si on a plus de TOP_LIMIT pros.
-                L'adresse doit etre `/page/2`, PAS `?page=2` : depuis le passage
-                a la pagination par chemin, cette route ne lit plus `searchParams`
-                (ses `Props` n'ont que `params`) et aucune redirection du
-                middleware ne rattrape l'ancien format. Un `?page=2` renvoyait
-                donc la page 1 en 200, et le reste de la liste n'etait atteignable
-                par aucun lien : mesure sur /plombier/marseille, 668 fiches sur
-                678 hors de portee de la navigation, donc invisibles pour Google
-                qui ne decouvre ces pages que par les liens internes (la
-                pagination n'est pas dans le sitemap). */}
-            {/* Le seuil est la TAILLE D'UNE PAGE, pas le nombre de fiches mises en
-                avant. Corrige le 01/09/2026 : la condition portait sur TOP_LIMIT
-                (10), alors qu'une page de pagination en contient DEFAULT_PAGE_SIZE
-                (20). Entre 11 et 20 fiches, le bouton s'affichait donc et menait a
-                une page 2 vide. Envoyer Google sur une page vide est pire que ne
-                pas lui proposer de lien du tout.
-                A noter : totalProsCount peut surestimer le total sur la page 1
-                (lib/queries/top-pros.ts compte en `estimated`), donc un cas
-                residuel de page 2 quasi vide reste possible. Le seuil a 20 le rend
-                rare la ou il etait systematique. */}
-            {totalProsCount > DEFAULT_PAGE_SIZE && (
+            {/* La page 2 commence au premier pro hors sélection, même s'il
+                n'en reste qu'un. Le chemin conserve le cache ISR. */}
+            {totalProsCount > topPros.length && (
               <div className="mt-8 flex justify-center">
                 <Link
                   href={`${baseUrl}/page/2`}

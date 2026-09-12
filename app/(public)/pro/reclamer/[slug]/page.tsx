@@ -188,7 +188,7 @@ export default async function ClaimPage({ params }: Props) {
         <div className="flex items-center">
           <div className="flex flex-col items-center">
             <div className="w-7 h-7 rounded-full border border-[var(--border-color)] text-[var(--text-tertiary)] flex items-center justify-center text-sm">3</div>
-            <span className="text-[11px] mt-1.5 text-[var(--text-tertiary)]">En ligne</span>
+            <span className="text-[11px] mt-1.5 text-[var(--text-tertiary)]">Validation</span>
           </div>
         </div>
       </div>
@@ -203,8 +203,8 @@ export default async function ClaimPage({ params }: Props) {
           </svg>
           <span className="text-xs font-semibold text-green-700 dark:text-green-400">
             {isBelgian
-              ? "Vérifié à la Banque-Carrefour des Entreprises"
-              : "Vérifié au registre Sirene"}
+              ? "Entreprise référencée à la Banque-Carrefour des Entreprises"
+              : "Entreprise référencée au registre Sirene"}
           </span>
         </div>
 
@@ -247,7 +247,7 @@ export default async function ClaimPage({ params }: Props) {
       )}
 
       <p className="text-sm text-[var(--text-secondary)] mb-3 px-1">
-        Prouvez que c&apos;est bien vous pour prendre le contrôle de votre fiche&nbsp;:
+        Vérifiez votre email pour envoyer votre demande. Notre équipe vérifiera ensuite votre lien avec l&apos;entreprise avant de vous donner accès à la fiche.
       </p>
 
       {/* Card formulaire : ombre portee + bordure plus marquee pour la faire

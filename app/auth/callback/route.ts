@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { inlineScriptString, sameOriginRedirect } from "@/lib/auth/safe-redirect";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -13,13 +14,13 @@ export async function GET(request: NextRequest) {
   if (code) {
     // Utiliser une réponse HTML (200) au lieu d'un redirect (302)
     // car Safari bloque les cookies posés pendant un redirect cross-origin
-    const redirectUrl = new URL(next, baseUrl).toString();
+    const redirectUrl = sameOriginRedirect(next, baseUrl, "/pro/dashboard").toString();
 
     const response = new NextResponse(
       `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Connexion...</title></head>
 <body><p>Connexion en cours...</p>
-<script>window.location.href=${JSON.stringify(redirectUrl)};</script>
+<script>window.location.href=${inlineScriptString(redirectUrl)};</script>
 </body></html>`,
       { headers: { "Content-Type": "text/html" } }
     );

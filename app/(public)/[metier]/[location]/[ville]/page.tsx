@@ -15,7 +15,7 @@ import { getCategoryBySlug } from "@/lib/queries/categories";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getCityBySlug } from "@/lib/queries/cities";
 import { getProsByCategoryAndCity } from "@/lib/queries/pros";
-import { getTopProsByCategoryAndCity } from "@/lib/queries/top-pros";
+import { getListingPros } from "@/lib/queries/listing-pros";
 import {
   getSpecialty,
   getSpecialtiesForMetier,
@@ -141,26 +141,12 @@ export async function renderSpecialtyCity(
   const meilleurs = listing.notes === "notées" ? "meilleures" : "meilleurs";
   const pluralCategory = listing.plural;
 
-  // Page 1 : fetch les TOP N tries par score + total.
-  // Pages 2+ : pagination classique sur tous les pros (ordre alpha).
-  let topPros: Awaited<ReturnType<typeof getTopProsByCategoryAndCity>>["tops"] = [];
-  let totalProsCount = 0;
-  let paginatedResult: Awaited<ReturnType<typeof getProsByCategoryAndCity>> | null = null;
+  const { tops: topPros, total: totalProsCount, pagination: paginatedResult } =
+    await getListingPros(category.id, [city.id], page, TOP_LIMIT);
 
-  if (isFirstPage) {
-    const topResult = await getTopProsByCategoryAndCity(
-      category.id,
-      city.id,
-      TOP_LIMIT
-    );
-    topPros = topResult.tops;
-    totalProsCount = topResult.total;
-  } else {
-    paginatedResult = await getProsByCategoryAndCity(category.id, city.id, {
-      page,
-    });
-    totalProsCount = paginatedResult.count;
-  }
+  // Les erreurs de lecture sont levées dans les requêtes. Une liste vide
+  // ici signifie donc une vraie page au-delà de la dernière, pas une panne.
+  if (!isFirstPage && paginatedResult?.data.length === 0) notFound();
 
   // 308 vers la page département de la VILLE si aucun pro pour ce
   // couple (cat × ville). Évite les URLs noindex pollutives en GSC.
@@ -206,7 +192,7 @@ export async function renderSpecialtyCity(
   const itemsForSchema = isFirstPage ? topPros : (paginatedResult?.data ?? []);
   const schemaStartPos = isFirstPage
     ? 1
-    : (page - 1) * (paginatedResult?.pageSize ?? 20) + 1;
+    : topPros.length + (page - 2) * (paginatedResult?.pageSize ?? 20) + 1;
   const itemListJsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -348,10 +334,10 @@ export async function renderSpecialtyCity(
               ))}
             </div>
 
-            {totalProsCount > TOP_LIMIT && (
+            {totalProsCount > topPros.length && (
               <div className="mt-8 flex justify-center">
                 <Link
-                  href={`${baseUrl}?page=2`}
+                  href={`${baseUrl}/page/2`}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] font-medium transition-all duration-200"
                 >
                   Voir tous les {totalProsCount} {pluralCategory} à {cityLabel}

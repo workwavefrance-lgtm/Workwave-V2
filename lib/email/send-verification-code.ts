@@ -8,11 +8,17 @@ function getResendClient() {
   return _resend;
 }
 
-export async function sendVerificationCode(
-  email: string,
+export type VerificationOperation = "claim" | "deletion";
+
+export function buildVerificationCodeEmail(
   code: string,
-  proName: string
-): Promise<void> {
+  proName: string,
+  operation: VerificationOperation = "claim"
+): { subject: string; html: string } {
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[char]!));
+  const action = operation === "deletion" ? "supprimer" : "réclamer";
   const html = `
 <!DOCTYPE html>
 <html>
@@ -27,11 +33,11 @@ export async function sendVerificationCode(
         Bonjour,
       </p>
       <p style="margin:0 0 24px;font-size:16px;color:#0A0A0A;line-height:1.6;">
-        Vous avez demandé à réclamer la fiche <strong>${proName}</strong> sur Workwave.
+        Vous avez demandé à ${action} la fiche <strong>${escapeHtml(proName)}</strong> sur Workwave.
         Voici votre code de vérification :
       </p>
       <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
-        <span style="font-family:'Courier New',monospace;font-size:36px;font-weight:700;letter-spacing:8px;color:#0A0A0A;">${code}</span>
+        <span style="font-family:'Courier New',monospace;font-size:36px;font-weight:700;letter-spacing:8px;color:#0A0A0A;">${escapeHtml(code)}</span>
       </div>
       <p style="margin:0 0 8px;font-size:14px;color:#6B7280;line-height:1.6;">
         Ce code est valable <strong>15 minutes</strong>.
@@ -51,6 +57,20 @@ export async function sendVerificationCode(
 </body>
 </html>`;
 
+  return {
+    subject: operation === "deletion" ? "Votre code de suppression de fiche · Workwave" : "Votre code de vérification · Workwave",
+    html,
+  };
+}
+
+export async function sendVerificationCode(
+  email: string,
+  code: string,
+  proName: string,
+  operation: VerificationOperation = "claim"
+): Promise<void> {
+  const message = buildVerificationCodeEmail(code, proName, operation);
+
   // Le SDK Resend ne LEVE PAS d'exception quand l'envoi est refusé : il renvoie
   // { data: null, error: {...} }. Ignorer ce champ rend un échec d'envoi
   // strictement indiscernable d'un succès : c'est ce qui a fait qu'un pro n'a
@@ -61,8 +81,8 @@ export async function sendVerificationCode(
   const { error } = await getResendClient().emails.send({
     from: "Workwave <contact@workwave.fr>",
     to: email,
-    subject: "Votre code de vérification · Workwave",
-    html,
+    subject: message.subject,
+    html: message.html,
   });
 
   if (error) {

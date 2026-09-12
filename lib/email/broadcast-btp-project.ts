@@ -37,10 +37,10 @@
  * des dizaines de milliers de pros pour rien.
  */
 import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
 import { haversineKm } from "@/lib/utils/haversine";
-import { getGeneralistCategoryIds } from "@/lib/matching/generalist";
+import { getBtpCategoryRules } from "@/lib/matching/btp-categories";
 import { getServiceClient } from "@/lib/supabase/service-client";
+import { createDeliveryStore, deliverProjectEmail, deliveryKind, type ProjectEmail } from "./project-delivery";
 
 let _resend: Resend | null = null;
 function getResendClient(): Resend {
@@ -58,10 +58,6 @@ function getResendClient(): Resend {
  *     artisan ; "climaticien" comme metier autonome n'existe quasiment pas).
  * Resolu slug → id au runtime (JAMAIS d'id en dur, lecon CATEGORY_ID_MAP 26/05).
  */
-const MATCHING_CLUSTERS: string[][] = [
-  ["plombier", "chauffagiste", "climaticien"],
-];
-
 /**
  * Si la categorie du projet appartient a un cluster, retourne TOUS les ids du
  * cluster (le lead touchera les metiers lies). Sinon, juste la categorie projet.
@@ -70,18 +66,7 @@ export async function getMatchCategoryIds(
   sb: ReturnType<typeof getServiceClient>,
   projectCategoryId: number
 ): Promise<number[]> {
-  const slugs = [...new Set(MATCHING_CLUSTERS.flat())];
-  const { data } = await sb.from("categories").select("id, slug").in("slug", slugs);
-  const idBySlug = new Map(
-    ((data || []) as { id: number; slug: string }[]).map((c) => [c.slug, c.id])
-  );
-  for (const cluster of MATCHING_CLUSTERS) {
-    const ids = cluster
-      .map((s) => idBySlug.get(s))
-      .filter((x): x is number => x != null);
-    if (ids.includes(projectCategoryId)) return ids;
-  }
-  return [projectCategoryId];
+  return (await getBtpCategoryRules(sb)).relatedCategoryIds(projectCategoryId);
 }
 
 /**
@@ -95,8 +80,18 @@ async function markProjectDone(
   sb: ReturnType<typeof getServiceClient>,
   projectId: number,
   relanceKind: "j1" | "j3" | null,
-  sentCount: number
+  sentCount: number,
+  complete = true
 ): Promise<void> {
+  if (relanceKind === null) {
+    // Le compteur cumule les destinataires réellement confirmés, y compris
+    // ceux qui ont depuis mis leur fiche en pause ou changé de rayon.
+    const { count, error } = await sb.from("project_email_deliveries")
+      .select("pro_id", { count: "exact", head: true })
+      .eq("project_id", projectId).eq("kind", "initial").not("sent_at", "is", null);
+    if (error) throw new Error(`Comptage des diffusions impossible : ${error.message}`);
+    sentCount = count ?? 0;
+  }
   // ── DIFFUSION INITIALE SANS AUCUN ENVOI : ON NE MARQUE PAS ────────────────
   // Ecrire broadcasted_at alors que zero pro a ete touche condamnait le projet :
   //   - broadcast-rescue selectionne `broadcasted_at IS NULL`  -> plus rattrape
@@ -115,8 +110,18 @@ async function markProjectDone(
   // de moins de 14 jours (`created_at >= NOW() - 14 days`). Passe ce delai le
   // projet cesse d'etre repropose, il reste simplement non marque.
   //
-  // Les RELANCES (j1/j3) continuent d'ecrire leur colonne quoi qu'il arrive :
-  // sans ca, le cron de relance les rejouerait en boucle a chaque passage.
+  // Une relance sans cible est terminée ; une relance en échec garde sa
+  // colonne vide. Le journal empêche la reprise de doubler les succès.
+  if (!complete) {
+    // Rescue reprend l'initial tant que broadcasted_at reste NULL. Les succès
+    // sont conservés par destinataire dans project_email_deliveries.
+    if (relanceKind === null) {
+      const { error } = await sb.from("projects").update({ broadcast_count: sentCount })
+        .eq("id", projectId).is("broadcasted_at", null);
+      if (error) throw new Error(error.message);
+    }
+    return;
+  }
   if (relanceKind === null && sentCount === 0) return;
 
   // Chaque relance ecrit dans SA colonne : sinon la relance J+1 remplirait
@@ -127,10 +132,13 @@ async function markProjectDone(
       : relanceKind === "j3"
         ? { relance_sent_at: new Date().toISOString() }
         : { broadcast_count: sentCount, broadcasted_at: new Date().toISOString() };
-  await sb.from("projects").update(update).eq("id", projectId);
+  const { error } = await sb.from("projects").update(update).eq("id", projectId);
+  if (error) throw new Error(error.message);
 }
 
-const CHUNK_SIZE = 50;
+// Limite conservatrice par flux : les appels concurrents entre flux restent
+// récupérables via le journal si le fournisseur refuse un pic de débit.
+const CHUNK_SIZE = 2;
 const CHUNK_DELAY_MS = 1000;
 const UNLOCK_PRICE_EUR_TTC = "9,90";
 
@@ -348,25 +356,17 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
 }
 
 async function sendOne(
-  email: string,
-  subject: string,
-  html: string
-): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const r = await getResendClient().emails.send({
-      from: "Workwave <contact@workwave.fr>",
-      to: [email],
-      subject,
-      html,
-    });
-    if (r.error) {
-      return { ok: false, error: r.error.message || String(r.error) };
-    }
-    return { ok: true };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { ok: false, error: msg };
-  }
+  email: ProjectEmail,
+  idempotencyKey: string
+): Promise<{ id: string }> {
+  const r = await getResendClient().emails.send({
+    from: "Workwave <contact@workwave.fr>",
+    to: [email.recipient_email],
+    subject: email.subject,
+    html: email.html,
+  }, { idempotencyKey });
+  if (r.error || !r.data?.id) throw new Error(r.error?.message || "Resend : réponse sans identifiant");
+  return { id: r.data.id };
 }
 
 /** Marqueur d'un depot de test technique : un projet dont la description
@@ -408,8 +408,8 @@ export async function broadcastBtpProject(
     .replace(/\/+$/, "");
   // Type de relance, calcule une seule fois pour l'objet du mail ET la colonne
   // d'idempotence ecrite en fin de traitement (markProjectDone).
-  const kind: "j1" | "j3" | null =
-    input.relanceKind ?? (input.isRelance === true ? "j3" : null);
+  const notificationKind = deliveryKind(input);
+  const kind = notificationKind === "initial" ? null : notificationKind;
   const lieuSujet = input.projectCityName ? ` a ${input.projectCityName}` : "";
   const subject =
     kind === "j1"
@@ -465,11 +465,12 @@ export async function broadcastBtpProject(
   // déjà les coordonnées du particulier, le rappel "toujours disponible" serait
   // absurde (et énervant). On exclut ses id du SELECT.
   let excludeProIds: number[] = [];
-  if (input.isRelance) {
-    const { data: unlocks } = await sb
+  if (kind !== null) {
+    const { data: unlocks, error: unlockError } = await sb
       .from("lead_unlocks")
       .select("pro_id")
       .eq("project_id", input.projectId);
+    if (unlockError) throw new Error(`Lecture déblocages impossible : ${unlockError.message}`);
     excludeProIds = (unlocks || [])
       .map((u: { pro_id: number | null }) => u.pro_id)
       .filter((id): id is number => id != null);
@@ -482,22 +483,13 @@ export async function broadcastBtpProject(
   // + les pros GÉNÉRALISTES (multiservice / petit-bricolage) reçoivent TOUS les
   // projets BTP de leur zone (homme toutes mains = tous corps de métier). Sans
   // risque : pay-per-lead, le pro lit le descriptif avant de payer et filtre lui-même.
-  const matchCategoryIds = await getMatchCategoryIds(sb, input.projectCategoryId);
-  const generalistIds = await getGeneralistCategoryIds(sb);
+  const matching = await getBtpCategoryRules(sb);
   // Généraliste = métier PRINCIPAL uniquement. Le 26/08, une aide à domicile
   // (aide-seniors, secondaires ménage/repassage/multiservice) a reçu un projet
   // de CUISINISTE à 190 km parce que « multiservice » figurait dans ses
   // catégories secondaires : la règle la traitait en homme toutes mains. Une
   // catégorie secondaire cochée ne transforme personne en généraliste BTP.
-  const categoryOrFilter = [
-    ...matchCategoryIds.flatMap((id) => [
-      `category_id.eq.${id}`,
-      `secondary_category_ids.cs.{${id}}`,
-    ]),
-    ...generalistIds
-      .filter((id) => !matchCategoryIds.includes(id))
-      .map((id) => `category_id.eq.${id}`),
-  ].join(",");
+  const categoryOrFilter = matching.proCategoryFilterForProject(input.projectCategoryId);
 
   let queryBuilder = sb
     .from("pros")
@@ -533,7 +525,7 @@ export async function broadcastBtpProject(
     }
     const deptCityIds = (deptCities || []).map((c: { id: number }) => c.id);
     if (deptCityIds.length === 0) {
-      await markProjectDone(sb, input.projectId, kind, 0);
+      await markProjectDone(sb, input.projectId, kind, 0, !deptErr);
       return { totalTargets: 0, sent: 0, failed: 0, errors: ["no_cities_in_department"] };
     }
     queryBuilder = queryBuilder.in("city_id", deptCityIds);
@@ -543,7 +535,7 @@ export async function broadcastBtpProject(
 
   if (queryError) {
     console.error("[broadcastBtpProject] query error:", queryError);
-    await markProjectDone(sb, input.projectId, kind, 0);
+    await markProjectDone(sb, input.projectId, kind, 0, false);
     return { totalTargets: 0, sent: 0, failed: 0, errors: [queryError.message] };
   }
 
@@ -597,11 +589,12 @@ export async function broadcastBtpProject(
   const FREE_UNLOCK_COUNT = 2;
   const gratuitsUtilises = new Map<number, number>();
   {
-    const { data: u } = await sb
+    const { data: u, error: freeError } = await sb
       .from("lead_unlocks")
       .select("pro_id")
       .eq("amount_cents", 0)
       .in("pro_id", targets.map((t) => t.id));
+    if (freeError) throw new Error(`Lecture des offres impossible : ${freeError.message}`);
     ((u || []) as { pro_id: number }[]).forEach((x) =>
       gratuitsUtilises.set(x.pro_id, (gratuitsUtilises.get(x.pro_id) || 0) + 1)
     );
@@ -609,19 +602,27 @@ export async function broadcastBtpProject(
   const restantsDe = (proId: number) =>
     Math.max(0, FREE_UNLOCK_COUNT - (gratuitsUtilises.get(proId) || 0));
 
-  // 3) Envoi en chunks de 50 (respect rate limit Resend ~10 req/s)
+  // 3) Envoi borné. Le journal conserve uniquement les acceptations confirmées.
   let sent = 0;
+  let newlyConfirmed = 0;
   let failed = 0;
   const errors: string[] = [];
+  const delivered: Array<{ proId: number; sentAt: string }> = [];
+  const deliveryStore = createDeliveryStore(sb);
 
   for (let i = 0; i < targets.length; i += CHUNK_SIZE) {
     const chunk = targets.slice(i, i + CHUNK_SIZE);
     const results = await Promise.all(
-      chunk.map((t) => sendOne(t.email, subject, htmlPour(restantsDe(t.id))))
+      chunk.map((t) => deliverProjectEmail(deliveryStore, sendOne, {
+        project_id: input.projectId, pro_id: t.id, kind: notificationKind,
+        recipient_email: t.email, subject, html: htmlPour(restantsDe(t.id)),
+      }))
     );
-    for (const r of results) {
+    for (const [index, r] of results.entries()) {
       if (r.ok) {
         sent++;
+        if (!r.reused) newlyConfirmed++;
+        delivered.push({ proId: chunk[index].id, sentAt: r.sentAt });
       } else {
         failed++;
         if (errors.length < 10 && r.error) errors.push(r.error.slice(0, 200));
@@ -633,10 +634,11 @@ export async function broadcastBtpProject(
   }
 
   // 4) Track le broadcast (ou la relance) en BDD
-  await markProjectDone(sb, input.projectId, kind, sent);
+  await markProjectDone(sb, input.projectId, kind, sent, failed === 0);
 
   // 5) Trace QUI a reçu le projet (project_leads, status "sent") pour les stats
-  //    admin "à qui c'est envoyé". N'insère que les pros pas déjà tracés (pas
+  //    admin "à qui c'est envoyé". Seulement les succès, jamais tous les ciblés.
+  //    N'insère que les pros pas déjà tracés (pas
   //    de contrainte unique → dédup côté code). Best-effort : un échec ici ne
   //    casse JAMAIS le broadcast (l'email est déjà parti).
   try {
@@ -645,14 +647,13 @@ export async function broadcastBtpProject(
       .select("pro_id")
       .eq("project_id", input.projectId);
     const already = new Set((existing || []).map((r: { pro_id: number }) => r.pro_id));
-    const sentAtIso = new Date().toISOString();
-    const toInsert = targets
-      .filter((t) => !already.has(t.id))
+    const toInsert = delivered
+      .filter((t) => !already.has(t.proId))
       .map((t) => ({
         project_id: input.projectId,
-        pro_id: t.id,
+        pro_id: t.proId,
         status: "sent" as const,
-        sent_at: sentAtIso,
+        sent_at: t.sentAt,
       }));
     if (toInsert.length > 0) {
       const { error: leadErr } = await sb.from("project_leads").insert(toInsert);
@@ -662,5 +663,5 @@ export async function broadcastBtpProject(
     console.error("[broadcastBtpProject] tracking destinataires KO:", (e as Error).message);
   }
 
-  return { totalTargets: targets.length, sent, failed, errors };
+  return { totalTargets: targets.length, sent: newlyConfirmed, failed, errors };
 }

@@ -13,7 +13,6 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { AgentContext } from "../agent-context/route";
 import {
   buildSystemPrompt,
   sanitizeContext,
@@ -156,6 +155,9 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
+    return NextResponse.json({ error: "Body invalide" }, { status: 400 });
+  }
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     return NextResponse.json({ error: "Body invalide" }, { status: 400 });
   }
 

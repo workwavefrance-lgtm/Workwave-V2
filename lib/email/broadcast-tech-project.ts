@@ -11,12 +11,11 @@
  * mails/jour via Resend. Plan Resend Business 100€/mois = 100k mails/mois
  * suffit jusqu'a ~6 projets/jour. Au dela, batch via cron quotidien.
  *
- * Batching : on envoie par chunks de 50 emails en parallele pour respecter
- * le rate limit Resend (10 req/s). Promise.all par chunk, sleep 1s entre
- * chunks.
+ * Envois par deux, espacés d'une seconde. Le journal par destinataire
+ * permet la reprise si le fournisseur refuse malgré tout un pic de débit.
  */
 import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
+import { createDeliveryStore, deliverProjectEmail, type ProjectEmail } from "./project-delivery";
 
 let _resend: Resend | null = null;
 function getResendClient(): Resend {
@@ -29,7 +28,7 @@ function getResendClient(): Resend {
 // les projets a TOUS les freelances dans ces categories, sans distinction.
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getServiceClient } from "@/lib/supabase/service-client";
-const CHUNK_SIZE = 50;
+const CHUNK_SIZE = 2;
 const CHUNK_DELAY_MS = 1000;
 
 function sleep(ms: number): Promise<void> {
@@ -116,25 +115,17 @@ function buildEmailHtml(input: BroadcastInput, baseUrl: string): string {
  * Envoie le mail a un freelance unique. Retourne ok=true/false + error.
  */
 async function sendOne(
-  email: string,
-  subject: string,
-  html: string
-): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const r = await getResendClient().emails.send({
-      from: "Workwave AI <contact@workwave.fr>",
-      to: [email],
-      subject,
-      html,
-    });
-    if (r.error) {
-      return { ok: false, error: r.error.message || String(r.error) };
-    }
-    return { ok: true };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { ok: false, error: msg };
-  }
+  email: ProjectEmail,
+  idempotencyKey: string
+): Promise<{ id: string }> {
+  const r = await getResendClient().emails.send({
+    from: "Workwave AI <contact@workwave.fr>",
+    to: [email.recipient_email],
+    subject: email.subject,
+    html: email.html,
+  }, { idempotencyKey });
+  if (r.error || !r.data?.id) throw new Error(r.error?.message || "Resend : réponse sans identifiant");
+  return { id: r.data.id };
 }
 
 /**
@@ -170,6 +161,7 @@ export async function broadcastTechProject(
     .is("deleted_at", null)
     .not("claimed_by_user_id", "is", null)
     .not("email", "is", null)
+    .eq("do_not_contact", false)
     .or(`paused_until.is.null,paused_until.lt.${nowIso}`);
 
   if (queryError) {
@@ -187,36 +179,47 @@ export async function broadcastTechProject(
   }
 
   let sent = 0;
+  let newlyConfirmed = 0;
   let failed = 0;
   const errors: string[] = [];
+  const deliveryStore = createDeliveryStore(sb);
 
   for (let i = 0; i < targets.length; i += CHUNK_SIZE) {
     const chunk = targets.slice(i, i + CHUNK_SIZE);
     const results = await Promise.all(
-      chunk.map((t) => sendOne(t.email, subject, html))
+      chunk.map((t) => deliverProjectEmail(deliveryStore, sendOne, {
+        project_id: input.projectId, pro_id: t.id, kind: "initial",
+        recipient_email: t.email, subject, html,
+      }))
     );
     for (const r of results) {
       if (r.ok) {
         sent++;
+        if (!r.reused) newlyConfirmed++;
       } else {
         failed++;
         if (errors.length < 10 && r.error) errors.push(r.error.slice(0, 200));
       }
     }
-    // Sleep 1s entre chunks (respect rate limit Resend ~10 req/s)
+    // Pause entre groupes pour borner le débit du flux.
     if (i + CHUNK_SIZE < targets.length) {
       await sleep(CHUNK_DELAY_MS);
     }
   }
 
   // Track le broadcast en BDD pour audit (count + dernier broadcast)
-  await sb
+  const { count: confirmedCount, error: countError } = await sb.from("project_email_deliveries")
+    .select("pro_id", { count: "exact", head: true })
+    .eq("project_id", input.projectId).eq("kind", "initial").not("sent_at", "is", null);
+  if (countError) throw new Error(countError.message);
+  const { error: updateError } = await sb
     .from("projects")
     .update({
-      broadcast_count: sent,
-      broadcasted_at: new Date().toISOString(),
+      broadcast_count: confirmedCount ?? 0,
+      ...(failed === 0 && sent > 0 ? { broadcasted_at: new Date().toISOString() } : {}),
     })
     .eq("id", input.projectId);
+  if (updateError) throw new Error(updateError.message);
 
-  return { totalTargets: targets.length, sent, failed, errors };
+  return { totalTargets: targets.length, sent: newlyConfirmed, failed, errors };
 }

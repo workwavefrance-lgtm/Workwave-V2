@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
+import { getAnalyticsTestUserIds, isAnalyticsTestActivity } from "@/lib/analytics/test-accounts";
 
 // Vertical métier : "btp" (BTP + domicile + personne) vs "ai" (tech/freelances).
 export type Vertical = "btp" | "ai";
@@ -15,15 +16,15 @@ export type Delta = { current: number; previous: number; pct: number | null };
 export type EventsByDayPoint = { date: string; count: number };
 export type RevenuePoint = { date: string; revenue: number; unlocks: number };
 export type TopEvent = { name: string; count: number };
-export type FunnelStep = { label: string; count: number; hint?: string };
+export type ActivityCount = { label: string; count: number; hint?: string };
 export type Breakdown = { name: string; count: number };
 
-/** Les indicateurs de tête (chiffres bruts + comparaison). L'UI dérive les taux. */
+/** Volumes indépendants, comparés à la période précédente ; aucun taux de conversion. */
 export type KpiSet = {
   revenueCents: Delta; // somme des unlocks PAYÉS (amount_cents > 0)
   unlocksPaid: Delta; // nb d'unlocks payés
   unlocksFree: Delta; // nb d'unlocks offerts (offre 2 premiers)
-  projectsSubmitted: Delta; // nb project_form_submitted
+  projectsValid: Delta; // projets créés, hors supprimés/suspects, BTP et freelances
   // 09/09/2026 : « vu » (affichage, sans intention, y compris les pages
   // listing qui embarquent le formulaire) et « commencé » (première
   // interaction) sont deux nombres distincts. Avant, project_form_started
@@ -41,9 +42,9 @@ export type VerticalBundle = {
   revenueByDay: RevenuePoint[];
   eventsByDay: EventsByDayPoint[];
   topEvents: TopEvent[];
-  conversionFunnel: FunnelStep[]; // commencé → soumis → contact débloqué (le cash)
-  formFunnel: FunnelStep[]; // vu → écrans (un par couple numéro x nom observé) → soumis
-  claimFunnel: FunnelStep[]; // claim_started → claim_completed
+  businessActivity: ActivityCount[];
+  formActivity: ActivityCount[]; // vues/écrans avec consentement, jamais les envois serveur
+  claimActivity: ActivityCount[]; // événements indépendants, sans cohorte de tentatives
   byCategory: Breakdown[]; // top métiers demandés
   byUrgency: Breakdown[]; // répartition urgence
   byCity: Breakdown[]; // top villes demandées
@@ -64,11 +65,12 @@ export type AdminAnalytics = VerticalSplit<VerticalBundle> & {
 // Raw + helpers de chargement
 // ============================================================
 
-type RawEvent = {
+export type RawEvent = {
   event_name: string;
   created_at: string;
   project_id: number | null;
   pro_id: number | null;
+  user_id?: string | null;
   metadata:
     | {
         vertical?: string;
@@ -79,17 +81,29 @@ type RawEvent = {
         category?: string;
         city?: string;
         urgency?: string;
+        pro_id?: number | string;
+        proId?: number | string;
       }
     | null;
 };
 
-type RawUnlock = {
+export type RawUnlock = {
   project_id: number | null;
   pro_id: number | null;
   amount_cents: number | null;
   paid_at: string | null;
   created_at: string | null;
 };
+
+export type RawProject = {
+  id: number;
+  created_at: string;
+  vertical: string | null;
+  status: string;
+};
+
+export const isValidAnalyticsProject = (project: RawProject) =>
+  project.status !== "deleted" && project.status !== "suspicious";
 
 const isAi = (v: string | null | undefined) => v === "tech" || v === "ai";
 
@@ -98,7 +112,8 @@ async function loadPaged<T>(
   table: string,
   select: string,
   sinceCol: string,
-  sinceIso: string
+  sinceIso: string,
+  untilIso: string
 ): Promise<T[]> {
   const db = getAdminServiceClient();
   const out: T[] = [];
@@ -109,9 +124,11 @@ async function loadPaged<T>(
       .from(table)
       .select(select)
       .gte(sinceCol, sinceIso)
+      .lte(sinceCol, untilIso)
       .order(sinceCol, { ascending: true })
+      .order("id", { ascending: true })
       .range(offset, offset + PAGE - 1);
-    if (error) break;
+    if (error) throw new Error(`Impossible de charger les statistiques (${table}).`);
     const rows = (data || []) as T[];
     if (rows.length === 0) break;
     out.push(...rows);
@@ -265,20 +282,19 @@ function activeProsCount(evs: RawEvent[]): number {
   return s.size;
 }
 
-function computeKpis(
+export function computeKpis(
   evCur: RawEvent[],
   evPrev: RawEvent[],
   uCur: RawUnlock[],
-  uPrev: RawUnlock[]
+  uPrev: RawUnlock[],
+  pCur: RawProject[],
+  pPrev: RawProject[]
 ): KpiSet {
   return {
     revenueCents: delta(sumPaid(uCur), sumPaid(uPrev)),
     unlocksPaid: delta(countPaid(uCur), countPaid(uPrev)),
     unlocksFree: delta(countFree(uCur), countFree(uPrev)),
-    projectsSubmitted: delta(
-      countName(evCur, "project_form_submitted"),
-      countName(evPrev, "project_form_submitted")
-    ),
+    projectsValid: delta(pCur.length, pPrev.length),
     formViewed: delta(
       countName(evCur, "project_form_viewed"),
       countName(evPrev, "project_form_viewed")
@@ -334,32 +350,13 @@ function computeTop(evs: RawEvent[]): TopEvent[] {
     .slice(0, 10);
 }
 
-/** Entonnoir cash : formulaire commencé → projet soumis → contact débloqué.
- *
- *  09/09/2026 : la première marche s'appuie sur project_form_started, qui
- *  signifie désormais « commencé » (première interaction), plus « affiché ».
- *  Le nombre d'affichages (project_form_viewed) est donné en indice sur cette
- *  marche et NON comme une marche au-dessus : AnalyticsClient.tsx lit
- *  conversionFunnel[0] et [2] par INDICE pour son taux « ouvert → débloqué »,
- *  une marche insérée en tête décalerait tout en silence. Les indices 0, 1, 2
- *  gardent donc exactement le même sens qu'avant. La marche « Formulaire vu »
- *  vit dans formFunnel, qui n'est lu par indice nulle part. */
-function computeConversionFunnel(evs: RawEvent[], us: RawUnlock[]): FunnelStep[] {
-  const vus = countName(evs, "project_form_viewed");
+/** Les déblocages peuvent concerner des projets plus anciens et plusieurs pros
+ *  peuvent acheter un même projet. Ces volumes ne forment pas un entonnoir. */
+export function computeBusinessActivity(projects: RawProject[], us: RawUnlock[]): ActivityCount[] {
   return [
-    {
-      label: "Formulaire commencé",
-      count: countName(evs, "project_form_started"),
-      // Absent tant que l'événement n'existe pas sur la période (données
-      // antérieures au 09/09/2026) : « sur 0 affichés » serait un faux signal.
-      ...(vus > 0 ? { hint: `sur ${vus.toLocaleString("fr-FR")} affichés` } : {}),
-    },
-    { label: "Projet soumis", count: countName(evs, "project_form_submitted") },
-    {
-      label: "Contact débloqué",
-      count: us.length,
-      hint: "payés + offerts",
-    },
+    { label: "Projets valides créés", count: projects.length, hint: "hors supprimés et suspects" },
+    { label: "Contacts payés", count: countPaid(us) },
+    { label: "Contacts offerts", count: countFree(us) },
   ];
 }
 
@@ -373,8 +370,8 @@ const ECRANS_ACTUELS: ReadonlyArray<readonly [number, string]> = [
   [4, "Coordonnées"],
 ];
 
-/** Progression dans le formulaire : vu → chaque écran → soumis
- *  (events project_form_viewed, project_step_reached, project_form_submitted).
+/** Affichages et interactions du formulaire après consentement.
+ *  project_form_submitted vient du serveur, sans le même périmètre : exclu ici.
  *
  *  Le formulaire a changé deux fois de découpage : 4 écrans jusqu'au 27/08/2026
  *  (Métier, Ville, Projet, Contact), 5 écrans du 28/08 au 08/09 (Besoin, Métier,
@@ -386,7 +383,7 @@ const ECRANS_ACTUELS: ReadonlyArray<readonly [number, string]> = [
  *  une ligne par couple observé, les époques ne se mélangent jamais, et une
  *  ligne d'un ancien découpage disparaît d'elle-même quand la période ne le
  *  couvre plus. */
-function computeFormFunnel(evs: RawEvent[]): FunnelStep[] {
+export function computeFormActivity(evs: RawEvent[]): ActivityCount[] {
   const nomDeRepli = new Map<number, string>(ECRANS_ACTUELS);
   const parCouple = new Map<string, { step: number; nom: string; count: number }>();
   for (const e of evs) {
@@ -406,7 +403,7 @@ function computeFormFunnel(evs: RawEvent[]): FunnelStep[] {
     const cle = `${step}:${nom}`;
     if (!parCouple.has(cle)) parCouple.set(cle, { step, nom, count: 0 });
   }
-  const ecrans: FunnelStep[] = [...parCouple.values()]
+  const ecrans: ActivityCount[] = [...parCouple.values()]
     .sort((a, b) => a.step - b.step || b.count - a.count || a.nom.localeCompare(b.nom, "fr"))
     .map((c) => ({ label: `Écran ${c.step} · ${c.nom}`, count: c.count }));
   return [
@@ -415,12 +412,12 @@ function computeFormFunnel(evs: RawEvent[]): FunnelStep[] {
       count: countName(evs, "project_form_viewed"),
       hint: "affiché, sans intention",
     },
+    { label: "Formulaire commencé", count: countName(evs, "project_form_started"), hint: "première interaction depuis le 09/09/2026" },
     ...ecrans,
-    { label: "Projet soumis", count: countName(evs, "project_form_submitted") },
   ];
 }
 
-function computeClaimFunnel(evs: RawEvent[]): FunnelStep[] {
+function computeClaimActivity(evs: RawEvent[]): ActivityCount[] {
   return [
     { label: "Réclamation démarrée", count: countName(evs, "claim_started") },
     { label: "Réclamation validée", count: countName(evs, "claim_completed") },
@@ -452,17 +449,19 @@ function computeBundle(
   evPrev: RawEvent[],
   uCur: RawUnlock[],
   uPrev: RawUnlock[],
+  pCur: RawProject[],
+  pPrev: RawProject[],
   b: Buckets
 ): VerticalBundle {
   return {
     totalEvents: evCur.length,
-    kpis: computeKpis(evCur, evPrev, uCur, uPrev),
+    kpis: computeKpis(evCur, evPrev, uCur, uPrev, pCur, pPrev),
     revenueByDay: computeRevenueByDay(uCur, b),
     eventsByDay: computeEventsByDay(evCur, b),
     topEvents: computeTop(evCur),
-    conversionFunnel: computeConversionFunnel(evCur, uCur),
-    formFunnel: computeFormFunnel(evCur),
-    claimFunnel: computeClaimFunnel(evCur),
+    businessActivity: computeBusinessActivity(pCur, uCur),
+    formActivity: computeFormActivity(evCur),
+    claimActivity: computeClaimActivity(evCur),
     byCategory: computeBreakdown(evCur, "category", 8),
     byUrgency: computeBreakdown(evCur, "urgency", 6, URGENCY_LABELS),
     byCity: computeBreakdown(evCur, "city", 8),
@@ -475,29 +474,39 @@ function computeBundle(
 
 type ClassifiedEvent = { ev: RawEvent; v: Vertical; inCurrent: boolean; inPrevious: boolean };
 type ClassifiedUnlock = { u: RawUnlock; v: Vertical; inCurrent: boolean; inPrevious: boolean };
+type ClassifiedProject = { p: RawProject; v: Vertical; inCurrent: boolean; inPrevious: boolean };
 
 async function loadAndClassify(spec: WindowSpec): Promise<{
   events: ClassifiedEvent[];
   unlocks: ClassifiedUnlock[];
+  projects: ClassifiedProject[];
 }> {
   const db = getAdminServiceClient();
   const loadSinceIso = spec.loadSince.toISOString();
+  const loadUntilIso = spec.currentEnd.toISOString();
 
   // Charge la fenêtre courante + la fenêtre de comparaison (pour les deltas)
-  const [events, unlocks] = await Promise.all([
+  const [rawEvents, rawUnlocks, rawProjects, testUserIds] = await Promise.all([
     loadPaged<RawEvent>(
       "events",
-      "event_name, created_at, project_id, pro_id, metadata",
+      "event_name, created_at, project_id, pro_id, user_id, metadata",
       "created_at",
-      loadSinceIso
+      loadSinceIso,
+      loadUntilIso
     ),
     loadPaged<RawUnlock>(
       "lead_unlocks",
       "project_id, pro_id, amount_cents, paid_at, created_at",
       "paid_at",
-      loadSinceIso
+      loadSinceIso,
+      loadUntilIso
     ),
+    loadPaged<RawProject>("projects", "id, created_at, vertical, status", "created_at", loadSinceIso, loadUntilIso),
+    getAnalyticsTestUserIds(),
   ]);
+  const events = rawEvents.filter((event) => !isAnalyticsTestActivity(event, testUserIds));
+  const unlocks = rawUnlocks.filter((unlock) => !isAnalyticsTestActivity(unlock));
+  const projects = rawProjects.filter(isValidAnalyticsProject);
 
   // Maps vertical : project_id → vertical, pro_id → vertical
   const projectIds = [
@@ -519,22 +528,26 @@ async function loadAndClassify(spec: WindowSpec): Promise<{
   const projVert = new Map<number, string>();
   for (let i = 0; i < projectIds.length; i += 1000) {
     const chunk = projectIds.slice(i, i + 1000);
-    const { data } = (await db.from("projects").select("id, vertical").in("id", chunk)) as {
+    const { data, error } = (await db.from("projects").select("id, vertical").in("id", chunk)) as {
       data: { id: number; vertical: string | null }[] | null;
+      error: unknown;
     };
+    if (error) throw new Error("Impossible de répartir les projets dans les statistiques.");
     for (const p of data || []) if (p.vertical) projVert.set(p.id, p.vertical);
   }
 
   const proVert = new Map<number, string>();
   for (let i = 0; i < proIds.length; i += 1000) {
     const chunk = proIds.slice(i, i + 1000);
-    const { data } = (await db
+    const { data, error } = (await db
       .from("pros")
       .select("id, categories(vertical)")
       .in("id", chunk)) as {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: { id: number; categories: any }[] | null;
+      error: unknown;
     };
+    if (error) throw new Error("Impossible de répartir les professionnels dans les statistiques.");
     for (const p of data || []) {
       const v = Array.isArray(p.categories) ? p.categories[0]?.vertical : p.categories?.vertical;
       if (v) proVert.set(p.id, v);
@@ -573,7 +586,17 @@ async function loadAndClassify(spec: WindowSpec): Promise<{
     };
   });
 
-  return { events: classifiedEvents, unlocks: classifiedUnlocks };
+  const classifiedProjects: ClassifiedProject[] = projects.map((p) => {
+    const t = new Date(p.created_at).getTime();
+    return {
+      p,
+      v: isAi(p.vertical) ? "ai" : "btp",
+      inCurrent: t >= scMs && t <= ceMs,
+      inPrevious: t >= spMs && t < peMs,
+    };
+  });
+
+  return { events: classifiedEvents, unlocks: classifiedUnlocks, projects: classifiedProjects };
 }
 
 // ============================================================
@@ -584,17 +607,20 @@ async function loadAndClassify(spec: WindowSpec): Promise<{
 export const getAdminAnalytics = cache(
   async (period: PeriodInput = 30): Promise<AdminAnalytics> => {
     const spec = windowFor(period);
-    const { events, unlocks } = await loadAndClassify(spec);
+    const { events, unlocks, projects } = await loadAndClassify(spec);
     const buckets = makeBuckets(spec);
 
     const bundleFor = (v: Vertical | "all"): VerticalBundle => {
       const evAll = v === "all" ? events : events.filter((c) => c.v === v);
       const uAll = v === "all" ? unlocks : unlocks.filter((c) => c.v === v);
+      const pAll = v === "all" ? projects : projects.filter((c) => c.v === v);
       const evCur = evAll.filter((c) => c.inCurrent).map((c) => c.ev);
       const evPrev = evAll.filter((c) => c.inPrevious).map((c) => c.ev);
       const uCur = uAll.filter((c) => c.inCurrent).map((c) => c.u);
       const uPrev = uAll.filter((c) => c.inPrevious).map((c) => c.u);
-      return computeBundle(evCur, evPrev, uCur, uPrev, buckets);
+      const pCur = pAll.filter((c) => c.inCurrent).map((c) => c.p);
+      const pPrev = pAll.filter((c) => c.inPrevious).map((c) => c.p);
+      return computeBundle(evCur, evPrev, uCur, uPrev, pCur, pPrev, buckets);
     };
 
     return {

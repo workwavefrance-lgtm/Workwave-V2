@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { formatDateFR } from "@/lib/utils/date";
 import { markLeadContacted, markLeadNotRelevant } from "@/app/pro/dashboard/leads/[id]/actions";
 import { startBtpUnlock } from "@/app/pro/dashboard/leads/actions";
-import type { LeadWithProject } from "@/lib/queries/leads";
+import type { LeadDetailData } from "@/lib/pro/lead-detail-data";
 
 const URGENCY_LABELS: Record<string, string> = {
   today: "Aujourd\u2019hui",
@@ -48,7 +48,7 @@ export default function LeadDetail({
   unlocked,
   freeRemaining,
 }: {
-  lead: LeadWithProject;
+  lead: LeadDetailData;
   /**
    * Le pro a-t-il payé (ou consommé un offert) pour CE projet ? Calculé côté
    * serveur dans page.tsx : quand c'est faux, les coordonnées ont déjà été

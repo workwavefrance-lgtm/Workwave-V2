@@ -263,7 +263,7 @@ export default function CreerFicheForm({
       </button>
 
       <p className="text-xs text-[var(--text-tertiary)] text-center">
-        Étape suivante : vous confirmez par un code envoyé à votre email pour activer votre fiche. Gratuit, sans engagement.
+        Étape suivante : vérifiez votre email, puis notre équipe validera votre lien avec l’entreprise avant de vous donner accès à la fiche. Gratuit, sans engagement.
       </p>
     </form>
   );

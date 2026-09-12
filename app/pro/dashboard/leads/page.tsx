@@ -2,7 +2,6 @@ import { getServiceClient } from "@/lib/supabase/service-client";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import { haversineKm } from "@/lib/utils/haversine";
 import { projetTropAncien } from "@/lib/matching/fraicheur";
@@ -12,10 +11,7 @@ import {
   FREE_UNLOCK_COUNT,
   getFreeUnlocksRemaining,
 } from "@/lib/billing/free-unlocks";
-import {
-  getGeneralistCategoryIds,
-  getAllBtpCategoryIds,
-} from "@/lib/matching/generalist";
+import { getBtpCategoryRules } from "@/lib/matching/btp-categories";
 
 export const metadata: Metadata = {
   title: "Leads reçus · Workwave Pro",
@@ -114,22 +110,9 @@ export default async function LeadsPage({
   const proDeptId = pro.city.department_id ?? null;
   const radiusKm = pro.intervention_radius_km ?? 200;
 
-  // Catégories du pro = principale + secondaires (multi-métiers).
-  const proCategoryIds = new Set<number>([
-    pro.category_id,
-    ...((pro.secondary_category_ids as number[] | null) || []),
-  ]);
-
-  // Pro GÉNÉRALISTE (multiservice / petit-bricolage) : il voit TOUS les projets
-  // BTP de sa zone, pas seulement ceux de sa catégorie (homme toutes mains =
-  // tous corps de métier). Cohérent avec le broadcast (lib/matching/generalist).
-  const generalistIds = await getGeneralistCategoryIds(service);
-  const isGeneralist = generalistIds.some((id) => proCategoryIds.has(id));
-  if (isGeneralist) {
-    const allBtp = await getAllBtpCategoryIds(service);
-    allBtp.forEach((id) => proCategoryIds.add(id));
-  }
-  const leadCategoryIds = Array.from(proCategoryIds);
+  // Même expansion des clusters et généralistes que la diffusion email.
+  const matching = await getBtpCategoryRules(service);
+  const leadCategoryIds = matching.projectCategoryIdsForPro(pro);
 
   // Les projets que CE pro a deja debloques. Charges AVANT la liste, parce
   // qu'ils echappent au masquage des projets clos : un lead debloque reste

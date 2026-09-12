@@ -5,6 +5,8 @@ import { getDashboardContext } from "@/lib/pro/dashboard-context";
 import DashboardHome from "@/components/pro/dashboard/DashboardHome";
 import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
+import { getBtpCategoryRules } from "@/lib/matching/btp-categories";
+import { getServiceClient } from "@/lib/supabase/service-client";
 
 export const metadata: Metadata = {
   title: "Tableau de bord · Workwave Pro",
@@ -26,14 +28,10 @@ export default async function DashboardHomePage() {
 
   // Accueil pay-per-lead : données dynamiques (projets matchant les catégories
   // principale + secondaires du pro + son département). Cf. getProDashboardData.
+  const matching = await getBtpCategoryRules(getServiceClient());
   const dashboardData = await getProDashboardData({
     proId: pro.id,
-    categoryIds: Array.from(
-      new Set<number>([
-        pro.category_id,
-        ...((pro.secondary_category_ids as number[] | null) || []),
-      ])
-    ),
+    categoryIds: matching.projectCategoryIdsForPro(pro),
     lat: pro.city?.latitude ?? null,
     lng: pro.city?.longitude ?? null,
     radiusKm: pro.intervention_radius_km ?? 200,
