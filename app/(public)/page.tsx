@@ -313,37 +313,9 @@ export default async function Home() {
             ))}
           </ul>
           </div>
-          {/* Barre de reassurance (maquette Willy). Trois signaux VRAIS et
-              verifiables, aucun chiffre invente : le SIRET est controlable au
-              registre officiel, les donnees viennent de Sirene, et le nombre
-              de projets n'est PAS affiche puisqu'on ne peut pas encore
-              l'annoncer honnetement. */}
-          <div className="relative mt-10 inline-flex flex-col sm:flex-row items-center gap-y-3 sm:gap-x-7 rounded-2xl bg-[var(--bg-primary)] border border-[var(--card-border)] shadow-sm px-6 py-4 text-sm text-[var(--text-secondary)]">
-            <span className="inline-flex items-center gap-2">
-              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true">
-                <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6l7-3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Gratuit pour les particuliers
-            </span>
-            <span className="hidden sm:block w-px h-5 bg-[var(--card-border)]" aria-hidden="true" />
-            <span className="inline-flex items-center gap-2">
-              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true">
-                <rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.8" />
-                <path d="M8 10V7a4 4 0 118 0v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-              Sécurisé et confidentiel
-            </span>
-            <span className="hidden sm:block w-px h-5 bg-[var(--card-border)]" aria-hidden="true" />
-            <span className="inline-flex items-center gap-2">
-              <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true">
-                <path d="M3 20v-1a5 5 0 015-5h3a5 5 0 015 5v1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <circle cx="9.5" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.8" />
-                <path d="M17 14a4 4 0 014 4v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-              Sans création de compte
-            </span>
-          </div>
+          {/* Barre de reassurance (gratuit / securise / sans compte) SUPPRIMEE le
+              12/09/2026 a la demande de Willy : elle repetait l'encart de recherche
+              (« Gratuit, sans compte ») et la section depot juste en dessous. */}
           {/* Bande de compteurs SUPPRIMEE le 11/08/2026.
               Le chiffre 2 560 292 est passe dans le H1 le meme jour : le
               repeter 400 px plus bas, en enorme et en coral, avec le meme
