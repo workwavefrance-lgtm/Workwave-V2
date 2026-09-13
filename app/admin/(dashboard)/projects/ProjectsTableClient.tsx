@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import Link from "next/link";
+import AdminPageHeading from "@/components/admin/layout/AdminPageHeading";
 import AdminTableSearch from "@/components/admin/data-display/AdminTableSearch";
 import AdminTableFilters from "@/components/admin/data-display/AdminTableFilters";
 import type { FilterConfig } from "@/components/admin/data-display/AdminTableFilters";
@@ -11,9 +12,9 @@ import CsvExportButton from "@/components/admin/export/CsvExportButton";
 import type { AdminProjectRow, AdminProjectsFilters } from "@/lib/queries/admin-projects";
 
 const STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  new: { label: "Nouveau", color: "#5EC8F0", bg: "rgba(94,200,240,.14)" },
-  routed: { label: "Routé", color: "var(--admin-success)", bg: "rgba(52,211,153,.14)" },
-  unrouted: { label: "Non routé", color: "var(--admin-warning)", bg: "rgba(251,191,36,.14)" },
+  new: { label: "Nouveau", color: "var(--admin-info)", bg: "rgba(94,200,240,.14)" },
+  routed: { label: "Diffusé", color: "var(--admin-success)", bg: "rgba(52,211,153,.14)" },
+  unrouted: { label: "Non diffusé", color: "var(--admin-warning)", bg: "rgba(251,191,36,.14)" },
   suspicious: { label: "Suspect", color: "var(--admin-danger)", bg: "rgba(251,110,91,.14)" },
   closed: { label: "Fermé", color: "var(--admin-text-tertiary)", bg: "var(--admin-hover)" },
 };
@@ -22,7 +23,7 @@ const FILTERS: FilterConfig[] = [{
   key: "status", label: "Statut",
   options: [
     { label: "Tous", value: "all" }, { label: "Nouveau", value: "new" },
-    { label: "Suspect", value: "suspicious" }, { label: "Routé", value: "routed" },
+    { label: "Suspect", value: "suspicious" }, { label: "Diffusé", value: "routed" },
     { label: "Fermé", value: "closed" },
   ],
 }];
@@ -57,14 +58,8 @@ export default function ProjectsTableClient({
   }, [router, searchParams]);
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between gap-3 mb-1">
-        <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--admin-text)" }}>Projets</h1>
-        <CsvExportButton endpoint={`/api/admin/projects?${searchParams.toString()}&format=csv`} filename="projects-export" />
-      </div>
-      <p className="text-xs mb-4" style={{ color: "var(--admin-text-tertiary)" }}>
-        {initialCount} projet{initialCount > 1 ? "s" : ""}
-      </p>
+    <div>
+      <AdminPageHeading eyebrow="Les projets" title="Chaque demande compte." subtitle="Gardez le fil." description={`${initialCount.toLocaleString("fr-FR")} projet${initialCount > 1 ? "s" : ""} dans cette sélection. Retrouvez leur diffusion, les contacts débloqués et les points à vérifier.`} actions={<CsvExportButton endpoint={`/api/admin/projects?${searchParams.toString()}&format=csv`} filename="projects-export" />} />
 
       <div className="flex flex-col sm:flex-row gap-2.5 mb-4">
         <div className="w-full sm:w-64">
@@ -78,41 +73,25 @@ export default function ProjectsTableClient({
           Aucun projet trouvé
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {initialData.map((p) => {
-            const st = STATUS[p.status] || STATUS.new;
-            const suspect = p.status === "suspicious";
-            return (
-              <Link key={p.id} href={`/admin/projects/${p.id}`}
-                className="p-4 rounded-2xl transition-colors hover:brightness-125 block"
-                style={{ background: "var(--admin-card)", border: `1px solid ${suspect ? "var(--admin-danger)" : "var(--admin-border)"}` }}>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ color: st.color, background: st.bg }}>{st.label}</span>
-                  <span className="text-[10px] tabular-nums" style={{ color: "var(--admin-text-tertiary)" }}>
-                    #{p.id} · {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-                <div className="text-[15px] font-bold" style={{ color: "var(--admin-text)" }}>
-                  {p.category?.name || "-"} <span className="font-medium" style={{ color: "var(--admin-text-secondary)" }}>· {p.city?.name || "-"}{p.city?.department?.code ? ` (${p.city.department.code})` : ""}</span>
-                </div>
-                <div className="text-[11px] mt-0.5" style={{ color: "var(--admin-text-tertiary)" }}>
-                  {p.first_name} · {BUDGET_LABEL[p.budget] || p.budget} · {URGENCY_LABEL[p.urgency] || p.urgency}
-                </div>
-                {p.ai_qualification?.summary && (
-                  <div className="text-[11px] mt-2 line-clamp-2" style={{ color: "var(--admin-text-secondary)" }}>{p.ai_qualification.summary}</div>
-                )}
-                <div className="flex items-center gap-3 mt-3 pt-3 text-[11px]" style={{ borderTop: "1px solid var(--admin-border)" }}>
-                  <span style={{ color: "var(--admin-text-tertiary)" }}>📡 {p.broadcast_count ?? 0} pro{(p.broadcast_count ?? 0) > 1 ? "s" : ""}</span>
-                  <span style={{ color: p.unlockCount > 0 ? "var(--admin-success)" : "var(--admin-text-tertiary)", fontWeight: p.unlockCount > 0 ? 700 : 400 }}>
-                    {p.unlockCount > 0 ? `✓ ${p.unlockCount} ont pris` : "0 prise"}
-                  </span>
-                  {suspect && p.suspicion_score != null && (
-                    <span className="ml-auto tabular-nums" style={{ color: "var(--admin-danger)" }}>risque {p.suspicion_score}</span>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
+        <div className="admin-surface overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="admin-table admin-project-table w-full text-left">
+              <thead style={{background:"var(--admin-hover)",color:"var(--admin-text-secondary)"}}><tr>{["Le projet", "Demandeur", "Statut", "Diffusion", "Contacts"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead>
+              <tbody>{initialData.map(p => {
+                const st = STATUS[p.status] || {label:p.status,color:"var(--admin-text-secondary)",bg:"var(--admin-hover)"};
+                return <tr key={p.id} style={{borderTop:"1px solid var(--admin-border)"}}>
+                  <td><Link href={`/admin/projects/${p.id}`} className="font-semibold">{p.category?.name || "Catégorie non renseignée"} · {p.city?.name || "Ville non renseignée"}{p.city?.department?.code ? ` (${p.city.department.code})` : ""}</Link>
+                    <small>#{p.id} · {new Date(p.created_at).toLocaleString("fr-FR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Paris"})}</small>
+                    {p.ai_qualification?.summary && <small className="line-clamp-2" title={p.ai_qualification.summary}>{p.ai_qualification.summary}</small>}
+                  </td>
+                  <td>{p.first_name || "Non renseigné"}<small>{BUDGET_LABEL[p.budget] || p.budget}</small><small>{URGENCY_LABEL[p.urgency] || p.urgency}</small></td>
+                  <td><span className="inline-block rounded-full px-3 py-1 text-[11px]" style={{background:st.bg,color:st.color}}>{st.label}</span>{p.status === "suspicious" && p.suspicion_score != null && <small>Score de risque : {p.suspicion_score}</small>}</td>
+                  <td className="tabular-nums">{p.broadcast_count ?? 0}<small>professionnels</small></td>
+                  <td className="tabular-nums"><strong style={{color:p.unlockCount > 0 ? "var(--admin-success)" : "var(--admin-text-secondary)"}}>{p.unlockCount}</strong><small>déblocage{p.unlockCount > 1 ? "s" : ""}</small><Link href={`/admin/projects/${p.id}`} className="inline-block mt-3 text-[11px]" aria-label={`Ouvrir le projet ${p.id}`}>Ouvrir ↗</Link></td>
+                </tr>;
+              })}</tbody>
+            </table>
+          </div>
         </div>
       )}
 

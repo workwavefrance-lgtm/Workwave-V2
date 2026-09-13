@@ -38,7 +38,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+      <div className="fixed bottom-24 lg:bottom-4 right-4 left-4 sm:left-auto z-[200] flex flex-col gap-2 max-w-md"
+        aria-live="polite" aria-atomic="false">
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onDismiss={removeToast} />
         ))}
@@ -66,16 +67,16 @@ function ToastItem({
   }, [toast.id, onDismiss]);
 
   const colors = {
-    success: { bg: "rgba(16, 185, 129, 0.15)", border: "rgba(16, 185, 129, 0.3)", text: "#10B981" },
-    error: { bg: "rgba(239, 68, 68, 0.15)", border: "rgba(239, 68, 68, 0.3)", text: "#EF4444" },
-    info: { bg: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.3)", text: "#3B82F6" },
+    success: { bg: "rgba(16, 185, 129, 0.15)", border: "rgba(16, 185, 129, 0.3)", text: "var(--admin-success)" },
+    error: { bg: "rgba(239, 68, 68, 0.15)", border: "rgba(239, 68, 68, 0.3)", text: "var(--admin-danger)" },
+    info: { bg: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.3)", text: "var(--admin-info)" },
   }[toast.type];
 
   return (
     <div
       className="px-4 py-2.5 rounded-lg text-xs font-medium shadow-xl transition-all duration-200"
       style={{
-        backgroundColor: colors.bg,
+        backgroundColor: "var(--admin-card-hi)",
         border: `1px solid ${colors.border}`,
         color: colors.text,
         transform: visible ? "translateX(0)" : "translateX(100%)",

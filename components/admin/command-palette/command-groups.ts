@@ -9,7 +9,7 @@ export type CommandItem = {
 
 export const STATIC_COMMANDS: CommandItem[] = [
   // Navigation
-  { id: "nav-overview", label: "Overview", href: "/admin", group: "Navigation", icon: "nav" },
+  { id: "nav-overview", label: "Vue d’ensemble", href: "/admin", group: "Navigation", icon: "nav" },
   { id: "nav-pros", label: "Professionnels", href: "/admin/pros", group: "Navigation", icon: "nav" },
   { id: "nav-projects", label: "Projets", href: "/admin/projects", group: "Navigation", icon: "nav" },
   { id: "nav-leads", label: "Leads", href: "/admin/leads", group: "Navigation", icon: "nav" },
@@ -17,11 +17,11 @@ export const STATIC_COMMANDS: CommandItem[] = [
   { id: "nav-lea-journal", label: "Conversations de Léa", href: "/admin/support/conversations", group: "Navigation", icon: "nav" },
   { id: "nav-reviews", label: "Avis", href: "/admin/reviews", group: "Navigation", icon: "nav" },
   { id: "nav-finances", label: "Finances", href: "/admin/finances", group: "Navigation", icon: "nav" },
-  { id: "nav-analytics", label: "Analytics", href: "/admin/analytics", group: "Navigation", icon: "nav" },
+  { id: "nav-analytics", label: "Conversions", href: "/admin/analytics", group: "Navigation", icon: "nav" },
   { id: "nav-statistiques", label: "Statistiques", href: "/admin/statistiques", group: "Navigation", icon: "nav" },
-  { id: "nav-alerts", label: "Alertes", href: "/admin/alerts", group: "Navigation", icon: "nav" },
-  { id: "nav-logs", label: "Logs", href: "/admin/logs", group: "Navigation", icon: "nav" },
-  { id: "nav-settings", label: "Settings", href: "/admin/settings", group: "Navigation", icon: "nav" },
+  { id: "nav-alerts", label: "Vigilance", href: "/admin/alerts", group: "Navigation", icon: "nav" },
+  { id: "nav-logs", label: "Journal", href: "/admin/logs", group: "Navigation", icon: "nav" },
+  { id: "nav-settings", label: "Réglages", href: "/admin/settings", group: "Navigation", icon: "nav" },
   // Actions
   { id: "action-stripe", label: "Ouvrir Stripe Dashboard", href: "https://dashboard.stripe.com", group: "Actions", icon: "action" },
 ];

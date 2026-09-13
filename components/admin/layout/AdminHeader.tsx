@@ -2,23 +2,26 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useAdmin } from "@/components/admin/shell/AdminProvider";
+import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const BREADCRUMB_LABELS: Record<string, string> = {
-  admin: "Admin",
+  admin: "Workwave",
   pros: "Professionnels",
   projects: "Projets",
+  support: "Support",
+  conversations: "Conversations",
   leads: "Leads",
   enquete: "Enquête",
   reviews: "Avis",
   reclamations: "Rattachements",
   finances: "Finances",
-  analytics: "Analytics",
+  analytics: "Conversions",
   statistiques: "Statistiques",
-  alerts: "Alertes",
-  logs: "Logs",
-  settings: "Settings",
+  alerts: "Vigilance",
+  logs: "Journal",
+  settings: "Réglages",
 };
 
 export default function AdminHeader() {
@@ -62,7 +65,7 @@ export default function AdminHeader() {
   }
 
   return (
-    <header className="h-14 flex items-center justify-between px-4 lg:px-6 border-b border-[var(--admin-border)] bg-[var(--admin-card)]">
+    <header className="admin-header flex items-center justify-between gap-3">
       {/* Breadcrumbs (nav mobile = barre du bas AdminBottomBar) */}
       <div className="flex items-center gap-3 min-w-0">
         <nav className="flex items-center gap-1.5 text-xs min-w-0 overflow-hidden">
@@ -73,7 +76,7 @@ export default function AdminHeader() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
             )}
-            <span
+            <Link href={crumb.href}
               className={
                 crumb.isLast
                   ? "text-[var(--admin-text)] font-medium"
@@ -81,7 +84,7 @@ export default function AdminHeader() {
               }
             >
               {crumb.label}
-            </span>
+            </Link>
           </span>
         ))}
         </nav>
@@ -105,6 +108,8 @@ export default function AdminHeader() {
         {/* User menu */}
         <div className="relative" ref={menuRef}>
           <button
+            aria-label="Menu du compte"
+            aria-expanded={showMenu}
             onClick={() => setShowMenu(!showMenu)}
             className="w-7 h-7 rounded-full bg-[var(--admin-accent)]/20 flex items-center justify-center hover:ring-2 hover:ring-[var(--admin-accent)]/30 transition-all duration-150"
           >
@@ -127,7 +132,7 @@ export default function AdminHeader() {
                 onClick={handleSignOut}
                 className="w-full text-left px-3 py-2 text-xs text-[var(--admin-danger)] hover:bg-[var(--admin-hover)] transition-colors duration-150"
               >
-                Se deconnecter
+                Se déconnecter
               </button>
             </div>
           )}

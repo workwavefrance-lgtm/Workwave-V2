@@ -1,0 +1,91 @@
+/* Scoped to the authenticated shell: public pages keep their own theme. */
+.admin-shell {
+  color-scheme: light;
+  --admin-bg:#f5f7f8; --admin-card:rgba(255,255,255,.86); --admin-card-hi:#fff;
+  --admin-border:#e3e9ed; --admin-border-strong:#cbd6dd; --admin-hover:#eef3f4;
+  --admin-text:#20282d; --admin-text-secondary:#596872; --admin-text-tertiary:#677781;
+  --admin-accent:#bd451b; --admin-accent-hover:#a63c16; --admin-accent-soft:#fbece3;
+  --admin-danger:#ae3f37; --admin-warning:#98601e; --admin-success:#28745a; --admin-info:#326b96;
+  --text-primary:var(--admin-text); --text-secondary:var(--admin-text-secondary); --text-tertiary:var(--admin-text-tertiary);
+  --bg-primary:var(--admin-bg); --bg-secondary:var(--admin-card); --bg-tertiary:var(--admin-hover);
+  --border-color:var(--admin-border); --border:var(--admin-border); --accent:var(--admin-accent); --accent-hover:var(--admin-accent-hover);
+  background:radial-gradient(ellipse at 85% 0%,#e7f0ed 0,transparent 45%),radial-gradient(ellipse at 12% 0%,#f6e8dd 0,transparent 45%),var(--admin-bg);
+  color:var(--admin-text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.admin-shell * {color-scheme:light}
+.admin-shell :focus-visible {outline:3px solid #3277aa;outline-offset:3px}
+.admin-shell ::-webkit-scrollbar {width:7px;height:7px}
+.admin-shell ::-webkit-scrollbar-thumb {background:var(--admin-border-strong);border-radius:8px}
+.admin-shell .admin-content {padding:24px 36px 36px;scroll-padding-top:24px}
+.admin-shell .admin-content > * {max-width:1440px;margin-inline:auto}
+.admin-shell .admin-skip-link {position:fixed;left:20px;top:-80px;z-index:250;background:#fff;padding:14px;border-radius:14px}
+.admin-shell .admin-skip-link:focus {top:12px}
+.admin-shell .admin-page-heading {display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:28px}
+.admin-shell .admin-eyebrow {font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:var(--admin-text-tertiary);margin-bottom:12px}
+.admin-shell .admin-page-heading h1 {font-size:40px;line-height:1.1;letter-spacing:-1.5px;font-weight:650;color:var(--admin-text);margin:0}
+.admin-shell .admin-page-heading h1 span {display:block;color:#75828b}
+.admin-shell .admin-page-description {font-size:12px;line-height:1.75;color:var(--admin-text-secondary);margin-top:12px;max-width:780px}
+.admin-shell .admin-surface {background:var(--admin-card);border:1px solid var(--admin-border);border-radius:25px;box-shadow:0 10px 34px #243b4804,inset 0 1px 0 #fff}
+.admin-shell .admin-kpi {padding:23px;border-radius:24px;box-shadow:0 10px 34px #243b4804}
+.admin-shell .admin-button {border-radius:999px;min-height:38px;padding-inline:17px}
+.admin-shell .admin-button-primary {background-image:linear-gradient(135deg,#c34b1c,#ad3d17);box-shadow:inset 0 1px 0 #ffffff50,0 4px 14px #b74a2114}
+.admin-shell .admin-table td {padding:17px 15px;font-size:12px}
+.admin-shell .admin-table th {padding:13px 15px;font-size:10px;text-transform:none;letter-spacing:.1px}
+.admin-shell .admin-sidebar {flex-shrink:0;background:#ffffff88;backdrop-filter:blur(22px);border-right:1px solid #fff;padding:25px 13px 16px}
+.admin-shell .admin-brand {font-size:25px;font-weight:700;letter-spacing:-1.3px;color:var(--admin-text);white-space:nowrap}
+.admin-shell .admin-brand span {color:var(--admin-accent)}
+.admin-shell .admin-nav-link {display:flex;align-items:center;gap:12px;border-radius:14px;padding:11px 13px;font-size:12px;color:var(--admin-text-secondary);margin:3px 0}
+.admin-shell .admin-nav-link:hover {background:#ffffffa8}
+.admin-shell .admin-nav-link[aria-current=page] {background:#fff;color:var(--admin-accent);box-shadow:0 4px 16px #233b4808;font-weight:600}
+.admin-shell .admin-header {min-height:74px;flex-shrink:0;background:transparent;border:0;padding-inline:36px}
+.admin-shell .admin-overview-grid {display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,1fr);gap:22px}
+.admin-shell .admin-priority {display:flex;align-items:center;gap:15px;padding:20px 0;border-bottom:1px solid var(--admin-border)}
+.admin-shell .admin-priority:last-child {border-bottom:0}
+.admin-shell .admin-priority:hover {color:var(--admin-accent)}
+.admin-shell .admin-priority-icon {width:40px;height:40px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;background:var(--admin-accent-soft);color:var(--admin-accent)}
+.admin-shell .admin-section-title {font-size:17px;font-weight:600;letter-spacing:-.4px;color:var(--admin-text)}
+.admin-shell .admin-project-table {min-width:720px}
+.admin-shell .admin-project-table small {display:block;font-size:11px;color:var(--admin-text-secondary);margin-top:4px;white-space:normal;max-width:380px}
+.admin-shell .admin-project-table a:hover {color:var(--admin-accent)}
+.admin-shell .admin-project-table td {vertical-align:top}
+.admin-shell .admin-support-toolbar {display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.admin-shell .admin-support-layout {display:grid;grid-template-columns:310px minmax(0,1fr);overflow:hidden;min-height:600px}
+.admin-shell .admin-support-list {padding:14px;background:#f7f9fa8a;border-right:1px solid var(--admin-border);max-height:calc(100dvh - 260px);min-height:400px;overflow:auto}
+.admin-shell .admin-ticket-row {padding:13px 10px;border:1px solid transparent;border-radius:17px;margin-bottom:5px;display:flex;align-items:flex-start;gap:9px}
+.admin-shell .admin-ticket-row[data-active=true] {background:#fff;border-color:var(--admin-border);box-shadow:0 5px 18px #253e4c05}
+.admin-shell .admin-ticket-avatar {width:32px;height:32px;border-radius:12px;background:#eaf1ef;color:#467761;display:grid;place-items:center;flex-shrink:0;font-size:11px;font-weight:600}
+.admin-shell .admin-ticket-row:nth-child(3n) .admin-ticket-avatar {background:#f5eae2;color:#936d50}
+.admin-shell .admin-ticket-link {display:block;min-width:0;flex:1}
+.admin-shell .admin-ticket-link strong {display:block;font-size:12px;line-height:1.5;font-weight:550}
+.admin-shell .admin-ticket-link small {display:block;color:var(--admin-text-secondary);font-size:10px;margin-top:5px;overflow-wrap:anywhere}
+.admin-shell .admin-support-conversation {padding:26px;min-width:0}
+.admin-shell .admin-conversation-grid {display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px}
+.admin-shell .admin-chat-card {border-radius:23px;padding:24px}
+.admin-shell .admin-message {max-width:92%;border-radius:20px 20px 20px 5px;padding:18px 20px;overflow-wrap:anywhere}
+.admin-shell .admin-message-outgoing {margin-left:auto;border-radius:20px 20px 5px 20px}
+.admin-shell .admin-message-internal {max-width:100%;border-radius:15px}
+.admin-shell .admin-message-body {font-size:13px;line-height:1.85}
+.admin-shell .admin-ticket-embedded .admin-conversation-grid {display:flex;flex-direction:column}
+.admin-shell .admin-ticket-embedded .admin-conversation-context {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.admin-shell .admin-ticket-embedded .admin-conversation-context > * {margin:0}
+.admin-shell .admin-ticket-embedded .admin-chat-card {box-shadow:none}
+.admin-shell .admin-composer {font-size:13px;line-height:1.8;min-height:140px;border-radius:16px;padding:15px}
+.admin-shell .admin-alert-card {border-radius:23px;box-shadow:0 8px 30px #263d4804}
+.admin-shell .hover\:brightness-125:hover {filter:none;background-color:var(--admin-hover)!important}
+@media(max-width:1200px){.admin-shell .admin-content{padding-inline:24px}.admin-shell .admin-support-layout{grid-template-columns:265px minmax(0,1fr)}.admin-shell .admin-conversation-grid{grid-template-columns:minmax(0,1fr) 220px}.admin-shell .admin-support-conversation{padding:18px}.admin-shell .admin-chat-card{padding:18px}}
+@media(max-width:1023px){.admin-shell .admin-content{padding:20px 20px 100px}.admin-shell .admin-header{min-height:62px;padding-inline:20px}.admin-shell .admin-page-heading h1{font-size:34px}.admin-shell .admin-overview-grid{grid-template-columns:1fr}.admin-shell .admin-conversation-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.admin-shell .admin-content{padding-inline:16px}.admin-shell .admin-page-heading{align-items:flex-start;flex-direction:column;margin-bottom:23px}.admin-shell .admin-page-heading h1{font-size:31px;letter-spacing:-1px}.admin-shell .admin-kpi{padding:18px}.admin-shell .admin-support-layout{display:block}.admin-shell .admin-support-list{max-height:310px;min-height:150px;border-right:0;border-bottom:1px solid var(--admin-border)}.admin-shell .admin-support-conversation{padding:16px}.admin-shell .admin-ticket-embedded .admin-conversation-context{grid-template-columns:1fr}.admin-shell .admin-message{max-width:100%}.admin-shell .admin-chat-card{padding:16px}.admin-shell .admin-support-toolbar>*{max-width:100%}.admin-shell .admin-table td{padding:13px}.admin-shell .admin-surface{border-radius:22px}}
+@media(prefers-reduced-motion:reduce){.admin-shell *{scroll-behavior:auto!important;transition:none!important;animation-duration:.01ms!important}}
+@media(prefers-reduced-transparency:reduce){.admin-shell .admin-sidebar,.admin-shell .admin-surface{background:#fff;backdrop-filter:none}}
+@media(max-width:700px){
+  .admin-shell .admin-project-table{display:block;min-width:0}
+  .admin-shell .admin-project-table thead{display:none}
+  .admin-shell .admin-project-table tbody{display:block}
+  .admin-shell .admin-project-table tr{display:grid;grid-template-columns:1fr 1fr;padding:12px}
+  .admin-shell .admin-project-table td{display:block;padding:8px!important;min-width:0}
+  .admin-shell .admin-project-table td:nth-child(-n+2){grid-column:1/-1}
+  .admin-shell .admin-project-table td:last-child{grid-column:1/-1}
+  .admin-shell .admin-project-table td:first-child{font-size:14px}
+  .admin-shell .admin-project-table td small{max-width:none}
+}

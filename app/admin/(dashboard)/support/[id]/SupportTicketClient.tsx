@@ -20,7 +20,7 @@ import {
 function Card({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
     <div
-      className="rounded-xl p-4"
+      className="admin-chat-card admin-surface"
       style={{ backgroundColor: "var(--admin-card)", border: "1px solid var(--admin-border)" }}
     >
       {title ? (
@@ -41,25 +41,32 @@ const AUTHOR_LABEL: Record<SupportAuthorRole, string> = {
   system: "Système",
 };
 
-export default function SupportTicketClient({ detail }: { detail: AdminTicketDetail }) {
+export default function SupportTicketClient({ detail, embedded = false, draftValue, onDraftChange, locked = false, onPendingChange }: {
+  detail: AdminTicketDetail; embedded?: boolean; draftValue?: string; onDraftChange?: (value: string) => void; locked?: boolean; onPendingChange?: (pending: boolean) => void;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const { ticket, messages, context } = detail;
 
-  const [draft, setDraft] = useState("");
+  const [localDraft, setLocalDraft] = useState("");
+  const draft = draftValue ?? localDraft;
+  const setDraft = (value: string) => { if (onDraftChange) onDraftChange(value); else setLocalDraft(value); };
   const [busy, setBusy] = useState<"reply" | "note" | null>(null);
   const [statusBusy, setStatusBusy] = useState(false);
   const [drafting, setDrafting] = useState(false);
 
+  const Heading = embedded ? "h2" : "h1";
   const statusMeta = STATUS_META[ticket.status as TicketStatus] || STATUS_META.open;
 
   async function sendMessage(kind: "reply" | "note") {
+    if (locked || busy || drafting) return;
     const text = draft.trim();
     if (!text) {
       toast("Message vide", "error");
       return;
     }
     setBusy(kind);
+    onPendingChange?.(true);
     try {
       const url =
         kind === "reply"
@@ -87,12 +94,16 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
       toast("Erreur réseau", "error");
     } finally {
       setBusy(null);
+      onPendingChange?.(false);
     }
   }
 
   /** Demande un brouillon à l'IA et le place dans la zone de texte. N'envoie rien. */
   async function generateDraft() {
+    if (locked || busy || drafting) return;
+    if (draft.trim()) { toast("Votre brouillon est conservé. Videz-le avant de générer une nouvelle proposition.", "info"); return; }
     setDrafting(true);
+    onPendingChange?.(true);
     try {
       const res = await fetch(`/api/admin/support/${ticket.id}/draft`, { method: "POST" });
       const json = await res.json();
@@ -106,12 +117,14 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
       toast("Erreur réseau", "error");
     } finally {
       setDrafting(false);
+      onPendingChange?.(false);
     }
   }
 
   async function changeStatus(status: string) {
-    if (status === ticket.status) return;
+    if (locked || statusBusy || status === ticket.status) return;
     setStatusBusy(true);
+    onPendingChange?.(true);
     try {
       const res = await fetch(`/api/admin/support/${ticket.id}`, {
         method: "PATCH",
@@ -129,13 +142,14 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
       toast("Erreur réseau", "error");
     } finally {
       setStatusBusy(false);
+      onPendingChange?.(false);
     }
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className={embedded ? "admin-ticket-embedded" : "max-w-6xl mx-auto"}>
       {/* Retour */}
-      <button
+      {!embedded && <button
         onClick={() => router.push("/admin/support")}
         className="inline-flex items-center gap-1.5 text-xs mb-4 transition-colors"
         style={{ color: "var(--admin-text-secondary)" }}
@@ -144,13 +158,13 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Boîte de réception
-      </button>
+      </button>}
 
       {/* En-tête */}
       <div className="flex flex-wrap items-center gap-3 mb-1">
-        <h1 className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--admin-text)" }}>
-          Ticket #{ticket.id}
-        </h1>
+        <Heading className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--admin-text)" }}>
+          {ticket.subject || `Ticket #${ticket.id}`}
+        </Heading>
         <AdminBadge variant={statusMeta.variant} dot>
           {statusMeta.label}
         </AdminBadge>
@@ -172,12 +186,12 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
         ) : null}
       </div>
       <p className="text-sm mb-6" style={{ color: "var(--admin-text-secondary)" }}>
-        {ticket.subject || "(sans objet)"}
+        #{ticket.id} · {ticket.requester_name || ticket.requester_email || "Demandeur"} · {SOURCE_LABEL[ticket.source] || ticket.source}
       </p>
 
-      <div className="grid lg:grid-cols-3 gap-4">
+      <div className="admin-conversation-grid">
         {/* Colonne principale : fil + réponse */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="space-y-4 min-w-0">
           <Card title="Conversation">
             <div className="space-y-3">
               {messages.length === 0 ? (
@@ -190,7 +204,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
                   return (
                     <div
                       key={m.id}
-                      className="rounded-lg p-3"
+                      className={`admin-message ${m.is_internal ? "admin-message-internal" : mine ? "admin-message-outgoing" : ""}`}
                       style={{
                         background: m.is_internal
                           ? "rgba(251,191,36,.08)"
@@ -221,8 +235,8 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
                         </span>
                       </div>
                       <div
-                        className="text-xs whitespace-pre-wrap break-words"
-                        style={{ color: "var(--admin-text-secondary)", lineHeight: 1.6 }}
+                        className="admin-message-body whitespace-pre-wrap break-words"
+                        style={{ color: "var(--admin-text-secondary)" }}
                       >
                         {m.body}
                       </div>
@@ -236,11 +250,13 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
           {/* Zone de réponse */}
           <Card title="Répondre">
             <textarea
+              aria-label="Votre réponse ou note interne"
+              disabled={locked || busy !== null || drafting}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               rows={5}
               placeholder="Votre réponse au client, ou une note interne…"
-              className="w-full px-3 py-2 rounded-lg text-xs outline-none resize-y"
+              className="admin-composer w-full resize-y"
               style={{
                 backgroundColor: "var(--admin-bg)",
                 border: "1px solid var(--admin-border)",
@@ -252,16 +268,16 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
                 variant="secondary"
                 size="sm"
                 loading={drafting}
-                disabled={drafting || busy !== null}
+                disabled={locked || drafting || busy !== null}
                 onClick={generateDraft}
               >
-                Rédiger la réponse
+                Préparer un brouillon avec l’IA
               </AdminButton>
               <AdminButton
                 variant="primary"
                 size="sm"
                 loading={busy === "reply"}
-                disabled={busy !== null || drafting || !ticket.requester_email}
+                disabled={locked || busy !== null || drafting || !ticket.requester_email}
                 onClick={() => sendMessage("reply")}
               >
                 Envoyer au client
@@ -270,7 +286,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
                 variant="ghost"
                 size="sm"
                 loading={busy === "note"}
-                disabled={busy !== null || drafting}
+                disabled={locked || busy !== null || drafting}
                 onClick={() => sendMessage("note")}
               >
                 Note interne
@@ -289,7 +305,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
         </div>
 
         {/* Sidebar contexte */}
-        <div className="space-y-4">
+        <div className="admin-conversation-context space-y-4">
           {/* Statut */}
           <Card title="Statut">
             <div className="flex flex-wrap gap-1.5">
@@ -298,7 +314,7 @@ export default function SupportTicketClient({ detail }: { detail: AdminTicketDet
                 return (
                   <button
                     key={t.value}
-                    disabled={statusBusy}
+                    disabled={locked || statusBusy}
                     onClick={() => changeStatus(t.value)}
                     className="px-2.5 py-1 text-[11px] font-semibold rounded-full transition-colors disabled:opacity-50"
                     style={{

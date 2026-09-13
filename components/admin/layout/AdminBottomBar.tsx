@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -16,11 +16,9 @@ import {
  */
 export default function AdminBottomBar() {
   const pathname = usePathname();
-  const [sheet, setSheet] = useState(false);
-
-  useEffect(() => {
-    setSheet(false);
-  }, [pathname]);
+  const [sheetPath, setSheetPath] = useState<string | null>(null);
+  const sheet = sheetPath === pathname;
+  const setSheet = (open: boolean) => setSheetPath(open ? pathname : null);
 
   const plusActive = ADMIN_NAV_SECONDARY.some((i) => isNavActive(i, pathname));
 
@@ -35,7 +33,7 @@ export default function AdminBottomBar() {
             style={{
               background: "var(--admin-card)",
               borderTop: "1px solid var(--admin-border-strong)",
-              boxShadow: "0 -20px 50px -10px rgba(0,0,0,.7)",
+              boxShadow: "0 -20px 50px -10px rgba(30,50,60,.16)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -47,6 +45,8 @@ export default function AdminBottomBar() {
                   <Link
                     key={item.key}
                     href={item.href}
+                    onClick={() => setSheet(false)}
+                    aria-current={active ? "page" : undefined}
                     className="flex flex-col items-center gap-2 rounded-2xl py-3.5 transition-colors"
                     style={{
                       background: active ? "var(--admin-accent-soft)" : "var(--admin-hover)",
@@ -68,7 +68,7 @@ export default function AdminBottomBar() {
       <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 z-[155] flex items-stretch"
         style={{
-          background: "rgba(10,11,15,.86)",
+          background: "rgba(255,255,255,.94)",
           backdropFilter: "blur(16px)",
           borderTop: "1px solid var(--admin-border)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -89,10 +89,11 @@ export default function AdminBottomBar() {
           );
         })}
         <button
-          onClick={() => setSheet((s) => !s)}
+          onClick={() => setSheet(!sheet)}
           className="flex-1 flex flex-col items-center justify-center gap-1 pt-2.5 pb-3"
           style={{ color: sheet || plusActive ? "var(--admin-accent)" : "var(--admin-text-tertiary)" }}
           aria-label="Plus d'espaces"
+          aria-expanded={sheet}
         >
           <span className="w-[22px] h-[22px]">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" className="w-full h-full">

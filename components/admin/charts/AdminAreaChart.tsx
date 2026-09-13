@@ -41,24 +41,24 @@ export default function AdminAreaChartComponent({
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="#1F1F1F"
+          stroke="var(--admin-border)"
           vertical={false}
         />
         <XAxis
           dataKey={xKey}
-          tick={{ fontSize: 10, fill: "#404040" }}
+          tick={{ fontSize: 10, fill: "var(--admin-text-tertiary)" }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 10, fill: "#404040" }}
+          tick={{ fontSize: 10, fill: "var(--admin-text-tertiary)" }}
           axisLine={false}
           tickLine={false}
           width={40}
         />
         <Tooltip
           content={<AdminChartTooltip valueFormatter={formatter} />}
-          cursor={{ stroke: "#1F1F1F" }}
+          cursor={{ stroke: "var(--admin-border)" }}
         />
         {ghostDataKey && (
           <Area

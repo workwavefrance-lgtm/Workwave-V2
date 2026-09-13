@@ -45,6 +45,7 @@ export default function AdminTableSearch({
       <input
         ref={inputRef}
         type="text"
+        aria-label={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -74,6 +75,7 @@ export default function AdminTableSearch({
       )}
       {value && (
         <button
+          aria-label="Effacer la recherche"
           onClick={() => onChange("")}
           className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
           style={{ color: "var(--admin-text-tertiary)" }}

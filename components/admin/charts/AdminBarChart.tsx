@@ -31,17 +31,17 @@ export default function AdminBarChartComponent({
       <BarChart data={data}>
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="#1F1F1F"
+          stroke="var(--admin-border)"
           vertical={false}
         />
         <XAxis
           dataKey={xKey}
-          tick={{ fontSize: 10, fill: "#404040" }}
+          tick={{ fontSize: 10, fill: "var(--admin-text-tertiary)" }}
           axisLine={false}
           tickLine={false}
         />
         <YAxis
-          tick={{ fontSize: 10, fill: "#404040" }}
+          tick={{ fontSize: 10, fill: "var(--admin-text-tertiary)" }}
           axisLine={false}
           tickLine={false}
           width={40}

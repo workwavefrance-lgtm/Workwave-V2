@@ -56,12 +56,13 @@ export default function AdminTable<T extends { id: number | string }>({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="admin-table w-full">
         <thead>
           <tr style={{ borderBottom: "1px solid var(--admin-border)" }}>
             {columns.map((col) => (
               <th
                 key={col.key}
+                scope="col"
                 className={`text-left text-[11px] font-medium uppercase tracking-wider px-3 py-2.5 ${col.className || ""}`}
                 style={{ color: "var(--admin-text-tertiary)" }}
               >

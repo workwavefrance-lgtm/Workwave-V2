@@ -1,4 +1,6 @@
-import { getAdminTickets, getTicketStatusCounts } from "@/lib/queries/admin-support";
+import { verifyAdmin } from "@/lib/admin/auth";
+import { redirect } from "next/navigation";
+import { getAdminTickets, getTicketStatusCounts, getAdminTicketById } from "@/lib/queries/admin-support";
 import SupportInboxClient from "./SupportInboxClient";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +10,7 @@ export default async function AdminSupportPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  if (!await verifyAdmin()) redirect("/admin/login");
   const sp = await searchParams;
   const filters = {
     status: sp.status || "open",
@@ -20,6 +23,9 @@ export default async function AdminSupportPage({
     getTicketStatusCounts(),
   ]);
 
+  const requestedId = sp.ticket && /^\d+$/.test(sp.ticket) ? Number(sp.ticket) : result.data[0]?.id;
+  const selectedDetail = requestedId && Number.isSafeInteger(requestedId) ? await getAdminTicketById(requestedId) : null;
+
   return (
     <SupportInboxClient
       initialData={result.data}
@@ -28,6 +34,7 @@ export default async function AdminSupportPage({
       initialTotalPages={result.totalPages}
       counts={counts}
       filters={filters}
+      selectedDetail={selectedDetail}
     />
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import AdminPageHeading from "@/components/admin/layout/AdminPageHeading";
 import type { Alert } from "@/lib/queries/admin-alerts";
 
 function timeAgo(dateStr: string): string {
@@ -76,7 +77,7 @@ function AlertCard({ alert }: { alert: Alert }) {
 
   return (
     <div
-      className="rounded-xl flex items-start gap-4 p-5"
+      className="admin-alert-card flex items-start gap-4 p-5"
       style={{
         backgroundColor: "var(--admin-card)",
         border: "1px solid var(--admin-border)",
@@ -131,24 +132,11 @@ function AlertCard({ alert }: { alert: Alert }) {
 export default function AlertsClient({ alerts }: { alerts: Alert[] }) {
   return (
     <div>
-      <h1
-        className="text-xl font-semibold mb-1"
-        style={{ color: "var(--admin-text)" }}
-      >
-        Alertes
-      </h1>
-      <p
-        className="text-xs mb-6"
-        style={{ color: "var(--admin-text-secondary)" }}
-      >
-        {alerts.length === 0
-          ? "Tout est nominal"
-          : `${alerts.length} anomalie${alerts.length > 1 ? "s" : ""} détectée${alerts.length > 1 ? "s" : ""}`}
-      </p>
+      <AdminPageHeading eyebrow="Vigilance" title="Voir les signaux." subtitle="Agir au bon moment." description={`${alerts.length} anomalie${alerts.length > 1 ? "s" : ""} remontée${alerts.length > 1 ? "s" : ""} par les contrôles disponibles. Les alertes sont recalculées à l’ouverture de cette page.`} />
 
       {alerts.length === 0 ? (
         <div
-          className="rounded-xl flex flex-col items-center justify-center py-20 gap-4"
+          className="admin-alert-card flex flex-col items-center justify-center py-20 gap-4"
           style={{
             backgroundColor: "var(--admin-card)",
             border: "1px solid var(--admin-border)",
@@ -184,7 +172,7 @@ export default function AlertsClient({ alerts }: { alerts: Alert[] }) {
               className="text-xs mt-1"
               style={{ color: "var(--admin-text-secondary)" }}
             >
-              La plateforme fonctionne normalement
+              Aucune anomalie remontée par ces contrôles.
             </p>
           </div>
         </div>

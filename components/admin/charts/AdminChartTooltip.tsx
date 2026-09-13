@@ -17,17 +17,17 @@ export default function AdminChartTooltip({
     <div
       className="rounded-lg px-3 py-2 text-xs shadow-xl"
       style={{
-        backgroundColor: "#1A1A1A",
-        border: "1px solid #2A2A2A",
+        backgroundColor: "var(--admin-card-hi)",
+        border: "1px solid var(--admin-border)",
       }}
     >
       {label && (
-        <p className="text-[10px] mb-1" style={{ color: "#737373" }}>
+        <p className="text-[10px] mb-1" style={{ color: "var(--admin-text-secondary)" }}>
           {label}
         </p>
       )}
       {payload.map((entry, i) => (
-        <p key={i} className="font-medium tabular-nums" style={{ color: entry.color }}>
+        <p key={i} className="font-medium tabular-nums" style={{ color: "var(--admin-text)" }}>
           {valueFormatter
             ? valueFormatter(entry.value as number, entry.name ?? "")
             : entry.value}

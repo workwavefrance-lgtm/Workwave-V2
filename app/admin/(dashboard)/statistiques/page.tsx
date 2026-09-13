@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AdminPageHeading from "@/components/admin/layout/AdminPageHeading";
 import {
   getStatistiquesAdmin,
   lirePeriode,
@@ -127,7 +128,7 @@ function Carte({
 }) {
   return (
     <section
-      className="rounded-xl p-5"
+      className="admin-surface rounded-xl p-5"
       style={{ backgroundColor: "var(--admin-card)", border: "1px solid var(--admin-border)" }}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -172,7 +173,7 @@ function Tuile({
 }) {
   return (
     <div
-      className="rounded-xl p-4"
+      className="admin-surface rounded-xl p-4"
       style={{ backgroundColor: "var(--admin-card)", border: "1px solid var(--admin-border)" }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -346,9 +347,7 @@ export default async function StatistiquesPage({
       {/* En-tête + sélecteur de période */}
       <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold mb-1" style={{ color: "var(--admin-text)" }}>
-            Statistiques
-          </h1>
+          <AdminPageHeading eyebrow="Statistiques" title="Comprendre ce qui avance." subtitle="Et ce qui reste à améliorer." />
           <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
             Audience et entonnoir de Workwave.fr · du {fmtJour(actuelle.debut)} au {fmtJour(actuelle.fin)} (
             {nbJours} jours, jusqu&apos;à hier) · comparé du {fmtJour(precedente.debut)} au{" "}
@@ -363,7 +362,7 @@ export default async function StatistiquesPage({
           </p>
         </div>
         <nav
-          className="inline-flex items-center gap-1 p-1 rounded-lg"
+          className="inline-flex items-center gap-1 p-1 rounded-full"
           style={{ backgroundColor: "var(--admin-hover)", border: "1px solid var(--admin-border)" }}
           aria-label="Période"
         >
@@ -373,6 +372,7 @@ export default async function StatistiquesPage({
               <Link
                 key={p}
                 href={`/admin/statistiques?periode=${p}`}
+                aria-current={actif ? "page" : undefined}
                 className="px-3 py-1.5 rounded-md text-sm font-semibold transition-all duration-150"
                 style={{
                   backgroundColor: actif ? "var(--admin-card)" : "transparent",
@@ -387,15 +387,15 @@ export default async function StatistiquesPage({
       </div>
 
       {/* G) Comment lire */}
-      <div
-        className="rounded-xl p-4 mb-4 text-sm space-y-1.5"
+      <details
+        className="admin-surface rounded-xl p-4 mb-4 text-sm space-y-1.5"
         style={{
           backgroundColor: "var(--admin-accent-soft)",
           border: "1px solid rgba(255,90,54,0.30)",
           color: "var(--admin-text)",
         }}
       >
-        <p className="font-semibold">Comment lire cette page</p>
+        <summary className="font-semibold cursor-pointer">Comment lire ces chiffres</summary>
         <p>
           Les visiteurs mesurés sont des sessions Umami : des navigateurs qui exécutent le JavaScript du site.
           Le trafic des robots identifié dans les journaux du serveur figure à part, en bas de page.
@@ -419,7 +419,7 @@ export default async function StatistiquesPage({
           « pas encore » signifie que la mesure n&apos;existe pas encore en base (NULL) : Search Console a 2 jours de
           retard et la table démarre le 09/09/2026. Ce n&apos;est jamais un zéro.
         </p>
-      </div>
+      </details>
 
       {/* A) Ligne de tête */}
       {e.statsJour ? (
@@ -432,7 +432,7 @@ export default async function StatistiquesPage({
           <Tuile titre="Vues de page" compare={s.tete.vues} nbJours={nbJours} />
           <Tuile titre="Clics Google (Search Console)" compare={s.tete.clicsGsc} nbJours={nbJours} />
           <div
-            className="rounded-xl p-4"
+            className="admin-surface rounded-xl p-4"
             style={{ backgroundColor: "var(--admin-card)", border: "1px solid var(--admin-border)" }}
           >
             <span className="text-sm font-medium" style={{ color: "var(--admin-text-secondary)" }}>

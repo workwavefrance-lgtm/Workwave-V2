@@ -22,7 +22,7 @@ export default function AdminKPICard({
 }) {
   return (
     <div
-      className="rounded-xl p-4 transition-colors duration-150"
+      className="admin-kpi transition-colors duration-150"
       style={{
         backgroundColor: "var(--admin-card)",
         border: "1px solid var(--admin-border)",

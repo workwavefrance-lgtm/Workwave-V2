@@ -2,28 +2,28 @@
 
 const VARIANTS = {
   default: {
-    bg: "rgba(250, 250, 250, 0.1)",
+    bg: "var(--admin-hover)",
     text: "var(--admin-text-secondary)",
   },
   success: {
     bg: "rgba(16, 185, 129, 0.1)",
-    text: "#10B981",
+    text: "var(--admin-success)",
   },
   warning: {
     bg: "rgba(245, 158, 11, 0.1)",
-    text: "#F59E0B",
+    text: "var(--admin-warning)",
   },
   danger: {
     bg: "rgba(239, 68, 68, 0.1)",
-    text: "#EF4444",
+    text: "var(--admin-danger)",
   },
   info: {
     bg: "rgba(59, 130, 246, 0.1)",
-    text: "#3B82F6",
+    text: "var(--admin-info)",
   },
   accent: {
-    bg: "rgba(16, 185, 129, 0.15)",
-    text: "#10B981",
+    bg: "var(--admin-accent-soft)",
+    text: "var(--admin-accent)",
   },
 } as const;
 

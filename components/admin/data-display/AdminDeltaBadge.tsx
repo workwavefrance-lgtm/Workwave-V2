@@ -15,8 +15,8 @@ export default function AdminDeltaBadge({
   const color = isNeutral
     ? "var(--admin-text-tertiary)"
     : isPositive
-      ? "#10B981"
-      : "#EF4444";
+      ? "var(--admin-success)"
+      : "var(--admin-danger)";
 
   const bg = isNeutral
     ? "rgba(250, 250, 250, 0.05)"
