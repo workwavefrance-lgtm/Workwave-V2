@@ -1,6 +1,6 @@
 # Admin — intégration du design validé, 13 septembre 2026
 
-Branche : `codex/admin-design-2026-09-13`. Travail local, sans push ni déploiement.
+Branche : `codex/admin-design-2026-09-13`. Intégration locale validée ; mise en ligne autorisée ensuite par Willy le 13 septembre.
 
 ## Réalisé
 
@@ -33,6 +33,12 @@ Les rubriques secondaires utilisent le nouveau thème et conservent leur organis
 - Build global : compilation et TypeScript réussis, génération interrompue volontairement à 352/415 après plusieurs minutes de progression très lente sur les pages publiques. Le build global complet n’est donc pas validé. Les premiers essais avaient rencontré la restriction réseau des polices Google puis le plafond mémoire Node ; la relance a utilisé 6 Go de heap.
 - Vérification supplémentaire sur réponse simulée retardée : changement de ticket et saisie désactivés pendant l’envoi, puis disponibles après sa fin.
 
+
+## Validation avec session réelle, avant mise en ligne
+
+Les cinq vues ont été ouvertes le 13 septembre avec le compte administrateur connecté sur le serveur Next local : vue d’ensemble, projets, support, statistiques et vigilance. Les vrais compteurs, tickets et tableaux sont affichés ; aucun message d’erreur navigateur. Vérification en lecture seule : aucun email ni changement de ticket réel.
+
+La référence distante `main` et le conteneur en service correspondent à `8e432df`. Le diff ajoute la refonte admin ainsi que le fichier SQL documentaire de l’index local préparé auparavant ; aucun exécuteur automatique de migration n’est ajouté. Le conteneur est sain ; le délai de job Coolify et le délai SSH effectif valent 7 200 secondes. Le build complet est confié au déploiement Coolify pour éviter deux générations de sitemaps simultanées contre la base.
 
 ## Avant mise en ligne
 
