@@ -1,3 +1,5 @@
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 /**
  * Webhook Resend "email.received" → transfère chaque email entrant reçu sur
  * contact@workwave.fr vers la vraie boîte admin (ADMIN_EMAIL), avec reply-to =
@@ -140,22 +142,21 @@ export async function POST(req: Request) {
   const attLine = atts.length
     ? `<b>Pièces jointes :</b> ${atts
         .map((a) => esc(a.filename || "pièce jointe"))
-        .join(", ")} <span style="color:#9CA3AF">(non re-jointes, visibles dans Resend)</span><br>`
+        .join(", ")} <span style="color:#66727c">(non re-jointes, visibles dans Resend)</span><br>`
     : "";
 
   const headerHtml = `
-    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#374151;line-height:1.6">
-      <div style="font-weight:700;color:#0A0A0A;margin-bottom:6px">📩 Email reçu sur contact@workwave.fr</div>
+      <div style="font-weight:700;color:#20282c;margin-bottom:6px">📩 Email reçu sur contact@workwave.fr</div>
       <b>De :</b> ${esc(from)}<br>
       <b>Objet :</b> ${esc(subject)}<br>
       ${attLine}
-      <span style="color:#6B7280">↩︎ Réponds directement à cet email : ta réponse part vers l'expéditeur d'origine.</span>
-    </div>`;
+      <span style="color:#53606a">↩︎ Réponds directement à cet email : ta réponse part vers l'expéditeur d'origine.</span>
+    `;
 
   const bodyHtml = mail.html
     ? mail.html
     : mail.text
-      ? `<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#0A0A0A">${esc(mail.text)}</pre>`
+      ? `<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#20282c">${esc(mail.text)}</pre>`
       : "<i>(corps vide)</i>";
 
   const textPlain = `📩 Email reçu sur contact@workwave.fr
@@ -218,7 +219,7 @@ ${mail.text || "(corps en HTML uniquement, voir la version HTML)"}`;
     to: adminEmail,
     replyTo: from,
     subject: `📩 ${subject} · via contact@workwave.fr`,
-    html: headerHtml + bodyHtml,
+    ...emailContent(renderEmail({ title: "Un nouveau message.", subtitle: "La conversation continue.", category: "Support", body: headerHtml + bodyHtml })),
     text: textPlain,
   });
   if (sent.error) {

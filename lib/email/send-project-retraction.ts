@@ -1,3 +1,5 @@
+import { escapeEmail, emailContent, renderEmail } from "@/lib/email/design";
+
 import { Resend } from "resend";
 
 let _resend: Resend | null = null;
@@ -36,26 +38,22 @@ export async function sendProjectRetractionEmail({
     from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: `[Workwave] Projet retiré · ${categoryName} à ${cityName}`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
-        <h1 style="font-size: 20px; font-weight: 700; color: #0A0A0A; margin-bottom: 16px;">
-          Projet retiré par le demandeur
-        </h1>
-        <p style="font-size: 15px; color: #6B7280; line-height: 1.6; margin-bottom: 16px;">
-          Bonjour ${proName},
+    ...emailContent(renderEmail({ title: "La demande a été retirée.", subtitle: "Vous êtes informé.", category: "Professionnels", body: `
+
+        <p style="font-size: 15px; color: #53606a; line-height: 1.6; margin-bottom: 16px;">
+          Bonjour ${escapeEmail(proName)},
         </p>
-        <p style="font-size: 15px; color: #6B7280; line-height: 1.6; margin-bottom: 16px;">
-          Le projet <strong>${categoryName}</strong> à <strong>${cityName}</strong> que vous avez
-          reçu le ${formattedDate} a été retiré par le demandeur.
+        <p style="font-size: 15px; color: #53606a; line-height: 1.6; margin-bottom: 16px;">
+          Le projet <strong>${escapeEmail(categoryName)}</strong> à <strong>${escapeEmail(cityName)}</strong> que vous avez
+          reçu le ${escapeEmail(formattedDate)} a été retiré par le demandeur.
         </p>
-        <p style="font-size: 15px; color: #6B7280; line-height: 1.6; margin-bottom: 24px;">
+        <p style="font-size: 15px; color: #53606a; line-height: 1.6; margin-bottom: 24px;">
           Merci de ne pas contacter cette personne.
         </p>
-        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;" />
-        <p style="font-size: 12px; color: #9CA3AF;">
+        <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0;">
+        <p style="font-size: 12px; color: #66727c;">
           Cet email a été envoyé automatiquement par Workwave.
         </p>
-      </div>
-    `,
+      ` })),
   });
 }

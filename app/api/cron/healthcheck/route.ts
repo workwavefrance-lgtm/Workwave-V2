@@ -1,3 +1,5 @@
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 /**
  * Cron horaire : healthcheck des routes critiques BTP + AI FR.
  *
@@ -134,8 +136,7 @@ async function checkOne(r: RouteCheck): Promise<CheckResult> {
 }
 
 function buildAlertHtml(failures: CheckResult[], allResults: CheckResult[]): string {
-  const criticalCount = failures.filter((f) => f.critical).length;
-  const warningCount = failures.filter((f) => !f.critical).length;
+
   const totalMs = allResults.reduce((s, r) => s + r.ms, 0);
 
   const failuresTable = failures
@@ -152,19 +153,17 @@ function buildAlertHtml(failures: CheckResult[], allResults: CheckResult[]): str
         ${f.url}
       </td>
     </tr>
-    ${f.error ? `<tr><td colspan="3" style="padding:0 12px 8px;font-size:11px;color:#999;font-family:monospace;">${f.error}</td></tr>` : ""}
+    ${f.error ? `<tr><td colspan="3" style="padding:0 12px 8px;font-size:11px;color:#66727c;font-family:monospace;">${f.error}</td></tr>` : ""}
   `,
     )
     .join("");
 
-  return `<!doctype html>
-<html><body style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#fafafa;padding:20px;">
-<div style="max-width:680px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;">
+  return renderEmail({ title: "Une route ne répond plus.", subtitle: "Vérifiez le site.", category: "Administration", body: `
   <div style="background:#fee;border-bottom:2px solid #f55;padding:20px 24px;">
-    <h1 style="margin:0;font-size:18px;color:#900;">🚨 Workwave healthcheck · ${criticalCount} critique${criticalCount > 1 ? "s" : ""}, ${warningCount} warning${warningCount > 1 ? "s" : ""}</h1>
+
     <p style="margin:6px 0 0;font-size:13px;color:#666;">${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })} · ${allResults.length} routes · ${totalMs}ms total</p>
   </div>
-  <div style="padding:20px 24px;">
+
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
         <tr style="background:#f8f8f8;text-align:left;">
@@ -175,10 +174,9 @@ function buildAlertHtml(failures: CheckResult[], allResults: CheckResult[]): str
       </thead>
       <tbody>${failuresTable}</tbody>
     </table>
-    <p style="margin:18px 0 0;font-size:12px;color:#999;">Cron horaire · VPS Hostinger (Coolify) · /api/cron/healthcheck</p>
-  </div>
-</div>
-</body></html>`;
+    <p style="margin:18px 0 0;font-size:12px;color:#66727c;">Cron horaire · VPS Hostinger (Coolify) · /api/cron/healthcheck</p>
+
+` });
 }
 
 export async function GET(req: Request) {
@@ -222,7 +220,7 @@ export async function GET(req: Request) {
         // "Receiving" du 08/06). On envoie donc directement à l'admin Gmail.
         to: [process.env.ADMIN_EMAIL || "workwave.france@gmail.com"],
         subject: `🚨 Workwave : ${criticalFailures.length} route critique${criticalFailures.length > 1 ? "s" : ""} KO`,
-        html: buildAlertHtml(failures, results),
+        ...emailContent(buildAlertHtml(failures, results)),
       });
       alertSent = true;
     } catch (e) {

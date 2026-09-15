@@ -1,3 +1,5 @@
+import { escapeEmail, emailContent, renderEmail } from "@/lib/email/design";
+
 /**
  * Email admin pour nouveau projet tech Workwave AI.
  *
@@ -11,7 +13,7 @@
  * admin_notification_error (les memes colonnes que pour le BTP).
  */
 import { Resend } from "resend";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 let _resend: Resend | null = null;
@@ -21,8 +23,6 @@ function getResendClient() {
   }
   return _resend;
 }
-
-let _sb: SupabaseClient | null = null;
 
 async function trackAdminNotification(
   projectId: number,
@@ -98,7 +98,7 @@ export async function sendAiProjectNotification(
 
   const suspicionBadge =
     input.qualification && input.qualification.suspicion_score > 70
-      ? `<span style="background:#FEE2E2;color:#DC2626;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;">⚠ Suspicion ${input.qualification.suspicion_score}/100</span>`
+      ? `<span style="background:#FEE2E2;color:#DC2626;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;">⚠ Suspicion ${escapeEmail(input.qualification.suspicion_score)}/100</span>`
       : "";
 
   // Phase 11 : broadcast remplace routing IA. On affiche les stats du broadcast
@@ -106,27 +106,27 @@ export async function sendAiProjectNotification(
   // Le bloc routed reste supporte pour retrocompat BTP (qui utilise toujours
   // le routing). En tech, broadcastInfo est defini et routed=[].
   const broadcastHtml = input.broadcastInfo
-    ? `<h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Broadcast a la communaute :</h3>
+    ? `<h3 style="font-size:14px;color:#53606a;margin:24px 0 12px 0;">Diffusion aux professionnels :</h3>
        <table style="font-size:13px;width:100%;border-collapse:collapse;">
-         <tr><td style="padding:4px 0;color:#999;width:160px;">Freelances cibles</td><td style="color:#0A0A0A;font-weight:600;">${input.broadcastInfo.totalTargets}</td></tr>
-         <tr><td style="padding:4px 0;color:#999;">Emails envoyes</td><td style="color:#0A0A0A;font-weight:600;">${input.broadcastInfo.sent}</td></tr>
-         ${input.broadcastInfo.failed > 0 ? `<tr><td style="padding:4px 0;color:#999;">Echecs envoi</td><td style="color:#DC2626;font-weight:600;">${input.broadcastInfo.failed}</td></tr>` : ""}
+         <tr><td style="padding:4px 0;color:#66727c;width:160px;">Professionnels ciblés</td><td style="color:#20282c;font-weight:600;">${escapeEmail(input.broadcastInfo.totalTargets)}</td></tr>
+         <tr><td style="padding:4px 0;color:#66727c;">Emails envoyés</td><td style="color:#20282c;font-weight:600;">${escapeEmail(input.broadcastInfo.sent)}</td></tr>
+         ${input.broadcastInfo.failed > 0 ? `<tr><td style="padding:4px 0;color:#66727c;">Échecs d’envoi</td><td style="color:#DC2626;font-weight:600;">${escapeEmail(input.broadcastInfo.failed)}</td></tr>` : ""}
        </table>`
     : "";
 
   const routedHtml = input.routed.length
-    ? `<h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Top 3 freelances routes par l'IA :</h3>
+    ? `<h3 style="font-size:14px;color:#53606a;margin:24px 0 12px 0;">Professionnels proposés :</h3>
        <ol style="padding-left:20px;">
          ${input.routed
            .map(
              (f) => `
            <li style="margin-bottom:10px;">
-             <a href="${baseUrl}/ai/freelance/${f.slug}" style="color:#FF6803;text-decoration:none;font-weight:600;">${f.name}</a>
-             <span style="color:#999;font-size:13px;">
+             <a href="${escapeEmail(baseUrl)}/ai/freelance/${escapeEmail(f.slug)}" style="color:#c64b1c;text-decoration:none;font-weight:600;">${escapeEmail(f.name)}</a>
+             <span style="color:#66727c;font-size:13px;">
                · ${f.postal_code || "-"}
-               · ${f.years_experience != null ? `${f.years_experience} ans XP` : "XP inconnue"}
-               ${f.github_username ? `· <a href="https://github.com/${f.github_username}" style="color:#525252;">@${f.github_username}</a>` : ""}
-               · score ${f.score}
+               · ${f.years_experience != null ? `${escapeEmail(f.years_experience)} ans XP` : "XP inconnue"}
+               ${f.github_username ? `· <a href="https://github.com/${escapeEmail(f.github_username)}" style="color:#53606a;">@${escapeEmail(f.github_username)}</a>` : ""}
+               · score ${escapeEmail(f.score)}
              </span>
            </li>`
            )
@@ -135,56 +135,51 @@ export async function sendAiProjectNotification(
     : broadcastHtml;
 
   const aiInsightsHtml = input.qualification
-    ? `<h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Analyse IA :</h3>
+    ? `<h3 style="font-size:14px;color:#53606a;margin:24px 0 12px 0;">Analyse IA :</h3>
        <table style="font-size:13px;width:100%;border-collapse:collapse;">
-         <tr><td style="padding:4px 0;color:#999;">Resume</td><td style="color:#0A0A0A;">${input.qualification.summary}</td></tr>
-         <tr><td style="padding:4px 0;color:#999;">Confiance categorie</td><td style="color:#0A0A0A;">${input.qualification.confidence}/100</td></tr>
-         <tr><td style="padding:4px 0;color:#999;">Budget realiste</td><td style="color:#0A0A0A;">${input.qualification.budget_realistic ? "✓" : "✗"} · ${input.qualification.budget_comment}</td></tr>
-         <tr><td style="padding:4px 0;color:#999;">Keywords</td><td style="color:#0A0A0A;">${input.qualification.keywords.join(", ")}</td></tr>
+         <tr><td style="padding:4px 0;color:#66727c;">Résumé</td><td style="color:#20282c;">${escapeEmail(input.qualification.summary)}</td></tr>
+         <tr><td style="padding:4px 0;color:#66727c;">Confiance sur la catégorie</td><td style="color:#20282c;">${escapeEmail(input.qualification.confidence)}/100</td></tr>
+         <tr><td style="padding:4px 0;color:#66727c;">Budget réaliste</td><td style="color:#20282c;">${input.qualification.budget_realistic ? "✓" : "✗"} · ${escapeEmail(input.qualification.budget_comment)}</td></tr>
+         <tr><td style="padding:4px 0;color:#66727c;">Mots-clés</td><td style="color:#20282c;">${input.qualification.keywords.join(", ")}</td></tr>
        </table>`
     : "";
 
-  const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;margin:0;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
+  const html = renderEmail({ title: "Un nouveau projet AI.", subtitle: "Découvrez la demande.", category: "Administration", body: `
     <div style="margin-bottom:20px;">
-      <span style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;">[ AI · NEW BRIEF ]</span>
+      <span style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#66727c;letter-spacing:0.2em;">WORKWAVE AI</span>
       ${suspicionBadge}
     </div>
 
-    <h1 style="font-size:22px;color:#0A0A0A;margin:0 0 8px 0;font-weight:800;letter-spacing:-0.02em;">${input.title}</h1>
-    <p style="font-size:14px;color:#525252;margin:0 0 24px 0;">Categorie : <strong>${input.categoryName}</strong></p>
+    <p style="font-size:14px;color:#53606a;margin:0 0 24px 0;">Catégorie : <strong>${escapeEmail(input.categoryName)}</strong></p>
 
-    <h3 style="font-size:14px;color:#525252;margin:0 0 8px 0;">Description :</h3>
-    <p style="font-size:14px;color:#0A0A0A;line-height:1.6;background:#FAFAFA;padding:16px;border-radius:8px;border-left:3px solid #FF6803;white-space:pre-wrap;">${input.description}</p>
+    <h3 style="font-size:14px;color:#53606a;margin:0 0 8px 0;">Description :</h3>
+    <p style="font-size:14px;color:#20282c;line-height:1.6;background:#f5f6f7;padding:16px;border-radius:22px;border-left:3px solid #c64b1c;white-space:pre-wrap;">${escapeEmail(input.description)}</p>
 
-    <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Brief :</h3>
+    <h3 style="font-size:14px;color:#53606a;margin:24px 0 12px 0;">Brief :</h3>
     <table style="font-size:13px;width:100%;border-collapse:collapse;">
-      <tr><td style="padding:4px 0;color:#999;">Budget</td><td style="color:#0A0A0A;font-family:'SF Mono',Menlo,monospace;">${input.budget}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Calendrier</td><td style="color:#0A0A0A;">${input.timeline}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Stack</td><td style="color:#0A0A0A;">${input.stack || "-"}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Remote OK</td><td style="color:#0A0A0A;">${input.remoteOk ? "✓ Oui" : "✗ Non"}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Localisation</td><td style="color:#0A0A0A;font-family:'SF Mono',Menlo,monospace;">${input.postal || "-"}</td></tr>
-    </table>
+      <tbody><tr><td style="padding:4px 0;color:#66727c;">Budget</td><td style="color:#20282c;font-family:'SF Mono',Menlo,monospace;">${escapeEmail(input.budget)}</td></tr>
+      <tr><td style="padding:4px 0;color:#66727c;">Calendrier</td><td style="color:#20282c;">${escapeEmail(input.timeline)}</td></tr>
+      <tr><td style="padding:4px 0;color:#66727c;">Stack</td><td style="color:#20282c;">${input.stack || "-"}</td></tr>
+      <tr><td style="padding:4px 0;color:#66727c;">À distance</td><td style="color:#20282c;">${input.remoteOk ? "✓ Oui" : "✗ Non"}</td></tr>
+      <tr><td style="padding:4px 0;color:#66727c;">Localisation</td><td style="color:#20282c;font-family:'SF Mono',Menlo,monospace;">${input.postal || "-"}</td></tr>
+    </tbody></table>
 
-    <h3 style="font-size:14px;color:#525252;margin:24px 0 12px 0;">Contact :</h3>
+    <h3 style="font-size:14px;color:#53606a;margin:24px 0 12px 0;">Contact :</h3>
     <table style="font-size:13px;width:100%;border-collapse:collapse;">
-      <tr><td style="padding:4px 0;color:#999;">Nom</td><td style="color:#0A0A0A;"><strong>${input.contactName}</strong>${input.company ? ` · ${input.company}` : ""}</td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Email</td><td style="color:#0A0A0A;"><a href="mailto:${input.contactEmail}" style="color:#FF6803;">${input.contactEmail}</a></td></tr>
-      <tr><td style="padding:4px 0;color:#999;">Telephone</td><td style="color:#0A0A0A;">${input.contactPhone || "-"}</td></tr>
-    </table>
+      <tbody><tr><td style="padding:4px 0;color:#66727c;">Nom</td><td style="color:#20282c;"><strong>${escapeEmail(input.contactName)}</strong>${input.company ? ` · ${escapeEmail(input.company)}` : ""}</td></tr>
+      <tr><td style="padding:4px 0;color:#66727c;">Email</td><td style="color:#20282c;"><a href="mailto:${escapeEmail(input.contactEmail)}" style="color:#c64b1c;">${escapeEmail(input.contactEmail)}</a></td></tr>
+      <tr><td style="padding:4px 0;color:#66727c;">Téléphone</td><td style="color:#20282c;">${input.contactPhone || "-"}</td></tr>
+    </tbody></table>
 
     ${aiInsightsHtml}
 
     ${routedHtml}
 
     <hr style="border:none;border-top:1px solid #E5E5E5;margin:32px 0 16px 0;">
-    <p style="font-size:11px;color:#999;text-align:center;">
-      Workwave AI · projet #${input.projectId} · <a href="${baseUrl}/admin/projects/${input.projectId}" style="color:#999;">Ouvrir dans l'admin</a>
+    <p style="font-size:11px;color:#66727c;text-align:center;">
+      Workwave AI · projet #${escapeEmail(input.projectId)} · <a href="${escapeEmail(baseUrl)}/admin/projects/${escapeEmail(input.projectId)}" style="color:#66727c;">Ouvrir dans l'admin</a>
     </p>
-  </div>
-</body></html>`;
+  ` });
 
   try {
     const r = await getResendClient().emails.send({
@@ -192,7 +187,7 @@ export async function sendAiProjectNotification(
       to: [adminEmail],
       replyTo: input.contactEmail,
       subject: `[AI] ${input.title}`,
-      html,
+      ...emailContent(html),
     });
     if (r.error) {
       console.error("[sendAiProjectNotification] Resend error:", r.error);

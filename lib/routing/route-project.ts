@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 import { haversineDistance } from "@/lib/utils/geo";
 import { getLeadsReceivedLast30Days } from "@/lib/queries/leads";
 import { sendLeadNotificationEmail } from "@/lib/email/send-lead-notification";
@@ -52,7 +53,6 @@ type ScoredPro = EligiblePro & {
 // ============================================
 // Helpers
 // ============================================
-
 
 function budgetToNumeric(budget: ProjectBudget): number {
   const mapping: Record<ProjectBudget, number> = {
@@ -289,15 +289,13 @@ async function markUnrouted(
       from: "Workwave <contact@workwave.fr>",
       to: process.env.ADMIN_EMAIL || "admin@workwave.fr",
       subject: `[Workwave Alert] Projet orphelin · ${project.category.name} à ${project.city.name}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
-          <h2 style="color: #0A0A0A;">Projet orphelin</h2>
+      ...emailContent(renderEmail({ title: "Un projet sans destinataire.", subtitle: "Vérifiez la couverture.", category: "Administration", body: `
+          <h2 style="color: #20282c;">Projet orphelin</h2>
           <p>Aucun pro éligible trouvé pour le projet #${projectId}.</p>
           <p><strong>Catégorie :</strong> ${project.category.name}</p>
           <p><strong>Ville :</strong> ${project.city.name}</p>
           <p>Veuillez router ce projet manuellement ou élargir la couverture.</p>
-        </div>
-      `,
+        ` })),
     });
   } catch (err) {
     console.error("Routing: erreur envoi alerte admin projet orphelin:", err);

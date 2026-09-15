@@ -16,29 +16,9 @@
 export const GOOGLE_REVIEW_URL = "https://g.page/r/CTOGdKur57CKEBM/review";
 
 export function buildGoogleReviewBlock(opts: { audience: "particulier" | "pro" }): string {
-  // ⚠️ Cadrage volontaire (décision Willy 12/06) : l'avis porte sur l'EXPÉRIENCE
-  // DE L'ÉTAPE qui vient d'être vécue (formulaire, simplicité, rapidité), PAS
-  // sur « avez-vous trouvé un pro » : la couverture pro par zone est encore en
-  // construction, un avis basé sur le résultat serait injustement négatif.
-  const question =
-    opts.audience === "pro"
-      ? "La réclamation de votre fiche s'est bien passée&nbsp;?"
-      : "Le dépôt de votre projet s'est bien passé&nbsp;?";
-  const steer =
-    opts.audience === "pro"
-      ? "Dites en 30&nbsp;secondes ce que vous avez pensé de cette étape&nbsp;: la vérification, la simplicité, la rapidité. Votre avis aide d'autres artisans à franchir le pas."
-      : "Dites en 30&nbsp;secondes ce que vous avez pensé de cette étape&nbsp;: le formulaire, la simplicité, la rapidité. Votre avis aide d'autres particuliers à se lancer.";
-  return `
-      <!-- Avis Google -->
-      <div style="background:#FFF5F2;border:1px solid #FFD4C7;border-radius:12px;padding:22px 20px;margin:0 0 24px;text-align:center;">
-        <p style="margin:0 0 8px;font-size:18px;letter-spacing:3px;color:#FF5A36;">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-        <p style="margin:0 0 6px;font-size:15px;color:#0A0A0A;font-weight:600;">${question}</p>
-        <p style="margin:0 0 16px;font-size:13px;color:#6B7280;line-height:1.6;">
-          ${steer}
-        </p>
-        <a href="${GOOGLE_REVIEW_URL}"
-           style="display:inline-block;background:#FF5A36;color:#FFFFFF;text-decoration:none;padding:12px 26px;border-radius:9999px;font-size:14px;font-weight:600;">
-          Donner mon avis sur Google
-        </a>
-      </div>`;
+  const step = opts.audience === "pro" ? "le rattachement de votre fiche" : "le dépôt de votre projet";
+  return `<div style="border-top:1px solid #e7eaec;margin-top:28px;padding-top:22px;font-size:13px;line-height:1.8;color:#66727c">
+    Comment avez-vous vécu ${step} ? Positif ou critique, votre retour nous aide.
+    <a href="${GOOGLE_REVIEW_URL}" style="color:#a63e18;text-decoration:underline">Partager mon expérience de Workwave sur Google</a>.
+  </div>`;
 }

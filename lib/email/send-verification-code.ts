@@ -1,3 +1,5 @@
+import { emailContent, renderEmail, escapeEmail, emailParagraph, emailButton, emailDetails } from "@/lib/email/design";
+
 import { Resend } from "resend";
 
 let _resend: Resend | null = null;
@@ -15,47 +17,18 @@ export function buildVerificationCodeEmail(
   proName: string,
   operation: VerificationOperation = "claim"
 ): { subject: string; html: string } {
-  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[char]!));
+
   const action = operation === "deletion" ? "supprimer" : "réclamer";
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-    <div style="background:#0A0A0A;padding:24px 32px;">
-      <h1 style="margin:0;color:#FFFFFF;font-size:20px;font-weight:700;letter-spacing:-0.02em;">Workwave</h1>
-    </div>
-    <div style="padding:32px;">
-      <p style="margin:0 0 16px;font-size:16px;color:#0A0A0A;line-height:1.6;">
-        Bonjour,
-      </p>
-      <p style="margin:0 0 24px;font-size:16px;color:#0A0A0A;line-height:1.6;">
-        Vous avez demandé à ${action} la fiche <strong>${escapeHtml(proName)}</strong> sur Workwave.
-        Voici votre code de vérification :
-      </p>
-      <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:24px;margin-bottom:24px;text-align:center;">
-        <span style="font-family:'Courier New',monospace;font-size:36px;font-weight:700;letter-spacing:8px;color:#0A0A0A;">${escapeHtml(code)}</span>
-      </div>
-      <p style="margin:0 0 8px;font-size:14px;color:#6B7280;line-height:1.6;">
-        Ce code est valable <strong>15 minutes</strong>.
-      </p>
-      <p style="margin:0 0 24px;font-size:14px;color:#6B7280;line-height:1.6;">
-        Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
-      </p>
-      <p style="margin:0;font-size:14px;color:#6B7280;line-height:1.6;">
-        À bientôt,<br>
-        <span style="color:#0A0A0A;font-weight:500;">L'équipe Workwave</span>
-      </p>
-    </div>
-    <div style="padding:16px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
-      <p style="margin:0;color:#9CA3AF;font-size:12px;">Workwave · Trouvez un professionnel de confiance près de chez vous</p>
-    </div>
-  </div>
-</body>
-</html>`;
+  const html = renderEmail({
+    title: operation === "deletion" ? "Confirmez votre demande." : "Votre code de vérification.",
+    subtitle: "Une étape pour sécuriser l’accès.", category: "Sécurité",
+    preheader: operation === "deletion" ? "Code de vérification pour votre demande de suppression." : "Confirmez votre adresse email pour poursuivre le rattachement.",
+    body: emailParagraph(`Vous avez demandé à ${action} la fiche ${proName} sur Workwave.`)
+      + `<div style="background:#f5f6f7;border-radius:22px;padding:24px 12px;text-align:center;margin:24px 0"><span style="font-family:monospace;font-size:34px;letter-spacing:5px;color:#20282c;font-weight:700">${escapeEmail(code)}</span></div>`
+      + emailParagraph("Saisissez ce code dans la page ouverte sur Workwave. Il est valable 15 minutes. Ne le communiquez à personne.")
+      + (operation === "claim" ? emailParagraph("Ce code confirme votre adresse email. Le rattachement de la fiche reste soumis à la vérification de votre lien avec l’entreprise.") : "")
+      + emailParagraph("Vous n’êtes pas à l’origine de cette demande ? Ignorez cet email."),
+  });
 
   return {
     subject: operation === "deletion" ? "Votre code de suppression de fiche · Workwave" : "Votre code de vérification · Workwave",
@@ -82,7 +55,7 @@ export async function sendVerificationCode(
     from: "Workwave <contact@workwave.fr>",
     to: email,
     subject: message.subject,
-    html: message.html,
+    ...emailContent(message.html),
   });
 
   if (error) {
@@ -101,38 +74,17 @@ export async function sendClaimAlreadyClaimedAlert(
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-    <div style="background:#991B1B;padding:24px 32px;">
-      <h1 style="margin:0;color:#FFFFFF;font-size:18px;font-weight:600;">Alerte · Tentative de réclamation sur fiche déjà réclamée</h1>
-    </div>
-    <div style="padding:32px;">
-      <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;">
-        <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Fiche</td><td style="padding:6px 0;color:#0A0A0A;font-weight:500;">${proName}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">Slug</td><td style="padding:6px 0;color:#0A0A0A;">${proSlug}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">Email tentative</td><td style="padding:6px 0;color:#0A0A0A;">${attemptEmail}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">SIRET saisi</td><td style="padding:6px 0;font-family:'Courier New',monospace;color:#0A0A0A;">${attemptSiret}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">IP</td><td style="padding:6px 0;color:#0A0A0A;">${ip}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">Date</td><td style="padding:6px 0;color:#0A0A0A;">${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</td></tr>
-      </table>
-      <p style="margin:24px 0 0;font-size:14px;color:#6B7280;line-height:1.6;">
-        Cette fiche est déjà réclamée. Vérifiez dans le dashboard admin si une action est nécessaire.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  const html = renderEmail({ title: "Un rattachement à vérifier.", subtitle: "La fiche est déjà gérée.", category: "Administration",
+body: emailParagraph("Une demande concerne une fiche déjà rattachée à un compte. Vérifiez le contexte avant toute intervention.")
+ + emailDetails([["Fiche", proName], ["Slug", proSlug], ["Email saisi", attemptEmail], ["SIRET saisi", attemptSiret], ["IP", ip]])
+ + emailButton("Examiner les rattachements", "https://workwave.fr/admin/reclamations") });
 
   try {
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
       subject: `[Workwave Alert] Tentative de réclamation sur fiche déjà réclamée · ${proName}`,
-      html,
+      ...emailContent(html),
     });
   } catch (error) {
     console.error("Erreur envoi alerte admin :", error);
@@ -158,46 +110,17 @@ export async function sendClaimSuccessAlert(params: {
   const dashboardUrl = `https://workwave.fr/admin/pros/${params.proId}`;
   const publicUrl = `https://workwave.fr/artisan/${params.proSlug}`;
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-    <div style="background:#16A34A;padding:24px 32px;">
-      <h1 style="margin:0;color:#FFFFFF;font-size:18px;font-weight:600;">✅ Nouvelle fiche réclamée</h1>
-    </div>
-    <div style="padding:32px;">
-      <p style="margin:0 0 20px;font-size:15px;color:#0A0A0A;line-height:1.6;">
-        Un professionnel vient de réclamer sa fiche. Son compte BTP est actif en mode gratuit (pay-per-lead 9,90&nbsp;€).
-      </p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;">
-        <tr><td style="padding:6px 0;color:#6B7280;width:160px;">Fiche</td><td style="padding:6px 0;color:#0A0A0A;font-weight:500;">${params.proName}</td></tr>
-        ${params.proCategory ? `<tr><td style="padding:6px 0;color:#6B7280;">Catégorie</td><td style="padding:6px 0;color:#0A0A0A;">${params.proCategory}</td></tr>` : ""}
-        ${params.proCity ? `<tr><td style="padding:6px 0;color:#6B7280;">Ville</td><td style="padding:6px 0;color:#0A0A0A;">${params.proCity}</td></tr>` : ""}
-        <tr><td style="padding:6px 0;color:#6B7280;">SIRET</td><td style="padding:6px 0;font-family:'Courier New',monospace;color:#0A0A0A;">${params.proSiret ?? "-"}</td></tr>
-        <tr><td style="padding:6px 0;color:#6B7280;">Email du pro</td><td style="padding:6px 0;color:#0A0A0A;">${params.claimEmail}</td></tr>
-        ${params.ip ? `<tr><td style="padding:6px 0;color:#6B7280;">IP</td><td style="padding:6px 0;color:#0A0A0A;">${params.ip}</td></tr>` : ""}
-        <tr><td style="padding:6px 0;color:#6B7280;">Date</td><td style="padding:6px 0;color:#0A0A0A;">${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}</td></tr>
-      </table>
-      <div style="margin-top:28px;display:flex;gap:12px;">
-        <a href="${publicUrl}" style="display:inline-block;padding:10px 18px;background:#0A0A0A;color:#FFFFFF;text-decoration:none;border-radius:10px;font-size:14px;font-weight:500;">Voir la fiche publique</a>
-        <a href="${dashboardUrl}" style="display:inline-block;padding:10px 18px;background:#FF5A36;color:#FFFFFF;text-decoration:none;border-radius:10px;font-size:14px;font-weight:500;margin-left:8px;">Ouvrir dans l'admin</a>
-      </div>
-      <p style="margin:24px 0 0;font-size:13px;color:#9CA3AF;line-height:1.6;">
-        Modele pay-per-lead Sprint 13 : la fiche reste gratuite a vie. Le pro paie 9,90&nbsp;€ par lead debloque, sans abonnement ni CB requise.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  const html = renderEmail({ title: "Une fiche rattachée.", subtitle: "Un professionnel peut démarrer.", category: "Administration",
+body: emailDetails([["Fiche", params.proName], ["Email", params.claimEmail], ["Ville", params.proCity || "Non renseignée"], ["Métier", params.proCategory || "Non renseigné"], ["SIRET", params.proSiret || "Non renseigné"]])
+ + emailButton("Ouvrir dans l’administration", dashboardUrl)
+ + `<p style="font-size:14px;line-height:1.7"><a style="color:#a63e18" href="${escapeEmail(publicUrl)}">Consulter la fiche publique</a></p>` });
 
   try {
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
       subject: `[Workwave] Nouvelle fiche réclamée · ${params.proName}`,
-      html,
+      ...emailContent(html),
     });
   } catch (error) {
     console.error("Erreur envoi notif claim success :", error);

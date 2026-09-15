@@ -1,3 +1,5 @@
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 /**
  * Email d'avertissement AVANT les tests de migration : previent les artisans
  * ayant reclame leur fiche qu'ils peuvent voir passer des projets [TEST] et
@@ -62,11 +64,11 @@ Willy
 Workwave.fr
 contact@workwave.fr`;
 
-const HTML = `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#0A0A0A;max-width:560px">
+const HTML = renderEmail({ title: "Une information utile.", subtitle: "À propos de votre espace.", category: "Campagnes", body: `
   <p>Bonjour,</p>
   <p>Je vous écris parce que vous faites partie des artisans qui ont <b>réclamé leur fiche</b> sur Workwave.fr, donc vous êtes directement concerné.</p>
   <p>Ce week-end, je change le serveur qui héberge le site. L'objectif : des pages beaucoup plus rapides (les fiches passent de 0,7 seconde à moins de 0,1). <b>Vous n'avez rien à faire</b>, votre fiche et votre compte restent en place.</p>
-  <div style="background:#FFF4F1;border:1px solid #FFD5C9;border-radius:12px;padding:16px 18px;margin:22px 0">
+  <div style="background:#FFF4F1;border:1px solid #FFD5C9;border-radius:22px;padding:16px 18px;margin:22px 0">
     <p style="margin:0 0 10px;font-weight:700;color:#C43D18">⚠️ Un seul point d'attention</p>
     <p style="margin:0 0 10px">Pendant les tests, vous pourriez recevoir <b>2 ou 3 projets de TEST</b>. Ils porteront la mention <b>[TEST]</b> dans le titre.</p>
     <ul style="margin:0;padding-left:20px">
@@ -79,8 +81,8 @@ const HTML = `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,sa
   <p>Si vous avez le moindre doute sur un projet reçu, <b>répondez à cet email</b>, je vous réponds directement.</p>
   <p>Merci de votre patience,</p>
   <p style="margin-top:22px">Willy<br>
-    <span style="color:#6B7280">Workwave.fr · contact@workwave.fr</span></p>
-</div>`;
+    <span style="color:#53606a">Workwave.fr · contact@workwave.fr</span></p>
+` });
 
 type Pro = { id: number; name: string | null; email: string | null; do_not_contact: boolean | null; email_bounced: boolean | null };
 
@@ -124,7 +126,7 @@ async function main() {
         to: [p.email!],
         subject: SUJET,
         text: TEXTE,
-        html: HTML,
+        ...emailContent(HTML),
       });
       if (r.error) throw new Error(r.error.message);
       ok++;

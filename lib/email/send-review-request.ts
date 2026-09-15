@@ -1,3 +1,5 @@
+import { emailContent, renderEmail, escapeEmail, emailParagraph, emailButton } from "@/lib/email/design";
+
 import { Resend } from "resend";
 import { generateReviewUnsubscribeToken } from "@/lib/utils/review-unsubscribe-token";
 
@@ -37,117 +39,23 @@ export async function sendReviewRequest(params: {
   const unsubToken = generateReviewUnsubscribeToken(params.particulierEmail);
   const unsubUrl = `${baseUrl}/unsubscribe-review?token=${unsubToken}&email=${encodeURIComponent(params.particulierEmail)}`;
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-
-    <!-- Liseré coral -->
-    <div style="height:4px;background:linear-gradient(90deg,#FF5A36 0%,#FF7A5C 50%,#FF5A36 100%);"></div>
-
-    <!-- Contenu principal -->
-    <div style="padding:36px 32px 28px;">
-
-      <p style="margin:0 0 18px;font-size:13px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">
-        Votre avis compte
-      </p>
-
-      <h1 style="margin:0 0 18px;color:#0A0A0A;font-size:24px;font-weight:700;letter-spacing:-0.02em;line-height:1.3;">
-        Bonjour${firstName ? ` ${firstName}` : ""},<br>comment ça s'est passé avec <span style="color:#FF5A36;">${escapeHtml(params.proName)}</span> ?
-      </h1>
-
-      <p style="margin:0 0 24px;color:#374151;font-size:15px;line-height:1.6;">
-        Vous avez déposé un projet sur Workwave.fr et nous avons mis en relation${proCityLabel} <strong>${escapeHtml(params.proName)}</strong>. Votre retour aide d'autres particuliers à faire le bon choix.
-      </p>
-
-      <!-- CTA principal -->
-      <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 24px;">
-        <tr>
-          <td align="center" style="border-radius:999px;background:#FF5A36;box-shadow:0 4px 14px -2px rgba(255,90,54,0.45);">
-            <a href="${reviewUrl}" style="display:inline-block;padding:14px 32px;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:999px;letter-spacing:-0.01em;">
-              Laisser mon avis (30 secondes)
-            </a>
-          </td>
-        </tr>
-      </table>
-
-      <p style="margin:0 0 8px;color:#6B7280;font-size:13px;text-align:center;line-height:1.5;">
-        5 étoiles + commentaire optionnel · 30 secondes
-      </p>
-      <p style="margin:0 0 28px;color:#9CA3AF;font-size:12px;text-align:center;line-height:1.5;">
-        Confidentiel : seul votre prénom et la première lettre de votre nom seront affichés.
-      </p>
-
-      <!-- Divider subtil -->
-      <div style="border-top:1px solid #F1F1F3;margin:0 -8px 24px;"></div>
-
-      <!-- Recap mise en relation -->
-      <p style="margin:0 0 8px;color:#9CA3AF;font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">
-        Récapitulatif
-      </p>
-      <p style="margin:0 0 8px;color:#0A0A0A;font-size:14px;line-height:1.5;">
-        <strong style="color:#0A0A0A;">Artisan contacté :</strong> ${escapeHtml(params.proName)}${proCityLabel}
-      </p>
-      <p style="margin:0 0 4px;color:#0A0A0A;font-size:14px;line-height:1.5;">
-        <strong style="color:#0A0A0A;">Sa fiche Workwave.fr :</strong>
-        <a href="${proPageUrl}" style="color:#FF5A36;text-decoration:none;font-weight:500;">${proPageUrl.replace("https://", "")}</a>
-      </p>
-    </div>
-
-    <!-- Footer -->
-    <div style="background:#FAFAFA;padding:20px 32px;text-align:center;border-top:1px solid #F1F1F3;">
-      <p style="margin:0 0 4px;color:#6B7280;font-size:12px;line-height:1.5;">
-        Vous n'avez pas été en contact avec cet artisan ? Pas de souci, ignorez cet email.
-      </p>
-      <p style="margin:0 0 8px;color:#9CA3AF;font-size:11px;line-height:1.5;">
-        Un problème ? Écrivez-nous à <a href="mailto:contact@workwave.fr" style="color:#FF5A36;text-decoration:none;">contact@workwave.fr</a>
-      </p>
-      <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.5;">
-        <a href="${unsubUrl}" style="color:#9CA3AF;text-decoration:underline;">Ne plus recevoir de demandes d'avis</a>
-      </p>
-    </div>
-
-  </div>
-</body>
-</html>
-  `.trim();
-
-  const text = `
-Bonjour${firstName ? ` ${firstName}` : ""},
-
-Comment s'est passée votre mise en relation avec ${params.proName}${proCityLabel} via Workwave.fr ?
-
-Votre avis aide d'autres particuliers à faire le bon choix.
-
-Laissez votre avis ici (30 secondes) :
-${reviewUrl}
-
-Confidentiel : seul votre prénom et la première lettre de votre nom seront affichés.
-
----
-
-Récapitulatif
-- Artisan contacté : ${params.proName}${proCityLabel}
-- Sa fiche Workwave.fr : ${proPageUrl}
-
-Vous n'avez pas été en contact avec cet artisan ? Ignorez cet email.
-
-Un problème ? Écrivez-nous à contact@workwave.fr.
-
-Pour ne plus recevoir de demandes d'avis : ${unsubUrl}
-
-- L'équipe Workwave
-  `.trim();
+  const html = renderEmail({
+    title: "Votre expérience compte.", subtitle: "Racontez-la simplement.", category: "Votre avis",
+    body: emailParagraph(`Bonjour${firstName ? ` ${firstName}` : ""}, avez-vous échangé avec ${params.proName}${proCityLabel} au sujet de votre projet ?`)
+      + emailParagraph("Si oui, partagez votre expérience : ce qui vous a plu comme ce qui pourrait être amélioré. Votre retour aide les autres particuliers.")
+      + emailButton("Partager mon expérience", reviewUrl)
+      + emailParagraph("Choisissez une note de 1 à 5 étoiles. Le commentaire est facultatif. Votre avis est destiné à être public ; votre nom de famille n’est pas affiché en entier.")
+      + `<p style="font-size:14px;line-height:1.7"><a style="color:#a63e18" href="${escapeEmail(proPageUrl)}">Consulter la fiche de ${escapeEmail(params.proName)}</a></p>`
+      + emailParagraph("Vous n’avez pas échangé avec ce professionnel ? Ignorez cette invitation.")
+      + `<p style="font-size:12px;line-height:1.7"><a style="color:#596670" href="${escapeEmail(unsubUrl)}">Ne plus recevoir de demandes d’avis</a></p>`,
+  }).trim();
 
   try {
     const result = await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: params.particulierEmail,
       subject: `Comment s'est passé votre contact avec ${params.proName} ?`,
-      html,
-      text,
+      ...emailContent(html),
       headers: {
         // Bloque le tracking pour respecter la simplicite du flow
         // (les emails de demande d'avis n'ont pas besoin d'analytics
@@ -169,13 +77,4 @@ Pour ne plus recevoir de demandes d'avis : ${unsubUrl}
     console.error("[review-request] Exception :", err.message);
     return { ok: false, error: err.message };
   }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

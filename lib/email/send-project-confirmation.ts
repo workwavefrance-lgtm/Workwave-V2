@@ -1,3 +1,5 @@
+import { emailContent, renderEmail, escapeEmail, emailParagraph, emailDetails } from "@/lib/email/design";
+
 import { Resend } from "resend";
 import { buildGoogleReviewBlock } from "./google-review-block";
 
@@ -45,86 +47,27 @@ export async function sendProjectConfirmation(
   // Les anciens projets gardent la leur.
   const budgetLabel = BUDGET_LABELS[data.budget] ?? null;
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-    <!-- Header -->
-    <div style="background:#0A0A0A;padding:24px 32px;">
-      <h1 style="margin:0;color:#FFFFFF;font-size:20px;font-weight:700;letter-spacing:-0.02em;">Workwave</h1>
-    </div>
-    <!-- Body -->
-    <div style="padding:32px;">
-      <p style="margin:0 0 16px;font-size:16px;color:#0A0A0A;line-height:1.6;">
-        Bonjour ${data.firstName},
-      </p>
-      <p style="margin:0 0 24px;font-size:16px;color:#0A0A0A;line-height:1.6;">
-        Votre demande a bien été reçue. Nous la transmettons aux professionnels adaptés dans votre zone, qui vous contacteront très prochainement.
-      </p>
-
-      <!-- Récapitulatif -->
-      <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:24px;margin-bottom:24px;">
-        <h2 style="margin:0 0 16px;font-size:14px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;">Récapitulatif de votre demande</h2>
-        <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;">
-          <tr>
-            <td style="padding:8px 0;color:#6B7280;width:120px;vertical-align:top;">Catégorie</td>
-            <td style="padding:8px 0;color:#0A0A0A;font-weight:500;">${data.categoryName}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Ville</td>
-            <td style="padding:8px 0;color:#0A0A0A;font-weight:500;">${data.cityName}</td>
-          </tr>
-          <tr>
-            <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Urgence</td>
-            <td style="padding:8px 0;color:#0A0A0A;font-weight:500;">${urgencyLabel}</td>
-          </tr>
-          ${budgetLabel ? `<tr>
-            <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Budget</td>
-            <td style="padding:8px 0;color:#0A0A0A;font-weight:500;">${budgetLabel}</td>
-          </tr>` : ""}
-          <tr>
-            <td style="padding:8px 0;color:#6B7280;vertical-align:top;">Description</td>
-            <td style="padding:8px 0;color:#0A0A0A;">${data.description}</td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- RGPD -->
-      <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
-        <p style="margin:0;font-size:13px;color:#9A3412;line-height:1.6;">
-          Si vous souhaitez annuler votre demande, ${data.deletionToken ? `<a href="${baseUrl}/deposer-projet/supprimer?token=${data.deletionToken}" style="color:#9A3412;font-weight:600;text-decoration:underline;">cliquez ici pour la supprimer</a>` : "répondez à cet email"}.
-        </p>
-      </div>
-
-${buildGoogleReviewBlock({ audience: "particulier" })}
-
-      <!-- Signature -->
-      <p style="margin:0;font-size:14px;color:#6B7280;line-height:1.6;">
-        À bientôt,<br>
-        <span style="color:#0A0A0A;font-weight:500;">L'équipe Workwave</span>
-      </p>
-    </div>
-    <!-- Footer -->
-    <div style="padding:16px 32px;background:#FAFAFA;border-top:1px solid #E5E7EB;text-align:center;">
-      <p style="margin:0 0 8px;color:#9CA3AF;font-size:12px;">
-        Workwave · Trouvez un professionnel de confiance près de chez vous
-      </p>
-      <p style="margin:0;color:#9CA3AF;font-size:11px;">
-        Workwave est un simple intermédiaire d'information. Les devis, contrats et prestations sont de la responsabilité exclusive du professionnel et du particulier.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  const html = renderEmail({
+    title: "Votre projet est déposé.", subtitle: "Un premier pas de fait.", category: "Votre projet",
+    preheader: `Votre demande ${data.categoryName} à ${data.cityName} a bien été reçue.`,
+    body: emailParagraph(`Bonjour ${data.firstName}, nous avons bien reçu votre demande.`)
+      + emailParagraph("Les professionnels intéressés pourront vous contacter si votre projet correspond à leur activité et à leur disponibilité. Vous restez libre de donner suite.")
+      + emailDetails([
+        ["Besoin", data.categoryName], ["Ville", data.cityName], ["Délai", urgencyLabel],
+        ...(budgetLabel ? [["Budget", budgetLabel] as [string, unknown]] : []), ["Description", data.description],
+      ])
+      + emailParagraph("Votre besoin a changé ou vous avez trouvé une solution ? Vous pouvez retirer votre demande.")
+      + (data.deletionToken ? `<p style="font-size:14px;line-height:1.7"><a style="color:#a63e18" href="${escapeEmail(`${escapeEmail(baseUrl)}/deposer-projet/supprimer?token=${encodeURIComponent(data.deletionToken)}`)}">Retirer ma demande</a></p>` : emailParagraph("Pour la retirer, répondez à cet email."))
+      + emailParagraph("Les devis et les prestations se conviennent directement avec le professionnel.")
+      + buildGoogleReviewBlock({ audience: "particulier" }),
+  });
 
   try {
     await getResendClient().emails.send({
       from: "Workwave <contact@workwave.fr>",
       to: data.email,
       subject: "Votre demande a bien été reçue · Workwave",
-      html,
+      ...emailContent(html),
     });
   } catch (error) {
     console.error("Erreur envoi email confirmation particulier :", error);

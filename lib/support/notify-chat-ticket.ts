@@ -1,3 +1,5 @@
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 /**
  * Alerte l'admin qu'un ticket vient d'être ouvert depuis le chat.
  *
@@ -11,7 +13,7 @@
  * depuis sa boîte, et sa réponse part au bon endroit.
  */
 import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
+
 import { getServiceClient } from "@/lib/supabase/service-client";
 
 function esc(s: string): string {
@@ -67,20 +69,19 @@ export async function notifyAdminOfChatTicket(
     ? `${alert.requesterName} <${alert.requesterEmail}>`
     : alert.requesterEmail;
 
-  const html = `
-    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0A0A0A;line-height:1.6">
-      <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#374151">
-        <div style="font-weight:700;color:#0A0A0A;margin-bottom:6px">Nouveau ticket depuis le chat</div>
+  const html = renderEmail({ title: "Une personne a besoin d’aide.", subtitle: "La conversation vous attend.", category: "Administration", body: `
+      <div style="background:#f5f6f7;border:1px solid #E5E7EB;border-radius:22px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#374151">
+        <div style="font-weight:700;color:#20282c;margin-bottom:6px">Nouveau ticket depuis le chat</div>
         <b>De :</b> ${esc(who)}<br>
         <b>Objet :</b> ${esc(alert.subject)}<br>
         ${alert.pathname ? `<b>Page :</b> ${esc(alert.pathname)}<br>` : ""}
-        <span style="color:#6B7280">Réponds directement à cet email : ta réponse part vers le visiteur.</span>
+        <span style="color:#53606a">Réponds directement à cet email : ta réponse part vers le visiteur.</span>
       </div>
       <pre style="white-space:pre-wrap;font-family:inherit;font-size:14px">${esc(alert.resume)}</pre>
       <p style="margin-top:22px">
-        <a href="${url}" style="background:#FF5A36;color:#fff;text-decoration:none;padding:11px 20px;border-radius:12px;font-weight:600;display:inline-block">Ouvrir le ticket</a>
+        <a href="${url}" style="background:#c64b1c;color:#fff;text-decoration:none;padding:11px 20px;border-radius:22px;font-weight:600;display:inline-block">Ouvrir le ticket</a>
       </p>
-    </div>`;
+    ` });
 
   try {
     const resend = new Resend(apiKey);
@@ -89,7 +90,7 @@ export async function notifyAdminOfChatTicket(
       to: adminEmail,
       replyTo: alert.requesterEmail,
       subject: `[Chat] ${alert.subject}`,
-      html,
+      ...emailContent(html),
       text: `Nouveau ticket depuis le chat\nDe : ${who}\nObjet : ${alert.subject}\n\n${alert.resume}\n\n${url}`,
     });
     if (error) {

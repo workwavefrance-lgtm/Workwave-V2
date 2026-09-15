@@ -1,5 +1,7 @@
 "use server";
 
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -37,7 +39,6 @@ function hashCode(code: string): string {
 function generateCode(): string {
   return randomInt(100000, 999999).toString();
 }
-
 
 async function getIp(): Promise<string> {
   const headersList = await headers();
@@ -390,15 +391,13 @@ export async function verifyDeletion(
       from: "Workwave <contact@workwave.fr>",
       to: process.env.ADMIN_EMAIL || "admin@workwave.fr",
       subject: `[Workwave Alert] Demande de suppression de fiche · ${pro.name}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 32px;">
-          <h2 style="color: #0A0A0A;">Fiche supprimée (RGPD)</h2>
+      ...emailContent(renderEmail({ title: "Une demande de suppression.", subtitle: "À traiter avec attention.", category: "Administration", body: `
+          <h2 style="color: #20282c;">Fiche supprimée (RGPD)</h2>
           <p>Le professionnel <strong>${pro.name}</strong> a demandé la suppression de sa fiche.</p>
           <p>La fiche a été désactivée (soft-delete). L'abonnement Stripe a été résilié si actif.</p>
           <p><strong>Slug :</strong> ${slug}</p>
           <p><strong>Email demandeur :</strong> ${attempt.email}</p>
-        </div>
-      `,
+        ` })),
     });
   } catch (err) {
     console.error("Erreur envoi alerte admin suppression fiche:", err);

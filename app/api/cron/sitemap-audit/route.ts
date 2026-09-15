@@ -1,3 +1,5 @@
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 /**
  * Cron quotidien : AUDIT DE COMPLÉTUDE DU SITEMAP.
  *
@@ -22,7 +24,7 @@
  * Auth : Bearer CRON_SECRET. Endpoint : /api/cron/sitemap-audit, appele par le crontab du VPS (72.60.130.5).
  */
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+
 import { Resend } from "resend";
 import { AI_CATEGORY_IDS } from "@/lib/ai/helpers";
 import { getServiceClient } from "@/lib/supabase/service-client";
@@ -33,7 +35,6 @@ const BASE = "https://workwave.fr";
 const PROS_PER_SITEMAP = 45000;
 const SITEMAP_LIMIT = 50000;
 const UA = "Workwave-SitemapAudit/1.0 (+contact@workwave.fr)";
-
 
 // Retry 3× : un seul fetch qui timeout pendant le pic de crawl Google
 // (base surchargée → le sous-sitemap qui fait une RPC dépasse le timeout)
@@ -211,8 +212,7 @@ export async function GET(req: Request) {
         from: "Workwave Sitemap Audit <contact@workwave.fr>",
         to: [process.env.ADMIN_EMAIL || "workwave.france@gmail.com"],
         subject: `🗺️ Sitemap : ${issues.length} régression${issues.length > 1 ? "s" : ""} détectée${issues.length > 1 ? "s" : ""}`,
-        html: `<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#fafafa;padding:20px;">
-<div style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #eee;border-radius:12px;padding:24px;">
+        ...emailContent(renderEmail({ title: "Un sitemap à contrôler.", subtitle: "Préservons la découverte des pages.", category: "Administration", body: `
 <h2 style="margin:0 0 12px;font-size:18px;color:#900;">🗺️ Audit sitemap · ${issues.length} problème(s)</h2>
 <ul style="font-size:14px;line-height:1.6;color:#333;">${issues.map((i) => `<li>${i}</li>`).join("")}</ul>
 <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
@@ -223,7 +223,7 @@ dernier tech déclaré : /sitemap/${dernierAi}.xml → ${pleinAi} adresses<br>
 suivant non déclaré : /sitemap/${dernierBtp + 1}.xml → ${orphelinBtp} · /sitemap/${dernierAi + 1}.xml → ${orphelinAi}<br>
 /sitemap/2 (cat×ville) : ${catCity} URLs · /sitemap/4 (/ai) : ${aiUrls} URLs</p>
 <p style="font-size:11px;color:#aaa;">Cron quotidien · /api/cron/sitemap-audit</p>
-</div></body></html>`,
+` })),
       });
       alertSent = true;
     } catch (e) {

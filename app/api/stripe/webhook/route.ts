@@ -1,3 +1,5 @@
+import { emailContent, renderEmail } from "@/lib/email/design";
+
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripeServer } from "@/lib/stripe/server";
@@ -584,14 +586,14 @@ export async function POST(req: Request) {
           from: "Workwave <contact@workwave.fr>",
           to: process.env.ADMIN_EMAIL || "workwave.france@gmail.com",
           subject: "[Workwave] PAIEMENT ENCAISSE SANS DEBLOCAGE · action requise",
-          html: `<div style="font-family:sans-serif;max-width:560px;padding:24px">
-            <h2 style="color:#0A0A0A">Un pro a payé, le déblocage n'a pas été enregistré</h2>
+          ...emailContent(renderEmail({ title: "Un paiement sans accès.", subtitle: "Une action est nécessaire.", category: "Administration", body: `
+            <h2 style="color:#20282c">Un pro a payé, le déblocage n'a pas été enregistré</h2>
             <p>L'écriture dans <code>lead_unlocks</code> a échoué. Stripe va rejouer
             l'événement automatiquement, mais vérifie que le pro obtient bien ses
             coordonnées, sinon débloque-le à la main.</p>
             <p><strong>Événement Stripe :</strong> ${event.id}</p>
             <p><strong>Détail :</strong> ${message}</p>
-          </div>`,
+          ` })),
         });
       } catch (mailErr) {
         console.error("[webhook] alerte admin paiement non livré KO:", mailErr);

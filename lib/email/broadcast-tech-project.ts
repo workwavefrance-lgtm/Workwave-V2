@@ -1,3 +1,5 @@
+import { emailContent, renderEmail, escapeEmail, emailParagraph, emailButton, emailDetails } from "@/lib/email/design";
+
 /**
  * Broadcast email a TOUS les freelances tech inscrits quand un nouveau projet
  * est publie. Modele pay-per-lead : tous les freelances sont alertes en temps
@@ -22,7 +24,6 @@ function getResendClient(): Resend {
   if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
   return _resend;
 }
-
 
 // 14 categories acceptees Workwave AI (tech + business/creatif). On broadcast
 // les projets a TOUS les freelances dans ces categories, sans distinction.
@@ -56,59 +57,17 @@ export type BroadcastResult = {
  * Construit le HTML de l'email (identique pour tous les destinataires).
  * Le firstName est laisse generique car on broadcast a tous.
  */
-function buildEmailHtml(input: BroadcastInput, baseUrl: string): string {
-  const previewDesc =
-    input.projectDescription.length > 220
-      ? input.projectDescription.slice(0, 220).trim() + "..."
-      : input.projectDescription;
+export function buildEmailHtml(input: BroadcastInput, baseUrl: string): string {
 
-  const suspiciousBanner = input.isSuspicious
-    ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
-        <p style="font-size:12px;color:#92400E;margin:0;font-weight:600;">
-          &#9888; Projet flague par notre IA : verifiez les informations avant de contacter.
-        </p>
-      </div>`
-    : "";
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;margin:0;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE AI &middot; NOUVEAU PROJET ]</p>
-
-    <h1 style="font-size:24px;color:#0A0A0A;margin:0 0 8px 0;font-weight:800;letter-spacing:-0.02em;">Nouveau projet ${input.projectCategoryName}</h1>
-    <p style="font-size:14px;color:#525252;line-height:1.6;margin:0 0 24px 0;">
-      Un nouveau projet vient d&apos;etre publie sur Workwave AI. Connectez-vous a votre dashboard pour le consulter et y repondre.
-    </p>
-
-    ${suspiciousBanner}
-
-    <div style="background:#FAFAFA;border-left:3px solid #FF6803;padding:20px;border-radius:8px;margin:0 0 24px 0;">
-      <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${input.projectTitle}</h2>
-      <p style="font-size:13px;color:#525252;line-height:1.6;margin:0 0 16px 0;white-space:pre-wrap;">${previewDesc}</p>
-      <table style="font-size:12px;width:100%;border-collapse:collapse;">
-        ${input.projectBudget ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Budget</td><td style="color:#0A0A0A;font-weight:600;">${input.projectBudget}</td></tr>` : ""}
-        ${input.projectTimeline ? `<tr><td style="padding:4px 0;color:#999;">Delai</td><td style="color:#0A0A0A;font-weight:600;">${input.projectTimeline}</td></tr>` : ""}
-      </table>
-    </div>
-
-    <a href="${baseUrl}/ai/dashboard/projets" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 24px 0;">
-      Voir le projet &rarr;
-    </a>
-
-    <p style="font-size:12px;color:#999;line-height:1.6;margin:24px 0 0 0;">
-      Si ce projet vous interesse, debloque-le a 9,90&euro; depuis votre dashboard pour acc&eacute;der aux coordonn&eacute;es du client et le contacter directement. Sans abonnement, sans engagement.
-    </p>
-    <p style="font-size:12px;color:#999;line-height:1.6;margin:8px 0 0 0;">
-      Pour ne plus recevoir ces notifications, mettez votre profil en pause depuis votre <a href="${baseUrl}/ai/dashboard/preferences" style="color:#999;">dashboard</a>.
-    </p>
-
-    <hr style="border:none;border-top:1px solid #E5E5E5;margin:32px 0 16px 0;">
-    <p style="font-size:11px;color:#999;text-align:center;">
-      Workwave AI &middot; <a href="${baseUrl}/ai" style="color:#999;">workwave.fr/ai</a> &middot; projet #${input.projectId}
-    </p>
-  </div>
-</body></html>`;
+  return renderEmail({
+    title: "Un nouveau projet.", subtitle: "À découvrir selon votre expertise.", category: "Workwave AI",
+    body: emailParagraph("Une nouvelle demande a été publiée. Retrouvez les informations dans votre espace pour décider si elle correspond à votre expertise et à vos disponibilités.")
+      + emailDetails([["Catégorie", input.projectCategoryName], ...(input.projectBudget ? [["Budget", input.projectBudget] as [string, unknown]] : []), ...(input.projectTimeline ? [["Délai", input.projectTimeline] as [string, unknown]] : [])])
+      + (input.isSuspicious ? emailParagraph("Cette demande présente un signal à vérifier avant de débloquer les coordonnées.") : "")
+      + emailButton("Consulter le projet", `${baseUrl}/ai/dashboard/projets`)
+      + emailParagraph("Consultez le tarif et les éventuelles offres disponibles dans votre espace avant de débloquer les coordonnées. Sans abonnement ni engagement.")
+      + `<p style="font-size:12px;line-height:1.7"><a style="color:#596670" href="${escapeEmail(`${escapeEmail(baseUrl)}/ai/dashboard/preferences`)}">Gérer mes notifications</a></p>`,
+  });
 }
 
 /**
@@ -122,7 +81,7 @@ async function sendOne(
     from: "Workwave AI <contact@workwave.fr>",
     to: [email.recipient_email],
     subject: email.subject,
-    html: email.html,
+    ...emailContent(email.html),
   }, { idempotencyKey });
   if (r.error || !r.data?.id) throw new Error(r.error?.message || "Resend : réponse sans identifiant");
   return { id: r.data.id };

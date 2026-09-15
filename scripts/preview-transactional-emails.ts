@@ -1,0 +1,100 @@
+/** Offline rendering only. Never loads .env, never sends an email or writes to Supabase. */
+import { mkdir, writeFile } from "node:fs/promises";
+import { mock } from "node:test";
+import { Resend } from "resend";
+import { load } from "cheerio";
+import { emailContent, escapeEmail } from "../lib/email/design";
+import { buildEmailHtml } from "../lib/email/broadcast-btp-project";
+import { buildEmailHtml as buildTechEmail } from "../lib/email/broadcast-tech-project";
+import { sendVerificationCode, sendClaimAlreadyClaimedAlert, sendClaimSuccessAlert } from "../lib/email/send-verification-code";
+import { sendClaimWelcomeEmail } from "../lib/email/send-claim-welcome";
+import { sendPasswordResetEmail } from "../lib/email/send-password-reset";
+import { sendProjectConfirmation } from "../lib/email/send-project-confirmation";
+import { sendReviewRequest } from "../lib/email/send-review-request";
+import { sendReviewThanks } from "../lib/email/send-review-thanks";
+import { sendFeedbackRequest } from "../lib/email/send-feedback-request";
+import { sendSupportReply } from "../lib/email/send-support-reply";
+import { sendPaymentFailedEmail } from "../lib/email/send-payment-failed";
+import { sendTrialReminderEmail } from "../lib/email/send-trial-reminder";
+import { sendImpersonationNotice } from "../lib/email/send-impersonation-notice";
+import { sendLeadNotificationEmail } from "../lib/email/send-lead-notification";
+import { sendProjectRetractionEmail } from "../lib/email/send-project-retraction";
+import { sendProjectNotification } from "../lib/email/send-project-notification";
+import { sendFreeUnlockAlert } from "../lib/email/send-free-unlock-alert";
+import { sendPaidUnlockAlert } from "../lib/email/send-paid-unlock-alert";
+import { sendFeedbackAlert } from "../lib/email/send-feedback-alert";
+import { sendReviewModerationAlert } from "../lib/email/send-review-moderation-alert";
+import { sendAiSignupAdminNotification, sendAiSignupWelcome, type SignupData } from "../lib/email/send-ai-signup-emails";
+import { sendAiProjectNotification } from "../lib/email/send-ai-project-notification";
+import { notifyClaimPending } from "../lib/pro/claim-review-email";
+import { notifyAdminOfChatTicket } from "../lib/support/notify-chat-ticket";
+
+async function main() {
+  process.env.RESEND_API_KEY = "re_preview_only";
+  process.env.ADMIN_EMAIL = "admin@example.test";
+  process.env.NEXT_PUBLIC_BASE_URL = "https://workwave.fr";
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://email-preview.invalid";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "preview-only-not-a-real-key";
+  const captured: Array<Record<string, unknown>> = [];
+  mock.method(globalThis, "fetch", async (input: RequestInfo | URL) => {
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+    if (url.hostname !== "email-preview.invalid") throw new Error("Preview blocked external request: " + url.hostname);
+    return new Response("[]", { status: 200, headers: { "content-type": "application/json" } });
+  });
+  mock.method(Resend.prototype, "post", async (_path: string, body: Record<string, unknown>) => { captured.push(body); return { data: { id: "offline-preview" }, error: null }; });
+  const email = "alex@example.test", proName = "Atelier Exemple", base = "https://workwave.fr";
+  await sendVerificationCode(email, "123456", proName);
+  await sendVerificationCode(email, "123456", proName, "deletion");
+  await sendPasswordResetEmail(email, base + "/pro/reset-password?token=demonstration");
+  await sendClaimWelcomeEmail({ email, proName });
+  await sendClaimWelcomeEmail({ email, proName, availableProjects: { count: 3, top: [{ id: 1042, metier: "Plomberie", city: "Lyon", distanceKm: 4, urgencyLabel: "Ce mois-ci" }] } });
+  const input = { projectId: 1042, projectTitle: "Texte réservé à l’espace", projectDescription: "Description de démonstration", projectBudget: "500_2000", projectTimeline: "this_month", projectCategoryName: "Plomberie", projectCityName: "Lyon", projectCityId: 1, projectCategoryId: 18, projectDepartmentId: 69, isSuspicious: false };
+  for (const relanceKind of [undefined, "j1", "j3"] as const) for (const free of [0, 1, 2]) {
+    captured.push({ subject: `${relanceKind || "j0"} · ${free} offert(s) · Plomberie à Lyon`, ...emailContent(buildEmailHtml({ ...input, relanceKind }, base, "69001", free)) });
+  }
+  captured.push({ subject: "Projet à vérifier", ...emailContent(buildEmailHtml({ ...input, isSuspicious: true }, base)) });
+  await sendProjectConfirmation({ email, firstName: "Alex", categoryName: "Plomberie", cityName: "Lyon", description: "Remplacer un robinet dans la cuisine. Je suis disponible le mercredi après-midi.", urgency: "this_month", budget: "unknown", deletionToken: "demonstration" });
+  await sendProjectConfirmation({ email, firstName: "Alex", categoryName: "Plomberie", cityName: "Lyon", description: "Une demande avec budget précisé.", urgency: "this_month", budget: "500_2000" });
+  await sendReviewRequest({ particulierEmail: email, particulierName: "Alex", proName, proSlug: "atelier-exemple", proCity: "Lyon", token: "demonstration" });
+  for (const published of [true, false]) await sendReviewThanks({ particulierEmail: email, particulierName: "Alex", proName, proSlug: "atelier-exemple", rating: published ? 4 : 2, published });
+  for (const audience of ["pro", "particulier"] as const) await sendFeedbackRequest({ email, audience });
+  await sendSupportReply({ to: email, subject: "Le rattachement de ma fiche", body: "Bonjour Alex,\n\nVotre fiche est maintenant rattachée à votre compte. Vous pouvez ajouter vos réalisations depuis la rubrique Ma fiche.\n\nSi vous rencontrez une difficulté, dites-moi à quelle étape : je vous aiderai.\n\nWilly" });
+  await sendPaymentFailedEmail(email, proName);
+  await sendTrialReminderEmail(email, proName);
+  await sendImpersonationNotice({ proEmail: email, proName, adminEmail: "admin@example.test", date: new Date("2026-09-14T10:00:00Z") });
+  await sendLeadNotificationEmail({ email, proName, categoryName: "Plomberie", cityName: "Lyon", urgency: "this_month", budget: "unknown", descriptionPreview: "Remplacer un robinet." });
+  await sendProjectRetractionEmail({ email, proName, categoryName: "Plomberie", cityName: "Lyon", sentDate: "2026-09-13" });
+  for (const isSuspicious of [true, false]) await sendProjectNotification({ projectId: 1042, firstName: "Alex", email, phone: "0100000000", categoryName: "Plomberie", cityName: "Lyon", departmentName: "Rhône", description: "Demande de démonstration.", urgency: "this_month", budget: "500_2000", isSuspicious, aiQualification: { summary: "Remplacement de robinet", category_match: true, urgency_assessment: "Non urgent", budget_realistic: true } });
+  await sendClaimAlreadyClaimedAlert(proName, "atelier-exemple", email, "00000000000000", "127.0.0.1");
+  await sendClaimSuccessAlert({ proId: 1, proName, proSlug: "atelier-exemple", proSiret: "00000000000000", proCity: "Lyon", proCategory: "Plomberie", claimEmail: email });
+  await notifyClaimPending({ requestId: 1, slug: "atelier-exemple", email });
+  await sendFreeUnlockAlert({ proId: 1, proName, projectId: 1042, vertical: "btp", freeUsed: 1, freeTotal: 2 });
+  await sendFreeUnlockAlert({ proId: 1, proName, projectId: 1042, vertical: "btp", freeUsed: 2, freeTotal: 2 });
+  await sendPaidUnlockAlert({ proId: 1, proName, projectId: 1042, amountCents: 990, city: "Lyon", category: "Plomberie" });
+  await sendFeedbackAlert({ category: "bug", summary: "Une difficulté à ajouter une photo", userKind: "pro", email, transcript: [{ role: "user", content: "Ma photo n’apparaît pas." }] });
+  await sendReviewModerationAlert({ proName, proSlug: "atelier-exemple", particulierName: "Alex", rating: 2, comment: "Le professionnel n’était pas disponible." });
+  const signup: SignupData = { signupId: 1, firstName: "Alex", lastName: "Exemple", email, categoryName: "Développement web", categorySlug: "developpement-web", plan: "free", github: "exemple", linkedin: null, skills: "Sites web", bio: "Création de sites pour les entreprises.", tjm: 450, experienceYears: 5, availability: "remote", location: "Lyon" };
+  await sendAiSignupAdminNotification(signup);
+  await sendAiSignupWelcome(signup, "fr");
+  await sendAiSignupWelcome(signup, "en");
+  await sendAiProjectNotification({ projectId: 1043, title: "Un site vitrine", categoryName: "Développement web", description: "Une présentation claire de mon activité.", budget: "2000 €", timeline: "Dans le mois", contactName: "Alex", contactEmail: email, contactPhone: null, company: "Atelier Exemple", postal: "69001", stack: "À définir", remoteOk: true, qualification: null, routed: [], broadcastInfo: { totalTargets: 5, sent: 5, failed: 0 } });
+  await notifyAdminOfChatTicket({ ticketId: 128, subject: "Modifier ma fiche", resume: "Besoin d’aide pour ajouter des photos.", requesterEmail: email, requesterName: "Alex" });
+  captured.push({ subject: "Nouveau projet Workwave AI", ...emailContent(buildTechEmail({ projectId: 1043, projectTitle: "Titre privé", projectDescription: "Texte privé", projectBudget: "2000 €", projectTimeline: "Dans le mois", projectCategoryName: "Développement web", isSuspicious: false }, base)) });
+  const dir = "previews/transactional-emails";
+  await mkdir(dir, { recursive: true });
+  const entries: Array<{ id: string; subject: string; bytes: number }> = [];
+  for (const [i, mail] of captured.entries()) {
+    const id = String(i + 1).padStart(2, "0");
+    const html = String(mail.html), text = String(mail.text || "");
+    const $ = load(html);
+    if ($("h1").length !== 1 || html.includes("WWEXPR") || !text) throw new Error("Malformed email " + id);
+    await writeFile(`${dir}/${id}.html`, html);
+    await writeFile(`${dir}/${id}.txt`, text);
+    entries.push({ id, subject: String(mail.subject), bytes: Buffer.byteLength(html) });
+  }
+  await writeFile(`${dir}/catalog.json`, JSON.stringify(entries, null, 2));
+  await writeFile(`${dir}/index.html`, `<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Emails Workwave · Intégration</title><style>body{margin:0;background:#f1f3f4;color:#20282c;font:16px -apple-system,BlinkMacSystemFont,Arial,sans-serif}header{padding:25px 30px}h1{margin:0;font-size:32px;letter-spacing:-1px}p{color:#596670}main{display:grid;grid-template-columns:300px 1fr;gap:20px;padding:0 20px}nav{height:75vh;overflow:auto}a{display:block;padding:14px;background:white;margin:5px;border-radius:14px;color:#20282c;text-decoration:none;font-size:14px}iframe{border:0;width:100%;height:80vh;border-radius:25px}@media(max-width:700px){main{grid-template-columns:1fr}nav{height:160px}iframe{height:75vh}}</style><header><h1>Vos emails.<br><span style="color:#707c85">La même attention.</span></h1><p>${entries.length} variantes rendues avec le code d’envoi · Données fictives · Aucun email envoyé</p></header><main><nav>${entries.map(e => `<a href="${e.id}.html" target="mail">${escapeEmail(e.subject)}</a>`).join("")}</nav><iframe name="mail" title="Aperçu du message" src="04.html"></iframe></main></html>`);
+  console.log(`${entries.length} variantes créées ; maximum ${Math.max(...entries.map(e => e.bytes))} octets. Aucun appel réseau réel.`);
+  mock.restoreAll();
+}
+main().catch(error => { mock.restoreAll(); console.error(error); process.exitCode = 1; });

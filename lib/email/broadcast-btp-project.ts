@@ -1,3 +1,5 @@
+import { emailContent, renderEmail, escapeEmail, emailParagraph, emailButton, emailDetails } from "@/lib/email/design";
+
 /**
  * Broadcast email a TOUS les pros BTP de la categorie + zone du projet.
  * Phase Sprint 13 (2026-05-27) : nouveau modele pay-per-lead.
@@ -47,7 +49,6 @@ function getResendClient(): Resend {
   if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
   return _resend;
 }
-
 
 /**
  * Clusters de metiers "reellement le meme artisan" → un lead dans l'un doit
@@ -220,14 +221,6 @@ function humanBudget(value: string | null): string | null {
  * dupliquee dans chaque fichier d'email, convention deja en place dans
  * send-review-request.ts et send-review-moderation-alert.ts).
  */
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 function humanUrgency(value: string | null): string | null {
   if (!value) return null;
@@ -254,14 +247,10 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
   // On tronque le texte BRUT puis on echappe : dans l'autre sens, la coupe a
   // 220 pourrait tomber au milieu d'une entite (`&amp;`) et produire du HTML
   // casse a l'ecran.
-  const previewDescRaw =
-    input.projectDescription.length > 220
-      ? input.projectDescription.slice(0, 220).trim() + "..."
-      : input.projectDescription;
-  const previewDesc = escapeHtml(previewDescRaw);
+
   // Titre : ecrit par le particulier lui aussi (les appelants prennent la 1re
   // ligne de sa description, cf. deposer-projet/actions.ts).
-  const projectTitleHtml = escapeHtml(input.projectTitle);
+
   const budgetLabel = humanBudget(input.projectBudget);
   const timelineLabel = humanUrgency(input.projectTimeline);
   const lieuLabel = input.projectCityName
@@ -276,83 +265,26 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
   const kind: "j1" | "j3" | null = input.relanceKind ?? (isRelance ? "j3" : null);
   const lieu = input.projectCityName ? ` à ${input.projectCityName}` : "";
 
-  const tagLabel =
-    kind === "j1" ? "PROJET EN ATTENTE" : kind === "j3" ? "RAPPEL PROJET" : "NOUVEAU PROJET";
-
-  const headline =
-    kind === "j1"
-      ? `Un projet ${input.projectCategoryName}${lieu} vous attend`
-      : kind === "j3"
-        ? `Toujours disponible : projet ${input.projectCategoryName}${lieu}`
-        : `Nouveau projet ${input.projectCategoryName}${lieu}`;
-
-  const introText =
-    kind === "j1"
-      ? "Personne n'a encore pris ce projet et le particulier attend toujours ses devis. Vous êtes donc encore parmi les premiers à pouvoir vous positionner. Tout est dans votre tableau de bord."
-      : kind === "j3"
-        ? "Ce projet est toujours en ligne et cherche un professionnel. Si vous souhaitez le traiter, c'est encore le moment. Tout est dans votre dashboard."
-        : "Un particulier de votre zone vient de publier une demande qui correspond à votre savoir-faire. Connectez-vous à votre dashboard pour la consulter.";
-
-  const suspiciousBanner = input.isSuspicious
-    ? `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
-        <p style="font-size:12px;color:#92400E;margin:0;font-weight:600;">
-          &#9888; Projet flague par notre IA : verifiez avant de debloquer.
-        </p>
-      </div>`
-    : "";
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;margin:0;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:white;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE &middot; ${tagLabel} ]</p>
-
-    <h1 style="font-size:24px;color:#0A0A0A;margin:0 0 8px 0;font-weight:800;letter-spacing:-0.02em;">${headline}</h1>
-    <p style="font-size:14px;color:#525252;line-height:1.6;margin:0 0 24px 0;">
-      ${introText}
-    </p>
-
-    ${suspiciousBanner}
-
-    <div style="background:#FAFAFA;border-left:3px solid #FF6803;padding:20px;border-radius:8px;margin:0 0 24px 0;">
-      <h2 style="font-size:18px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;">${projectTitleHtml}</h2>
-      <p style="font-size:13px;color:#525252;line-height:1.6;margin:0 0 16px 0;white-space:pre-wrap;">${previewDesc}</p>
-      <table style="font-size:12px;width:100%;border-collapse:collapse;">
-        ${lieuLabel ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Lieu</td><td style="color:#0A0A0A;font-weight:600;">${lieuLabel}</td></tr>` : ""}
-        ${budgetLabel ? `<tr><td style="padding:4px 0;color:#999;width:90px;">Budget</td><td style="color:#0A0A0A;font-weight:600;">${budgetLabel}</td></tr>` : ""}
-        ${timelineLabel ? `<tr><td style="padding:4px 0;color:#999;">D&eacute;lai</td><td style="color:#0A0A0A;font-weight:600;">${timelineLabel}</td></tr>` : ""}
-      </table>
-    </div>
-
-    ${
-      freeRemaining && freeRemaining > 0
-        ? `<div style="background:#FFF4E8;border:1px solid #FFD9B8;border-radius:8px;padding:12px 16px;margin:0 0 16px 0;">
-        <p style="font-size:13px;color:#B24800;margin:0;font-weight:700;">
-          ${freeRemaining === 1 ? "Il vous reste 1 d&eacute;blocage offert" : `Vos ${freeRemaining} premiers d&eacute;blocages sont offerts`} : ce projet ne vous co&ucirc;te rien.
-        </p>
-      </div>`
-        : ""
-    }
-    <a href="${baseUrl}/pro/dashboard/leads" style="display:inline-block;background:#FF6803;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;margin:0 0 12px 0;">
-      ${freeRemaining && freeRemaining > 0 ? "Voir le projet (offert) &rarr;" : "Voir le projet &rarr;"}
-    </a>
-    <p style="font-size:12px;color:#525252;line-height:1.6;margin:0 0 24px 0;">
-      Pas le temps maintenant&nbsp;? Vous retrouverez ce projet &agrave; tout moment dans votre <a href="${baseUrl}/pro/dashboard/leads" style="color:#FF6803;font-weight:600;text-decoration:none;">dashboard, onglet &laquo;&nbsp;Leads&nbsp;&raquo;</a>&nbsp;&mdash; rien ne se perd.
-    </p>
-
-    <p style="font-size:12px;color:#525252;line-height:1.6;margin:24px 0 0 0;">
-      <strong>Comment ca marche ?</strong> Acces gratuit a tous les projets de votre zone. Pour debloquer les coordonnees d'un particulier (telephone + email) et le contacter directement : ${UNLOCK_PRICE_EUR_TTC}&euro; TTC par projet, <strong>et vos 2 premiers deblocages sont offerts</strong>. Sans engagement, sans abonnement, sans commission.
-    </p>
-    <p style="font-size:12px;color:#999;line-height:1.6;margin:8px 0 0 0;">
-      Pour ne plus recevoir ces notifications, mettez votre fiche en pause depuis votre <a href="${baseUrl}/pro/dashboard/preferences" style="color:#999;">dashboard</a>.
-    </p>
-
-    <hr style="border:none;border-top:1px solid #E5E5E5;margin:32px 0 16px 0;">
-    <p style="font-size:11px;color:#999;text-align:center;">
-      Workwave &middot; <a href="${baseUrl}" style="color:#999;">workwave.fr</a> &middot; projet #${input.projectId}
-    </p>
-  </div>
-</body></html>`;
+  return renderEmail({
+    title: kind ? "Un projet à redécouvrir." : "Un nouveau projet.",
+    subtitle: `${input.projectCategoryName}${lieu}.`, category: kind ? "Rappel de projet" : "Projets près de chez vous",
+    preheader: `${input.projectCategoryName}${lieu} : consultez la demande et choisissez si vous souhaitez répondre.`,
+    body: emailParagraph(kind
+      ? "Cette demande est toujours publiée. Si elle correspond à votre activité et à vos disponibilités, retrouvez-la dans votre espace."
+      : "Un particulier a déposé une demande dans votre zone. Consultez les informations pour décider si vous souhaitez y répondre.")
+      + (input.isSuspicious ? emailParagraph("Cette demande présente un signal à vérifier. Lisez attentivement les informations avant de débloquer les coordonnées.") : "")
+      + emailDetails([
+        ["Métier", input.projectCategoryName], ...(lieuLabel ? [["Lieu", lieuLabel] as [string, unknown]] : []),
+        ...(budgetLabel ? [["Budget", budgetLabel] as [string, unknown]] : []),
+        ...(timelineLabel ? [["Délai", timelineLabel] as [string, unknown]] : []),
+      ])
+      + emailParagraph(freeRemaining != null && freeRemaining > 0
+        ? `Il vous reste ${freeRemaining} déblocage${freeRemaining > 1 ? "s" : ""} offert${freeRemaining > 1 ? "s" : ""}. Vous pouvez en utiliser un pour accéder aux coordonnées de ce projet.`
+        : `Le déblocage des coordonnées coûte ${UNLOCK_PRICE_EUR_TTC} € TTC par projet, hors offre disponible sur votre compte. Le tarif est affiché avant de confirmer.`)
+      + emailButton("Consulter le projet", `${baseUrl}/pro/dashboard/leads`)
+      + emailParagraph("Vous restez libre de répondre. Sans abonnement ni commission sur vos prestations. La disponibilité du projet peut évoluer.")
+      + `<p style="font-size:12px;line-height:1.7;color:#66727c">Pour suspendre ces notifications, <a style="color:#596670" href="${escapeEmail(`${escapeEmail(baseUrl)}/pro/dashboard/preferences`)}">mettez votre fiche en pause</a>.</p>`,
+  });
 }
 
 async function sendOne(
@@ -363,7 +295,7 @@ async function sendOne(
     from: "Workwave <contact@workwave.fr>",
     to: [email.recipient_email],
     subject: email.subject,
-    html: email.html,
+    ...emailContent(email.html),
   }, { idempotencyKey });
   if (r.error || !r.data?.id) throw new Error(r.error?.message || "Resend : réponse sans identifiant");
   return { id: r.data.id };

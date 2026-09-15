@@ -1,3 +1,5 @@
+import { emailButton, emailContent, emailParagraph, renderEmail } from "@/lib/email/design";
+
 /**
  * ANNONCE AUX PROS : leurs 2 premiers deblocages sont offerts.
  *
@@ -44,79 +46,20 @@ const FREE_UNLOCK_COUNT = 2;
 
 type Pro = { id: number; name: string; email: string | null; do_not_contact: boolean | null; email_bounced: boolean | null };
 
-const echappe = (s: string) =>
-  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
 function corps(restants: number): { sujet: string; html: string } {
   // Le message s'adapte au compteur reel du pro.
-  const titre = restants >= 2 ? "Vos 2 premiers chantiers sont offerts"
-    : restants === 1 ? "Il vous reste un chantier offert"
-    : "Une mise au point sur ce que vous coûte Workwave";
+
   const sujet = restants >= 2 ? "Vos 2 premiers chantiers sont offerts (on ne vous l'avait pas dit)"
     : restants === 1 ? "Il vous reste un chantier offert sur votre compte"
     : "Ce que vous coûte Workwave, en clair";
 
-  const encadre = restants > 0
-    ? `<div style="background:#FFF4E8;border:1px solid #FFD9B8;border-radius:10px;padding:18px 20px;margin:0 0 24px 0;">
-      <p style="font-size:16px;color:#B24800;margin:0 0 6px 0;font-weight:800;">${restants === 1 ? "1 déblocage offert" : "2 déblocages offerts"}, sur votre compte, maintenant</p>
-      <p style="font-size:14px;color:#8A3A00;margin:0;line-height:1.6;">
-        Aucun code, aucune carte bancaire, rien à activer. Vous ouvrez un chantier
-        qui vous intéresse, vous obtenez le nom, le téléphone et l'email du client.
-        Le prix s'applique ensuite.
-      </p>
-    </div>`
-    : `<div style="background:#FAFAFA;border:1px solid #E5E5E5;border-radius:10px;padding:18px 20px;margin:0 0 24px 0;">
-      <p style="font-size:14px;color:#525252;margin:0;line-height:1.6;">
-        Vous avez déjà utilisé vos deux déblocages offerts. Les suivants sont à
-        9,90 € l'unité, sans abonnement ni commission.
-      </p>
-    </div>`;
-
-  const intro = restants > 0
-    ? `<p style="font-size:15px;color:#525252;line-height:1.7;margin:0 0 18px 0;">
-      Je vous écris parce qu'on a fait une erreur, et qu'elle vous a peut-être coûté un chantier.
-    </p>
-    <p style="font-size:15px;color:#525252;line-height:1.7;margin:0 0 22px 0;">
-      Quand un chantier de votre secteur vous est envoyé, notre email indique qu'il faut
-      <strong style="color:#0A0A0A;">9,90&nbsp;€</strong> pour obtenir les coordonnées du client.
-      Il ne dit pas que <strong style="color:#0A0A0A;">vos premiers déblocages ne vous coûtent rien</strong>.
-      C'était le cas depuis le début, on ne l'avait simplement écrit nulle part.
-    </p>`
-    : `<p style="font-size:15px;color:#525252;line-height:1.7;margin:0 0 22px 0;">
-      Notre email de chantier annonce le prix de 9,90 € sans préciser le reste.
-      Voici donc, en clair, ce que Workwave vous coûte et ce qu'il ne vous coûte pas.
-    </p>`;
-
-  const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE &middot; VOTRE COMPTE ]</p>
-    <h1 style="font-size:24px;color:#0A0A0A;margin:0 0 16px 0;font-weight:800;letter-spacing:-0.02em;line-height:1.25;">${titre}</h1>
-    <p style="font-size:15px;color:#525252;line-height:1.7;margin:0 0 18px 0;">Bonjour,</p>
-    ${intro}
-    ${encadre}
-    <p style="font-size:11px;color:#999999;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;margin:0 0 10px 0;">Ce que vous payez, en clair</p>
-    <table style="width:100%;font-size:14px;border-collapse:collapse;margin:0 0 26px 0;">
-      <tr><td style="padding:6px 0;color:#525252;">Recevoir les chantiers de votre zone</td><td style="padding:6px 0;color:#0A0A0A;font-weight:700;text-align:right;">0 &euro;</td></tr>
-      <tr><td style="padding:6px 0;color:#525252;">Vos ${FREE_UNLOCK_COUNT} premiers déblocages</td><td style="padding:6px 0;color:#0A0A0A;font-weight:700;text-align:right;">0 &euro;</td></tr>
-      <tr><td style="padding:6px 0;color:#525252;">Les suivants, par chantier</td><td style="padding:6px 0;color:#0A0A0A;font-weight:700;text-align:right;">9,90 &euro;</td></tr>
-      <tr><td style="padding:6px 0;color:#525252;">Abonnement</td><td style="padding:6px 0;color:#0A0A0A;font-weight:700;text-align:right;">aucun</td></tr>
-      <tr><td style="padding:6px 0;color:#525252;">Commission sur vos travaux</td><td style="padding:6px 0;color:#0A0A0A;font-weight:700;text-align:right;">aucune</td></tr>
-    </table>
-    <a href="${BASE}/pro/dashboard/leads" style="display:inline-block;background:#FF6803;color:#ffffff;padding:15px 30px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Voir les chantiers de ma zone</a>
-    <p style="font-size:13px;color:#525252;line-height:1.6;margin:20px 0 0 0;">
-      Les chantiers déjà reçus vous attendent toujours dans votre espace. Rien ne se perd.
-    </p>
-    <hr style="border:none;border-top:1px solid #E5E5E5;margin:28px 0 20px 0;">
-    <p style="font-size:14px;color:#525252;line-height:1.6;margin:0;">
-      Willy Gauvrit<br><span style="color:#999999;">Fondateur de Workwave.fr, ancien artisan</span>
-    </p>
-    <p style="font-size:12px;color:#999999;line-height:1.6;margin:20px 0 0 0;">
-      Vous recevez ce message parce que vous avez repris votre fiche sur Workwave.fr.
-      Pour ne plus recevoir de chantiers, mettez votre compte en pause depuis votre
-      <a href="${BASE}/pro/dashboard/preferences" style="color:#999999;">espace professionnel</a>.
-    </p>
-  </div>
-</div>`;
+  const html = renderEmail({ title: "Votre prochain contact.", subtitle: "À choisir dans votre espace.", category: "Professionnels",
+body: emailParagraph(restants > 0 ? `Votre compte dispose de ${restants} déblocage${restants > 1 ? "s" : ""} offert${restants > 1 ? "s" : ""}. Vous pouvez les utiliser pour consulter les coordonnées des projets qui vous intéressent.` : "Vos déblocages offerts ont été utilisés. Vous pouvez continuer à consulter les projets disponibles et choisir les contacts à débloquer.")
+ + emailButton("Consulter les projets", `${BASE}/pro/dashboard/leads`)
+ + emailParagraph("Votre fiche et la consultation des projets sont gratuites. Hors déblocages offerts disponibles, les coordonnées coûtent 9,90 € TTC par projet. Sans abonnement ni commission sur vos prestations.")
+ + emailParagraph("La disponibilité des projets évolue. Consultez les informations avant de choisir de répondre : le déblocage d’un contact ne garantit pas un chantier.")
+ + emailParagraph("Une question sur le fonctionnement ? Répondez à cet email.\nWilly, fondateur de Workwave.fr")
+ + `<p style="font-size:12px;line-height:1.8;color:#66727c">Vous recevez ce message à la suite du rattachement de votre fiche. Pour suspendre les notifications, <a style="color:#596670" href="${BASE}/pro/dashboard/preferences">mettez votre fiche en pause</a>.</p>` });
   return { sujet, html };
 }
 
@@ -182,7 +125,7 @@ function corps(restants: number): { sujet: string; html: string } {
         from: "Workwave <contact@workwave.fr>",
         to: p.email!,
         subject: m.sujet,
-        html: m.html,
+        ...emailContent(m.html),
         headers: { "X-Mailin-Track-Click": "0", "X-Mailin-Track-Open": "0" },
       });
       if (er) {

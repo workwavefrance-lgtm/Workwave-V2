@@ -1,3 +1,5 @@
+import { emailButton, emailContent, emailDetails, emailParagraph, renderEmail } from "@/lib/email/design";
+
 /**
  * ENVOI DE PROSPECTION AUX PROS, avec test A/B des deux modeles de mail.
  *
@@ -31,7 +33,6 @@
  */
 import * as dotenv from "dotenv";
 import path from "path";
-import fs from "fs";
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
@@ -87,81 +88,47 @@ type Cible = {
   km: number; urgence: string; jours: number;
 };
 
-const echappe = (s: string) =>
-  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
 function pied(c: Cible): string {
   const t = jetonGlobal(c.pro_id);
   return `
-      Votre fiche figure sur Workwave.fr a partir de donnees publiques : registre
-      des entreprises (base Sirene) et liste des entreprises RGE publiee par
+      Votre fiche figure sur Workwave.fr à partir de données publiques : registre
+      des entreprises (base Sirene) et liste des entreprises RGE publiée par
       l'ADEME sous Licence Ouverte.
-      <a href="${BASE}/unsubscribe-all?token=${t}&amp;id=${c.pro_id}" style="color:#999999;">Se desinscrire</a> &middot;
+      <a href="${BASE}/unsubscribe-all?token=${t}&amp;id=${c.pro_id}" style="color:#999999;">Se désinscrire</a> &middot;
       <a href="${BASE}/artisan/${c.slug}/supprimer" style="color:#999999;">Supprimer ma fiche</a>`;
 }
 
-const lieu = (c: Cible) => (c.km === 0 ? "dans votre commune" : `a ${c.km} km de vous`);
+const lieu = (c: Cible) => (c.km === 0 ? "dans votre commune" : `à ${c.km} km de vous`);
 const depuis = (c: Cible) =>
   c.jours === 0 ? "aujourd'hui" : c.jours === 1 ? "hier" : `il y a ${c.jours} jours`;
 
 /** Modele A : structure, le chantier sert de preuve. */
 function modeleA(c: Cible) {
-  const sujet = `Chantier ${c.projet_metier.toLowerCase()} a ${c.projet_ville} (${c.projet_cp.slice(0, 2)})`;
-  const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F7F7F7;padding:24px;color:#0A0A0A;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #E5E5E5;border-radius:16px;padding:32px;">
-    <p style="font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#999999;letter-spacing:0.2em;margin:0 0 20px 0;">[ WORKWAVE &middot; VOTRE FICHE ]</p>
-    <h1 style="font-size:24px;color:#0A0A0A;margin:0 0 12px 0;font-weight:800;letter-spacing:-0.02em;line-height:1.25;">Votre entreprise est deja sur Workwave.fr</h1>
-    <p style="font-size:14px;color:#525252;line-height:1.65;margin:0 0 20px 0;">
-      Bonjour,<br><br>
-      <strong style="color:#0A0A0A;">${echappe(c.nom)}</strong> a une fiche publique sur Workwave.fr, creee a partir du registre officiel des entreprises. Vous n'avez rien demande. Vous pouvez la reprendre, la corriger, ou demander sa suppression. Les trois se font en un clic.
-    </p>
-    <div style="background:#FFF4E8;border:1px solid #FFD9B8;border-radius:8px;padding:12px 16px;margin:0 0 20px 0;">
-      <p style="font-size:13px;color:#B24800;margin:0;font-weight:700;">Vos 2 premiers deblocages sont offerts : vos 2 premiers chantiers ne vous coutent rien.</p>
-    </div>
-    <div style="background:#FAFAFA;border-left:3px solid #FF6803;padding:20px;border-radius:8px;margin:0 0 24px 0;">
-      <p style="font-size:11px;color:#999999;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;margin:0 0 10px 0;">Pourquoi je vous ecris</p>
-      <h2 style="font-size:17px;color:#0A0A0A;margin:0 0 12px 0;font-weight:700;line-height:1.35;">Un particulier de ${echappe(c.projet_ville)} cherche un ${echappe(c.projet_metier.toLowerCase())}</h2>
-      <table style="width:100%;font-size:13px;border-collapse:collapse;">
-        <tr><td style="padding:4px 0;color:#999999;width:96px;">Depose</td><td style="color:#0A0A0A;font-weight:600;">${depuis(c)}</td></tr>
-        <tr><td style="padding:4px 0;color:#999999;">Lieu</td><td style="color:#0A0A0A;font-weight:600;">${echappe(c.projet_ville)} (${echappe(c.projet_cp)})</td></tr>
-        <tr><td style="padding:4px 0;color:#999999;">Distance</td><td style="color:#0A0A0A;font-weight:600;">${lieu(c)}</td></tr>
-        <tr><td style="padding:4px 0;color:#999999;">Delai</td><td style="color:#0A0A0A;font-weight:600;">${URGENCE[c.urgence] || "a definir"}</td></tr>
-      </table>
-      <p style="font-size:13px;color:#525252;line-height:1.6;margin:14px 0 0 0;">Il est parti aux professionnels qui avaient repris leur fiche. Vous n'en faisiez pas partie.</p>
-    </div>
-    <p style="font-size:11px;color:#999999;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;margin:0 0 10px 0;">Comment ca marche</p>
-    <table style="width:100%;font-size:14px;border-collapse:collapse;margin:0 0 24px 0;">
-      <tr><td style="padding:7px 12px 7px 0;color:#FF6803;font-weight:800;vertical-align:top;width:20px;">1</td><td style="padding:7px 0;color:#525252;line-height:1.6;">Un chantier pour votre domaine d'activite arrive dans votre secteur, vous recevez le descriptif par email. <strong style="color:#0A0A0A;">Gratuit.</strong></td></tr>
-      <tr><td style="padding:7px 12px 7px 0;color:#FF6803;font-weight:800;vertical-align:top;">2</td><td style="padding:7px 0;color:#525252;line-height:1.6;">Le chantier vous interesse, vous debloquez le nom, le telephone et l'email du particulier pour <strong style="color:#0A0A0A;">9,90 &euro;</strong>. <strong style="color:#FF6803;">Vos 2 premiers deblocages sont offerts.</strong></td></tr>
-      <tr><td style="padding:7px 12px 7px 0;color:#FF6803;font-weight:800;vertical-align:top;">3</td><td style="padding:7px 0;color:#525252;line-height:1.6;">Vous l'appelez directement. <strong style="color:#0A0A0A;">Aucun abonnement, aucune commission</strong> sur ce que vous facturez.</td></tr>
-    </table>
-    <a href="${BASE}/pro/reclamer/${c.slug}" style="display:inline-block;background:#FF6803;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Reprendre ma fiche</a>
-    <p style="font-size:13px;color:#525252;line-height:1.6;margin:18px 0 0 0;">Vous pouvez d'abord regarder ce qui est publie sur vous : <a href="${BASE}/artisan/${c.slug}" style="color:#FF6803;font-weight:600;text-decoration:none;">voir ma fiche</a>.</p>
-    <hr style="border:none;border-top:1px solid #E5E5E5;margin:28px 0 20px 0;">
-    <p style="font-size:13px;color:#525252;line-height:1.6;margin:0;">Willy Gauvrit<br><span style="color:#999999;">Fondateur de Workwave.fr, ancien artisan</span></p>
-    <p style="font-size:11px;color:#999999;line-height:1.6;margin:22px 0 0 0;">${pied(c)}</p>
-  </div>
-</div>`;
+  const sujet = `Projet ${c.projet_metier.toLowerCase()} à ${c.projet_ville} (${c.projet_cp.slice(0, 2)})`;
+  const html = renderEmail({ title: "Votre savoir-faire.", subtitle: "Des projets à découvrir.", category: "Professionnels",
+body: emailParagraph(`Bonjour, une fiche publique au nom de ${c.nom} figure sur Workwave.fr à partir des données du registre des entreprises.`)
+ + emailParagraph(`Une demande de ${c.projet_metier.toLowerCase()} a été déposée à ${c.projet_ville} ${depuis(c)}. Découvrez le fonctionnement de Workwave et les projets disponibles dans votre zone.`)
+ + emailDetails([["Métier", c.projet_metier], ["Lieu", `${c.projet_ville} (${c.projet_cp})`], ["Distance", lieu(c)], ["Délai", URGENCE[c.urgence] || "À définir"]])
+ + emailButton("Découvrir ma fiche", `${BASE}/pro/reclamer/${c.slug}`)
+ + emailParagraph("Le rattachement est gratuit et nécessite de vérifier votre lien avec l’entreprise. Vous pourrez ensuite compléter votre fiche et choisir les demandes auxquelles répondre.")
+ + emailParagraph("Le déblocage des coordonnées coûte 9,90 € TTC par projet, hors offre découverte disponible sur votre compte. Sans abonnement ni commission sur vos prestations. Un contact débloqué ne garantit pas un chantier.")
+ + emailParagraph("Une question ? Répondez simplement à cet email.\nWilly, fondateur de Workwave.fr")
+ + `<p style="font-size:12px;line-height:1.8;color:#66727c">${pied(c)}</p>` });
   return { sujet, html };
 }
 
 /** Modele B : lettre personnelle, sans mise en page marketing. */
 function modeleB(c: Cible) {
   const sujet = `Un chantier de ${c.projet_metier.toLowerCase()} a ${c.projet_ville}`;
-  const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#ffffff;padding:32px 28px;color:#0A0A0A;">
-  <div style="max-width:560px;margin:0 auto;font-size:15px;line-height:1.75;color:#1A1A1A;">
-    <p style="margin:0 0 18px 0;">Bonjour,</p>
-    <p style="margin:0 0 18px 0;">Je m'appelle Willy Gauvrit, j'ai monte Workwave.fr. J'ai ete artisan avant, donc je vais aller droit au but.</p>
-    <p style="margin:0 0 18px 0;">Votre entreprise, <strong>${echappe(c.nom)}</strong>, apparait sur mon site avec une fiche construite a partir du registre officiel. Vous ne m'avez rien demande. Si elle vous derange, le lien en bas la supprime, sans discussion.</p>
-    <p style="margin:0 0 18px 0;">Si je vous ecris aujourd'hui, c'est qu'<strong>un particulier de ${echappe(c.projet_ville)} a depose une demande de ${echappe(c.projet_metier.toLowerCase())} ${depuis(c)}</strong>, ${URGENCE[c.urgence] || "sans date imposee"}, ${lieu(c)}. Elle est partie aux professionnels qui avaient repris leur fiche chez moi. Vous n'en faisiez pas partie, et ca me gene, parce que vous etes juste a cote.</p>
-    <p style="margin:0 0 18px 0;">Le fonctionnement tient en trois lignes. Vous recevez par email le descriptif de tout chantier pour votre domaine d'activite, gratuitement. Si le client vous interesse, vous payez 9,90 &euro; une fois pour avoir son nom, son telephone et son email, et vos 2 premiers deblocages sont offerts. Vous l'appelez, et ce que vous facturez ensuite ne me regarde pas : pas d'abonnement, pas de commission.</p>
-    <p style="margin:0 0 18px 0;">Reprendre votre fiche prend deux minutes, avec votre SIRET :<br><a href="${BASE}/pro/reclamer/${c.slug}" style="color:#FF6803;font-weight:700;text-decoration:none;">workwave.fr/pro/reclamer</a></p>
-    <p style="margin:0 0 18px 0;">Et si vous voulez juste voir ce qui est ecrit sur vous :<br><a href="${BASE}/artisan/${c.slug}" style="color:#525252;text-decoration:underline;">votre fiche publique</a></p>
-    <p style="margin:0 0 6px 0;">Bien a vous,</p>
-    <p style="margin:0 0 28px 0;">Willy</p>
-    <p style="font-size:12px;color:#999999;line-height:1.6;margin:0;border-top:1px solid #E5E5E5;padding-top:16px;">${pied(c)}</p>
-  </div>
-</div>`;
+  const html = renderEmail({ title: "Votre savoir-faire.", subtitle: "Des projets à découvrir.", category: "Professionnels",
+body: emailParagraph(`Bonjour, une fiche publique au nom de ${c.nom} figure sur Workwave.fr à partir des données du registre des entreprises.`)
+ + emailParagraph(`Une demande de ${c.projet_metier.toLowerCase()} a été déposée à ${c.projet_ville} ${depuis(c)}. Découvrez le fonctionnement de Workwave et les projets disponibles dans votre zone.`)
+ + emailDetails([["Métier", c.projet_metier], ["Lieu", `${c.projet_ville} (${c.projet_cp})`], ["Distance", lieu(c)], ["Délai", URGENCE[c.urgence] || "À définir"]])
+ + emailButton("Découvrir ma fiche", `${BASE}/pro/reclamer/${c.slug}`)
+ + emailParagraph("Le rattachement est gratuit et nécessite de vérifier votre lien avec l’entreprise. Vous pourrez ensuite compléter votre fiche et choisir les demandes auxquelles répondre.")
+ + emailParagraph("Le déblocage des coordonnées coûte 9,90 € TTC par projet, hors offre découverte disponible sur votre compte. Sans abonnement ni commission sur vos prestations. Un contact débloqué ne garantit pas un chantier.")
+ + emailParagraph("Une question ? Répondez simplement à cet email.\nWilly, fondateur de Workwave.fr")
+ + `<p style="font-size:12px;line-height:1.8;color:#66727c">${pied(c)}</p>` });
   return { sujet, html };
 }
 
@@ -315,7 +282,7 @@ async function calculerCibles(): Promise<Cible[]> {
         from: "Workwave <contact@workwave.fr>",
         to: destinataire,
         subject: m.sujet,
-        html: m.html,
+        ...emailContent(m.html),
         headers: {
           "X-Mailin-Track-Click": "0",
           "X-Mailin-Track-Open": "0",

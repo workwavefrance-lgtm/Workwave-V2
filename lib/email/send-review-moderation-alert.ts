@@ -1,3 +1,5 @@
+import { escapeEmail, emailContent, renderEmail } from "@/lib/email/design";
+
 import { Resend } from "resend";
 
 let _resend: Resend | null = null;
@@ -34,73 +36,59 @@ export async function sendReviewModerationAlert(params: {
   const ratingColor =
     params.rating <= 1 ? "#DC2626" : params.rating === 2 ? "#EA580C" : "#D97706";
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:40px auto;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+  const html = renderEmail({ title: "Un avis attend.", subtitle: "Prenez le temps de le lire.", category: "Administration", body: `
 
     <!-- Liseré rouge en haut -->
-    <div style="height:4px;background:${ratingColor};"></div>
+    <div style="height:4px;background:${escapeEmail(ratingColor)};"></div>
 
-    <div style="padding:28px 32px;">
-      <p style="margin:0 0 12px;font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">
+      <p style="margin:0 0 12px;font-size:11px;color:#66727c;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">
         Modération requise · Workwave
       </p>
 
-      <h1 style="margin:0 0 16px;color:#0A0A0A;font-size:20px;font-weight:700;letter-spacing:-0.01em;line-height:1.3;">
-        Avis ${params.rating}/5 à modérer sur <span style="color:#FF5A36;">${escapeHtml(params.proName)}</span>
-      </h1>
-
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin:0 0 20px;">
-        <tr>
-          <td style="padding:6px 0;color:#6B7280;font-size:13px;font-weight:500;width:120px;">Note :</td>
-          <td style="padding:6px 0;color:${ratingColor};font-size:14px;font-weight:700;">${params.rating}/5 ★</td>
+        <tbody><tr>
+          <td style="padding:6px 0;color:#53606a;font-size:13px;font-weight:500;width:120px;">Note :</td>
+          <td style="padding:6px 0;color:${escapeEmail(ratingColor)};font-size:14px;font-weight:700;">${escapeEmail(params.rating)}/5 ★</td>
         </tr>
         <tr>
-          <td style="padding:6px 0;color:#6B7280;font-size:13px;font-weight:500;">Particulier :</td>
-          <td style="padding:6px 0;color:#0A0A0A;font-size:14px;">${escapeHtml(params.particulierName)}</td>
+          <td style="padding:6px 0;color:#53606a;font-size:13px;font-weight:500;">Particulier :</td>
+          <td style="padding:6px 0;color:#20282c;font-size:14px;">${escapeHtml(params.particulierName)}</td>
         </tr>
         <tr>
-          <td style="padding:6px 0;color:#6B7280;font-size:13px;font-weight:500;vertical-align:top;">Fiche pro :</td>
+          <td style="padding:6px 0;color:#53606a;font-size:13px;font-weight:500;vertical-align:top;">Fiche pro :</td>
           <td style="padding:6px 0;">
-            <a href="${proUrl}" style="color:#FF5A36;font-size:13px;text-decoration:none;">${escapeHtml(params.proSlug)}</a>
+            <a href="${escapeEmail(proUrl)}" style="color:#c64b1c;font-size:13px;text-decoration:none;">${escapeHtml(params.proSlug)}</a>
           </td>
         </tr>
-      </table>
+      </tbody></table>
 
       ${params.comment ? `
-      <div style="background:#FAFAFA;border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin:0 0 24px;">
-        <p style="margin:0 0 4px;color:#9CA3AF;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Commentaire</p>
-        <p style="margin:0;color:#0A0A0A;font-size:14px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(params.comment)}</p>
+      <div style="background:#f5f6f7;border:1px solid #E5E7EB;border-radius:22px;padding:14px 16px;margin:0 0 24px;">
+        <p style="margin:0 0 4px;color:#66727c;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Commentaire</p>
+        <p style="margin:0;color:#20282c;font-size:14px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(params.comment)}</p>
       </div>
       ` : `
-      <p style="margin:0 0 24px;color:#9CA3AF;font-size:13px;font-style:italic;">
+      <p style="margin:0 0 24px;color:#66727c;font-size:13px;font-style:italic;">
         (Aucun commentaire, note uniquement)
       </p>
       `}
 
       <table cellpadding="0" cellspacing="0" border="0" style="margin:0;">
-        <tr>
-          <td style="border-radius:999px;background:#FF5A36;">
-            <a href="${adminUrl}" style="display:inline-block;padding:12px 24px;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:999px;">
+        <tbody><tr>
+          <td style="border-radius:999px;background:#c64b1c;">
+            <a href="${escapeEmail(adminUrl)}" style="display:inline-block;padding:12px 24px;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:999px;">
               Modérer cet avis
             </a>
           </td>
         </tr>
-      </table>
-    </div>
+      </tbody></table>
 
-    <div style="background:#FAFAFA;padding:14px 32px;border-top:1px solid #F1F1F3;">
-      <p style="margin:0;color:#9CA3AF;font-size:11px;line-height:1.5;">
+    <div style="background:#f5f6f7;padding:14px 32px;border-top:1px solid #F1F1F3;">
+      <p style="margin:0;color:#66727c;font-size:11px;line-height:1.5;">
         Auto-publication des avis ≥ 3★. Les avis &lt; 3★ requièrent votre validation.
       </p>
     </div>
-  </div>
-</body>
-</html>
-  `.trim();
+  ` }).trim();
 
   const text = `
 Avis ${params.rating}/5 à modérer sur ${params.proName}
@@ -117,7 +105,7 @@ Modérer ici : ${adminUrl}
       from: "Workwave <contact@workwave.fr>",
       to: adminEmail,
       subject: `[Mod] Avis ${params.rating}/5 à valider · ${params.proName}`,
-      html,
+      ...emailContent(html),
       text,
     });
     if (result.error) {
