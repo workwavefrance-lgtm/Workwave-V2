@@ -43,7 +43,7 @@ export default async function InlineProjectForm({
             <span className="text-[#FF5A36]"> Décrivez votre projet</span>
           </h2>
           <p className="text-[var(--text-secondary)] text-base">
-            On vous met en relation avec des {category.name.toLowerCase()}{city ? ` à ${city.name}` : ""} en 24h.
+            On vous met en relation avec des {category.name.toLowerCase()}{city ? ` à ${city.name}` : ""} intéressés par votre demande.
             Gratuit, sans engagement.
           </p>
         </div>

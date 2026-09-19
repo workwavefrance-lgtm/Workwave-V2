@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { acquisitionReport, type AcquisitionReport } from "@/lib/analytics/acquisition-report";
 import { getAdminServiceClient } from "@/lib/admin/service-client";
 import { getAnalyticsTestUserIds, isAnalyticsTestActivity } from "@/lib/analytics/test-accounts";
 
@@ -37,6 +38,7 @@ export type KpiSet = {
 };
 
 export type VerticalBundle = {
+  acquisition: AcquisitionReport;
   totalEvents: number;
   kpis: KpiSet;
   revenueByDay: RevenuePoint[];
@@ -74,6 +76,7 @@ export type RawEvent = {
   metadata:
     | {
         vertical?: string;
+        acquisition?: unknown;
         step?: number; // project_step_reached : écran 1..4 depuis le 09/09/2026 (1..5 du 28/08 au 08/09)
         name?: string; // project_step_reached : Métier|Quand|Projet|Coordonnées (autres noms avant le 09/09/2026)
         initialStep?: number; // project_form_viewed / started : écran de départ 1..4
@@ -455,6 +458,7 @@ function computeBundle(
 ): VerticalBundle {
   return {
     totalEvents: evCur.length,
+    acquisition: acquisitionReport(evCur, pCur.map(p => p.id)),
     kpis: computeKpis(evCur, evPrev, uCur, uPrev, pCur, pPrev),
     revenueByDay: computeRevenueByDay(uCur, b),
     eventsByDay: computeEventsByDay(evCur, b),

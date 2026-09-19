@@ -1,9 +1,10 @@
 "use server";
 
 import { getServiceClient } from "@/lib/supabase/service-client";
-import { z } from "zod";
+import { projectSchema } from "@/lib/project-validation";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { parseAcquisition } from "@/lib/analytics/acquisition";
+import { headers, cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { qualifyProject } from "@/lib/ai/qualify-project";
 import { sendProjectNotification } from "@/lib/email/send-project-notification";
@@ -14,58 +15,6 @@ import { track } from "@/lib/analytics/track";
 import { EVENTS } from "@/lib/analytics/events";
 
 // --- Validation schema ---
-
-const projectSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, "Le prénom doit contenir au moins 2 caractères"),
-  email: z.string().email("Adresse email invalide"),
-  phone: z
-    .string()
-    .regex(
-      /^(?:(?:\+33|0)\s?[1-9])(?:[\s.-]?\d{2}){4}$/,
-      "Numéro de téléphone invalide"
-    ),
-  // Liste complete des metiers choisis, « 3,1,2 » (le premier est le
-  // principal, deja porte par categoryId). Optionnel : un formulaire qui
-  // n'envoie que categoryId continue de fonctionner a l'identique.
-  categoryIds: z.string().optional(),
-  categoryId: z.coerce
-    .number()
-    .int()
-    .positive("Veuillez choisir un type de travaux"),
-  cityId: z.coerce.number().int().positive("Veuillez choisir une ville"),
-  // Description OBLIGATOIRE depuis le 19/08/2026 (demande Willy) : un pro a qui
-  // on demande 9,90 EUR pour un contact doit pouvoir juger sur piece. Deux
-  // projets deposes le 18/08 (Chateauroux, Mevoisins) n'avaient pas une ligne.
-  //
-  // L'echec silencieux de l'ancienne version est evite AUTREMENT : le bouton
-  // "Continuer" de l'etape 2 est desormais bloque tant que le champ n'est pas
-  // rempli, donc l'utilisateur ne peut plus atteindre l'envoi avec un champ
-  // vide. Cette regle serveur n'est plus que le filet de securite.
-  //
-  // A SURVEILLER : le tunnel etait a 18 % de completion (758 formulaires
-  // ouverts pour 134 projets soumis). Un champ obligatoire de plus fera
-  // abandonner des gens. Si le nombre de projets deposes chute nettement, le
-  // seuil de 20 caracteres est le premier levier a baisser.
-  description: z
-    .string()
-    .trim()
-    .min(20, "Décrivez votre projet en quelques mots : les artisans en ont besoin pour vous répondre")
-    .max(5000, "Description trop longue (5000 caractères max)"),
-  urgency: z.enum(["today", "this_week", "this_month", "not_urgent"], {
-    message: "Veuillez indiquer l'urgence",
-  }),
-  budget: z.enum(
-    ["lt500", "500_2000", "2000_5000", "5000_15000", "gt15000", "unknown"],
-    { message: "Veuillez indiquer votre budget" }
-  ),
-  consent: z.literal("on", {
-    message: "Vous devez accepter la transmission de vos données",
-  }),
-  // Honeypot : doit rester vide
-  website: z.string().max(0).optional(),
-});
 
 // --- Rate limiting en mémoire ---
 // TODO: Migrer vers Upstash Redis au Sprint 5 ou 6 pour que le rate limiting
@@ -218,7 +167,6 @@ export async function submitProject(
 
   // Insertion en base
   // On utilise le service_role key pour bypass RLS sur l'insert + select
-  const { createClient: createServiceClient } = await import("@supabase/supabase-js");
   const serviceClient = getServiceClient();
 
   // Dédup anti double-soumission : si un projet identique (même email + ville +
@@ -338,10 +286,18 @@ export async function submitProject(
     deletionToken,
   }).catch((err) => console.error("Erreur email confirmation (non bloquante) :", err));
 
+  // Attribution facultative : la soumission fonctionnelle reste indépendante.
+  let acquisition = null;
+  try {
+    const consent = (await cookies()).get("consent_analytics")?.value === "accepted";
+    acquisition = parseAcquisition(formData.get("acquisition"), consent);
+  } catch { /* Le suivi ne bloque jamais un dépôt enregistré. */ }
   // Tracking (fire-and-forget)
   track(EVENTS.PROJECT_FORM_SUBMITTED, {
     projectId: project.id,
+    sessionId: acquisition?.sessionId,
     metadata: {
+      ...(acquisition ? { acquisition } : {}),
       category: category.name,
       city: city.name,
       urgency: data.urgency,
@@ -444,6 +400,12 @@ export async function submitProject(
         continue;
       }
       console.log(`[submitProject] projet ${autreProjet.id} cree pour ${autreCat.name}`);
+
+      track(EVENTS.PROJECT_FORM_SUBMITTED, {
+        projectId: autreProjet.id,
+        sessionId: acquisition?.sessionId,
+        metadata: { category: autreCat.name, city: city.name, urgency: data.urgency, ...(acquisition ? { acquisition } : {}) },
+      });
 
       sendProjectNotification({
         firstName: data.firstName,

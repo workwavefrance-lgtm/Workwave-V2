@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import QuickProjectModalTrigger from "@/components/project/QuickProjectModalTrigger";
 import { createClient } from "@/lib/supabase/client";
+import glass from "@/components/redesign/public-shell.module.css";
 
-export default function Header() {
+export default function Header({ redesign = false }: { redesign?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isPro, setIsPro] = useState(false);
@@ -58,7 +59,7 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={redesign ? glass.header : `sticky top-0 z-50 transition-all duration-300 ${
         scrolled
           ? "bg-white/80 dark:bg-[#0A0A0A]/80 backdrop-blur-lg border-b border-[var(--border-color)]"
           : "bg-transparent"
@@ -122,7 +123,7 @@ export default function Header() {
 
         {/* Actions desktop */}
         <div className="hidden lg:flex items-center gap-3">
-          <ThemeToggle />
+          {!redesign && <ThemeToggle />}
           <Link
             prefetch={false}
             href={isPro ? "/pro/dashboard" : "/pro/connexion"}
@@ -134,25 +135,25 @@ export default function Header() {
               capture lead à zéro friction. Levier business critique.
               CTA PRINCIPAL du header (plein + agrandi). Le "Trouver un pro"
               faisait doublon avec la recherche du hero → retiré le 16/07. */}
-          <QuickProjectModalTrigger
+          {redesign ? <Link href="/deposer-projet" prefetch={false} data-project-cta="header-desktop" className={glass.cta}>Déposer un projet</Link> : <QuickProjectModalTrigger
             label="Déposer un projet (gratuit)"
             // whitespace-nowrap : sans lui, "(gratuit)" fait passer le bouton
             // sur 3 lignes (96 px de haut) des que la barre est serree, autour
             // de 800 px de large, et il chevauche la navigation. Mesure du
             // 11/08/2026 avant correction.
             className="whitespace-nowrap bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-5 py-3 rounded-full text-sm lg:text-base font-semibold transition-all duration-250 hover:scale-[1.02]"
-          />
+          />}
         </div>
 
         {/* Mobile: CTA Déposer + ThemeToggle + Hamburger */}
         <div className="flex lg:hidden items-center gap-2">
           {/* CTA modal visible AVANT le hamburger pour ne pas être caché.
               Compact : "Déposer" suffit (le titre du H1 dans la modal complète). */}
-          <QuickProjectModalTrigger
+          {redesign ? <Link href="/deposer-projet" prefetch={false} data-project-cta="header-mobile" className={glass.cta}>Déposer</Link> : <QuickProjectModalTrigger
             label="Déposer"
             className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-250"
-          />
-          <ThemeToggle />
+          />}
+          {!redesign && <ThemeToggle />}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-secondary)] transition-colors duration-250"

@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { publicPath,sanitizeAcquisition,parseAcquisition,safeEventMetadata,ACQUISITION_TTL } from '../../lib/analytics/acquisition';
+const now=Date.now();
+const context={version:1,sessionId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',entryPath:'/artisan/lf-concept-00021?email=secret@example.com#private',entryFamily:'fake',lastCta:'home-hero',startedAt:now};
+test('attribution bornée sans paramètres ni provenance arbitraire',()=>{const c=sanitizeAcquisition(context,now)!;assert.equal(c.entryPath,'/artisan/lf-concept-00021');assert.equal(c.entryFamily,'fiche');assert.equal(c.lastCta,'home-hero');assert.equal('email' in c,false);});
+test('URL privées, absolues, identifiants et caractères inattendus refusés',()=>{for(const path of ['/admin/support','/api/track','/pro/dashboard','/pro','/deposer-projet/supprimer','//evil.com','https://workwave.fr/','/artisan/person@example.com','/artisan/0612345678','/artisan/%40secret'])assert.equal(publicPath(path),null,path);});
+test('aucune attribution sans consentement ou contexte valide',()=>{assert.equal(parseAcquisition(JSON.stringify(context),false),null);assert.equal(parseAcquisition('{broken',true),null);assert.equal(sanitizeAcquisition({...context,startedAt:now-ACQUISITION_TTL-1},now),null);assert.equal(sanitizeAcquisition({...context,startedAt:now+1},now),null);assert.equal(sanitizeAcquisition({...context,sessionId:'email@example.com'},now),null);});
+test('les métadonnées ne transportent jamais besoin, téléphone ou email',()=>{assert.deepEqual(safeEventMetadata({step:2,inline:true,name:'Quand',description:'texte privé',email:'x@y.fr',phone:'0612345678',path:'/peintre/draveil?besoin=secret',cta:'bad/email'}),{step:2,inline:true,name:'Quand',path:'/peintre/draveil'});});

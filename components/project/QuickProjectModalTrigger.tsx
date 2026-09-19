@@ -59,6 +59,7 @@ export default function QuickProjectModalTrigger({
     <>
       <button
         type="button"
+        data-project-cta="quick-project-modal"
         onClick={openModal}
         className={
           className ||

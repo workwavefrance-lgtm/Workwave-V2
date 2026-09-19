@@ -1,3 +1,5 @@
+import { publicRedesignEnabled } from "@/lib/public-redesign";
+import glass from "@/components/redesign/public-shell.module.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import LoginForm from "./LoginForm";
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function ConnexionPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]">
+    <main className={`${publicRedesignEnabled ? `${glass.shell} ${glass.auth}` : ""} min-h-screen flex items-center justify-center px-4 bg-[var(--bg-primary)]`}>
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -19,9 +21,8 @@ export default function ConnexionPage() {
           >
             Workwave
           </Link>
-          <p className="text-sm text-[var(--text-secondary)] mt-2">
-            Connectez-vous à votre espace professionnel
-          </p>
+          <h1 className="text-3xl font-semibold tracking-tight mt-7 mb-3">Votre espace professionnel.</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-2">Retrouvez vos demandes et faites vivre votre fiche.</p>
         </div>
 
         {/* Card */}

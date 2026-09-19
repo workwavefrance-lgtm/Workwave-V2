@@ -1,5 +1,6 @@
 "use client";
 
+import { clearAcquisition } from "@/lib/analytics/acquisition-client";
 import { useState, useEffect } from "react";
 
 const COOKIE_NAME = "consent_analytics";
@@ -55,12 +56,15 @@ export default function CookieBanner() {
   function accept() {
     setCookie(COOKIE_NAME, "accepted", COOKIE_MAX_AGE);
     pushGoogleConsent("granted");
+    window.dispatchEvent(new Event("ww-consent-change"));
     setVisible(false);
   }
 
   function refuse() {
     setCookie(COOKIE_NAME, "refused", COOKIE_MAX_AGE);
     pushGoogleConsent("denied");
+    clearAcquisition();
+    window.dispatchEvent(new Event("ww-consent-change"));
     setVisible(false);
   }
 

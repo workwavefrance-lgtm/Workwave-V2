@@ -1,5 +1,8 @@
+import { SPECIALTIES } from "@/lib/specialties";
 import type { Metadata } from "next";
 import ProjectForm from "@/components/project/ProjectForm";
+import DepositGlass from "@/components/redesign/DepositGlass";
+import { publicRedesignEnabled } from "@/lib/public-redesign";
 import {
   getAllCategories,
   getCategoryBySlug,
@@ -14,11 +17,11 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ categorie?: string; ville?: string; besoin?: string }>;
+  searchParams: Promise<{ categorie?: string; ville?: string; besoin?: string; specialite?: string }>;
 };
 
 export default async function DeposerProjetPage({ searchParams }: Props) {
-  const { categorie, ville, besoin } = await searchParams;
+  const { categorie, ville, besoin, specialite } = await searchParams;
 
   // Pré-remplissage depuis les liens des pages listings (/[metier]/[location])
   const [categories, prefilledCategory, prefilledCity] = await Promise.all([
@@ -28,6 +31,15 @@ export default async function DeposerProjetPage({ searchParams }: Props) {
     // getCityBySlug renvoie null pour un slug de département → comportement OK (pas de prefill).
     ville ? getCityBySlug(ville) : Promise.resolve(null),
   ]);
+
+  const specialty = categorie ? SPECIALTIES[categorie]?.find(item => item.slug === specialite) : undefined;
+
+  if (publicRedesignEnabled) return <DepositGlass
+    categories={categories.map(c => ({ id: c.id, name: c.name, vertical: c.vertical }))}
+    defaultCategoryId={prefilledCategory?.id}
+    defaultCity={prefilledCity ? { id: prefilledCity.id, name: prefilledCity.name } : null}
+    defaultDescription={besoin ? besoin.slice(0,500) : specialty ? `${specialty.name} : ` : undefined}
+  />;
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-16 sm:py-24">

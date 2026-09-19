@@ -10,6 +10,8 @@ type CityResult = {
 
 type Props = {
   onSelect: (cityId: number, cityName: string) => void;
+  onClear?: () => void;
+  inputId?: string;
   error?: string;
   /** Pré-remplissage : ville déjà sélectionnée (ex: depuis query params) */
   defaultCity?: { id: number; name: string } | null;
@@ -17,6 +19,8 @@ type Props = {
 
 export default function CityAutocomplete({
   onSelect,
+  onClear,
+  inputId,
   error,
   defaultCity,
 }: Props) {
@@ -28,6 +32,7 @@ export default function CityAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const requestVersion = useRef(0);
 
   // Notifier le parent du prefill au mount
   useEffect(() => {
@@ -38,6 +43,7 @@ export default function CityAutocomplete({
   }, []);
 
   const fetchCities = useCallback(async (q: string) => {
+    const version = requestVersion.current;
     if (q.length < 2) {
       setResults([]);
       setIsOpen(false);
@@ -47,24 +53,34 @@ export default function CityAutocomplete({
       const res = await fetch(
         `/api/cities/search?q=${encodeURIComponent(q)}`
       );
+      if (!res.ok) throw new Error('City search unavailable');
       const data: CityResult[] = await res.json();
+      if (version !== requestVersion.current) return;
+      if (!Array.isArray(data)) throw new Error('Invalid city results');
       setResults(data);
       setIsOpen(data.length > 0);
       setHighlightIndex(-1);
     } catch {
+      if (version !== requestVersion.current) return;
       setResults([]);
       setIsOpen(false);
     }
   }, []);
 
   function handleChange(value: string) {
+    requestVersion.current++;
+    onClear?.();
     setQuery(value);
     setSelectedName("");
+    setResults([]);
+    setIsOpen(false);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchCities(value), 200);
   }
 
   function selectCity(city: CityResult) {
+    requestVersion.current++;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setSelectedName(city.name);
     setQuery(city.name);
     setIsOpen(false);
@@ -107,15 +123,15 @@ export default function CityAutocomplete({
 
   return (
     <div ref={containerRef} className="relative">
-      <label
+      {!inputId && <label
         htmlFor="city-search"
         className="block text-sm font-medium text-[var(--text-primary)] mb-2"
       >
         Ville
-      </label>
+      </label>}
       <input
         ref={inputRef}
-        id="city-search"
+        id={inputId ?? "city-search"}
         type="text"
         autoComplete="off"
         value={query}
@@ -128,23 +144,25 @@ export default function CityAutocomplete({
             : "border-[var(--border-color)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
         }`}
         role="combobox"
+        aria-invalid={!!error}
+        aria-describedby={error ? `${inputId ?? 'city-search'}-error` : undefined}
         aria-expanded={isOpen}
-        aria-controls="city-listbox"
+        aria-controls={`${inputId ?? 'city'}-listbox`}
         aria-activedescendant={
-          highlightIndex >= 0 ? `city-option-${highlightIndex}` : undefined
+          highlightIndex >= 0 ? `${inputId ?? 'city'}-option-${highlightIndex}` : undefined
         }
       />
 
       {isOpen && results.length > 0 && (
         <ul
-          id="city-listbox"
+          id={`${inputId ?? 'city'}-listbox`}
           role="listbox"
           className="absolute z-50 top-full mt-2 w-full bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl shadow-md overflow-hidden"
         >
           {results.map((city, i) => (
             <li
               key={city.id}
-              id={`city-option-${i}`}
+              id={`${inputId ?? 'city'}-option-${i}`}
               role="option"
               aria-selected={i === highlightIndex}
               className={`px-4 py-3 cursor-pointer transition-colors duration-150 ${
@@ -169,7 +187,7 @@ export default function CityAutocomplete({
       )}
 
       {error && (
-        <p className="mt-1.5 text-sm text-red-500 animate-in">{error}</p>
+        <p id={`${inputId ?? 'city-search'}-error`} className="mt-1.5 text-sm text-red-500 animate-in">{error}</p>
       )}
     </div>
   );

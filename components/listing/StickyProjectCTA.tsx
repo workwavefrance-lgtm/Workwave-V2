@@ -17,7 +17,7 @@ export default function StickyProjectCTA({
   locationName,
   preposition,
   specialitySlug,
-  tagline = "Recevez des devis gratuits en 30 sec.",
+  tagline = "Expliquez votre besoin. Dépôt gratuit.",
   ctaText = "Demander un devis",
 }: {
   categorySlug: string;
@@ -85,6 +85,7 @@ export default function StickyProjectCTA({
 
   return (
     <div
+      data-sticky-project
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         visible
           ? "translate-y-0 opacity-100 pointer-events-auto"

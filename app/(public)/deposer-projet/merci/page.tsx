@@ -30,12 +30,13 @@ export default function MerciPage() {
       </h1>
 
       <p className="text-[var(--text-secondary)] text-lg max-w-md mx-auto mb-3">
-        Un professionnel adapté à votre projet vous contactera très
-        prochainement.
+        Les professionnels concernés et intéressés pourront vous contacter.
+        Vous restez libre de choisir avec qui échanger.
       </p>
 
       <p className="text-[var(--text-tertiary)] text-sm max-w-md mx-auto mb-10">
-        Nous avons envoyé une confirmation à votre adresse email.
+        Consultez votre boîte email, y compris les courriers indésirables,
+        pour retrouver le suivi de votre demande.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4">

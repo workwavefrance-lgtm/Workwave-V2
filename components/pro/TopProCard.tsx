@@ -10,7 +10,7 @@ import { buildProSummary, buildProBadges } from "@/lib/utils/pro-summary";
  * - Numero de rang affiche (1, 2, 3, ...)
  * - Phrase "Pourquoi choisir [pro]" auto-construite
  * - Badges visuels (RGE, anciennete, note Google si dispo)
- * - 2 CTAs distincts : "Voir la fiche" + "Demander un devis"
+ * - 2 CTAs distincts : "Voir la fiche" + "Décrire mon projet"
  *
  * Pas de logique d'affaire ici : tout est cote helpers (buildProSummary,
  * buildProBadges). Composant pur visuel.
@@ -59,7 +59,7 @@ export default function TopProCard({
   const projectHref = `/deposer-projet?${projectParams.toString()}`;
 
   return (
-    <article className="group relative bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-5 sm:p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-lg hover:border-[var(--accent)]">
+    <article data-pro-card className="group relative bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-5 sm:p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-lg hover:border-[var(--accent)]">
       {/* Badge "Rang" en haut a gauche : #1, #2, #3 etc. */}
       <span
         className="absolute -top-2.5 left-5 inline-flex items-center justify-center min-w-[28px] h-[28px] px-2 rounded-full text-[12px] font-bold text-white tracking-tight"
@@ -192,16 +192,16 @@ export default function TopProCard({
       <div className="flex flex-col sm:flex-row gap-2 pt-1">
         <Link
           href={`/artisan/${pro.slug}`}
-          className="flex-1 inline-flex items-center justify-center h-9 px-3 text-[13px] font-medium rounded-full border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-150"
+          className="flex-1 inline-flex items-center justify-center min-h-11 py-2 px-3 text-[13px] font-medium rounded-full border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-150"
         >
           Voir la fiche
         </Link>
         <Link
           href={projectHref}
-          className="flex-1 inline-flex items-center justify-center h-9 px-3 text-[13px] font-semibold rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white transition-all duration-150"
+          className="flex-1 inline-flex items-center justify-center min-h-11 py-2 px-3 text-[13px] text-center font-semibold rounded-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white transition-all duration-150"
           style={{ boxShadow: "0 2px 8px -2px rgba(255, 90, 54, 0.4)" }}
         >
-          Demander un devis
+          Décrire mon projet
         </Link>
       </div>
     </article>

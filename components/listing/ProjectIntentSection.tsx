@@ -75,7 +75,8 @@ export default function ProjectIntentSection({
         Quel est votre projet {deOrDApostrophe(getCategoryServiceLabel(categorySlug, categoryName))} à {locationName} ?
       </h2>
       <p className="text-sm text-[var(--text-secondary)] mb-5">
-        Décrivez votre besoin en 30 secondes, nous transmettons votre demande aux artisans qualifiés de votre zone. Gratuit, sans engagement.
+        Décrivez votre besoin et précisez le lieu de votre projet.
+        Les professionnels intéressés peuvent vous contacter. Vous choisissez librement.
       </p>
 
       {/* Boutons rapides par specialite (si la categorie en a) */}
@@ -116,7 +117,7 @@ export default function ProjectIntentSection({
           </svg>
         </Link>
         <p className="text-[12px] text-[var(--text-tertiary)] sm:ml-1">
-          Réponse sous 24h · 100% gratuit · Sans compte
+          Dépôt gratuit · Sans engagement · Sans compte
         </p>
       </div>
     </section>

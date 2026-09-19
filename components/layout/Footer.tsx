@@ -1,13 +1,10 @@
 import Link from "next/link";
+import glass from "@/components/redesign/public-shell.module.css";
 // Imports publics (sans cookies) : critique pour le caching ISR du layout
 // (public). Si on remet `getAllCategories` / `getAllDepartments` qui
 // touchent aux cookies, toutes les pages publiques basculent en dynamic
 // => cache CDN inactif.
-import {
-  getAllCategoriesPublic,
-  getAllDepartmentsPublic,
-} from "@/lib/queries/home-public";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import { getAllCategoriesPublic } from "@/lib/queries/home-public";
 
 /**
  * Pied de page, reorganise le 11/09/2026 (maquette validee par Willy).
@@ -91,11 +88,8 @@ const TITRE = "text-xs font-bold uppercase tracking-wider text-white mb-4";
 // defilement) ; sur grand ecran, une colonne classique.
 const LISTE = "grid grid-cols-2 gap-x-4 gap-y-2 lg:block lg:space-y-2";
 
-export default async function Footer() {
-  const [categories, departments] = await Promise.all([
-    getAllCategoriesPublic(),
-    getAllDepartmentsPublic(),
-  ]);
+export default async function Footer({ redesign = false }: { redesign?: boolean }) {
+  const categories = await getAllCategoriesPublic();
   const parSlug = new Map(categories.map((c) => [c.slug, c]));
   const metiers = METIERS_LES_PLUS_DEMANDES.map((s) => parSlug.get(s)).filter(
     (c): c is NonNullable<typeof c> => Boolean(c)
@@ -104,19 +98,11 @@ export default async function Footer() {
     (c): c is NonNullable<typeof c> => Boolean(c)
   );
 
-  // Rotation des departements sur les liens metier, conservee (audit du
-  // 03/05/2026) : le pied de page est sur 2 M de pages, faire pointer chaque
-  // metier vers un departement different repartit la decouverte par Google
-  // sur toute la France au lieu de tout pousser vers un seul departement.
-  const deptSlugs = departments.map((d) => generateDepartmentSlug(d));
-  const linkFor = (catSlug: string, idx: number, offset: number): string => {
-    if (deptSlugs.length === 0) return `/${catSlug}`;
-    const dept = deptSlugs[(idx + offset) % deptSlugs.length];
-    return `/${catSlug}/${dept}`;
-  };
+  // Les pages métier donnent accès aux villes et départements : le visiteur
+  // choisit sa zone, sans être envoyé dans un département arbitraire.
 
   return (
-    <footer className="bg-[#0A0A0A] dark:bg-[#111111] text-white mt-auto">
+    <footer className={redesign ? glass.footer : "bg-[#0A0A0A] dark:bg-[#111111] text-white mt-auto"}>
       <div className="max-w-6xl mx-auto px-4 py-14 sm:py-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.3fr_repeat(4,1fr)] lg:gap-8">
           {/* Bloc de marque : l'accroche et les deux actions */}
@@ -147,9 +133,9 @@ export default async function Footer() {
           <div>
             <p className={TITRE}>Métiers les plus demandés</p>
             <ul className={LISTE}>
-              {metiers.map((cat, i) => (
+              {metiers.map((cat) => (
                 <li key={cat.id}>
-                  <Link prefetch={false} href={linkFor(cat.slug, i, 0)} className={LIEN}>
+                  <Link prefetch={false} href={`/${cat.slug}`} className={LIEN}>
                     {cat.name}
                   </Link>
                 </li>
@@ -165,9 +151,9 @@ export default async function Footer() {
           <div>
             <p className={TITRE}>Maison et personne</p>
             <ul className={LISTE}>
-              {maison.map((cat, i) => (
+              {maison.map((cat) => (
                 <li key={cat.id}>
-                  <Link prefetch={false} href={linkFor(cat.slug, i, 5)} className={LIEN}>
+                  <Link prefetch={false} href={`/${cat.slug}`} className={LIEN}>
                     {cat.name}
                   </Link>
                 </li>

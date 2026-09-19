@@ -383,6 +383,29 @@ export default function AnalyticsClient({
           </Card>
         </div>
 
+        <div className="mb-4">
+          <Card title="Les pages qui apportent des projets" subtitle="Pages d’entrée observées après acceptation de la mesure d’audience">
+            {b.acquisition?.pages.length ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead><tr className="border-b" style={{ borderColor: "var(--admin-border)" }}>
+                    <th className="py-3 pr-4">Page d’entrée</th><th className="p-3">Sessions observées</th><th className="p-3">Avec clic dépôt</th><th className="p-3">Formulaire commencé</th><th className="p-3">Projets enregistrés</th>
+                  </tr></thead>
+                  <tbody>{b.acquisition.pages.map(row => <tr key={row.path} className="border-b" style={{ borderColor: "var(--admin-border)" }}>
+                    <td className="py-3 pr-4 break-all"><a href={row.path} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">{row.path}</a></td>
+                    <td className="p-3 tabular-nums">{row.sessions}</td><td className="p-3 tabular-nums">{row.ctaSessions}</td><td className="p-3 tabular-nums">{row.startedSessions}</td><td className="p-3 tabular-nums font-semibold">{row.projects}</td>
+                  </tr>)}</tbody>
+                </table>
+              </div>
+            ) : <Empty message="Aucune page d’entrée attribuée sur cette période. Le suivi commence à sa mise en ligne, sans reprise de l’historique." />}
+            <p className="text-xs mt-4" style={{ color: "var(--admin-text-secondary)" }}>
+              {b.acquisition?.attributedProjects ?? 0} projet(s) valide(s) attribué(s) · {b.acquisition?.unattributedProjects ?? k.projectsValid.current} sans attribution.
+              Les projets supprimés ou suspects sont exclus. Une session dure au maximum 30 minutes ; les événements répétés sont dédupliqués par session et les projets par identifiant.
+              Ce tableau affiche jusqu’à 30 pages. Il ne distingue pas encore le trafic Google des autres sources et ne reconstitue pas les visites antérieures au consentement.
+            </p>
+          </Card>
+        </div>
+
         {/* Répartitions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
           <Card title="Top métiers demandés" subtitle="Dépôts BTP enregistrés par catégorie">

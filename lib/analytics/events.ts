@@ -1,6 +1,7 @@
 // Noms d'événements trackés sur la plateforme
 export const EVENTS = {
   // Particulier
+  PROJECT_CTA_CLICKED: "project_cta_clicked",
   PAGE_VIEW: "page_view",
   // Tiré à l'AFFICHAGE du formulaire, sans intention : le composant est aussi
   // intégré dans les pages métier x ville, donc un simple chargement de page

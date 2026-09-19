@@ -1,3 +1,5 @@
+import { publicRedesignEnabled } from "@/lib/public-redesign";
+import ProGlass from "@/components/redesign/ProGlass";
 import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/components/seo/JsonLd";
@@ -9,15 +11,15 @@ import BarresAnnee from "@/components/pro/landing/BarresAnnee";
 import SimulateurCout from "@/components/pro/landing/SimulateurCout";
 
 export const metadata: Metadata = {
-  title: "9,90 € le client, sans abonnement · Workwave.fr Pro",
+  title: "Votre fiche professionnelle gratuite · Workwave.fr Pro",
   description:
-    "Recevez gratuitement les chantiers de votre commune par email. Vous ne payez que les clients que vous decidez d'appeler : 9,90 EUR TTC, vos 2 premiers projets offerts. Aucun abonnement, aucune commission, aucun engagement.",
+    "Recevez gratuitement les chantiers de votre commune par email. Vous ne payez que les clients que vous decidez d'appeler : 9,90 EUR TTC par contact, vos 2 premiers déblocages offerts. Aucun abonnement, aucune commission, aucun engagement.",
   alternates: { canonical: "https://workwave.fr/pro" },
   openGraph: {
     type: "website",
-    title: "9,90 € le client, sans abonnement · Workwave.fr Pro",
+    title: "Votre fiche professionnelle gratuite · Workwave.fr Pro",
     description:
-      "Vos 2 premiers projets sont offerts. Fiche gratuite, pas d'abonnement, zero commission, puis 9,90 EUR TTC par client que vous voulez appeler.",
+      "Vos 2 premiers contacts sont offerts. Fiche gratuite, pas d'abonnement, zero commission, puis 9,90 EUR TTC par client que vous voulez appeler.",
     url: "https://workwave.fr/pro",
   },
 };
@@ -216,6 +218,7 @@ function Sceau({ haut, gros, bas }: { haut: string; gros: string; bas: string })
 // ============================================================
 
 export default function ProLandingPage() {
+  if (publicRedesignEnabled) return <ProGlass />;
   return (
     <main>
       {/* ---------- Hero ---------- */}

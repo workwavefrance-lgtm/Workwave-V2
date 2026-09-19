@@ -1,6 +1,11 @@
 "use client";
 
+import { saveProjectIntent } from "@/lib/project-intent";
+import { acquisitionContext } from "@/lib/analytics/acquisition-client";
+import { trackClient } from "@/lib/analytics/client-track";
+import { EVENTS } from "@/lib/analytics/events";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type CityResult = {
@@ -53,6 +58,7 @@ export default function SearchForm({
 }: SearchFormProps) {
   const router = useRouter();
 
+  const [handoffError,setHandoffError] = useState("");
   // --- Métier (combobox searchable groupé) ---
   const [metierQuery, setMetierQuery] = useState("");
   const [metierSlug, setMetierSlug] = useState("");
@@ -157,6 +163,7 @@ export default function SearchForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setHandoffError("");
     // Métier : slug sélectionné, sinon 1er résultat filtré si l'utilisateur a tapé.
     const slug = metierSlug || (metierQuery.trim() ? flatFiltered[0]?.slug : "");
     // Aucun metier ne correspond a ce que l'utilisateur a ecrit ("fuite d'eau",
@@ -167,7 +174,13 @@ export default function SearchForm({
     // il a decrit son besoin, on ne le lui fait pas retaper.
     if (!slug && metierQuery.trim()) {
       const ville = selectedCity?.slug || (suggestions.length > 0 ? suggestions[0].slug : "");
-      const params = new URLSearchParams({ besoin: metierQuery.trim() });
+      if (!saveProjectIntent(metierQuery.trim())) {
+        setHandoffError("Votre navigateur n’a pas pu conserver le besoin. Réessayez ou ouvrez le formulaire pour le saisir directement.");
+        return;
+      }
+      acquisitionContext("search-need");
+      trackClient(EVENTS.PROJECT_CTA_CLICKED,{cta:"search-need",path:window.location.pathname});
+      const params = new URLSearchParams();
       if (ville) params.set("ville", ville);
       router.push(`/deposer-projet?${params.toString()}`);
       return;
@@ -181,6 +194,8 @@ export default function SearchForm({
       (cityQuery.trim() && suggestions.length > 0 ? suggestions[0].slug : "");
 
     if (destination === "depot") {
+      acquisitionContext("search-deposit");
+      trackClient(EVENTS.PROJECT_CTA_CLICKED,{cta:"search-deposit",path:window.location.pathname});
       // On emmene directement deposer le projet, metier (et ville si connue)
       // deja renseignes. L'utilisateur ne re-saisit rien.
       const params = new URLSearchParams({ categorie: slug });
@@ -205,6 +220,7 @@ export default function SearchForm({
       onSubmit={handleSubmit}
       className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-2xl mx-auto bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl sm:rounded-full p-2 shadow-sm hover:shadow-md transition-shadow duration-250"
     >
+      {handoffError && <p role="alert" className="text-sm text-red-700">{handoffError} <Link href="/deposer-projet" className="underline">Ouvrir le formulaire</Link></p>}
       {/* Sélecteur métier · combobox searchable groupé */}
       <div ref={metierRef} className="flex-1 min-w-0 relative flex items-center gap-3 pl-4">
         <svg
@@ -222,6 +238,7 @@ export default function SearchForm({
         </svg>
         <input
           type="text"
+          aria-label="Métier ou besoin"
           value={metierQuery}
           onChange={(e) => {
             setMetierQuery(e.target.value);
@@ -399,7 +416,7 @@ export default function SearchForm({
         type="submit"
         className="bg-[var(--text-primary)] hover:opacity-90 text-[var(--card-bg)] px-6 py-3 rounded-full text-sm font-semibold transition-all duration-250 shrink-0"
       >
-        Rechercher
+        {destination === "depot" ? "Continuer" : "Rechercher"}
       </button>
     </form>
   );

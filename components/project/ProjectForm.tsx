@@ -3,6 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitProject, type FormState } from "@/app/(public)/deposer-projet/actions";
 import CityAutocomplete from "@/components/project/CityAutocomplete";
+import { takeProjectIntent } from "@/lib/project-intent";
+import { acquisitionContext } from "@/lib/analytics/acquisition-client";
 import { trackClient } from "@/lib/analytics/client-track";
 import { EVENTS } from "@/lib/analytics/events";
 
@@ -193,6 +195,17 @@ export default function ProjectForm({
   const [consent, setConsent] = useState(false);
   // Step 3 : description (pour preserver aussi)
   const [description, setDescription] = useState(defaultDescription ?? "");
+
+  const intentRead = useRef(false);
+  useEffect(() => {
+    // Consume once only on the dedicated route: an inline form must not take it.
+    if (intentRead.current || window.location.pathname !== "/deposer-projet") return;
+    intentRead.current = true;
+    const need = takeProjectIntent();
+    // Synchronize the external, one-use browser draft after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (need && !defaultDescription) setDescription(need);
+  }, [defaultDescription]);
 
   // Couverture affichee a l'etape 2 : « 997 maçons référencés en Vienne ».
   // Chargee UNIQUEMENT quand metier ET ville sont connus, donc jamais au
@@ -499,7 +512,9 @@ export default function ProjectForm({
   return (
     <form
       action={formAction}
-      onSubmit={() => {
+      onSubmit={(event) => {
+        const input = event.currentTarget.elements.namedItem("acquisition") as HTMLInputElement | null;
+        if (input) input.value = JSON.stringify(acquisitionContext());
         // Safari fix : declencher handleAttemptSubmit ici (onSubmit) plutot
         // que dans le onClick du bouton. Sur Safari iOS, un setState dans
         // onClick PEUT preempter la submission native si le re-render React
@@ -514,6 +529,7 @@ export default function ProjectForm({
       }}
       className="space-y-8"
     >
+      <input type="hidden" name="acquisition" defaultValue="" />
       {/* Barre de progression. L'id sert d'ancre au defilement automatique
           entre etapes (cf. remonterAuFormulaire). */}
       <div id="depot-progression" className="scroll-mt-20">

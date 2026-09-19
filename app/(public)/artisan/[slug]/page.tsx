@@ -1,3 +1,6 @@
+import { publicRedesignEnabled } from "@/lib/public-redesign";
+import { ProfileGlassHero, ProfileGlassContact } from "@/components/redesign/ProfileGlass";
+import glass from "@/components/redesign/profile-glass.module.css";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
@@ -790,10 +793,11 @@ export default async function ProPage({ params }: Props) {
   const paymentMethods = Array.isArray(pro.payment_methods) ? pro.payment_methods : [];
 
   return (
-    <main className="max-w-5xl mx-auto px-4 py-12">
+    <main data-glass={publicRedesignEnabled || undefined} className={publicRedesignEnabled ? glass.page : "max-w-5xl mx-auto px-4 py-12"}>
       <JsonLd data={jsonLdPrincipal} />
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
+      {publicRedesignEnabled && <ProfileGlassHero name={pro.name} category={pro.category.name} city={cityName} claimed={isClaimed} closed={estFerme} rge={!!pro.rge_certified} freeQuote={!!pro.free_quote} phone={!blurCoords ? pro.phone : null} projectHref={hrefDepotProjet} directoryHref={`/${pro.category.slug}/${pro.city?.slug || deptSlug}`} specialties={secondaryCategories.map(c => ({name:c.name,href:pro.city ? `/${c.slug}/${pro.city.slug}` : `/${c.slug}`}))} cover={coverUrl} photos={photos} />}
 
       {/* BANDEAU DE COUVERTURE (21/08/2026). Les photos sont la seule chose
           qu'un artisan produit lui-meme : tout le reste vient de l'INSEE.
@@ -813,6 +817,7 @@ export default async function ProPage({ params }: Props) {
           n'y touche, donc une couverture ne peut venir que du pro lui-meme.
           Verifie le 30/08 : les 8 couvertures existantes sont toutes stockees
           chez nous, sur des fiches toutes reclamees. */}
+      {!publicRedesignEnabled && <>
       <div className="relative h-56 sm:h-80 rounded-2xl overflow-hidden border border-[var(--card-border)] mb-4">
         {coverUrl ? (
           <Image
@@ -840,13 +845,14 @@ export default async function ProPage({ params }: Props) {
         )}
       </div>
 
+      </>}
       {/* Banniere de reclamation TOP : version fine (Levier D, mai 2026).
           Reduite vs version originelle (gros bloc orange dominant) pour
           ne pas ecraser la fiche aux yeux des particuliers (77% du trafic
           SEO arrive sur /artisan/[slug] via recherches navigationnelles).
           Le pro qui visite sa fiche la voit toujours immediatement, mais
           l'espace principal de la fiche est rendu au visiteur particulier. */}
-      {!isClaimed && pro.siret && !estFerme && (
+      {!publicRedesignEnabled && !isClaimed && pro.siret && !estFerme && (
         <section className="mb-6 bg-[#FF5A36]/5 dark:bg-[#FF5A36]/10 border border-[#FF5A36]/20 dark:border-[#FF5A36]/30 rounded-xl px-4 py-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
             <p className="text-sm text-[var(--text-secondary)] leading-snug">
@@ -897,8 +903,9 @@ export default async function ProPage({ params }: Props) {
         {/* Colonne gauche */}
         <div className="lg:col-span-2 space-y-8">
           {/* En-tete */}
+          {!publicRedesignEnabled && <>
           <div className="flex items-start gap-4">
-            {pro.logo_url && pro.logo_url.startsWith("http") ? (
+            {pro.logo_url && pro.logo_url.startsWith("https://") && hoteAutorise(pro.logo_url) ? (
               <Image
                 src={pro.logo_url}
                 alt={`Logo ${pro.name}`}
@@ -968,6 +975,7 @@ export default async function ProPage({ params }: Props) {
             </div>
           </div>
 
+          </>}
           {/* BANDEAU ÉTABLISSEMENT FERMÉ (02/09/2026), sous le titre. Sobre :
               une phrase factuelle tirée du registre, et les deux sorties
               utiles au visiteur (la fiche actuelle de l'entreprise si elle a
@@ -1053,7 +1061,7 @@ export default async function ProPage({ params }: Props) {
               </svg>
             </Link>
             <p className="text-xs text-[var(--text-tertiary)] mt-3">
-              Réponse rapide · 100 % gratuit · Sans création de compte
+              Gratuit pour les particuliers · Sans engagement
             </p>
           </section>
           )}
@@ -1667,10 +1675,10 @@ export default async function ProPage({ params }: Props) {
           {/* Fiche FERMÉE : la colonne de contact devient une réorientation
               honnête vers les pros en activité, via le dépôt de projet
               pré-rempli (métier + ville), comme sur les autres pages. */}
-          {estFerme ? (
+          {publicRedesignEnabled ? <ProfileGlassContact name={pro.name} projectHref={hrefDepotProjet} phone={!blurCoords ? pro.phone : null} closed={estFerme} /> : estFerme ? (
             <div className="bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-2xl p-6">
               <h3 className="font-semibold text-[var(--text-primary)] mb-2">
-                Cette entreprise n&apos;est plus en activité.
+                Cet établissement est fermé.
               </h3>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
                 {`Décrivez votre projet, les ${listing.plural} en activité${cityName ? ` à ${cityName}` : " près de chez vous"} vous répondent.`}

@@ -1,5 +1,7 @@
 export const revalidate = 3600; // 1h
 
+import { publicRedesignEnabled } from "@/lib/public-redesign";
+import HomeGlass from "@/components/redesign/HomeGlass";
 import Link from "next/link";
 import Image from "next/image";
 import { Fragment } from "react";
@@ -89,6 +91,7 @@ const homeFaqs = [
 ];
 
 export default async function Home() {
+  if (publicRedesignEnabled) return <HomeGlass />;
   // `departments` n'est plus lu depuis que les liens de l'accueil viennent de
   // lib/data/home-links.ts. La lecture est conservee pour ne pas changer
   // l'ordre du Promise.all ci-dessous.

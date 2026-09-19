@@ -25,11 +25,13 @@ export const getGuideBySlug = cache(async function getGuideBySlug(
   slug: string
 ): Promise<SeoGuide | null> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("seo_guides")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
+  // Une panne de lecture ne doit pas devenir une fausse 404 conservée par l'ISR.
+  if (error) throw new Error(`Lecture du guide impossible : ${error.message}`);
   return data as SeoGuide | null;
 })
 

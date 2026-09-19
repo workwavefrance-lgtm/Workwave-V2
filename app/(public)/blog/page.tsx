@@ -1,3 +1,5 @@
+import { publicRedesignEnabled } from "@/lib/public-redesign";
+import BlogGlass from "@/components/redesign/BlogGlass";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPublishedPosts } from "@/lib/queries/blog";
@@ -7,20 +9,20 @@ import EmptyState from "@/components/ui/EmptyState";
 export const metadata: Metadata = {
   title: "Blog - Conseils et guides pour vos projets",
   description:
-    "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne. Articles rédigés par des experts.",
+    "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en France et en Belgique. Articles rédigés par des experts.",
   alternates: { canonical: "https://workwave.fr/blog" },
   openGraph: {
     type: "website",
     title: "Blog Workwave - Conseils et guides pour vos projets",
     description:
-      "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne.",
+      "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en France et en Belgique.",
     url: "https://workwave.fr/blog",
   },
   twitter: {
     card: "summary_large_image",
     title: "Blog Workwave - Conseils et guides pour vos projets",
     description:
-      "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en Vienne.",
+      "Conseils pratiques, guides de prix et astuces pour bien choisir vos professionnels en France et en Belgique.",
   },
 };
 
@@ -36,6 +38,8 @@ export default async function BlogPage({ searchParams }: Props) {
 
   const { data: posts, totalPages } = await getPublishedPosts(page, 12);
 
+  if (publicRedesignEnabled) return <BlogGlass posts={posts} page={page} totalPages={totalPages} />;
+
   return (
     <main className="max-w-5xl mx-auto px-4 py-12">
       <div className="mb-10">
@@ -43,7 +47,7 @@ export default async function BlogPage({ searchParams }: Props) {
           Blog Workwave
         </h1>
         <p className="text-[var(--text-secondary)]">
-          Conseils pratiques et guides de prix pour vos projets en Vienne.
+          Conseils pratiques et guides de prix pour vos projets en France et en Belgique.
         </p>
       </div>
 

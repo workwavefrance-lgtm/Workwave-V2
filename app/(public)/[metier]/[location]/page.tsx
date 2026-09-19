@@ -516,7 +516,7 @@ export async function renderListing(
       ? "Aucun artisan référencé pour le moment"
       : totalProsCount === 1
         ? `1 ${listing.singular} référencé en ${currentYear}`
-        : `Top ${displayCount} ${pluralCategory} parmi ${totalProsCount} référencés ${preposition} ${locationName} en ${currentYear} · Sélection objective par profil, certifications et avis`;
+        : `${totalProsCount} ${pluralCategory} référencés ${preposition} ${locationName} · Comparez les profils et préparez votre projet.`;
 
   // Sections SEO programmatiques (6 H2 + FAQ avec data unique par dept)
   const seoSectionsContent = isFirstPage && totalProsCount > 0

@@ -1,3 +1,4 @@
+import { sanitizeAcquisition, safeEventMetadata } from "@/lib/analytics/acquisition";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { track } from "@/lib/analytics/track";
@@ -5,6 +6,7 @@ import { EVENTS, type EventName } from "@/lib/analytics/events";
 
 const ALLOWED_EVENTS = new Set<string>([
   EVENTS.PAGE_VIEW,
+  EVENTS.PROJECT_CTA_CLICKED,
   EVENTS.PROJECT_FORM_VIEWED,
   EVENTS.PROJECT_FORM_STARTED,
   EVENTS.PROJECT_FORM_ABANDONED,
@@ -15,9 +17,10 @@ const ALLOWED_EVENTS = new Set<string>([
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { event, metadata } = body as {
+    const { event, metadata, acquisition } = body as {
       event: string;
       metadata?: Record<string, unknown>;
+      acquisition?: unknown;
     };
 
     if (!event || !ALLOWED_EVENTS.has(event)) {
@@ -38,8 +41,10 @@ export async function POST(req: Request) {
       undefined;
     const userAgent = req.headers.get("user-agent") || undefined;
 
+    const context = sanitizeAcquisition(acquisition);
     track(event as EventName, {
-      metadata,
+      sessionId: context?.sessionId,
+      metadata: { ...safeEventMetadata(metadata), ...(context ? { acquisition: context } : {}) },
       ipAddress: ip,
       userAgent,
     });

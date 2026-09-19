@@ -173,7 +173,7 @@ export function buildProBadges(pro: ProCardData): string[] {
   }
 
   if (pro.rge_certified) badges.push("RGE certifié");
-  if (pro.claimed_by_user_id && badges.length < 3) badges.push("Profil vérifié");
+  if (pro.claimed_by_user_id && badges.length < 3) badges.push("Fiche réclamée");
 
   // 1 certif notable si pas deja affichee
   const certs = pro.certifications ?? [];
@@ -188,7 +188,7 @@ export function buildProBadges(pro: ProCardData): string[] {
     new Date().getFullYear() - foundedYear >= 10 &&
     badges.length < 3
   ) {
-    badges.push(`${new Date().getFullYear() - foundedYear} ans d'expérience`);
+    badges.push(`Création : ${foundedYear}`);
   }
 
   return badges.slice(0, 3);

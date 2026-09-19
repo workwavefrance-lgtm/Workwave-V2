@@ -39,7 +39,7 @@ export default async function ProGuidesLinks({
         {guides.map((g) => (
           <li key={g.slug}>
             <Link
-              href={`/guide-des-prix/${g.slug}`}
+              href={g.scope === "metier" ? `/${metierSlug}/prix` : `/guide-des-prix/${g.slug}`}
               className="text-sm text-[var(--accent)] hover:underline"
             >
               {g.h1 || `Guide des prix ${metierName.toLowerCase()}`}

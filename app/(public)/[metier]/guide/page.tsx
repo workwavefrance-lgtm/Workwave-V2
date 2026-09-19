@@ -6,8 +6,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import SeoContent from "@/components/seo/SeoContent";
 import { getCategoryBySlug } from "@/lib/queries/categories";
 import { getGuideBySlug } from "@/lib/queries/seo-guides";
-import { getAllDepartments } from "@/lib/queries/departments";
-import { generateDepartmentSlug } from "@/lib/utils/slugs";
+import { getCategoryListing } from "@/lib/utils/category-grammar";
 import { toBreadcrumbSchema } from "@/lib/utils/schema";
 import { BASE_URL } from "@/lib/constants";
 
@@ -58,15 +57,11 @@ export default async function GuidePage({ params }: Props) {
   const guide = await getGuideBySlug(metier);
   if (!guide) notFound();
 
-  // Departement dynamique (premier disponible)
-  const departments = await getAllDepartments();
-  const dept = departments[0];
-  const deptSlug = dept ? generateDepartmentSlug(dept) : "vienne-86";
-  const deptName = dept?.name || "Vienne";
+  const listing = getCategoryListing(category.slug, category.name);
 
   const breadcrumbItems = [
     { label: "Accueil", href: "/" },
-    { label: category.name, href: `/${category.slug}/${deptSlug}` },
+    { label: category.name, href: `/${category.slug}` },
     { label: "Guide" },
   ];
 
@@ -103,7 +98,7 @@ export default async function GuidePage({ params }: Props) {
       </h1>
 
       <p className="text-sm text-[var(--text-tertiary)] mb-8">
-        Par {guide.author} · Mis a jour le{" "}
+        Par {guide.author} · Mis à jour le{" "}
         {new Date(guide.updated_at).toLocaleDateString("fr-FR", {
           year: "numeric",
           month: "long",
@@ -137,15 +132,27 @@ export default async function GuidePage({ params }: Props) {
 
       {/* CTA bas de page */}
       <div className="mt-12 pt-8 border-t border-[var(--border-color)] text-center">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
-          Trouvez un {category.name.toLowerCase()} pres de chez vous
-        </h3>
-        <Link
-          href={`/${category.slug}/${deptSlug}`}
-          className="inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-8 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
-        >
-          Voir les {category.name.toLowerCase()}s en {deptName}
-        </Link>
+        <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
+          Trouvez {listing.article} {listing.singular} près de chez vous
+        </h2>
+        <p className="text-sm text-[var(--text-secondary)] mb-5">
+          Consultez les professionnels de votre secteur ou décrivez votre besoin.
+          Le dépôt de projet est gratuit et sans engagement.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
+          <Link
+            href={`/deposer-projet?categorie=${category.slug}`}
+            className="inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-8 py-3 rounded-full text-sm font-semibold transition-all duration-250 hover:scale-[1.02]"
+          >
+            Décrire mon projet
+          </Link>
+          <Link
+            href={`/${category.slug}`}
+            className="inline-block border border-[var(--border-color)] text-[var(--text-primary)] px-8 py-3 rounded-full text-sm font-semibold hover:text-[var(--accent)] transition-colors"
+          >
+            Choisir ma ville
+          </Link>
+        </div>
       </div>
     </main>
   );

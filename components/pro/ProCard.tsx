@@ -8,7 +8,7 @@ export default function ProCard({ pro }: { pro: ProCardData }) {
   const initial = pro.name.charAt(0).toUpperCase();
 
   return (
-    <article className="group bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]">
+    <article data-pro-card className="group bg-[var(--card-bg)] border border-[var(--card-border)] rounded-2xl p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-md hover:border-[var(--accent)]">
       <Link href={`/artisan/${pro.slug}`} className="flex gap-4">
         {/* Logo ou initiale */}
         {pro.logo_url ? (
@@ -64,6 +64,8 @@ export default function ProCard({ pro }: { pro: ProCardData }) {
               {pro.description}
             </p>
           )}
+
+          <span className="block mt-4 text-sm font-medium text-[var(--accent)]">Voir le profil →</span>
 
           {pro.phone && (
             <p className="text-sm font-medium text-[var(--text-primary)] mt-2">
