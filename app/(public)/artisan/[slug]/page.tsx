@@ -792,12 +792,29 @@ export default async function ProPage({ params }: Props) {
   const certifications = Array.isArray(pro.certifications) ? pro.certifications : [];
   const paymentMethods = Array.isArray(pro.payment_methods) ? pro.payment_methods : [];
 
+  // Haut de fiche glass : l'annee d'activite, le logo et le rayon sont
+  // calcules ici pour que le composant reste un composant de rendu. Meme
+  // regle que le bloc « Etablissement ouvert en » plus bas : founded_year
+  // (saisi par le pro) prime, sauf sur une fiche enrichie non reclamee ou la
+  // date de creation de l'entreprise fait foi.
+  const anneeSireneHero = formatFoundingYear(pro.founding_date);
+  const anneeProHero =
+    pro.founded_year && pro.founded_year > 1800 ? String(pro.founded_year) : null;
+  const anneeActivite = dateFaitFoi && anneeSireneHero ? anneeSireneHero : anneeProHero || anneeSireneHero;
+  const logoHero =
+    pro.logo_url && pro.logo_url.startsWith("https://") && hoteAutorise(pro.logo_url)
+      ? pro.logo_url
+      : null;
+  // Rayon : uniquement sur une fiche reclamee. Sur les autres, la valeur en
+  // base est celle posee par defaut a l'import, pas une declaration du pro.
+  const rayonHero = isClaimed && pro.intervention_radius_km ? pro.intervention_radius_km : null;
+
   return (
     <main data-glass={publicRedesignEnabled || undefined} className={publicRedesignEnabled ? glass.page : "max-w-5xl mx-auto px-4 py-12"}>
       <JsonLd data={jsonLdPrincipal} />
       <JsonLd data={breadcrumbJsonLd} />
       <Breadcrumb items={breadcrumbItems} />
-      {publicRedesignEnabled && <ProfileGlassHero name={pro.name} category={pro.category.name} city={cityName} claimed={isClaimed} closed={estFerme} rge={!!pro.rge_certified} freeQuote={!!pro.free_quote} phone={!blurCoords ? pro.phone : null} projectHref={hrefDepotProjet} directoryHref={`/${pro.category.slug}/${pro.city?.slug || deptSlug}`} specialties={secondaryCategories.map(c => ({name:c.name,href:pro.city ? `/${c.slug}/${pro.city.slug}` : `/${c.slug}`}))} cover={coverUrl} photos={photos} />}
+      {publicRedesignEnabled && <ProfileGlassHero name={pro.name} category={pro.category.name} city={cityName} claimed={isClaimed} closed={estFerme} rge={!!pro.rge_certified} freeQuote={!!pro.free_quote} phone={!blurCoords ? pro.phone : null} projectHref={hrefDepotProjet} directoryHref={`/${pro.category.slug}/${pro.city?.slug || deptSlug}`} specialties={secondaryCategories.map(c => ({name:c.name,href:pro.city ? `/${c.slug}/${pro.city.slug}` : `/${c.slug}`}))} cover={coverUrl} photos={photos} logo={logoHero} foundedYear={anneeActivite} radiusKm={rayonHero} decennale={!!pro.has_decennale} rcPro={!!pro.has_rc_pro} />}
 
       {/* BANDEAU DE COUVERTURE (21/08/2026). Les photos sont la seule chose
           qu'un artisan produit lui-meme : tout le reste vient de l'INSEE.
