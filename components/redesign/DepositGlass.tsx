@@ -18,6 +18,10 @@ type Props = { categories: Category[]; defaultCategoryId?: number; defaultCity?:
 const DELAYS = [{ value: 'today', label: 'Aujourd’hui' }, { value: 'this_week', label: 'Cette semaine' }, { value: 'this_month', label: 'Ce mois-ci' }, { value: 'not_urgent', label: 'Je ne suis pas pressé' }];
 const STEPS = ['Votre besoin', 'Votre contact', 'Vérification'];
 const NEED = ['description', 'categoryId', 'cityId', 'urgency'];
+// Meme seuil que la regle serveur (lib/project-validation.ts). Sans indication
+// visible, un champ qui refuse la soumission donne l'impression d'un bug :
+// signale le 20/09/2026 sur le formulaire en production.
+const DESCRIPTION_MIN = 20;
 const INITIAL: FormState = { success: false };
 
 export default function DepositGlass({ categories, defaultCategoryId, defaultCity, defaultDescription }: Props) {
@@ -90,6 +94,7 @@ export default function DepositGlass({ categories, defaultCategoryId, defaultCit
     }
     setErrors({}); move(target);
   }
+  const manquants = Math.max(0, DESCRIPTION_MIN - description.trim().length);
   const error = (field: string) => errors[field] ? <p id={`deposit-error-${field}`} className={s.error} role="alert">{errors[field]}</p> : null;
   const fieldProps = (field: string) => ({ id: `deposit-${field}`, 'aria-invalid': !!errors[field], 'aria-describedby': errors[field] ? `deposit-error-${field}` : undefined });
 
@@ -103,8 +108,11 @@ export default function DepositGlass({ categories, defaultCategoryId, defaultCit
         <fieldset hidden={step!==0} disabled={pending} className={s.fields}>
           <p className={s.intro}>Le besoin et le lieu nous aident à orienter votre demande.</p>
           <label htmlFor="deposit-description">Votre projet</label>
-          <textarea {...fieldProps('description')} name="description" rows={4} maxLength={5000} value={description} onChange={e=>{setDescription(e.target.value);clear('description');}} placeholder="Ex. : repeindre les murs et le plafond de mon salon de 25 m²."/>
-          <p className={s.hint}>Précisez ce qu’il y a à faire, les dimensions ou la situation. Évitez d’y inscrire vos coordonnées.</p>{error('description')}
+          <textarea {...fieldProps('description')} aria-describedby={errors.description ? 'deposit-error-description' : 'deposit-description-hint'} name="description" rows={4} maxLength={5000} value={description} onChange={e=>{setDescription(e.target.value);clear('description');}} placeholder="Ex. : repeindre les murs et le plafond de mon salon de 25 m²."/>
+          <div className={s.hintRow}>
+            <p className={s.hint} id="deposit-description-hint">Précisez ce qu’il y a à faire, les dimensions ou la situation. Évitez d’y inscrire vos coordonnées.</p>
+            <p className={s.counter} data-ok={manquants === 0}>{manquants === 0 ? `${DESCRIPTION_MIN} caractères minimum ✓` : description.trim().length === 0 ? `${DESCRIPTION_MIN} caractères minimum` : `Encore ${manquants} caractère${manquants > 1 ? 's' : ''}`}</p>
+          </div>{error('description')}
           <div className={s.pair}><div><label htmlFor="deposit-categoryId">Le métier recherché</label>
             <select {...fieldProps('categoryId')} name="categoryId" value={categoryId} onChange={e=>{setCategoryId(e.target.value);setExtras([]);clear('categoryId');}}><option value="">Choisir un métier</option>
               {[['btp','Bâtiment et travaux'],['domicile','Entretien de la maison'],['personne','Aide à la personne']].map(([vertical,label])=><optgroup key={vertical} label={label}>{categories.filter(c=>c.vertical===vertical).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</optgroup>)}
