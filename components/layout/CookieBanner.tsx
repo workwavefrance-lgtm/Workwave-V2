@@ -72,21 +72,35 @@ export default function CookieBanner() {
 
   return (
     <div className="fixed bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:max-w-xs z-50 animate-in slide-in-from-bottom-4">
-      <div className="bg-white dark:bg-[#111111] border border-[#E5E7EB] dark:border-[#27272A] rounded-xl px-3.5 py-2.5 shadow-lg flex items-center gap-2.5">
-        <p className="text-[11px] text-[#6B7280] dark:text-[#9CA3AF] leading-snug flex-1">
+      {/* Thème verre : le bandeau se pose sur la page au lieu de la trancher.
+          Les classes `dark:` ont été retirées le 20/09/2026 : les pages
+          publiques sont claires par construction, et le bandeau s'affichait
+          en noir chez un visiteur dont le système est en mode sombre. */}
+      <div
+        className="backdrop-blur-md border border-white rounded-[18px] px-3.5 py-2.5 flex items-center gap-2.5"
+        style={{
+          background: "rgba(255, 255, 255, 0.86)",
+          boxShadow: "0 14px 34px -10px rgba(36, 57, 67, 0.20)",
+        }}
+      >
+        <p className="text-[11px] text-[#5c7078] leading-snug flex-1">
           Cookies de mesure d&apos;audience.
         </p>
         <button
           onClick={accept}
-          className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
-          style={{ backgroundColor: "#FF5A36" }}
+          className="shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-semibold text-white cursor-pointer transition-transform duration-200 hover:scale-[1.03]"
+          style={{
+            background: "linear-gradient(135deg, #ef6426, #bd4214)",
+            border: "1px solid #e89977",
+            boxShadow: "inset 0 2px 2px rgba(255, 255, 255, 0.4)",
+          }}
         >
           OK
         </button>
         <button
           onClick={refuse}
           aria-label="Refuser les cookies"
-          className="shrink-0 px-2 py-1.5 rounded-lg text-xs font-medium cursor-pointer text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#0A0A0A] dark:hover:text-[#FAFAFA]"
+          className="shrink-0 px-2 py-1.5 rounded-full text-[11px] font-medium cursor-pointer text-[#7d919a] hover:text-[#243036] transition-colors"
         >
           Refuser
         </button>
