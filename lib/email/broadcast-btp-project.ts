@@ -264,6 +264,11 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
   const isRelance = input.isRelance === true || input.relanceKind != null;
   const kind: "j1" | "j3" | null = input.relanceKind ?? (isRelance ? "j3" : null);
   const lieu = input.projectCityName ? ` à ${input.projectCityName}` : "";
+  // 24/09/2026 : la refonte du 15/09 (0ced424) avait retire la description, les
+  // artisans ne voyaient plus que metier, lieu et delai. Remise en tete du
+  // tableau, coupee a 220 caracteres comme avant ; emailDetails l'echappe.
+  const descBrute = (input.projectDescription ?? "").trim();
+  const description = descBrute.length > 220 ? `${descBrute.slice(0, 220).trim()}...` : descBrute;
 
   return renderEmail({
     title: kind ? "Un projet à redécouvrir." : "Un nouveau projet.",
@@ -274,6 +279,7 @@ export function buildEmailHtml(input: BroadcastBtpInput, baseUrl: string, postal
       : "Un particulier a déposé une demande dans votre zone. Consultez les informations pour décider si vous souhaitez y répondre.")
       + (input.isSuspicious ? emailParagraph("Cette demande présente un signal à vérifier. Lisez attentivement les informations avant de débloquer les coordonnées.") : "")
       + emailDetails([
+        ...(description ? [["Demande", description] as [string, unknown]] : []),
         ["Métier", input.projectCategoryName], ...(lieuLabel ? [["Lieu", lieuLabel] as [string, unknown]] : []),
         ...(budgetLabel ? [["Budget", budgetLabel] as [string, unknown]] : []),
         ...(timelineLabel ? [["Délai", timelineLabel] as [string, unknown]] : []),

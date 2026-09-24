@@ -1,17 +1,9 @@
+import DepositGlass from "@/components/redesign/DepositGlass";
+import { publicRedesignEnabled } from "@/lib/public-redesign";
 import ProjectForm from "@/components/project/ProjectForm";
 import { getAllCategories } from "@/lib/queries/categories";
 
-/**
- * Form de dépôt projet EMBEDDÉ inline sur les pages listing et autres pages
- * publiques. Réutilise `<ProjectForm>` (zéro modif du flow validé /deposer-projet)
- * + le step initial intelligent : si catégorie+ville sont passées, l'user
- * arrive directement à l'étape "Projet" (urgence + budget), saute "Métier" et
- * "Ville".
- *
- * Objectif business : capter les visiteurs qui ont scrollé la liste sans
- * trouver le pro idéal, ils n'ont qu'à décrire leur besoin sans changer
- * de page. Impact attendu : × 3-5 la conversion sur les pages listing.
- */
+/** Dépôt intégré aux listings, avec métier et ville conservés. */
 export default async function InlineProjectForm({
   category,
   city,
@@ -26,6 +18,21 @@ export default async function InlineProjectForm({
   // (utilisée seulement si l'user revient en arrière à l'étape 1, non bloquant).
   const categories = await getAllCategories();
 
+  if (publicRedesignEnabled) return (
+    <section className="max-w-3xl mx-auto my-12" aria-labelledby="inline-project-form-title">
+      <div className="text-center mb-7 px-4">
+        <h2 id="inline-project-form-title" className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text-primary)] mb-3">
+          Et si on parlait de votre projet&nbsp;?
+        </h2>
+        <p className="text-[var(--text-secondary)] text-base">
+          {category.name}{city ? ` · ${city.name}` : ""}. Décrivez votre besoin, puis échangez avec les professionnels intéressés.
+        </p>
+      </div>
+      <DepositGlass embedded categories={categories.map(c => ({ id: c.id, name: c.name, vertical: c.vertical }))}
+        defaultCategoryId={category.id} defaultCity={city ?? null} />
+    </section>
+  );
+
   const wrapperClasses =
     variant === "compact"
       ? "max-w-2xl mx-auto"
@@ -39,7 +46,7 @@ export default async function InlineProjectForm({
             id="inline-project-form-title"
             className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)] mb-3"
           >
-            Vous n'avez pas trouvé ?
+            Vous n’avez pas trouvé ?
             <span className="text-[#FF5A36]"> Décrivez votre projet</span>
           </h2>
           <p className="text-[var(--text-secondary)] text-base">

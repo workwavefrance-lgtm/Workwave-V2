@@ -177,7 +177,12 @@
   // ── Injection des données projet ──
   const P = window.PROJECT || {};
   document.body.dataset.theme = P.theme === "dark" ? "dark" : "light";
-  const set = (id, v) => { if (v) document.getElementById(id).textContent = v; };
+  // 22/09/2026 : `set` tolere un id absent. Avant, un JSON contenant un champ
+  // `budget` faisait planter tout le script sur `getElementById("budget")` qui
+  // renvoie null (cet id n'existe plus depuis que le budget a ete retire le
+  // 28/08). Consequence : window.TOTAL restait undefined, le rendu annoncait
+  // « NaN frames » et ne produisait AUCUNE image, sans message d'erreur.
+  const set = (id, v) => { const el = document.getElementById(id); if (v && el) el.textContent = v; };
   set("metier", P.metier); set("ville", P.ville); set("dept", P.dept);
   set("budget", P.budget); set("urgence", P.urgence); set("zone", P.zone || `${P.ville} (${P.deptCode || ""})`.replace(" ()", ""));
   set("description", P.description);

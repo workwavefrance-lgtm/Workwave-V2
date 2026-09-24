@@ -110,7 +110,7 @@ BTP + services à domicile + aide à la personne sur `workwave.fr`, **France ent
 
 ## 0 bis. Leçons apprises : INDEX (Règle 3)
 
-**99 leçons. Le détail complet est dans `docs/lecons-detail.md`** (le symptôme, la
+**100 leçons. Le détail complet est dans `docs/lecons-detail.md`** (le symptôme, la
 mesure, la cause, le correctif, les extraits de code). Ce fichier-ci n'en garde
 que la règle, une ligne chacune.
 
@@ -233,6 +233,7 @@ dans le même mouvement.** Jamais l'un sans l'autre.
 | L97 | 10/09 | `vps` | Coolify tue un déploiement au-delà de 3 600 s (en dur dans son code) et nos builds durent 55 à 70 min : limites montées à 7 200 s, à refaire après chaque mise à jour de Coolify. Les commandes serveur se donnent à Willy enveloppées dans `ssh`. |
 | L98 | 10/09 | `mesure` | Un cron qui répond 200 en ne trouvant jamais rien est une panne silencieuse : les demandes d'avis filtraient un statut de l'ancien modèle, 0 envoi depuis mai. Tout cron doit exposer son nombre d'envois. |
 | L99 | 11/09 | `vps` | 🔴 Site hors ligne 8 min : le délai 7 200 s écrit le 10/09 n'a jamais été actif, Coolify n'avait pas redémarré (ouvriers PHP figés à 3 600). Après toute modification dans un conteneur : `docker restart` puis prouver la valeur en marche. Un délai dépassé APRÈS la bascule retire les deux versions. |
+| L100 | 22/09 | `mesure` | Un rendu qui affiche « NaN frames » puis « OK » et sort 0 image sans erreur : le template de reel plantait sur `getElementById("budget")`, identifiant retire le 28/08. Tout acces DOM par identifiant doit tolerer l'absence ; un script de rendu doit verifier son nombre d'images et echouer sinon ; brancher `pageerror` avant de deviner. |
 
 ---
 

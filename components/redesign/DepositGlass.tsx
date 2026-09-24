@@ -14,7 +14,7 @@ import { EVENTS } from '@/lib/analytics/events';
 import s from './deposit-glass.module.css';
 
 type Category = { id: number; name: string; vertical: string };
-type Props = { categories: Category[]; defaultCategoryId?: number; defaultCity?: { id: number; name: string } | null; defaultDescription?: string };
+type Props = { categories: Category[]; defaultCategoryId?: number; defaultCity?: { id: number; name: string } | null; defaultDescription?: string; embedded?: boolean };
 const DELAYS = [{ value: 'today', label: 'Aujourd’hui' }, { value: 'this_week', label: 'Cette semaine' }, { value: 'this_month', label: 'Ce mois-ci' }, { value: 'not_urgent', label: 'Je ne suis pas pressé' }];
 const STEPS = ['Votre besoin', 'Votre contact', 'Vérification'];
 const NEED = ['description', 'categoryId', 'cityId', 'urgency'];
@@ -24,7 +24,7 @@ const NEED = ['description', 'categoryId', 'cityId', 'urgency'];
 const DESCRIPTION_MIN = 20;
 const INITIAL: FormState = { success: false };
 
-export default function DepositGlass({ categories, defaultCategoryId, defaultCity, defaultDescription }: Props) {
+export default function DepositGlass({ categories, defaultCategoryId, defaultCity, defaultDescription, embedded = false }: Props) {
   const [step, setStep] = useState(0);
   const [description, setDescription] = useState(defaultDescription ?? '');
   const [categoryId, setCategoryId] = useState(String(defaultCategoryId ?? ''));
@@ -98,12 +98,14 @@ export default function DepositGlass({ categories, defaultCategoryId, defaultCit
   const error = (field: string) => errors[field] ? <p id={`deposit-error-${field}`} className={s.error} role="alert">{errors[field]}</p> : null;
   const fieldProps = (field: string) => ({ id: `deposit-${field}`, 'aria-invalid': !!errors[field], 'aria-describedby': errors[field] ? `deposit-error-${field}` : undefined });
 
-  return <main data-glass className={s.page}>
-    <div className={s.heading}><p className={s.eyebrow}>VOTRE IDÉE MÉRITE DE PRENDRE VIE.</p><h1>Racontez votre projet.<br/><span>Faisons le premier pas.</span></h1><p>Gratuit pour les particuliers. Vous choisissez librement.</p></div>
+  // embedded : le meme formulaire place dans une page de listing, sans le grand titre.
+  const Container = embedded ? 'div' : 'main';
+  return <Container data-glass className={embedded ? s.embedded : s.page}>
+    {!embedded && <div className={s.heading}><p className={s.eyebrow}>VOTRE IDÉE MÉRITE DE PRENDRE VIE.</p><h1>Racontez votre projet.<br/><span>Faisons le premier pas.</span></h1><p>Gratuit pour les particuliers. Vous choisissez librement.</p></div>}
     <section className={s.card} aria-labelledby="deposit-step-title">
       <ol className={s.progress} aria-label="Étapes du dépôt">{STEPS.map((label,i) => <li key={label} aria-current={step===i?'step':undefined} data-done={i<step}><span>{i+1}</span>{label}</li>)}</ol>
       <form action={action} noValidate onInput={interaction} onSubmit={event => { if (step<2) { event.preventDefault(); validate(step+1); } }}>
-        <h2 id="deposit-step-title" ref={title} tabIndex={-1}>{['De quoi avez-vous envie ?', 'Faisons connaissance.', 'Tout est prêt ?'][step]}</h2>
+        <h2 id="deposit-step-title" ref={title} tabIndex={-1}>{['De quoi avez-vous envie\u00a0?', 'Faisons connaissance.', 'Tout est prêt\u00a0?'][step]}</h2>
         {state.message && !pending && <p className={s.sendError} role="alert">{state.message} Vos réponses sont conservées.</p>}
         <fieldset hidden={step!==0} disabled={pending} className={s.fields}>
           <p className={s.intro}>Le besoin et le lieu nous aident à orienter votre demande.</p>
@@ -145,5 +147,5 @@ export default function DepositGlass({ categories, defaultCategoryId, defaultCit
         <div className={s.honeypot} aria-hidden="true"><label htmlFor="deposit-website">Ne pas remplir</label><input id="deposit-website" name="website" tabIndex={-1} autoComplete="off"/></div>
       </form>
     </section><p className={s.footnote}>Gratuit pour les particuliers · Sans création de compte · Sans engagement</p>
-  </main>;
+  </Container>;
 }
